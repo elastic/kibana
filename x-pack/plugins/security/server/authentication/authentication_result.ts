@@ -7,7 +7,8 @@
 
 import type { AuthHeaders } from 'src/core/server';
 
-import type { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common';
+import type { UserProfileGrant } from '../user_profile';
 
 /**
  * Represents status that `AuthenticationResult` can be in.
@@ -49,7 +50,20 @@ interface AuthenticationOptions {
   user?: AuthenticatedUser;
   authHeaders?: AuthHeaders;
   authResponseHeaders?: AuthHeaders;
+  userProfileGrant?: UserProfileGrant;
 }
+
+export type SucceededAuthenticationResultOptions = Pick<
+  AuthenticationOptions,
+  'authHeaders' | 'userProfileGrant' | 'authResponseHeaders' | 'state'
+>;
+
+export type RedirectedAuthenticationResultOptions = Pick<
+  AuthenticationOptions,
+  'user' | 'userProfileGrant' | 'authResponseHeaders' | 'state'
+>;
+
+export type FailedAuthenticationResultOptions = Pick<AuthenticationOptions, 'authResponseHeaders'>;
 
 /**
  * Represents the result of an authentication attempt.
@@ -66,6 +80,7 @@ export class AuthenticationResult {
   /**
    * Produces `AuthenticationResult` for the case when authentication succeeds.
    * @param user User information retrieved as a result of successful authentication attempt.
+   * @param [userProfileGrant] Optional user profile grant that can be used to activate user profile.
    * @param [authHeaders] Optional dictionary of the HTTP headers with authentication information.
    * @param [authResponseHeaders] Optional dictionary of the HTTP headers with authentication
    * information that should be specified in the response we send to the client request.
@@ -74,10 +89,11 @@ export class AuthenticationResult {
   public static succeeded(
     user: AuthenticatedUser,
     {
+      userProfileGrant,
       authHeaders,
       authResponseHeaders,
       state,
-    }: Pick<AuthenticationOptions, 'authHeaders' | 'authResponseHeaders' | 'state'> = {}
+    }: SucceededAuthenticationResultOptions = {}
   ) {
     if (!user) {
       throw new Error('User should be specified.');
@@ -85,6 +101,7 @@ export class AuthenticationResult {
 
     return new AuthenticationResult(AuthenticationResultStatus.Succeeded, {
       user,
+      userProfileGrant,
       authHeaders,
       authResponseHeaders,
       state,
@@ -100,7 +117,7 @@ export class AuthenticationResult {
    */
   public static failed(
     error: Error,
-    { authResponseHeaders }: Pick<AuthenticationOptions, 'authResponseHeaders'> = {}
+    { authResponseHeaders }: FailedAuthenticationResultOptions = {}
   ) {
     if (!error) {
       throw new Error('Error should be specified.');
@@ -116,6 +133,7 @@ export class AuthenticationResult {
    * Produces `AuthenticationResult` for the case when authentication needs user to be redirected.
    * @param redirectURL URL that should be used to redirect user to complete authentication.
    * @param [user] Optional user information retrieved as a result of successful authentication attempt.
+   * @param [userProfileGrant] Optional user profile grant that can be used to activate user profile.
    * @param [authResponseHeaders] Optional dictionary of the HTTP headers with authentication
    * information that should be specified in the response we send to the client request.
    * @param [state] Optional state to be stored and reused for the next request.
@@ -124,9 +142,10 @@ export class AuthenticationResult {
     redirectURL: string,
     {
       user,
+      userProfileGrant,
       authResponseHeaders,
       state,
-    }: Pick<AuthenticationOptions, 'user' | 'authResponseHeaders' | 'state'> = {}
+    }: RedirectedAuthenticationResultOptions = {}
   ) {
     if (!redirectURL) {
       throw new Error('Redirect URL must be specified.');
@@ -135,16 +154,24 @@ export class AuthenticationResult {
     return new AuthenticationResult(AuthenticationResultStatus.Redirected, {
       redirectURL,
       user,
+      userProfileGrant,
       authResponseHeaders,
       state,
     });
   }
 
   /**
-   * Authenticated user instance (only available for `succeeded` result).
+   * Authenticated user instance (only available for `succeeded` or `redirected` result).
    */
   public get user() {
     return this.options.user;
+  }
+
+  /**
+   * User profile grant that can be used to activate user profile (only available for `succeeded` and `redirected` results).
+   */
+  public get userProfileGrant() {
+    return this.options.userProfileGrant;
   }
 
   /**
@@ -169,8 +196,7 @@ export class AuthenticationResult {
   }
 
   /**
-   * State associated with the authenticated user (only available for `succeeded`
-   * and `redirected` results).
+   * State associated with the authenticated user (only available for `succeeded` and `redirected` results).
    */
   public get state() {
     return this.options.state;
@@ -184,8 +210,7 @@ export class AuthenticationResult {
   }
 
   /**
-   * URL that should be used to redirect user to complete authentication only available
-   * for `redirected` result).
+   * URL that should be used to redirect user to complete authentication (only available for `redirected` result).
    */
   public get redirectURL() {
     return this.options.redirectURL;

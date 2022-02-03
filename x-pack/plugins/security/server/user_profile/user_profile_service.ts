@@ -5,31 +5,21 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
+import type { IClusterClient, Logger } from 'src/core/server';
 
-import type { User } from '../../common';
+import { getDetailedErrorMessage } from '../errors';
+import type { UserData, UserInfo, UserProfile } from './user_profile';
+import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
 
-export interface UserProfile<T extends UserData> {
-  uid: string;
-  user: UserInfo;
-  data: T;
-}
-
-export interface UserInfo extends User {
-  display_name?: string;
-  avatar?: {
-    initials?: string;
-    color?: string;
-    image_url?: string;
-  };
-  active: boolean;
-}
-
-export type UserData = Record<string, unknown>;
-
 export interface UserProfileServiceStart {
+  /**
+   * Activates user profile using provided user profile grant.
+   * @param grant User profile grant (username/password or access token).
+   */
+  activate(grant: UserProfileGrant): Promise<UserProfile>;
+
   /**
    * Retrieves a single user profile by identifier.
    * @param uid User ID
@@ -59,22 +49,50 @@ type GetProfileResponse<T extends UserData> = Record<
   }
 >;
 
+export interface UserProfileServiceStartParams {
+  clusterClient: IClusterClient;
+}
+
 export class UserProfileService {
   constructor(private readonly logger: Logger) {}
 
-  start(elasticsearchClient: ElasticsearchClient): UserProfileServiceStart {
+  start({ clusterClient }: UserProfileServiceStartParams): UserProfileServiceStart {
     const { logger } = this;
+
+    async function activate(grant: UserProfileGrant): Promise<UserProfile> {
+      logger.debug(`Activating user profile via ${grant.type} grant.`);
+
+      try {
+        const response = await clusterClient.asInternalUser.transport.request<UserProfile>({
+          method: 'POST',
+          path: '_security/profile/_activate',
+          body:
+            grant.type === 'password'
+              ? { grant_type: 'password', username: grant.username, password: grant.password }
+              : { grant_type: 'access_token', access_token: grant.accessToken },
+        });
+
+        logger.debug(`Successfully activated profile for "${response.body.user.username}".`);
+
+        return response.body;
+      } catch (err) {
+        logger.error(`Failed to activate user profile: ${getDetailedErrorMessage(err)}.`);
+        throw err;
+      }
+    }
 
     async function get<T extends UserData>(uid: string, dataPath?: string) {
       try {
-        const { body } = await elasticsearchClient.transport.request<GetProfileResponse<T>>({
+        const { body } = await clusterClient.asInternalUser.transport.request<
+          GetProfileResponse<T>
+        >({
           method: 'GET',
           path: `_security/profile/${uid}${
             dataPath ? `?data=${KIBANA_DATA_ROOT}.${dataPath}` : ''
           }`,
         });
-        const { user, data } = body[uid];
-        return { uid, user, data: data[KIBANA_DATA_ROOT] };
+        const { user, enabled, data } = body[uid];
+        return { uid, enabled, user, data: data[KIBANA_DATA_ROOT] };
       } catch (error) {
         logger.error(`Failed to retrieve user profile [uid=${uid}]: ${error.message}`);
         throw error;
@@ -83,7 +101,7 @@ export class UserProfileService {
 
     async function update<T extends UserData>(uid: string, data: T) {
       try {
-        await elasticsearchClient.transport.request({
+        await clusterClient.asInternalUser.transport.request({
           method: 'POST',
           path: `_security/profile/_data/${uid}`,
           body: {
@@ -98,6 +116,6 @@ export class UserProfileService {
       }
     }
 
-    return { get, update };
+    return { activate, get, update };
   }
 }

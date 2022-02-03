@@ -57,6 +57,12 @@ export interface SessionValue {
   state: unknown;
 
   /**
+   * Unique identifier of the user profile, if any. Not all users that have session will have an associated user
+   * profile, e.g. anonymous users won't have it.
+   */
+  userProfileUid?: string;
+
+  /**
    * Indicates whether user acknowledged access agreement or not.
    */
   accessAgreementAcknowledged?: boolean;
@@ -76,6 +82,7 @@ export interface SessionOptions {
 
 export interface SessionValueContentToEncrypt {
   username?: string;
+  userProfileUid?: string;
   state: unknown;
 }
 
@@ -173,7 +180,7 @@ export class Session {
 
     return {
       ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
-      // Unlike session index, session cookie contains the most up to date idle timeout expiration.
+      // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
       idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
     };
   }
@@ -198,7 +205,7 @@ export class Session {
     sessionLogger.debug('Creating a new session.');
 
     const sessionExpirationInfo = this.calculateExpiry(sessionValue.provider);
-    const { username, state, ...publicSessionValue } = sessionValue;
+    const { username, userProfileUid, state, ...publicSessionValue } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -207,14 +214,18 @@ export class Session {
       ...sessionExpirationInfo,
       sid,
       usernameHash: username && Session.getUsernameHash(username),
-      content: await this.crypto.encrypt(JSON.stringify({ username, state }), aad),
+      content: await this.crypto.encrypt(JSON.stringify({ username, userProfileUid, state }), aad),
     });
 
     await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
 
     sessionLogger.debug('Successfully created a new session.');
 
-    return Session.sessionIndexValueToSessionValue(sessionIndexValue, { username, state });
+    return Session.sessionIndexValueToSessionValue(sessionIndexValue, {
+      username,
+      userProfileUid,
+      state,
+    });
   }
 
   /**
@@ -234,7 +245,7 @@ export class Session {
       sessionValue.provider,
       sessionCookieValue.lifespanExpiration
     );
-    const { username, state, metadata, ...publicSessionInfo } = sessionValue;
+    const { username, userProfileUid, state, metadata, ...publicSessionInfo } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -244,7 +255,7 @@ export class Session {
       ...sessionExpirationInfo,
       usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(
-        JSON.stringify({ username, state }),
+        JSON.stringify({ username, userProfileUid, state }),
         sessionCookieValue.aad
       ),
     });
@@ -264,7 +275,11 @@ export class Session {
 
     sessionLogger.debug('Successfully updated existing session.');
 
-    return Session.sessionIndexValueToSessionValue(sessionIndexValue, { username, state });
+    return Session.sessionIndexValueToSessionValue(sessionIndexValue, {
+      username,
+      userProfileUid,
+      state,
+    });
   }
 
   /**
@@ -446,11 +461,17 @@ export class Session {
    */
   private static sessionIndexValueToSessionValue(
     sessionIndexValue: Readonly<SessionIndexValue>,
-    { username, state }: SessionValueContentToEncrypt
+    { username, userProfileUid, state }: SessionValueContentToEncrypt
   ): Readonly<SessionValue> {
     // Extract values that are specific to session index value.
     const { usernameHash, content, ...publicSessionValue } = sessionIndexValue;
-    return { ...publicSessionValue, username, state, metadata: { index: sessionIndexValue } };
+    return {
+      ...publicSessionValue,
+      username,
+      userProfileUid,
+      state,
+      metadata: { index: sessionIndexValue },
+    };
   }
 
   /**

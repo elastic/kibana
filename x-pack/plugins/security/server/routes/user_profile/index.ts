@@ -6,10 +6,10 @@
  */
 
 import type { RouteDefinitionParams } from '../index';
-import { defineGetProfileRoute } from './get';
-import { defineUpdateProfileDataRoute } from './update';
+import { defineGetUserProfileRoute } from './get';
+import { defineUpdateUserProfileDataRoute } from './update';
 
-export function defineProfileRoutes(params: RouteDefinitionParams) {
-  defineUpdateProfileDataRoute(params);
-  defineGetProfileRoute(params);
+export function defineUserProfileRoutes(params: RouteDefinitionParams) {
+  defineUpdateUserProfileDataRoute(params);
+  defineGetUserProfileRoute(params);
 }

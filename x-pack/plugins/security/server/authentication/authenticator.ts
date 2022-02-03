@@ -10,6 +10,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 
 import { KibanaRequest } from '../../../../../src/core/server';
+import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -17,8 +18,6 @@ import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { AuditServiceSetup } from '../audit';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
@@ -26,6 +25,7 @@ import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session, SessionValue } from '../session_management';
+import type { UserProfileServiceStart } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -80,6 +80,7 @@ export interface ProviderLoginAttempt {
 export interface AuthenticatorOptions {
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
+  userProfileService: UserProfileServiceStart;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'authc'>;
   basePath: IBasePath;
@@ -712,16 +713,35 @@ export class Authenticator {
       existingSessionValue = null;
     }
 
+    // If authentication result includes user profile grant, we should try to activate user profile for this user and
+    // store user profile identifier in the session value.
+    let userProfileUid = existingSessionValue?.userProfileUid;
+    if (authenticationResult.userProfileGrant) {
+      this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
+      userProfileUid = (
+        await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
+      ).uid;
+
+      if (
+        existingSessionValue?.userProfileUid &&
+        existingSessionValue.userProfileUid !== userProfileUid
+      ) {
+        this.logger.warn(`User profile for "${authenticationResult.user?.username}" has changed.`);
+      }
+    }
+
     let newSessionValue;
     if (!existingSessionValue) {
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
+        userProfileUid,
         provider,
         state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
       });
     } else if (authenticationResult.shouldUpdateState()) {
       newSessionValue = await this.session.update(request, {
         ...existingSessionValue,
+        userProfileUid,
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSessionValue.state,

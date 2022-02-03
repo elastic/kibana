@@ -201,6 +201,7 @@ describe('OIDCAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo('/base-path/some-path', {
+            userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
             state: {
               accessToken: 'some-token',
               refreshToken: 'some-refresh-token',

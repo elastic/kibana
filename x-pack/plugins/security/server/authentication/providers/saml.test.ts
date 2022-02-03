@@ -63,6 +63,7 @@ describe('SAMLAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
           state: {
             accessToken: 'some-token',
             refreshToken: 'some-refresh-token',
@@ -108,6 +109,7 @@ describe('SAMLAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
           state: {
             accessToken: 'some-token',
             refreshToken: 'some-refresh-token',
@@ -184,6 +186,7 @@ describe('SAMLAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'user-initiated-login-token' },
           state: {
             accessToken: 'user-initiated-login-token',
             refreshToken: 'user-initiated-login-refresh-token',
@@ -225,6 +228,7 @@ describe('SAMLAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'user-initiated-login-token' },
           state: {
             accessToken: 'user-initiated-login-token',
             refreshToken: 'user-initiated-login-refresh-token',
@@ -258,6 +262,7 @@ describe('SAMLAuthenticationProvider', () => {
         })
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'idp-initiated-login-token' },
           state: {
             accessToken: 'idp-initiated-login-token',
             refreshToken: 'idp-initiated-login-refresh-token',
@@ -331,6 +336,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -349,6 +355,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -368,6 +375,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -387,6 +395,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -408,6 +417,7 @@ describe('SAMLAuthenticationProvider', () => {
           AuthenticationResult.redirectTo(
             `${mockOptions.basePath.serverBasePath}/app/some-app#some-deep-link`,
             {
+              userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
               state: {
                 accessToken: 'valid-token',
                 refreshToken: 'valid-refresh-token',
@@ -432,6 +442,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -601,6 +612,7 @@ describe('SAMLAuthenticationProvider', () => {
             )
           ).resolves.toEqual(
             AuthenticationResult.redirectTo('/mock-server-basepath/', {
+              userProfileGrant: { type: 'accessToken', accessToken: 'new-valid-token' },
               state: {
                 accessToken: 'new-valid-token',
                 refreshToken: 'new-valid-refresh-token',
@@ -663,6 +675,7 @@ describe('SAMLAuthenticationProvider', () => {
             )
           ).resolves.toEqual(
             AuthenticationResult.redirectTo('/mock-server-basepath/app/some-app#some-deep-link', {
+              userProfileGrant: { type: 'accessToken', accessToken: 'new-valid-token' },
               state: {
                 accessToken: 'new-valid-token',
                 refreshToken: 'new-valid-refresh-token',

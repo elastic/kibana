@@ -11,16 +11,14 @@ import type { RouteDefinitionParams } from '../';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineUpdateProfileDataRoute({
+export function defineUpdateUserProfileDataRoute({
   router,
   getUserProfileService,
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/profile/_data/{uid}',
-      options: {
-        tags: ['access:accessUserProfile', 'access:updateUserProfle'],
-      },
+      path: '/internal/security/user_profile/_data/{uid}',
+      options: { tags: ['access:updateUserProfile'] },
       validate: {
         params: schema.object({ uid: schema.string() }),
         body: schema.recordOf(schema.string(), schema.any()),
