@@ -256,20 +256,6 @@ describe('AddSourceLogic', () => {
       expect(AddSourceLogic.values).toEqual({
         ...DEFAULT_VALUES,
         dataLoading: false,
-        buttonLoading: false,
-        customSourceNameValue: '',
-        clientIdValue: '',
-        clientSecretValue: '',
-        baseUrlValue: '',
-        loginValue: '',
-        passwordValue: '',
-        subdomainValue: '',
-        indexPermissionsValue: false,
-        newCustomSource: {},
-        currentServiceType: '',
-        githubOrganizations: [],
-        selectedGithubOrganizationsMap: {},
-        preContentSourceId: '',
       });
     });
 
