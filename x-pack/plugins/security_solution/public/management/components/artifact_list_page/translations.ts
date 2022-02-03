@@ -17,6 +17,7 @@ export const artifactListPageLabels = Object.freeze({
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.addButtonTitle', {
     defaultMessage: 'Add artifact',
   }),
+
   emptyStateTitle: i18n.translate('xpack.securitySolution.emptyStateTitle', {
     defaultMessage: 'Add your first artifact',
   }),
@@ -27,6 +28,7 @@ export const artifactListPageLabels = Object.freeze({
     'xpack.securitySolution.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add' }
   ),
+
   searchPlaceholderInfo: i18n.translate('xpack.securitySolution.searchPlaceholderInfo', {
     defaultMessage: 'Search on the fields below: name, description, comments, value',
   }),
@@ -36,6 +38,7 @@ export const artifactListPageLabels = Object.freeze({
       values: { total },
     });
   },
+
   cardActionEditLabel: i18n.translate('xpack.securitySolution.cardActionEditLabel', {
     defaultMessage: 'Edit artifact',
   }),

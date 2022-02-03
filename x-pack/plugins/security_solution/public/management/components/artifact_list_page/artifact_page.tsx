@@ -21,6 +21,8 @@ import { artifactListPageLabels } from './translations';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
 import { SearchExceptions } from '../search_exceptions';
+import { useArtifactCardPropsProvider } from './hooks/use_artifact_card_props_provider';
+import { NoDataEmptyState } from './components/no_data_empty_state';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -41,6 +43,8 @@ const AdministrationListPage = styled(_AdministrationListPage)`
 
 export interface ArtifactListPageProps {
   apiClient: unknown; // ExceptionsListApiClient;
+  /** The artifact Component that will be displayed in the Flyout for Create and Edit flows */
+  ArtifactForm: React.ComponentType;
   /** A list of labels for the given artifact page. */
   labels?: Partial<typeof artifactListPageLabels>;
   'data-test-subj'?: string;
@@ -57,96 +61,16 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       };
     }, [_labels]);
 
+    const handleCardProps = useArtifactCardPropsProvider({
+      artifacts: [],
+      policies: {},
+      cardActionDeleteLabel: labels.cardActionDeleteLabel,
+      cardActionEditLabel: labels.cardActionEditLabel,
+      dataTestSubj: getTestId('card'),
+    });
+
     const isLoading = false; // FIXME: implement
-    const doesDataExist = true; // FIXME: implement
-
-    // const handleAddButtonClick = useCallback(
-    // () =>
-    //   navigateCallback({
-    //     show: 'create',
-    //     id: undefined,
-    //   }),
-    // [navigateCallback]
-    // );
-
-    // const handleCancelButtonClick = useCallback(
-    //   () =>
-    //     navigateCallback({
-    //       show: undefined,
-    //       id: undefined,
-    //     }),
-    //   [navigateCallback]
-    // );
-    //
-    // const handlePaginatedContentChange: EventListPaginatedContent['onChange'] = useCallback(
-    //   ({ pageIndex, pageSize }) => {
-    //     navigateCallback({
-    //       page_index: pageIndex,
-    //       page_size: pageSize,
-    //     });
-    //   },
-    //   [navigateCallback]
-    // );
-    //
-    // const handleOnSearch = useCallback(
-    //   (query: string, includedPolicies?: string) => {
-    //     dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
-    //     navigateCallback({ filter: query, included_policies: includedPolicies });
-    //   },
-    //   [navigateCallback, dispatch]
-    // );
-    //
-    // const artifactCardPropsPerItem = useMemo(() => {
-    //   const cachedCardProps: Record<string, ArtifactEntryCardProps> = {};
-    //
-    //   // Casting `listItems` below to remove the `Immutable<>` from it in order to prevent errors
-    //   // with common component's props
-    //   for (const eventFilter of listItems as ExceptionListItemSchema[]) {
-    //     cachedCardProps[eventFilter.id] = {
-    //       item: eventFilter as AnyArtifact,
-    //       policies: artifactCardPolicies,
-    //       'data-test-subj': 'eventFilterCard',
-    //       actions: [
-    //         {
-    //           icon: 'controlsHorizontal',
-    //           onClick: () => {
-    //             history.push(
-    //               getEventFiltersListPath({
-    //                 ...location,
-    //                 show: 'edit',
-    //                 id: eventFilter.id,
-    //               })
-    //             );
-    //           },
-    //           'data-test-subj': 'editEventFilterAction',
-    //           children: EDIT_EVENT_FILTER_ACTION_LABEL,
-    //         },
-    //         {
-    //           icon: 'trash',
-    //           onClick: () => {
-    //             dispatch({
-    //               type: 'eventFilterForDeletion',
-    //               payload: eventFilter,
-    //             });
-    //           },
-    //           'data-test-subj': 'deleteEventFilterAction',
-    //           children: DELETE_EVENT_FILTER_ACTION_LABEL,
-    //         },
-    //       ],
-    //       hideDescription: !eventFilter.description,
-    //       hideComments: !eventFilter.comments.length,
-    //     };
-    //   }
-    //
-    //   return cachedCardProps;
-    // }, [artifactCardPolicies, dispatch, history, listItems, location]);
-    //
-    // const handleArtifactCardProps = useCallback(
-    //   (eventFilter: ExceptionListItemSchema) => {
-    //     return artifactCardPropsPerItem[eventFilter.id];
-    //   },
-    //   [artifactCardPropsPerItem]
-    // );
+    const doesDataExist = false; // FIXME: implement
 
     if (isLoading && !doesDataExist) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
@@ -156,6 +80,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       <AdministrationListPage
         // FIXME: header back component
         // headerBackComponent={backButtonHeaderComponent}
+        hideHeader={!doesDataExist}
         title={labels.pageTitle}
         subtitle={labels.pageAboutInfo}
         actions={
@@ -171,7 +96,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             </EuiButton>
           )
         }
-        hideHeader={false} // FIXME: implement if no data
       >
         {/* {showFlyout && (*/}
         {/*  <EventFiltersFlyout*/}
@@ -183,6 +107,17 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
         {/* {showDelete && <EventFilterDeleteModal />}*/}
 
+        {!doesDataExist && (
+          <NoDataEmptyState
+            onAdd={() => {}}
+            titleLabel={labels.emptyStateTitle}
+            aboutInfo={labels.emptyStateInfo}
+            primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
+            // FIXME:PT implement back component
+            // backComponent={}
+          />
+        )}
+
         {doesDataExist && (
           <>
             <SearchExceptions
@@ -193,38 +128,47 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               policyList={[]} // FIXME:PT provide list of policies
               defaultIncludedPolicies={''} // FIXME:PT provide list of included policies
             />
+
             <EuiSpacer size="m" />
+
             <EuiText color="subdued" size="xs" data-test-subj={getTestId('showCount')}>
               {
                 // FIXME:PT provide total count
                 labels.getShowingCountLabel(0)
               }
             </EuiText>
+
             <EuiSpacer size="s" />
+
+            <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
+              items={[]}
+              ItemComponent={ArtifactEntryCard}
+              itemComponentProps={handleCardProps}
+              onChange={() => {}}
+              error={undefined}
+              loading={false}
+              pagination={{
+                totalItemCount: 0,
+                pageSize: MANAGEMENT_DEFAULT_PAGE_SIZE,
+                pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+                pageIndex: 0,
+              }}
+              contentClassName="event-filter-container"
+              data-test-subj={getTestId('cardContent')}
+              noItemsMessage={<>{'no items'}</>} // FIXME: implement no results message
+            />
           </>
         )}
 
-        <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
-          items={[]}
-          ItemComponent={ArtifactEntryCard}
-          itemComponentProps={() => {}}
-          onChange={() => {}}
-          error={undefined}
-          loading={false}
-          pagination={{
-            totalItemCount: 0,
-            pageSize: MANAGEMENT_DEFAULT_PAGE_SIZE,
-            pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-            pageIndex: 0,
-          }}
-          contentClassName="event-filter-container"
-          data-test-subj={getTestId('cardContent')}
-          noItemsMessage={<>{'no items'}</>} // FIXME: implement no results message
-        />
-
+        {/* DEV ONLY */}
+        {/* DEV ONLY */}
+        {/* DEV ONLY */}
         <EuiCallOut style={{ marginTop: '3em' }} color="danger">
           <p>{'ALPHA - In development'}</p>
         </EuiCallOut>
+        {/* DEV ONLY */}
+        {/* DEV ONLY */}
+        {/* DEV ONLY */}
       </AdministrationListPage>
     );
   }

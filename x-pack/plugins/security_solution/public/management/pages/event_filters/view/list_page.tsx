@@ -13,6 +13,6 @@ export interface EventFiltersListPageProps {
 }
 
 export const EventFiltersListPageAlpha = memo<EventFiltersListPageProps>((props) => {
-  return <ArtifactListPage apiClient={{}} />;
+  return <ArtifactListPage apiClient={{}} ArtifactForm={() => <>{'Form here'}</>} />;
 });
 EventFiltersListPageAlpha.displayName = 'EventFiltersListPageAlpha';
