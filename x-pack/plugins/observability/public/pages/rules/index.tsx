@@ -6,9 +6,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
 
 import { loadAlerts as loadRules } from '../../../../triggers_actions_ui/public';
 
@@ -17,6 +19,7 @@ interface RuleState {
 }
 export function RulesPage() {
   const { core, ObservabilityPageTemplate } = usePluginContext();
+  const { docLinks } = useKibana().services;
   const {
     http,
     notifications: { toasts },
@@ -47,7 +50,7 @@ export function RulesPage() {
       });
     } catch (_e) {
       toasts.addDanger({
-        title: i18n.translate('xpack.observability.alerts.ruleStats.loadError', {
+        title: i18n.translate('xpack.observability.rules.loadError', {
           defaultMessage: 'Unable to load rules',
         }),
       });
@@ -70,6 +73,19 @@ export function RulesPage() {
         pageTitle: (
           <>{i18n.translate('xpack.observability.rulesTitle', { defaultMessage: 'Rules' })} </>
         ),
+        rightSideItems: [
+          <EuiButtonEmpty
+            href={docLinks.links.alerting.guide}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.observability.rules.docsLinkText"
+              defaultMessage="Documentation"
+            />
+          </EuiButtonEmpty>,
+        ],
       }}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
