@@ -88,13 +88,17 @@ export const getExportedRulesDetails = async (blob: Blob): Promise<ExportRulesDe
 
 /**
  * This function helps to parse NDJSON with exported rules
- * and retrieve the number of successfully exported rules.
+ * and retrieve the object with counts of successfully exported/missing/total rules.
  *
  * @param blob a Blob received from an _export endpoint
- * @returns Number of exported rules
+ * @returns Object of exported rules counts
  */
-export const getExportedRulesCount = async (blob: Blob): Promise<number> => {
+export const getExportedRulesCounts = async (blob: Blob) => {
   const details = await getExportedRulesDetails(blob);
 
-  return details.exported_rules_count;
+  return {
+    exported: details.exported_rules_count,
+    missing: details.missing_rules_count,
+    total: details.exported_rules_count + details.missing_rules_count,
+  };
 };

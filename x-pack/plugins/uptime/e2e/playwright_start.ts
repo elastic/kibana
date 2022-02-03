@@ -13,17 +13,20 @@ import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
 import { createApmAndObsUsersAndRoles } from '../../apm/scripts/create_apm_users_and_roles/create_apm_users_and_roles';
+import { importMonitors } from './tasks/import_monitors';
 
 const listOfJourneys = [
   'uptime',
   'StepsDuration',
   'TlsFlyoutInAlertingApp',
   'StatusFlyoutInAlertingApp',
+  'DefaultEmailSettings',
   'MonitorManagement-http',
   'MonitorManagement-tcp',
   'MonitorManagement-icmp',
   'MonitorManagement-browser',
   'MonitorManagement breadcrumbs',
+  'Monitor Management read only user',
 ] as const;
 
 export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
@@ -54,6 +57,8 @@ async function playwrightStart(getService: any, headless = true, match?: string)
     hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.kibana.port'),
   });
+
+  await importMonitors({ kibanaUrl });
 
   await createApmAndObsUsersAndRoles({
     elasticsearch: { username: 'elastic', password: 'changeme' },
