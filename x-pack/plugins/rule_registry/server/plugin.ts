@@ -105,7 +105,9 @@ export class RuleRegistryPlugin
     core.getStartServices().then(([_, depsStart]) => {
       const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
         depsStart.data,
-        this.ruleDataService!
+        this.ruleDataService!,
+        depsStart.alerting,
+        plugins.security
       );
 
       plugins.data.search.registerSearchStrategy(

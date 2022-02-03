@@ -14,7 +14,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KibanaFeature } from '../../../features/common';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
+import { Section, routeToRuleDetails } from './constants';
 import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -59,7 +59,7 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { savedObjects, uiSettings, theme$ } = deps;
-  const sections: Section[] = ['rules', 'connectors'];
+  const sections: Section[] = ['rules', 'connectors', 'alerts'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');
@@ -90,11 +90,11 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         path={routeToRuleDetails}
         component={suspendedComponentWithProps(AlertDetailsRoute, 'xl')}
       />
-      <Route
+      {/* <Route
         exact
         path={legacyRouteToRuleDetails}
         render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
-      />
+      /> */}
       <Redirect from={'/'} to="rules" />
       <Redirect from={'/alerts'} to="rules" />
     </Switch>

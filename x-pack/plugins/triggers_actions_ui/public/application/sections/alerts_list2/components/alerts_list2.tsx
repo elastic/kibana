@@ -4,28 +4,55 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { DataViewBase } from '@kbn/es-query';
 import { get } from 'lodash';
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiDataGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
   ParsedTechnicalFields,
+  BASE_RAC_ALERTS_API_PATH,
 } from '../../../../../../rule_registry/common';
 import { useKibana } from '../../../../common/lib/kibana';
+import { Consumer } from '../types';
+import { QueryBar } from './query_bar';
+import { useStateContainer } from './state/use_state_container';
+import { Provider, alertsPageStateContainer } from './state/state_container';
 
-export const AlertsList: React.FunctionComponent = () => {
-  const { data, notifications } = useKibana().services;
+const AlertsListUI: React.FunctionComponent = () => {
+  const {
+    http,
+    data,
+    notifications,
+    application: { capabilities },
+    kibanaFeatures,
+  } = useKibana().services;
+
+  const timefilterService = data.query.timefilter.timefilter;
+  const visibleConsumers: Consumer[] = Object.values(AlertConsumers)
+    .filter((consumer) => {
+      return capabilities[consumer]?.show;
+    })
+    .map((consumer) => {
+      const feature = kibanaFeatures.find((kibanaFeature) => kibanaFeature.id === consumer);
+      return { id: consumer, name: feature?.name } as Consumer;
+    });
 
   const [alerts, setAlerts] = useState<ParsedTechnicalFields[]>([]);
   const [alertsTotal, setAlertsTotal] = useState<number>(0);
+  const [dynamicIndexPatterns, setDynamicIndexPatterns] = useState<DataViewBase[]>([]);
+  // const [filteredConsumers, setFilteredConsumers] = useState<Consumer[]>(visibleConsumers);
 
-  function fetch() {
+  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } = useStateContainer();
+
+  const streamData = useCallback(() => {
     const abortController = new AbortController();
     const request: RuleRegistrySearchRequest = {
-      featureId: AlertConsumers.LOGS,
+      featureIds: visibleConsumers.map((c) => c.id),
+      query: kuery,
     };
 
     data.search
@@ -35,8 +62,9 @@ export const AlertsList: React.FunctionComponent = () => {
       })
       .subscribe({
         next: (res) => {
-          console.log({ res })
-          const alertsResponse = res.rawResponse.hits.hits.map((hit) => hit._source);
+          // eslint-disable-next-line no-console
+          console.log({ res });
+          const alertsResponse = res.rawResponse.hits.hits.map((hit) => hit._source!);
           setAlerts(alertsResponse);
           setAlertsTotal(res.total ?? 0);
         },
@@ -53,10 +81,47 @@ export const AlertsList: React.FunctionComponent = () => {
           }
         },
       });
-  }
+  }, [data.search, notifications.toasts, visibleConsumers, kuery]);
+
+  const fetchIndicesForQueryBar = useCallback(async () => {
+    const { index_name: indexNames } = await http.get<{ index_name: string[] }>(
+      `${BASE_RAC_ALERTS_API_PATH}/index`,
+      {
+        query: { features: visibleConsumers.map(({ id }) => id).join(',') },
+      }
+    );
+    setDynamicIndexPatterns([
+      {
+        id: 'dynamic-observability-alerts-table-index-pattern',
+        title: indexNames.join(','),
+        fields: await data.dataViews.getFieldsForWildcard({
+          pattern: indexNames.join(','),
+          allowNoIndex: true,
+        }),
+      },
+    ]);
+  }, [visibleConsumers, http, data.dataViews]);
+
+  const onQueryBarQueryChange = useCallback(
+    ({ dateRange, query }) => {
+      if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
+        streamData();
+        return;
+        // return refetch.current && refetch.current();
+      }
+      timefilterService.setTime(dateRange);
+      setRangeFrom(dateRange.from);
+      setRangeTo(dateRange.to);
+      setKuery(query);
+      // syncAlertStatusFilterStatus(query as string);
+    },
+    [rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, timefilterService, streamData]
+  );
 
   useEffect(() => {
-    fetch();
+    streamData();
+    fetchIndicesForQueryBar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const columns = [
@@ -75,32 +140,58 @@ export const AlertsList: React.FunctionComponent = () => {
     columns.map(({ id }) => id) // initialize to the full set of columns
   );
 
-  const RenderCellValue = ({ rowIndex, columnId, setCellProps }) => {
+  const RenderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
     const row = alerts[rowIndex];
-    console.log({ rowIndex, columnId })
+    // console.log({ rowIndex, columnId });
     return get(row, columnId);
-  }
+  };
 
   return (
-    <EuiDataGrid
-      aria-label="Data grid demo"
-      columns={columns}
-      columnVisibility={{ visibleColumns, setVisibleColumns }}
-      // trailingControlColumns={trailingControlColumns}
-      rowCount={alertsTotal}
-      renderCellValue={RenderCellValue}
-      // inMemory={{ level: 'sorting' }}
-      // sorting={{ columns: sortingColumns, onSort }}
-      // pagination={{
-      //   ...pagination,
-      //   pageSizeOptions: [10, 50, 100],
-      //   onChangeItemsPerPage: onChangeItemsPerPage,
-      //   onChangePage: onChangePage,
-      // }}
-      // onColumnResize={onColumnResize.current}
-    />
+    <>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <QueryBar
+                dynamicIndexPatterns={dynamicIndexPatterns}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                query={kuery}
+                onQueryChange={onQueryBarQueryChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiDataGrid
+        aria-label="Data grid demo"
+        columns={columns}
+        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        // trailingControlColumns={trailingControlColumns}
+        rowCount={alertsTotal}
+        renderCellValue={RenderCellValue}
+        // inMemory={{ level: 'sorting' }}
+        // sorting={{ columns: sortingColumns, onSort }}
+        // pagination={{
+        //   ...pagination,
+        //   pageSizeOptions: [10, 50, 100],
+        //   onChangeItemsPerPage: onChangeItemsPerPage,
+        //   onChangePage: onChangePage,
+        // }}
+        // onColumnResize={onColumnResize.current}
+      />
+    </>
   );
 };
+
+export function AlertsList() {
+  return (
+    <Provider value={alertsPageStateContainer}>
+      <AlertsListUI />
+    </Provider>
+  );
+}
 
 // eslint-disable-next-line import/no-default-export
 export { AlertsList as default };

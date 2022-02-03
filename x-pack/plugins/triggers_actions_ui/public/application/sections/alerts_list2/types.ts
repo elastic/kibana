@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
-export const BASE_RAC_ALERTS_API_PATH = '/internal/rac/alerts';
-export const MAX_ALERT_SEARCH_SIZE = 1000;
+export interface Consumer {
+  id: AlertConsumers;
+  name: string;
+}

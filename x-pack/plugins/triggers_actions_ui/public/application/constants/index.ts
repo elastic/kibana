@@ -13,15 +13,13 @@ export {
 } from '../../../../alerting/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../../../actions/common';
 
-export type Section = 'connectors' | 'rules' | 'output';
+export type Section = 'connectors' | 'rules' | 'alerts';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
-export const routeToAlerts = `/output`;
+export const routeToAlerts = `/alerts`;
 export const routeToRules = `/rules`;
 export const routeToRuleDetails = `/rule/:ruleId`;
-export const legacyRouteToRules = `/alerts`;
-export const legacyRouteToRuleDetails = `/alert/:alertId`;
 
 export const recoveredActionGroupMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.RecoveredMessage',

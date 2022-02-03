@@ -23,8 +23,8 @@ import { suspendedComponentWithProps } from './lib/suspended_component_with_prop
 const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
-const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
-const AlertsList2 = lazy(() => import('./sections/alerts_list2/components/alerts_list2'));
+const RulesList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
+const AlertsList = lazy(() => import('./sections/alerts_list2/components/alerts_list2'));
 
 export interface MatchParams {
   section: Section;
@@ -71,7 +71,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   if (canShowAlerts) {
     tabs.push({
-      id: 'output',
+      id: 'alerts',
       name: (
         <FormattedMessage
           id="xpack.triggersActionsUI.home.alertsTabTitle"
@@ -140,20 +140,20 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               <Route
                 exact
                 path={routeToConnectors}
-                component={suspendedComponentWithProps(AlertsList2, 'xl')}
+                component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
               />
             )}
             {canShowAlerts && (
               <Route
                 exact
                 path={routeToAlerts}
-                component={suspendedComponentWithProps(AlertsList2, 'xl')}
+                component={suspendedComponentWithProps(AlertsList, 'xl')}
               />
             )}
             <Route
               exact
               path={routeToRules}
-              component={suspendedComponentWithProps(AlertsList, 'xl')}
+              component={suspendedComponentWithProps(RulesList, 'xl')}
             />
           </Switch>
         </HealthCheck>

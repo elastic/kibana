@@ -9,6 +9,7 @@ import { IEsSearchRequest, IEsSearchResponse } from 'src/plugins/data/common';
 import { ParsedTechnicalFields } from '../';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
-  featureId: ValidFeatureId;
+  featureIds: ValidFeatureId[];
+  query?: string;
 };
 export type RuleRegistrySearchResponse = IEsSearchResponse<ParsedTechnicalFields>;
