@@ -99,16 +99,18 @@ export const hasReadIndexPrivileges = async (args: {
 }): Promise<boolean> => {
   const { privileges, logger, buildRuleMessage, ruleExecutionLogger, savedObjectsClient, version } =
     args;
-  const config = await savedObjectsClient.get<{ 'securitySolution:enableCcsWarning': boolean }>(
-    'config',
-    version
+  const config = await withSecuritySpan('getCcsWarningEnabled', () =>
+    savedObjectsClient.get<{ 'securitySolution:enableCcsWarning': boolean }>('config', version)
   );
-  const isCcsPermissionWarningEnabled = config.attributes[ENABLE_CCS_READ_WARNING_SETTING];
 
+  let isCcsPermissionWarningEnabled = true;
+  if (config.attributes != null && config.attributes[ENABLE_CCS_READ_WARNING_SETTING] != null) {
+    isCcsPermissionWarningEnabled = config.attributes[ENABLE_CCS_READ_WARNING_SETTING];
+  }
   const indexNames = Object.keys(privileges.index);
   const filteredIndexNames = isCcsPermissionWarningEnabled
     ? indexNames
-    : indexNames.filter((indexName) => indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
+    : indexNames.filter((indexName) => !indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
 
   const [, indexesWithNoReadPrivileges] = partition(
     filteredIndexNames,
