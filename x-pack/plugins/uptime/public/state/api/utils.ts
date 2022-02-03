@@ -109,6 +109,8 @@ class ApiService {
       body: JSON.stringify(data),
     });
 
+    this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
+
     if (decodeType) {
       const decoded = decodeType.decode(response);
       if (isRight(decoded)) {
