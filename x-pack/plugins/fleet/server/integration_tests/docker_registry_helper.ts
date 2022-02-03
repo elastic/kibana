@@ -53,7 +53,6 @@ export function useDockerRegistry() {
   async function cleanupDockerRegistryServer() {
     if (dockerProcess && !dockerProcess.killed) {
       dockerProcess.kill();
-      return new Promise((resolve) => dockerProcess!.once('exit', resolve));
     }
   }
 
