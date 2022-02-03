@@ -254,8 +254,8 @@ describe('ColumnHeaders', () => {
     });
   });
 
-  describe('Fields', () => {
-    test('Closes field editor when the timeline is closed', () => {
+  describe('Field Editor', () => {
+    test('Closes field editor when the timeline is unmounted', () => {
       const mockCloseEditor = jest.fn();
       mockUseCreateFieldButton.mockImplementation((_, __, fieldEditorActionsRef) => {
         fieldEditorActionsRef.current = { closeEditor: mockCloseEditor };
@@ -267,12 +267,29 @@ describe('ColumnHeaders', () => {
           <ColumnHeadersComponent {...defaultProps} />
         </TestProviders>
       );
-      wrapper.setProps({ ...defaultProps, show: false });
+      expect(mockCloseEditor).not.toHaveBeenCalled();
 
-      // let useEffect hook execute
-      setTimeout(() => {
-        expect(mockCloseEditor).toHaveBeenCalled();
-      }, 0);
+      wrapper.unmount();
+      expect(mockCloseEditor).toHaveBeenCalled();
+    });
+
+    test('Closes field editor when the timeline is closed', () => {
+      const mockCloseEditor = jest.fn();
+      mockUseCreateFieldButton.mockImplementation((_, __, fieldEditorActionsRef) => {
+        fieldEditorActionsRef.current = { closeEditor: mockCloseEditor };
+        return <></>;
+      });
+
+      const Proxy = (props: ColumnHeadersComponentProps) => (
+        <TestProviders>
+          <ColumnHeadersComponent {...props} />
+        </TestProviders>
+      );
+      const wrapper = mount(<Proxy {...defaultProps} />);
+      expect(mockCloseEditor).not.toHaveBeenCalled();
+
+      wrapper.setProps({ ...defaultProps, show: false });
+      expect(mockCloseEditor).toHaveBeenCalled();
     });
   });
 });

@@ -56,7 +56,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
 
     const onClick = useCallback(() => {
       if (dataView) {
-        const closeEditor = dataViewFieldEditor?.openEditor({
+        const closeFieldEditor = dataViewFieldEditor?.openEditor({
           ctx: { dataView },
           onSave: async (field: DataViewField) => {
             // Fetch the updated list of fields
@@ -77,7 +77,12 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
           },
         });
         if (editorActionsRef) {
-          editorActionsRef.current = { closeEditor };
+          editorActionsRef.current = {
+            closeEditor: () => {
+              editorActionsRef.current = null;
+              closeFieldEditor();
+            },
+          };
         }
       }
       onClickParam();

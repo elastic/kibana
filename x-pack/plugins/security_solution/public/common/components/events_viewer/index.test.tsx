@@ -105,8 +105,9 @@ describe('StatefulEventsViewer', () => {
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
-    wrapper.unmount();
+    expect(mockCloseEditor).not.toHaveBeenCalled();
 
+    wrapper.unmount();
     expect(mockCloseEditor).toHaveBeenCalled();
   });
 });

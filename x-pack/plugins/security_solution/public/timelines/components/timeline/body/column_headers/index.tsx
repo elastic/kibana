@@ -106,6 +106,15 @@ export const ColumnHeadersComponent = ({
   const fieldEditorActionsRef = useRef<CreateFieldEditorActions>(null);
 
   useEffect(() => {
+    return () => {
+      if (fieldEditorActionsRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        fieldEditorActionsRef.current.closeEditor();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!show && fieldEditorActionsRef.current) {
       fieldEditorActionsRef.current.closeEditor();
     }

@@ -110,9 +110,9 @@ describe('CreateFieldButton', () => {
   });
 
   it("stores 'closeEditor' in the actions ref when editor is open", async () => {
-    const closeEditorDummyFn = () => {};
+    const mockCloseEditor = jest.fn();
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = () => closeEditorDummyFn;
+    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
 
     const editorActionsRef: MutableRefObject<CreateFieldEditorActions> = React.createRef();
     await act(async () => {
@@ -130,7 +130,16 @@ describe('CreateFieldButton', () => {
       await runAllPromises();
     });
 
+    expect(editorActionsRef?.current).toBeNull();
+
     fireEvent.click(screen.getByRole('button'));
-    expect(editorActionsRef?.current?.closeEditor).toBe(closeEditorDummyFn);
+
+    expect(mockCloseEditor).not.toHaveBeenCalled();
+    expect(editorActionsRef?.current?.closeEditor).toBeDefined();
+
+    editorActionsRef!.current!.closeEditor();
+
+    expect(mockCloseEditor).toHaveBeenCalled();
+    expect(editorActionsRef!.current).toBeNull();
   });
 });
