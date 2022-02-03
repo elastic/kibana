@@ -5,23 +5,16 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { getDataMinMax, isValidColor } from '../utils';
+import { isValidColor } from '../utils';
 
 import type { ColorRange, ColorRangeAccessor } from './types';
-import type { DataBounds } from '../types';
-
-import { CustomPaletteParams } from '../../../../common';
 
 /** @internal **/
 type ColorRangeValidationErrors = 'invalidColor' | 'invalidValue' | 'greaterThanMaxValue';
 
 /** @internal **/
-type ColorRangeValidationWarnings = 'lowerThanDataBounds' | 'greaterThanDataBounds';
-
-/** @internal **/
 export interface ColorRangeValidation {
   errors: ColorRangeValidationErrors[];
-  warnings: ColorRangeValidationWarnings[];
   isValid: boolean;
 }
 
@@ -44,7 +37,7 @@ export const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeV
               );
             case 'greaterThanMaxValue':
               return i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
-                defaultMessage: 'Maximum value should be greater than preceding values',
+                defaultMessage: 'Maximum value must be greater than preceding values',
               });
             default:
               return '';
@@ -54,45 +47,9 @@ export const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeV
   ];
 };
 
-export const getOutsideDataBoundsWarningMessage = (warnings: ColorRangeValidation['warnings']) => {
-  for (const warning of warnings) {
-    switch (warning) {
-      case 'lowerThanDataBounds':
-        return i18n.translate('xpack.lens.dynamicColoring.customPalette.lowerThanDataBounds', {
-          defaultMessage: 'This value is outside the minimum data bound',
-        });
-      case 'greaterThanDataBounds':
-        return i18n.translate('xpack.lens.dynamicColoring.customPalette.greaterThanDataBounds', {
-          defaultMessage: 'This value is outside the maximum data bound',
-        });
-    }
-  }
-};
-
-const checkForComplianceWithDataBounds = (value: number, minMax?: [number, number]) => {
-  const warnings: ColorRangeValidationWarnings[] = [];
-  if (minMax) {
-    const [min, max] = minMax;
-
-    if (value < min) {
-      warnings.push('lowerThanDataBounds');
-    }
-    if (value > max) {
-      warnings.push('greaterThanDataBounds');
-    }
-  }
-
-  return warnings;
-};
-
 /** @internal **/
-export const validateColorRange = (
-  colorRange: ColorRange,
-  accessor: ColorRangeAccessor,
-  minMax?: [number, number]
-) => {
+export const validateColorRange = (colorRange: ColorRange, accessor: ColorRangeAccessor) => {
   const errors: ColorRangeValidationErrors[] = [];
-  let warnings: ColorRangeValidationWarnings[] = [];
 
   if (Number.isNaN(colorRange[accessor])) {
     errors.push('invalidValue');
@@ -102,53 +59,33 @@ export const validateColorRange = (
     if (colorRange.start > colorRange.end) {
       errors.push('greaterThanMaxValue');
     }
-    warnings = [...warnings, ...checkForComplianceWithDataBounds(colorRange.end, minMax)];
-  } else {
-    if (!isValidColor(colorRange.color)) {
-      errors.push('invalidColor');
-    }
-    warnings = [...warnings, ...checkForComplianceWithDataBounds(colorRange.start, minMax)];
+  } else if (!isValidColor(colorRange.color)) {
+    errors.push('invalidColor');
   }
 
   return {
     isValid: !errors.length,
     errors,
-    warnings,
   } as ColorRangeValidation;
 };
 
 export const validateColorRanges = (
-  colorRanges: ColorRange[],
-  dataBounds: DataBounds,
-  rangeType: CustomPaletteParams['rangeType']
+  colorRanges: ColorRange[]
 ): Record<string, ColorRangeValidation> => {
-  let minMax: [number, number] | undefined;
-
-  if ((dataBounds.fallback && rangeType === 'percent') || !dataBounds.fallback) {
-    const { min, max } = getDataMinMax(rangeType, dataBounds);
-    minMax = [min, max];
-  }
-
   const validations = colorRanges.reduce<Record<string, ColorRangeValidation>>(
     (acc, item, index) => ({
       ...acc,
-      [index]: validateColorRange(item, 'start', minMax),
+      [index]: validateColorRange(item, 'start'),
     }),
     {}
   );
 
   return {
     ...validations,
-    last: validateColorRange(colorRanges[colorRanges.length - 1], 'end', minMax),
+    last: validateColorRange(colorRanges[colorRanges.length - 1], 'end'),
   };
 };
 
-export const isAllColorRangesValid = (
-  colorRanges: ColorRange[],
-  dataBounds: DataBounds,
-  rangeType: CustomPaletteParams['rangeType']
-) => {
-  return Object.values(validateColorRanges(colorRanges, dataBounds, rangeType)).every(
-    (colorRange) => colorRange.isValid
-  );
+export const isAllColorRangesValid = (colorRanges: ColorRange[]) => {
+  return Object.values(validateColorRanges(colorRanges)).every((colorRange) => colorRange.isValid);
 };
