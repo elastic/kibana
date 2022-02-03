@@ -13,7 +13,12 @@ import {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { AbstractSearchStrategy, DefaultSearchCapabilities } from '../../search_strategies';
+
+import {
+  AbstractSearchStrategy,
+  DefaultSearchCapabilities,
+  EsSearchRequest,
+} from '../../search_strategies';
 
 export type AnnotationServices = VisTypeTimeseriesRequestServices & {
   capabilities: DefaultSearchCapabilities;
@@ -32,7 +37,7 @@ export async function getAnnotationRequestParams(
     uiSettings,
     cachedIndexPatternFetcher,
   }: AnnotationServices
-) {
+): Promise<EsSearchRequest> {
   const annotationIndex = await cachedIndexPatternFetcher(annotation.index_pattern);
 
   const request = await buildAnnotationRequest(
@@ -47,6 +52,9 @@ export async function getAnnotationRequestParams(
 
   return {
     index: annotationIndex.indexPatternString,
+    trackingEsSearchMeta: {
+      requestId: annotation.id,
+    },
     body: {
       ...request,
       runtime_mappings: annotationIndex.indexPattern?.getComputedFields().runtimeFields ?? {},

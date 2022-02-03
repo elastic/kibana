@@ -7,27 +7,35 @@
  */
 
 import { PANEL_TYPES } from '../enums';
-import { TimeseriesUIRestrictions } from '../ui_restrictions';
+import type { TimeseriesUIRestrictions } from '../ui_restrictions';
 
 export type TimeseriesVisData = SeriesData | TableData;
 
-export interface TableData {
-  type: PANEL_TYPES.TABLE;
+export type TrackedEsSearches = Record<
+  string,
+  {
+    body: Record<string, any>;
+    response?: Record<string, any>;
+  }
+>;
+
+export interface DataResponseMeta {
+  type: PANEL_TYPES;
   uiRestrictions: TimeseriesUIRestrictions;
+  trackedEsSearches: TrackedEsSearches;
+}
+
+export interface TableData extends DataResponseMeta {
   series?: PanelData[];
   pivot_label?: string;
 }
 
 // series data is not fully typed yet
-export type SeriesData = {
-  type: Exclude<PANEL_TYPES, PANEL_TYPES.TABLE>;
-  uiRestrictions: TimeseriesUIRestrictions;
+export type SeriesData = DataResponseMeta & {
   error?: string;
-} & {
-  [key: string]: PanelSeries;
-};
+} & Record<string, PanelSeries>;
 
-interface PanelSeries {
+export interface PanelSeries {
   annotations: {
     [key: string]: unknown[];
   };

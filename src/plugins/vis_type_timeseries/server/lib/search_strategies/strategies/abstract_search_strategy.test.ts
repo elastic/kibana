@@ -9,8 +9,8 @@
 import { IndexPatternsService } from '../../../../../data/common';
 
 import { from } from 'rxjs';
-import { AbstractSearchStrategy } from './abstract_search_strategy';
-import type { IFieldType } from '../../../../../data/common';
+import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
+import type { FieldSpec } from '../../../../../data/common';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -21,7 +21,7 @@ class FooSearchStrategy extends AbstractSearchStrategy {}
 
 describe('AbstractSearchStrategy', () => {
   let abstractSearchStrategy: AbstractSearchStrategy;
-  let mockedFields: IFieldType[];
+  let mockedFields: FieldSpec[];
   let requestContext: VisTypeTimeseriesRequestHandlerContext;
 
   beforeEach(() => {
@@ -64,7 +64,7 @@ describe('AbstractSearchStrategy', () => {
   });
 
   test('should return response', async () => {
-    const searches = [{ body: 'body', index: 'index' }];
+    const searches: EsSearchRequest[] = [{ body: {}, index: 'index' }];
 
     const responses = await abstractSearchStrategy.search(
       requestContext,
@@ -84,7 +84,7 @@ describe('AbstractSearchStrategy', () => {
     expect(requestContext.search.search).toHaveBeenCalledWith(
       {
         params: {
-          body: 'body',
+          body: {},
           index: 'index',
         },
         indexType: undefined,

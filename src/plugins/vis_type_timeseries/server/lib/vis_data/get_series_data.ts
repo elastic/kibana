@@ -18,7 +18,7 @@ import type {
   VisTypeTimeseriesVisDataRequest,
   VisTypeTimeseriesRequestServices,
 } from '../../types';
-import type { Panel } from '../../../common/types';
+import type { DataResponseMeta, Panel } from '../../../common/types';
 import { PANEL_TYPES } from '../../../common/enums';
 
 export async function getSeriesData(
@@ -44,9 +44,10 @@ export async function getSeriesData(
   }
 
   const { searchStrategy, capabilities } = strategy;
-  const meta = {
+  const meta: DataResponseMeta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
+    trackedEsSearches: {},
   };
 
   const handleError = handleErrorResponse(panel);
@@ -57,7 +58,7 @@ export async function getSeriesData(
     );
 
     const searches = await Promise.all(bodiesPromises);
-    const data = await searchStrategy.search(requestContext, req, searches);
+    const data = await searchStrategy.search(requestContext, req, searches, meta.trackedEsSearches);
 
     const handleResponseBodyFn = handleResponseBody(panel, req, {
       indexPatternsService: services.indexPatternsService,
@@ -85,6 +86,7 @@ export async function getSeriesData(
           searchStrategy,
           capabilities,
         },
+        trackedEsSearches: meta.trackedEsSearches,
       });
     }
 

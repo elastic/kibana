@@ -396,6 +396,7 @@ export {
   isEsError,
   SearchSessionState,
   SortDirection,
+  handleResponse,
 } from './search';
 
 export type {

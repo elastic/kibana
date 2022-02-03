@@ -51,3 +51,5 @@ export { getEsPreference } from './es_search';
 
 export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
 export * from './errors';
+
+export { handleResponse } from './fetch';

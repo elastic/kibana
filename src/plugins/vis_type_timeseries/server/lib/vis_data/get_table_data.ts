@@ -24,7 +24,7 @@ import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { Panel } from '../../../common/types';
+import type { DataResponseMeta, Panel } from '../../../common/types';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -66,9 +66,10 @@ export async function getTableData(
     return panel.pivot_id;
   };
 
-  const meta = {
+  const meta: DataResponseMeta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
+    trackedEsSearches: {},
   };
 
   const handleError = handleErrorResponse(panel);
@@ -84,15 +85,23 @@ export async function getTableData(
       () => services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes))
     );
 
-    const [resp] = await searchStrategy.search(requestContext, req, [
-      {
-        body: {
-          ...body,
-          runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+    const [resp] = await searchStrategy.search(
+      requestContext,
+      req,
+      [
+        {
+          body: {
+            ...body,
+            runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+          },
+          index: panelIndex.indexPatternString,
+          trackingEsSearchMeta: {
+            requestId: panel.id,
+          },
         },
-        index: panelIndex.indexPatternString,
-      },
-    ]);
+      ],
+      meta.trackedEsSearches
+    );
 
     const buckets = get(
       resp.rawResponse ? resp.rawResponse : resp,

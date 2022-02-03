@@ -47,6 +47,7 @@
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
 |  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-public.gettime.md) |  |
+|  [handleResponse(request, response)](./kibana-plugin-plugins-data-public.handleresponse.md) |  |
 |  [isEsError(e)](./kibana-plugin-plugins-data-public.iseserror.md) | Checks if a given errors originated from Elasticsearch. Those params are assigned to the attributes property of an error. |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-public.plugin.md) |  |
 |  [waitUntilNextSessionCompletes$(sessionService, { waitForIdle })](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletes_.md) | Creates an observable that emits when next search session completes. This utility is helpful to use in the application to delay some tasks until next session completes. |

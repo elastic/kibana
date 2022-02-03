@@ -13,7 +13,7 @@ import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import type { DefaultSearchCapabilities } from '../../search_strategies';
+import type { DefaultSearchCapabilities, EsSearchRequest } from '../../search_strategies';
 
 export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
@@ -28,7 +28,7 @@ export async function getSeriesRequestParams(
     cachedIndexPatternFetcher,
     buildSeriesMetaParams,
   }: VisTypeTimeseriesRequestServices
-) {
+): Promise<EsSearchRequest> {
   let seriesIndex = panelIndex;
 
   if (series.override_index_pattern) {
@@ -52,6 +52,9 @@ export async function getSeriesRequestParams(
       ...request,
       runtime_mappings: seriesIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
+    },
+    trackingEsSearchMeta: {
+      requestId: series.id,
     },
   };
 }

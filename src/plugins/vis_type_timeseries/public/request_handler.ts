@@ -12,7 +12,7 @@ import { ROUTES } from '../common/constants';
 
 import type { TimeseriesVisParams } from './types';
 import type { TimeseriesVisData } from '../common/types';
-import type { KibanaContext } from '../../data/public';
+import { KibanaContext, handleResponse } from '../../data/public';
 
 interface MetricsRequestHandlerParams {
   input: KibanaContext | null;
@@ -46,7 +46,7 @@ export const metricsRequestHandler = async ({
 
     try {
       const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
-      return await getCoreStart().http.post(ROUTES.VIS_DATA, {
+      const visData: TimeseriesVisData = await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
           timerange: {
             timezone,
@@ -61,6 +61,14 @@ export const metricsRequestHandler = async ({
           }),
         }),
       });
+
+      Object.entries(visData.trackedEsSearches || {}).forEach(([key, query]) => {
+        if (query.response) {
+          handleResponse({ body: query.body }, { rawResponse: query.response });
+        }
+      });
+
+      return visData;
     } finally {
       if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
         // untrack if this search still belongs to current session

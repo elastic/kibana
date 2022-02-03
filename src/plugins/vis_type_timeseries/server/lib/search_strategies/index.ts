@@ -8,5 +8,6 @@
 
 export { SearchStrategyRegistry } from './search_strategy_registry';
 export { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
-
 export { AbstractSearchStrategy, RollupSearchStrategy, DefaultSearchStrategy } from './strategies';
+
+export type { EsSearchRequest } from './strategies/abstract_search_strategy';
