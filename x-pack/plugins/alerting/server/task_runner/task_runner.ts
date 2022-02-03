@@ -151,7 +151,7 @@ export class TaskRunner<
     this.executionId = uuid.v4();
   }
 
-  async getDecryptedAttributes(
+  private async getDecryptedAttributes(
     ruleId: string,
     spaceId: string
   ): Promise<{ apiKey: string | null; enabled: boolean }> {
