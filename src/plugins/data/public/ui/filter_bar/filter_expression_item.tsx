@@ -50,7 +50,7 @@ interface Props {
   groupId: string;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
-  onEditFilterClick: () => void;
+  onEditFilterClick: (groupId: number) => void;
   savedQueryService?: SavedQueryService;
   onFilterSave?: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   customLabel?: string;
@@ -81,8 +81,8 @@ export const FilterExpressionItem: FC<Props> = ({
     setIsPopoverOpen(!isPopoverOpen);
   }
 
-  function onEdit() {
-    onEditFilterClick();
+  function onEdit(groupId: number) {
+    onEditFilterClick(groupId);
   }
 
   function onDuplicate() {
@@ -120,7 +120,7 @@ export const FilterExpressionItem: FC<Props> = ({
         icon: 'pencil',
         onClick: () => {
           setIsPopoverOpen(false);
-          onEdit();
+          onEdit(groupId);
         },
         'data-test-subj': 'editFilter',
       },

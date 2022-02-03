@@ -11,7 +11,7 @@ import { groupBy, isEqual } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { Filter, toggleFilterNegated } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FilterItem } from './filter_item';
@@ -51,6 +51,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
+  const [groupId, setGroupId] = useState<number | null>(null);
   if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
@@ -61,7 +62,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     }
   }
 
-  const onEditFilterClick = () => {
+  const onEditFilterClick = (groupId: number) => {
+    setGroupId(groupId);
     props.toggleEditFilterModal?.(true);
   };
 
@@ -158,7 +160,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={groupId}
           groupedFilters={groupedFilters}
           indexPatterns={props?.indexPatterns}
-          onClick={() => {}}
+          onClick={() => { }}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
@@ -181,7 +183,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={groupId}
           groupedFilters={groupedByAlias[label]}
           indexPatterns={props?.indexPatterns}
-          onClick={() => {}}
+          onClick={() => { }}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           onEditFilterClick={onEditFilterClick}
@@ -199,6 +201,10 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function renderEditFilter() {
+    const currentEditFilters = props.multipleFilters.filter(
+      (filter) => filter.groupId == Number(groupId)
+    );
+
     return (
       <EuiFlexItem grow={false}>
         {props.isEditFilterModalOpen && (
@@ -207,8 +213,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
             applySavedQueries={() => props.toggleEditFilterModal?.(false)}
             onCancel={() => props.toggleEditFilterModal?.(false)}
-            filter={props.filters[0]}
-            multipleFilters={props.multipleFilters}
+            filter={props.multipleFilters[0]}
+            multipleFilters={currentEditFilters}
             indexPatterns={props.indexPatterns!}
             onRemoveFilterGroup={onDeleteFilterGroup}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
