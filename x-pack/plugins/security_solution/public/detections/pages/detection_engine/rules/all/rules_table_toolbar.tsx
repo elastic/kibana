@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
 import * as i18n from '../translations';
-import { useFeatureTour } from './use_feature_tour';
+import { useRulesFeatureTourContext } from './rules_feature_tour_context';
 
 const ToolbarLayout = styled.div`
   display: grid;
@@ -54,7 +54,7 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
     const {
       steps: { inMemoryTableStepProps },
       goToNextStep,
-    } = useFeatureTour();
+    } = useRulesFeatureTourContext();
 
     return (
       <ToolbarLayout>

@@ -102,6 +102,13 @@ export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP = i18n.translate(
   }
 );
 
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_NEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepNextButtonTitle',
+  {
+    defaultMessage: 'Next',
+  }
+);
+
 export const FEATURE_TOUR_BULK_ACTIONS_STEP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepDescription',
   {

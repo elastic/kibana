@@ -13,8 +13,8 @@ import { waitFor } from '@testing-library/react';
 import { AllRulesUtilityBar } from './utility_bar';
 import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('./use_feature_tour', () => ({
-  useFeatureTour: jest.fn().mockReturnValue({ steps: {} }),
+jest.mock('./rules_feature_tour_context', () => ({
+  useRulesFeatureTourContext: jest.fn().mockReturnValue({ steps: {} }),
 }));
 
 const mockTheme = getMockTheme({
