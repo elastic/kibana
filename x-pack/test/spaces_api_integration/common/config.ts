@@ -34,7 +34,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       services: {
         es: config.kibana.api.get('services.es'),
         esWithoutSystemIndices: config.kibana.api.get('services.esWithoutSystemIndices'),
-        esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
         retry: config.xpack.api.get('services.retry'),
