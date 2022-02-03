@@ -78,11 +78,12 @@ describe('AppLogic', () => {
 
   describe('setSourceRestriction', () => {
     it('sets property', () => {
-      mount({}, DEFAULT_INITIAL_APP_DATA);
+      mount(DEFAULT_INITIAL_APP_DATA);
       AppLogic.actions.setSourceRestriction(true);
 
       expect(AppLogic.values).toEqual({
         ...DEFAULT_VALUES,
+        searchOAuth: DEFAULT_INITIAL_APP_DATA.searchOAuth,
         account: {
           canCreatePrivateSources: true,
         },
@@ -93,11 +94,12 @@ describe('AppLogic', () => {
   describe('setOrgName', () => {
     it('sets property', () => {
       const NAME = 'new name';
-      mount({}, DEFAULT_INITIAL_APP_DATA);
+      mount(DEFAULT_INITIAL_APP_DATA);
       AppLogic.actions.setOrgName(NAME);
 
       expect(AppLogic.values).toEqual({
         ...DEFAULT_VALUES,
+        searchOAuth: DEFAULT_INITIAL_APP_DATA.searchOAuth,
         organization: {
           name: NAME,
         },

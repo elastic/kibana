@@ -46,7 +46,7 @@ describe('AddSourceLogic', () => {
   const { navigateToUrl } = mockKibanaValues;
   const { clearFlashMessages, flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
 
-  const defaultValues = {
+  const DEFAULT_VALUES = {
     addSourceCurrentStep: AddSourceSteps.ConfigIntroStep,
     addSourceProps: {},
     dataLoading: true,
@@ -90,30 +90,15 @@ describe('AddSourceLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(AddSourceLogic.values).toEqual(defaultValues);
+    expect(AddSourceLogic.values).toEqual(DEFAULT_VALUES);
   });
 
-  const setupExpectedState = ({ setSourceConfigData = {} } = {}) => {
-    const sourceConfigDataSettings =
-      Object.keys(setSourceConfigData).length > 0
-        ? {
-            dataLoading: false,
-            sourceConfigData: setSourceConfigData,
-          }
-        : {};
-
-    return {
-      ...defaultValues,
-      ...sourceConfigDataSettings,
-    };
-  };
   describe('actions', () => {
     it('setSourceConfigData', () => {
       AddSourceLogic.actions.setSourceConfigData(sourceConfigData);
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         sourceConfigData,
         dataLoading: false,
         buttonLoading: false,
@@ -125,10 +110,9 @@ describe('AddSourceLogic', () => {
 
     it('setSourceConnectData', () => {
       AddSourceLogic.actions.setSourceConnectData(sourceConnectData);
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         sourceConnectData,
         buttonLoading: false,
       });
@@ -136,80 +120,72 @@ describe('AddSourceLogic', () => {
 
     it('setClientIdValue', () => {
       AddSourceLogic.actions.setClientIdValue('id');
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         clientIdValue: 'id',
       });
     });
 
     it('setClientSecretValue', () => {
       AddSourceLogic.actions.setClientSecretValue('secret');
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         clientSecretValue: 'secret',
       });
     });
 
     it('setBaseUrlValue', () => {
       AddSourceLogic.actions.setBaseUrlValue('secret');
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         baseUrlValue: 'secret',
       });
     });
 
     it('setCustomSourceNameValue', () => {
       AddSourceLogic.actions.setCustomSourceNameValue('name');
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         customSourceNameValue: 'name',
       });
     });
 
     it('setSourceLoginValue', () => {
       AddSourceLogic.actions.setSourceLoginValue('login');
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         loginValue: 'login',
       });
     });
 
     it('setSourcePasswordValue', () => {
       AddSourceLogic.actions.setSourcePasswordValue('password');
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         passwordValue: 'password',
       });
     });
 
     it('setSourceSubdomainValue', () => {
       AddSourceLogic.actions.setSourceSubdomainValue('subdomain');
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         subdomainValue: 'subdomain',
       });
     });
 
     it('setSourceIndexPermissionsValue', () => {
       AddSourceLogic.actions.setSourceIndexPermissionsValue(true);
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         indexPermissionsValue: true,
       });
     });
@@ -223,20 +199,18 @@ describe('AddSourceLogic', () => {
       };
 
       AddSourceLogic.actions.setCustomSourceData(newCustomSource);
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         newCustomSource,
       });
     });
 
     it('setPreContentSourceConfigData', () => {
       AddSourceLogic.actions.setPreContentSourceConfigData(config);
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         oauthConfigCompleted: true,
         dataLoading: false,
         sectionLoading: false,
@@ -247,10 +221,9 @@ describe('AddSourceLogic', () => {
 
     it('setSelectedGithubOrganizations', () => {
       AddSourceLogic.actions.setSelectedGithubOrganizations('foo');
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         selectedGithubOrganizationsMap: {
           foo: true,
         },
@@ -260,10 +233,9 @@ describe('AddSourceLogic', () => {
 
     it('setPreContentSourceId', () => {
       AddSourceLogic.actions.setPreContentSourceId('123');
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         oauthConfigCompleted: false,
         preContentSourceId: '123',
       });
@@ -271,10 +243,9 @@ describe('AddSourceLogic', () => {
 
     it('setButtonNotLoading', () => {
       AddSourceLogic.actions.setButtonNotLoading();
-      const EXPECTED_BASE_STATE = setupExpectedState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
         buttonLoading: false,
       });
     });
@@ -283,7 +254,7 @@ describe('AddSourceLogic', () => {
       AddSourceLogic.actions.resetSourceState();
 
       expect(AddSourceLogic.values).toEqual({
-        ...defaultValues,
+        ...DEFAULT_VALUES,
         dataLoading: false,
         buttonLoading: false,
         customSourceNameValue: '',
@@ -314,10 +285,10 @@ describe('AddSourceLogic', () => {
       };
       AddSourceLogic.actions.setSourceConfigData(sourceConfigDataMock);
 
-      const EXPECTED_BASE_STATE = setupExpectedState({ setSourceConfigData: sourceConfigDataMock });
-
       expect(AddSourceLogic.values).toEqual({
-        ...EXPECTED_BASE_STATE,
+        ...DEFAULT_VALUES,
+        dataLoading: false,
+        sourceConfigData: sourceConfigDataMock,
         clientIdValue: '',
         clientSecretValue: '',
         baseUrlValue: '',

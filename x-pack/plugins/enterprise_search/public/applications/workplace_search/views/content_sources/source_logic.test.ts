@@ -34,7 +34,7 @@ describe('SourceLogic', () => {
 
   const contentSource = fullContentSources[0];
 
-  const defaultValues = {
+  const DEFAULT_VALUES = {
     contentSource: {},
     contentItems: [],
     dataLoading: true,
@@ -52,32 +52,13 @@ describe('SourceLogic', () => {
     meta,
   };
 
-  const setExpectedState = ({ setContentSource = false, setSearchResults = false } = {}) => {
-    const contentSourceState = {
-      contentSource,
-      dataLoading: false,
-    };
-
-    const searchResultState = {
-      contentItems,
-      contentMeta: meta,
-      sectionLoading: false,
-    };
-
-    return {
-      ...defaultValues,
-      ...(setContentSource ? contentSourceState : {}),
-      ...(setSearchResults ? searchResultState : {}),
-    };
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     mount();
   });
 
   it('has expected default values', () => {
-    expect(SourceLogic.values).toEqual(defaultValues);
+    expect(SourceLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
@@ -85,7 +66,7 @@ describe('SourceLogic', () => {
       SourceLogic.actions.setContentSource(contentSource);
 
       expect(SourceLogic.values).toEqual({
-        ...defaultValues,
+        ...DEFAULT_VALUES,
         contentSource,
         dataLoading: false,
       });
@@ -95,28 +76,23 @@ describe('SourceLogic', () => {
       const NAME = 'foo';
       SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.onUpdateSourceName(NAME);
-      const EXPECTED_STATE_BASE = setExpectedState({ setContentSource: true });
 
       expect(SourceLogic.values).toEqual({
-        ...EXPECTED_STATE_BASE,
+        ...DEFAULT_VALUES,
+        dataLoading: false,
         contentSource: {
           ...contentSource,
           name: NAME,
         },
       });
-      // expect(SourceLogic.values.contentSource).toEqual({
-      //   ...contentSource,
-      //   name: NAME,
-      // });
       expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('setSearchResults', () => {
       SourceLogic.actions.setSearchResults(searchServerResponse);
-      const EXPECTED_STATE_BASE = setExpectedState();
 
       expect(SourceLogic.values).toEqual({
-        ...EXPECTED_STATE_BASE,
+        ...DEFAULT_VALUES,
         contentItems,
         contentMeta: meta,
         sectionLoading: false,
@@ -129,13 +105,13 @@ describe('SourceLogic', () => {
       SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.setContentFilterValue(VALUE);
 
-      const EXPECTED_STATE_BASE = setExpectedState({
-        setSearchResults: true,
-        setContentSource: true,
-      });
-
       expect(SourceLogic.values).toEqual({
-        ...EXPECTED_STATE_BASE,
+        ...DEFAULT_VALUES,
+        dataLoading: false,
+        sectionLoading: false,
+        contentItems,
+        contentSource,
+
         contentMeta: {
           ...meta,
           page: {
@@ -152,10 +128,10 @@ describe('SourceLogic', () => {
       SourceLogic.actions.setSearchResults(searchServerResponse);
       SourceLogic.actions.setActivePage(PAGE);
 
-      const EXPECTED_STATE_BASE = setExpectedState({ setSearchResults: true });
-
       expect(SourceLogic.values).toEqual({
-        ...EXPECTED_STATE_BASE,
+        ...DEFAULT_VALUES,
+        contentItems,
+        sectionLoading: false,
         contentMeta: {
           ...meta,
           page: {
@@ -170,20 +146,18 @@ describe('SourceLogic', () => {
       // Set button state to loading
       SourceLogic.actions.removeContentSource(contentSource.id);
       SourceLogic.actions.setButtonNotLoading();
-      const EXPECTED_STATE_BASE = setExpectedState();
 
       expect(SourceLogic.values).toEqual({
-        ...EXPECTED_STATE_BASE,
+        ...DEFAULT_VALUES,
         buttonLoading: false,
       });
     });
 
     it('showDiagnosticDownloadButton', () => {
       SourceLogic.actions.showDiagnosticDownloadButton();
-      const EXPECTED_STATE_BASE = setExpectedState({});
 
       expect(SourceLogic.values).toEqual({
-        ...EXPECTED_STATE_BASE,
+        ...DEFAULT_VALUES,
         diagnosticDownloadButtonVisible: true,
       });
     });

@@ -21,7 +21,7 @@ describe('AppLogic', () => {
     jest.clearAllMocks();
   });
 
-  const EXPECTED_BASE_RESULTS = {
+  const DEFAULT_VALUES = {
     configuredLimits: {
       engine: {
         maxDocumentByteSize: 102400,
@@ -70,7 +70,7 @@ describe('AppLogic', () => {
 
         AppLogic.actions.setOnboardingComplete();
         expect(AppLogic.values).toEqual({
-          ...EXPECTED_BASE_RESULTS,
+          ...DEFAULT_VALUES,
           account: {
             onboardingComplete: true,
           },
@@ -85,7 +85,7 @@ describe('AppLogic', () => {
         mount({}, { ...DEFAULT_INITIAL_APP_DATA, appSearch: {} });
 
         expect(AppLogic.values).toEqual({
-          ...EXPECTED_BASE_RESULTS,
+          ...DEFAULT_VALUES,
           account: {},
           myRole: {},
         });

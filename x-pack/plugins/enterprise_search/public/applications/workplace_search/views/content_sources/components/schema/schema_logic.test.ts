@@ -44,7 +44,7 @@ describe('SchemaLogic', () => {
   const { clearFlashMessages, flashSuccessToast, setErrorMessage } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
 
-  const defaultValues = {
+  const DEFAULT_VALUES = {
     sourceId: '',
     activeSchema: {},
     serverSchema: {},
@@ -86,44 +86,25 @@ describe('SchemaLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(SchemaLogic.values).toEqual(defaultValues);
+    expect(SchemaLogic.values).toEqual(DEFAULT_VALUES);
   });
 
-  const setupExpectedState = ({
-    isSchemaSet = false,
-    didInitialize = false,
-    setSchema = schema,
-  } = {}) => {
-    const filteredSchemaSettings = {
-      filteredSchemaFields: isSchemaSet || didInitialize ? setSchema : {},
-    };
-    const initializeSettings = didInitialize
-      ? {
-          sourceId: contentSource.id,
-          activeSchema: setSchema,
-          serverSchema: schema,
-          mostRecentIndexJob,
-          dataLoading: false,
-        }
-      : {};
-    return {
-      ...defaultValues,
-      ...filteredSchemaSettings,
-      ...initializeSettings,
-    };
-  };
-
   describe('actions', () => {
+    const initializedState = {
+      ...DEFAULT_VALUES,
+      activeSchema: schema,
+      serverSchema: schema,
+      mostRecentIndexJob,
+      dataLoading: false,
+      filteredSchemaFields: schema,
+    };
+
     it('onInitializeSchema', () => {
       SchemaLogic.actions.onInitializeSchema(serverResponse);
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState({ didInitialize: true }),
+        ...initializedState,
         sourceId: contentSource.id,
-        activeSchema: schema,
-        serverSchema: schema,
-        mostRecentIndexJob,
-        dataLoading: false,
       });
     });
 
@@ -131,7 +112,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.onInitializeSchemaFieldErrors({ fieldCoercionErrors });
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         fieldCoercionErrors,
       });
     });
@@ -142,15 +123,11 @@ describe('SchemaLogic', () => {
       });
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState({ isSchemaSet: true }),
-        activeSchema: schema,
-        serverSchema: schema,
-        mostRecentIndexJob,
+        ...initializedState,
         newFieldType: SchemaType.Text,
         addFieldFormErrors: null,
         formUnchanged: true,
         showAddFieldModal: false,
-        dataLoading: false,
         rawFieldName: '',
       });
     });
@@ -159,7 +136,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.onSchemaSetFormErrors(errors);
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         addFieldFormErrors: errors,
       });
     });
@@ -168,7 +145,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.updateNewFieldType(SchemaType.Number);
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         newFieldType: SchemaType.Number,
       });
     });
@@ -177,8 +154,9 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.onFieldUpdate({ schema, formUnchanged: false });
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState({ isSchemaSet: true }),
+        ...DEFAULT_VALUES,
         activeSchema: schema,
+        filteredSchemaFields: schema,
         formUnchanged: false,
       });
     });
@@ -187,7 +165,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.onIndexingComplete(1);
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         mostRecentIndexJob: {
           ...mostRecentIndexJob,
           activeReindexJobId: undefined,
@@ -202,7 +180,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.resetMostRecentIndexJob(mostRecentIndexJob);
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         mostRecentIndexJob,
       });
     });
@@ -212,7 +190,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.setFieldName(NAME);
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         rawFieldName: NAME,
       });
     });
@@ -222,7 +200,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.setFilterValue(VALUE);
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         filterValue: VALUE,
       });
     });
@@ -231,7 +209,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.openAddFieldModal();
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         showAddFieldModal: true,
       });
     });
@@ -242,7 +220,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.closeAddFieldModal();
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         showAddFieldModal: false,
         addFieldFormErrors: null,
       });
@@ -252,7 +230,7 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.resetSchemaState();
 
       expect(SchemaLogic.values).toEqual({
-        ...setupExpectedState(),
+        ...DEFAULT_VALUES,
         dataLoading: true,
       });
       expect(clearFlashMessages).toHaveBeenCalled();
@@ -515,12 +493,21 @@ describe('SchemaLogic', () => {
 
   describe('selectors', () => {
     describe('filteredSchemaFields', () => {
+      const expectedValues = {
+        ...DEFAULT_VALUES,
+        dataLoading: false,
+        mostRecentIndexJob,
+        serverSchema: schema,
+        sourceId: contentSource.id,
+      };
+
       it('handles empty response', () => {
         SchemaLogic.actions.onInitializeSchema(serverResponse);
         SchemaLogic.actions.setFilterValue('baz');
 
         expect(SchemaLogic.values).toEqual({
-          ...setupExpectedState({ didInitialize: true }),
+          ...expectedValues,
+          activeSchema: schema,
           filterValue: 'baz',
           filteredSchemaFields: {},
         });
@@ -536,7 +523,8 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.setFilterValue('foo');
 
         expect(SchemaLogic.values).toEqual({
-          ...setupExpectedState({ didInitialize: true, setSchema: newSchema }),
+          ...expectedValues,
+          activeSchema: newSchema,
           filterValue: 'foo',
           filteredSchemaFields: schema,
           formUnchanged: false,
