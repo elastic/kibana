@@ -39,6 +39,7 @@ import { SetupInitializer } from '../plugin';
 import { ElementFactory } from '../../types';
 import { pieVis } from './pie_vis';
 import { treemapVis } from './treemap_vis';
+import { mosaicVis } from './mosaic_vis';
 
 const elementSpecs = [
   areaChart,
@@ -69,6 +70,7 @@ const elementSpecs = [
   heatmap,
   pieVis,
   treemapVis,
+  mosaicVis,
 ];
 
 const initializeElementFactories = [metricElementInitializer];

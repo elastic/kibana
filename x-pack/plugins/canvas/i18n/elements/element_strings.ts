@@ -262,4 +262,12 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Treemap visualization',
     }),
   },
+  mosaicVis: {
+    displayName: i18n.translate('xpack.canvas.elements.mosaicVisDisplayName', {
+      defaultMessage: '(New) Mosaic Vis',
+    }),
+    help: i18n.translate('xpack.canvas.elements.mosaicVisHelpText', {
+      defaultMessage: 'Mosaic visualization',
+    }),
+  },
 });

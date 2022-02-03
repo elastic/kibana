@@ -6,3 +6,4 @@
  */
 
 export { ChartTreemapIcon } from './treemap';
+export { ChartMosaicIcon } from './mosaic';
