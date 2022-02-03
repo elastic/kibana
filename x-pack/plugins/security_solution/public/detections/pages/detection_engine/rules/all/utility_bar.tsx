@@ -11,7 +11,6 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiContextMenuPanelDescriptor,
-  EuiTourStep,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
@@ -23,7 +22,10 @@ import {
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
 import * as i18n from '../translations';
-import { useRulesFeatureTourContext } from './rules_feature_tour_context';
+import {
+  useRulesFeatureTourContextOptional,
+  OptionalEuiTourStep,
+} from './rules_feature_tour_context';
 
 interface AllRulesUtilityBarProps {
   canBulkEdit: boolean;
@@ -57,10 +59,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isBulkActionInProgress,
     hasDisabledActions,
   }) => {
-    const {
-      steps: { bulkActionsStepProps },
-      finishTour,
-    } = useRulesFeatureTourContext();
+    const featureTour = useRulesFeatureTourContextOptional();
 
     const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
@@ -141,7 +140,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 )}
 
                 {canBulkEdit && (
-                  <EuiTourStep {...bulkActionsStepProps}>
+                  <OptionalEuiTourStep stepProps={featureTour?.steps?.bulkActionsStepProps}>
                     <UtilityBarAction
                       disabled={hasDisabledActions}
                       inProgress={isBulkActionInProgress}
@@ -150,11 +149,11 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                       iconType="arrowDown"
                       popoverPanelPaddingSize="none"
                       popoverContent={handleGetBulkItemsPopoverContent}
-                      onClick={finishTour}
+                      onClick={featureTour?.finishTour}
                     >
                       {i18n.BATCH_ACTIONS}
                     </UtilityBarAction>
-                  </EuiTourStep>
+                  </OptionalEuiTourStep>
                 )}
 
                 <UtilityBarAction

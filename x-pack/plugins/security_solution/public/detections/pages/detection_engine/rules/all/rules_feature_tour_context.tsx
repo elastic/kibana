@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiButton,
   EuiTourStepProps,
+  EuiTourStep,
 } from '@elastic/eui';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -36,18 +37,21 @@ export interface RulesFeatureTourContextType {
   finishTour: () => void;
 }
 
+const STORAGE_KEY = 'securitySolution.rulesFeatureTour';
+const TOUR_POPOVER_WIDTH = 360;
+
 const featuresTourSteps: EuiStatelessTourStep[] = [
   {
     step: 1,
-    title: null,
-    content: null,
+    title: i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP_TITLE,
+    content: <></>,
     stepsTotal: 2,
     children: <></>,
     onFinish: noop,
   },
   {
     step: 2,
-    title: null,
+    title: i18n.FEATURE_TOUR_BULK_ACTIONS_STEP_TITLE,
     content: <p>{i18n.FEATURE_TOUR_BULK_ACTIONS_STEP}</p>,
     stepsTotal: 2,
     children: <></>,
@@ -59,11 +63,9 @@ const featuresTourSteps: EuiStatelessTourStep[] = [
 const tourConfig = {
   currentTourStep: 1,
   isTourActive: true,
-  tourPopoverWidth: 360,
+  tourPopoverWidth: TOUR_POPOVER_WIDTH,
   tourSubtitle: i18n.FEATURE_TOUR_TITLE,
 };
-
-const STORAGE_KEY = 'securitySolution.rulesFeatureTour';
 
 const RulesFeatureTourContext = createContext<RulesFeatureTourContextType | null>(null);
 
@@ -71,13 +73,31 @@ export const RulesFeatureTourContextProvider: FC = ({ children }) => {
   const { storage } = useKibana().services;
   const initialStore = useMemo(() => storage.get(STORAGE_KEY) ?? tourConfig, [storage]);
 
-  const [[inMemoryTableStepProps, bulkActionsStepProps], actions, reducerState] = useEuiTour(
-    featuresTourSteps,
-    initialStore
-  );
+  const [stepProps, actions, reducerState] = useEuiTour(featuresTourSteps, initialStore);
 
   const finishTour = useCallback(() => actions.finishTour(), [actions]);
   const goToNextStep = useCallback(() => actions.incrementStep(), [actions]);
+
+  const inMemoryTableStepProps = useMemo(
+    () => ({
+      ...stepProps[0],
+      maxWidth: TOUR_POPOVER_WIDTH,
+      content: (
+        <>
+          <p>{i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP}</p>
+          <EuiSpacer />
+          <EuiButton color="primary" onClick={goToNextStep}>
+            {i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP_NEXT}
+          </EuiButton>
+        </>
+      ),
+    }),
+    [stepProps, goToNextStep]
+  );
+  const bulkActionsStepProps = useMemo(
+    () => ({ ...stepProps[1], maxWidth: TOUR_POPOVER_WIDTH }),
+    [stepProps]
+  );
 
   useEffect(() => {
     storage.set(STORAGE_KEY, reducerState);
@@ -86,18 +106,7 @@ export const RulesFeatureTourContextProvider: FC = ({ children }) => {
   const providerValue = useMemo(
     () => ({
       steps: {
-        inMemoryTableStepProps: {
-          ...inMemoryTableStepProps,
-          content: (
-            <>
-              <p>{i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP}</p>
-              <EuiSpacer />
-              <EuiButton color="primary" onClick={goToNextStep}>
-                {i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP_NEXT}
-              </EuiButton>
-            </>
-          ),
-        },
+        inMemoryTableStepProps,
         bulkActionsStepProps,
       },
       finishTour,
@@ -122,3 +131,21 @@ export const useRulesFeatureTourContext = (): RulesFeatureTourContextType => {
 
   return rulesFeatureTourContext;
 };
+
+export const useRulesFeatureTourContextOptional = (): RulesFeatureTourContextType | null => {
+  const rulesFeatureTourContext = useContext(RulesFeatureTourContext);
+
+  return rulesFeatureTourContext;
+};
+
+export const OptionalEuiTourStep: FC<{ stepProps: EuiTourStepProps | undefined }> = ({
+  children,
+  stepProps,
+}) =>
+  stepProps ? (
+    <EuiTourStep {...stepProps}>
+      <>{children}</>
+    </EuiTourStep>
+  ) : (
+    <>{children}</>
+  );

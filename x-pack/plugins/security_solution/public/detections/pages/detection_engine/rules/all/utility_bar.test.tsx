@@ -13,10 +13,6 @@ import { waitFor } from '@testing-library/react';
 import { AllRulesUtilityBar } from './utility_bar';
 import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('./rules_feature_tour_context', () => ({
-  useRulesFeatureTourContext: jest.fn().mockReturnValue({ steps: {} }),
-}));
-
 const mockTheme = getMockTheme({
   eui: { euiBreakpoints: { l: '1200px' }, paddingSizes: { m: '10px' } },
 });
