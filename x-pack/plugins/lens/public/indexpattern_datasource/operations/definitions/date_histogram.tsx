@@ -16,11 +16,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiRange,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiTextColor,
+  EuiIconTip,
 } from '@elastic/eui';
 import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition, ParamEditorProps } from './index';
@@ -37,6 +39,8 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { HelpPopover, HelpPopoverButton } from '../../help_popover';
 import { IndexPatternLayer } from '../../types';
+
+const LEVEL_OF_DETAIL_STEPS = 10;
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -169,10 +173,23 @@ export const dateHistogramOperation: OperationDefinition<
     dateRange,
     data,
     indexPattern,
+    uiSettings,
   }: ParamEditorProps<DateHistogramIndexPatternColumn>) {
     const field = currentColumn && indexPattern.getFieldByName(currentColumn.sourceField);
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
+
+    const maxBarsUiSetting = uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
+
+    if (currentColumn.params.interval === autoInterval) {
+      // can't allow "auto" because we need to know where we are on the slider
+      const { fromDate, toDate } = dateRange;
+      const autoIntervalExpression =
+        data.search.aggs.calculateAutoTimeExpression({ from: fromDate, to: toDate }) || '1h';
+      updateLayer(
+        updateColumnParam({ layer, columnId, paramName: 'interval', value: autoIntervalExpression })
+      );
+    }
 
     const interval = parseInterval(currentColumn.params.interval);
 
@@ -201,6 +218,45 @@ export const dateHistogramOperation: OperationDefinition<
 
     return (
       <>
+        <EuiFormRow
+          label={
+            <>
+              <FormattedMessage
+                id="xpack.lens.indexPattern.dateHistogram.detailLevelInterval"
+                defaultMessage="Level of detail"
+              />{' '}
+              <EuiIconTip
+                position="right"
+                content={
+                  <FormattedMessage
+                    id="xpack.lens.indexPattern.dateHistogram.detailLevelHelperText"
+                    defaultMessage="Controls the auto interval based on the time range. The default interval is affected by the advanced settings {histogramTargetBars} and {histogramMaxBars}."
+                    values={{
+                      histogramTargetBars: UI_SETTINGS.HISTOGRAM_MAX_BARS,
+                      histogramMaxBars: UI_SETTINGS.HISTOGRAM_BAR_TARGET,
+                    }}
+                  />
+                }
+                type="questionInCircle"
+              />
+            </>
+          }
+        >
+          <EuiRange
+            value={interval.value}
+            onChange={(ev) => setInterval({ ...interval, value: ev.target.value })}
+            disabled={false}
+            min={0}
+            max={maxBarsUiSetting}
+            step={maxBarsUiSetting / LEVEL_OF_DETAIL_STEPS}
+            aria-label={i18n.translate(
+              'xpack.lens.indexPattern.dateHistogram.detailLevelInterval',
+              {
+                defaultMessage: 'Level of detail',
+              }
+            )}
+          />
+        </EuiFormRow>
         {!intervalIsRestricted && (
           <EuiFormRow display="rowCompressed" hasChildLabel={false}>
             <EuiSwitch
