@@ -227,6 +227,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
           setAdvancedContentState('open');
+        } else {
+          setFieldValue('ecs_mapping', {});
         }
       } else {
         setFieldValue('savedQueryId', null);

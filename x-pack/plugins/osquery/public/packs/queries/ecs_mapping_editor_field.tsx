@@ -1012,6 +1012,14 @@ export const ECSMappingEditorField = React.memo(
       });
     }, [query]);
 
+    useEffect(() => {
+      Object.keys(formRefs.current).forEach((key) => {
+        if (!value[key]) {
+          delete formRefs.current[key];
+        }
+      });
+    }, [value]);
+
     const handleAddRow = useCallback(
       (newRow) => {
         if (newRow?.key && newRow?.value) {
