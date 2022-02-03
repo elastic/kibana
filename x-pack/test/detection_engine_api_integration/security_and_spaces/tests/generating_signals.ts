@@ -23,6 +23,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
@@ -1215,7 +1216,7 @@ export default ({ getService }: FtrProviderContext) => {
           supertest,
           log,
           ruleResponse.id,
-          'succeeded',
+          RuleExecutionStatus.succeeded,
           initialStatusDate
         );
 

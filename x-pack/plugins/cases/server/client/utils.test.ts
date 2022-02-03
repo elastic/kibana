@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseConnector, CaseType, ConnectorTypes } from '../../common/api';
+import { CaseConnector, ConnectorTypes } from '../../common/api';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { transformNewCase } from '../common/utils';
 import { sortToSnake } from './utils';
@@ -55,7 +55,7 @@ describe('utils', () => {
     };
     it('transform correctly', () => {
       const myCase = {
-        newCase: { ...newCase, type: CaseType.individual, connector },
+        newCase: { ...newCase, connector },
         user: {
           email: 'elastic@elastic.co',
           full_name: 'Elastic',
@@ -97,7 +97,6 @@ describe('utils', () => {
             "case",
           ],
           "title": "My new case",
-          "type": "individual",
           "updated_at": null,
           "updated_by": null,
         }

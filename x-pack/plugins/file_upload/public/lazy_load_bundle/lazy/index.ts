@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { JsonUploadAndParse } from '../../components/json_upload_and_parse';
-export { IndexNameForm } from '../../components/geojson_upload_form/index_name_form';
+export { GeoUploadWizard } from '../../components/geo_upload_wizard';
+export { IndexNameForm } from '../../components/geo_upload_form/index_name_form';
 export { importerFactory } from '../../importer';
