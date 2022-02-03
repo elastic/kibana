@@ -15,10 +15,11 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 
 interface Props {
   id: string;
-  setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  isDisabled?: boolean;
+  onUpdate: () => void;
 }
 
-export const Actions = ({ id, setRefresh }: Props) => {
+export const Actions = ({ id, onUpdate, isDisabled }: Props) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { basePath } = useContext(UptimeSettingsContext);
 
@@ -45,19 +46,20 @@ export const Actions = ({ id, setRefresh }: Props) => {
         toastLifeTimeMs: 3000,
       });
     } else if (status === FETCH_STATUS.SUCCESS) {
-      setRefresh(true);
+      onUpdate();
       notifications.toasts.success({
         title: <p data-test-subj="uptimeDeleteMonitorSuccess">{MONITOR_DELETE_SUCCESS_LABEL}</p>,
         toastLifeTimeMs: 3000,
       });
     }
-  }, [setIsDeleting, setRefresh, notifications.toasts, status]);
+  }, [setIsDeleting, onUpdate, notifications.toasts, status]);
 
   // TODO: Add popovers to icons
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
+          isDisabled={isDisabled}
           iconType="pencil"
           href={`${basePath}/app/uptime/edit-monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
           aria-label={EDIT_MONITOR_LABEL}
@@ -69,6 +71,7 @@ export const Actions = ({ id, setRefresh }: Props) => {
           <EuiLoadingSpinner size="m" aria-label={MONITOR_DELETE_LOADING_LABEL} />
         ) : (
           <EuiButtonIcon
+            isDisabled={isDisabled}
             iconType="trash"
             onClick={handleDelete}
             aria-label={DELETE_MONITOR_LABEL}

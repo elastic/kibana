@@ -26,18 +26,22 @@ import { histogramDateTimeFormatter } from '../../../common/components/utils';
 import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
+import { useHostRiskScore } from '../../containers/host_risk_score';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
-export interface HostRiskScoreOverTimeProps {
+export interface HostRiskScoreOverTimeProps
+  extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
   hostName: string;
   from: string;
   to: string;
 }
 
-const RISKY_TRESHOULD = 70;
-const DEFAULT_CHART_HEIGH = 250;
+const RISKY_THRESHOLD = 70;
+const DEFAULT_CHART_HEIGHT = 250;
+const QUERY_ID = HostRiskScoreQueryId.HOST_RISK_SCORE_OVER_TIME;
 
 const StyledEuiText = styled(EuiText)`
   font-size: 9px;
@@ -54,13 +58,12 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
   hostName,
   from,
   to,
+  setQuery,
+  deleteQuery,
 }) => {
   const timeZone = useTimeZone();
 
-  const memoizedDataTimeFormatter = useMemo(
-    () => histogramDateTimeFormatter([from, to]),
-    [from, to]
-  );
+  const dataTimeFormatter = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
   const scoreFormatter = useCallback((d: number) => Math.round(d).toString(), []);
   const headerFormatter = useCallback(
     (tooltip: TooltipValue) => <PreferenceFormattedDate value={tooltip.value} />,
@@ -76,23 +79,31 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
   );
   const theme = useTheme();
 
-  const hostRisk = useHostsRiskScore({
+  const [loading, { data, refetch, inspect }] = useHostRiskScore({
     hostName,
     onlyLatest: false,
     timerange,
-    queryId: HostRiskScoreQueryId.HOST_RISK_SCORE_OVER_TIME,
   });
 
-  const data = useMemo(
+  const graphData = useMemo(
     () =>
-      hostRisk?.result
-        ?.map((result) => ({
-          x: result['@timestamp'],
-          y: result.risk_stats.risk_score,
+      data
+        ?.map((hostRisk) => ({
+          x: hostRisk['@timestamp'],
+          y: hostRisk.risk_stats.risk_score,
         }))
         .reverse() ?? [],
-    [hostRisk]
+    [data]
   );
+
+  useQueryInspector({
+    queryId: QUERY_ID,
+    loading,
+    refetch,
+    setQuery,
+    deleteQuery,
+    inspect,
+  });
 
   return (
     <InspectButtonContainer>
@@ -103,17 +114,14 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <InspectButton
-              queryId={HostRiskScoreQueryId.HOST_RISK_SCORE_OVER_TIME}
-              title={i18n.HOST_RISK_SCORE_OVER_TIME}
-            />
+            <InspectButton queryId={QUERY_ID} title={i18n.HOST_RISK_SCORE_OVER_TIME} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
-            <div style={{ height: DEFAULT_CHART_HEIGH }}>
-              {hostRisk?.loading ? (
+            <div style={{ height: DEFAULT_CHART_HEIGHT }}>
+              {loading ? (
                 <LoadingChart size="l" data-test-subj="HostRiskScoreOverTime-loading" />
               ) : (
                 <Chart>
@@ -127,7 +135,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
                   <Axis
                     id="bottom"
                     position={Position.Bottom}
-                    tickFormat={memoizedDataTimeFormatter}
+                    tickFormat={dataTimeFormatter}
                     showGridLines
                     gridLine={{
                       strokeWidth: 1,
@@ -160,7 +168,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
                     xAccessor="x"
                     yAccessors={['y']}
                     timeZone={timeZone}
-                    data={data}
+                    data={graphData}
                     tickFormat={scoreFormatter}
                   />
                   <LineAnnotation
@@ -168,8 +176,8 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
                     domainType={AnnotationDomainType.YDomain}
                     dataValues={[
                       {
-                        dataValue: RISKY_TRESHOULD,
-                        details: RISKY_TRESHOULD.toString(),
+                        dataValue: RISKY_THRESHOLD,
+                        details: `${RISKY_THRESHOLD}`,
                         header: i18n.HOST_RISK_THRESHOLD,
                       },
                     ]}
