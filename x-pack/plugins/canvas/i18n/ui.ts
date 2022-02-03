@@ -1633,6 +1633,12 @@ export const ViewStrings = {
         defaultMessage: '(New) Pie Visualization',
       }),
   },
+  TreemapVis: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.treemapVisTitle', {
+        defaultMessage: '(New) Treemap Visualization',
+      }),
+  },
   PartitionVis: {
     getMetricColumnDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.metricDisplayName', {

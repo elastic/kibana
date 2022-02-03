@@ -38,6 +38,7 @@ import { heatmap } from './heatmap';
 import { SetupInitializer } from '../plugin';
 import { ElementFactory } from '../../types';
 import { pieVis } from './pie_vis';
+import { treemapVis } from './treemap_vis';
 
 const elementSpecs = [
   areaChart,
@@ -67,6 +68,7 @@ const elementSpecs = [
   tagCloud,
   heatmap,
   pieVis,
+  treemapVis,
 ];
 
 const initializeElementFactories = [metricElementInitializer];

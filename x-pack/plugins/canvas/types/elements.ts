@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { ReactElement } from 'react';
 import { ExpressionAstExpression } from 'src/plugins/expressions';
 import { CanvasElement } from '.';
 
 export interface ElementSpec {
   name: string;
-  icon?: string;
+  icon?: string | ReactElement;
   expression: string;
   displayName?: string;
   type?: string;
