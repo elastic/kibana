@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
