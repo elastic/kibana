@@ -16,8 +16,8 @@ export function getSortingParams(
   mappings: IndexMapping,
   type: string | string[],
   sortField?: string,
-  sortOrder?: estypes.SearchSortOrder
-): { sort?: estypes.SearchSortContainer[] } {
+  sortOrder?: estypes.SortOrder
+): { sort?: estypes.SortCombinations[] } {
   if (!sortField) {
     return {};
   }

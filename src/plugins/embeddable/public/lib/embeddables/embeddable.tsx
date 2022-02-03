@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import fastIsEqual from 'fast-deep-equal';
+import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
@@ -15,11 +16,11 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
+import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
 }
-
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
@@ -131,6 +132,33 @@ export abstract class Embeddable<
     return this.output;
   }
 
+  public async getExplicitInputIsEqual(
+    lastExplicitInput: Partial<TEmbeddableInput>
+  ): Promise<boolean> {
+    const currentExplicitInput = this.getExplicitInput();
+    return (
+      genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput) &&
+      fastIsEqual(
+        omitGenericEmbeddableInput(lastExplicitInput),
+        omitGenericEmbeddableInput(currentExplicitInput)
+      )
+    );
+  }
+
+  public getExplicitInput() {
+    const root = this.getRoot();
+    if (root.getIsContainer()) {
+      return (
+        (root.getInput().panels?.[this.id]?.explicitInput as TEmbeddableInput) ?? this.getInput()
+      );
+    }
+    return this.getInput();
+  }
+
+  public getPersistableInput() {
+    return this.getExplicitInput();
+  }
+
   public getInput(): Readonly<TEmbeddableInput> {
     return this.input;
   }
@@ -213,7 +241,7 @@ export abstract class Embeddable<
       ...this.output,
       ...outputChanges,
     };
-    if (!isEqual(this.output, newOutput)) {
+    if (!fastIsEqual(this.output, newOutput)) {
       this.output = newOutput;
       this.output$.next(this.output);
     }
@@ -230,7 +258,7 @@ export abstract class Embeddable<
   }
 
   private onResetInput(newInput: TEmbeddableInput) {
-    if (!isEqual(this.input, newInput)) {
+    if (!fastIsEqual(this.input, newInput)) {
       const oldLastReloadRequestTime = this.input.lastReloadRequestTime;
       this.input = newInput;
       this.input$.next(newInput);

@@ -72,7 +72,7 @@ export class SingleMetricJobCreator extends JobCreator {
       delete this._datafeed_config.aggregations;
 
       const functionName = this._aggs[0].dslName;
-      const timeField = this._job_config.data_description.time_field;
+      const timeField = this._job_config.data_description.time_field!;
 
       const duration = parseInterval(this._job_config.analysis_config.bucket_span, true);
       if (duration === null) {

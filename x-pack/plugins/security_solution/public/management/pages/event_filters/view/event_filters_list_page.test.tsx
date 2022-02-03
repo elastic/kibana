@@ -221,11 +221,27 @@ describe('When on the Event Filters List Page', () => {
       expect(button).toHaveAttribute('href', '/fleet');
     });
 
-    it('back button is not present', () => {
+    it('back button is still present after push history', () => {
       act(() => {
         history.push('/administration/event_filters');
       });
-      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+  });
+
+  describe('and the back button is not present', () => {
+    beforeEach(async () => {
+      renderResult = render();
+      act(() => {
+        history.push('/administration/event_filters');
+      });
+    });
+
+    it('back button is not present when missing history params', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).toBeNull();
     });
   });
 });

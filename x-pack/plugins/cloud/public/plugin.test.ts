@@ -40,6 +40,9 @@ describe('Cloud Plugin', () => {
           full_story: {
             enabled: false,
           },
+          chat: {
+            enabled: false,
+          },
           ...config,
         });
 
@@ -47,11 +50,15 @@ describe('Cloud Plugin', () => {
 
         const coreSetup = coreMock.createSetup();
         const coreStart = coreMock.createStart();
+
         if (currentAppId$) {
           coreStart.application.currentAppId$ = currentAppId$;
         }
+
         coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
+
         const securitySetup = securityMock.createSetup();
+
         securitySetup.authc.getCurrentUser.mockResolvedValue(
           securityMock.createMockAuthenticatedUser(currentUserProps)
         );
@@ -212,6 +219,101 @@ describe('Cloud Plugin', () => {
       });
     });
 
+    describe('setupChat', () => {
+      let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
+
+      beforeEach(() => {
+        consoleMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
+      });
+
+      afterEach(() => {
+        consoleMock.mockRestore();
+      });
+
+      const setupPlugin = async ({
+        config = {},
+        securityEnabled = true,
+        currentUserProps = {},
+        isCloudEnabled = true,
+        failHttp = false,
+      }: {
+        config?: Partial<CloudConfigType>;
+        securityEnabled?: boolean;
+        currentUserProps?: Record<string, any>;
+        isCloudEnabled?: boolean;
+        failHttp?: boolean;
+      }) => {
+        const initContext = coreMock.createPluginInitializerContext({
+          id: isCloudEnabled ? 'cloud-id' : null,
+          base_url: 'https://cloud.elastic.co',
+          deployment_url: '/abc123',
+          profile_url: '/profile/alice',
+          organization_url: '/org/myOrg',
+          full_story: {
+            enabled: false,
+          },
+          chat: {
+            enabled: false,
+          },
+          ...config,
+        });
+
+        const plugin = new CloudPlugin(initContext);
+
+        const coreSetup = coreMock.createSetup();
+        const coreStart = coreMock.createStart();
+
+        if (failHttp) {
+          coreSetup.http.get.mockImplementation(() => {
+            throw new Error('HTTP request failed');
+          });
+        }
+
+        coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
+
+        const securitySetup = securityMock.createSetup();
+        securitySetup.authc.getCurrentUser.mockResolvedValue(
+          securityMock.createMockAuthenticatedUser(currentUserProps)
+        );
+
+        const setup = plugin.setup(coreSetup, securityEnabled ? { security: securitySetup } : {});
+
+        return { initContext, plugin, setup, coreSetup };
+      };
+
+      it('chatConfig is not retrieved if cloud is not enabled', async () => {
+        const { coreSetup } = await setupPlugin({ isCloudEnabled: false });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
+      });
+
+      it('chatConfig is not retrieved if security is not enabled', async () => {
+        const { coreSetup } = await setupPlugin({ securityEnabled: false });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
+      });
+
+      it('chatConfig is not retrieved if chat is enabled but url is not provided', async () => {
+        // @ts-expect-error 2741
+        const { coreSetup } = await setupPlugin({ config: { chat: { enabled: true } } });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
+      });
+
+      it('chatConfig is not retrieved if internal API fails', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { chat: { enabled: true, chatURL: 'http://chat.elastic.co' } },
+          failHttp: true,
+        });
+        expect(coreSetup.http.get).toHaveBeenCalled();
+        expect(consoleMock).toHaveBeenCalled();
+      });
+
+      it('chatConfig is retrieved if chat is enabled and url is provided', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { chat: { enabled: true, chatURL: 'http://chat.elastic.co' } },
+        });
+        expect(coreSetup.http.get).toHaveBeenCalled();
+      });
+    });
+
     describe('interface', () => {
       const setupPlugin = () => {
         const initContext = coreMock.createPluginInitializerContext({
@@ -221,6 +323,12 @@ describe('Cloud Plugin', () => {
           deployment_url: '/abc123',
           profile_url: '/user/settings/',
           organization_url: '/account/',
+          chat: {
+            enabled: false,
+          },
+          full_story: {
+            enabled: false,
+          },
         });
         const plugin = new CloudPlugin(initContext);
 
@@ -284,6 +392,9 @@ describe('Cloud Plugin', () => {
           full_story: {
             enabled: false,
           },
+          chat: {
+            enabled: false,
+          },
         })
       );
       const coreSetup = coreMock.createSetup();
@@ -304,7 +415,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
       expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "https://support.elastic.co/",
+          "https://cloud.elastic.co/support",
         ]
       `);
     });

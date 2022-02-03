@@ -5,44 +5,41 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
-import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
-  EuiSpacer,
-  EuiText,
-  EuiFormRow,
+  EuiAccordion,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiToolTip,
-  EuiIcon,
   EuiFieldSearch,
-  EuiAccordion,
-  EuiPanel,
+  EuiFormRow,
+  EuiIcon,
   EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
-import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
-import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  ForLastExpression,
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
+import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
-
-import { ExpressionRow } from './expression_row';
-import { MetricExpression, AlertParams, AlertContextMeta } from '../types';
+import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-
+import { ExpressionRow } from './expression_row';
+import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
-export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
@@ -68,7 +65,7 @@ export const Expressions: React.FC<Props> = (props) => {
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit | undefined>('m');
+  const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
@@ -170,7 +167,7 @@ export const Expressions: React.FC<Props> = (props) => {
           ...c,
           timeUnit: tu,
         })) || [];
-      setTimeUnit(tu as Unit);
+      setTimeUnit(tu as TimeUnitChar);
       setRuleParams('criteria', criteria as AlertParams['criteria']);
     },
     [ruleParams.criteria, setRuleParams]

@@ -25,6 +25,7 @@ const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 const auditLogger = {
   log: jest.fn(),
+  enabled: true,
 } as jest.Mocked<AuditLogger>;
 
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
@@ -88,6 +89,7 @@ describe('bulkUpdate()', () => {
             body: {
               docs: [
                 {
+                  found: true,
                   _id: fakeAlertId,
                   _index: indexName,
                   _source: {
@@ -145,6 +147,7 @@ describe('bulkUpdate()', () => {
             body: {
               docs: [
                 {
+                  found: true,
                   _id: fakeAlertId,
                   _index: indexName,
                   _source: {
@@ -191,6 +194,7 @@ describe('bulkUpdate()', () => {
             body: {
               docs: [
                 {
+                  found: true,
                   _id: successfulAuthzHit,
                   _index: indexName,
                   _source: {
@@ -201,6 +205,7 @@ describe('bulkUpdate()', () => {
                   },
                 },
                 {
+                  found: true,
                   _id: unsuccessfulAuthzHit,
                   _index: indexName,
                   _source: {

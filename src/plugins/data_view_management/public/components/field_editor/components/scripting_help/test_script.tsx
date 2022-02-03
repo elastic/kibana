@@ -24,13 +24,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { esQuery, IndexPattern, Query } from '../../../../../../../plugins/data/public';
+import { Query, buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '../../../../../../../plugins/data/public';
+import { DataView } from '../../../../../../../plugins/data_views/public';
 import { context as contextType } from '../../../../../../kibana_react/public';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   lang: string;
   name?: string;
   script?: string;
@@ -82,13 +84,8 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     let query;
     if (searchContext) {
-      const esQueryConfigs = esQuery.getEsQueryConfig(this.context.services.uiSettings);
-      query = esQuery.buildEsQuery(
-        this.props.indexPattern,
-        searchContext.query || [],
-        [],
-        esQueryConfigs
-      );
+      const esQueryConfigs = getEsQueryConfig(this.context.services.uiSettings);
+      query = buildEsQuery(this.props.indexPattern, searchContext.query || [], [], esQueryConfigs);
     }
 
     const scriptResponse = await executeScript({

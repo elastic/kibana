@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
-import { OverlayStart, OverlayRef } from 'src/core/public';
+import { OverlayStart, OverlayRef, ThemeServiceStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { Tag, TagAttributes } from '../../../common/types';
 import { ITagInternalClient } from '../../services';
 
 interface GetModalOpenerOptions {
   overlays: OverlayStart;
+  theme: ThemeServiceStart;
   tagClient: ITagInternalClient;
 }
 
@@ -39,7 +40,7 @@ const LazyEditTagModal = React.lazy(() =>
 );
 
 export const getCreateModalOpener =
-  ({ overlays, tagClient }: GetModalOpenerOptions): CreateModalOpener =>
+  ({ overlays, theme, tagClient }: GetModalOpenerOptions): CreateModalOpener =>
   async ({ onCreate, defaultValues }: OpenCreateModalOptions) => {
     const modal = overlays.openModal(
       toMountPoint(
@@ -55,7 +56,8 @@ export const getCreateModalOpener =
             }}
             tagClient={tagClient}
           />
-        </React.Suspense>
+        </React.Suspense>,
+        { theme$: theme.theme$ }
       )
     );
     return modal;
@@ -67,7 +69,7 @@ interface OpenEditModalOptions {
 }
 
 export const getEditModalOpener =
-  ({ overlays, tagClient }: GetModalOpenerOptions) =>
+  ({ overlays, theme, tagClient }: GetModalOpenerOptions) =>
   async ({ tagId, onUpdate }: OpenEditModalOptions) => {
     const tag = await tagClient.get(tagId);
 
@@ -85,7 +87,8 @@ export const getEditModalOpener =
             }}
             tagClient={tagClient}
           />
-        </React.Suspense>
+        </React.Suspense>,
+        { theme$: theme.theme$ }
       )
     );
 

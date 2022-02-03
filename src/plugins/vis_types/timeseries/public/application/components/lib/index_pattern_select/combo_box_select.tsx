@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback, useState, useEffect } from 'react';
-import type { UnwrapPromise } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import { getDataStart } from '../../../../services';
 
@@ -18,7 +17,7 @@ import type { IndexPatternValue } from '../../../../../common/types';
 import type { IndexPatternsService } from '../../../../../../../data/public';
 
 /** @internal **/
-type IdsWithTitle = UnwrapPromise<ReturnType<IndexPatternsService['getIdsWithTitle']>>;
+type IdsWithTitle = Awaited<ReturnType<IndexPatternsService['getIdsWithTitle']>>;
 
 /** @internal **/
 type SelectedOptions = EuiComboBoxProps<string>['selectedOptions'];

@@ -8,11 +8,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
-import { DiscoverServices } from '../../../build_services';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import { MarkdownSimple, toMountPoint, wrapWithTheme } from '../../../../../kibana_react/public';
-import { IndexPattern, SortDirection } from '../../../../../data/public';
+import { DataView, SortDirection } from '../../../../../data/common';
 import {
   ContextFetchState,
   FailureReason,
@@ -22,6 +21,7 @@ import {
 import { AppState } from '../services/context_state';
 import { getFirstSortableField } from './sorting';
 import { EsHitRecord } from '../../types';
+import { useDiscoverServices } from '../../../utils/use_discover_services';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
@@ -29,10 +29,9 @@ const createError = (statusKey: string, reason: FailureReason, error?: Error) =>
 
 export interface ContextAppFetchProps {
   anchorId: string;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   appState: AppState;
   useNewFieldsApi: boolean;
-  services: DiscoverServices;
 }
 
 export function useContextAppFetch({
@@ -40,9 +39,14 @@ export function useContextAppFetch({
   indexPattern,
   appState,
   useNewFieldsApi,
-  services,
 }: ContextAppFetchProps) {
-  const { uiSettings: config, data, toastNotifications, filterManager, core } = services;
+  const {
+    uiSettings: config,
+    data,
+    toastNotifications,
+    filterManager,
+    core,
+  } = useDiscoverServices();
   const { theme$ } = core.theme;
 
   const searchSource = useMemo(() => {
@@ -133,6 +137,7 @@ export function useContextAppFetch({
           SortDirection.desc,
           count,
           filters,
+          data,
           useNewFieldsApi
         );
         setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
@@ -156,6 +161,7 @@ export function useContextAppFetch({
       toastNotifications,
       useNewFieldsApi,
       theme$,
+      data,
     ]
   );
 

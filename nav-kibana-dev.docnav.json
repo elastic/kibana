@@ -64,6 +64,8 @@
     {
       "category": "Contributors Newsletters",
       "items": [
+        { "id": "kibJanuary2022ContributorNewsletter" },
+        { "id": "kibDecember2021ContributorNewsletter" },
         { "id": "kibNovember2021ContributorNewsletter" },
         { "id": "kibOctober2021ContributorNewsletter" },
         { "id": "kibSeptember2021ContributorNewsletter" },
@@ -80,6 +82,7 @@
       "items": [
         { "id": "kibDevDocsApiWelcome" },
         { "id": "kibDevDocsPluginDirectory" },
+        { "id": "kibDevDocsDeprecationsDueByTeam" },
         { "id": "kibDevDocsDeprecationsByPlugin" },
         { "id": "kibDevDocsDeprecationsByApi" },
         { "id": "kibCorePluginApi" },

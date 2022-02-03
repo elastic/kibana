@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { Ast } from '@kbn/interpreter';
 import type { Transform } from './transform';
 import type { View } from './view';
 import type { Datasource } from './datasource';
 import type { Model } from './model';
 
 export type ArgType = string;
+export type ArgDisplayType = 'model' | 'argument';
 
 export type ArgTypeDef = View | Model | Transform | Datasource;
 
@@ -20,3 +22,6 @@ export type { Arg } from './arg';
 export type ExpressionType = View | Model | Transform;
 
 export type { RenderArgData } from './function_form';
+
+export type ArgValue = string | Ast;
+export type Args = Record<string, Array<ArgValue | null>> | null;

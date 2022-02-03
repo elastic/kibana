@@ -246,6 +246,7 @@ export class PageManager extends Component<Props, State> {
                 <button
                   onClick={onAddPage}
                   className="canvasPageManager__addPage kbn-resetFocusState"
+                  data-test-subj="canvasAddPageButton"
                 >
                   <EuiIcon color="ghost" type="plusInCircle" size="l" />
                 </button>

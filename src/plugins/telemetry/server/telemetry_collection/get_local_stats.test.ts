@@ -36,8 +36,8 @@ function mockGetLocalStats<ClusterInfo, ClusterStats>(
   esClient.cluster.stats
     // @ts-expect-error we only care about the response body
     .mockResolvedValue({ body: { ...clusterStats } });
+  // @ts-expect-error we only care about the response body
   esClient.nodes.usage.mockResolvedValue({
-    // @ts-expect-error we only care about the response body
     body: {
       cluster_name: 'testCluster',
       nodes: {

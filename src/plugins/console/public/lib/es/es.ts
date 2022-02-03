@@ -28,12 +28,15 @@ export function send(
   method: string,
   path: string,
   data: string | object,
-  { asSystemRequest }: SendOptions = {}
+  { asSystemRequest }: SendOptions = {},
+  withProductOrigin: boolean = false
 ) {
   const wrappedDfd = $.Deferred();
 
   const options: JQuery.AjaxSettings = {
-    url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
+    url:
+      '../api/console/proxy?' +
+      stringify({ path, method, ...(withProductOrigin && { withProductOrigin }) }, { sort: false }),
     headers: {
       'kbn-xsrf': 'kibana',
       ...(asSystemRequest && { 'kbn-system-request': 'true' }),

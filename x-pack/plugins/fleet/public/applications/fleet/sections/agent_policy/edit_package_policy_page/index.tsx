@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
 import {
   EuiButtonEmpty,
-  EuiButton,
   EuiBottomBar,
   EuiCallOut,
   EuiFlexGroup,
@@ -42,6 +41,7 @@ import {
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
   sendUpgradePackagePolicyDryRun,
+  useAuthz,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -64,6 +64,9 @@ import type {
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
+import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
+
+import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -84,16 +87,16 @@ export const EditPackagePolicyPage = memo(() => {
       // the edit form in an "upgrade" state regardless of whether the user intended to
       // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
       // set to use the latest version of the package, not its current version.
-      isUpgrade={extensionView?.useLatestPackageVersion}
+      forceUpgrade={extensionView?.useLatestPackageVersion}
     />
   );
 });
 
 export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
-  isUpgrade?: boolean;
+  forceUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
-}>(({ packagePolicyId, isUpgrade = false, from = 'edit' }) => {
+}>(({ packagePolicyId, forceUpgrade = false, from = 'edit' }) => {
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -118,6 +121,16 @@ export const EditPackagePolicyForm = memo<{
   const [originalPackagePolicy, setOriginalPackagePolicy] =
     useState<GetOnePackagePolicyResponse['item']>();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
+
+  const [isUpgrade, setIsUpgrade] = useState<boolean>(false);
+
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+
+  useEffect(() => {
+    if (forceUpgrade) {
+      setIsUpgrade(true);
+    }
+  }, [forceUpgrade]);
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -146,11 +159,24 @@ export const EditPackagePolicyForm = memo<{
           setAgentPolicy(agentPolicyData.item);
         }
 
-        const { data: upgradePackagePolicyDryRunData } = await sendUpgradePackagePolicyDryRun([
-          packagePolicyId,
-        ]);
+        const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
+          await sendUpgradePackagePolicyDryRun([packagePolicyId]);
 
-        if (upgradePackagePolicyDryRunData) {
+        if (upgradePackagePolicyDryRunError) {
+          throw upgradePackagePolicyDryRunError;
+        }
+
+        const hasUpgrade = upgradePackagePolicyDryRunData
+          ? hasUpgradeAvailable(upgradePackagePolicyDryRunData)
+          : false;
+
+        // If the dry run data doesn't indicate a difference in version numbers, flip the form back
+        // to its non-upgrade state, even if we were initially set to the upgrade view
+        if (!hasUpgrade) {
+          setIsUpgrade(false);
+        }
+
+        if (upgradePackagePolicyDryRunData && hasUpgrade) {
           setDryRunData(upgradePackagePolicyDryRunData);
         }
 
@@ -187,7 +213,28 @@ export const EditPackagePolicyForm = memo<{
             ...restOfPackagePolicy,
             inputs: baseInputs.map((input: any) => {
               // Remove `compiled_input` from all input info, we assign this after saving
-              const { streams, compiled_input: compiledInput, ...restOfInput } = input;
+              const { streams, compiled_input: compiledInput, vars, ...restOfInput } = input;
+              let basePolicyInputVars: any =
+                isUpgrade &&
+                basePolicy.inputs.find(
+                  (i) => i.type === input.type && i.policy_template === input.policy_template
+                )?.vars;
+              let newVars = vars;
+              if (basePolicyInputVars && vars) {
+                // merging vars from dry run with updated ones
+                basePolicyInputVars = Object.keys(vars).reduce(
+                  (acc, curr) => ({ ...acc, [curr]: basePolicyInputVars[curr] }),
+                  {}
+                );
+                newVars = {
+                  ...vars,
+                  ...basePolicyInputVars,
+                };
+              }
+              // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
+              if (basePackage.name === 'apm') {
+                newVars = fixApmDurationVars(newVars);
+              }
               return {
                 ...restOfInput,
                 streams: streams.map((stream: any) => {
@@ -195,6 +242,7 @@ export const EditPackagePolicyForm = memo<{
                   const { compiled_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),
+                vars: newVars,
               };
             }),
             package: basePackage,
@@ -425,7 +473,7 @@ export const EditPackagePolicyForm = memo<{
   const [selectedTab, setSelectedTab] = useState(0);
 
   const layoutProps = {
-    from: extensionView?.useLatestPackageVersion ? 'upgrade-from-extension' : from,
+    from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
     cancelUrl,
     agentPolicy,
     packageInfo,
@@ -463,6 +511,7 @@ export const EditPackagePolicyForm = memo<{
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults!}
               submitAttempted={formState === 'INVALID'}
+              isUpdate={true}
             />
           )}
 
@@ -583,11 +632,27 @@ export const EditPackagePolicyForm = memo<{
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButton
+                      <EuiButtonWithTooltip
                         onClick={onSubmit}
                         isLoading={formState === 'LOADING'}
                         // Allow to save only if the package policy is upgraded or had been edited
-                        disabled={formState !== 'VALID' || (!isEdited && !isUpgrade)}
+                        isDisabled={
+                          !canWriteIntegrationPolicies ||
+                          formState !== 'VALID' ||
+                          (!isEdited && !isUpgrade)
+                        }
+                        tooltip={
+                          !canWriteIntegrationPolicies
+                            ? {
+                                content: (
+                                  <FormattedMessage
+                                    id="xpack.fleet.agentPolicy.saveIntegrationTooltip"
+                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations. Contact your administrator."
+                                  />
+                                ),
+                              }
+                            : undefined
+                        }
                         iconType="save"
                         color="primary"
                         fill
@@ -604,7 +669,7 @@ export const EditPackagePolicyForm = memo<{
                             defaultMessage="Save integration"
                           />
                         )}
-                      </EuiButton>
+                      </EuiButtonWithTooltip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

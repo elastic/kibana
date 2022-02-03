@@ -14,27 +14,27 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern, DiscoverIndexPatternProps } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
-import { IndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
+import { DataView, DataViewAttributes } from 'src/plugins/data/common';
 import { indexPatternsMock } from '../../../../__mocks__/index_patterns';
 
 const indexPattern = {
   id: 'the-index-pattern-id-first',
   title: 'test1 title',
-} as IndexPattern;
+} as DataView;
 
 const indexPattern1 = {
   id: 'the-index-pattern-id-first',
   attributes: {
     title: 'test1 title',
   },
-} as SavedObject<IndexPatternAttributes>;
+} as SavedObject<DataViewAttributes>;
 
 const indexPattern2 = {
   id: 'the-index-pattern-id',
   attributes: {
     title: 'test2 title',
   },
-} as SavedObject<IndexPatternAttributes>;
+} as SavedObject<DataViewAttributes>;
 
 const defaultProps = {
   indexPatternList: [indexPattern1, indexPattern2],

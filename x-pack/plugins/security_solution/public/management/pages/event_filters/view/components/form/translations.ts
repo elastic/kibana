@@ -17,6 +17,19 @@ export const NAME_PLACEHOLDER = i18n.translate(
 export const NAME_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.name.label', {
   defaultMessage: 'Name your event filter',
 });
+export const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.eventFilter.form.description.placeholder',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.eventFilter.form.description.label',
+  {
+    defaultMessage: 'Describe your event filter',
+  }
+);
 
 export const NAME_ERROR = i18n.translate('xpack.securitySolution.eventFilter.form.name.error', {
   defaultMessage: "The name can't be empty",

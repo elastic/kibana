@@ -24,8 +24,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
       try {
         agents = await osqueryContext.service
           .getAgentService()
-          ?.asScoped(request)
-          // @ts-expect-error update types
+          ?.asInternalUser // @ts-expect-error update types
           .listAgents(request.query);
       } catch (error) {
         return response.badRequest({ body: error });

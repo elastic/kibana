@@ -15,7 +15,7 @@ import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
 import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
 import { DashboardContainerInput, DashboardSavedObject } from '../..';
-import { ControlGroupContainer, ControlGroupInput } from '../../../../presentation_util/public';
+import { ControlGroupContainer, ControlGroupInput } from '../../../../controls/public';
 
 // only part of the control group input should be stored in dashboard state. The rest is passed down from the dashboard.
 export interface DashboardControlGroupInput {

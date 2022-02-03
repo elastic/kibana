@@ -133,6 +133,72 @@ export default function (providerContext: FtrProviderContext) {
           .expect(409);
       });
 
+      it('should create policy with provided id and return 409 the second time', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'test-id',
+            name: 'TEST ID',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        expect(createdPolicy.id).to.equal('test-id');
+
+        // second one fails because id exists
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'test-id',
+            name: 'TEST 2 ID',
+            namespace: 'default',
+          })
+          .expect(409);
+      });
+
+      it('should allow to create policy with the system integration policy and increment correctly the name if there is more than 10 package policy', async () => {
+        // load a bunch of fake system integration policy
+        for (let i = 0; i < 10; i++) {
+          await kibanaServer.savedObjects.create({
+            id: `package-policy-test-${i}`,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            overwrite: true,
+            attributes: {
+              name: `system-${i + 1}`,
+              package: {
+                name: 'system',
+              },
+            },
+          });
+          packagePoliciesToDeleteIds.push(`package-policy-test-${i}`);
+        }
+
+        // first one succeeds
+        const res = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .query({
+            sys_monitoring: true,
+          })
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Policy with system monitoring ${Date.now()}`,
+            namespace: 'default',
+          })
+          .expect(200);
+
+        const {
+          body: { items: policies },
+        } = await supertest.get(`/api/fleet/agent_policies?full=true`).expect(200);
+
+        const policy = policies.find((p: any) => (p.id = res.body.item.id));
+
+        expect(policy.package_policies[0].name).be('system-11');
+      });
+
       it('should allow to create policy with the system integration policy and increment correctly the name', async () => {
         // load a bunch of fake system integration policy
         await kibanaServer.savedObjects.create({
