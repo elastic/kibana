@@ -23,9 +23,9 @@ export const SetupModeToggleButton: React.FC<SetupModeToggleButtonProps> = (
   const [isLoading, setIsLoading] = React.useState(false);
   const trackStat = useUiTracker({ app: 'stack_monitoring' });
 
-  async function toggleSetupMode(enabled: boolean, stat: string) {
+  function toggleSetupMode(enabled: boolean, stat: string) {
     setIsLoading(true);
-    await props.toggleSetupMode(enabled);
+    props.toggleSetupMode(enabled);
     trackStat({
       metric: `${TELEMETRY_METRIC_BUTTON_CLICK}setupmode_${stat}`,
       metricType: METRIC_TYPE.CLICK,
