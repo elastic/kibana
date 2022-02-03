@@ -6,7 +6,7 @@
  */
 import apm from 'elastic-apm-node';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
+import { Dictionary, pickBy, mapValues, without, cloneDeep, concat, set, omit } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import uuid from 'uuid';
@@ -36,13 +36,17 @@ import {
   AlertExecutionStatusErrorReasons,
   RuleTypeRegistry,
   RuleMonitoring,
+  RuleMonitoringHistory,
   RawRuleExecutionStatus,
+  AlertAction,
+  RuleTaskStateWithActions,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
+import { getExecutionSuccessRatio, getExecutionDurationPercentiles } from '../lib/monitoring';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
-import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
+import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
@@ -52,6 +56,8 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   WithoutReservedActionGroups,
+  parseDuration,
+  MONITORING_HISTORY_LIMIT,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -62,7 +68,7 @@ import {
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
-const MONITORING_HISTORY_LIMIT = 200;
+const CONNECTIVITY_RETRY_INTERVAL = '5m';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -75,6 +81,12 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
     },
   },
 });
+
+interface RuleTaskRunResultWithActions {
+  state: RuleTaskStateWithActions;
+  monitoring: RuleMonitoring | undefined;
+  schedule: IntervalSchedule | undefined;
+}
 
 interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -294,7 +306,7 @@ export class TaskRunner<
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string,
     event: Event
-  ): Promise<RuleTaskState> {
+  ): Promise<RuleTaskStateWithActions> {
     const {
       alertTypeId,
       consumer,
@@ -444,10 +456,15 @@ export class TaskRunner<
       });
     }
 
+    let triggeredActions: AlertAction[] = [];
     if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
-      scheduleActionsForRecoveredAlerts<InstanceState, InstanceContext, RecoveryActionGroupId>({
+      const scheduledActionsForRecoveredAlerts = await scheduleActionsForRecoveredAlerts<
+        InstanceState,
+        InstanceContext,
+        RecoveryActionGroupId
+      >({
         recoveryActionGroup: this.ruleType.recoveryActionGroup,
         recoveredAlerts,
         executionHandler,
@@ -455,6 +472,8 @@ export class TaskRunner<
         logger: this.logger,
         ruleLabel,
       });
+
+      triggeredActions = concat(triggeredActions, scheduledActionsForRecoveredAlerts);
 
       const alertsToExecute =
         notifyWhen === 'onActionGroupChange'
@@ -485,12 +504,14 @@ export class TaskRunner<
               }
             );
 
-      await Promise.all(
+      const allTriggeredActions = await Promise.all(
         alertsToExecute.map(
           ([alertId, alert]: [string, AlertInstance<InstanceState, InstanceContext>]) =>
             this.executeAlert(alertId, alert, executionHandler)
         )
       );
+
+      triggeredActions = concat(triggeredActions, ...allTriggeredActions);
     } else {
       if (muteAll) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is muted.`);
@@ -509,6 +530,7 @@ export class TaskRunner<
     }
 
     return {
+      triggeredActions,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
         Record<string, AlertInstance<InstanceState, InstanceContext>>,
@@ -542,7 +564,9 @@ export class TaskRunner<
     return this.executeAlerts(services, rule, validatedParams, executionHandler, spaceId, event);
   }
 
-  async loadRuleAttributesAndRun(event: Event): Promise<Resultable<RuleTaskRunResult, Error>> {
+  async loadRuleAttributesAndRun(
+    event: Event
+  ): Promise<Resultable<RuleTaskRunResultWithActions, Error>> {
     const {
       params: { alertId: ruleId, spaceId },
     } = this.taskInstance;
@@ -601,7 +625,7 @@ export class TaskRunner<
     }
     return {
       monitoring: asOk(rule.monitoring),
-      state: await promiseResult<RuleTaskState, Error>(
+      state: await promiseResult<RuleTaskStateWithActions, Error>(
         this.validateAndExecuteRule(services, apiKey, rule, event)
       ),
       schedule: asOk(
@@ -675,9 +699,10 @@ export class TaskRunner<
       resolveErr<RuleMonitoring | undefined, Error>(monitoring, () => {
         return getDefaultRuleMonitoring();
       }) ?? getDefaultRuleMonitoring();
-    const executionStatus: AlertExecutionStatus = map(
+
+    const executionStatus = map<RuleTaskStateWithActions, ElasticsearchError, AlertExecutionStatus>(
       state,
-      (ruleTaskState: RuleTaskState) => executionStatusFromState(ruleTaskState),
+      (ruleTaskState) => executionStatusFromState(ruleTaskState),
       (err: ElasticsearchError) => executionStatusFromError(err)
     );
 
@@ -699,37 +724,43 @@ export class TaskRunner<
     );
 
     eventLogger.stopTiming(event);
-    event.kibana = event.kibana || {};
-    event.kibana.alerting = event.kibana.alerting || {};
-    event.kibana.alerting.status = executionStatus.status;
+    set(event, 'kibana.alerting.status', executionStatus.status);
+
+    const monitoringHistory: RuleMonitoringHistory = {
+      success: true,
+      timestamp: +new Date(),
+    };
 
     // Copy duration into execution status if available
     if (null != event.event?.duration) {
       executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
+      monitoringHistory.duration = executionStatus.lastDuration;
     }
 
-    const monitoringHistory = {
-      success: true,
-      timestamp: +new Date(),
-    };
     // if executionStatus indicates an error, fill in fields in
     // event from it
     if (executionStatus.error) {
-      event.event = event.event || {};
-      event.event.reason = executionStatus.error?.reason || 'unknown';
-      event.event.outcome = 'failure';
-      event.error = event.error || {};
-      event.error.message = event.error.message || executionStatus.error.message;
+      set(event, 'event.reason', executionStatus.error?.reason || 'unknown');
+      set(event, 'event.outcome', 'failure');
+      set(event, 'error.message', event?.error?.message || executionStatus.error.message);
       if (!event.message) {
         event.message = `${this.ruleType.id}:${ruleId}: execution failed`;
       }
       monitoringHistory.success = false;
+    } else {
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+        executionStatus.numberOfTriggeredActions ?? 0
+      );
     }
 
     ruleMonitoring.execution.history.push(monitoringHistory);
-    ruleMonitoring.execution.calculated_metrics.success_ratio =
-      ruleMonitoring.execution.history.filter(({ success }) => success).length /
-      ruleMonitoring.execution.history.length;
+    ruleMonitoring.execution.calculated_metrics = {
+      success_ratio: getExecutionSuccessRatio(ruleMonitoring),
+      ...getExecutionDurationPercentiles(ruleMonitoring),
+    };
+
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {
@@ -744,15 +775,20 @@ export class TaskRunner<
       });
     }
 
+    const transformStateForTaskState = (
+      stateWithActions: RuleTaskStateWithActions
+    ): RuleTaskState => {
+      return {
+        ...omit(stateWithActions, 'triggeredActions'),
+        previousStartedAt: startedAt,
+      };
+    };
+
     return {
-      state: map<RuleTaskState, ElasticsearchError, RuleTaskState>(
+      state: map<RuleTaskStateWithActions, ElasticsearchError, RuleTaskState>(
         state,
-        (stateUpdates: RuleTaskState) => {
-          return {
-            ...stateUpdates,
-            previousStartedAt: startedAt,
-          };
-        },
+        (stateWithActions: RuleTaskStateWithActions) =>
+          transformStateForTaskState(stateWithActions),
         (err: ElasticsearchError) => {
           const message = `Executing Rule ${spaceId}:${
             this.ruleType.id
@@ -773,7 +809,18 @@ export class TaskRunner<
           );
           throwUnrecoverableError(error);
         }
-        return { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
+
+        let retryInterval = taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL;
+
+        // Set retry interval smaller for ES connectivity errors
+        if (isEsUnavailableError(error, ruleId)) {
+          retryInterval =
+            parseDuration(retryInterval) > parseDuration(CONNECTIVITY_RETRY_INTERVAL)
+              ? CONNECTIVITY_RETRY_INTERVAL
+              : retryInterval;
+        }
+
+        return { interval: retryInterval };
       }),
       monitoring: ruleMonitoring,
     };
@@ -1076,7 +1123,7 @@ interface ScheduleActionsForRecoveredAlertsParams<
   ruleLabel: string;
 }
 
-function scheduleActionsForRecoveredAlerts<
+async function scheduleActionsForRecoveredAlerts<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   RecoveryActionGroupId extends string
@@ -1086,7 +1133,7 @@ function scheduleActionsForRecoveredAlerts<
     InstanceContext,
     RecoveryActionGroupId
   >
-) {
+): Promise<AlertAction[]> {
   const {
     logger,
     recoveryActionGroup,
@@ -1096,6 +1143,7 @@ function scheduleActionsForRecoveredAlerts<
     ruleLabel,
   } = params;
   const recoveredIds = Object.keys(recoveredAlerts);
+  let triggeredActions: AlertAction[] = [];
   for (const id of recoveredIds) {
     if (mutedAlertIdsSet.has(id)) {
       logger.debug(
@@ -1105,15 +1153,17 @@ function scheduleActionsForRecoveredAlerts<
       const alert = recoveredAlerts[id];
       alert.updateLastScheduledActions(recoveryActionGroup.id);
       alert.unscheduleActions();
-      executionHandler({
+      const triggeredActionsForRecoveredAlert = await executionHandler({
         actionGroup: recoveryActionGroup.id,
         context: {},
         state: {},
         alertId: id,
       });
       alert.scheduleActions(recoveryActionGroup.id);
+      triggeredActions = concat(triggeredActions, triggeredActionsForRecoveredAlert);
     }
   }
+  return triggeredActions;
 }
 
 interface LogActiveAndRecoveredAlertsParams<
@@ -1176,8 +1226,8 @@ function logActiveAndRecoveredAlerts<
  * so that we can treat each field independantly
  */
 async function errorAsRuleTaskRunResult(
-  future: Promise<Resultable<RuleTaskRunResult, Error>>
-): Promise<Resultable<RuleTaskRunResult, Error>> {
+  future: Promise<Resultable<RuleTaskRunResultWithActions, Error>>
+): Promise<Resultable<RuleTaskRunResultWithActions, Error>> {
   try {
     return await future;
   } catch (e) {

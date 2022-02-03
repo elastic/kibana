@@ -12,7 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
-import type { Query, Filter, TimeRange, IndexPattern } from 'src/plugins/data/common';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
+import type { Query, TimeRange, IndexPattern } from 'src/plugins/data/common';
 import {
   getData,
   getCoreChrome,
@@ -31,7 +32,6 @@ import {
   MapsGlobalState,
 } from '../url_state';
 import {
-  esFilters,
   SavedQuery,
   QueryStateChange,
   QueryState,
@@ -446,7 +446,7 @@ export class MapApp extends React.Component<Props, State> {
 
   _addFilter = async (newFilters: Filter[]) => {
     newFilters.forEach((filter) => {
-      filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
+      filter.$state = { store: FilterStateStore.APP_STATE };
     });
     this._onFiltersChange([...this.props.filters, ...newFilters]);
   };

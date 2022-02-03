@@ -67,6 +67,13 @@ export interface EmbeddableContainerContext {
 
 interface Props {
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+
+  /**
+   * Ordinal number of the embeddable in the container, used as a
+   * "title" when the panel has no title, i.e. "Panel {index}".
+   */
+  index?: number;
+
   getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories?: EmbeddableStart['getEmbeddableFactories'];
@@ -286,6 +293,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             }
             closeContextMenu={this.state.closeContextMenu}
             title={title}
+            index={this.props.index}
             badges={this.state.badges}
             notifications={this.state.notifications}
             embeddable={this.props.embeddable}

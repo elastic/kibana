@@ -17,6 +17,7 @@ import { EmbeddableStart } from '../../plugin';
 
 export interface EmbeddableChildPanelProps {
   embeddableId: string;
+  index?: number;
   className?: string;
   container: IContainer;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
@@ -64,7 +65,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   }
 
   public render() {
-    const { PanelComponent } = this.props;
+    const { PanelComponent, index } = this.props;
     const classes = classNames('embPanel', {
       'embPanel-isLoading': this.state.loading,
     });
@@ -74,7 +75,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
         {this.state.loading || !this.embeddable ? (
           <EuiLoadingChart size="l" mono />
         ) : (
-          <PanelComponent embeddable={this.embeddable} />
+          <PanelComponent embeddable={this.embeddable} index={index} />
         )}
       </div>
     );
