@@ -165,9 +165,7 @@ export function EditFilterModal({
     const index = localFilters.findIndex((f) => f.id === localFilterIndex);
     // Only reset params when the operator type changes
     const params =
-      localFilters[localFilterIndex].operator?.type === operator.type
-        ? localFilters[localFilterIndex].value
-        : undefined;
+      localFilters[index]?.operator?.type === operator.type ? localFilters[index].value : undefined;
     const updatedLocalFilter = { ...localFilters[index], operator, value: params };
     localFilters[index] = updatedLocalFilter;
     setLocalFilters([...localFilters]);
@@ -268,10 +266,10 @@ export function EditFilterModal({
             placeholder={
               selectedField
                 ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                defaultMessage: 'Operator',
+                  defaultMessage: 'Operator',
                 })
                 : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                defaultMessage: 'Waiting',
+                  defaultMessage: 'Waiting',
                 })
             }
             options={operators}
