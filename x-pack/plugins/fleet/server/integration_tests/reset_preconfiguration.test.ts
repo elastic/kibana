@@ -67,6 +67,7 @@ describe('Fleet preconfiguration rest', () => {
         {
           xpack: {
             fleet: {
+              registryUrl,
               // Preconfigure two policies test-12345 and test-456789
               agentPolicies: [
                 {
