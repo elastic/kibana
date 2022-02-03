@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DOCUMENT_FIELD_NAME } from '../../common';
 import { IndexPatternField } from './types';
 
 /**
@@ -16,9 +17,7 @@ export const documentField: IndexPatternField = {
   displayName: i18n.translate('xpack.lens.indexPattern.records', {
     defaultMessage: 'Records',
   }),
-  name: i18n.translate('xpack.lens.indexPattern.records', {
-    defaultMessage: 'Records',
-  }),
+  name: DOCUMENT_FIELD_NAME,
   type: 'document',
   aggregatable: true,
   searchable: true,
