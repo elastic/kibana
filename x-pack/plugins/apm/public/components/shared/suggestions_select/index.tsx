@@ -33,7 +33,7 @@ export function SuggestionsSelect({
   isInvalid,
   dataTestSubj,
   isClearable = true,
-  allowCustomOption = true,
+  allowCustomOption = false,
 }: SuggestionsSelectProps) {
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -95,7 +95,6 @@ export function SuggestionsSelect({
   return (
     <EuiComboBox
       async={true}
-      compressed={false}
       customOptionText={customOptionText}
       isClearable={isClearable}
       isLoading={status === FETCH_STATUS.LOADING}

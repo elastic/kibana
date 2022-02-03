@@ -18,7 +18,7 @@ interface Props {
   description: string;
   fieldLabel: string;
   isLoading: boolean;
-  options: Array<EuiComboBoxOptionOption<string>>;
+  options?: Array<EuiComboBoxOptionOption<string>>;
   isDisabled: boolean;
   value?: string;
   onChange: (value?: string) => void;
