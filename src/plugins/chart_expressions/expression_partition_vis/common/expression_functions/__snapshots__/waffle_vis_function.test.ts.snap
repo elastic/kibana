@@ -164,3 +164,5 @@ Object {
   },
 }
 `;
+
+exports[`interpreter/functions#waffleVis throws error if provided not valid legend position 1`] = `"Invalid legend position: 'some not valid position'. Supported values: top, bottom, left, right."`;

@@ -100,6 +100,15 @@ describe('interpreter/functions#pieVis', () => {
     expect(actual).toMatchSnapshot();
   });
 
+  it('throws error if provided not valid legend position', async () => {
+    expect(() =>
+      fn(context, {
+        ...visConfig,
+        legendPosition: 'some not valid position',
+      })
+    ).toThrowErrorMatchingSnapshot();
+  });
+
   it('logs correct datatable to inspector', async () => {
     let loggedTable: Datatable;
     const handlers = {
