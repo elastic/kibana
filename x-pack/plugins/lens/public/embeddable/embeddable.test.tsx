@@ -318,6 +318,52 @@ describe('embeddable', () => {
     expect(spacesPluginStart.ui.components.getEmbeddableLegacyUrlConflict).toHaveBeenCalled();
   });
 
+  it('should not render if timeRange prop is not passed when a referenced data view is time based', async () => {
+    attributeService = attributeServiceMockFromSavedVis({
+      ...savedVis,
+      references: [
+        { type: 'index-pattern', id: '123', name: 'abc' },
+        { type: 'index-pattern', id: '123', name: 'def' },
+        { type: 'index-pattern', id: '456', name: 'ghi' },
+      ],
+    });
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        inspector: inspectorPluginMock.createStartContract(),
+        indexPatternService: {
+          get: (id: string) => Promise.resolve({ id, isTimeBased: jest.fn(() => true) }),
+        } as unknown as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
+        theme: themeServiceMock.createStartContract(),
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      {} as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
+  });
+
   it('should initialize output with deduped list of index patterns', async () => {
     attributeService = attributeServiceMockFromSavedVis({
       ...savedVis,
@@ -335,7 +381,7 @@ describe('embeddable', () => {
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {
-          get: (id: string) => Promise.resolve({ id }),
+          get: (id: string) => Promise.resolve({ id, isTimeBased: () => false }),
         } as unknown as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
