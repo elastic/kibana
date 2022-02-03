@@ -103,10 +103,19 @@ const getFiltersAreEqual = (
   filtersB: Filter[],
   ignorePinned?: boolean
 ): boolean => {
+  let compare = COMPARE_ALL_OPTIONS;
+  const allFilters = filtersA.concat(filtersB);
+  for (let i = 0; i < allFilters.length; i++) {
+    //  if at least one filter doesn't have state, then ignore it when comparing
+    if (!allFilters[i].$state) {
+      compare = { ...COMPARE_ALL_OPTIONS, state: false };
+      break;
+    }
+  }
   return compareFilters(
     filtersA,
     ignorePinned ? filtersB.filter((f) => !isFilterPinned(f)) : filtersB,
-    { ...COMPARE_ALL_OPTIONS, state: false }
+    compare
   );
 };
 
