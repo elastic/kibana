@@ -43,9 +43,6 @@ interface RuleStatsState {
   error: number;
 }
 
-interface RuleState {
-  data: [];
-}
 export interface TopAlert {
   fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
