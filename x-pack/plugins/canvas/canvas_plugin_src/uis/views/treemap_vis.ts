@@ -47,25 +47,6 @@ export const treemapVis = () => ({
       default: `{visdimension}`,
     },
     {
-      name: 'isDonut',
-      displayName: strings.getIsDonutDisplayName(),
-      help: strings.getIsDonutHelp(),
-      argType: 'toggle',
-      default: false,
-    },
-    {
-      name: 'emptySizeRatio',
-      displayName: strings.getEmptySizeRatioDisplayName(),
-      help: strings.getEmptySizeRatioHelp(),
-      argType: 'range',
-      default: 0.4,
-      options: {
-        min: 0,
-        max: 1,
-        step: 0.01,
-      },
-    },
-    {
       name: 'addTooltip',
       displayName: strings.getAddTooltipDisplayName(),
       help: strings.getAddTooltipHelp(),
@@ -121,27 +102,6 @@ export const treemapVis = () => ({
       help: strings.getMaxLegendLinesHelp(),
       argType: 'number',
       default: 1,
-    },
-    {
-      name: 'distinctColors',
-      displayName: strings.getDistictColorsDisplayName(),
-      help: strings.getDistictColorsHelp(),
-      argType: 'toggle',
-      default: false,
-    },
-    {
-      name: 'respectSourceOrder',
-      displayName: strings.getRespectSourceOrderDisplayName(),
-      help: strings.getRespectSourceOrderHelp(),
-      argType: 'toggle',
-      default: true,
-    },
-    {
-      name: 'startFromSecondLargestSlice',
-      displayName: strings.getStartFromSecondLargestSliceDisplayName(),
-      help: strings.getStartFromSecondLargestSliceHelp(),
-      argType: 'toggle',
-      default: true,
     },
     {
       name: 'palette',
