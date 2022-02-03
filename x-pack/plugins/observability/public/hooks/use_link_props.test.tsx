@@ -29,6 +29,7 @@ const history = createMemoryHistory();
 history.push(`${PREFIX}${INTERNAL_APP}`);
 const scopedHistory = new ScopedHistory(history, `${PREFIX}${INTERNAL_APP}`);
 
+// eslint-disable-next-line react/function-component-definition
 const ProviderWrapper: React.FC = ({ children }) => {
   return (
     <Router history={scopedHistory}>
