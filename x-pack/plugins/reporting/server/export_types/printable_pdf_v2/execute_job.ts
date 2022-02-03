@@ -57,7 +57,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
             logo
           );
         }),
-        tap(({ buffer, warnings }) => {
+        tap(({ buffer }) => {
           apmGeneratePdf?.end();
 
           if (buffer) {

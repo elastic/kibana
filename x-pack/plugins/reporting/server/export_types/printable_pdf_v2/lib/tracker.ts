@@ -20,8 +20,6 @@ interface PdfTracker {
   endAddImage: () => void;
   startCompile: () => void;
   endCompile: () => void;
-  startGetBuffer: () => void;
-  endGetBuffer: () => void;
   end: () => void;
 }
 
@@ -39,38 +37,31 @@ export function getTracker(): PdfTracker {
   let apmSetup: ApmSpan | null = null;
   let apmAddImage: ApmSpan | null = null;
   let apmCompilePdf: ApmSpan | null = null;
-  let apmGetBuffer: ApmSpan | null = null;
 
   return {
     startScreenshots() {
       apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
     },
     endScreenshots() {
-      if (apmScreenshots) apmScreenshots.end();
+      apmScreenshots?.end();
     },
     startSetup() {
       apmSetup = apmTrans?.startSpan('setup-pdf', SPANTYPE_SETUP) || null;
     },
     endSetup() {
-      if (apmSetup) apmSetup.end();
+      apmSetup?.end();
     },
     startAddImage() {
       apmAddImage = apmTrans?.startSpan('add-pdf-image', SPANTYPE_OUTPUT) || null;
     },
     endAddImage() {
-      if (apmAddImage) apmAddImage.end();
+      apmAddImage?.end();
     },
     startCompile() {
       apmCompilePdf = apmTrans?.startSpan('compile-pdf', SPANTYPE_OUTPUT) || null;
     },
     endCompile() {
-      if (apmCompilePdf) apmCompilePdf.end();
-    },
-    startGetBuffer() {
-      apmGetBuffer = apmTrans?.startSpan('get-buffer', SPANTYPE_OUTPUT) || null;
-    },
-    endGetBuffer() {
-      if (apmGetBuffer) apmGetBuffer.end();
+      apmCompilePdf?.end();
     },
     setByteLength(byteLength: number) {
       apmTrans?.setLabel('byte-length', byteLength, false);
@@ -82,7 +73,7 @@ export function getTracker(): PdfTracker {
       apmTrans?.setLabel('memory', memory, false);
     },
     end() {
-      if (apmTrans) apmTrans.end();
+      apmTrans?.end();
     },
   };
 }
