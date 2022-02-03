@@ -20,7 +20,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTextColor,
   EuiIconTip,
 } from '@elastic/eui';
@@ -179,7 +178,7 @@ export const dateHistogramOperation: OperationDefinition<
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    const maxBarsUiSetting = uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
+    const maxIntervalValue = uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
 
     if (currentColumn.params.interval === autoInterval) {
       // can't allow "auto" because we need to know where we are on the slider
@@ -201,13 +200,7 @@ export const dateHistogramOperation: OperationDefinition<
       restrictedInterval(field!.aggregationRestrictions)
     );
 
-    function onChangeAutoInterval(ev: EuiSwitchEvent) {
-      const { fromDate, toDate } = dateRange;
-      const value = ev.target.checked
-        ? data.search.aggs.calculateAutoTimeExpression({ from: fromDate, to: toDate }) || '1h'
-        : autoInterval;
-      updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
-    }
+    const [useAdvancedIntervalEditing, setUseAdvancedIntervalEditing] = useState(false);
 
     const setInterval = (newInterval: typeof interval) => {
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
@@ -223,7 +216,7 @@ export const dateHistogramOperation: OperationDefinition<
             <>
               <FormattedMessage
                 id="xpack.lens.indexPattern.dateHistogram.detailLevelInterval"
-                defaultMessage="Level of detail"
+                defaultMessage="Interval granularity"
               />{' '}
               <EuiIconTip
                 position="right"
@@ -243,16 +236,18 @@ export const dateHistogramOperation: OperationDefinition<
           }
         >
           <EuiRange
-            value={interval.value}
-            onChange={(ev) => setInterval({ ...interval, value: ev.target.value })}
-            disabled={false}
+            value={maxIntervalValue - parseInt(interval.value as string, 10)}
+            onChange={(ev) =>
+              setInterval({ ...interval, value: maxIntervalValue - ev.target.value })
+            }
+            disabled={useAdvancedIntervalEditing}
             min={0}
-            max={maxBarsUiSetting}
-            step={maxBarsUiSetting / LEVEL_OF_DETAIL_STEPS}
+            max={maxIntervalValue}
+            step={maxIntervalValue / LEVEL_OF_DETAIL_STEPS}
             aria-label={i18n.translate(
               'xpack.lens.indexPattern.dateHistogram.detailLevelInterval',
               {
-                defaultMessage: 'Level of detail',
+                defaultMessage: 'Interval granularity',
               }
             )}
           />
@@ -263,13 +258,13 @@ export const dateHistogramOperation: OperationDefinition<
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
                 defaultMessage: 'Customize time interval',
               })}
-              checked={currentColumn.params.interval !== autoInterval}
-              onChange={onChangeAutoInterval}
+              checked={useAdvancedIntervalEditing}
+              onChange={() => setUseAdvancedIntervalEditing(!useAdvancedIntervalEditing)}
               compressed
             />
           </EuiFormRow>
         )}
-        {currentColumn.params.interval !== autoInterval && (
+        {useAdvancedIntervalEditing && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
               defaultMessage: 'Minimum interval',
