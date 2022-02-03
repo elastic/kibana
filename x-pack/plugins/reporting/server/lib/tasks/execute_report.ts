@@ -358,12 +358,12 @@ export class ExecuteReportTask implements ReportingTask {
 
             stream.end();
 
-            eventLog.logExecutionComplete({ byteSize: stream.bytesWritten });
-
             await promisify(finished)(stream, { readable: false });
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
+
+            eventLog.logExecutionComplete({ byteSize: stream.bytesWritten });
 
             if (output) {
               this.logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
