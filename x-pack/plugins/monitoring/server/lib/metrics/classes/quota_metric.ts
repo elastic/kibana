@@ -6,12 +6,26 @@
  */
 
 import { get } from 'lodash';
-import { Metric } from './metric';
+import { Metric, MetricOptions } from './metric';
 import { LARGE_FLOAT } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
+type QuotaMetricOptions = Pick<
+  MetricOptions,
+  | 'fieldSource'
+  | 'usageField'
+  | 'periodsField'
+  | 'quotaField'
+  | 'field'
+  | 'label'
+  | 'description'
+  | 'app'
+  | 'timestampField'
+> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class QuotaMetric extends Metric {
-  constructor(opts) {
+  constructor(opts: QuotaMetricOptions) {
     super({
       ...opts,
       format: LARGE_FLOAT,
@@ -51,7 +65,7 @@ export class QuotaMetric extends Metric {
       },
     };
 
-    this.calculation = (bucket) => {
+    this.calculation = (bucket: object) => {
       const quota = get(bucket, 'quota.value');
       const deltaUsageDerivNormalizedValue = get(bucket, 'usage_deriv.normalized_value');
       const periodsDerivNormalizedValue = get(bucket, 'periods_deriv.normalized_value');
