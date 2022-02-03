@@ -9,7 +9,13 @@ import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison, { RisonValue } from 'rison-node';
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiProgress,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -497,11 +503,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
     if (!isCategorizationAnomalyRecord) {
       // Add item from the start, but disable it during the URL generation.
+      const isLoading = openInDiscoverUrl === undefined;
+
       items.push(
         <EuiContextMenuItem
           key={`auto_raw_data_url`}
           icon="discoverApp"
-          disabled={openInDiscoverUrl === undefined}
+          disabled={isLoading}
           href={openInDiscoverUrl}
           data-test-subj={`mlAnomaliesListRowAction_viewInDiscoverButton`}
         >
@@ -509,6 +517,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             id="xpack.ml.anomaliesTable.linksMenu.viewInDiscover"
             defaultMessage="View in Discover"
           />
+          {isLoading ? <EuiProgress size={'xs'} color={'accent'} /> : null}
         </EuiContextMenuItem>
       );
     }
