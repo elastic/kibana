@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../utils/kibana_react';
@@ -50,9 +50,15 @@ export const useDataFetcher = <ApiCallParams, AlertDataType>({
     };
   }, [executeApiCall, http, paramsForApiCall, shouldExecuteApiCall]);
 
+  useEffect(() => {
+    fetch();
+
+    return () => {
+      cancel();
+    };
+  }, [fetch, cancel]);
+
   return {
-    fetch,
-    cancel,
     loading,
     data,
   };

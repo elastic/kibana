@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 
 import { HttpSetup } from 'kibana/public';
@@ -32,25 +32,12 @@ export const useFetchAlertDetail = (id: string): [boolean, TopAlert | null] => {
     []
   );
 
-  const {
-    fetch,
-    cancel,
-    loading,
-    data: alert,
-  } = useDataFetcher<AlertDetailParams, TopAlert | null>({
+  const { loading, data: alert } = useDataFetcher<AlertDetailParams, TopAlert | null>({
     paramsForApiCall: params,
     initialDataState: null,
     executeApiCall: fetchAlert,
     shouldExecuteApiCall,
   });
-
-  useEffect(() => {
-    fetch();
-
-    return () => {
-      cancel();
-    };
-  }, [fetch, cancel]);
 
   return [loading, alert];
 };

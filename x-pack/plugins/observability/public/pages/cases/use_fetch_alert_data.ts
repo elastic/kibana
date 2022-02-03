@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -17,25 +17,12 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
   const validIds = useMemo(() => getValidValues(alertIds), [alertIds]);
   const shouldExecuteApiCall = useCallback((ids: string[]) => ids.length > 0, []);
 
-  const {
-    fetch,
-    cancel,
-    loading,
-    data: alerts,
-  } = useDataFetcher<string[], Record<string, unknown> | undefined>({
+  const { loading, data: alerts } = useDataFetcher<string[], Record<string, unknown> | undefined>({
     paramsForApiCall: validIds,
     initialDataState: undefined,
     executeApiCall: fetchAlerts,
     shouldExecuteApiCall,
   });
-
-  useEffect(() => {
-    fetch();
-
-    return () => {
-      cancel();
-    };
-  }, [fetch, cancel]);
 
   return [loading, alerts ?? {}];
 };
