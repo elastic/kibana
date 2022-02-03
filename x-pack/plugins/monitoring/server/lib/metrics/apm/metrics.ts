@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { LARGE_BYTES, LARGE_FLOAT } from '../../../../common/formatting';
 import { ApmMetric, ApmCpuUtilizationMetric, ApmEventsRateClusterMetric } from './classes';
-import { i18n } from '@kbn/i18n';
 import { QuotaMetric } from '../classes';
 
 const instanceSystemLoadTitle = i18n.translate(
