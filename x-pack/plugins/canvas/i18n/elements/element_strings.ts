@@ -262,4 +262,12 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Treemap visualization',
     }),
   },
+  waffleVis: {
+    displayName: i18n.translate('xpack.canvas.elements.waffleVisDisplayName', {
+      defaultMessage: '(New) Waffle Vis',
+    }),
+    help: i18n.translate('xpack.canvas.elements.waffleVisHelpText', {
+      defaultMessage: 'Waffle visualization',
+    }),
+  },
 });
