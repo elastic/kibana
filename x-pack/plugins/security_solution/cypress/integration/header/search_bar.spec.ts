@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { loginAndWaitForPage, waitForPageWithoutDateRange } from '../../tasks/login';
 import { openAddFilterPopover, fillAddFilterForm } from '../../tasks/search_bar';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../screens/search_bar';
 import { getHostIpFilter } from '../../objects/filter';
 
-import { HOSTS_URL } from '../../urls/navigation';
+import { HOSTS_URL, ALERTS_URL } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 import { cleanKibana } from '../../tasks/common';
 
@@ -28,6 +28,16 @@ describe('SearchBar', () => {
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
       'have.text',
       `${getHostIpFilter().key}: ${getHostIpFilter().value}`
+    );
+  });
+
+  it('popluates the filters correctly from the URL', () => {
+    const testFilter = getHostIpFilter();
+    const filterParam = `sourcerer=(default:(id:security-solution-default,selectedPatterns:!('logs-*')))&filters=!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:${testFilter.key},negate:!f,params:(query:'${testFilter.value}'),type:phrase),query:(match_phrase:(${testFilter.key}:'${testFilter.value}'))))`;
+    waitForPageWithoutDateRange(`${ALERTS_URL}?${filterParam}`);
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
+      'have.text',
+      `${testFilter.key}: ${testFilter.value}`
     );
   });
 });
