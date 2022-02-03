@@ -22,6 +22,8 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiSpacer,
+  EuiFieldNumber,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
@@ -85,24 +87,32 @@ export const SerialDiffAgg = (props) => {
           <EuiFormRow
             id={htmlId('lag')}
             label={
-              <FormattedMessage
-                id="visTypeTimeseries.serialDiff.lagLabel"
-                defaultMessage="Lag"
-                description="'Lag' refers to the parameter name of the serial diff translation
+              <>
+                <FormattedMessage
+                  id="visTypeTimeseries.serialDiff.lagLabel"
+                  defaultMessage="Lag"
+                  description="'Lag' refers to the parameter name of the serial diff translation
                 https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-pipeline-serialdiff-aggregation.html.
                 This should only be translated if there is a reasaonable word explaining what that parameter does."
-              />
+                />{' '}
+                <EuiIconTip
+                  position="right"
+                  content={
+                    <FormattedMessage
+                      id="visTypeTimeseries.serialDiff.lagLabel.hint"
+                      defaultMessage="The historical bucket to subtract from the current value. Must be a positive, non-zero integer"
+                    />
+                  }
+                  type="questionInCircle"
+                />
+              </>
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              Should it be text or number?
-            */}
-            <input
+            <EuiFieldNumber
               className="tvbAgg__input"
-              onChange={handleNumberChange('lag')}
+              onChange={handleNumberChange('lag', 1, true)}
               value={model.lag}
-              type="text"
+              min={1}
             />
           </EuiFormRow>
         </EuiFlexItem>
