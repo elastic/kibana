@@ -6,14 +6,11 @@
  */
 
 import { IndicesCreateRequest } from '@elastic/elasticsearch/api/types';
-import expect from '@kbn/expect';
+// import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  API_BASE_PATH,
-  indexSettingDeprecations,
-} from '../../../../plugins/upgrade_assistant/common/constants';
-import { EnrichedDeprecationInfo } from '../../../../plugins/upgrade_assistant/common/types';
+import { API_BASE_PATH } from '../../../../plugins/upgrade_assistant/common/constants';
+// import { EnrichedDeprecationInfo } from '../../../../plugins/upgrade_assistant/common/types';
 
 const translogSettingsIndexDeprecation: IndicesCreateRequest = {
   index: 'deprecated_settings',
@@ -28,7 +25,7 @@ const translogSettingsIndexDeprecation: IndicesCreateRequest = {
 
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const supertest = getService('supertest');
+  // const supertest = getService('supertest');
   const security = getService('security');
   const es = getService('es');
   const log = getService('log');
@@ -83,21 +80,21 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
 
-        it('returns the expected deprecation message for deprecated translog index settings', async () => {
-          const { body: apiRequestResponse } = await supertest
-            .get(`${API_BASE_PATH}/es_deprecations`)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
+        // it('returns the expected deprecation message for deprecated translog index settings', async () => {
+        //   const { body: apiRequestResponse } = await supertest
+        //     .get(`${API_BASE_PATH}/es_deprecations`)
+        //     .set('kbn-xsrf', 'xxx')
+        //     .expect(200);
 
-          const indexSettingDeprecation = apiRequestResponse.deprecations.find(
-            (deprecation: EnrichedDeprecationInfo) =>
-              deprecation.index === translogSettingsIndexDeprecation.index
-          );
+        //   const indexSettingDeprecation = apiRequestResponse.deprecations.find(
+        //     (deprecation: EnrichedDeprecationInfo) =>
+        //       deprecation.index === translogSettingsIndexDeprecation.index
+        //   );
 
-          expect(indexSettingDeprecation.message).to.equal(
-            indexSettingDeprecations.translog.deprecationMessage
-          );
-        });
+        //   expect(indexSettingDeprecation.message).to.equal(
+        //     indexSettingDeprecations.translog.deprecationMessage
+        //   );
+        // });
       });
     });
   });

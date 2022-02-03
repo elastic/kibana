@@ -7,7 +7,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { indexSettingDeprecations } from '../../common/constants';
 import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
@@ -94,6 +93,8 @@ const getCombinedIndexInfos = async (
             message,
             url,
             level,
+            // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
+            _meta: metadata,
             // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
             resolve_during_rolling_upgrade: resolveDuringUpgrade,
           }) =>
@@ -104,7 +105,7 @@ const getCombinedIndexInfos = async (
               index: indexName,
               type: 'index_settings',
               isCritical: level === 'critical',
-              correctiveAction: getCorrectiveAction(message),
+              correctiveAction: getCorrectiveAction(message, metadata),
               resolveDuringUpgrade,
             } as EnrichedDeprecationInfo)
         )
@@ -130,13 +131,22 @@ const getCombinedIndexInfos = async (
   return indices as EnrichedDeprecationInfo[];
 };
 
+interface Action {
+  actions: {
+    remove_settings: {
+      settings: string[];
+    };
+  };
+}
+type EsMetadata = Action & {
+  [key: string]: string;
+};
+
 const getCorrectiveAction = (
   message: string,
-  metadata?: { [key: string]: string }
+  metadata: EsMetadata
 ): EnrichedDeprecationInfo['correctiveAction'] => {
-  const indexSettingDeprecation = Object.values(indexSettingDeprecations).find(
-    ({ deprecationMessage }) => deprecationMessage === message
-  );
+  const indexSettingDeprecation = metadata.actions.remove_settings.settings.length > 0;
   const requiresReindexAction = /Index created before/.test(message);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresMlAction = /[Mm]odel snapshot/.test(message);
@@ -150,12 +160,12 @@ const getCorrectiveAction = (
   if (requiresIndexSettingsAction) {
     return {
       type: 'indexSetting',
-      deprecatedSettings: indexSettingDeprecation!.settings,
+      deprecatedSettings: metadata.actions.remove_settings.settings,
     };
   }
 
   if (requiresMlAction) {
-    const { snapshot_id: snapshotId, job_id: jobId } = metadata!;
+    const { snapshot_id: snapshotId, job_id: jobId } = metadata;
 
     return {
       type: 'mlSnapshot',

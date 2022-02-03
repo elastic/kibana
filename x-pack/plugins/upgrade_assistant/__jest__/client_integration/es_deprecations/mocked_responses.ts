@@ -6,7 +6,6 @@
  */
 
 import type { ESUpgradeStatus, EnrichedDeprecationInfo } from '../../../common/types';
-import { indexSettingDeprecations } from '../../../common/constants';
 
 export const MOCK_SNAPSHOT_ID = '1';
 export const MOCK_JOB_ID = 'deprecation_check_job';
@@ -43,13 +42,13 @@ const MOCK_INDEX_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
   isCritical: false,
   resolveDuringUpgrade: false,
   type: 'index_settings',
-  message: indexSettingDeprecations.translog.deprecationMessage,
+  message: 'Translog retention settings are deprecated',
   details: 'deprecation details',
   url: 'doc_url',
   index: 'my_index',
   correctiveAction: {
     type: 'indexSetting',
-    deprecatedSettings: indexSettingDeprecations.translog.settings,
+    deprecatedSettings: ['translog.retention.size', 'translog.retention.age'],
   },
 };
 
