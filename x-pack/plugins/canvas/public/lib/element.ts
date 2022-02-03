@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { ReactElement } from 'react';
 import { ElementSpec } from '../../types';
 
 export class Element {
@@ -15,7 +15,7 @@ export class Element {
   /** The type of the Element */
   public type?: string;
   /** The name of the EUI icon to display in the element menu */
-  public icon: string;
+  public icon: string | ReactElement;
   /** A sentence or few about what this Element does */
   public help: string;
   /** A default expression that allows Canvas to render the Element */
