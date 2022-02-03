@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import { MetricState } from '../../../common/expressions';
 
 export interface TitlePositionProps {
@@ -41,27 +41,16 @@ const alignButtonIcons = [
 
 export const AlignOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      label={
-        <>
-          {i18n.translate('xpack.lens.metricChart.titleAlignLabel', {
-            defaultMessage: 'Align',
-          })}
-        </>
-      }
-    >
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.lens.metricChart.titleAlignLabel', {
-          defaultMessage: 'Align',
-        })}
-        options={alignButtonIcons}
-        idSelected={state.textAlign ?? 'center'}
-        onChange={(id) => {
-          setState({ ...state, textAlign: id as MetricState['textAlign'] });
-        }}
-        isIconOnly
-      />
-    </EuiFormRow>
+    <EuiButtonGroup
+      legend={i18n.translate('xpack.lens.metricChart.titleAlignLabel', {
+        defaultMessage: 'Align',
+      })}
+      options={alignButtonIcons}
+      idSelected={state.textAlign ?? 'center'}
+      onChange={(id) => {
+        setState({ ...state, textAlign: id as MetricState['textAlign'] });
+      }}
+      isIconOnly
+    />
   );
 };

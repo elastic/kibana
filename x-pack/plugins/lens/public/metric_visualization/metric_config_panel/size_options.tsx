@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
 import { MetricState } from '../../../common/expressions';
 
 export interface TitlePositionProps {
@@ -19,70 +19,79 @@ const titleSizes = [
   {
     id: 'xs',
     label: i18n.translate('xpack.lens.metricChart.metricSize.extraSmall', {
-      defaultMessage: 'Extra small',
+      defaultMessage: 'XS',
     }),
   },
   {
     id: 's',
     label: i18n.translate('xpack.lens.metricChart.metricSize.small', {
-      defaultMessage: 'Small',
+      defaultMessage: 'S',
     }),
   },
   {
     id: 'm',
     label: i18n.translate('xpack.lens.metricChart.metricSize.medium', {
-      defaultMessage: 'Medium',
+      defaultMessage: 'M',
     }),
   },
   {
     id: 'l',
     label: i18n.translate('xpack.lens.metricChart.metricSize.large', {
-      defaultMessage: 'Large',
+      defaultMessage: 'L',
     }),
   },
   {
     id: 'xl',
     label: i18n.translate('xpack.lens.metricChart.metricSize.extraLarge', {
-      defaultMessage: 'Extra large',
+      defaultMessage: 'XL',
     }),
   },
   {
     id: 'xxl',
     label: i18n.translate('xpack.lens.metricChart.metricSize.xxl', {
-      defaultMessage: 'Extra extra large',
+      defaultMessage: 'XXL',
     }),
   },
 ];
 
 export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
+  const currSizeIndex = titleSizes.findIndex((size) => size.id === (state.size || 'xl'));
+
+  const changeSize = (change: number) => {
+    setState({ ...state, size: titleSizes[currSizeIndex + change].id });
+  };
+
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      label={
-        <>
-          {i18n.translate('xpack.lens.metricChart.metricSizeLabel', {
-            defaultMessage: 'Size',
-          })}
-        </>
+    <EuiSuperSelect
+      append={
+        <EuiButtonIcon
+          iconType="plus"
+          onClick={() => changeSize(1)}
+          isDisabled={currSizeIndex === titleSizes.length - 1}
+        />
       }
-    >
-      <EuiSuperSelect
-        data-test-subj="lnsMetricSizeSelect"
-        compressed
-        options={titleSizes.map((position) => {
-          return {
-            value: position.id,
-            dropdownDisplay: position.label,
-            inputDisplay: position.label,
-          };
-        })}
-        valueOfSelected={state.size ?? 'xl'}
-        onChange={(value) => {
-          setState({ ...state, size: value });
-        }}
-        itemLayoutAlign="top"
-        hasDividers
-      />
-    </EuiFormRow>
+      prepend={
+        <EuiButtonIcon
+          iconType="minus"
+          onClick={() => changeSize(-1)}
+          isDisabled={currSizeIndex === 0}
+        />
+      }
+      data-test-subj="lnsMetricSizeSelect"
+      compressed
+      options={titleSizes.map((position) => {
+        return {
+          value: position.id,
+          dropdownDisplay: position.label,
+          inputDisplay: position.label,
+        };
+      })}
+      valueOfSelected={state.size ?? 'xl'}
+      onChange={(value) => {
+        setState({ ...state, size: value });
+      }}
+      itemLayoutAlign="top"
+      hasDividers
+    />
   );
 };

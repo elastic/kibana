@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { MetricState } from '../../../common/expressions';
 
 export interface TitlePositionProps {
@@ -32,22 +32,15 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
         </>
       }
     >
-      <EuiSuperSelect
+      <EuiButtonGroup
+        isFullWidth={true}
         data-test-subj="lnsMissingValuesSelect"
-        compressed
-        options={titlePositions.map((position) => {
-          return {
-            value: position.id,
-            dropdownDisplay: position.label,
-            inputDisplay: position.label,
-          };
-        })}
-        valueOfSelected={state.titlePosition ?? 'top'}
+        legend="This is a basic group"
+        options={titlePositions}
+        idSelected={state.titlePosition ?? 'top'}
         onChange={(value) => {
           setState({ ...state, titlePosition: value as MetricState['titlePosition'] });
         }}
-        itemLayoutAlign="top"
-        hasDividers
       />
     </EuiFormRow>
   );
