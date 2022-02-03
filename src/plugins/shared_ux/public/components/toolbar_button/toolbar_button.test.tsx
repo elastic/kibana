@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { ToolbarButton, POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES } from './toolbar_button';
+import { ToolbarButton, POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES } from './toolbar_button.component';
 
 const noop = () => {};
 
