@@ -62,7 +62,7 @@ export const SimplifiedSelectable: React.FC<Props> = ({ options, selectedOptions
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.crawler.simplifiedSelectable.deselectAllButtonLabel',
               {
-                defaultMessage: 'De select all',
+                defaultMessage: 'Deselect all',
               }
             )}
           </EuiButtonEmpty>
