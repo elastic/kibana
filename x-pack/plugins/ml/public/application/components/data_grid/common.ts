@@ -431,10 +431,12 @@ export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['colum
 
   const sortFn = (a: any, b: any, sortingColumnIndex = 0): number => {
     const sort = sortingColumns[sortingColumnIndex];
-    const aValue = getNestedProperty(a, sort.id, null);
-    const bValue = getNestedProperty(b, sort.id, null);
 
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
+    // Value can be nested or the fieldName itself might contain `.`
+    const aValue = getNestedProperty(a, sort.id, null) ?? a[sort.id];
+    const bValue = getNestedProperty(b, sort.id, null) ?? b[sort.id];
+
+    if (typeof aValue === 'number' || typeof bValue === 'number') {
       if (aValue < bValue) {
         return sort.direction === 'asc' ? -1 : 1;
       }
