@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.1.0",
+  "version": "8.2.0",
   "branch": "main",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -727,7 +727,7 @@
     "callsites": "^3.1.0",
     "chai": "3.5.0",
     "chance": "1.0.18",
-    "chromedriver": "^97.0.4",
+    "chromedriver": "^97.0.2",
     "clean-webpack-plugin": "^3.0.0",
     "cmd-shim": "^2.1.0",
     "compression-webpack-plugin": "^4.0.0",
