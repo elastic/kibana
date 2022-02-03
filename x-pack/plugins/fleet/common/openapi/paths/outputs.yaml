@@ -46,14 +46,14 @@ post:
               type: string
             type:
               type: string
-              enum: ["elasticsearch"]            
+              enum: ["elasticsearch"]
             is_default:
               type: boolean
             is_default_monitoring:
               type: boolean
             hosts:
               type: array
-              items: 
+              items:
                 type: string
             ca_sha256:
               type: string

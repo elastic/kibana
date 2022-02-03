@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface Props {
@@ -74,7 +74,7 @@ export function FieldSearch({
         <EuiFlexItem>
           <EuiFieldSearch
             aria-label={searchPlaceholder}
-            data-test-subj="fieldFilterSearchInput"
+            data-test-subj="field-search-input"
             fullWidth
             onChange={(event) => onSearchChange(event.currentTarget.value)}
             placeholder={searchPlaceholder}

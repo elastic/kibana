@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
+import { toNumberRt } from '@kbn/io-ts-utils';
 
 import { isActivePlatinumLicense } from '../../../common/license_check';
 
@@ -19,13 +19,13 @@ import {
   fetchSignificantCorrelations,
   fetchTransactionDurationFieldCandidates,
   fetchTransactionDurationFieldValuePairs,
+  fetchFieldValueFieldStats,
 } from './queries';
 import { fetchFieldsStats } from './queries/field_stats/get_fields_stats';
 
 import { withApmSpan } from '../../utils/with_apm_span';
 
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
@@ -48,7 +48,7 @@ const fieldCandidatesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<{ fieldCandidates: string[] }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -77,16 +77,23 @@ const fieldStatsRoute = createApmServerRoute({
         transactionName: t.string,
         transactionType: t.string,
       }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
       t.type({
         fieldsToSample: t.array(t.string),
       }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    stats: Array<
+      import('./../../../common/correlations/field_stats_types').FieldStats
+    >;
+    errors: any[];
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -112,6 +119,55 @@ const fieldStatsRoute = createApmServerRoute({
   },
 });
 
+const fieldValueStatsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/correlations/field_value_stats',
+  params: t.type({
+    query: t.intersection([
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.type({
+        fieldName: t.string,
+        fieldValue: t.union([t.string, t.number]),
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<
+    import('./../../../common/correlations/field_stats_types').TopValuesStats
+  > => {
+    const { context } = resources;
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
+    const { indices } = await setupRequest(resources);
+    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+
+    const { fieldName, fieldValue, ...params } = resources.params.query;
+
+    return withApmSpan(
+      'get_correlations_field_value_stats',
+      async () =>
+        await fetchFieldValueFieldStats(
+          esClient,
+          {
+            ...params,
+            index: indices.transaction,
+          },
+          { fieldName, fieldValue }
+        )
+    );
+  },
+});
+
 const fieldValuePairsRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/correlations/field_value_pairs',
   params: t.type({
@@ -130,7 +186,14 @@ const fieldValuePairsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    fieldValuePairs: Array<
+      import('./../../../common/correlations/types').FieldValuePair
+    >;
+    errors: any[];
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -179,7 +242,15 @@ const significantCorrelationsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    latencyCorrelations: Array<
+      import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation
+    >;
+    ccsWarning: boolean;
+    totalDocCount: number;
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -225,7 +296,14 @@ const pValuesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    failedTransactionsCorrelations: Array<
+      import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation
+    >;
+    ccsWarning: boolean;
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -248,9 +326,11 @@ const pValuesRoute = createApmServerRoute({
   },
 });
 
-export const correlationsRouteRepository = createApmServerRouteRepository()
-  .add(pValuesRoute)
-  .add(fieldCandidatesRoute)
-  .add(fieldStatsRoute)
-  .add(fieldValuePairsRoute)
-  .add(significantCorrelationsRoute);
+export const correlationsRouteRepository = {
+  ...pValuesRoute,
+  ...fieldCandidatesRoute,
+  ...fieldStatsRoute,
+  ...fieldValueStatsRoute,
+  ...fieldValuePairsRoute,
+  ...significantCorrelationsRoute,
+};

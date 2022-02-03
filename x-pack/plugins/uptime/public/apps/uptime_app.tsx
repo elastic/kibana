@@ -120,6 +120,7 @@ const Application = (props: UptimeAppProps) => {
                 inspector: startPlugins.inspector,
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
+                cases: startPlugins.cases,
               }}
             >
               <Router history={appMountParameters.history}>
@@ -137,7 +138,10 @@ const Application = (props: UptimeAppProps) => {
                                 <InspectorContextProvider>
                                   <UptimeAlertsFlyoutWrapper />
                                   <PageRouter config={config} />
-                                  <ActionMenu appMountParameters={appMountParameters} />
+                                  <ActionMenu
+                                    appMountParameters={appMountParameters}
+                                    config={config}
+                                  />
                                 </InspectorContextProvider>
                               </RedirectAppLinks>
                             </div>

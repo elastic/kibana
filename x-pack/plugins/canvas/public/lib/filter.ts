@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { flowRight, groupBy } from 'lodash';
+import { Ast, AstFunction, fromExpression, toExpression } from '@kbn/interpreter';
+import { flowRight, get, groupBy } from 'lodash';
 import {
   Filter as FilterType,
   FilterField,
   FilterViewInstance,
   FlattenFilterViewInstance,
 } from '../../types/filters';
+
+const SELECT_FILTER = 'selectFilter';
+const FILTERS = 'filters';
+const REMOVE_FILTER = 'removeFilter';
+
+const includeFiltersExpressions = [FILTERS, SELECT_FILTER];
+const excludeFiltersExpressions = [REMOVE_FILTER];
+const filtersExpressions = [...includeFiltersExpressions, ...excludeFiltersExpressions];
 
 export const defaultFormatter = (value: unknown) => (value || null ? `${value}` : '-');
 
@@ -52,4 +61,75 @@ export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField)
     name: groupedFilters[key]?.[0]?.[groupByField] ? key : null,
     filters: groupedFilters[key],
   }));
+};
+
+const excludeFiltersByGroups = (filters: Ast[], filterExprAst: AstFunction) => {
+  const groupsToExclude = filterExprAst.arguments.group ?? [];
+  const removeUngrouped = filterExprAst.arguments.ungrouped?.[0] ?? false;
+  return filters.filter((filter) => {
+    const groups: string[] = get(filter, 'chain[0].arguments.filterGroup', []).filter(
+      (group: string) => group !== ''
+    );
+    const noNeedToExcludeByGroup = !(
+      groups.length &&
+      groupsToExclude.length &&
+      groupsToExclude.includes(groups[0])
+    );
+
+    const noNeedToExcludeByUngrouped = (removeUngrouped && groups.length) || !removeUngrouped;
+    const excludeAllFilters = !groupsToExclude.length && !removeUngrouped;
+
+    return !excludeAllFilters && noNeedToExcludeByUngrouped && noNeedToExcludeByGroup;
+  });
+};
+
+const includeFiltersByGroups = (
+  filters: Ast[],
+  filterExprAst: AstFunction,
+  ignoreUngroupedIfGroups: boolean = false
+) => {
+  const groupsToInclude = filterExprAst.arguments.group ?? [];
+  const includeOnlyUngrouped = filterExprAst.arguments.ungrouped?.[0] ?? false;
+  return filters.filter((filter) => {
+    const groups: string[] = get(filter, 'chain[0].arguments.filterGroup', []).filter(
+      (group: string) => group !== ''
+    );
+    const needToIncludeByGroup =
+      groups.length && groupsToInclude.length && groupsToInclude.includes(groups[0]);
+
+    const needToIncludeByUngrouped =
+      includeOnlyUngrouped &&
+      !groups.length &&
+      (ignoreUngroupedIfGroups ? !groupsToInclude.length : true);
+
+    const allowAll = !groupsToInclude.length && !includeOnlyUngrouped;
+    return needToIncludeByUngrouped || needToIncludeByGroup || allowAll;
+  });
+};
+
+export const getFiltersByFilterExpressions = (
+  filters: string[],
+  filterExprsAsts: AstFunction[]
+) => {
+  const filtersAst = filters.map((filter) => fromExpression(filter));
+  const matchedFiltersAst = filterExprsAsts.reduce((includedFilters, filter) => {
+    if (excludeFiltersExpressions.includes(filter.function)) {
+      return excludeFiltersByGroups(includedFilters, filter);
+    }
+    const isFiltersExpr = filter.function === FILTERS;
+    const filtersToInclude = isFiltersExpr ? filtersAst : includedFilters;
+    return includeFiltersByGroups(filtersToInclude, filter, isFiltersExpr);
+  }, filtersAst);
+
+  return matchedFiltersAst.map((ast) => toExpression(ast));
+};
+
+export const getFiltersExprsFromExpression = (expr: string) => {
+  const ast = fromExpression(expr);
+  return ast.chain.filter((expression) => filtersExpressions.includes(expression.function));
+};
+
+export const isExpressionWithFilters = (expr: string) => {
+  const ast = fromExpression(expr);
+  return ast.chain.some((expression) => filtersExpressions.includes(expression.function));
 };

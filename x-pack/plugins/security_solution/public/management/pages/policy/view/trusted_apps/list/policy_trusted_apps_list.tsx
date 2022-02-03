@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiText, Pagination, EuiPageTemplate } from '@elastic/eui';
+import { EuiSpacer, EuiText, Pagination } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,9 +14,8 @@ import {
   ArtifactCardGridCardComponentProps,
   ArtifactCardGridProps,
 } from '../../../../../components/artifact_card_grid';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { usePolicyDetailsSelector, usePolicyDetailsNavigateCallback } from '../../policy_hooks';
 import {
-  doesPolicyHaveTrustedApps,
   getCurrentArtifactsLocation,
   getPolicyTrustedAppList,
   getPolicyTrustedAppListError,
@@ -24,7 +23,7 @@ import {
   getTrustedAppsAllPoliciesById,
   isPolicyTrustedAppListLoading,
   policyIdFromParams,
-  doesTrustedAppExistsLoading,
+  getCurrentPolicyArtifactsFilter,
 } from '../../../store/policy_details/selectors';
 import {
   getPolicyDetailPath,
@@ -34,11 +33,12 @@ import {
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
 import { useAppUrl, useToasts } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
+import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
@@ -52,16 +52,16 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
     const toasts = useToasts();
     const history = useHistory();
     const { getAppUrl } = useAppUrl();
-    const { isPlatinumPlus } = useEndpointPrivileges();
+    const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const policyId = usePolicyDetailsSelector(policyIdFromParams);
-    const hasTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
     const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
-    const isTrustedAppExistsCheckLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
+    const defaultFilter = usePolicyDetailsSelector(getCurrentPolicyArtifactsFilter);
     const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
     const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
     const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
     const allPoliciesById = usePolicyDetailsSelector(getTrustedAppsAllPoliciesById);
     const trustedAppsApiError = usePolicyDetailsSelector(getPolicyTrustedAppListError);
+    const navigateCallback = usePolicyDetailsNavigateCallback();
 
     const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
     const [trustedAppsForRemoval, setTrustedAppsForRemoval] = useState<typeof trustedAppItems>([]);
@@ -158,7 +158,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
         ];
         const thisTrustedAppCardProps: ArtifactCardGridCardComponentProps = {
           expanded: Boolean(isCardExpanded[trustedApp.id]),
-          actions: isPlatinumPlus
+          actions: canCreateArtifactsByPolicy
             ? [
                 ...fullDetailsAction,
                 {
@@ -194,7 +194,14 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
       }
 
       return newCardProps;
-    }, [allPoliciesById, getAppUrl, getTestId, isCardExpanded, trustedAppItems, isPlatinumPlus]);
+    }, [
+      allPoliciesById,
+      getAppUrl,
+      getTestId,
+      isCardExpanded,
+      trustedAppItems,
+      canCreateArtifactsByPolicy,
+    ]);
 
     const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
       (item) => {
@@ -227,20 +234,22 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
       }
     }, [toasts, trustedAppsApiError]);
 
-    if (hasTrustedApps.loading || isTrustedAppExistsCheckLoading) {
-      return (
-        <EuiPageTemplate template="centeredContent">
-          <EuiLoadingSpinner
-            className="essentialAnimation"
-            size="xl"
-            data-test-subj={getTestId('loading')}
-          />
-        </EuiPageTemplate>
-      );
-    }
-
     return (
       <>
+        <SearchExceptions
+          placeholder={i18n.translate(
+            'xpack.securitySolution.endpoint.olicy.trustedApps.layout.search.placeholder',
+            {
+              defaultMessage: 'Search on the fields below: name, description, value',
+            }
+          )}
+          defaultValue={defaultFilter}
+          hideRefreshButton
+          onSearch={(filter) => {
+            navigateCallback({ filter });
+          }}
+        />
+        <EuiSpacer size="s" />
         {!hideTotalShowingLabel && (
           <EuiText color="subdued" size="xs" data-test-subj="policyDetailsTrustedAppsCount">
             {totalItemsCountLabel}

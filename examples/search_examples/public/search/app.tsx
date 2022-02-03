@@ -41,12 +41,12 @@ import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
-  IndexPattern,
-  IndexPatternField,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
+import type { DataViewField, DataView } from '../../../../src/plugins/data_views/public';
 import { IMyStrategyResponse } from '../../common/types';
+import { AbortError } from '../../../../src/plugins/kibana_utils/common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
@@ -55,22 +55,22 @@ interface SearchExamplesAppDeps {
   data: DataPublicPluginStart;
 }
 
-function getNumeric(fields?: IndexPatternField[]) {
+function getNumeric(fields?: DataViewField[]) {
   if (!fields) return [];
   return fields?.filter((f) => f.type === 'number' && f.aggregatable);
 }
 
-function getAggregatableStrings(fields?: IndexPatternField[]) {
+function getAggregatableStrings(fields?: DataViewField[]) {
   if (!fields) return [];
   return fields?.filter((f) => f.type === 'string' && f.aggregatable);
 }
 
-function formatFieldToComboBox(field?: IndexPatternField | null) {
+function formatFieldToComboBox(field?: DataViewField | null) {
   if (!field) return [];
   return formatFieldsToComboBox([field]);
 }
 
-function formatFieldsToComboBox(fields?: IndexPatternField[]) {
+function formatFieldsToComboBox(fields?: DataViewField[]) {
   if (!fields) return [];
 
   return fields?.map((field) => {
@@ -92,16 +92,18 @@ export const SearchExamplesApp = ({
   const [timeTook, setTimeTook] = useState<number | undefined>();
   const [total, setTotal] = useState<number>(100);
   const [loaded, setLoaded] = useState<number>(0);
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
-  const [fields, setFields] = useState<IndexPatternField[]>();
-  const [selectedFields, setSelectedFields] = useState<IndexPatternField[]>([]);
+  const [dataView, setDataView] = useState<DataView | null>();
+  const [fields, setFields] = useState<DataViewField[]>();
+  const [selectedFields, setSelectedFields] = useState<DataViewField[]>([]);
   const [selectedNumericField, setSelectedNumericField] = useState<
-    IndexPatternField | null | undefined
+    DataViewField | null | undefined
   >();
   const [selectedBucketField, setSelectedBucketField] = useState<
-    IndexPatternField | null | undefined
+    DataViewField | null | undefined
   >();
   const [request, setRequest] = useState<Record<string, any>>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -112,20 +114,20 @@ export const SearchExamplesApp = ({
     setTimeTook(response.rawResponse.took);
   }
 
-  // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
+  // Fetch the default data view using the `data.dataViews` service, as the component is mounted.
   useEffect(() => {
-    const setDefaultIndexPattern = async () => {
-      const defaultIndexPattern = await data.indexPatterns.getDefault();
-      setIndexPattern(defaultIndexPattern);
+    const setDefaultDataView = async () => {
+      const defaultDataView = await data.dataViews.getDefault();
+      setDataView(defaultDataView);
     };
 
-    setDefaultIndexPattern();
+    setDefaultDataView();
   }, [data]);
 
-  // Update the fields list every time the index pattern is modified.
+  // Update the fields list every time the data view is modified.
   useEffect(() => {
-    setFields(indexPattern?.fields);
-  }, [indexPattern]);
+    setFields(dataView?.fields);
+  }, [dataView]);
   useEffect(() => {
     setSelectedBucketField(fields?.length ? getAggregatableStrings(fields)[0] : null);
     setSelectedNumericField(fields?.length ? getNumeric(fields)[0] : null);
@@ -137,10 +139,10 @@ export const SearchExamplesApp = ({
     addWarning: boolean = false,
     addError: boolean = false
   ) => {
-    if (!indexPattern || !selectedNumericField) return;
+    if (!dataView || !selectedNumericField) return;
 
     // Construct the query portion of the search request
-    const query = data.query.getEsQuery(indexPattern);
+    const query = data.query.getEsQuery(dataView);
 
     if (addWarning) {
       query.bool.must.push({
@@ -148,7 +150,7 @@ export const SearchExamplesApp = ({
         error_query: {
           indices: [
             {
-              name: indexPattern.title,
+              name: dataView.title,
               error_type: 'warning',
               message: 'Watch out!',
             },
@@ -162,7 +164,7 @@ export const SearchExamplesApp = ({
         error_query: {
           indices: [
             {
-              name: indexPattern.title,
+              name: dataView.title,
               error_type: 'exception',
               message: 'Watch out!',
             },
@@ -173,11 +175,11 @@ export const SearchExamplesApp = ({
 
     // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
     const aggs = [{ type: 'avg', params: { field: selectedNumericField!.name } }];
-    const aggsDsl = data.search.aggs.createAggConfigs(indexPattern, aggs).toDsl();
+    const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
 
     const req = {
       params: {
-        index: indexPattern.title,
+        index: dataView.title,
         body: {
           aggs: aggsDsl,
           query,
@@ -187,16 +189,23 @@ export const SearchExamplesApp = ({
       ...(strategy ? { get_cool: getCool } : {}),
     };
 
+    const abortController = new AbortController();
+    setAbortController(abortController);
+
     // Submit the search request using the `data.search` service.
     setRequest(req.params.body);
-    const searchSubscription$ = data.search
+    setIsLoading(true);
+
+    data.search
       .search(req, {
         strategy,
         sessionId,
+        abortSignal: abortController.signal,
       })
       .subscribe({
         next: (res) => {
           if (isCompleteResponse(res)) {
+            setIsLoading(false);
             setResponse(res);
             const avgResult: number | undefined = res.rawResponse.aggregations
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
@@ -226,7 +235,6 @@ export const SearchExamplesApp = ({
                 toastLifeTimeMs: 300000,
               }
             );
-            searchSubscription$.unsubscribe();
             if (res.warning) {
               notifications.toasts.addWarning({
                 title: 'Warning',
@@ -236,24 +244,30 @@ export const SearchExamplesApp = ({
           } else if (isErrorResponse(res)) {
             // TODO: Make response error status clearer
             notifications.toasts.addDanger('An error has occurred');
-            searchSubscription$.unsubscribe();
           }
         },
         error: (e) => {
-          notifications.toasts.addDanger({
-            title: 'Failed to run search',
-            text: e.message,
-          });
+          setIsLoading(false);
+          if (e instanceof AbortError) {
+            notifications.toasts.addWarning({
+              title: e.message,
+            });
+          } else {
+            notifications.toasts.addDanger({
+              title: 'Failed to run search',
+              text: e.message,
+            });
+          }
         },
       });
   };
 
   const doSearchSourceSearch = async (otherBucket: boolean) => {
-    if (!indexPattern) return;
+    if (!dataView) return;
 
     const query = data.query.queryString.getQuery();
     const filters = data.query.filterManager.getFilters();
-    const timefilter = data.query.timefilter.timefilter.createFilter(indexPattern);
+    const timefilter = data.query.timefilter.timefilter.createFilter(dataView);
     if (timefilter) {
       filters.push(timefilter);
     }
@@ -262,7 +276,7 @@ export const SearchExamplesApp = ({
       const searchSource = await data.search.searchSource.create();
 
       searchSource
-        .setField('index', indexPattern)
+        .setField('index', dataView)
         .setField('filter', filters)
         .setField('query', query)
         .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : [''])
@@ -281,12 +295,17 @@ export const SearchExamplesApp = ({
         aggDef.push({ type: 'avg', params: { field: selectedNumericField.name } });
       }
       if (aggDef.length > 0) {
-        const ac = data.search.aggs.createAggConfigs(indexPattern, aggDef);
+        const ac = data.search.aggs.createAggConfigs(dataView, aggDef);
         searchSource.setField('aggs', ac);
       }
 
       setRequest(searchSource.getSearchRequestBody());
-      const { rawResponse: res } = await searchSource.fetch$().toPromise();
+      const abortController = new AbortController();
+      setAbortController(abortController);
+      setIsLoading(true);
+      const { rawResponse: res } = await searchSource
+        .fetch$({ abortSignal: abortController.signal })
+        .toPromise();
       setRawResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
@@ -301,7 +320,18 @@ export const SearchExamplesApp = ({
       );
     } catch (e) {
       setRawResponse(e.body);
-      notifications.toasts.addWarning(`An error has occurred: ${e.message}`);
+      if (e instanceof AbortError) {
+        notifications.toasts.addWarning({
+          title: e.message,
+        });
+      } else {
+        notifications.toasts.addDanger({
+          title: 'Failed to run search',
+          text: e.message,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -329,32 +359,44 @@ export const SearchExamplesApp = ({
       },
     };
 
+    const abortController = new AbortController();
+    setAbortController(abortController);
+
     // Submit the search request using the `data.search` service.
     setRequest(req.params);
-    const searchSubscription$ = data.search
+    setIsLoading(true);
+    data.search
       .search(req, {
         strategy: 'fibonacciStrategy',
+        abortSignal: abortController.signal,
       })
       .subscribe({
         next: (res) => {
           setResponse(res);
           if (isCompleteResponse(res)) {
+            setIsLoading(false);
             notifications.toasts.addSuccess({
               title: 'Query result',
               text: 'Query finished',
             });
-            searchSubscription$.unsubscribe();
           } else if (isErrorResponse(res)) {
+            setIsLoading(false);
             // TODO: Make response error status clearer
             notifications.toasts.addWarning('An error has occurred');
-            searchSubscription$.unsubscribe();
           }
         },
         error: (e) => {
-          notifications.toasts.addDanger({
-            title: 'Failed to run search',
-            text: e.message,
-          });
+          setIsLoading(false);
+          if (e instanceof AbortError) {
+            notifications.toasts.addWarning({
+              title: e.message,
+            });
+          } else {
+            notifications.toasts.addDanger({
+              title: 'Failed to run search',
+              text: e.message,
+            });
+          }
         },
       });
   };
@@ -364,18 +406,33 @@ export const SearchExamplesApp = ({
   };
 
   const onServerClickHandler = async () => {
-    if (!indexPattern || !selectedNumericField) return;
+    if (!dataView || !selectedNumericField) return;
+    const abortController = new AbortController();
+    setAbortController(abortController);
+    setIsLoading(true);
     try {
       const res = await http.get(SERVER_SEARCH_ROUTE_PATH, {
         query: {
-          index: indexPattern.title,
+          index: dataView.title,
           field: selectedNumericField!.name,
         },
+        signal: abortController.signal,
       });
 
       notifications.toasts.addSuccess(`Server returned ${JSON.stringify(res)}`);
     } catch (e) {
-      notifications.toasts.addDanger('Failed to run search');
+      if (e?.name === 'AbortError') {
+        notifications.toasts.addWarning({
+          title: e.message,
+        });
+      } else {
+        notifications.toasts.addDanger({
+          title: 'Failed to run search',
+          text: e.message,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -452,22 +509,26 @@ export const SearchExamplesApp = ({
             appName={PLUGIN_ID}
             showSearchBar={true}
             useDefaultBehaviors={true}
-            indexPatterns={indexPattern ? [indexPattern] : undefined}
+            indexPatterns={dataView ? [dataView] : undefined}
           />
           <EuiFlexGrid columns={4}>
             <EuiFlexItem>
-              <EuiFormLabel>Index Pattern</EuiFormLabel>
+              <EuiFormLabel>Data view</EuiFormLabel>
               <IndexPatternSelect
-                placeholder={i18n.translate('searchSessionExample.selectIndexPatternPlaceholder', {
-                  defaultMessage: 'Select index pattern',
+                placeholder={i18n.translate('searchSessionExample.selectDataViewPlaceholder', {
+                  defaultMessage: 'Select data view',
                 })}
-                indexPatternId={indexPattern?.id || ''}
-                onChange={async (newIndexPatternId: any) => {
-                  const newIndexPattern = await data.indexPatterns.get(newIndexPatternId);
-                  setIndexPattern(newIndexPattern);
+                indexPatternId={dataView?.id || ''}
+                onChange={async (dataViewId?: string) => {
+                  if (dataViewId) {
+                    const newDataView = await data.dataViews.get(dataViewId);
+                    setDataView(newDataView);
+                  } else {
+                    setDataView(undefined);
+                  }
                 }}
                 isClearable={false}
-                data-test-subj="indexPatternSelector"
+                data-test-subj="dataViewSelector"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -478,7 +539,7 @@ export const SearchExamplesApp = ({
                 singleSelection={true}
                 onChange={(option) => {
                   if (option.length) {
-                    const fld = indexPattern?.getFieldByName(option[0].label);
+                    const fld = dataView?.getFieldByName(option[0].label);
                     setSelectedBucketField(fld || null);
                   } else {
                     setSelectedBucketField(null);
@@ -496,7 +557,7 @@ export const SearchExamplesApp = ({
                 singleSelection={true}
                 onChange={(option) => {
                   if (option.length) {
-                    const fld = indexPattern?.getFieldByName(option[0].label);
+                    const fld = dataView?.getFieldByName(option[0].label);
                     setSelectedNumericField(fld || null);
                   } else {
                     setSelectedNumericField(null);
@@ -514,9 +575,9 @@ export const SearchExamplesApp = ({
                 singleSelection={false}
                 onChange={(option) => {
                   const flds = option
-                    .map((opt) => indexPattern?.getFieldByName(opt?.label))
+                    .map((opt) => dataView?.getFieldByName(opt?.label))
                     .filter((f) => f);
-                  setSelectedFields(flds.length ? (flds as IndexPatternField[]) : []);
+                  setSelectedFields(flds.length ? (flds as DataViewField[]) : []);
                 }}
                 sortMatchesBy="startsWith"
               />
@@ -532,9 +593,8 @@ export const SearchExamplesApp = ({
               </EuiTitle>
               <EuiText>
                 If you want to fetch data from Elasticsearch, you can use the different services
-                provided by the <EuiCode>data</EuiCode> plugin. These help you get the index pattern
-                and search bar configuration, format them into a DSL query and send it to
-                Elasticsearch.
+                provided by the <EuiCode>data</EuiCode> plugin. These help you get the data view and
+                search bar configuration, format them into a DSL query and send it to Elasticsearch.
                 <EuiSpacer />
                 <EuiButtonEmpty size="xs" onClick={onClickHandler} iconType="play">
                   <FormattedMessage
@@ -721,6 +781,11 @@ export const SearchExamplesApp = ({
                 strategy. This request does not take the configuration of{' '}
                 <EuiCode>TopNavMenu</EuiCode> into account, but you could pass those down to the
                 server as well.
+                <br />
+                When executing search on the server, make sure to cancel the search in case user
+                cancels corresponding network request. This could happen in case user re-runs a
+                query or leaves the page without waiting for the result. Cancellation API is similar
+                on client and server and use `AbortController`.
                 <EuiSpacer />
                 <EuiButtonEmpty size="xs" onClick={onServerClickHandler} iconType="play">
                   <FormattedMessage
@@ -737,6 +802,15 @@ export const SearchExamplesApp = ({
                 selectedTab={reqTabs[selectedTab]}
                 onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
               />
+              <EuiSpacer />
+              {currentAbortController && isLoading && (
+                <EuiButtonEmpty size="xs" onClick={() => currentAbortController?.abort()}>
+                  <FormattedMessage
+                    id="searchExamples.abortButtonText"
+                    defaultMessage="Abort request"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiPageContentBody>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isUrlInvalid } from '.';
+import { isUrlInvalid, hasValueToDisplay } from '.';
 
 describe('helpers', () => {
   describe('isUrlInvalid', () => {
@@ -47,6 +47,20 @@ describe('helpers', () => {
 
     test('should verify as invalid url without //', () => {
       expect(isUrlInvalid('http:www.thisIsNotValid.com/foo')).toBeTruthy();
+    });
+  });
+
+  describe('hasValueToDisplay', () => {
+    test('identifies valid values', () => {
+      expect(hasValueToDisplay('test')).toBeTruthy();
+      expect(hasValueToDisplay(0)).toBeTruthy();
+      expect(hasValueToDisplay(100)).toBeTruthy();
+    });
+
+    test('identifies empty/invalid values', () => {
+      expect(hasValueToDisplay('')).toBeFalsy();
+      expect(hasValueToDisplay(null)).toBeFalsy();
+      expect(hasValueToDisplay(undefined)).toBeFalsy();
     });
   });
 });

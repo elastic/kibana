@@ -10,16 +10,16 @@ import { mount } from 'enzyme';
 import { EnrichmentButtonContent } from './enrichment_button_content';
 
 describe('EnrichmentButtonContent', () => {
-  it('renders string with provider if provider is present', () => {
+  it('renders string with feedName if feedName is present', () => {
     const wrapper = mount(
-      <EnrichmentButtonContent field={'source.ip'} value={'127.0.0.1'} provider={'eceintel'} />
+      <EnrichmentButtonContent field={'source.ip'} value={'127.0.0.1'} feedName={'eceintel'} />
     );
     expect(wrapper.find('[data-test-subj="enrichment-button-content"]').hostNodes().text()).toEqual(
       'source.ip 127.0.0.1 from eceintel'
     );
   });
 
-  it('renders string without provider if provider is not present', () => {
+  it('renders string without feedName if feedName is not present', () => {
     const wrapper = mount(<EnrichmentButtonContent field={'source.ip'} value={'127.0.0.1'} />);
     expect(wrapper.find('[data-test-subj="enrichment-button-content"]').hostNodes().text()).toEqual(
       'source.ip 127.0.0.1'

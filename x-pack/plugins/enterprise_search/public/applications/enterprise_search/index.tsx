@@ -27,10 +27,10 @@ export const EnterpriseSearch: React.FC<InitialAppData> = ({
   enterpriseSearchVersion,
   kibanaVersion,
 }) => {
-  const { errorConnecting } = useValues(HttpLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
   const { config } = useValues(KibanaLogic);
 
-  const showErrorConnecting = !!(config.host && errorConnecting);
+  const showErrorConnecting = !!(config.host && errorConnectingMessage);
   const incompatibleVersions = !!(
     config.host && isVersionMismatch(enterpriseSearchVersion, kibanaVersion)
   );

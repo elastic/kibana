@@ -18,18 +18,17 @@ const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
 export const getCreateCaseFlyoutLazy = ({
   owner,
   userCanCrud,
+  features,
   afterCaseCreated,
   onClose,
   onSuccess,
-  disableAlerts,
 }: GetCreateCaseFlyoutProps) => (
-  <CasesProvider value={{ owner, userCanCrud }}>
+  <CasesProvider value={{ owner, userCanCrud, features }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CreateCaseFlyoutLazy
         afterCaseCreated={afterCaseCreated}
         onClose={onClose}
         onSuccess={onSuccess}
-        disableAlerts={disableAlerts}
       />
     </Suspense>
   </CasesProvider>

@@ -22,7 +22,7 @@ export function registerRefreshRoute({ router, lib: { handleEsError } }: RouteDe
       const { indices = [] } = request.body as typeof bodySchema.type;
 
       const params = {
-        expand_wildcards: 'none',
+        expand_wildcards: 'none' as const,
         format: 'json',
         index: indices,
       };

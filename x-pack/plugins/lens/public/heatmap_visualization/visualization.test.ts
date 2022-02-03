@@ -41,6 +41,8 @@ function exampleState(): HeatmapVisualizationState {
       isCellLabelVisible: false,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: true,
+      isXAxisTitleVisible: true,
     },
     shape: CHART_SHAPES.HEATMAP,
   };
@@ -68,13 +70,14 @@ describe('heatmap', () => {
           position: Position.Right,
           type: LEGEND_FUNCTION,
           maxLines: 1,
-          shouldTruncate: true,
         },
         gridConfig: {
           type: HEATMAP_GRID_FUNCTION,
           isCellLabelVisible: false,
           isYAxisLabelVisible: true,
           isXAxisLabelVisible: true,
+          isYAxisTitleVisible: true,
+          isXAxisTitleVisible: true,
         },
       });
     });
@@ -154,10 +157,7 @@ describe('heatmap', () => {
               {
                 columnId: 'v-accessor',
                 triggerIcon: 'colorBy',
-                palette: [
-                  { color: 'blue', stop: 100 },
-                  { color: 'yellow', stop: 350 },
-                ],
+                palette: ['blue', 'yellow'],
               },
             ],
             filterOperations: isCellValueSupported,
@@ -377,15 +377,12 @@ describe('heatmap', () => {
         xAccessor: 'x-accessor',
         valueAccessor: 'value-accessor',
       };
-      const attributes = {
-        title: 'Test',
-      };
 
       expect(
         getHeatmapVisualization({
           paletteService,
           theme,
-        }).toExpression(state, datasourceLayers, attributes)
+        }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
         chain: [
@@ -393,8 +390,6 @@ describe('heatmap', () => {
             type: 'function',
             function: FUNCTION_NAME,
             arguments: {
-              title: ['Test'],
-              description: [''],
               xAccessor: ['x-accessor'],
               yAccessor: [''],
               valueAccessor: ['value-accessor'],
@@ -412,6 +407,7 @@ describe('heatmap', () => {
                   ],
                 },
               ],
+              lastRangeIsRightOpen: [true],
               legend: [
                 {
                   type: 'expression',
@@ -438,16 +434,16 @@ describe('heatmap', () => {
                         // grid
                         strokeWidth: [],
                         strokeColor: [],
-                        cellHeight: [],
-                        cellWidth: [],
+                        xTitle: [],
+                        yTitle: [],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [true],
-                        yAxisLabelWidth: [],
-                        yAxisLabelColor: [],
+                        isYAxisTitleVisible: [true],
                         // X-axis
                         isXAxisLabelVisible: [true],
+                        isXAxisTitleVisible: [true],
                       },
                     },
                   ],
@@ -513,8 +509,6 @@ describe('heatmap', () => {
             type: 'function',
             function: FUNCTION_NAME,
             arguments: {
-              title: [''],
-              description: [''],
               xAccessor: ['x-accessor'],
               yAccessor: [''],
               valueAccessor: [''],
@@ -561,8 +555,12 @@ describe('heatmap', () => {
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [false],
+                        isYAxisTitleVisible: [true],
                         // X-axis
                         isXAxisLabelVisible: [false],
+                        isXAxisTitleVisible: [true],
+                        xTitle: [''],
+                        yTitle: [''],
                       },
                     },
                   ],

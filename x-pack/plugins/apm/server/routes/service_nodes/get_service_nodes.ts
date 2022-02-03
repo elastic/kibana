@@ -109,7 +109,7 @@ const getServiceNodes = async ({
       name: bucket.key as string,
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.value,
-      hostName: bucket.latest.top?.[0]?.metrics?.['host.hostname'] as
+      hostName: bucket.latest.top?.[0]?.metrics?.[HOST_NAME] as
         | string
         | null
         | undefined,

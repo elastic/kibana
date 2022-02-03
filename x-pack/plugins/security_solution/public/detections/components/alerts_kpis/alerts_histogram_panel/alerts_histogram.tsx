@@ -16,10 +16,10 @@ import {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { isEmpty } from 'lodash/fp';
 
 import { useTheme, UpdateDateRange, ChartData } from '../../../../common/components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
+import { hasValueToDisplay } from '../../../../common/utils/validators';
 import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
 import { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { EMPTY_VALUE_LABEL } from '../../../../common/components/charts/translation';
@@ -59,7 +59,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     const id = 'alertsHistogram';
     const yAccessors = useMemo(() => ['y'], []);
     const splitSeriesAccessors = useMemo(
-      () => [(datum: ChartData) => (isEmpty(datum.g) ? EMPTY_VALUE_LABEL : datum.g)],
+      () => [(datum: ChartData) => (hasValueToDisplay(datum.g) ? datum.g : EMPTY_VALUE_LABEL)],
       []
     );
     const tickFormat = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);

@@ -8,7 +8,7 @@
 import { SimpleSavedObject } from 'src/core/public';
 import { FontawesomeIcon } from '../helpers/style_choices';
 import { OutlinkEncoder } from '../helpers/outlink_encoders';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
+import type { IndexPattern } from '../../../../../src/plugins/data/public';
 
 export interface UrlTemplate {
   url: string;

@@ -11,7 +11,7 @@ import { Logger, SavedObjectReference } from 'src/core/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoContainmentExecutor } from './geo_containment';
 import {
-  AlertType,
+  RuleType,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -147,7 +147,7 @@ export interface GeoContainmentInstanceContext extends AlertInstanceContext {
   containingBoundaryName: unknown;
 }
 
-export type GeoContainmentAlertType = AlertType<
+export type GeoContainmentAlertType = RuleType<
   GeoContainmentParams,
   GeoContainmentExtractedParams,
   GeoContainmentState,

@@ -25,10 +25,12 @@ describe('<FollowerIndicesList />', () => {
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
+    jest.useFakeTimers();
     ({ server, httpRequestsMockHelpers } = setupEnvironment());
   });
 
   afterAll(() => {
+    jest.useRealTimers();
     server.restore();
   });
 
@@ -39,12 +41,14 @@ describe('<FollowerIndicesList />', () => {
 
   describe('on component mount', () => {
     let exists;
+    let component;
 
     beforeEach(async () => {
-      ({ exists } = setup());
+      ({ exists, component } = await setup());
+      component.update();
     });
 
-    test('should show a loading indicator on component', async () => {
+    test('should show a loading indicator on component', () => {
       expect(exists('sectionLoading')).toBe(true);
     });
   });
@@ -55,17 +59,17 @@ describe('<FollowerIndicesList />', () => {
 
     beforeEach(async () => {
       await act(async () => {
-        ({ exists, component } = setup());
+        ({ exists, component } = await setup());
       });
 
       component.update();
     });
 
-    test('should display an empty prompt', async () => {
+    test('should display an empty prompt', () => {
       expect(exists('emptyPrompt')).toBe(true);
     });
 
-    test('should have a button to create a follower index', async () => {
+    test('should have a button to create a follower index', () => {
       expect(exists('emptyPrompt.createFollowerIndexButton')).toBe(true);
     });
   });
@@ -94,7 +98,7 @@ describe('<FollowerIndicesList />', () => {
       httpRequestsMockHelpers.setLoadFollowerIndicesResponse({ indices: followerIndices });
 
       await act(async () => {
-        ({ component, table, actions, form } = setup());
+        ({ component, table, actions, form } = await setup());
       });
 
       component.update();
@@ -137,7 +141,7 @@ describe('<FollowerIndicesList />', () => {
 
       // Mount the component
       await act(async () => {
-        ({ find, exists, component, table, actions } = setup());
+        ({ find, exists, component, table, actions } = await setup());
       });
 
       component.update();
@@ -314,8 +318,7 @@ describe('<FollowerIndicesList />', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/100951
-    describe.skip('detail panel', () => {
+    describe('detail panel', () => {
       test('should open a detail panel when clicking on a follower index', async () => {
         expect(exists('followerIndexDetail')).toBe(false);
 

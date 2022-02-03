@@ -9,6 +9,8 @@ import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { ElasticsearchClient } from 'kibana/server';
 
+import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
+
 import * as Registry from '../registry';
 
 import { sendTelemetryEvents } from '../../upgrade_sender';
@@ -26,6 +28,9 @@ jest.mock('../../app_context', () => {
         return { error: jest.fn(), debug: jest.fn(), warn: jest.fn() };
       }),
       getTelemetryEventsSender: jest.fn(),
+      getSavedObjects: jest.fn(() => ({
+        createImporter: jest.fn(),
+      })),
     },
   };
 });
@@ -72,6 +77,7 @@ describe('install', () => {
   describe('registry', () => {
     it('should send telemetry on install failure, out of date', async () => {
       await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.1.0',
         savedObjectsClient: savedObjectsClientMock.create(),
@@ -93,6 +99,7 @@ describe('install', () => {
     it('should send telemetry on install failure, license error', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
       await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.3.0',
         savedObjectsClient: savedObjectsClientMock.create(),
@@ -114,6 +121,7 @@ describe('install', () => {
     it('should send telemetry on install success', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.3.0',
         savedObjectsClient: savedObjectsClientMock.create(),
@@ -137,6 +145,7 @@ describe('install', () => {
         .mockImplementationOnce(() => Promise.resolve({ attributes: { version: '1.2.0' } } as any));
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.3.0',
         savedObjectsClient: savedObjectsClientMock.create(),
@@ -160,6 +169,7 @@ describe('install', () => {
         .mockImplementation(() => Promise.reject(new Error('error')));
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.3.0',
         savedObjectsClient: savedObjectsClientMock.create(),
@@ -180,11 +190,13 @@ describe('install', () => {
   });
 
   describe('upload', () => {
-    it('should send telemetry on install failure', async () => {
+    it('should send telemetry on update', async () => {
       jest
         .spyOn(obj, 'getInstallationObject')
         .mockImplementationOnce(() => Promise.resolve({ attributes: { version: '1.2.0' } } as any));
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
         installSource: 'upload',
         archiveBuffer: {} as Buffer,
         contentType: '',
@@ -195,18 +207,17 @@ describe('install', () => {
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
         currentVersion: '1.2.0',
         dryRun: false,
-        errorMessage:
-          'Package upload only supports fresh installations. Package apache is already installed, please uninstall first.',
         eventType: 'package-install',
         installType: 'update',
         newVersion: '1.3.0',
         packageName: 'apache',
-        status: 'failure',
+        status: 'success',
       });
     });
 
     it('should send telemetry on install success', async () => {
       await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
         installSource: 'upload',
         archiveBuffer: {} as Buffer,
         contentType: '',
@@ -230,6 +241,7 @@ describe('install', () => {
         .spyOn(install, '_installPackage')
         .mockImplementation(() => Promise.reject(new Error('error')));
       await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
         installSource: 'upload',
         archiveBuffer: {} as Buffer,
         contentType: '',

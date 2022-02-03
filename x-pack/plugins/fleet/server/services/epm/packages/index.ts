@@ -7,7 +7,7 @@
 
 import type { SavedObject } from 'src/core/server';
 
-import { unremovablePackages, installationStatuses } from '../../../../common';
+import { installationStatuses, KibanaSavedObjectType } from '../../../../common';
 import { KibanaAssetType } from '../../../types';
 import type { AssetType, Installable, Installation } from '../../../types';
 
@@ -28,10 +28,6 @@ export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
 export { removeInstallation } from './remove';
 
-export function isUnremovablePackage(value: string): boolean {
-  return unremovablePackages.includes(value);
-}
-
 export class PackageNotInstalledError extends Error {
   constructor(pkgkey: string) {
     super(`${pkgkey} is not installed`);
@@ -40,7 +36,7 @@ export class PackageNotInstalledError extends Error {
 
 // only Kibana Assets use Saved Objects at this point
 export const savedObjectTypes: AssetType[] = Object.values(KibanaAssetType);
-
+export const kibanaSavedObjectTypes: KibanaSavedObjectType[] = Object.values(KibanaSavedObjectType);
 export function createInstallableFrom<T>(
   from: T,
   savedObject?: SavedObject<Installation>

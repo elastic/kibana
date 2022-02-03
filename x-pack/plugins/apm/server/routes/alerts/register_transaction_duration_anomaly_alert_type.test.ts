@@ -6,9 +6,10 @@
  */
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
-import { Job, MlPluginSetup } from '../../../../ml/server';
+import { MlPluginSetup } from '../../../../ml/server';
 import * as GetServiceAnomalies from '../service_map/get_service_anomalies';
 import { createRuleTypeMocks } from './test_utils';
+import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
 
 describe('Transaction duration anomaly alert', () => {
   afterEach(() => {
@@ -65,14 +66,14 @@ describe('Transaction duration anomaly alert', () => {
       jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
         Promise.resolve([
           {
-            job_id: '1',
-            custom_settings: { job_tags: { environment: 'development' } },
+            jobId: '1',
+            environment: 'development',
           },
           {
-            job_id: '2',
-            custom_settings: { job_tags: { environment: 'production' } },
+            jobId: '2',
+            environment: 'production',
           },
-        ] as unknown as Job[])
+        ] as unknown as ApmMlJob[])
       );
 
       const { services, dependencies, executor } = createRuleTypeMocks();
@@ -118,14 +119,14 @@ describe('Transaction duration anomaly alert', () => {
       jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
         Promise.resolve([
           {
-            job_id: '1',
-            custom_settings: { job_tags: { environment: 'development' } },
+            jobId: '1',
+            environment: 'development',
           },
           {
-            job_id: '2',
-            custom_settings: { job_tags: { environment: 'production' } },
+            jobId: '2',
+            environment: 'production',
           },
-        ] as unknown as Job[])
+        ] as unknown as ApmMlJob[])
       );
 
       const { services, dependencies, executor, scheduleActions } =

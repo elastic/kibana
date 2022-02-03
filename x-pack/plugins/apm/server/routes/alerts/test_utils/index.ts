@@ -45,6 +45,7 @@ export const createRuleTypeMocks = () => {
     alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     alertWithLifecycle: jest.fn(),
     logger: loggerMock,
+    shouldWriteAlerts: () => true,
   };
 
   return {

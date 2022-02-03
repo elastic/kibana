@@ -11,7 +11,6 @@ import { shallow } from 'enzyme';
 import { StepDefineRule } from './index';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../containers/detection_engine/alerts/use_preview_index');
 
 describe('StepDefineRule', () => {
   it('renders correctly', () => {

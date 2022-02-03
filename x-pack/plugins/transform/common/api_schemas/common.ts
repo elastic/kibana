@@ -6,7 +6,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-
 import { TRANSFORM_STATE } from '../constants';
 
 export const transformIdsSchema = schema.arrayOf(

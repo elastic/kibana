@@ -287,7 +287,7 @@ function endDataLoad(
       const eventHandlers = getEventHandlers(getState());
       if (eventHandlers && eventHandlers.onDataLoadEnd) {
         const resultMeta: ResultMeta = {};
-        if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
+        if (layer && layer.getType() === LAYER_TYPE.GEOJSON_VECTOR) {
           const featuresWithoutCentroids = features.filter((feature) => {
             return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
           });

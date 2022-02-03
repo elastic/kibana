@@ -16,7 +16,7 @@ import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
-import { ISearchSetup, ISearchStart } from './search';
+import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { DataViewsContract } from './data_views';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';

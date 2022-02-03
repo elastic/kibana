@@ -12,7 +12,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ValidationResult,
-  Alert,
+  Rule,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
@@ -107,7 +107,7 @@ describe('alert_edit', () => {
         },
       },
     ];
-    const alertType = {
+    const ruleType = {
       id: 'my-alert-type',
       iconClass: 'test',
       description: 'test',
@@ -115,7 +115,7 @@ describe('alert_edit', () => {
       validate: (): ValidationResult => {
         return { errors: {} };
       },
-      alertParamsExpression: () => <></>,
+      ruleParamsExpression: () => <></>,
       requiresAppContext: false,
     };
 
@@ -133,7 +133,7 @@ describe('alert_edit', () => {
       actionConnectorFields: null,
     });
     loadAlertTypes.mockResolvedValue(alertTypes);
-    const alert: Alert = {
+    const alert: Rule = {
       id: 'ab5661e0-197e-45ee-b477-302d89193b5e',
       params: {
         aggType: 'average',
@@ -175,8 +175,8 @@ describe('alert_edit', () => {
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
-    ruleTypeRegistry.list.mockReturnValue([alertType]);
-    ruleTypeRegistry.get.mockReturnValue(alertType);
+    ruleTypeRegistry.list.mockReturnValue([ruleType]);
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
     ruleTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);

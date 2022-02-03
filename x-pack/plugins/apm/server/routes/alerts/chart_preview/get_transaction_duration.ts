@@ -16,7 +16,7 @@ import { AlertParams } from '../route';
 import {
   getSearchAggregatedTransactions,
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -55,7 +55,7 @@ export async function getTransactionDurationChartPreview({
     },
   };
 
-  const transactionDurationField = getTransactionDurationFieldForTransactions(
+  const transactionDurationField = getDurationFieldForTransactions(
     searchAggregatedTransactions
   );
 

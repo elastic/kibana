@@ -70,3 +70,5 @@ include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
 include::monitoring/monitoring-metricbeat.asciidoc[leveloffset=+2]
 include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
 include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
+
+include::commands/cli-commands.asciidoc[]

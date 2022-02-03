@@ -19,9 +19,9 @@ import {
   throwErrors,
   excess,
   CasesStatusRequestRt,
-} from '../../../common';
+} from '../../../common/api';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../utils';
 
 /**
@@ -71,8 +71,7 @@ async function getStatusTotalsByType(
         });
         return caseService.findCaseStatusStats({
           unsecuredSavedObjectsClient,
-          caseOptions: statusQuery.case,
-          subCaseOptions: statusQuery.subCase,
+          caseOptions: statusQuery,
           ensureSavedObjectsAreAuthorized,
         });
       }),

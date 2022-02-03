@@ -10,6 +10,16 @@ import { IncomingHttpHeaders } from 'http';
 import { pick } from '@kbn/std';
 
 /**
+ * Converts an object type to a new object type where each string
+ * key is copied to the values of the object, and non string keys are
+ * given a `never` value. This allows us to map over the values and
+ * get the list of all string keys on a type in `KnownKeys<T>`
+ */
+type StringKeysAsVals<T> = {
+  [K in keyof T]: string extends K ? never : number extends K ? never : K;
+};
+
+/**
  * Creates a Union type of all known keys of a given interface.
  * @example
  * ```ts
@@ -21,11 +31,7 @@ import { pick } from '@kbn/std';
  * type PersonKnownKeys = KnownKeys<Person>; // "age" | "name"
  * ```
  */
-type KnownKeys<T> = {
-  [K in keyof T]: string extends K ? never : number extends K ? never : K;
-} extends { [_ in keyof T]: infer U }
-  ? U
-  : never;
+type KnownKeys<T> = StringKeysAsVals<T> extends { [_ in keyof T]: infer U } ? U : never;
 
 /**
  * Set of well-known HTTP headers.
@@ -55,7 +61,7 @@ export function filterHeaders(
   headers: Headers,
   fieldsToKeep: string[],
   fieldsToExclude: string[] = []
-) {
+): Headers {
   const fieldsToExcludeNormalized = fieldsToExclude.map(normalizeHeaderField);
   // Normalize list of headers we want to allow in upstream request
   const fieldsToKeepNormalized = fieldsToKeep

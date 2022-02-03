@@ -28,7 +28,6 @@ import {
 import { Dispatch } from 'redux';
 import {
   policyDetails,
-  getCurrentArtifactsLocation,
   getAssignableArtifactsList,
   getAssignableArtifactsListIsLoading,
   getUpdateArtifactsIsLoading,
@@ -50,7 +49,6 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
   usePolicyTrustedAppsNotification();
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
-  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const assignableArtifactsList = usePolicyDetailsSelector(getAssignableArtifactsList);
   const isAssignableArtifactsListLoading = usePolicyDetailsSelector(
@@ -175,7 +173,6 @@ export const PolicyTrustedAppsFlyout = React.memo(() => {
       <EuiFlyoutBody>
         {(assignableArtifactsList?.total || 0) > 100 ? searchWarningMessage : null}
         <SearchExceptions
-          defaultValue={location.filter}
           onSearch={handleOnSearch}
           placeholder={i18n.translate(
             'xpack.securitySolution.endpoint.policy.trustedApps.layout.searh.label',

@@ -8,20 +8,21 @@
 
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
-import { isQuotaExceededError } from '../../../services/history';
-import { instance as registry } from '../../contexts/editor_context/editor_registry';
-import { useRequestActionContext, useServicesContext } from '../../contexts';
-import { sendRequestToES } from './send_request_to_es';
-import { track } from './track';
-import { toMountPoint } from '../../../../../kibana_react/public';
 
+import { toMountPoint } from '../../../shared_imports';
+import { isQuotaExceededError } from '../../../services/history';
 // @ts-ignore
 import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
+import { instance as registry } from '../../contexts/editor_context/editor_registry';
+import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { StorageQuotaError } from '../../components/storage_quota_error';
+import { sendRequestToES } from './send_request_to_es';
+import { track } from './track';
 
 export const useSendCurrentRequestToES = () => {
   const {
     services: { history, settings, notifications, trackUiMetric },
+    theme$,
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
@@ -83,7 +84,8 @@ export const useSendCurrentRequestToES = () => {
                   settings.setHistoryDisabled(true);
                   notifications.toasts.remove(toast);
                 },
-              })
+              }),
+              { theme$ }
             ),
           });
         } else {
@@ -127,5 +129,5 @@ export const useSendCurrentRequestToES = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications, trackUiMetric]);
+  }, [dispatch, settings, history, notifications, trackUiMetric, theme$]);
 };

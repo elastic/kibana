@@ -15,7 +15,7 @@ import type {
 } from '../../../../../alerting/common';
 import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
-import { AlertType } from '../../../../../alerting/server';
+import { RuleType } from '../../../../../alerting/server';
 import { transformHealthServiceProvider } from './transform_health_service';
 import type { PluginSetupContract as AlertingSetup } from '../../../../../alerting/server';
 
@@ -57,7 +57,7 @@ export function registerTransformHealthRuleType(params: RegisterParams) {
   alerting.registerType(getTransformHealthRuleType());
 }
 
-export function getTransformHealthRuleType(): AlertType<
+export function getTransformHealthRuleType(): RuleType<
   TransformHealthRuleParams,
   never,
   AlertTypeState,

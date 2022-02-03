@@ -52,7 +52,6 @@ const createDashboardAppStateProps = (): UseDashboardStateProps => ({
   savedDashboardId: 'testDashboardId',
   history: createBrowserHistory(),
   isEmbeddedExternally: false,
-  redirectTo: jest.fn(),
 });
 
 const createDashboardAppStateServices = () => {

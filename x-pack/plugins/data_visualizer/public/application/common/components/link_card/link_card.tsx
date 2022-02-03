@@ -46,7 +46,11 @@ export const LinkCard: FC<Props> = ({
     ...(onClick ? { onClick } : {}),
   };
   return (
-    <EuiPanel style={{ cursor: isDisabled ? 'not-allowed' : undefined }}>
+    <EuiPanel
+      style={{ cursor: isDisabled ? 'not-allowed' : undefined }}
+      hasShadow={false}
+      hasBorder
+    >
       <EuiLink
         style={{
           display: 'block',

@@ -12,6 +12,8 @@ export interface HostIsolationExceptionsPageLocation {
   /** Used for editing. The ID of the selected event filter */
   id?: string;
   filter: string;
+  // A string with comma dlimetered list of included policy IDs
+  included_policies: string;
 }
 
 export interface HostIsolationExceptionsPageState {

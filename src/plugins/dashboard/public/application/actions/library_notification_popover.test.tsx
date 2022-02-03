@@ -29,6 +29,7 @@ import {
   ContactCardEmbeddable,
 } from '../../services/embeddable_test_samples';
 import { getStubPluginServices } from '../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -57,7 +58,9 @@ describe('LibraryNotificationPopover', () => {
       uiActions: {} as any,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       http: coreStart.http,
+      theme: coreStart.theme,
       presentationUtil: getStubPluginServices(),
+      screenshotMode: screenshotModePluginMock.createSetupContract(),
     };
 
     container = new DashboardContainer(getSampleDashboardInput(), containerOptions);

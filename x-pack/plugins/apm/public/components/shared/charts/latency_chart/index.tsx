@@ -9,14 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { AlertType } from '../../../../../common/alert_types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useTheme } from '../../../../hooks/use_theme';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
@@ -24,13 +23,15 @@ import {
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
-import * as urlHelpers from '../../../shared/Links/url_helpers';
+import * as urlHelpers from '../../../shared/links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
+import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
+import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 
 interface Props {
   height?: number;
   kuery: string;
-  environment: string;
 }
 
 const options: Array<{ value: LatencyAggregationType; text: string }> = [
@@ -43,13 +44,15 @@ function filterNil<T>(value: T | null | undefined): value is T {
   return value != null;
 }
 
-export function LatencyChart({ height, kuery, environment }: Props) {
+export function LatencyChart({ height, kuery }: Props) {
   const history = useHistory();
-  const theme = useTheme();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
+
+  const comparisonChartTheme = getComparisonChartTheme();
   const { urlParams } = useLegacyUrlParams();
   const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();
+
+  const { environment } = useEnvironmentsContext();
 
   const { latencyChartsData, latencyChartsStatus } =
     useTransactionLatencyChartsFetcher({
@@ -57,10 +60,13 @@ export function LatencyChart({ height, kuery, environment }: Props) {
       environment,
     });
 
-  const { currentPeriod, previousPeriod, anomalyTimeseries, mlJobId } =
-    latencyChartsData;
+  const { currentPeriod, previousPeriod } = latencyChartsData;
 
   const { alerts } = useApmServiceContext();
+
+  const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
+    ApmMlDetectorType.txLatency
+  );
 
   const timeseries = [
     currentPeriod,
@@ -111,7 +117,7 @@ export function LatencyChart({ height, kuery, environment }: Props) {
           <EuiFlexItem grow={false}>
             <MLHeader
               hasValidMlLicense={license?.getFeature('ml').isAvailable}
-              mlJobId={mlJobId}
+              mlJobId={preferredAnomalyTimeseries?.jobId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -124,7 +130,7 @@ export function LatencyChart({ height, kuery, environment }: Props) {
           customTheme={comparisonChartTheme}
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          anomalyTimeseries={anomalyTimeseries}
+          anomalyTimeseries={preferredAnomalyTimeseries}
           alerts={alerts.filter(
             (alert) =>
               alert[ALERT_RULE_TYPE_ID]?.[0] ===

@@ -6,6 +6,7 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "dataViews",
     "charts",
     "expressions",
     "fieldFormats",
@@ -18,7 +19,9 @@
     "embeddable",
     "share",
     "presentationUtil",
-    "dataViewFieldEditor"
+    "dataViewFieldEditor",
+    "expressionGauge",
+    "expressionHeatmap"
   ],
   "optionalPlugins": [
     "usageCollection",

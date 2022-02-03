@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import {
   RULE_DETAILS,
   RULE_MEMORY_USAGE,
@@ -21,7 +21,7 @@ import { MonitoringAlertTypeParams, validate } from '../components/param_details
 
 export function createMemoryUsageAlertType(
   config: MonitoringConfig
-): AlertTypeModel<MonitoringAlertTypeParams> {
+): RuleTypeModel<MonitoringAlertTypeParams> {
   return {
     id: RULE_MEMORY_USAGE,
     description: RULE_DETAILS[RULE_MEMORY_USAGE].description,
@@ -29,7 +29,7 @@ export function createMemoryUsageAlertType(
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaJvmThreshold}`;
     },
-    alertParamsExpression: (props: LazyExpressionProps) => (
+    ruleParamsExpression: (props: LazyExpressionProps) => (
       <LazyExpression
         {...props}
         config={config}

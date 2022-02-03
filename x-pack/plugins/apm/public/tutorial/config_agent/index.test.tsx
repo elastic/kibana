@@ -10,7 +10,7 @@ import React from 'react';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-} from '../../utils/testHelpers';
+} from '../../utils/test_helpers';
 import TutorialConfigAgent from './';
 
 const policyElasticAgentOnCloudAgent = {
@@ -57,6 +57,7 @@ describe('TutorialConfigAgent', () => {
           }
           basePath="http://localhost:5601"
           isCloudEnabled
+          kibanaVersion="8.0.0"
         />
       );
       expect(component.getByTestId('loading')).toBeInTheDocument();
@@ -76,6 +77,7 @@ describe('TutorialConfigAgent', () => {
           }
           basePath="http://localhost:5601"
           isCloudEnabled={false}
+          kibanaVersion="8.0.0"
         />
       );
       expect(
@@ -123,6 +125,7 @@ describe('TutorialConfigAgent', () => {
             }
             basePath="http://localhost:5601"
             isCloudEnabled={false}
+            kibanaVersion="8.0.0"
           />
         );
         expect(
@@ -158,6 +161,7 @@ describe('TutorialConfigAgent', () => {
             }
             basePath="http://localhost:5601"
             isCloudEnabled
+            kibanaVersion="8.0.0"
           />
         );
         expect(
@@ -199,6 +203,7 @@ describe('TutorialConfigAgent', () => {
             }
             basePath="http://localhost:5601"
             isCloudEnabled
+            kibanaVersion="8.0.0"
           />
         );
         expect(
@@ -237,6 +242,7 @@ describe('TutorialConfigAgent', () => {
             }
             basePath="http://localhost:5601"
             isCloudEnabled
+            kibanaVersion="8.0.0"
           />
         );
         expect(
@@ -271,6 +277,7 @@ describe('TutorialConfigAgent', () => {
             }
             basePath="http://localhost:5601"
             isCloudEnabled
+            kibanaVersion="8.0.0"
           />
         );
         expect(
@@ -306,6 +313,7 @@ describe('TutorialConfigAgent', () => {
           }
           basePath="http://localhost:5601"
           isCloudEnabled
+          kibanaVersion="8.0.0"
         />
       );
 
@@ -329,6 +337,7 @@ describe('TutorialConfigAgent', () => {
           }
           basePath="http://localhost:5601"
           isCloudEnabled
+          kibanaVersion="8.0.0"
         />
       );
       expect(
@@ -367,6 +376,7 @@ describe('TutorialConfigAgent', () => {
           }
           basePath="http://localhost:5601"
           isCloudEnabled
+          kibanaVersion="8.0.0"
         />
       );
       expect(

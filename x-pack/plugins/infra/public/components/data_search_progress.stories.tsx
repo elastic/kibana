@@ -8,17 +8,14 @@
 import { PropsOf } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { decorateWithGlobalStorybookThemeProviders } from '../test_utils/use_global_storybook_theme';
 import { DataSearchProgress } from './data_search_progress';
 
 export default {
   title: 'infra/dataSearch/DataSearchProgress',
   decorators: [
-    (wrappedStory) => (
-      <EuiThemeProvider>
-        <div style={{ width: 400 }}>{wrappedStory()}</div>
-      </EuiThemeProvider>
-    ),
+    (wrappedStory) => <div style={{ width: 400 }}>{wrappedStory()}</div>,
+    decorateWithGlobalStorybookThemeProviders,
   ],
   parameters: {
     layout: 'padded',

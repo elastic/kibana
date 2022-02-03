@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions } from '../../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../../common/types';
 import { ColumnHeaderType } from '../../../../store/timeline/model';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 

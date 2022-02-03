@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
-import { esQuery } from '../../../../../../../data/server';
 
 const filter = (metric) => metric.type === 'filter_ratio';
 
@@ -19,12 +19,12 @@ export function ratios(req, panel, series, esQueryConfig, seriesIndex) {
         overwrite(
           doc,
           `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.filter`,
-          esQuery.buildEsQuery(seriesIndex.indexPattern, metric.numerator, [], esQueryConfig)
+          buildEsQuery(seriesIndex.indexPattern, metric.numerator, [], esQueryConfig)
         );
         overwrite(
           doc,
           `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.filter`,
-          esQuery.buildEsQuery(seriesIndex.indexPattern, metric.denominator, [], esQueryConfig)
+          buildEsQuery(seriesIndex.indexPattern, metric.denominator, [], esQueryConfig)
         );
 
         let numeratorPath = `${metric.id}-numerator>_count`;

@@ -14,7 +14,7 @@ import {
   hasObjectErrors,
   isValidAlert,
 } from './alert_errors';
-import { Alert, AlertType, AlertTypeModel } from '../../../types';
+import { Rule, RuleType, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
 describe('alert_errors', () => {
@@ -218,8 +218,8 @@ describe('alert_errors', () => {
 });
 
 function mockserverRuleType(
-  overloads: Partial<AlertType<string, string>> = {}
-): AlertType<string, string> {
+  overloads: Partial<RuleType<string, string>> = {}
+): RuleType<string, string> {
   return {
     actionGroups: [],
     defaultActionGroupId: 'default',
@@ -242,20 +242,20 @@ function mockserverRuleType(
   };
 }
 
-function mockAlertTypeModel(overloads: Partial<AlertTypeModel> = {}): AlertTypeModel {
+function mockAlertTypeModel(overloads: Partial<RuleTypeModel> = {}): RuleTypeModel {
   return {
     id: 'alertTypeModel',
     description: 'some alert',
     iconClass: 'something',
     documentationUrl: null,
     validate: () => ({ errors: {} }),
-    alertParamsExpression: () => <Fragment />,
+    ruleParamsExpression: () => <Fragment />,
     requiresAppContext: false,
     ...overloads,
   };
 }
 
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockAlert(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,

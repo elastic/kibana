@@ -60,6 +60,10 @@ export const closeAlerts = () => {
     .should('not.be.visible');
 };
 
+export const expandFirstAlertActions = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+};
+
 export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).should('exist');
 
@@ -146,21 +150,6 @@ export const investigateFirstAlertInTimeline = () => {
 
 export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-};
-
-export const waitForAlertsIndexToBeCreated = () => {
-  cy.request({
-    url: '/api/detection_engine/index',
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status !== 200) {
-      cy.request({
-        method: 'POST',
-        url: `/api/detection_engine/index`,
-        headers: { 'kbn-xsrf': 'create-signals-index' },
-      });
-    }
-  });
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {

@@ -6,12 +6,11 @@
  */
 
 import { MutableRefObject } from 'react';
-import { Ecs, CaseViewRefreshPropInterface } from '../../../common';
+import { Ecs, CaseViewRefreshPropInterface } from '../../../common/ui/types';
 import { CasesNavigation } from '../links';
 import { CasesTimelineIntegration } from '../timeline_context';
 
 export interface CasesRoutesProps {
-  disableAlerts?: boolean;
   onComponentInitialized?: () => void;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
@@ -22,6 +21,5 @@ export interface CasesRoutesProps {
    * **NOTE**: Do not hold on to the `.current` object, as it could become stale
    */
   refreshRef?: MutableRefObject<CaseViewRefreshPropInterface>;
-  hideSyncAlerts?: boolean;
   timelineIntegration?: CasesTimelineIntegration;
 }

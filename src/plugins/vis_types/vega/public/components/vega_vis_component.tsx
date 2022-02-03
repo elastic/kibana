@@ -27,7 +27,7 @@ interface VegaVisComponentProps {
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
 
-const VegaVisComponent = ({
+export const VegaVisComponent = ({
   visData,
   fireEvent,
   renderComplete,
@@ -55,13 +55,13 @@ const VegaVisComponent = ({
     }
   }, [visData, renderComplete]);
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const updateChartSize = useCallback(
-    () =>
-      throttle(() => {
-        if (visController.current) {
-          visController.current.render(visData).then(renderComplete);
-        }
-      }, 300),
+    throttle(() => {
+      if (visController.current) {
+        visController.current.render(visData).then(renderComplete);
+      }
+    }, 300),
     [renderComplete, visData]
   );
 
@@ -75,7 +75,3 @@ const VegaVisComponent = ({
     </EuiResizeObserver>
   );
 };
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { VegaVisComponent as default };

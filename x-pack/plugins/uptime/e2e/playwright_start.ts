@@ -12,22 +12,45 @@ import { run as playwrightRun } from '@elastic/synthetics';
 import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
+import { createApmAndObsUsersAndRoles } from '../../apm/scripts/create_apm_users_and_roles/create_apm_users_and_roles';
+import { importMonitors } from './tasks/import_monitors';
 
-export function playwrightRunTests() {
+const listOfJourneys = [
+  'uptime',
+  'StepsDuration',
+  'TlsFlyoutInAlertingApp',
+  'StatusFlyoutInAlertingApp',
+  'DefaultEmailSettings',
+  'MonitorManagement-http',
+  'MonitorManagement-tcp',
+  'MonitorManagement-icmp',
+  'MonitorManagement-browser',
+  'MonitorManagement breadcrumbs',
+  'Monitor Management read only user',
+] as const;
+
+export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
   return async ({ getService }: any) => {
-    const result = await playwrightStart(getService);
+    const result = await playwrightStart(getService, headless, match);
 
-    if (result && result.uptime.status !== 'succeeded') {
-      throw new Error('Tests failed');
-    }
+    listOfJourneys.forEach((journey) => {
+      if (result?.[journey] && result[journey].status !== 'succeeded') {
+        throw new Error('Tests failed');
+      }
+    });
   };
 }
 
-async function playwrightStart(getService: any) {
+async function playwrightStart(getService: any, headless = true, match?: string) {
   console.log('Loading esArchiver...');
-  await esArchiverLoad('full_heartbeat');
+  const esArchiver = getService('esArchiver');
+
+  esArchiverLoad('full_heartbeat');
+  esArchiverLoad('browser');
 
   const config = getService('config');
+
+  await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
 
   const kibanaUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
@@ -35,13 +58,22 @@ async function playwrightStart(getService: any) {
     port: config.get('servers.kibana.port'),
   });
 
+  await importMonitors({ kibanaUrl });
+
+  await createApmAndObsUsersAndRoles({
+    elasticsearch: { username: 'elastic', password: 'changeme' },
+    kibana: { roleSuffix: 'e2e', hostname: kibanaUrl },
+  });
+
   const res = await playwrightRun({
     params: { kibanaUrl },
-    playwrightOptions: { headless: true, chromiumSandbox: false, timeout: 60 * 1000 },
+    playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
+    match: match === 'undefined' ? '' : match,
   });
 
   console.log('Removing esArchiver...');
-  await esArchiverUnload('full_heartbeat');
+  esArchiverUnload('full_heartbeat');
+  esArchiverUnload('browser');
 
   return res;
 }

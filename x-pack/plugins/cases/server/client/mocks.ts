@@ -12,8 +12,8 @@ import { AttachmentsSubClient } from './attachments/client';
 import { CasesSubClient } from './cases/client';
 import { ConfigureSubClient } from './configure/client';
 import { CasesClientFactory } from './factory';
+import { MetricsSubClient } from './metrics/client';
 import { StatsSubClient } from './stats/client';
-import { SubCasesClient } from './sub_cases/client';
 import { UserActionsSubClient } from './user_actions/client';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
@@ -30,6 +30,14 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     getTags: jest.fn(),
     getReporters: jest.fn(),
     getCasesByAlertID: jest.fn(),
+  };
+};
+
+type MetricsSubClientMock = jest.Mocked<MetricsSubClient>;
+
+const createMetricsSubClientMock = (): MetricsSubClientMock => {
+  return {
+    getCaseMetrics: jest.fn(),
   };
 };
 
@@ -56,17 +64,6 @@ const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
   };
 };
 
-type SubCasesClientMock = jest.Mocked<SubCasesClient>;
-
-const createSubCasesClientMock = (): SubCasesClientMock => {
-  return {
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
-};
-
 type ConfigureSubClientMock = jest.Mocked<ConfigureSubClient>;
 
 const createConfigureSubClientMock = (): ConfigureSubClientMock => {
@@ -90,7 +87,6 @@ export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
   attachments: AttachmentsSubClientMock;
   userActions: UserActionsSubClientMock;
-  subCases: SubCasesClientMock;
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
@@ -98,9 +94,9 @@ export const createCasesClientMock = (): CasesClientMock => {
     cases: createCasesSubClientMock(),
     attachments: createAttachmentsSubClientMock(),
     userActions: createUserActionsSubClientMock(),
-    subCases: createSubCasesClientMock(),
     configure: createConfigureSubClientMock(),
     stats: createStatsSubClientMock(),
+    metrics: createMetricsSubClientMock(),
   };
   return client as unknown as CasesClientMock;
 };

@@ -1,11 +1,11 @@
 [[docker]]
 === Install {kib} with Docker
 ++++
-<titleabbrev>Install with Docker </titleabbrev>
+<titleabbrev>Install with Docker</titleabbrev>
 ++++
 
-Docker images for Kibana are available from the Elastic Docker registry. The
-base image is https://hub.docker.com/_/centos/[centos:7].
+Docker images for {kib} are available from the Elastic Docker registry. The
+base image is https://hub.docker.com/_/ubuntu[ubuntu:20.04].
 
 A list of all published Docker images and tags is available at
 https://www.docker.elastic.co[www.docker.elastic.co]. The source code is in
@@ -14,10 +14,13 @@ https://github.com/elastic/dockerfiles/tree/{branch}/kibana[GitHub].
 These images contain both free and subscription features.
 <<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
-[float]
+[discrete]
 [[run-kibana-on-docker-for-dev]]
 === Run {kib} on Docker for development
 
+. Start an {es} container for development or testing:
++
+--
 ifeval::["{release-state}"=="unreleased"]
 
 NOTE: No Docker images are currently available for {kib} {version}.
@@ -26,14 +29,16 @@ endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-. Start an {es} container for development or testing:
-+
 [source,sh,subs="attributes"]
 ----
 docker network create elastic
 docker pull {es-docker-image}
 docker run --name es-node01 --net elastic -p 9200:9200 -p 9300:9300 -t {es-docker-image}
 ----
+
+endif::[]
+
+--
 +
 When you start {es} for the first time, the following security configuration 
 occurs automatically:
@@ -51,30 +56,26 @@ and enrollment token.
 . Copy the generated password and enrollment token and save them in a secure 
 location. These values are shown only when you start {es} for the first time.
 You'll use these to enroll {kib} with your {es} cluster and log in.
-+
-[NOTE]
-====
-If you need to reset the password for the `elastic` user or other
-built-in users, run the {ref}/reset-password.html[`elasticsearch-reset-password`]
-tool. To generate new enrollment tokens for {kib} or {es} nodes, run the
-{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.
-These tools are available in the {es} `bin` directory of the Docker container.
-
-For example:
-
-[source,sh]
-----
-docker exec -it es-node01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
-----
-====
 
 . In a new terminal session, start {kib} and connect it to your {es} container:
 +
+--
+ifeval::["{release-state}"=="unreleased"]
+
+NOTE: No Docker images are currently available for {kib} {version}.
+
+endif::[]
+
+ifeval::["{release-state}"!="unreleased"]
+
 [source,sh,subs="attributes"]
 ----
 docker pull {docker-image}
 docker run --name kib-01 --net elastic -p 5601:5601 {docker-image}
 ----
+
+endif::[]
+--
 +
 When you start {kib}, a unique link is output to your terminal.
 
@@ -86,7 +87,32 @@ When you start {kib}, a unique link is output to your terminal.
   .. Log in to {kib} as the `elastic` user with the password that was generated
   when you started {es}.
 
-[float]
+[[docker-generate]]
+[discrete]
+=== Generate passwords and enrollment tokens
+If you need to reset the password for the `elastic` user or other
+built-in users, run the {ref}/reset-password.html[`elasticsearch-reset-password`]
+tool. This tool is available in the {es} `bin` directory of the Docker container.
+
+For example, to reset the password for the `elastic` user:
+
+[source,sh]
+----
+docker exec -it es-node01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
+----
+
+If you need to generate new enrollment tokens for {kib} or {es} nodes, run the
+{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.
+This tool is available in the {es} `bin` directory of the Docker container.
+
+For example, to generate a new enrollment token for {kib}:
+
+[source,sh]
+----
+docker exec -it es-node01 /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+----
+
+[discrete]
 === Remove Docker containers
 
 To remove the containers and their network, run:
@@ -98,21 +124,20 @@ docker rm es-node01
 docker rm kib-01
 ----
 
-endif::[]
-[float]
+[discrete]
 [[configuring-kibana-docker]]
-=== Configure Kibana on Docker
+=== Configure {kib} on Docker
 
-The Docker images provide several methods for configuring Kibana. The
+The Docker images provide several methods for configuring {kib}. The
 conventional approach is to provide a `kibana.yml` file as described in
 {kibana-ref}/settings.html[Configuring Kibana], but it's also possible to use
 environment variables to define settings.
 
-[float]
+[discrete]
 [[bind-mount-config]]
 ==== Bind-mounted configuration
 
-One way to configure Kibana on Docker is to provide `kibana.yml` via bind-mounting.
+One way to configure {kib} on Docker is to provide `kibana.yml` via bind-mounting.
 With `docker-compose`, the bind-mount can be specified like this:
 
 ["source","yaml",subs="attributes"]
@@ -127,7 +152,7 @@ services:
 
 ==== Persist the {kib} keystore
 
-By default, {kib] auto-generates a keystore file for secure settings at startup. To persist your {kibana-ref}/secure-settings.html[secure settings], use the `kibana-keystore` utility to bind-mount the parent directory of the keystore to the container. For example:
+By default, {kib} auto-generates a keystore file for secure settings at startup. To persist your {kibana-ref}/secure-settings.html[secure settings], use the `kibana-keystore` utility to bind-mount the parent directory of the keystore to the container. For example:
 
 ["source","sh",subs="attributes"]
 ----
@@ -135,7 +160,7 @@ docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path
 docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data {docker-image} bin/kibana-keystore add test_keystore_setting
 ----
 
-[float]
+[discrete]
 [[environment-variable-config]]
 ==== Environment variable configuration
 
@@ -179,7 +204,7 @@ services:
 Since environment variables are translated to CLI arguments, they take
 precedence over settings configured in `kibana.yml`.
 
-[float]
+[discrete]
 [[docker-defaults]]
 ==== Docker defaults
 The following settings have different default values when using the Docker

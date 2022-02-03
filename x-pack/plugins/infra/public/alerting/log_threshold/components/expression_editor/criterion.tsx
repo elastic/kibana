@@ -20,8 +20,8 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DataViewField } from 'src/plugins/data_views/common';
 import { isNumber, isFinite } from 'lodash';
-import { IFieldType } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 import {
@@ -55,7 +55,7 @@ const criterionComparatorValueTitle = i18n.translate(
   }
 );
 
-const getCompatibleComparatorsForField = (fieldInfo: IFieldType | undefined) => {
+const getCompatibleComparatorsForField = (fieldInfo: DataViewField | undefined) => {
   if (fieldInfo?.type === 'number') {
     return [
       { value: Comparator.GT, text: ComparatorToi18nMap[Comparator.GT] },
@@ -83,7 +83,7 @@ const getCompatibleComparatorsForField = (fieldInfo: IFieldType | undefined) => 
   }
 };
 
-const getFieldInfo = (fields: IFieldType[], fieldName: string): IFieldType | undefined => {
+const getFieldInfo = (fields: DataViewField[], fieldName: string): DataViewField | undefined => {
   return fields.find((field) => {
     return field.name === fieldName;
   });
@@ -91,7 +91,7 @@ const getFieldInfo = (fields: IFieldType[], fieldName: string): IFieldType | und
 
 interface Props {
   idx: number;
-  fields: IFieldType[];
+  fields: DataViewField[];
   criterion: Partial<CriterionType>;
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
@@ -117,7 +117,7 @@ export const Criterion: React.FC<Props> = ({
     });
   }, [fields]);
 
-  const fieldInfo: IFieldType | undefined = useMemo(() => {
+  const fieldInfo: DataViewField | undefined = useMemo(() => {
     if (criterion.field) {
       return getFieldInfo(fields, criterion.field);
     } else {
@@ -177,7 +177,7 @@ export const Criterion: React.FC<Props> = ({
                   value={criterion.field ?? 'a chosen field'}
                   isActive={isFieldPopoverOpen}
                   color={errors.field.length === 0 ? 'success' : 'danger'}
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     setIsFieldPopoverOpen(!isFieldPopoverOpen);
                   }}
@@ -185,7 +185,7 @@ export const Criterion: React.FC<Props> = ({
               }
               isOpen={isFieldPopoverOpen}
               closePopover={() => setIsFieldPopoverOpen(false)}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"
@@ -230,7 +230,7 @@ export const Criterion: React.FC<Props> = ({
                       ? 'success'
                       : 'danger'
                   }
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     setIsComparatorPopoverOpen(!isComparatorPopoverOpen);
                   }}

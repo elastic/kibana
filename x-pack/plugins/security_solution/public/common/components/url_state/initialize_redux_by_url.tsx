@@ -64,7 +64,7 @@ export const useSetInitialStateFromUrl = () => {
               dispatch(
                 sourcererActions.setSelectedDataView({
                   id: scope,
-                  selectedDataViewId: sourcererState[scope]?.id ?? '',
+                  selectedDataViewId: sourcererState[scope]?.id ?? null,
                   selectedPatterns: sourcererState[scope]?.selectedPatterns ?? [],
                 })
               )

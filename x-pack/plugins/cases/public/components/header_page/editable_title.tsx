@@ -19,7 +19,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { MAX_TITLE_LENGTH } from '../../../common';
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
 import { Title } from './title';
 
@@ -134,5 +134,6 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
     </EuiFlexGroup>
   );
 };
+EditableTitleComponent.displayName = 'EditableTitle';
 
 export const EditableTitle = React.memo(EditableTitleComponent);

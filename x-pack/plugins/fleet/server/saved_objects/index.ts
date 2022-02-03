@@ -77,9 +77,9 @@ const getSavedObjectTypes = (
         name: { type: 'keyword' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
+        is_managed: { type: 'boolean' },
         is_default: { type: 'boolean' },
         is_default_fleet_server: { type: 'boolean' },
-        is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },
         unenroll_timeout: { type: 'integer' },
@@ -113,6 +113,7 @@ const getSavedObjectTypes = (
         is_default_monitoring: { type: 'boolean' },
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
+        ca_trusted_fingerprint: { type: 'keyword', index: false },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
@@ -238,6 +239,7 @@ const getSavedObjectTypes = (
             type: { type: 'keyword' },
           },
         },
+        installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
           type: 'nested',
           properties: {

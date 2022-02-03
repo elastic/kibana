@@ -8,12 +8,10 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import { IndexPattern, SortDirection } from 'src/plugins/data/common';
+import { DataView, SortDirection } from 'src/plugins/data/common';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { setServices } from '../../../kibana_services';
-import { Query } from '../../../../../data/public';
-import { DiscoverServices } from '../../../build_services';
+import { DataPublicPluginStart, Query } from '../../../../../data/public';
 import { EsHitRecord, EsHitRecordList } from '../../types';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -29,6 +27,7 @@ interface Timestamp {
 }
 
 describe('context predecessors', function () {
+  let dataPluginMock: DataPublicPluginStart;
   let fetchPredecessors: (
     timeValIso: string,
     timeValNr: number,
@@ -36,6 +35,7 @@ describe('context predecessors', function () {
     tieBreakerValue: number,
     size: number
   ) => Promise<EsHitRecordList>;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
   const indexPattern = {
@@ -43,21 +43,18 @@ describe('context predecessors', function () {
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
-  } as unknown as IndexPattern;
+  } as unknown as DataView;
 
   describe('function fetchPredecessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
-
-      setServices({
-        data: {
-          search: {
-            searchSource: {
-              createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
-            },
+      dataPluginMock = {
+        search: {
+          searchSource: {
+            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
           },
         },
-      } as unknown as DiscoverServices);
+      } as unknown as DataPublicPluginStart;
 
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
         const anchor = {
@@ -74,7 +71,8 @@ describe('context predecessors', function () {
           tieBreakerField,
           SortDirection.desc,
           size,
-          []
+          [],
+          dataPluginMock
         );
       };
     });
@@ -192,15 +190,13 @@ describe('context predecessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices({
-        data: {
-          search: {
-            searchSource: {
-              createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
-            },
+      dataPluginMock = {
+        search: {
+          searchSource: {
+            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
           },
         },
-      } as unknown as DiscoverServices);
+      } as unknown as DataPublicPluginStart;
 
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
         const anchor = {
@@ -218,6 +214,7 @@ describe('context predecessors', function () {
           SortDirection.desc,
           size,
           [],
+          dataPluginMock,
           true
         );
       };

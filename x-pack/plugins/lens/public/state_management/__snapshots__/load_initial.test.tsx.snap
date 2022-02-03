@@ -21,36 +21,41 @@ Object {
     "isSaveable": true,
     "persistedDoc": Object {
       "exactMatchDoc": Object {
-        "expression": "definitely a valid expression",
-        "references": Array [
-          Object {
-            "id": "1",
-            "name": "index-pattern-0",
-            "type": "index-pattern",
+        "attributes": Object {
+          "expression": "definitely a valid expression",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "index-pattern-0",
+              "type": "index-pattern",
+            },
+          ],
+          "savedObjectId": "1234",
+          "state": Object {
+            "datasourceStates": Object {
+              "testDatasource": "datasource",
+            },
+            "filters": Array [
+              Object {
+                "meta": Object {
+                  "index": "index-pattern-0",
+                },
+                "query": Object {
+                  "match_phrase": Object {
+                    "src": "test",
+                  },
+                },
+              },
+            ],
+            "query": "kuery",
+            "visualization": Object {},
           },
-        ],
-        "savedObjectId": "1234",
+          "title": "An extremely cool default document!",
+          "visualizationType": "testVis",
+        },
         "sharingSavedObjectProps": Object {
           "outcome": "exactMatch",
         },
-        "state": Object {
-          "datasourceStates": Object {
-            "testDatasource": "datasource",
-          },
-          "filters": Array [
-            Object {
-              "query": Object {
-                "match_phrase": Object {
-                  "src": "test",
-                },
-              },
-            },
-          ],
-          "query": "kuery",
-          "visualization": Object {},
-        },
-        "title": "An extremely cool default document!",
-        "visualizationType": "testVis",
       },
       "references": Array [],
       "savedObjectId": "1234",

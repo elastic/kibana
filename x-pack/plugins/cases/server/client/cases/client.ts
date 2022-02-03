@@ -13,7 +13,7 @@ import {
   AllTagsFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
-} from '../../../common';
+} from '../../../common/api';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
 import {
@@ -108,7 +108,7 @@ export const createCasesSubClient = (
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
     push: (params: PushParams) => push(params, clientArgs, casesClient, casesClientInternal),
-    update: (cases: CasesPatchRequest) => update(cases, clientArgs, casesClientInternal),
+    update: (cases: CasesPatchRequest) => update(cases, clientArgs),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),

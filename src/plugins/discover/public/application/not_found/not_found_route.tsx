@@ -10,20 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect } from 'react-router-dom';
-import { toMountPoint } from '../../../../kibana_react/public';
-import { DiscoverServices } from '../../build_services';
+import { toMountPoint, wrapWithTheme } from '../../../../kibana_react/public';
 import { getUrlTracker } from '../../kibana_services';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
-export interface NotFoundRouteProps {
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
-}
 let bannerId: string | undefined;
 
-export function NotFoundRoute(props: NotFoundRouteProps) {
-  const { services } = props;
+export function NotFoundRoute() {
+  const services = useDiscoverServices();
   const { urlForwarding, core, history } = services;
   const currentLocation = history().location.pathname;
 
@@ -39,17 +33,20 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
     bannerId = core.overlays.banners.replace(
       bannerId,
       toMountPoint(
-        <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
-          <p data-test-subj="invalidRouteMessage">
-            <FormattedMessage
-              id="discover.noMatchRoute.bannerText"
-              defaultMessage="Discover application doesn't recognize this route: {route}"
-              values={{
-                route: history().location.state.referrer,
-              }}
-            />
-          </p>
-        </EuiCallOut>
+        wrapWithTheme(
+          <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
+            <p data-test-subj="invalidRouteMessage">
+              <FormattedMessage
+                id="discover.noMatchRoute.bannerText"
+                defaultMessage="Discover application doesn't recognize this route: {route}"
+                values={{
+                  route: history().location.state.referrer,
+                }}
+              />
+            </p>
+          </EuiCallOut>,
+          core.theme.theme$
+        )
       )
     );
 
@@ -59,7 +56,7 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
         core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-  }, [core.overlays.banners, history, urlForwarding]);
+  }, [core.overlays.banners, history, urlForwarding, core.theme.theme$]);
 
   return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
 }

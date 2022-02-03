@@ -8,6 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 
+import { KibanaThemeProvider } from '../shared_imports';
 import { AppContextProvider, AppDependencies } from './app_context';
 // @ts-ignore
 import { licenseManagementStore } from './store';
@@ -23,6 +24,7 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
     plugins,
     services,
     store: { initialLicense },
+    theme$,
   } = appDependencies;
 
   const {
@@ -46,9 +48,11 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
 
   return (
     <I18nContext>
-      <Provider store={store}>
-        <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
-      </Provider>
+      <KibanaThemeProvider theme$={theme$}>
+        <Provider store={store}>
+          <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
+        </Provider>
+      </KibanaThemeProvider>
     </I18nContext>
   );
 };

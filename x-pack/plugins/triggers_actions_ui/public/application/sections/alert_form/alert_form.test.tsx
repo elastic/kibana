@@ -13,8 +13,8 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import {
   ValidationResult,
-  Alert,
-  AlertType,
+  Rule,
+  RuleType,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
@@ -31,7 +31,7 @@ jest.mock('../../lib/alert_api', () => ({
 jest.mock('../../../common/lib/kibana');
 
 describe('alert_form', () => {
-  const alertType = {
+  const ruleType = {
     id: 'my-alert-type',
     iconClass: 'test',
     description: 'Alert when testing',
@@ -39,7 +39,7 @@ describe('alert_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <></>,
+    ruleParamsExpression: () => <></>,
     requiresAppContext: false,
   };
 
@@ -64,7 +64,7 @@ describe('alert_form', () => {
     actionConnectorFields: null,
   });
 
-  const alertTypeNonEditable = {
+  const ruleTypeNonEditable = {
     id: 'non-edit-alert-type',
     iconClass: 'test',
     description: 'test',
@@ -72,11 +72,11 @@ describe('alert_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <></>,
+    ruleParamsExpression: () => <></>,
     requiresAppContext: true,
   };
 
-  const disabledByLicenseAlertType = {
+  const disabledByLicenseRuleType = {
     id: 'disabled-by-license',
     iconClass: 'test',
     description: 'Alert when testing',
@@ -84,7 +84,7 @@ describe('alert_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <></>,
+    ruleParamsExpression: () => <></>,
     requiresAppContext: false,
   };
 
@@ -96,7 +96,7 @@ describe('alert_form', () => {
     async function setup() {
       const mocks = coreMock.createSetup();
       const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
-      const alertTypes: AlertType[] = [
+      const alertTypes: RuleType[] = [
         {
           id: 'my-alert-type',
           name: 'Test',
@@ -160,9 +160,9 @@ describe('alert_form', () => {
         },
       };
       ruleTypeRegistry.list.mockReturnValue([
-        alertType,
-        alertTypeNonEditable,
-        disabledByLicenseAlertType,
+        ruleType,
+        ruleTypeNonEditable,
+        disabledByLicenseRuleType,
       ]);
       ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
@@ -180,7 +180,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown as Alert;
+      } as unknown as Rule;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -322,7 +322,7 @@ describe('alert_form', () => {
           validate: (): ValidationResult => {
             return { errors: {} };
           },
-          alertParamsExpression: () => <></>,
+          ruleParamsExpression: () => <></>,
           requiresAppContext: true,
         },
         {
@@ -333,7 +333,7 @@ describe('alert_form', () => {
           validate: (): ValidationResult => {
             return { errors: {} };
           },
-          alertParamsExpression: () => <></>,
+          ruleParamsExpression: () => <></>,
           requiresAppContext: false,
         },
       ]);
@@ -352,7 +352,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown as Alert;
+      } as unknown as Rule;
 
       wrapper = mountWithIntl(
         <AlertForm
@@ -394,8 +394,8 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      ruleTypeRegistry.list.mockReturnValue([alertType]);
-      ruleTypeRegistry.get.mockReturnValue(alertType);
+      ruleTypeRegistry.list.mockReturnValue([ruleType]);
+      ruleTypeRegistry.get.mockReturnValue(ruleType);
       ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
@@ -403,7 +403,7 @@ describe('alert_form', () => {
 
       const initialAlert = {
         name: 'test',
-        alertTypeId: alertType.id,
+        alertTypeId: ruleType.id,
         params: {},
         consumer: ALERTS_FEATURE_ID,
         schedule: {
@@ -414,7 +414,7 @@ describe('alert_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown as Alert;
+      } as unknown as Rule;
 
       wrapper = mountWithIntl(
         <AlertForm

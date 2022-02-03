@@ -8,7 +8,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,21 +25,20 @@ import {
   keys,
 } from '@elastic/eui';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
-import { DocViewFilterFn, ElasticSearchHit } from '../../services/doc_views/doc_views_types';
-import { DiscoverServices } from '../../build_services';
-import { getContextUrl } from '../../utils/get_context_url';
-import { getSingleDocUrl } from '../../utils/get_single_doc_url';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import { useNavigationProps } from '../../utils/use_navigation_props';
+import { ElasticSearchHit } from '../../types';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
-interface Props {
+export interface DiscoverGridFlyoutProps {
   columns: string[];
   hit: ElasticSearchHit;
   hits?: ElasticSearchHit[];
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  services: DiscoverServices;
   setExpandedDoc: (doc: ElasticSearchHit) => void;
 }
 
@@ -67,9 +66,9 @@ export function DiscoverGridFlyout({
   onClose,
   onRemoveColumn,
   onAddColumn,
-  services,
   setExpandedDoc,
-}: Props) {
+}: DiscoverGridFlyoutProps) {
+  const services = useDiscoverServices();
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ _id }) => _id === hit?._id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
@@ -101,6 +100,15 @@ export function DiscoverGridFlyout({
     },
     [activePage, setPage]
   );
+
+  const { singleDocProps, surrDocsProps } = useNavigationProps({
+    indexPatternId: indexPattern.id!,
+    rowIndex: hit._index,
+    rowId: hit._id,
+    filterManager: services.filterManager,
+    addBasePath: services.addBasePath,
+    columns,
+  });
 
   return (
     <EuiPortal>
@@ -142,8 +150,8 @@ export function DiscoverGridFlyout({
                 size="xs"
                 iconType="document"
                 flush="left"
-                href={services.addBasePath(getSingleDocUrl(indexPattern.id!, hit._index, hit._id))}
                 data-test-subj="docTableRowAction"
+                {...singleDocProps}
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
                   defaultMessage: 'Single document',
@@ -156,13 +164,7 @@ export function DiscoverGridFlyout({
                   size="xs"
                   iconType="documents"
                   flush="left"
-                  href={getContextUrl(
-                    String(hit._id),
-                    indexPattern.id,
-                    columns,
-                    services.filterManager,
-                    services.addBasePath
-                  )}
+                  {...surrDocsProps}
                   data-test-subj="docTableRowAction"
                 >
                   {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {

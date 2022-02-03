@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 import { Ecs } from '../../../../common/ecs';
 import {
   allowSorting,
@@ -18,7 +18,7 @@ import {
   addBuildingBlockStyle,
 } from './helpers';
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { mockDnsEvent } from '../../../mock';
 
 describe('helpers', () => {

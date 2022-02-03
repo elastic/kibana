@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { EuiThemeColorMode } from '@elastic/eui/src/services/theme/types';
+import { COLOR_MODES_STANDARD } from '@elastic/eui';
+import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { CoreTheme } from '../../../../core/public';
 
-// IMPORTANT: This code has been copied to the `interactive_setup` plugin, any changes here should be applied there too.
-// That copy and this comment can be removed once https://github.com/elastic/kibana/issues/119204 is implemented.
+/* IMPORTANT: This code has been copied to the `interactive_setup` plugin, any changes here should be applied there too.
+That copy and this comment can be removed once https://github.com/elastic/kibana/issues/119204 is implemented.*/
+// IMPORTANT: This code has been copied to the `kibana_utils` plugin, to avoid cyclical dependency, any changes here should be applied there too.
 
-export const getColorMode = (theme: CoreTheme): EuiThemeColorMode => {
-  // COLOR_MODES_STANDARD is not exported from eui
-  return theme.darkMode ? 'DARK' : 'LIGHT';
+export const getColorMode = (theme: CoreTheme): EuiThemeColorModeStandard => {
+  return theme.darkMode ? COLOR_MODES_STANDARD.dark : COLOR_MODES_STANDARD.light;
 };

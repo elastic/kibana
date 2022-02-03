@@ -157,7 +157,8 @@ export const getFieldEditorOpener =
               fieldFormats={fieldFormats}
               uiSettings={uiSettings}
             />
-          </KibanaReactContextProvider>
+          </KibanaReactContextProvider>,
+          { theme$: core.theme.theme$ }
         ),
         {
           className: euiFlyoutClassname,

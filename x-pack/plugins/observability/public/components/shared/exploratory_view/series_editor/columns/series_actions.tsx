@@ -112,7 +112,7 @@ const HIDE_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.hide'
 });
 
 const COPY_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.clone', {
-  defaultMessage: 'Copy series',
+  defaultMessage: 'Duplicate series',
 });
 
 const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(

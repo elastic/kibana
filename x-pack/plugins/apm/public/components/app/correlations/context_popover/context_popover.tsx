@@ -11,14 +11,11 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldStats } from '../../../../../common/correlations/field_stats_types';
 import { OnAddFilter, TopValues } from './top_values';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -97,27 +94,11 @@ export function CorrelationsContextPopover({
         </h5>
       </EuiTitle>
       {infoIsOpen ? (
-        <>
-          <TopValues
-            topValueStats={topValueStats}
-            onAddFilter={onAddFilter}
-            fieldValue={fieldValue}
-          />
-          {topValueStats.topValuesSampleSize !== undefined && (
-            <Fragment>
-              <EuiSpacer size="s" />
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="xpack.apm.correlations.fieldContextPopover.calculatedFromSampleDescription"
-                  defaultMessage="Calculated from sample of {sampleSize} documents"
-                  values={{
-                    sampleSize: topValueStats.topValuesSampleSize,
-                  }}
-                />
-              </EuiText>
-            </Fragment>
-          )}
-        </>
+        <TopValues
+          topValueStats={topValueStats}
+          onAddFilter={onAddFilter}
+          fieldValue={fieldValue}
+        />
       ) : null}
     </EuiPopover>
   );

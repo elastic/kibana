@@ -10,13 +10,12 @@ import { RiskyHostsPanelView } from './risky_hosts_panel_view';
 import { LinkPanelListItem } from '../link_panel';
 import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
-import { HostRisk } from '../../containers/overview_risky_host_links/use_hosts_risk_score';
-import { HostsRiskScore } from '../../../../common';
+import { HostsRiskScore } from '../../../../common/search_strategy';
 
 const getListItemsFromHits = (items: HostsRiskScore[]): LinkPanelListItem[] => {
-  return items.map(({ host, risk_score: count, risk: copy }) => ({
+  return items.map(({ host, risk_stats: riskStats, risk: copy }) => ({
     title: host.name,
-    count,
+    count: riskStats.risk_score,
     copy,
     path: '',
   }));
@@ -24,13 +23,10 @@ const getListItemsFromHits = (items: HostsRiskScore[]): LinkPanelListItem[] => {
 
 const RiskyHostsEnabledModuleComponent: React.FC<{
   from: string;
-  hostRiskScore: HostRisk;
+  hostRiskScore?: HostsRiskScore[];
   to: string;
 }> = ({ hostRiskScore, to, from }) => {
-  const listItems = useMemo(
-    () => getListItemsFromHits(hostRiskScore?.result || []),
-    [hostRiskScore]
-  );
+  const listItems = useMemo(() => getListItemsFromHits(hostRiskScore || []), [hostRiskScore]);
   const { buttonHref } = useRiskyHostsDashboardButtonHref(to, from);
   const { listItemsWithLinks } = useRiskyHostsDashboardLinks(to, from, listItems);
 

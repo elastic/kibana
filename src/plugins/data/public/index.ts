@@ -78,19 +78,17 @@ export type {
   IFieldType,
   IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
   AggregationRestrictions,
-  IndexPatternListItem,
   RuntimeType,
+  DataViewListItem,
 } from '../common';
 export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
   fieldList,
-  IndexPatternType,
   DuplicateDataViewError,
 } from '../common';
 
@@ -188,6 +186,7 @@ export type {
   ISearchSource,
   SearchRequest,
   SearchSourceFields,
+  SerializedSearchSourceFields,
   // errors
   IEsError,
   Reason,
@@ -205,6 +204,7 @@ export {
   isEsError,
   SearchSessionState,
   SortDirection,
+  handleResponse,
 } from './search';
 
 export type {
@@ -293,12 +293,7 @@ export type {
 
 export type { AggsStart } from './search/aggs';
 
-export {
-  getTime,
-  // kbn field types
-  castEsToKbnFieldTypeName,
-  getKbnTypeNames,
-} from '../common';
+export { getTime, getKbnTypeNames } from '../common';
 
 export { isTimeRange, isQuery } from '../common';
 

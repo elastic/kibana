@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
-import * as mocks from './test_mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import {
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+} from '../../../../../alerting/server';
 // import { RecoveredActionGroup } from '../../../../../alerting/common';
 import {
-  alertsMock,
-  AlertServicesMock,
   AlertInstanceMock,
+  AlertServicesMock,
+  alertsMock,
 } from '../../../../../alerting/server/mocks';
 import { LifecycleAlertServices } from '../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { createLifecycleRuleExecutorMock } from '../../../../../rule_registry/server/utils/create_lifecycle_rule_executor_mock';
-import { InfraSources } from '../../sources';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import { AlertInstanceContext, AlertInstanceState } from '../../../../../alerting/server';
 import {
   Aggregators,
   Comparator,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
-} from './types';
+} from '../../../../common/alerting/metrics';
+import { InfraSources } from '../../sources';
+import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
+import * as mocks from './test_mocks';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -48,6 +51,7 @@ const initialRuleState: TestRuleState = {
 
 const mockOptions = {
   alertId: '',
+  executionId: '',
   startedAt: new Date(),
   previousStartedAt: null,
   state: {
@@ -154,9 +158,10 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toContain('current value is 1');
-      expect(action.reason).toContain('threshold of 0.75');
+      expect(action.reason).toContain('is 1');
+      expect(action.reason).toContain('Alert when > 0.75');
       expect(action.reason).toContain('test.metric.1');
+      expect(action.reason).toContain('in the last 1 min');
     });
   });
 
@@ -253,16 +258,22 @@ describe('The metric threshold alert type', () => {
               metric: metric ?? baseNonCountCriterion.metric,
             },
           ],
+          filterQuery,
         },
         state: state ?? mockOptions.state.wrapped,
       });
     test('persists previous groups that go missing, until the filterQuery param changes', async () => {
-      const stateResult1 = await executeWithFilter(Comparator.GT, [0.75], 'query', 'test.metric.2');
+      const stateResult1 = await executeWithFilter(
+        Comparator.GT,
+        [0.75],
+        JSON.stringify({ query: 'q' }),
+        'test.metric.2'
+      );
       expect(stateResult1.groups).toEqual(expect.arrayContaining(['a', 'b', 'c']));
       const stateResult2 = await executeWithFilter(
         Comparator.GT,
         [0.75],
-        'query',
+        JSON.stringify({ query: 'q' }),
         'test.metric.1',
         stateResult1
       );
@@ -270,7 +281,7 @@ describe('The metric threshold alert type', () => {
       const stateResult3 = await executeWithFilter(
         Comparator.GT,
         [0.75],
-        'different query',
+        JSON.stringify({ query: 'different' }),
         'test.metric.1',
         stateResult2
       );
@@ -333,10 +344,14 @@ describe('The metric threshold alert type', () => {
       expect(reasons.length).toBe(2);
       expect(reasons[0]).toContain('test.metric.1');
       expect(reasons[1]).toContain('test.metric.2');
-      expect(reasons[0]).toContain('current value is 1');
-      expect(reasons[1]).toContain('current value is 3');
-      expect(reasons[0]).toContain('threshold of 1');
-      expect(reasons[1]).toContain('threshold of 3');
+      expect(reasons[0]).toContain('is 1');
+      expect(reasons[1]).toContain('is 3');
+      expect(reasons[0]).toContain('Alert when >= 1');
+      expect(reasons[1]).toContain('Alert when >= 3');
+      expect(reasons[0]).toContain('in the last 1 min');
+      expect(reasons[1]).toContain('in the last 1 min');
+      expect(reasons[0]).toContain('for all hosts');
+      expect(reasons[1]).toContain('for all hosts');
     });
   });
   describe('querying with the count aggregator', () => {
@@ -704,15 +719,48 @@ describe('The metric threshold alert type', () => {
       await execute();
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toContain('current value is 100%');
-      expect(action.reason).toContain('threshold of 75%');
+      expect(action.reason).toContain('is 100%');
+      expect(action.reason).toContain('Alert when > 75%');
       expect(action.threshold.condition0[0]).toBe('75%');
       expect(action.value.condition0).toBe('100%');
+    });
+  });
+
+  describe('attempting to use a malformed filterQuery', () => {
+    afterAll(() => clearInstances());
+    const instanceID = '*';
+    const execute = () =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+            },
+          ],
+          sourceId: 'default',
+          filterQuery: '',
+          filterQueryText:
+            'host.name:(look.there.is.no.space.after.these.parentheses)and uh.oh: "wow that is bad"',
+        },
+      });
+    test('reports an error', async () => {
+      await execute();
+      expect(mostRecentAction(instanceID)).toBeErrorAction();
     });
   });
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
+  alerting: {
+    inventory_threshold: {
+      group_by_page_size: 100,
+    },
+    metric_threshold: {
+      group_by_page_size: 100,
+    },
+  },
   inventory: {
     compositeSize: 2000,
   },
@@ -732,8 +780,7 @@ const mockLibs: any = {
 const executor = createMetricThresholdExecutor(mockLibs);
 
 const alertsServices = alertsMock.createAlertServices();
-const services: AlertServicesMock &
-  LifecycleAlertServices<AlertInstanceState, AlertInstanceContext, string> = {
+const services: AlertServicesMock & LifecycleAlertServices<AlertState, AlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };
@@ -847,6 +894,14 @@ expect.extend({
       pass,
     };
   },
+  toBeErrorAction(action?: Action) {
+    const pass = action?.id === FIRED_ACTIONS.id && action?.action.alertState === 'ERROR';
+    const message = () => `expected ${action} to be an ERROR action`;
+    return {
+      message,
+      pass,
+    };
+  },
 });
 
 declare global {
@@ -855,6 +910,7 @@ declare global {
     interface Matchers<R> {
       toBeAlertAction(action?: Action): R;
       toBeNoDataAction(action?: Action): R;
+      toBeErrorAction(action?: Action): R;
     }
   }
 }

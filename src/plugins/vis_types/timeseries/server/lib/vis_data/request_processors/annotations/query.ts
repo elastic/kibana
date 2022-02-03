@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { getBucketSize, getTimerange, overwrite } from '../../helpers';
 import { validateField } from '../../../../../common/fields_utils';
-import { esQuery, UI_SETTINGS } from '../../../../../../../data/server';
+import { UI_SETTINGS } from '../../../../../../../data/server';
 
 import type { AnnotationsRequestProcessorsFunction } from './types';
 
@@ -37,7 +38,7 @@ export const query: AnnotationsRequestProcessorsFunction = ({
     const queries = !annotation.ignore_global_filters ? req.body.query : [];
     const filters = !annotation.ignore_global_filters ? req.body.filters : [];
 
-    doc.query = esQuery.buildEsQuery(indexPattern, queries, filters, esQueryConfig);
+    doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
 
     const boolFilters: unknown[] = [
       {
@@ -52,13 +53,11 @@ export const query: AnnotationsRequestProcessorsFunction = ({
     ];
 
     if (annotation.query_string) {
-      boolFilters.push(
-        esQuery.buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
-      );
+      boolFilters.push(buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig));
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
-      boolFilters.push(esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
+      boolFilters.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     if (annotation.fields) {

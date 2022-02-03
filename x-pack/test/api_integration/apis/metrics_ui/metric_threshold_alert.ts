@@ -7,18 +7,18 @@
 
 import expect from '@kbn/expect';
 import { convertToKibanaClient } from '@kbn/test';
-import { InfraSource } from '../../../../plugins/infra/common/source_configuration/source_configuration';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  evaluateAlert,
-  EvaluatedAlertParams,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/evaluate_alert';
 import {
   Aggregators,
+  Comparator,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/types';
-import { Comparator } from '../../../../plugins/infra/server/lib/alerting/common/types';
+} from '../../../../plugins/infra/common/alerting/metrics';
+import { InfraSource } from '../../../../plugins/infra/common/source_configuration/source_configuration';
+import {
+  EvaluatedRuleParams,
+  evaluateRule,
+} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/evaluate_rule';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const { gauge, rate } = DATES['alert-test-data'];
@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
 
-  const baseParams: EvaluatedAlertParams = {
+  const baseParams: EvaluatedRuleParams = {
     groupBy: void 0,
     filterQuery: void 0,
     criteria: [
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateAlert(kbnClient, params, config, [], timeFrame);
+          const results = await evaluateRule(kbnClient, params, config, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateAlert(kbnClient, params, config, [], timeFrame);
+          const results = await evaluateRule(kbnClient, params, config, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               web: {
@@ -184,7 +184,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: gauge.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -208,7 +215,14 @@ export default function ({ getService }: FtrProviderContext) {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -246,7 +260,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: gauge.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
@@ -287,7 +308,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: gauge.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
@@ -329,11 +357,12 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: gauge.midpoint };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateAlert(
+          const results = await evaluateRule(
             kbnClient,
             params,
             configuration,
             ['dev', 'prod'],
+            10000,
             timeFrame
           );
           expect(results).to.eql([
@@ -392,7 +421,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: rate.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -433,7 +469,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: rate.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateAlert(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {

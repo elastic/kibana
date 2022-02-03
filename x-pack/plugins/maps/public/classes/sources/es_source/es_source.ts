@@ -7,8 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { Filter, IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import type { Query } from 'src/plugins/data/common';
+import type { KibanaExecutionContext } from 'kibana/public';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
@@ -37,6 +39,7 @@ import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { makePublicExecutionContext } from '../../../util';
 
 export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
@@ -159,6 +162,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     requestName,
     searchSessionId,
     searchSource,
+    executionContext,
   }: {
     registerCancelCallback: (callback: () => void) => void;
     requestDescription: string;
@@ -166,6 +170,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     requestName: string;
     searchSessionId?: string;
     searchSource: ISearchSource;
+    executionContext: KibanaExecutionContext;
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
@@ -182,6 +187,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             title: requestName,
             description: requestDescription,
           },
+          executionContext,
         })
         .toPromise();
       return resp;
@@ -276,6 +282,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       const esResp = await searchSource.fetch({
         abortSignal: abortController.signal,
         legacyHitsTotal: false,
+        executionContext: makePublicExecutionContext('es_source:bounds'),
       });
 
       if (!esResp.aggregations) {
@@ -468,6 +475,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         }
       ),
       searchSessionId,
+      executionContext: makePublicExecutionContext('es_source:style_meta'),
     });
 
     return resp.aggregations;

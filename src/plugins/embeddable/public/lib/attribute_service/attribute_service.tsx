@@ -15,8 +15,6 @@ import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
-  IEmbeddable,
-  Container,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactory,
 } from '../index';
@@ -29,13 +27,28 @@ import {
  */
 export const ATTRIBUTE_SERVICE_KEY = 'attributes';
 
-export interface AttributeServiceOptions<A extends { title: string }> {
+export interface GenericAttributes {
+  title: string;
+}
+export interface AttributeServiceUnwrapResult<
+  SavedObjectAttributes extends GenericAttributes,
+  MetaInfo extends unknown = unknown
+> {
+  attributes: SavedObjectAttributes;
+  metaInfo?: MetaInfo;
+}
+export interface AttributeServiceOptions<
+  SavedObjectAttributes extends GenericAttributes,
+  MetaInfo extends unknown = unknown
+> {
   saveMethod: (
-    attributes: A,
+    attributes: SavedObjectAttributes,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
   checkForDuplicateTitle: (props: OnSaveProps) => Promise<true>;
-  unwrapMethod?: (savedObjectId: string) => Promise<A>;
+  unwrapMethod?: (
+    savedObjectId: string
+  ) => Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>>;
 }
 
 export class AttributeService<
@@ -43,7 +56,8 @@ export class AttributeService<
   ValType extends EmbeddableInput & {
     [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
   } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
-  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+  MetaInfo extends unknown = unknown
 > {
   constructor(
     private type: string,
@@ -53,7 +67,7 @@ export class AttributeService<
     ) => void,
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
-    private options: AttributeServiceOptions<SavedObjectAttributes>,
+    private options: AttributeServiceOptions<SavedObjectAttributes, MetaInfo>,
     getEmbeddableFactory?: (embeddableFactoryId: string) => EmbeddableFactory
   ) {
     if (getEmbeddableFactory) {
@@ -64,20 +78,21 @@ export class AttributeService<
     }
   }
 
-  private async defaultUnwrapMethod(input: RefType): Promise<SavedObjectAttributes> {
-    return new Promise<SavedObjectAttributes>((resolve) => {
-      // @ts-ignore
-      return resolve({ ...input });
-    });
+  private async defaultUnwrapMethod(
+    input: RefType
+  ): Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>> {
+    return Promise.resolve({ attributes: { ...(input as unknown as SavedObjectAttributes) } });
   }
 
-  public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
+  public async unwrapAttributes(
+    input: RefType | ValType
+  ): Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>> {
     if (this.inputIsRefType(input)) {
       return this.options.unwrapMethod
         ? await this.options.unwrapMethod(input.savedObjectId)
         : await this.defaultUnwrapMethod(input);
     }
-    return input[ATTRIBUTE_SERVICE_KEY];
+    return { attributes: (input as ValType)[ATTRIBUTE_SERVICE_KEY] };
   }
 
   public async wrapAttributes(
@@ -117,21 +132,20 @@ export class AttributeService<
     return isSavedObjectEmbeddableInput(input);
   };
 
-  public getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType {
-    return ((embeddable.getRoot() as Container).getInput()?.panels?.[embeddable.id]
-      ?.explicitInput ?? embeddable.getInput()) as ValType | RefType;
-  }
-
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
     if (!this.inputIsRefType(input)) {
-      return input;
+      return input as ValType;
     }
-    const attributes = await this.unwrapAttributes(input);
+    const { attributes } = await this.unwrapAttributes(input);
+    const libraryTitle = attributes.title;
+    const { savedObjectId, ...originalInputToPropagate } = input;
+
     return {
-      ...input,
-      savedObjectId: undefined,
-      attributes,
-    };
+      ...originalInputToPropagate,
+      // by value visualizations should not have default titles and/or descriptions
+      ...{ attributes: omit(attributes, ['title', 'description']) },
+      title: libraryTitle,
+    } as unknown as ValType;
   };
 
   getInputAsRefType = async (
@@ -145,14 +159,17 @@ export class AttributeService<
       const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
         await this.options.checkForDuplicateTitle(props);
         try {
-          const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
+          const newAttributes = { ...(input as ValType)[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
-          const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
+          const wrappedInput = (await this.wrapAttributes(
+            newAttributes,
+            true
+          )) as unknown as RefType;
+          // Remove unneeded attributes from the original input. Note that the original panel title
+          // is removed in favour of the new attributes title
+          const newInput = omit(input, [ATTRIBUTE_SERVICE_KEY, 'title']);
 
-          // Remove unneeded attributes from the original input.
-          const newInput = omit(input, ATTRIBUTE_SERVICE_KEY);
-
-          // Combine input and wrapped input to preserve any passed in explicit Input.
+          // Combine input and wrapped input to preserve any passed in explicit Input
           resolve({ ...newInput, ...wrappedInput });
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
@@ -165,7 +182,11 @@ export class AttributeService<
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => reject()}
-            title={get(saveOptions, 'saveModalTitle', input[ATTRIBUTE_SERVICE_KEY].title)}
+            title={get(
+              saveOptions,
+              'saveModalTitle',
+              (input as ValType)[ATTRIBUTE_SERVICE_KEY].title
+            )}
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}

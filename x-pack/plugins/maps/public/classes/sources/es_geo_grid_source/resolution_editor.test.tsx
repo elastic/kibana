@@ -12,6 +12,7 @@ import { ResolutionEditor } from './resolution_editor';
 import { GRID_RESOLUTION } from '../../../../common/constants';
 
 const defaultProps = {
+  isHeatmap: false,
   resolution: GRID_RESOLUTION.COARSE,
   onChange: () => {},
   metrics: [],

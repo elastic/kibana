@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { ENDPOINT_DEFAULT_PAGE, ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
 import { HostStatus } from '../types';
 
-export const GetMetadataListRequestSchemaV2 = {
+export const GetMetadataListRequestSchema = {
   query: schema.object(
     {
       page: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE, min: 0 }),
@@ -31,4 +31,4 @@ export const GetMetadataListRequestSchemaV2 = {
   ),
 };
 
-export type GetMetadataListRequestQuery = TypeOf<typeof GetMetadataListRequestSchemaV2.query>;
+export type GetMetadataListRequestQuery = TypeOf<typeof GetMetadataListRequestSchema.query>;

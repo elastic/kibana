@@ -232,11 +232,11 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
 
 export function isAgentDocument(
   maybeDocument: any
-): maybeDocument is estypes.MgetHit<FleetServerAgent> {
+): maybeDocument is estypes.MgetResponseItem<FleetServerAgent> {
   return '_id' in maybeDocument && '_source' in maybeDocument;
 }
 
-export type ESAgentDocumentResult = estypes.MgetHit<FleetServerAgent>;
+export type ESAgentDocumentResult = estypes.MgetResponseItem<FleetServerAgent>;
 
 export async function getAgentDocuments(
   esClient: ElasticsearchClient,
@@ -337,6 +337,7 @@ export async function bulkUpdateAgents(
     items: res.body.items.map((item) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
+      // @ts-expect-error it not assignable to ErrorCause
       error: item.update!.error as Error,
     })),
   };

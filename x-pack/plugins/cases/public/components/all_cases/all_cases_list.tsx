@@ -9,25 +9,19 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
-import classnames from 'classnames';
 
 import {
   Case,
-  CaseStatuses,
-  CaseType,
-  CommentRequestAlertType,
   CaseStatusWithAllStatus,
   FilterOptions,
   SortFieldCase,
-  SubCase,
-  caseStatuses,
-} from '../../../common';
-import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
+} from '../../../common/ui/types';
+import { CaseStatuses, CommentRequestAlertType, caseStatuses } from '../../../common/api';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
 
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './columns';
-import { getExpandedRowMap } from './expanded_row';
 import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
@@ -53,10 +47,9 @@ const getSortField = (field: string): SortFieldCase =>
 
 export interface AllCasesListProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
-  disableAlerts?: boolean;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
-  onRowClick?: (theCase?: Case | SubCase) => void;
+  onRowClick?: (theCase?: Case) => void;
   updateCase?: (newCase: Case) => void;
   doRefresh?: () => void;
 }
@@ -64,17 +57,21 @@ export interface AllCasesListProps {
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({
     alertData,
-    disableAlerts,
     hiddenStatuses = [],
     isSelectorView = false,
     onRowClick,
     updateCase,
     doRefresh,
   }) => {
-    const { userCanCrud } = useCasesContext();
+    const { owner, userCanCrud } = useCasesContext();
+    const hasOwner = !!owner.length;
+    const availableSolutions = useAvailableCasesOwners();
+
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
-    const initialFilterOptions =
-      !isEmpty(hiddenStatuses) && firstAvailableStatus ? { status: firstAvailableStatus } : {};
+    const initialFilterOptions = {
+      ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
+      owner: hasOwner ? owner : availableSolutions,
+    };
 
     const {
       data,
@@ -101,24 +98,31 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     );
 
     const filterRefetch = useRef<() => void>();
-    const tableRef = useRef<EuiBasicTable>();
+    const tableRef = useRef<EuiBasicTable | null>(null);
+    const [isLoading, handleIsLoading] = useState<boolean>(false);
+
     const setFilterRefetch = useCallback(
       (refetchFilter: () => void) => {
         filterRefetch.current = refetchFilter;
       },
       [filterRefetch]
     );
-    const [isLoading, handleIsLoading] = useState<boolean>(false);
+
+    const deselectCases = useCallback(() => {
+      setSelectedCases([]);
+      tableRef.current?.setSelection([]);
+    }, [setSelectedCases]);
+
     const refreshCases = useCallback(
       (dataRefresh = true) => {
+        deselectCases();
         if (dataRefresh) refetchCases();
         if (doRefresh) doRefresh();
-        setSelectedCases([]);
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
       },
-      [doRefresh, filterRefetch, refetchCases, setSelectedCases]
+      [deselectCases, doRefresh, refetchCases]
     );
 
     const tableOnChangeCallback = useCallback(
@@ -157,18 +161,16 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           setQueryParams({ sortField: SortFieldCase.createdAt });
         }
 
-        setSelectedCases([]);
-        tableRef.current?.setSelection([]);
+        deselectCases();
         setFilters(newFilterOptions);
         refreshCases(false);
       },
-      [setSelectedCases, setFilters, refreshCases, setQueryParams]
+      [deselectCases, setFilters, refreshCases, setQueryParams]
     );
 
     const showActions = userCanCrud && !isSelectorView;
 
     const columns = useCasesColumns({
-      disableAlerts,
       dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
       handleIsLoading,
@@ -181,17 +183,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       alertData,
       postComment,
       updateCase,
+      showSolutionColumn: !hasOwner && availableSolutions.length > 1,
     });
-
-    const itemIdToExpandedRowMap = useMemo(
-      () =>
-        getExpandedRowMap({
-          columns,
-          data: data.cases,
-          onSubCaseClick: onRowClick,
-        }),
-      [data.cases, columns, onRowClick]
-    );
 
     const pagination = useMemo(
       () => ({
@@ -206,7 +199,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({
         onSelectionChange: setSelectedCases,
-        selectableMessage: (selectable) => (!selectable ? SELECTABLE_MESSAGE_COLLECTIONS : ''),
         initialSelected: selectedCases,
       }),
       [selectedCases, setSelectedCases]
@@ -217,7 +209,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const tableRowProps = useCallback(
       (theCase: Case) => ({
         'data-test-subj': `cases-table-row-${theCase.id}`,
-        className: classnames({ isDisabled: theCase.type === CaseType.collection }),
       }),
       []
     );
@@ -235,11 +226,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           countOpenCases={data.countOpenCases}
           countInProgressCases={data.countInProgressCases}
           onFilterChanged={onFilterChangedCallback}
+          availableSolutions={hasOwner ? [] : availableSolutions}
           initial={{
             search: filterOptions.search,
             reporters: filterOptions.reporters,
             tags: filterOptions.tags,
             status: filterOptions.status,
+            owner: filterOptions.owner,
           }}
           setFilterRefetch={setFilterRefetch}
           hiddenStatuses={hiddenStatuses}
@@ -254,7 +247,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           isCommentUpdating={isCommentUpdating}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           onChange={tableOnChangeCallback}
           pagination={pagination}
           refreshCases={refreshCases}

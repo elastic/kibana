@@ -139,7 +139,7 @@ const getCorrectiveAction = (
   );
   const requiresReindexAction = /Index created before/.test(message);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
-  const requiresMlAction = /model snapshot/.test(message);
+  const requiresMlAction = /[Mm]odel snapshot/.test(message);
 
   if (requiresReindexAction) {
     return {

@@ -44,10 +44,6 @@ const strings = {
     i18n.translate('xpack.canvas.workpadHeaderElementMenu.elementMenuLabel', {
       defaultMessage: 'Add an element',
     }),
-  getEmbedObjectMenuItemLabel: () =>
-    i18n.translate('xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel', {
-      defaultMessage: 'Add from Kibana',
-    }),
   getFilterMenuItemLabel: () =>
     i18n.translate('xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel', {
       defaultMessage: 'Filter',

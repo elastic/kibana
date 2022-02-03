@@ -10,7 +10,7 @@ import { map } from 'lodash/fp';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { ConnectorTypes, JiraFieldsType } from '../../../../common';
+import { ConnectorTypes, JiraFieldsType } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
@@ -209,6 +209,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFiel
     />
   );
 };
+JiraFieldsComponent.displayName = 'JiraFields';
 
 // eslint-disable-next-line import/no-default-export
 export { JiraFieldsComponent as default };

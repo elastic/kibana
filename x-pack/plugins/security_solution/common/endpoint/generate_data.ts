@@ -1600,7 +1600,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   /**
    * Generate an EPM Package for Endpoint
    */
-  public generateEpmPackage(): GetPackagesResponse['response'][0] {
+  public generateEpmPackage(): GetPackagesResponse['items'][0] {
     return {
       id: this.seededUUIDv4(),
       name: 'endpoint',

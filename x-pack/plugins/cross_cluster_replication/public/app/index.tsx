@@ -8,9 +8,17 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
-import { UnmountCallback } from 'src/core/public';
-import { DocLinksStart } from 'kibana/public';
+import { Observable } from 'rxjs';
+
+import {
+  UnmountCallback,
+  I18nStart,
+  ScopedHistory,
+  ApplicationStart,
+  DocLinksStart,
+  CoreTheme,
+} from 'src/core/public';
+import { KibanaThemeProvider } from '../shared_imports';
 import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
 import { init as initDocumentation } from './services/documentation_links';
 import { App } from './app';
@@ -20,13 +28,16 @@ const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
   history: ScopedHistory,
-  getUrlForApp: ApplicationStart['getUrlForApp']
+  getUrlForApp: ApplicationStart['getUrlForApp'],
+  theme$: Observable<CoreTheme>
 ): UnmountCallback => {
   render(
     <I18nContext>
-      <Provider store={ccrStore}>
-        <App history={history} getUrlForApp={getUrlForApp} />
-      </Provider>
+      <KibanaThemeProvider theme$={theme$}>
+        <Provider store={ccrStore}>
+          <App history={history} getUrlForApp={getUrlForApp} />
+        </Provider>
+      </KibanaThemeProvider>
     </I18nContext>,
     element
   );
@@ -41,6 +52,7 @@ export async function mountApp({
   docLinks,
   history,
   getUrlForApp,
+  theme$,
 }: {
   element: Element;
   setBreadcrumbs: SetBreadcrumbs;
@@ -48,11 +60,12 @@ export async function mountApp({
   docLinks: DocLinksStart;
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  theme$: Observable<CoreTheme>;
 }): Promise<UnmountCallback> {
   // Import and initialize additional services here instead of in plugin.ts to reduce the size of the
   // initial bundle as much as possible.
   initBreadcrumbs(setBreadcrumbs);
   initDocumentation(docLinks);
 
-  return renderApp(element, I18nContext, history, getUrlForApp);
+  return renderApp(element, I18nContext, history, getUrlForApp, theme$);
 }

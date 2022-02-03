@@ -313,7 +313,10 @@ export class AnomalyDetails extends Component {
           }),
           content: (
             <Fragment>
-              <div className="ml-anomalies-table-details">
+              <div
+                className="ml-anomalies-table-details"
+                data-test-subj="mlAnomaliesListRowDetails"
+              >
                 {this.renderDescription()}
                 <EuiSpacer size="m" />
                 {this.renderDetails()}
@@ -633,7 +636,7 @@ export class AnomalyDetails extends Component {
       );
     } else {
       return (
-        <div className="ml-anomalies-table-details">
+        <div className="ml-anomalies-table-details" data-test-subj="mlAnomaliesListRowDetails">
           {this.renderDescription()}
           <EuiSpacer size="m" />
           {this.renderDetails()}

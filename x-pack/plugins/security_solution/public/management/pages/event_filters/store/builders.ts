@@ -23,6 +23,7 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     page_index: MANAGEMENT_DEFAULT_PAGE,
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     filter: '',
+    included_policies: '',
   },
   listPage: {
     active: false,

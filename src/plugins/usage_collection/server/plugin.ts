@@ -60,11 +60,6 @@ export interface UsageCollectionSetup {
     type: string
   ) => Collector<TFetchReturn, ExtraOptions> | undefined;
   /**
-   * Returns if all the collectors are ready to fetch their reported usage.
-   * @internal: telemetry use
-   */
-  areAllCollectorsReady: () => Promise<boolean>;
-  /**
    * Fetches the collection from all the registered collectors
    * @internal: telemetry use
    */
@@ -147,7 +142,6 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     });
 
     return {
-      areAllCollectorsReady: collectorSet.areAllCollectorsReady,
       bulkFetch: collectorSet.bulkFetch,
       getCollectorByType: collectorSet.getCollectorByType,
       makeStatsCollector: collectorSet.makeStatsCollector,

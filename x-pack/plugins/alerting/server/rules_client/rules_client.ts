@@ -24,27 +24,23 @@ import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
   Alert,
   PartialAlert,
-  RawAlert,
+  RawRule,
   RuleTypeRegistry,
   AlertAction,
   IntervalSchedule,
   SanitizedAlert,
-  AlertTaskState,
+  RuleTaskState,
   AlertSummary,
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
   AlertTypeParams,
   ResolvedSanitizedRule,
   AlertWithLegacyId,
-  SanitizedAlertWithLegacyId,
+  SanitizedRuleWithLegacyId,
   PartialAlertWithLegacyId,
   RawAlertInstance,
 } from '../types';
-import {
-  validateAlertTypeParams,
-  alertExecutionStatusFromRaw,
-  getAlertNotifyWhenType,
-} from '../lib';
+import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -52,7 +48,7 @@ import {
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
-import { RegistryRuleType, UntypedNormalizedAlertType } from '../rule_type_registry';
+import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   AlertingAuthorization,
   WriteOperations,
@@ -76,11 +72,12 @@ import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
 import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
-import { mapSortField } from './lib';
-import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
+import { mapSortField, validateOperationOnAttributes } from './lib';
+import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { AlertInstance } from '../alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
+import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -92,6 +89,29 @@ export type CreateAPIKeyResult =
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginInvalidateAPIKeyResult };
+
+export interface RuleAggregation {
+  status: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+  muted: {
+    buckets: Array<{
+      key: number;
+      key_as_string: string;
+      doc_count: number;
+    }>;
+  };
+  enabled: {
+    buckets: Array<{
+      key: number;
+      key_as_string: string;
+      doc_count: number;
+    }>;
+  };
+}
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -124,7 +144,7 @@ export interface FindOptions extends IndexType {
   defaultSearchOperator?: 'AND' | 'OR';
   searchFields?: string[];
   sortField?: string;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
   hasReference?: {
     type: string;
     id: string;
@@ -150,6 +170,8 @@ interface IndexType {
 
 export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
+  ruleEnabledStatus?: { enabled: number; disabled: number };
+  ruleMutedStatus?: { muted: number; unmuted: number };
 }
 
 export interface FindResult<Params extends AlertTypeParams> {
@@ -196,6 +218,7 @@ export interface UpdateOptions<Params extends AlertTypeParams> {
 export interface GetAlertSummaryParams {
   id: string;
   dateStart?: string;
+  numberOfExecutions?: number;
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -225,6 +248,7 @@ export class RulesClient {
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly auditLogger?: AuditLogger;
   private readonly eventLogger?: IEventLogger;
+  private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedAlert> = ['monitoring'];
 
   constructor({
     ruleTypeRegistry,
@@ -291,10 +315,7 @@ export class RulesClient {
     // Throws an error if alert type isn't registered
     const ruleType = this.ruleTypeRegistry.get(data.alertTypeId);
 
-    const validatedAlertTypeParams = validateAlertTypeParams(
-      data.params,
-      ruleType.validate?.params
-    );
+    const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
     const username = await this.getUserName();
 
     let createdAPIKey = null;
@@ -330,7 +351,7 @@ export class RulesClient {
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
-    const rawAlert: RawAlert = {
+    const rawRule: RawRule = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       legacyId,
@@ -339,11 +360,12 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      params: updatedParams as RawAlert['params'],
+      params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      executionStatus: getAlertExecutionStatusPending(new Date().toISOString()),
+      executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
+      monitoring: getDefaultRuleMonitoring(),
     };
 
     this.auditLogger?.log(
@@ -354,11 +376,11 @@ export class RulesClient {
       })
     );
 
-    let createdAlert: SavedObject<RawAlert>;
+    let createdAlert: SavedObject<RawRule>;
     try {
       createdAlert = await this.unsecuredSavedObjectsClient.create(
         'alert',
-        this.updateMeta(rawAlert),
+        this.updateMeta(rawRule),
         {
           ...options,
           references,
@@ -368,7 +390,7 @@ export class RulesClient {
     } catch (e) {
       // Avoid unused API key
       markApiKeyForInvalidation(
-        { apiKey: rawAlert.apiKey },
+        { apiKey: rawRule.apiKey },
         this.logger,
         this.unsecuredSavedObjectsClient
       );
@@ -379,7 +401,7 @@ export class RulesClient {
       try {
         scheduledTask = await this.scheduleRule(
           createdAlert.id,
-          rawAlert.alertTypeId,
+          rawRule.alertTypeId,
           data.schedule,
           true
         );
@@ -395,7 +417,7 @@ export class RulesClient {
         }
         throw e;
       }
-      await this.unsecuredSavedObjectsClient.update<RawAlert>('alert', createdAlert.id, {
+      await this.unsecuredSavedObjectsClient.update<RawRule>('alert', createdAlert.id, {
         scheduledTaskId: scheduledTask.id,
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
@@ -404,18 +426,22 @@ export class RulesClient {
       createdAlert.id,
       createdAlert.attributes.alertTypeId,
       createdAlert.attributes,
-      references
+      references,
+      false,
+      true
     );
   }
 
   public async get<Params extends AlertTypeParams = never>({
     id,
     includeLegacyId = false,
+    excludeFromPublicApi = false,
   }: {
     id: string;
     includeLegacyId?: boolean;
-  }): Promise<SanitizedAlert<Params> | SanitizedAlertWithLegacyId<Params>> {
-    const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+    excludeFromPublicApi?: boolean;
+  }): Promise<SanitizedAlert<Params> | SanitizedRuleWithLegacyId<Params>> {
+    const result = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     try {
       await this.authorization.ensureAuthorized({
         ruleTypeId: result.attributes.alertTypeId,
@@ -444,7 +470,8 @@ export class RulesClient {
       result.attributes.alertTypeId,
       result.attributes,
       result.references,
-      includeLegacyId
+      includeLegacyId,
+      excludeFromPublicApi
     );
   }
 
@@ -456,7 +483,7 @@ export class RulesClient {
     includeLegacyId?: boolean;
   }): Promise<ResolvedSanitizedRule<Params>> {
     const { saved_object: result, ...resolveResponse } =
-      await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
+      await this.unsecuredSavedObjectsClient.resolve<RawRule>('alert', id);
     try {
       await this.authorization.ensureAuthorized({
         ruleTypeId: result.attributes.alertTypeId,
@@ -495,7 +522,7 @@ export class RulesClient {
     };
   }
 
-  public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
+  public async getAlertState({ id }: { id: string }): Promise<RuleTaskState | void> {
     const alert = await this.get({ id });
     await this.authorization.ensureAuthorized({
       ruleTypeId: alert.alertTypeId,
@@ -512,9 +539,13 @@ export class RulesClient {
     }
   }
 
-  public async getAlertSummary({ id, dateStart }: GetAlertSummaryParams): Promise<AlertSummary> {
+  public async getAlertSummary({
+    id,
+    dateStart,
+    numberOfExecutions,
+  }: GetAlertSummaryParams): Promise<AlertSummary> {
     this.logger.debug(`getAlertSummary(): getting alert ${id}`);
-    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedAlertWithLegacyId;
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
     await this.authorization.ensureAuthorized({
       ruleTypeId: rule.alertTypeId,
@@ -525,7 +556,7 @@ export class RulesClient {
 
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
-    const durationMillis = parseDuration(rule.schedule.interval) * 60;
+    const durationMillis = parseDuration(rule.schedule.interval) * (numberOfExecutions ?? 60);
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
     const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 
@@ -533,30 +564,49 @@ export class RulesClient {
 
     this.logger.debug(`getAlertSummary(): search the event log for rule ${id}`);
     let events: IEvent[];
+    let executionEvents: IEvent[];
+
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObjectIds(
-        'alert',
-        [id],
-        {
-          page: 1,
-          per_page: 10000,
-          start: parsedDateStart.toISOString(),
-          end: dateNow.toISOString(),
-          sort_order: 'desc',
-        },
-        rule.legacyId !== null ? [rule.legacyId] : undefined
-      );
+      const [queryResults, executionResults] = await Promise.all([
+        eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            page: 1,
+            per_page: 10000,
+            start: parsedDateStart.toISOString(),
+            sort_order: 'desc',
+            end: dateNow.toISOString(),
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+        eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            page: 1,
+            per_page: numberOfExecutions ?? 60,
+            filter: 'event.provider: alerting AND event.action:execute',
+            sort_order: 'desc',
+            end: dateNow.toISOString(),
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+      ]);
       events = queryResults.data;
+      executionEvents = executionResults.data;
     } catch (err) {
       this.logger.debug(
         `rulesClient.getAlertSummary(): error searching event log for rule ${id}: ${err.message}`
       );
       events = [];
+      executionEvents = [];
     }
 
     return alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });
@@ -564,7 +614,8 @@ export class RulesClient {
 
   public async find<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
-  }: { options?: FindOptions } = {}): Promise<FindResult<Params>> {
+    excludeFromPublicApi = false,
+  }: { options?: FindOptions; excludeFromPublicApi?: boolean } = {}): Promise<FindResult<Params>> {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -581,21 +632,32 @@ export class RulesClient {
       throw error;
     }
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
+    const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
+    const sortField = mapSortField(options.sortField);
+    if (excludeFromPublicApi) {
+      try {
+        validateOperationOnAttributes(
+          filterKueryNode,
+          sortField,
+          options.searchFields,
+          this.fieldsToExcludeFromPublicApi
+        );
+      } catch (error) {
+        throw Boom.badRequest(`Error find rules: ${error.message}`);
+      }
+    }
 
     const {
       page,
       per_page: perPage,
       total,
       saved_objects: data,
-    } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
+    } = await this.unsecuredSavedObjectsClient.find<RawRule>({
       ...options,
-      sortField: mapSortField(options.sortField),
+      sortField,
       filter:
-        (authorizationFilter && options.filter
-          ? nodeBuilder.and([
-              esKuery.fromKueryExpression(options.filter),
-              authorizationFilter as KueryNode,
-            ])
+        (authorizationFilter && filterKueryNode
+          ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
           : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
@@ -621,8 +683,10 @@ export class RulesClient {
       return this.getAlertFromRaw<Params>(
         id,
         attributes.alertTypeId,
-        fields ? (pick(attributes, fields) as RawAlert) : attributes,
-        references
+        fields ? (pick(attributes, fields) as RawRule) : attributes,
+        references,
+        false,
+        excludeFromPublicApi
       );
     });
 
@@ -644,42 +708,100 @@ export class RulesClient {
   }
 
   public async aggregate({
-    options: { fields, ...options } = {},
+    options: { fields, filter, ...options } = {},
   }: { options?: AggregateOptions } = {}): Promise<AggregateResult> {
-    // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
-    const alertExecutionStatus = await Promise.all(
-      AlertExecutionStatusValues.map(async (status: string) => {
-        const { filter: authorizationFilter } = await this.authorization.getFindAuthorizationFilter(
-          AlertingAuthorizationEntity.Rule,
-          alertingAuthorizationFilterOpts
-        );
-        const filter = options.filter
-          ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
-          : `alert.attributes.executionStatus.status:(${status})`;
-        const { total } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
-          ...options,
-          filter:
-            (authorizationFilter && filter
-              ? nodeBuilder.and([
-                  esKuery.fromKueryExpression(filter),
-                  authorizationFilter as KueryNode,
-                ])
-              : authorizationFilter) ?? filter,
-          page: 1,
-          perPage: 0,
-          type: 'alert',
-        });
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Rule,
+        alertingAuthorizationFilterOpts
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.AGGREGATE,
+          error,
+        })
+      );
+      throw error;
+    }
+    const { filter: authorizationFilter } = authorizationTuple;
+    const resp = await this.unsecuredSavedObjectsClient.find<RawRule, RuleAggregation>({
+      ...options,
+      filter:
+        (authorizationFilter && filter
+          ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
+          : authorizationFilter) ?? filter,
+      page: 1,
+      perPage: 0,
+      type: 'alert',
+      aggs: {
+        status: {
+          terms: { field: 'alert.attributes.executionStatus.status' },
+        },
+        enabled: {
+          terms: { field: 'alert.attributes.enabled' },
+        },
+        muted: {
+          terms: { field: 'alert.attributes.muteAll' },
+        },
+      },
+    });
 
-        return { [status]: total };
+    if (!resp.aggregations) {
+      // Return a placeholder with all zeroes
+      const placeholder: AggregateResult = {
+        alertExecutionStatus: {},
+        ruleEnabledStatus: {
+          enabled: 0,
+          disabled: 0,
+        },
+        ruleMutedStatus: {
+          muted: 0,
+          unmuted: 0,
+        },
+      };
+
+      for (const key of AlertExecutionStatusValues) {
+        placeholder.alertExecutionStatus[key] = 0;
+      }
+
+      return placeholder;
+    }
+
+    const alertExecutionStatus = resp.aggregations.status.buckets.map(
+      ({ key, doc_count: docCount }) => ({
+        [key]: docCount,
       })
     );
 
-    return {
+    const ret: AggregateResult = {
       alertExecutionStatus: alertExecutionStatus.reduce(
         (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
         {}
       ),
     };
+
+    // Fill missing keys with zeroes
+    for (const key of AlertExecutionStatusValues) {
+      if (!ret.alertExecutionStatus.hasOwnProperty(key)) {
+        ret.alertExecutionStatus[key] = 0;
+      }
+    }
+
+    const enabledBuckets = resp.aggregations.enabled.buckets;
+    ret.ruleEnabledStatus = {
+      enabled: enabledBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
+      disabled: enabledBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
+    };
+
+    const mutedBuckets = resp.aggregations.muted.buckets;
+    ret.ruleMutedStatus = {
+      muted: mutedBuckets.find((bucket) => bucket.key === 1)?.doc_count ?? 0,
+      unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
+    };
+
+    return ret;
   }
 
   public async delete({ id }: { id: string }) {
@@ -693,11 +815,11 @@ export class RulesClient {
   private async deleteWithOCC({ id }: { id: string }) {
     let taskIdToRemove: string | undefined | null;
     let apiKeyToInvalidate: string | null = null;
-    let attributes: RawAlert;
+    let attributes: RawRule;
 
     try {
       const decryptedAlert =
-        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -709,7 +831,7 @@ export class RulesClient {
         `delete(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the scheduledTaskId using SOC
-      const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       taskIdToRemove = alert.attributes.scheduledTaskId;
       attributes = alert.attributes;
     }
@@ -771,20 +893,23 @@ export class RulesClient {
     id,
     data,
   }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
-    let alertSavedObject: SavedObject<RawAlert>;
+    let alertSavedObject: SavedObject<RawRule>;
 
     try {
-      alertSavedObject =
-        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+      alertSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        'alert',
+        id,
+        {
           namespace: this.namespace,
-        });
+        }
+      );
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
         `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the object using SOC
-      alertSavedObject = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      alertSavedObject = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     }
 
     try {
@@ -851,15 +976,12 @@ export class RulesClient {
 
   private async updateAlert<Params extends AlertTypeParams>(
     { id, data }: UpdateOptions<Params>,
-    { attributes, version }: SavedObject<RawAlert>
+    { attributes, version }: SavedObject<RawRule>
   ): Promise<PartialAlert<Params>> {
     const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
-    const validatedAlertTypeParams = validateAlertTypeParams(
-      data.params,
-      ruleType.validate?.params
-    );
+    const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
     await this.validateActions(ruleType, data.actions);
 
     // Validate intervals, if configured
@@ -894,19 +1016,19 @@ export class RulesClient {
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
-    let updatedObject: SavedObject<RawAlert>;
+    let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({
       ...attributes,
       ...data,
       ...apiKeyAttributes,
-      params: updatedParams as RawAlert['params'],
+      params: updatedParams as RawRule['params'],
       actions,
       notifyWhen,
       updatedBy: username,
       updatedAt: new Date().toISOString(),
     });
     try {
-      updatedObject = await this.unsecuredSavedObjectsClient.create<RawAlert>(
+      updatedObject = await this.unsecuredSavedObjectsClient.create<RawRule>(
         'alert',
         createAttributes,
         {
@@ -930,14 +1052,16 @@ export class RulesClient {
       id,
       ruleType,
       updatedObject.attributes,
-      updatedObject.references
+      updatedObject.references,
+      false,
+      true
     );
   }
 
   private apiKeyAsAlertAttributes(
     apiKey: CreateAPIKeyResult | null,
     username: string | null
-  ): Pick<RawAlert, 'apiKey' | 'apiKeyOwner'> {
+  ): Pick<RawRule, 'apiKey' | 'apiKeyOwner'> {
     return apiKey && apiKey.apiKeysEnabled
       ? {
           apiKeyOwner: username,
@@ -959,12 +1083,12 @@ export class RulesClient {
 
   private async updateApiKeyWithOCC({ id }: { id: string }) {
     let apiKeyToInvalidate: string | null = null;
-    let attributes: RawAlert;
+    let attributes: RawRule;
     let version: string | undefined;
 
     try {
       const decryptedAlert =
-        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -976,7 +1100,7 @@ export class RulesClient {
         `updateApiKey(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the attributes and version using SOC
-      const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       attributes = alert.attributes;
       version = alert.version;
     }
@@ -1063,12 +1187,12 @@ export class RulesClient {
 
   private async enableWithOCC({ id }: { id: string }) {
     let apiKeyToInvalidate: string | null = null;
-    let attributes: RawAlert;
+    let attributes: RawRule;
     let version: string | undefined;
 
     try {
       const decryptedAlert =
-        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -1080,7 +1204,7 @@ export class RulesClient {
         `enable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the attributes and version using SOC
-      const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       attributes = alert.attributes;
       version = alert.version;
     }
@@ -1182,12 +1306,12 @@ export class RulesClient {
 
   private async disableWithOCC({ id }: { id: string }) {
     let apiKeyToInvalidate: string | null = null;
-    let attributes: RawAlert;
+    let attributes: RawRule;
     let version: string | undefined;
 
     try {
       const decryptedAlert =
-        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
@@ -1199,7 +1323,7 @@ export class RulesClient {
         `disable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the attributes and version using SOC
-      const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
+      const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       attributes = alert.attributes;
       version = alert.version;
     }
@@ -1320,7 +1444,7 @@ export class RulesClient {
   }
 
   private async muteAllWithOCC({ id }: { id: string }) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawAlert>(
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
     );
@@ -1382,7 +1506,7 @@ export class RulesClient {
   }
 
   private async unmuteAllWithOCC({ id }: { id: string }) {
-    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawAlert>(
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
     );
@@ -1550,7 +1674,7 @@ export class RulesClient {
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-      await this.unsecuredSavedObjectsClient.update<RawAlert>(
+      await this.unsecuredSavedObjectsClient.update<RawRule>(
         'alert',
         alertId,
         this.updateMeta({
@@ -1608,7 +1732,7 @@ export class RulesClient {
 
   private injectReferencesIntoActions(
     alertId: string,
-    actions: RawAlert['actions'],
+    actions: RawRule['actions'],
     references: SavedObjectReference[]
   ) {
     return actions.map((action) => {
@@ -1633,20 +1757,22 @@ export class RulesClient {
   private getAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
     ruleTypeId: string,
-    rawAlert: RawAlert,
+    rawRule: RawRule,
     references: SavedObjectReference[] | undefined,
-    includeLegacyId: boolean = false
+    includeLegacyId: boolean = false,
+    excludeFromPublicApi: boolean = false
   ): Alert | AlertWithLegacyId {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
-    // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
+    // partial updates of an Alert, but when we receive an actual RawRule, it is safe
     // to cast the result to an Alert
     const res = this.getPartialAlertFromRaw<Params>(
       id,
       ruleType,
-      rawAlert,
+      rawRule,
       references,
-      includeLegacyId
+      includeLegacyId,
+      excludeFromPublicApi
     );
     // include to result because it is for internal rules client usage
     if (includeLegacyId) {
@@ -1658,7 +1784,7 @@ export class RulesClient {
 
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
-    ruleType: UntypedNormalizedAlertType,
+    ruleType: UntypedNormalizedRuleType,
     {
       createdAt,
       updatedAt,
@@ -1670,15 +1796,16 @@ export class RulesClient {
       executionStatus,
       schedule,
       actions,
-      ...partialRawAlert
-    }: Partial<RawAlert>,
+      ...partialRawRule
+    }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
-    includeLegacyId: boolean = false
+    includeLegacyId: boolean = false,
+    excludeFromPublicApi: boolean = false
   ): PartialAlert<Params> | PartialAlertWithLegacyId<Params> {
     const rule = {
       id,
       notifyWhen,
-      ...partialRawAlert,
+      ...omit(partialRawRule, excludeFromPublicApi ? [...this.fieldsToExcludeFromPublicApi] : ''),
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: schedule as IntervalSchedule,
@@ -1688,16 +1815,17 @@ export class RulesClient {
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
       ...(executionStatus
-        ? { executionStatus: alertExecutionStatusFromRaw(this.logger, id, executionStatus) }
+        ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
     };
+
     return includeLegacyId
       ? ({ ...rule, legacyId } as PartialAlertWithLegacyId<Params>)
       : (rule as PartialAlert<Params>);
   }
 
   private async validateActions(
-    alertType: UntypedNormalizedAlertType,
+    alertType: UntypedNormalizedRuleType,
     actions: NormalizedAlertAction[]
   ): Promise<void> {
     if (actions.length === 0) {
@@ -1748,11 +1876,11 @@ export class RulesClient {
     Params extends AlertTypeParams,
     ExtractedParams extends AlertTypeParams
   >(
-    ruleType: UntypedNormalizedAlertType,
+    ruleType: UntypedNormalizedRuleType,
     ruleActions: NormalizedAlertAction[],
     ruleParams: Params
   ): Promise<{
-    actions: RawAlert['actions'];
+    actions: RawRule['actions'];
     params: ExtractedParams;
     references: SavedObjectReference[];
   }> {
@@ -1785,7 +1913,7 @@ export class RulesClient {
     ExtractedParams extends AlertTypeParams
   >(
     ruleId: string,
-    ruleType: UntypedNormalizedAlertType,
+    ruleType: UntypedNormalizedRuleType,
     ruleParams: SavedObjectAttributes | undefined,
     references: SavedObjectReference[]
   ): Params {
@@ -1813,9 +1941,9 @@ export class RulesClient {
 
   private async denormalizeActions(
     alertActions: NormalizedAlertAction[]
-  ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
+  ): Promise<{ actions: RawRule['actions']; references: SavedObjectReference[] }> {
     const references: SavedObjectReference[] = [];
-    const actions: RawAlert['actions'] = [];
+    const actions: RawRule['actions'] = [];
     if (alertActions.length) {
       const actionsClient = await this.getActionsClient();
       const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
@@ -1870,7 +1998,7 @@ export class RulesClient {
     return truncate(`Alerting: ${alertTypeId}/${trim(alertName)}`, { length: 256 });
   }
 
-  private updateMeta<T extends Partial<RawAlert>>(alertAttributes: T): T {
+  private updateMeta<T extends Partial<RawRule>>(alertAttributes: T): T {
     if (alertAttributes.hasOwnProperty('apiKey') || alertAttributes.hasOwnProperty('apiKeyOwner')) {
       alertAttributes.meta = alertAttributes.meta ?? {};
       alertAttributes.meta.versionApiKeyLastmodified = this.kibanaVersion;

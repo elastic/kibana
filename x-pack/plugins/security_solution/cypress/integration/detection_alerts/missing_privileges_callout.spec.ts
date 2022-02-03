@@ -15,7 +15,6 @@ import {
   loginAndWaitForPageWithoutDateRange,
   waitForPageWithoutDateRange,
 } from '../../tasks/login';
-import { waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createCustomRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../../tasks/common/callouts';
@@ -48,7 +47,6 @@ describe('Detections > Callouts', () => {
     // Otherwise the app will be disabled and show a "welcome"-like page.
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
-    waitForAlertsIndexToBeCreated();
 
     // After that we can login as a read-only user.
     login(ROLES.reader);

@@ -26,6 +26,7 @@ import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
 import { defaultCountLabel, LabelRotation } from '../../../../charts/public';
+import { getVisTypeFromParams } from './get_vis_type_from_params';
 
 export const horizontalBarVisTypeDefinition = {
   name: 'horizontal_bar',
@@ -38,6 +39,7 @@ export const horizontalBarVisTypeDefinition = {
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  updateVisTypeOnParamsChange: getVisTypeFromParams,
   visConfig: {
     defaults: {
       type: ChartType.Histogram,
@@ -100,7 +102,7 @@ export const horizontalBarVisTypeDefinition = {
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
-          circlesRadius: 3,
+          circlesRadius: 1,
         },
       ],
       addTooltip: true,
@@ -157,7 +159,16 @@ export const horizontalBarVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -167,7 +178,16 @@ export const horizontalBarVisTypeDefinition = {
         }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -177,7 +197,16 @@ export const horizontalBarVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter', '!multi_terms'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
     ],
   },

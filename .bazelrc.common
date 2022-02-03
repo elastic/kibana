@@ -132,6 +132,9 @@ coverage --instrument_test_targets
 # Metadata settings
 build --workspace_status_command="node ./src/dev/bazel_workspace_status.js"
 
+# Load remote cache settings, if they exist
+try-import %workspace%/.bazelrc.cache
+
 # Load any settings specific to the current user.
 # .bazelrc.user should appear in .gitignore so that settings are not shared with team members
 # This needs to be last statement in this

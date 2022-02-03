@@ -7,14 +7,18 @@
 
 import React, { FC, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { State, FilterField } from '../../../types';
-import { groupFiltersBy } from '../../lib/filter';
+import { State, FilterField, PositionedElement } from '../../../types';
+import { groupFiltersBy, getFiltersExprsFromExpression } from '../../lib/filter';
 import { setGroupFiltersByOption } from '../../state/actions/sidebar';
 import { getGroupFiltersByOption } from '../../state/selectors/sidebar';
 import { useCanvasFilters } from './hooks';
 import { WorkpadFilters as Component } from './workpad_filters.component';
 
-export const WorkpadFilters: FC = () => {
+interface Props {
+  element?: PositionedElement | null;
+}
+
+export const WorkpadFilters: FC<Props> = ({ element }) => {
   const groupFiltersByField: FilterField = useSelector((state: State) =>
     getGroupFiltersByOption(state)
   );
@@ -27,8 +31,8 @@ export const WorkpadFilters: FC = () => {
     },
     [dispatch]
   );
-
-  const canvasFilters = useCanvasFilters();
+  const filterExprs = element ? getFiltersExprsFromExpression(element.expression) : [];
+  const canvasFilters = useCanvasFilters(filterExprs);
 
   const filtersGroups = groupFiltersByField
     ? groupFiltersBy(canvasFilters, groupFiltersByField)

@@ -22,6 +22,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from 'kibana/public';
+
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
@@ -90,9 +93,10 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
 
 interface Props {
   packageInfo: PackageInfo;
+  theme$: Observable<CoreTheme>;
 }
 
-export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
+export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
   const { name, title, removable, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse | null>();
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
@@ -122,7 +126,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
       try {
         setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
 
-        await sendUpdatePackage(`${packageInfo.name}-${packageInfo.version}`, {
+        await sendUpdatePackage(packageInfo.name, packageInfo.version, {
           keepPoliciesUpToDate: !keepPoliciesUpToDateSwitchValue,
         });
 
@@ -291,6 +295,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       dryRunData={dryRunData}
                       isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                       setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
+                      theme$={theme$}
                     />
                   </p>
                 </>

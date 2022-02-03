@@ -18,13 +18,14 @@ import {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
-import { CancellationToken } from '../../../common';
+import { CancellationToken } from '../../../common/cancellation_token';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
-import { ReportOutput } from '../../../common/types';
-import { ReportingConfigType } from '../../config';
-import { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
-import { Report, ReportDocument, ReportingStore, SavedReport } from '../store';
-import { ReportFailedFields, ReportProcessingFields } from '../store/store';
+import type { ReportOutput } from '../../../common/types';
+import type { ReportingConfigType } from '../../config';
+import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
+import type { ReportDocument, ReportingStore } from '../store';
+import { Report, SavedReport } from '../store';
+import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import {
   ReportingTask,
   ReportingTaskStatus,
@@ -159,7 +160,6 @@ export class ExecuteReportTask implements ReportingTask {
     const doc: ReportProcessingFields = {
       kibana_id: this.kibanaId,
       kibana_name: this.kibanaName,
-      browser_type: this.config.capture.browser.type,
       attempts: report.attempts + 1,
       max_attempts: maxAttempts,
       started_at: startTime,
@@ -333,6 +333,10 @@ export class ExecuteReportTask implements ReportingTask {
           );
           this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
+          const eventLog = this.reporting.getEventLogger(
+            new Report({ ...task, _id: task.id, _index: task.index })
+          );
+
           try {
             const jobContentEncoding = this.getJobContentEncoding(jobType);
             const stream = await getContentStream(
@@ -347,9 +351,15 @@ export class ExecuteReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
+
+            eventLog.logExecutionStart();
+
             const output = await this._performJob(task, cancellationToken, stream);
 
             stream.end();
+
+            eventLog.logExecutionComplete({ byteSize: stream.bytesWritten });
+
             await promisify(finished)(stream, { readable: false });
 
             report._seq_no = stream.getSeqNo()!;
@@ -365,6 +375,8 @@ export class ExecuteReportTask implements ReportingTask {
             // untrack the report for concurrency awareness
             this.logger.debug(`Stopping ${jobId}.`);
           } catch (failedToExecuteErr) {
+            eventLog.logError(failedToExecuteErr);
+
             cancellationToken.cancel();
 
             if (attempts < maxAttempts) {

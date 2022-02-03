@@ -86,9 +86,9 @@ export class ScalingForm extends Component<Props, State> {
     if (optionId === SCALING_TYPES.CLUSTERS) {
       layerType = LAYER_TYPE.BLENDED_VECTOR;
     } else if (optionId === SCALING_TYPES.MVT) {
-      layerType = LAYER_TYPE.TILED_VECTOR;
+      layerType = LAYER_TYPE.MVT_VECTOR;
     } else {
-      layerType = LAYER_TYPE.VECTOR;
+      layerType = LAYER_TYPE.GEOJSON_VECTOR;
     }
 
     this.props.onChange({ propName: 'scalingType', value: optionId, newLayerType: layerType });

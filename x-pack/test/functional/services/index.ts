@@ -31,6 +31,7 @@ import {
   MonitoringLogstashNodesProvider,
   MonitoringLogstashNodeDetailProvider,
   MonitoringLogstashPipelinesProvider,
+  MonitoringLogstashPipelineViewerProvider,
   MonitoringLogstashSummaryStatusProvider,
   MonitoringKibanaOverviewProvider,
   MonitoringKibanaInstancesProvider,
@@ -38,6 +39,8 @@ import {
   MonitoringKibanaSummaryStatusProvider,
   MonitoringSetupModeProvider,
   MonitoringAlertsProvider,
+  MonitoringEnterpriseSearchOverviewProvider,
+  MonitoringEnterpriseSearchSummaryStatusProvider,
   // @ts-ignore not ts yet
 } from './monitoring';
 // @ts-ignore not ts yet
@@ -96,11 +99,14 @@ export const services = {
   monitoringLogstashNodes: MonitoringLogstashNodesProvider,
   monitoringLogstashNodeDetail: MonitoringLogstashNodeDetailProvider,
   monitoringLogstashPipelines: MonitoringLogstashPipelinesProvider,
+  monitoringLogstashPipelineViewer: MonitoringLogstashPipelineViewerProvider,
   monitoringLogstashSummaryStatus: MonitoringLogstashSummaryStatusProvider,
   monitoringKibanaOverview: MonitoringKibanaOverviewProvider,
   monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
   monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
   monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
+  monitoringEnterpriseSearchOverview: MonitoringEnterpriseSearchOverviewProvider,
+  monitoringEnterpriseSearchSummaryStatus: MonitoringEnterpriseSearchSummaryStatusProvider,
   monitoringSetupMode: MonitoringSetupModeProvider,
   monitoringAlerts: MonitoringAlertsProvider,
   pipelineList: PipelineListProvider,

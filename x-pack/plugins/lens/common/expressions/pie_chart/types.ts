@@ -8,7 +8,7 @@
 import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
 import type { LensMultiTable, LayerType } from '../../types';
 
-export type PieChartTypes = 'donut' | 'pie' | 'treemap' | 'mosaic';
+export type PieChartTypes = 'donut' | 'pie' | 'treemap' | 'mosaic' | 'waffle';
 
 export interface SharedPieLayerState {
   groups: string[];
@@ -17,8 +17,10 @@ export interface SharedPieLayerState {
   categoryDisplay: 'default' | 'inside' | 'hide';
   legendDisplay: 'default' | 'show' | 'hide';
   legendPosition?: 'left' | 'right' | 'top' | 'bottom';
+  showValuesInLegend?: boolean;
   nestedLegend?: boolean;
   percentDecimals?: number;
+  emptySizeRatio?: number;
   legendMaxLines?: number;
   truncateLegend?: boolean;
 }

@@ -52,19 +52,19 @@ describe('RiskyHostsEnabledModule', () => {
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <RiskyHostsEnabledModule
-              hostRiskScore={{
-                loading: false,
-                isModuleEnabled: true,
-                result: [
-                  {
-                    host: {
-                      name: 'a',
-                    },
-                    risk_score: 1,
-                    risk: '',
+              hostRiskScore={[
+                {
+                  '@timestamp': '1641902481',
+                  host: {
+                    name: 'a',
                   },
-                ],
-              }}
+                  risk_stats: {
+                    risk_score: 1,
+                    rule_risks: [],
+                  },
+                  risk: '',
+                },
+              ]}
               to={'now'}
               from={'now-30d'}
             />

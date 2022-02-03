@@ -37,7 +37,7 @@ const mockApiCallsWithHealthyFleetServer = (http: MockedFleetStartServices['http
       };
     }
 
-    if (path === '/api/fleet/agent-status') {
+    if (path === '/api/fleet/agent_status') {
       return {
         data: {
           results: { online: 1, updating: 0, offline: 0 },
@@ -65,7 +65,7 @@ const mockApiCallsWithoutHealthyFleetServer = (http: MockedFleetStartServices['h
       };
     }
 
-    if (path === '/api/fleet/agent-status') {
+    if (path === '/api/fleet/agent_status') {
       return {
         data: {
           results: { online: 0, updating: 0, offline: 1 },

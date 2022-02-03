@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -14,7 +14,8 @@ import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
-import { TimelineEventsDetailsItem } from '../../../../common';
+import { TimelineId } from '../../../../common/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 import { getSummaryRows } from './get_alert_summary_rows';
 
@@ -37,15 +38,18 @@ const getDescription = ({
       isDraggable={isDraggable}
       values={values}
     />
-    <ActionCell
-      contextId={timelineId}
-      data={data}
-      eventId={eventId}
-      fieldFromBrowserField={fieldFromBrowserField}
-      linkValue={linkValue}
-      timelineId={timelineId}
-      values={values}
-    />
+    {timelineId !== TimelineId.active && (
+      <ActionCell
+        contextId={timelineId}
+        data={data}
+        eventId={eventId}
+        fieldFromBrowserField={fieldFromBrowserField}
+        linkValue={linkValue}
+        timelineId={timelineId}
+        values={values}
+        applyWidthAndPadding={false}
+      />
+    )}
   </>
 );
 
@@ -57,18 +61,21 @@ const AlertSummaryViewComponent: React.FC<{
   eventId: string;
   isDraggable?: boolean;
   timelineId: string;
-  title?: string;
-}> = ({ browserFields, data, eventId, isDraggable, timelineId, title }) => {
+  title: string;
+  goToTable: () => void;
+}> = ({ browserFields, data, eventId, isDraggable, timelineId, title, goToTable }) => {
   const summaryRows = useMemo(
     () => getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId }),
     [browserFields, data, eventId, isDraggable, timelineId]
   );
 
   return (
-    <>
-      <EuiSpacer size="s" />
-      <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
-    </>
+    <SummaryView
+      summaryColumns={summaryColumns}
+      summaryRows={summaryRows}
+      title={title}
+      goToTable={goToTable}
+    />
   );
 };
 

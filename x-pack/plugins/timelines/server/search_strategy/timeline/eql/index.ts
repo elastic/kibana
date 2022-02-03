@@ -15,7 +15,7 @@ import {
   EqlSearchStrategyResponse,
   EQL_SEARCH_STRATEGY,
 } from '../../../../../../../src/plugins/data/common';
-import { EqlSearchResponse } from '../../../../common';
+import { EqlSearchResponse } from '../../../../common/search_strategy';
 import {
   TimelineEqlRequestOptions,
   TimelineEqlResponse,

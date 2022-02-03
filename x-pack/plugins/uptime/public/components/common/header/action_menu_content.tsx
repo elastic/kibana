@@ -9,17 +9,22 @@ import React from 'react';
 import { EuiHeaderLinks, EuiToolTip, EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { createExploratoryViewUrl } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { useGetUrlParams } from '../../../hooks';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
-import { SETTINGS_ROUTE } from '../../../../common/constants';
+import {
+  MONITOR_MANAGEMENT_ROUTE,
+  MONITOR_ROUTE,
+  SETTINGS_ROUTE,
+} from '../../../../common/constants';
 import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
+import { UptimeConfig } from '../../../../common/config';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -34,7 +39,7 @@ const ANALYZE_MESSAGE = i18n.translate('xpack.uptime.analyzeDataButtonLabel.mess
     'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
 
-export function ActionMenuContent(): React.ReactElement {
+export function ActionMenuContent({ config }: { config: UptimeConfig }): React.ReactElement {
   const kibana = useKibana();
   const { basePath } = useUptimeSettingsContext();
   const params = useGetUrlParams();
@@ -43,6 +48,7 @@ export function ActionMenuContent(): React.ReactElement {
 
   const selectedMonitor = useSelector(monitorStatusSelector);
 
+  const detailRouteMatch = useRouteMatch(MONITOR_ROUTE);
   const monitorId = selectedMonitor?.monitor?.id;
 
   const syntheticExploratoryViewLink = createExploratoryViewUrl(
@@ -56,7 +62,10 @@ export function ActionMenuContent(): React.ReactElement {
           time: { from: dateRangeStart, to: dateRangeEnd },
           breakdown: monitorId ? 'observer.geo.name' : 'monitor.type',
           reportDefinitions: {
-            'monitor.name': selectedMonitor?.monitor?.name ? [selectedMonitor?.monitor?.name] : [],
+            'monitor.name':
+              selectedMonitor?.monitor?.name && detailRouteMatch?.isExact === true
+                ? [selectedMonitor?.monitor?.name]
+                : [],
             'url.full': ['ALL_VALUES'],
           },
           name: monitorId ? `${monitorId}-response-duration` : 'All monitors response duration',
@@ -68,6 +77,24 @@ export function ActionMenuContent(): React.ReactElement {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
+      {config.ui?.monitorManagement?.enabled && (
+        <EuiHeaderLink
+          aria-label={i18n.translate('xpack.uptime.page_header.manageLink.label', {
+            defaultMessage: 'Navigate to the Uptime monitor management page',
+          })}
+          color="text"
+          data-test-subj="management-page-link"
+          href={history.createHref({
+            pathname: MONITOR_MANAGEMENT_ROUTE,
+          })}
+        >
+          <FormattedMessage
+            id="xpack.uptime.page_header.manageLink"
+            defaultMessage="Monitor management"
+          />
+        </EuiHeaderLink>
+      )}
+
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {
           defaultMessage: 'Navigate to the Uptime settings page',
@@ -92,6 +119,7 @@ export function ActionMenuContent(): React.ReactElement {
           href={syntheticExploratoryViewLink}
           color="text"
           iconType="visBarVerticalStacked"
+          data-test-subj={'uptimeExploreDataButton'}
         >
           {ANALYZE_DATA}
         </EuiHeaderLink>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -94,6 +94,7 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
   additionalFilters: React.ReactNode;
+  appId: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
@@ -138,6 +139,7 @@ export interface TGridIntegratedProps {
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   additionalFilters,
+  appId,
   browserFields,
   bulkActions = true,
   columns,
@@ -325,7 +327,13 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
+              <UpdatedFlexGroup
+                alignItems={alignItems}
+                data-test-subj="updated-flex-group"
+                gutterSize="m"
+                justifyContent="flexEnd"
+                $view={tableView}
+              >
                 <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
@@ -350,6 +358,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                       <ScrollableFlexItem grow={1}>
                         <StatefulBody
                           activePage={pageInfo.activePage}
+                          appId={appId}
                           browserFields={browserFields}
                           bulkActions={bulkActions}
                           createFieldComponent={createFieldComponent}

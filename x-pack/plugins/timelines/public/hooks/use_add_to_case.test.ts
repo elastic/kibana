@@ -6,7 +6,7 @@
  */
 
 import { normalizedEventFields } from './use_add_to_case';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { merge } from 'lodash';
 
 const defaultArgs = {

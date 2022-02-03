@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart } from 'src/core/server';
+import { CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/server';
 import {
   TutorialProvider,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
+  TutorialContext,
 } from './lib/tutorials_registry_types';
 import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
@@ -71,12 +72,14 @@ export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
     const router = core.http.createRouter();
     router.get(
       { path: '/api/kibana/home/tutorials', validate: false },
       async (context, req, res) => {
-        const initialContext = {};
+        const initialContext = this.baseTutorialContext;
         const scopedContext = this.scopedTutorialContextFactories.reduce(
           (accumulatedContext, contextFactory) => {
             return { ...accumulatedContext, ...contextFactory(req) };
@@ -92,7 +95,7 @@ export class TutorialsRegistry {
     );
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
-        const emptyContext = {};
+        const emptyContext = this.baseTutorialContext;
         let tutorial: TutorialSchema;
         try {
           tutorial = tutorialSchema.validate(specProvider(emptyContext));
@@ -132,11 +135,15 @@ export class TutorialsRegistry {
 
     if (customIntegrations) {
       builtInTutorials.forEach((provider) => {
-        const tutorial = provider({});
+        const tutorial = provider(this.baseTutorialContext);
         registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
       });
     }
     return {};
+  }
+
+  private get baseTutorialContext(): TutorialContext {
+    return { kibanaBranch: this.initContext.env.packageInfo.branch };
   }
 }
 

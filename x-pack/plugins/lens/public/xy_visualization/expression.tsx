@@ -33,6 +33,9 @@ import {
   RecursivePartial,
   AxisStyle,
   ScaleType,
+  AreaSeriesProps,
+  BarSeriesProps,
+  LineSeriesProps,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n-react';
 import type {
@@ -44,6 +47,7 @@ import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
 import { ThemeServiceStart } from 'kibana/public';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
@@ -61,7 +65,6 @@ import {
   useActiveCursor,
 } from '../../../../../src/plugins/charts/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/common';
-import { EmptyPlaceholder } from '../shared_components';
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
@@ -83,10 +86,7 @@ declare global {
   }
 }
 
-type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
-type SeriesSpec = InferPropType<typeof LineSeries> &
-  InferPropType<typeof BarSeries> &
-  InferPropType<typeof AreaSeries>;
+type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -497,10 +497,18 @@ export function XYChart({
     if (xySeries.seriesKeys.length > 1) {
       const pointValue = xySeries.seriesKeys[0];
 
+      const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
+      const splitFormatter = formatFactory(splitColumn && splitColumn.meta?.params);
+
       points.push({
-        row: table.rows.findIndex(
-          (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
-        ),
+        row: table.rows.findIndex((row) => {
+          if (layer.splitAccessor) {
+            if (layersAlreadyFormatted[layer.splitAccessor]) {
+              return splitFormatter.convert(row[layer.splitAccessor]) === pointValue;
+            }
+            return row[layer.splitAccessor] === pointValue;
+          }
+        }),
         column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
         value: pointValue,
       });
@@ -554,9 +562,8 @@ export function XYChart({
   } as LegendPositionConfig;
 
   const isHistogramModeEnabled = filteredLayers.some(
-    ({ isHistogram, seriesType, splitAccessor }) =>
+    ({ isHistogram, seriesType }) =>
       isHistogram &&
-      (seriesType.includes('stacked') || !splitAccessor) &&
       (seriesType.includes('stacked') ||
         !seriesType.includes('bar') ||
         !chartHasMoreThanOneBarSeries)

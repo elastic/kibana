@@ -22,11 +22,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
 import {
-  IndexPattern,
-  IndexPatternField,
-  UI_SETTINGS,
-  DataPublicPluginStart,
-} from '../../../../../../plugins/data/public';
+  DataView,
+  DataViewField,
+  DataViewsPublicPluginStart,
+  META_FIELDS,
+} from '../../../../../../plugins/data_views/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
@@ -38,9 +38,9 @@ import { getTabs, getPath, convertToEuiSelectOption } from './utils';
 import { getFieldInfo } from '../../utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
-  indexPattern: IndexPattern;
-  fields: IndexPatternField[];
-  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  indexPattern: DataView;
+  fields: DataViewField[];
+  saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
   refreshFields: () => void;
 }
 
@@ -80,7 +80,7 @@ export function Tabs({
   location,
   refreshFields,
 }: TabsProps) {
-  const { application, uiSettings, docLinks, dataViewFieldEditor, overlays } =
+  const { application, uiSettings, docLinks, dataViewFieldEditor, overlays, theme } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -93,13 +93,6 @@ export function Tabs({
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
-  const conflict = i18n.translate(
-    'indexPatternManagement.editIndexPattern.fieldTypes.conflictType',
-    {
-      defaultMessage: 'conflict',
-    }
-  );
-
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
@@ -109,8 +102,13 @@ export function Tabs({
           tempScriptedFieldLanguages.push(field.lang);
         }
       } else {
+        // for conflicted fields, add conflict as a type
+        if (field.type === 'conflict') {
+          tempIndexedFieldTypes.push('conflict');
+        }
         if (field.esTypes) {
-          tempIndexedFieldTypes.push(field.esTypes.length === 1 ? field.esTypes[0] : conflict);
+          // add all types, may be multiple
+          field.esTypes.forEach((item) => tempIndexedFieldTypes.push(item));
         }
       }
     });
@@ -119,7 +117,7 @@ export function Tabs({
     setScriptedFieldLanguages(
       convertToEuiSelectOption(tempScriptedFieldLanguages, 'scriptedFieldLanguages')
     );
-  }, [indexPattern, conflict]);
+  }, [indexPattern]);
 
   const closeFieldEditor = useCallback(() => {
     if (closeEditorHandler.current) {
@@ -152,7 +150,7 @@ export function Tabs({
   }, [closeFieldEditor]);
 
   const fieldWildcardMatcherDecorated = useCallback(
-    (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get(UI_SETTINGS.META_FIELDS)),
+    (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get(META_FIELDS)),
     [uiSettings]
   );
 
@@ -238,6 +236,7 @@ export function Tabs({
                       getFieldInfo,
                     }}
                     openModal={overlays.openModal}
+                    theme={theme}
                   />
                 )}
               </DeleteRuntimeFieldProvider>
@@ -255,7 +254,7 @@ export function Tabs({
                 fieldFilter={fieldFilter}
                 scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
                 helpers={{
-                  redirectToRoute: (field: IndexPatternField) => {
+                  redirectToRoute: (field: DataViewField) => {
                     history.push(getPath(field, indexPattern));
                   },
                 }}
@@ -297,6 +296,7 @@ export function Tabs({
       DeleteRuntimeFieldProvider,
       refreshFields,
       overlays,
+      theme,
     ]
   );
 

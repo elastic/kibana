@@ -127,10 +127,10 @@ export class JobImportService {
   public async validateJobs(
     jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
     type: JobType,
-    getIndexPatternTitles: (refresh?: boolean) => Promise<string[]>,
+    getDataViewTitles: (refresh?: boolean) => Promise<string[]>,
     getFilters: () => Promise<Filter[]>
   ) {
-    const existingIndexPatterns = new Set(await getIndexPatternTitles());
+    const existingDataViews = new Set(await getDataViewTitles());
     const existingFilters = new Set((await getFilters()).map((f) => f.filter_id));
     const tempJobs: Array<{ jobId: string; destIndex?: string }> = [];
     const skippedJobs: SkippedJobs[] = [];
@@ -154,7 +154,7 @@ export class JobImportService {
           }));
 
     commonJobs.forEach(({ jobId, indices, filters = [], destIndex }) => {
-      const missingIndices = indices.filter((i) => existingIndexPatterns.has(i) === false);
+      const missingIndices = indices.filter((i) => existingDataViews.has(i) === false);
       const missingFilters = filters.filter((i) => existingFilters.has(i) === false);
 
       if (missingIndices.length === 0 && missingFilters.length === 0) {

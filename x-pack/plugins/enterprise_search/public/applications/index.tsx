@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
@@ -16,8 +16,10 @@ import { Store } from 'redux';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../src/plugins/kibana_react/public';
 import { InitialAppData } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
@@ -38,8 +40,11 @@ export const renderApp = (
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { publicUrl, errorConnecting, ...initialData } = data;
+  const { publicUrl, errorConnectingMessage, ...initialData } = data;
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
+
+  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
   const store = getContext().store;
@@ -63,23 +68,25 @@ export const renderApp = (
   });
   const unmountHttpLogic = mountHttpLogic({
     http: core.http,
-    errorConnecting,
+    errorConnectingMessage,
     readOnlyMode: initialData.readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic();
 
   ReactDOM.render(
     <I18nProvider>
-      <EuiThemeProvider>
+      <KibanaThemeProvider theme$={params.theme$}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <Provider store={store}>
-            <Router history={params.history}>
-              <App {...initialData} />
-              <Toasts />
-            </Router>
-          </Provider>
+          <CloudContext>
+            <Provider store={store}>
+              <Router history={params.history}>
+                <App {...initialData} />
+                <Toasts />
+              </Router>
+            </Provider>
+          </CloudContext>
         </KibanaContextProvider>
-      </EuiThemeProvider>
+      </KibanaThemeProvider>
     </I18nProvider>,
     params.element
   );

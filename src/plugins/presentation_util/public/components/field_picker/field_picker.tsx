@@ -11,8 +11,7 @@ import { sortBy, uniq } from 'lodash';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { FieldIcon } from '@kbn/react-field/field_icon';
-import { FieldButton } from '@kbn/react-field/field_button';
+import { FieldButton, FieldIcon } from '@kbn/react-field';
 
 import { FieldSearch } from './field_search';
 import { DataView, DataViewField } from '../../../../data_views/common';
@@ -88,6 +87,7 @@ export const FieldPicker = ({
                 return (
                   <EuiFlexItem key={f.name}>
                     <FieldButton
+                      data-test-subj={`field-picker-select-${f.name}`}
                       className={classNames('presFieldPicker__fieldButton', {
                         presFieldPickerFieldButtonActive: f.name === selectedFieldName,
                       })}
@@ -142,3 +142,7 @@ export const FieldPicker = ({
     </EuiFlexGroup>
   );
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default FieldPicker;

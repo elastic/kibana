@@ -7,7 +7,7 @@
 
 import { Logger } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
-import { UptimeCorePluginsSetup, UptimeCoreSetup } from '../../adapters';
+import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../types';
 import type { IRuleDataClient } from '../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
@@ -27,7 +27,7 @@ export const bootstrapDependencies = (customRequests?: any, customPlugins: any =
   const router = {} as UptimeRouter;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
-  const server = { router, config: {} } as UptimeCoreSetup;
+  const server = { router, config: {} } as UptimeServerSetup;
   const plugins: UptimeCorePluginsSetup = customPlugins as any;
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };

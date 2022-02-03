@@ -7,7 +7,6 @@
 
 import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
-import { IEventLogService } from '../../../event_log/server';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -26,7 +25,7 @@ export function initializeActionsTelemetry(
   core: CoreSetup,
   kibanaIndex: string,
   preconfiguredActions: PreConfiguredAction[],
-  eventLog: IEventLogService
+  eventLogIndex: string
 ) {
   registerActionsTelemetryTask(
     logger,
@@ -34,7 +33,7 @@ export function initializeActionsTelemetry(
     core,
     kibanaIndex,
     preconfiguredActions,
-    eventLog
+    eventLogIndex
   );
 }
 
@@ -48,7 +47,7 @@ function registerActionsTelemetryTask(
   core: CoreSetup,
   kibanaIndex: string,
   preconfiguredActions: PreConfiguredAction[],
-  eventLog: IEventLogService
+  eventLogIndex: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
@@ -59,7 +58,7 @@ function registerActionsTelemetryTask(
         core,
         kibanaIndex,
         preconfiguredActions,
-        eventLog
+        eventLogIndex
       ),
     },
   });
@@ -83,11 +82,10 @@ export function telemetryTaskRunner(
   core: CoreSetup,
   kibanaIndex: string,
   preconfiguredActions: PreConfiguredAction[],
-  eventLog: IEventLogService
+  eventLogIndex: string
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const eventLogIndex = eventLog.getIndexPattern();
     const getEsClient = () =>
       core.getStartServices().then(
         ([

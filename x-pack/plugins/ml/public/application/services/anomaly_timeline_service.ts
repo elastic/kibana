@@ -69,7 +69,10 @@ export class AnomalyTimelineService {
     this._customTimeRange = timeRange;
   }
 
-  public getSwimlaneBucketInterval(selectedJobs: ExplorerJob[], swimlaneContainerWidth: number) {
+  public getSwimlaneBucketInterval(
+    selectedJobs: Array<{ id: string; bucketSpanSeconds: number }>,
+    swimlaneContainerWidth: number
+  ) {
     // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
     // and the max bucket span for the jobs shown in the chart.
     const bounds = this.getTimeBounds();
@@ -114,7 +117,7 @@ export class AnomalyTimelineService {
    * @param chartWidth
    */
   public async loadOverallData(
-    selectedJobs: ExplorerJob[],
+    selectedJobs: Array<{ id: string; bucketSpanSeconds: number }>,
     chartWidth?: number,
     bucketInterval?: TimeBucketsInterval,
     overallScore?: number

@@ -18,11 +18,12 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
+import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
 import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
+import { findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import type {
   DataContextType,
@@ -212,7 +213,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const isNumericMap: Record<string, boolean> = useMemo(() => {
     const numericMap: Record<string, boolean> = {};
     for (const column of firstLocalTable.columns) {
-      numericMap[column.id] = column.meta.type === 'number';
+      // filtered metrics result as "number" type, but have no field
+      numericMap[column.id] =
+        (column.meta.type === 'number' && column.meta.field != null) ||
+        // as fallback check the first available value type
+        // mind here: date can be seen as numbers, to carefully check that is a filtered metric
+        (column.meta.field == null &&
+          typeof firstLocalTable.rows.find((row) => row[column.id] != null)?.[column.id] ===
+            'number');
     }
     return numericMap;
   }, [firstLocalTable]);
@@ -390,15 +398,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         }}
       >
         <EuiDataGrid
-          {
-            // we control the key when pagination is on to circumvent an EUI rendering bug
-            // see https://github.com/elastic/eui/issues/5391
-            ...(pagination
-              ? {
-                  key: columns.map(({ id }) => id).join('-') + '-' + pagination.pageSize,
-                }
-              : {})
-          }
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
           rowHeightsOptions={

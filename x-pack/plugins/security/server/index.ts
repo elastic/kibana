@@ -21,6 +21,7 @@ import { SecurityPlugin } from './plugin';
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
 export type {
+  CreateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeysParams,
   InvalidateAPIKeyResult,
@@ -41,6 +42,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   exposeToBrowser: {
     loginAssistanceMessage: true,
     showInsecureClusterWarning: true,
+    sameSiteCookies: true,
   },
 };
 export const plugin: PluginInitializer<

@@ -7,7 +7,7 @@
 
 import { buildDnsHistogramQuery } from './query.dns_histogram.dsl';
 import { getDnsParsedData } from './helpers';
-import { MatrixHistogramTypeToAggName } from '../../../../../../common';
+import { MatrixHistogramTypeToAggName } from '../../../../../../common/search_strategy';
 
 export const dnsMatrixHistogramConfig = {
   buildDsl: buildDnsHistogramQuery,

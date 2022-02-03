@@ -72,9 +72,7 @@ export const eventHit = {
                 ],
                 astring: 'cool',
                 aNumber: 1,
-                anObject: {
-                  neat: true,
-                },
+                neat: true,
               },
             ],
           },

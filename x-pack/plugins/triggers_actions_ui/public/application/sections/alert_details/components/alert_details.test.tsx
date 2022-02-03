@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
 import { AlertDetails } from './alert_details';
-import { Alert, ActionType, AlertTypeModel, AlertType } from '../../../../types';
+import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
 import {
   EuiBadge,
   EuiFlexItem,
@@ -57,6 +57,7 @@ const mockAlertApis = {
   enableAlert: jest.fn(),
   disableAlert: jest.fn(),
   requestRefresh: jest.fn(),
+  refreshToken: Date.now(),
 };
 
 const authorizedConsumers = {
@@ -64,7 +65,7 @@ const authorizedConsumers = {
 };
 const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
-const alertType: AlertType = {
+const alertType: RuleType = {
   id: '.noop',
   name: 'No Op',
   actionGroups: [{ id: 'default', name: 'Default' }],
@@ -599,7 +600,7 @@ describe('edit button', () => {
     },
   ];
   ruleTypeRegistry.has.mockReturnValue(true);
-  const alertTypeR: AlertTypeModel = {
+  const alertTypeR: RuleTypeModel = {
     id: 'my-alert-type',
     iconClass: 'test',
     description: 'Alert when testing',
@@ -607,7 +608,7 @@ describe('edit button', () => {
     validate: () => {
       return { errors: {} };
     },
-    alertParamsExpression: jest.fn(),
+    ruleParamsExpression: jest.fn(),
     requiresAppContext: false,
   };
   ruleTypeRegistry.get.mockReturnValue(alertTypeR);
@@ -738,7 +739,7 @@ describe('broken connector indicator', () => {
     },
   ];
   ruleTypeRegistry.has.mockReturnValue(true);
-  const alertTypeR: AlertTypeModel = {
+  const alertTypeR: RuleTypeModel = {
     id: 'my-alert-type',
     iconClass: 'test',
     description: 'Alert when testing',
@@ -746,7 +747,7 @@ describe('broken connector indicator', () => {
     validate: () => {
       return { errors: {} };
     },
-    alertParamsExpression: jest.fn(),
+    ruleParamsExpression: jest.fn(),
     requiresAppContext: false,
   };
   ruleTypeRegistry.get.mockReturnValue(alertTypeR);
@@ -945,7 +946,7 @@ describe('refresh button', () => {
   });
 });
 
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockAlert(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,

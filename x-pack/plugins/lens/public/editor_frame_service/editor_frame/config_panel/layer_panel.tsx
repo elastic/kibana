@@ -64,6 +64,7 @@ export function LayerPanel(
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
     initialActiveDimensionState
   );
+  const [hideTooltip, setHideTooltip] = useState<boolean>(false);
 
   const {
     framePublicAPI,
@@ -317,12 +318,7 @@ export function LayerPanel(
 
   return (
     <>
-      <section
-        tabIndex={-1}
-        ref={registerLayerRef}
-        className="lnsLayerPanel"
-        style={{ visibility: isDimensionPanelOpen ? 'hidden' : 'visible' }}
-      >
+      <section tabIndex={-1} ref={registerLayerRef} className="lnsLayerPanel">
         <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="none">
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
@@ -406,7 +402,7 @@ export function LayerPanel(
                   defaultMessage: 'Requires field',
                 });
 
-            const isOptional = !group.required;
+            const isOptional = !group.required && !group.suggestedValue;
             return (
               <EuiFormRow
                 className="lnsLayerPanel__row"
@@ -416,7 +412,6 @@ export function LayerPanel(
                     {group.groupLabel}
                     {group.groupTooltip && (
                       <>
-                        {' '}
                         <EuiIconTip
                           color="subdued"
                           content={group.groupTooltip}
@@ -465,6 +460,8 @@ export function LayerPanel(
                             layerDatasource={layerDatasource}
                             layerIndex={layerIndex}
                             layerId={layerId}
+                            onDragStart={() => setHideTooltip(true)}
+                            onDragEnd={() => setHideTooltip(false)}
                             onDrop={onDrop}
                           >
                             <div className="lnsLayerPanel__dimension">
@@ -512,6 +509,7 @@ export function LayerPanel(
                                     columnId: accessorConfig.columnId,
                                     groupId: group.groupId,
                                     filterOperations: group.filterOperations,
+                                    hideTooltip,
                                     invalid: group.invalid,
                                     invalidMessage: group.invalidMessage,
                                   }}

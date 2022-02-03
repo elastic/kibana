@@ -6,7 +6,6 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import 'jest-canvas-mock';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import {
@@ -351,7 +350,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
+    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-___records___');
 
     expect(
       options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
@@ -482,7 +481,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             dataType: 'number',
             isBucketed: false,
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         })}
       />
@@ -992,7 +991,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       const newColumnState = setState.mock.calls[0][0](state).layers.first.columns.col2;
       expect(newColumnState.operationType).toEqual('count');
-      expect(newColumnState.sourceField).toEqual('Records');
+      expect(newColumnState.sourceField).toEqual('___records___');
     });
 
     it('should indicate document and field compatibility with selected document operation', () => {
@@ -1005,7 +1004,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               isBucketed: false,
               label: '',
               operationType: 'count',
-              sourceField: 'Records',
+              sourceField: '___records___',
             },
           })}
           columnId="col2"
@@ -1091,7 +1090,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
           } as GenericIndexPatternColumn,
         }),
@@ -1321,7 +1320,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
           } as GenericIndexPatternColumn,
         }),
@@ -1338,7 +1337,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
@@ -1485,6 +1484,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
         },
       });
     });
+
+    it('should report a generic error for invalid shift string', () => {
+      const props = getProps({
+        timeShift: '5 months',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+
+      expect(wrapper.find(TimeShift).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
+
+      expect(
+        wrapper
+          .find(TimeShift)
+          .find('[data-test-subj="indexPattern-dimension-time-shift-row"]')
+          .first()
+          .prop('error')
+      ).toBe('Time shift value is not valid.');
+    });
   });
 
   describe('filtering', () => {
@@ -1508,7 +1524,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
           } as GenericIndexPatternColumn,
         }),
@@ -1855,7 +1871,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: '',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         })}
         columnId={'col2'}

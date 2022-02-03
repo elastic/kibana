@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
-import type { AnomalyRecordDoc } from '../types/anomalies';
+import type { AnomaliesTableRecord, AnomalyRecordDoc } from '../types/anomalies';
 
 export interface SeverityType {
   id: ANOMALY_SEVERITY;
@@ -119,15 +119,23 @@ function getSeverityTypes() {
   });
 }
 
+export function isCategorizationAnomaly(anomaly: AnomaliesTableRecord): boolean {
+  return anomaly.entityName === 'mlcategory';
+}
+
 /**
- * Return formatted severity score.
+ * Returns formatted severity score.
+ * @param score - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
  */
 export function getFormattedSeverityScore(score: number): string {
   return score < 1 ? '< 1' : String(parseInt(String(score), 10));
 }
 
-// Returns a severity label (one of critical, major, minor, warning or unknown)
-// for the supplied normalized anomaly score (a value between 0 and 100).
+/**
+ * Returns a severity label (one of critical, major, minor, warning or unknown)
+ * for the supplied normalized anomaly score (a value between 0 and 100).
+ * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
+ */
 export function getSeverity(normalizedScore: number): SeverityType {
   const severityTypesList = getSeverityTypes();
 
@@ -144,6 +152,11 @@ export function getSeverity(normalizedScore: number): SeverityType {
   }
 }
 
+/**
+ * Returns a severity type (indicating a critical, major, minor, warning or low severity anomaly)
+ * for the supplied normalized anomaly score (a value between 0 and 100).
+ * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
+ */
 export function getSeverityType(normalizedScore: number): ANOMALY_SEVERITY {
   if (normalizedScore >= 75) {
     return ANOMALY_SEVERITY.CRITICAL;
@@ -160,9 +173,12 @@ export function getSeverityType(normalizedScore: number): ANOMALY_SEVERITY {
   }
 }
 
-// Returns a severity label (one of critical, major, minor, warning, low or unknown)
-// for the supplied normalized anomaly score (a value between 0 and 100), where scores
-// less than 3 are assigned a severity of 'low'.
+/**
+ * Returns a severity label (one of critical, major, minor, warning, low or unknown)
+ * for the supplied normalized anomaly score (a value between 0 and 100), where scores
+ * less than 3 are assigned a severity of 'low'.
+ * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
+ */
 export function getSeverityWithLow(normalizedScore: number): SeverityType {
   const severityTypesList = getSeverityTypes();
 
@@ -181,8 +197,11 @@ export function getSeverityWithLow(normalizedScore: number): SeverityType {
   }
 }
 
-// Returns a severity RGB color (one of critical, major, minor, warning, low_warning or unknown)
-// for the supplied normalized anomaly score (a value between 0 and 100).
+/**
+ * Returns a severity RGB color (one of critical, major, minor, warning, low or blank)
+ * for the supplied normalized anomaly score (a value between 0 and 100).
+ * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
+ */
 export function getSeverityColor(normalizedScore: number): string {
   if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
     return SEVERITY_COLORS.CRITICAL;
@@ -199,9 +218,12 @@ export function getSeverityColor(normalizedScore: number): string {
   }
 }
 
-// Returns a label to use for the multi-bucket impact of an anomaly
-// according to the value of the multi_bucket_impact field of a record,
-// which ranges from -5 to +5.
+/**
+ * Returns a label to use for the multi-bucket impact of an anomaly
+ * according to the value of the multi_bucket_impact field of a record,
+ * which ranges from -5 to +5.
+ * @param multiBucketImpact - Value of the multi_bucket_impact field of a record, from -5 to +5
+ */
 export function getMultiBucketImpactLabel(multiBucketImpact: number): string {
   if (multiBucketImpact >= MULTI_BUCKET_IMPACT.HIGH) {
     return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.highLabel', {
@@ -222,9 +244,12 @@ export function getMultiBucketImpactLabel(multiBucketImpact: number): string {
   }
 }
 
-// Returns the name of the field to use as the entity name from the source record
-// obtained from Elasticsearch. The function looks first for a by_field, then over_field,
-// then partition_field, returning undefined if none of these fields are present.
+/**
+ * Returns the name of the field to use as the entity name from the source record
+ * obtained from Elasticsearch. The function looks first for a by_field, then over_field,
+ * then partition_field, returning undefined if none of these fields are present.
+ * @param record - anomaly record result for which to obtain the entity field name.
+ */
 export function getEntityFieldName(record: AnomalyRecordDoc): string | undefined {
   // Analyses with by and over fields, will have a top-level by_field_name, but
   // the by_field_value(s) will be in the nested causes array.
@@ -241,9 +266,12 @@ export function getEntityFieldName(record: AnomalyRecordDoc): string | undefined
   }
 }
 
-// Returns the value of the field to use as the entity value from the source record
-// obtained from Elasticsearch. The function looks first for a by_field, then over_field,
-// then partition_field, returning undefined if none of these fields are present.
+/**
+ * Returns the value of the field to use as the entity value from the source record
+ * obtained from Elasticsearch. The function looks first for a by_field, then over_field,
+ * then partition_field, returning undefined if none of these fields are present.
+ * @param record - anomaly record result for which to obtain the entity field value.
+ */
 export function getEntityFieldValue(record: AnomalyRecordDoc): string | number | undefined {
   if (record.by_field_value !== undefined) {
     return record.by_field_value;
@@ -258,8 +286,11 @@ export function getEntityFieldValue(record: AnomalyRecordDoc): string | number |
   }
 }
 
-// Returns the list of partitioning entity fields for the source record as a list
-// of objects in the form { fieldName: airline, fieldValue: AAL, fieldType: partition }
+/**
+ * Returns the list of partitioning entity fields for the source record as a list
+ * of objects in the form { fieldName: airline, fieldValue: AAL, fieldType: partition }
+ * @param record - anomaly record result for which to obtain the entity field list.
+ */
 export function getEntityFieldList(record: AnomalyRecordDoc): EntityField[] {
   const entityFields: EntityField[] = [];
   if (record.partition_field_name !== undefined) {
@@ -292,21 +323,30 @@ export function getEntityFieldList(record: AnomalyRecordDoc): EntityField[] {
   return entityFields;
 }
 
-// Returns whether actual values should be displayed for a record with the specified function description.
-// Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
-// whereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'.
+/**
+ * Returns whether actual values should be displayed for a record with the specified function description.
+ * Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
+ * whereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'.
+ * @param functionDescription - function_description value for the anomaly record
+ */
 export function showActualForFunction(functionDescription: string): boolean {
   return DISPLAY_ACTUAL_FUNCTIONS.indexOf(functionDescription) > -1;
 }
 
-// Returns whether typical values should be displayed for a record with the specified function description.
-// Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
-// whereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'.
+/**
+ * Returns whether typical values should be displayed for a record with the specified function description.
+ * Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
+ * whereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'.
+ * @param functionDescription - function_description value for the anomaly record
+ */
 export function showTypicalForFunction(functionDescription: string): boolean {
   return DISPLAY_TYPICAL_FUNCTIONS.indexOf(functionDescription) > -1;
 }
 
-// Returns whether a rule can be configured against the specified anomaly.
+/**
+ * Returns whether a rule can be configured against the specified anomaly.
+ * @param record - anomaly record result
+ */
 export function isRuleSupported(record: AnomalyRecordDoc): boolean {
   // A rule can be configured with a numeric condition if the function supports it,
   // and/or with scope if there is a partitioning fields.
@@ -316,23 +356,25 @@ export function isRuleSupported(record: AnomalyRecordDoc): boolean {
   );
 }
 
-// Two functions for converting aggregation type names.
-// ML and ES use different names for the same function.
-// Possible values for ML aggregation type are (defined in lib/model/CAnomalyDetector.cc):
-//    count
-//    distinct_count
-//    rare
-//    info_content
-//    mean
-//    median
-//    min
-//    max
-//    varp
-//    sum
-//    lat_long
-//    time
-// The input to toES and the output from toML correspond to the value of the
-// function_description field of anomaly records.
+/**
+ * Two functions for converting aggregation type names.
+ * ML and ES use different names for the same function.
+ * Possible values for ML aggregation type are (defined in lib/model/CAnomalyDetector.cc):
+ *    count
+ *    distinct_count
+ *    rare
+ *    info_content
+ *    mean
+ *    median
+ *    min
+ *    max
+ *    varp
+ *    sum
+ *    lat_long
+ *    time
+ * The input to toES and the output from toML correspond to the value of the
+ * function_description field of anomaly records.
+ */
 export const aggregationTypeTransform = {
   toES(oldAggType: string): string {
     let newAggType = oldAggType;

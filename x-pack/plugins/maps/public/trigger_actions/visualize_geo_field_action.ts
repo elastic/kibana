@@ -52,8 +52,6 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
 
 const getMapsLink = async (context: VisualizeFieldContext) => {
   const indexPattern = await getIndexPatternService().get(context.indexPatternId);
-  const field = indexPattern.fields.find((fld) => fld.name === context.fieldName);
-  const supportsClustering = field?.aggregatable;
   // create initial layer descriptor
   const hasTooltips =
     context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
@@ -61,7 +59,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
     {
       id: uuid(),
       visible: true,
-      type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR,
+      type: LAYER_TYPE.MVT_VECTOR,
       sourceDescriptor: {
         id: uuid(),
         type: SOURCE_TYPES.ES_SEARCH,
@@ -69,7 +67,7 @@ const getMapsLink = async (context: VisualizeFieldContext) => {
         label: indexPattern.title,
         indexPatternId: context.indexPatternId,
         geoField: context.fieldName,
-        scalingType: supportsClustering ? SCALING_TYPES.CLUSTERS : SCALING_TYPES.LIMIT,
+        scalingType: SCALING_TYPES.MVT,
       },
     },
   ];

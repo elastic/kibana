@@ -14,10 +14,10 @@ import type { IlmPolicyMigrationStatus } from '../../common/types';
 import { ListingProps as Props } from '.';
 
 import { setup, TestBed, TestDependencies, mockJobs } from './__test__';
+import { Job } from '../lib/job';
 
 describe('ReportListing', () => {
   let testBed: TestBed;
-
   let applicationService: TestDependencies['application'];
 
   const runSetup = async (props?: Partial<Props>) => {
@@ -71,6 +71,61 @@ describe('ReportListing', () => {
       '/s/my-space/app/reportingRedirect?jobId=k90e51pk1ieucbae0c3t8wo2',
       '_blank'
     );
+  });
+
+  describe('flyout', () => {
+    let reportingAPIClient: TestDependencies['reportingAPIClient'];
+    let jobUnderTest: Job;
+
+    beforeEach(async () => {
+      await runSetup();
+      reportingAPIClient = testBed.testDependencies.reportingAPIClient;
+      jest.spyOn(reportingAPIClient, 'getInfo').mockResolvedValue(jobUnderTest);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('shows the enabled "open in Kibana" button in the actions menu for v2 jobs', async () => {
+      const [jobJson] = mockJobs;
+      jobUnderTest = new Job(jobJson);
+      const { actions } = testBed;
+
+      await actions.flyout.open(jobUnderTest.id);
+      actions.flyout.openActionsMenu();
+      expect(actions.flyout.findOpenInAppButton().props().disabled).toBe(false);
+    });
+
+    it('shows the disabled "open in Kibana" button in the actions menu for pre-v2 jobs', async () => {
+      const [, jobJson] = mockJobs;
+      jobUnderTest = new Job(jobJson);
+      const { actions } = testBed;
+
+      await actions.flyout.open(jobUnderTest.id);
+      actions.flyout.openActionsMenu();
+      expect(actions.flyout.findOpenInAppButton().props().disabled).toBe(true);
+    });
+
+    it('shows the disabled "Download" button in the actions menu for a job that is not done', async () => {
+      const [jobJson] = mockJobs;
+      jobUnderTest = new Job(jobJson);
+      const { actions } = testBed;
+
+      await actions.flyout.open(jobUnderTest.id);
+      actions.flyout.openActionsMenu();
+      expect(actions.flyout.findDownloadButton().props().disabled).toBe(true);
+    });
+
+    it('shows the enabled "Download" button in the actions menu for a job is done', async () => {
+      const [, , jobJson] = mockJobs;
+      jobUnderTest = new Job(jobJson);
+      const { actions } = testBed;
+
+      await actions.flyout.open(jobUnderTest.id);
+      actions.flyout.openActionsMenu();
+      expect(actions.flyout.findDownloadButton().props().disabled).toBe(false);
+    });
   });
 
   describe('ILM policy', () => {

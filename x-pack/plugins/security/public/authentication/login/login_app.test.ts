@@ -18,7 +18,7 @@ describe('loginApp', () => {
 
     loginApp.create({
       ...coreSetupMock,
-      config: { loginAssistanceMessage: '' },
+      config: { loginAssistanceMessage: '', sameSiteCookies: undefined },
     });
 
     expect(coreSetupMock.http.anonymousPaths.register).toHaveBeenCalledTimes(1);
@@ -43,7 +43,7 @@ describe('loginApp', () => {
 
     loginApp.create({
       ...coreSetupMock,
-      config: { loginAssistanceMessage: 'some-message' },
+      config: { loginAssistanceMessage: 'some-message', sameSiteCookies: undefined },
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;

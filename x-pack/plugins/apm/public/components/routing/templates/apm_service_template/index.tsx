@@ -15,16 +15,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { enableInfrastructureView } from '../../../../../../observability/public';
 import {
   isIosAgentName,
   isJavaAgentName,
   isJRubyAgent,
   isRumAgentName,
+  isServerlessAgent,
 } from '../../../../../common/agent_name';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
+import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -41,6 +44,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'errors'
     | 'metrics'
     | 'nodes'
+    | 'infra'
     | 'service-map'
     | 'logs'
     | 'profiling';
@@ -57,7 +61,9 @@ interface Props {
 export function ApmServiceTemplate(props: Props) {
   return (
     <ApmServiceContextProvider>
-      <TemplateWithContext {...props} />
+      <ServiceAnomalyTimeseriesContextProvider>
+        <TemplateWithContext {...props} />
+      </ServiceAnomalyTimeseriesContextProvider>
     </ApmServiceContextProvider>
   );
 }
@@ -139,7 +145,8 @@ export function isMetricsTabHidden({
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
     isIosAgentName(agentName) ||
-    isJRubyAgent(agentName, runtimeName)
+    isJRubyAgent(agentName, runtimeName) ||
+    isServerlessAgent(runtimeName)
   );
 }
 
@@ -150,12 +157,16 @@ export function isJVMsTabHidden({
   agentName?: string;
   runtimeName?: string;
 }) {
-  return !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName));
+  return (
+    !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) ||
+    isServerlessAgent(runtimeName)
+  );
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config } = useApmPluginContext();
+  const { config, core } = useApmPluginContext();
+  const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
 
   const router = useApmRouter();
 
@@ -236,6 +247,17 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'JVMs',
       }),
       hidden: isJVMsTabHidden({ agentName, runtimeName }),
+    },
+    {
+      key: 'infra',
+      href: router.link('/services/{serviceName}/infra', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.infraTabLabel', {
+        defaultMessage: 'Infrastructure',
+      }),
+      hidden: !showInfraTab,
     },
     {
       key: 'service-map',

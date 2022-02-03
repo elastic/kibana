@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchSourceFields } from 'src/plugins/data/common';
+import { SerializedSearchSourceFields } from 'src/plugins/data/common';
 import { ReportApiJSON } from '../../../plugins/reporting/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
             },
           },
-        } as unknown as SearchSourceFields,
+        } as unknown as SerializedSearchSourceFields,
       });
       expect(status).to.be(200);
 

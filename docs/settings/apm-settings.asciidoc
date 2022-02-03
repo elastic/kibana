@@ -101,6 +101,8 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.indices.sourcemap` {ess-icon}
   | Matcher for all source map indices. Defaults to `apm-*`.
 
+| `xpack.apm.autoCreateApmDataView` {ess-icon}
+  | Set to `false` to disable the automatic creation of the APM data view when the APM app is opened. Defaults to `true`.
 |===
 
 // end::general-apm-settings[]

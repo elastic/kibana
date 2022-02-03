@@ -123,6 +123,26 @@ class ApiService {
     return response;
   }
 
+  public async put<T>(apiUrl: string, data?: any, decodeType?: any) {
+    const response = await this._http!.put<T>(apiUrl, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+
+    if (decodeType) {
+      const decoded = decodeType.decode(response);
+      if (isRight(decoded)) {
+        return decoded.right as T;
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `API ${apiUrl} is not returning expected response, ${PathReporter.report(decoded)}`
+        );
+      }
+    }
+    return response;
+  }
+
   public async delete<T>(apiUrl: string) {
     const response = await this._http!.delete<T>(apiUrl);
     if (response instanceof Error) {

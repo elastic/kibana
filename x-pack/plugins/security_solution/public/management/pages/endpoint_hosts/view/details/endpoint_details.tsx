@@ -38,13 +38,11 @@ import {
 import { useEndpointSelector } from '../hooks';
 import * as i18 from '../translations';
 import { ActionsMenu } from './components/actions_menu';
-import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
 import {
   EndpointDetailsFlyoutTabs,
   EndpointDetailsTabsTypes,
 } from './components/endpoint_details_tabs';
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
-import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
 import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsContent } from './endpoint_details_content';
@@ -126,7 +124,11 @@ export const EndpointDetails = memo(() => {
   return (
     <>
       {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
-        <EndpointDetailsFlyoutHeader hostname={hostDetails?.host?.hostname} />
+        <EndpointDetailsFlyoutHeader
+          hasBorder
+          endpointId={hostDetails?.agent.id}
+          hostname={hostDetails?.host?.hostname}
+        />
       )}
       {hostDetails === undefined ? (
         <EuiFlyoutBody>
@@ -174,9 +176,7 @@ const PolicyResponseFlyoutPanel = memo<{
 
   return (
     <>
-      <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
-
-      <FlyoutBodyNoTopPadding
+      <EuiFlyoutBody
         data-test-subj="endpointDetailsPolicyResponseFlyoutBody"
         className="endpointDetailsPolicyResponseFlyoutBody"
       >
@@ -218,7 +218,7 @@ const PolicyResponseFlyoutPanel = memo<{
             responseAttentionCount={responseAttentionCount}
           />
         )}
-      </FlyoutBodyNoTopPadding>
+      </EuiFlyoutBody>
     </>
   );
 });

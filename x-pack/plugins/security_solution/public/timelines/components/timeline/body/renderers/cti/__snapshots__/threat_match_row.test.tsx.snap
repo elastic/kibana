@@ -23,7 +23,7 @@ exports[`ThreatMatchRowView matches the registered snapshot 1`] = `
     <IndicatorDetails
       contextId="contextId"
       eventId="eventId"
-      indicatorProvider="provider"
+      feedName="feedName"
       indicatorReference="http://example.com"
       indicatorType="domain"
     />

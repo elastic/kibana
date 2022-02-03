@@ -18,18 +18,16 @@ export default function (providerContext: FtrProviderContext) {
   const pkgName = 'datastreams';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
-  const pkgKey = `${pkgName}-${pkgVersion}`;
-  const pkgUpdateKey = `${pkgName}-${pkgUpdateVersion}`;
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
   const namespaces = ['default', 'foo', 'bar'];
 
-  const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+  const uninstallPackage = async (name: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
-  const installPackage = async (pkg: string) => {
+  const installPackage = async (name: string, version: string) => {
     return await supertest
-      .post(`/api/fleet/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${name}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
       .expect(200);
@@ -40,7 +38,7 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     beforeEach(async () => {
-      await installPackage(pkgKey);
+      await installPackage(pkgName, pkgVersion);
       await Promise.all(
         namespaces.map(async (namespace) => {
           const createLogsRequest = es.transport.request(
@@ -100,8 +98,8 @@ export default function (providerContext: FtrProviderContext) {
           return Promise.all([deleteLogsRequest, deleteMetricsRequest]);
         })
       );
-      await uninstallPackage(pkgKey);
-      await uninstallPackage(pkgUpdateKey);
+      await uninstallPackage(pkgName, pkgVersion);
+      await uninstallPackage(pkgName, pkgUpdateVersion);
     });
 
     it('should list the logs and metrics datastream', async function () {
@@ -128,7 +126,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('after update, it should have rolled over logs datastream because mappings are not compatible and not metrics', async function () {
-      await installPackage(pkgUpdateKey);
+      await installPackage(pkgName, pkgUpdateVersion);
       await asyncForEach(namespaces, async (namespace) => {
         const resLogsDatastream = await es.transport.request<any>(
           {
@@ -167,7 +165,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
       });
-      await installPackage(pkgUpdateKey);
+      await installPackage(pkgName, pkgUpdateVersion);
     });
   });
 }

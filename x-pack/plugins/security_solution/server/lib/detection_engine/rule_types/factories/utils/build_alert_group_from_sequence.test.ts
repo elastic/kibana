@@ -123,6 +123,7 @@ describe('buildAlert', () => {
             },
           ]),
           [ALERT_DEPTH]: 2,
+          [ALERT_BUILDING_BLOCK_TYPE]: 'default',
           [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
         }),
       })

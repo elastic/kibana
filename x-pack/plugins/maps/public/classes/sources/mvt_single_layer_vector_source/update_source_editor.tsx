@@ -33,7 +33,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
   _handleChange = (settings: MVTSettings) => {
     const changes: OnSourceChangeArgs[] = [];
-    if (settings.layerName !== this.props.source.getLayerName()) {
+    if (settings.layerName !== this.props.source.getTileSourceLayer()) {
       changes.push({ propName: 'layerName', value: settings.layerName });
     }
     if (settings.minSourceZoom !== this.props.source.getMinZoom()) {
@@ -87,7 +87,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <EuiSpacer size="m" />
           <MVTSingleLayerSourceSettings
             handleChange={this._handleChange}
-            layerName={this.props.source.getLayerName() || ''}
+            layerName={this.props.source.getTileSourceLayer() || ''}
             fields={fieldDescriptors}
             minSourceZoom={this.props.source.getMinZoom()}
             maxSourceZoom={this.props.source.getMaxZoom()}

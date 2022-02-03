@@ -4,6 +4,8 @@
 <titleabbrev>Get index pattern</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-api-get>> instead.]
+
 experimental[] Retrieve a single {kib} index pattern by ID.
 
 [[index-patterns-api-get-request]]

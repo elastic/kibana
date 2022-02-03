@@ -11,7 +11,7 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import { ConfigSchema } from '../config';
-import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
+import type { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
@@ -20,13 +20,15 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 import { getUiSettings } from './ui_settings';
+import { QuerySetup } from './query';
 
-export interface DataEnhancements {
+interface DataEnhancements {
   search: SearchEnhancements;
 }
 
 export interface DataPluginSetup {
   search: ISearchSetup;
+  query: QuerySetup;
   /**
    * @deprecated - use "fieldFormats" plugin directly instead
    */
@@ -88,7 +90,7 @@ export class DataServerPlugin
     { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
-    this.queryService.setup(core);
+    const querySetup = this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
@@ -105,6 +107,7 @@ export class DataServerPlugin
         searchSetup.__enhance(enhancements.search);
       },
       search: searchSetup,
+      query: querySetup,
       fieldFormats,
     };
   }

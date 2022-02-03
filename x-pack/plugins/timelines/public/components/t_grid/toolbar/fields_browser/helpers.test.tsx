@@ -16,7 +16,7 @@ import {
   getFieldCount,
   filterBrowserFieldsByFieldName,
 } from './helpers';
-import { BrowserFields } from '../../../../../common';
+import { BrowserFields } from '../../../../../common/search_strategy';
 
 const timelineId = 'test';
 
@@ -229,6 +229,20 @@ describe('helpers', () => {
               name: 'agent.id',
               searchable: true,
               type: 'string',
+            },
+          },
+        },
+        base: {
+          fields: {
+            _id: {
+              category: 'base',
+              description: 'Each document has an _id that uniquely identifies it',
+              example: 'Y-6TfmcB0WOhS6qyMv3s',
+              name: '_id',
+              type: 'string',
+              searchable: true,
+              aggregatable: false,
+              indexes: ['auditbeat', 'filebeat', 'packetbeat'],
             },
           },
         },

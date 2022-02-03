@@ -33,9 +33,19 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'string',
     description: 'Path to the Kibana install directory',
   })
+  .option('headless', {
+    default: true,
+    type: 'boolean',
+    description: 'Start in headless mode',
+  })
+  .option('grep', {
+    default: undefined,
+    type: 'string',
+    description: 'run only journeys with a name or tags that matches the glob',
+  })
   .help();
 
-const { server, runner, open, kibanaInstallDir } = argv;
+const { server, runner, open, kibanaInstallDir, headless, grep } = argv;
 
 const e2eDir = path.join(__dirname, '../e2e');
 
@@ -49,12 +59,30 @@ if (server) {
 const config = './playwright_run.ts';
 
 function executeRunner() {
-  childProcess.execSync(
-    `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'`,
-    {
-      cwd: e2eDir,
-      stdio: 'inherit',
-    }
-  );
+  if (server) {
+    childProcess.execSync(
+      `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'`,
+      {
+        cwd: e2eDir,
+        stdio: 'inherit',
+      }
+    );
+  } else if (runner) {
+    childProcess.execSync(
+      `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'  --headless ${headless} --grep '${grep}'`,
+      {
+        cwd: e2eDir,
+        stdio: 'inherit',
+      }
+    );
+  } else {
+    childProcess.execSync(
+      `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}' --grep '${grep}'`,
+      {
+        cwd: e2eDir,
+        stdio: 'inherit',
+      }
+    );
+  }
 }
 executeRunner();

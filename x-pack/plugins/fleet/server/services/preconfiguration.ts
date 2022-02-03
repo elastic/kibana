@@ -21,11 +21,9 @@ import type {
   PreconfiguredOutput,
   PackagePolicy,
 } from '../../common';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
 import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
-import {
-  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_LATEST_KEYWORD,
-} from '../constants';
+import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
@@ -34,7 +32,7 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { overridePackageInputs, packagePolicyService } from './package_policy';
+import { preconfigurePackageInputs, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
@@ -61,6 +59,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
         preconfiguredOutput.hosts.map(normalizeHostsForAgents)
       )) ||
     existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
+    existingOutput.ca_trusted_fingerprint !== preconfiguredOutput.ca_trusted_fingerprint ||
     existingOutput.config_yaml !== preconfiguredOutput.config_yaml
   );
 }
@@ -143,7 +142,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
-  defaultOutput: Output
+  defaultOutput: Output,
+  spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
 
@@ -170,18 +170,25 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     );
   }
 
+  const packagesToInstall = packages.map((pkg) =>
+    pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
+  );
+
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: soClient,
     esClient,
-    packagesToInstall: packages.map((pkg) =>
-      pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
-    ),
+    packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
+    spaceId,
+    // During setup, we'll try to install preconfigured packages from the versions bundled with Kibana
+    // whenever possible
+    preferredSource: 'bundled',
   });
 
   const fulfilledPackages = [];
   const rejectedPackages: PreconfigurationError[] = [];
+
   for (let i = 0; i < preconfiguredPackages.length; i++) {
     const packageResult = preconfiguredPackages[i];
     if ('error' in packageResult) {
@@ -341,7 +348,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         policy!,
         packagePoliciesToAdd!,
         defaultOutput,
-        !created
+        true
       );
 
       // Add the is_managed flag after configuring package policies to avoid errors
@@ -378,7 +385,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             }),
           }
     ),
-    packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
+    packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
   };
 }
@@ -404,6 +411,7 @@ async function addPreconfiguredPolicyPackages(
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<
     Partial<Omit<NewPackagePolicy, 'inputs'>> & {
+      id?: string | number;
       name: string;
       installedPackage: Installation;
       inputs?: InputsOverride[];
@@ -413,7 +421,7 @@ async function addPreconfiguredPolicyPackages(
   bumpAgentPolicyRevison = false
 ) {
   // Add packages synchronously to avoid overwriting
-  for (const { installedPackage, name, description, inputs } of installedPackagePolicies) {
+  for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
     const packageInfo = await getPackageInfo({
       savedObjectsClient: soClient,
       pkgName: installedPackage.name,
@@ -427,8 +435,9 @@ async function addPreconfiguredPolicyPackages(
       agentPolicy,
       defaultOutput,
       name,
+      id,
       description,
-      (policy) => overridePackageInputs(policy, packageInfo, inputs),
+      (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
       bumpAgentPolicyRevison
     );
   }

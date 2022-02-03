@@ -11,10 +11,13 @@ import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notificatio
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { DataViewField } from './fields';
 import { FieldFormat, SerializedFieldFormat } from '../../field_formats/common';
+
+export type { QueryDslQueryContainer };
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -65,7 +68,7 @@ export interface RuntimeFieldSubField extends FieldConfiguration {
 /**
  * @deprecated
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
- * Use IndexPattern or IndexPatternSpec instead
+ * Use DataView or DataViewSpec instead
  */
 export interface IIndexPattern extends DataViewBase {
   title: string;
@@ -92,7 +95,6 @@ export interface DataViewAttributes {
   type?: string;
   typeMeta?: string;
   timeFieldName?: string;
-  intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
   fieldAttrs?: string;
@@ -163,6 +165,7 @@ export interface GetFieldsOptions {
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
+  filter?: QueryDslQueryContainer;
 }
 
 export interface GetFieldsOptionsTimePattern {
@@ -177,11 +180,6 @@ export interface IDataViewsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
   hasUserIndexPattern: () => Promise<boolean>;
 }
-
-/**
- * @deprecated Use IDataViewsApiClient. All index pattern interfaces were renamed.
- */
-export type IIndexPatternsApiClient = IDataViewsApiClient;
 
 export type { SavedObject };
 
@@ -263,11 +261,6 @@ export interface FieldSpec extends DataViewFieldBase {
 export type DataViewFieldMap = Record<string, FieldSpec>;
 
 /**
- * @deprecated Use DataViewFieldMap. All index pattern interfaces were renamed.
- */
-export type IndexPatternFieldMap = DataViewFieldMap;
-
-/**
  * Static index pattern format
  * Serialized data object, representing index pattern attributes and state
  */
@@ -281,11 +274,6 @@ export interface DataViewSpec {
    */
   version?: string;
   title?: string;
-  /**
-   * @deprecated
-   * Deprecated. Was used by time range based index patterns
-   */
-  intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
   fields?: DataViewFieldMap;
@@ -296,11 +284,6 @@ export interface DataViewSpec {
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }
-
-/**
- * @deprecated Use DataViewSpec. All index pattern interfaces were renamed.
- */
-export type IndexPatternSpec = DataViewSpec;
 
 export interface SourceFilter {
   value: string;

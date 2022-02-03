@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeModel } from '../../types';
+import { RuleTypeModel } from '../../types';
 import { alertTypeGroupCompare, alertTypeCompare } from './alert_type_compare';
 import { IsEnabledResult, IsDisabledResult } from './check_alert_type_enabled';
 
@@ -17,7 +17,7 @@ test('should sort groups by containing enabled alert types first and then by nam
         id: string;
         name: string;
         checkEnabledResult: IsEnabledResult | IsDisabledResult;
-        alertTypeItem: AlertTypeModel;
+        alertTypeItem: RuleTypeModel;
       }>
     ]
   > = [
@@ -36,7 +36,7 @@ test('should sort groups by containing enabled alert types first and then by nam
             validate: () => {
               return { errors: {} };
             },
-            alertParamsExpression: () => null,
+            ruleParamsExpression: () => null,
             requiresAppContext: false,
           },
         },
@@ -57,7 +57,7 @@ test('should sort groups by containing enabled alert types first and then by nam
             validate: () => {
               return { errors: {} };
             },
-            alertParamsExpression: () => null,
+            ruleParamsExpression: () => null,
             requiresAppContext: false,
           },
         },
@@ -73,7 +73,7 @@ test('should sort groups by containing enabled alert types first and then by nam
             validate: () => {
               return { errors: {} };
             },
-            alertParamsExpression: () => null,
+            ruleParamsExpression: () => null,
             requiresAppContext: false,
           },
         },
@@ -94,7 +94,7 @@ test('should sort groups by containing enabled alert types first and then by nam
             validate: () => {
               return { errors: {} };
             },
-            alertParamsExpression: () => null,
+            ruleParamsExpression: () => null,
             requiresAppContext: false,
           },
         },
@@ -118,7 +118,7 @@ test('should sort alert types by enabled first and then by name', async () => {
     id: string;
     name: string;
     checkEnabledResult: IsEnabledResult | IsDisabledResult;
-    alertTypeItem: AlertTypeModel;
+    alertTypeItem: RuleTypeModel;
   }> = [
     {
       id: '1',
@@ -132,7 +132,7 @@ test('should sort alert types by enabled first and then by name', async () => {
         validate: () => {
           return { errors: {} };
         },
-        alertParamsExpression: () => null,
+        ruleParamsExpression: () => null,
         requiresAppContext: false,
       },
     },
@@ -148,7 +148,7 @@ test('should sort alert types by enabled first and then by name', async () => {
         validate: () => {
           return { errors: {} };
         },
-        alertParamsExpression: () => null,
+        ruleParamsExpression: () => null,
         requiresAppContext: false,
       },
     },
@@ -164,7 +164,7 @@ test('should sort alert types by enabled first and then by name', async () => {
         validate: () => {
           return { errors: {} };
         },
-        alertParamsExpression: () => null,
+        ruleParamsExpression: () => null,
         requiresAppContext: false,
       },
     },

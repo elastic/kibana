@@ -18,16 +18,17 @@ import {
   caseStatuses,
   CasesFindResponseRt,
   excess,
-} from '../../../common';
+} from '../../../common/api';
 
-import { createCaseError, transformCases } from '../../common';
+import { createCaseError } from '../../common/error';
+import { transformCases } from '../../common/utils';
 import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import { CasesClientArgs } from '..';
 
 /**
- * Retrieves a case and optionally its comments and sub case comments.
+ * Retrieves a case and optionally its comments.
  *
  * @ignore
  */
@@ -51,7 +52,6 @@ export const find = async (
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
       status: queryParams.status,
-      caseType: queryParams.type,
       owner: queryParams.owner,
     };
 
@@ -60,7 +60,7 @@ export const find = async (
       unsecuredSavedObjectsClient,
       caseOptions: {
         ...queryParams,
-        ...caseQueries.case,
+        ...caseQueries,
         searchFields:
           queryParams.searchFields != null
             ? Array.isArray(queryParams.searchFields)
@@ -69,7 +69,6 @@ export const find = async (
             : queryParams.searchFields,
         fields: includeFieldsRequiredForAuthentication(queryParams.fields),
       },
-      subCaseOptions: caseQueries.subCase,
     });
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
@@ -80,8 +79,7 @@ export const find = async (
         const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
         return caseService.findCaseStatusStats({
           unsecuredSavedObjectsClient,
-          caseOptions: statusQuery.case,
-          subCaseOptions: statusQuery.subCase,
+          caseOptions: statusQuery,
           ensureSavedObjectsAreAuthorized,
         });
       }),

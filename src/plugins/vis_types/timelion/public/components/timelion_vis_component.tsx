@@ -18,6 +18,7 @@ import {
   LayoutDirection,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
+import { RangeFilterParams } from '@kbn/es-query';
 
 import { useKibana } from '../../../../kibana_react/public';
 import { useActiveCursor } from '../../../../charts/public';
@@ -38,7 +39,6 @@ import { getCharts } from '../helpers/plugin_services';
 import type { Sheet } from '../helpers/timelion_request_handler';
 import type { IInterpreterRenderHandlers } from '../../../../expressions';
 import type { TimelionVisDependencies } from '../plugin';
-import type { RangeFilterParams } from '../../../../data/public';
 import type { Series } from '../helpers/timelion_request_handler';
 
 import './timelion_vis.scss';
@@ -93,7 +93,7 @@ const renderYAxis = (series: Series[]) => {
   return yAxis.length ? yAxis : <DefaultYAxis />;
 };
 
-const TimelionVisComponent = ({
+export const TimelionVisComponent = ({
   interval,
   seriesList,
   renderComplete,
@@ -238,7 +238,3 @@ const TimelionVisComponent = ({
     </div>
   );
 };
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { TimelionVisComponent as default };

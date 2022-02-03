@@ -18,7 +18,7 @@ import type { I18nStart } from '../i18n';
 import { CoreContextProvider } from '../utils';
 import { AppWrapper } from './app_containers';
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
@@ -51,7 +51,7 @@ export class RenderingService {
       });
 
     ReactDOM.render(
-      <CoreContextProvider i18n={i18n} theme={theme}>
+      <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
         <>
           {/* Fixed headers */}
           {chromeHeader}

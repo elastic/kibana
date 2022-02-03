@@ -16,7 +16,7 @@ const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
 const FINAL_PIPELINE_VERSION = 1;
 
-let pkgKey: string;
+let pkgVersion: string;
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -45,22 +45,22 @@ export default function (providerContext: FtrProviderContext) {
       const { body: getPackagesRes } = await supertest.get(
         `/api/fleet/epm/packages?experimental=true`
       );
-      const logPackage = getPackagesRes.response.find((p: any) => p.name === 'log');
+      const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
       if (!logPackage) {
         throw new Error('No log package');
       }
 
-      pkgKey = `log-${logPackage.version}`;
+      pkgVersion = logPackage.version;
 
       await supertest
-        .post(`/api/fleet/epm/packages/${pkgKey}`)
+        .post(`/api/fleet/epm/packages/log/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
     after(async () => {
       await supertest
-        .delete(`/api/fleet/epm/packages/${pkgKey}`)
+        .delete(`/api/fleet/epm/packages/log/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -197,12 +197,17 @@ export default function (providerContext: FtrProviderContext) {
     for (const scenario of scenarios) {
       it(`Should write the correct event.agent_id_status for ${scenario.name}`, async () => {
         // Create an API key
-        const apiKeyRes = await es.security.createApiKey({
-          body: {
-            name: `test api key`,
-            ...(scenario.apiKey || {}),
+        const apiKeyRes = await es.security.createApiKey(
+          {
+            body: {
+              name: `test api key`,
+              ...(scenario.apiKey || {}),
+            },
           },
-        });
+          {
+            headers: { 'es-security-runas-user': 'elastic' }, // run as elastic suer
+          }
+        );
 
         const res = await indexUsingApiKey(
           {

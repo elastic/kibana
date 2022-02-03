@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterMultiTerms } from './create_filter/multi_terms';
-import { aggTermsFnName } from './terms_fn';
+import { aggMultiTermsFnName } from './multi_terms_fn';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
 import { MultiFieldKey } from './multi_field_key';
@@ -34,13 +34,14 @@ export interface AggParamsMultiTerms extends BaseAggParams {
   size?: number;
   otherBucket?: boolean;
   otherBucketLabel?: string;
+  separatorLabel?: string;
 }
 
 export const getMultiTermsBucketAgg = () => {
   const keyCaches = new WeakMap();
   return new BucketAggType({
     name: BUCKET_TYPES.MULTI_TERMS,
-    expressionName: aggTermsFnName,
+    expressionName: aggMultiTermsFnName,
     title: termsTitle,
     makeLabel(agg) {
       const params = agg.params;
@@ -83,6 +84,7 @@ export const getMultiTermsBucketAgg = () => {
         params: {
           otherBucketLabel: params.otherBucketLabel,
           paramsPerField: formats,
+          separator: agg.params.separatorLabel,
         },
       };
     },
@@ -140,6 +142,11 @@ export const getMultiTermsBucketAgg = () => {
           defaultMessage: 'Label for other bucket',
         }),
         shouldShow: (agg) => agg.getParam('otherBucket'),
+        write: noop,
+      },
+      {
+        name: 'separatorLabel',
+        type: 'string',
         write: noop,
       },
     ],

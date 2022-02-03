@@ -40,8 +40,11 @@ describe('SourceLogic', () => {
     dataLoading: true,
     sectionLoading: true,
     buttonLoading: false,
+    diagnosticDownloadButtonVisible: false,
     contentMeta: DEFAULT_META,
     contentFilterValue: '',
+    isConfigurationUpdateButtonLoading: false,
+    stagedPrivateKey: null,
   };
 
   const searchServerResponse = {
@@ -123,6 +126,12 @@ describe('SourceLogic', () => {
 
       expect(SourceLogic.values.buttonLoading).toEqual(false);
     });
+
+    it('showDiagnosticDownloadButton', () => {
+      SourceLogic.actions.showDiagnosticDownloadButton();
+
+      expect(SourceLogic.values.diagnosticDownloadButtonVisible).toEqual(true);
+    });
   });
 
   describe('listeners', () => {
@@ -179,6 +188,27 @@ describe('SourceLogic', () => {
           await expectedAsyncError(mockError);
 
           expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        });
+
+        it('handles error message with diagnostic bundle error message', async () => {
+          const showDiagnosticDownloadButtonSpy = jest.spyOn(
+            SourceLogic.actions,
+            'showDiagnosticDownloadButton'
+          );
+
+          // For contenst source errors, the API returns the source errors in an error property in the success
+          // response. We don't reject here because we still render the content source with the error.
+          const promise = Promise.resolve({
+            ...contentSource,
+            errors: [
+              'The database is on fire. [Check diagnostic bundle for details - Message id: 123]',
+            ],
+          });
+          http.get.mockReturnValue(promise);
+          SourceLogic.actions.initializeSource(contentSource.id);
+          await promise;
+
+          expect(showDiagnosticDownloadButtonSpy).toHaveBeenCalled();
         });
 
         describe('404s', () => {

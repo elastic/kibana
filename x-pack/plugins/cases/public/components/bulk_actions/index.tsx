@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import { CaseStatuses, CaseStatusWithAllStatus } from '../../../common';
+import { CaseStatusWithAllStatus } from '../../../common/ui/types';
+import { CaseStatuses } from '../../../common/api';
 import { statuses } from '../status';
 import * as i18n from './translations';
 import { Case } from '../../containers/types';
@@ -17,7 +18,6 @@ interface GetBulkItems {
   caseStatus: CaseStatusWithAllStatus;
   closePopover: () => void;
   deleteCasesAction: (cases: Case[]) => void;
-  includeCollections: boolean;
   selectedCases: Case[];
   updateCaseStatus: (status: string) => void;
 }
@@ -26,7 +26,6 @@ export const getBulkItems = ({
   caseStatus,
   closePopover,
   deleteCasesAction,
-  includeCollections,
   selectedCases,
   updateCaseStatus,
 }: GetBulkItems) => {
@@ -35,7 +34,7 @@ export const getBulkItems = ({
   const openMenuItem = (
     <EuiContextMenuItem
       data-test-subj="cases-bulk-open-button"
-      disabled={selectedCases.length === 0 || includeCollections}
+      disabled={selectedCases.length === 0}
       icon={statuses[CaseStatuses.open].icon}
       key="cases-bulk-open-button"
       onClick={() => {
@@ -50,7 +49,7 @@ export const getBulkItems = ({
   const inProgressMenuItem = (
     <EuiContextMenuItem
       data-test-subj="cases-bulk-in-progress-button"
-      disabled={selectedCases.length === 0 || includeCollections}
+      disabled={selectedCases.length === 0}
       icon={statuses[CaseStatuses['in-progress']].icon}
       key="cases-bulk-in-progress-button"
       onClick={() => {
@@ -65,7 +64,7 @@ export const getBulkItems = ({
   const closeMenuItem = (
     <EuiContextMenuItem
       data-test-subj="cases-bulk-close-button"
-      disabled={selectedCases.length === 0 || includeCollections}
+      disabled={selectedCases.length === 0}
       icon={statuses[CaseStatuses.closed].icon}
       key="cases-bulk-close-button"
       onClick={() => {

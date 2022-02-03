@@ -22,10 +22,17 @@ import {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { ServerApiError } from '../../../../../common/types';
+import { useMutation, useQueryClient } from 'react-query';
 import { Loader } from '../../../../../common/components/loader';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
+import { ServerApiError } from '../../../../../common/types';
+import { useGetEndpointSpecificPolicies } from '../../../../services/policies/hooks';
+import {
+  createHostIsolationExceptionItem,
+  updateOneHostIsolationExceptionItem,
+} from '../../service';
+import { useGetHostIsolationExceptionFormEntry } from '../hooks';
+import { HostIsolationExceptionsForm } from './form';
 import {
   getCreateErrorMessage,
   getCreationSuccessMessage,
@@ -33,13 +40,6 @@ import {
   getUpdateErrorMessage,
   getUpdateSuccessMessage,
 } from './translations';
-import { createEmptyHostIsolationException } from '../../utils';
-import { HostIsolationExceptionsForm } from './form';
-import {
-  createHostIsolationExceptionItem,
-  getOneHostIsolationExceptionItem,
-  updateOneHostIsolationExceptionItem,
-} from '../../service';
 
 export const HostIsolationExceptionsFormFlyout = memo(
   ({ onCancel, id }: { onCancel: () => void; id?: string }) => {
@@ -52,28 +52,23 @@ export const HostIsolationExceptionsFormFlyout = memo(
       CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined
     >(undefined);
 
-    useQuery<UpdateExceptionListItemSchema | CreateExceptionListItemSchema, ServerApiError>(
-      ['hostIsolationExceptions', 'form', id],
-      async () => {
-        // for editing, fetch from the API
-        if (id !== undefined) {
-          return getOneHostIsolationExceptionItem(http, id);
-        }
-        // for adding, return a new empty object
-        return createEmptyHostIsolationException();
+    // Load the entry to create or edit
+    useGetHostIsolationExceptionFormEntry({
+      id,
+      onSuccess: (data) => setException(data),
+      onError: (error) => {
+        toasts.addWarning(getLoadErrorMessage(error));
+        onCancel();
       },
-      {
-        refetchIntervalInBackground: false,
-        refetchOnWindowFocus: false,
-        onSuccess: (data) => {
-          setException(data);
-        },
-        onError: (error) => {
-          toasts.addWarning(getLoadErrorMessage(error));
-          onCancel();
-        },
-      }
-    );
+    });
+
+    // load the list of policies>
+    const policiesRequest = useGetEndpointSpecificPolicies({
+      onError: (error) => {
+        toasts.addWarning(getLoadErrorMessage(error));
+        onCancel();
+      },
+    });
 
     const mutation = useMutation(
       () => {
@@ -131,7 +126,7 @@ export const HostIsolationExceptionsFormFlyout = memo(
           {isEditing ? (
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.flyout.editButton"
-              defaultMessage="Edit host isolation exception"
+              defaultMessage="Save"
             />
           ) : (
             <FormattedMessage
@@ -144,7 +139,13 @@ export const HostIsolationExceptionsFormFlyout = memo(
       [formHasError, handleOnSubmit, isEditing, mutation.isLoading]
     );
 
-    return exception ? (
+    const handleFormChange = (
+      change: Partial<CreateExceptionListItemSchema> | Partial<UpdateExceptionListItemSchema>
+    ) => {
+      setException(Object.assign(exception, change));
+    };
+
+    return exception && policiesRequest.data?.items ? (
       <EuiFlyout
         size="m"
         onClose={handleOnCancel}
@@ -172,7 +173,8 @@ export const HostIsolationExceptionsFormFlyout = memo(
 
         <EuiFlyoutBody>
           <HostIsolationExceptionsForm
-            onChange={setException}
+            policies={policiesRequest.data?.items}
+            onChange={handleFormChange}
             exception={exception}
             onError={setFormHasError}
           />

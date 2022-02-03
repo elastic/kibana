@@ -15,7 +15,7 @@ import {
 } from './use_configure';
 import { mappings, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { TestProviders } from '../../common/mock';
 
 const mockErrorToast = jest.fn();

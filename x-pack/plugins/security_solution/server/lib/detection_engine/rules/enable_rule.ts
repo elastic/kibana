@@ -7,37 +7,19 @@
 
 import { SanitizedAlert } from '../../../../../alerting/common';
 import { RulesClient } from '../../../../../alerting/server';
-import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import { RuleParams } from '../schemas/rule_schemas';
 
 interface EnableRuleArgs {
   rule: SanitizedAlert<RuleParams>;
   rulesClient: RulesClient;
-  ruleStatusClient: IRuleExecutionLogClient;
-  spaceId: string;
 }
 
 /**
- * Enables the rule and updates its status to 'going to run'
+ * Enables the rule
  *
  * @param rule - rule to enable
  * @param rulesClient - Alerts client
- * @param ruleStatusClient - ExecLog client
  */
-export const enableRule = async ({
-  rule,
-  rulesClient,
-  ruleStatusClient,
-  spaceId,
-}: EnableRuleArgs) => {
+export const enableRule = async ({ rule, rulesClient }: EnableRuleArgs) => {
   await rulesClient.enable({ id: rule.id });
-
-  await ruleStatusClient.logStatusChange({
-    ruleId: rule.id,
-    ruleName: rule.name,
-    ruleType: rule.alertTypeId,
-    spaceId,
-    newStatus: RuleExecutionStatus['going to run'],
-  });
 };

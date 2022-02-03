@@ -15,7 +15,7 @@ import { useKibana } from '../../../common/lib/kibana';
 
 import * as i18n from './translations';
 import { CreateFieldComponentType, TimelineId } from '../../../../../timelines/common';
-import { tGridActions } from '../../../../../timelines/public';
+import { upsertColumn } from '../../../../../timelines/public';
 import { useDataView } from '../../../common/containers/source/use_data_view';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { sourcererSelectors } from '../../../common/store';
@@ -41,6 +41,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
     const {
       dataViewFieldEditor,
       data: { dataViews },
+      application: { capabilities },
     } = useKibana().services;
 
     useEffect(() => {
@@ -53,14 +54,14 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       if (dataView) {
         dataViewFieldEditor?.openEditor({
           ctx: { dataView },
-          onSave: (fields: DataViewField[]) => {
+          onSave: async (fields: DataViewField[]) => {
             // Fetch the updated list of fields
-            indexFieldsSearch(selectedDataViewId);
+            await indexFieldsSearch(selectedDataViewId);
 
             for (const field of fields) {
               // Add the new field(s) to the event table
               dispatch(
-                tGridActions.upsertColumn({
+                upsertColumn({
                   column: {
                     columnHeaderType: defaultColumnHeaderType,
                     id: field.name,
@@ -85,7 +86,11 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       timelineId,
     ]);
 
-    if (!dataViewFieldEditor?.userPermissions.editIndexPattern()) {
+    if (
+      !dataViewFieldEditor?.userPermissions.editIndexPattern() ||
+      // remove below check once resolved: https://github.com/elastic/kibana/issues/122462
+      !capabilities.indexPatterns.save
+    ) {
       return null;
     }
 
@@ -116,11 +121,14 @@ export const useCreateFieldButton = (
   timelineId: TimelineId
 ) => {
   const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
-  const { selectedDataViewId } = useDeepEqualSelector((state) =>
+  const { missingPatterns, selectedDataViewId } = useDeepEqualSelector((state) =>
     scopeIdSelector(state, sourcererScope)
   );
 
-  const createFieldComponent = useMemo(() => {
+  return useMemo(() => {
+    if (selectedDataViewId == null || missingPatterns.length > 0) {
+      return;
+    }
     // It receives onClick props from field browser in order to close the modal.
     const CreateFieldButtonComponent: CreateFieldComponentType = ({ onClick }) => (
       <CreateFieldButton
@@ -131,7 +139,5 @@ export const useCreateFieldButton = (
     );
 
     return CreateFieldButtonComponent;
-  }, [selectedDataViewId, timelineId]);
-
-  return createFieldComponent;
+  }, [missingPatterns.length, selectedDataViewId, timelineId]);
 };

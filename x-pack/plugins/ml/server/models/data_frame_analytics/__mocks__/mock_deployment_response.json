@@ -1,355 +1,383 @@
 [
   {
     "model_id": "distilbert-base-uncased-finetuned-sst-2-english",
-    "model_size_bytes": 267386880,
-    "inference_threads": 1,
-    "model_threads": 1,
-    "state": "started",
-    "allocation_status": {
-      "allocation_count": 2,
-      "target_allocation_count": 3,
-      "state": "started"
+    "model_size_stats" : {
+      "model_size_bytes" : 267386880,
+      "required_native_memory_bytes" : 534773760
     },
-    "nodes": [
-      {
-        "node": {
-          "3qIoLFnbSi-DwVrYioUCdw": {
-            "name": "node3",
-            "ephemeral_id": "WeA49KLuRPmJM_ulLx0ANg",
-            "transport_address": "10.142.0.2:9353",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "ingest",
-              "master",
-              "ml",
-              "transform"
-            ]
-          }
-        },
-        "routing_state": {
-          "routing_state": "started"
-        },
-        "inference_count": 0,
-        "average_inference_time_ms": 0.0
+    "pipeline_count" : 0,
+    "deployment_stats": {
+      "model_id": "distilbert-base-uncased-finetuned-sst-2-english",
+      "inference_threads": 1,
+      "model_threads": 1,
+      "state": "started",
+      "allocation_status": {
+        "allocation_count": 2,
+        "target_allocation_count": 3,
+        "state": "started"
       },
-      {
-        "node": {
-          "DpCy7SOBQla3pu0Dq-tnYw": {
-            "name": "node2",
-            "ephemeral_id": "17qcsXsNTYqbJ6uwSvdl9g",
-            "transport_address": "10.142.0.2:9352",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "master",
-              "ml",
-              "transform"
-            ]
+      "nodes": [
+        {
+          "node": {
+            "3qIoLFnbSi-DwVrYioUCdw": {
+              "name": "node3",
+              "ephemeral_id": "WeA49KLuRPmJM_ulLx0ANg",
+              "transport_address": "10.142.0.2:9353",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "ingest",
+                "master",
+                "ml",
+                "transform"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "started"
+          },
+          "inference_count": 0,
+          "average_inference_time_ms": 0.0
+        },
+        {
+          "node": {
+            "DpCy7SOBQla3pu0Dq-tnYw": {
+              "name": "node2",
+              "ephemeral_id": "17qcsXsNTYqbJ6uwSvdl9g",
+              "transport_address": "10.142.0.2:9352",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "master",
+                "ml",
+                "transform"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "failed",
+            "reason": "The object cannot be set twice!"
           }
         },
-        "routing_state": {
-          "routing_state": "failed",
-          "reason": "The object cannot be set twice!"
+        {
+          "node": {
+            "pt7s6lKHQJaP4QHKtU-Q0Q": {
+              "name": "node1",
+              "ephemeral_id": "nMJBE9WSRQSWotk0zDPi_Q",
+              "transport_address": "10.142.0.2:9351",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "master",
+                "ml"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "started"
+          },
+          "inference_count": 0,
+          "average_inference_time_ms": 0.0
         }
-      },
-      {
-        "node": {
-          "pt7s6lKHQJaP4QHKtU-Q0Q": {
-            "name": "node1",
-            "ephemeral_id": "nMJBE9WSRQSWotk0zDPi_Q",
-            "transport_address": "10.142.0.2:9351",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "master",
-              "ml"
-            ]
-          }
-        },
-        "routing_state": {
-          "routing_state": "started"
-        },
-        "inference_count": 0,
-        "average_inference_time_ms": 0.0
-      }
-    ]
+      ]
+    }
   },
   {
     "model_id": "elastic__distilbert-base-cased-finetuned-conll03-english",
-    "model_size_bytes": 260947500,
-    "inference_threads": 1,
-    "model_threads": 1,
-    "state": "started",
-    "allocation_status": {
-      "allocation_count": 2,
-      "target_allocation_count": 3,
-      "state": "started"
+    "model_size_stats" : {
+      "model_size_bytes" : 260947500,
+      "required_native_memory_bytes" : 521895000
     },
-    "nodes": [
-      {
-        "node": {
-          "3qIoLFnbSi-DwVrYioUCdw": {
-            "name": "node3",
-            "ephemeral_id": "WeA49KLuRPmJM_ulLx0ANg",
-            "transport_address": "10.142.0.2:9353",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "ingest",
-              "master",
-              "ml",
-              "transform"
-            ]
-          }
-        },
-        "routing_state": {
-          "routing_state": "started"
-        },
-        "inference_count": 0,
-        "average_inference_time_ms": 0.0
+    "pipeline_count" : 0,
+    "deployment_stats": {
+      "model_id": "elastic__distilbert-base-cased-finetuned-conll03-english",
+      "inference_threads": 1,
+      "model_threads": 1,
+      "state": "started",
+      "allocation_status": {
+        "allocation_count": 2,
+        "target_allocation_count": 3,
+        "state": "started"
       },
-      {
-        "node": {
-          "DpCy7SOBQla3pu0Dq-tnYw": {
-            "name": "node2",
-            "ephemeral_id": "17qcsXsNTYqbJ6uwSvdl9g",
-            "transport_address": "10.142.0.2:9352",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "master",
-              "ml",
-              "transform"
-            ]
+      "nodes": [
+        {
+          "node": {
+            "3qIoLFnbSi-DwVrYioUCdw": {
+              "name": "node3",
+              "ephemeral_id": "WeA49KLuRPmJM_ulLx0ANg",
+              "transport_address": "10.142.0.2:9353",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "ingest",
+                "master",
+                "ml",
+                "transform"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "started"
+          },
+          "inference_count": 0,
+          "average_inference_time_ms": 0.0
+        },
+        {
+          "node": {
+            "DpCy7SOBQla3pu0Dq-tnYw": {
+              "name": "node2",
+              "ephemeral_id": "17qcsXsNTYqbJ6uwSvdl9g",
+              "transport_address": "10.142.0.2:9352",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "master",
+                "ml",
+                "transform"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "failed",
+            "reason": "The object cannot be set twice!"
           }
         },
-        "routing_state": {
-          "routing_state": "failed",
-          "reason": "The object cannot be set twice!"
+        {
+          "node": {
+            "pt7s6lKHQJaP4QHKtU-Q0Q": {
+              "name": "node1",
+              "ephemeral_id": "nMJBE9WSRQSWotk0zDPi_Q",
+              "transport_address": "10.142.0.2:9351",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "master",
+                "ml"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "started"
+          },
+          "inference_count": 0,
+          "average_inference_time_ms": 0.0
         }
-      },
-      {
-        "node": {
-          "pt7s6lKHQJaP4QHKtU-Q0Q": {
-            "name": "node1",
-            "ephemeral_id": "nMJBE9WSRQSWotk0zDPi_Q",
-            "transport_address": "10.142.0.2:9351",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "master",
-              "ml"
-            ]
-          }
-        },
-        "routing_state": {
-          "routing_state": "started"
-        },
-        "inference_count": 0,
-        "average_inference_time_ms": 0.0
-      }
-    ]
+      ]
+    }
   },
   {
     "model_id": "sentence-transformers__msmarco-minilm-l-12-v3",
-    "model_size_bytes": 133378867,
-    "inference_threads": 1,
-    "model_threads": 1,
-    "state": "started",
-    "allocation_status": {
-      "allocation_count": 2,
-      "target_allocation_count": 3,
-      "state": "started"
+    "model_size_stats" : {
+      "model_size_bytes" : 133378867,
+      "required_native_memory_bytes" : 266757734
     },
-    "nodes": [
-      {
-        "node": {
-          "3qIoLFnbSi-DwVrYioUCdw": {
-            "name": "node3",
-            "ephemeral_id": "WeA49KLuRPmJM_ulLx0ANg",
-            "transport_address": "10.142.0.2:9353",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "ingest",
-              "master",
-              "ml",
-              "transform"
-            ]
-          }
-        },
-        "routing_state": {
-          "routing_state": "started"
-        },
-        "inference_count": 0,
-        "average_inference_time_ms": 0.0
+    "pipeline_count" : 0,
+    "deployment_stats": {
+      "model_id": "sentence-transformers__msmarco-minilm-l-12-v3",
+      "inference_threads": 1,
+      "model_threads": 1,
+      "state": "started",
+      "allocation_status": {
+        "allocation_count": 2,
+        "target_allocation_count": 3,
+        "state": "started"
       },
-      {
-        "node": {
-          "DpCy7SOBQla3pu0Dq-tnYw": {
-            "name": "node2",
-            "ephemeral_id": "17qcsXsNTYqbJ6uwSvdl9g",
-            "transport_address": "10.142.0.2:9352",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "master",
-              "ml",
-              "transform"
-            ]
+      "nodes": [
+        {
+          "node": {
+            "3qIoLFnbSi-DwVrYioUCdw": {
+              "name": "node3",
+              "ephemeral_id": "WeA49KLuRPmJM_ulLx0ANg",
+              "transport_address": "10.142.0.2:9353",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "ingest",
+                "master",
+                "ml",
+                "transform"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "started"
+          },
+          "inference_count": 0,
+          "average_inference_time_ms": 0.0
+        },
+        {
+          "node": {
+            "DpCy7SOBQla3pu0Dq-tnYw": {
+              "name": "node2",
+              "ephemeral_id": "17qcsXsNTYqbJ6uwSvdl9g",
+              "transport_address": "10.142.0.2:9352",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "master",
+                "ml",
+                "transform"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "failed",
+            "reason": "The object cannot be set twice!"
           }
         },
-        "routing_state": {
-          "routing_state": "failed",
-          "reason": "The object cannot be set twice!"
+        {
+          "node": {
+            "pt7s6lKHQJaP4QHKtU-Q0Q": {
+              "name": "node1",
+              "ephemeral_id": "nMJBE9WSRQSWotk0zDPi_Q",
+              "transport_address": "10.142.0.2:9351",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "master",
+                "ml"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "started"
+          },
+          "inference_count": 0,
+          "average_inference_time_ms": 0.0
         }
-      },
-      {
-        "node": {
-          "pt7s6lKHQJaP4QHKtU-Q0Q": {
-            "name": "node1",
-            "ephemeral_id": "nMJBE9WSRQSWotk0zDPi_Q",
-            "transport_address": "10.142.0.2:9351",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "master",
-              "ml"
-            ]
-          }
-        },
-        "routing_state": {
-          "routing_state": "started"
-        },
-        "inference_count": 0,
-        "average_inference_time_ms": 0.0
-      }
-    ]
+      ]
+    }
   },
   {
     "model_id": "typeform__mobilebert-uncased-mnli",
-    "model_size_bytes": 100139008,
-    "inference_threads": 1,
-    "model_threads": 1,
-    "state": "started",
-    "allocation_status": {
-      "allocation_count": 2,
-      "target_allocation_count": 3,
-      "state": "started"
+    "model_size_stats" : {
+      "model_size_bytes" : 100139008,
+      "required_native_memory_bytes" : 200278016
     },
-    "nodes": [
-      {
-        "node": {
-          "3qIoLFnbSi-DwVrYioUCdw": {
-            "name": "node3",
-            "ephemeral_id": "WeA49KLuRPmJM_ulLx0ANg",
-            "transport_address": "10.142.0.2:9353",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "ingest",
-              "master",
-              "ml",
-              "transform"
-            ]
-          }
-        },
-        "routing_state": {
-          "routing_state": "started"
-        },
-        "inference_count": 0,
-        "average_inference_time_ms": 0.0
+    "pipeline_count" : 0,
+    "deployment_stats": {
+      "model_id": "typeform__mobilebert-uncased-mnli",
+      "inference_threads": 1,
+      "model_threads": 1,
+      "state": "started",
+      "allocation_status": {
+        "allocation_count": 2,
+        "target_allocation_count": 3,
+        "state": "started"
       },
-      {
-        "node": {
-          "DpCy7SOBQla3pu0Dq-tnYw": {
-            "name": "node2",
-            "ephemeral_id": "17qcsXsNTYqbJ6uwSvdl9g",
-            "transport_address": "10.142.0.2:9352",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "master",
-              "ml",
-              "transform"
-            ]
+      "nodes": [
+        {
+          "node": {
+            "3qIoLFnbSi-DwVrYioUCdw": {
+              "name": "node3",
+              "ephemeral_id": "WeA49KLuRPmJM_ulLx0ANg",
+              "transport_address": "10.142.0.2:9353",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "ingest",
+                "master",
+                "ml",
+                "transform"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "started"
+          },
+          "inference_count": 0,
+          "average_inference_time_ms": 0.0
+        },
+        {
+          "node": {
+            "DpCy7SOBQla3pu0Dq-tnYw": {
+              "name": "node2",
+              "ephemeral_id": "17qcsXsNTYqbJ6uwSvdl9g",
+              "transport_address": "10.142.0.2:9352",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "master",
+                "ml",
+                "transform"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "failed",
+            "reason": "The object cannot be set twice!"
           }
         },
-        "routing_state": {
-          "routing_state": "failed",
-          "reason": "The object cannot be set twice!"
+        {
+          "node": {
+            "pt7s6lKHQJaP4QHKtU-Q0Q": {
+              "name": "node1",
+              "ephemeral_id": "nMJBE9WSRQSWotk0zDPi_Q",
+              "transport_address": "10.142.0.2:9351",
+              "attributes": {
+                "ml.machine_memory": "15599742976",
+                "xpack.installed": "true",
+                "ml.max_jvm_size": "1073741824"
+              },
+              "roles": [
+                "data",
+                "master",
+                "ml"
+              ]
+            }
+          },
+          "routing_state": {
+            "routing_state": "started"
+          },
+          "inference_count": 0,
+          "average_inference_time_ms": 0.0
         }
-      },
-      {
-        "node": {
-          "pt7s6lKHQJaP4QHKtU-Q0Q": {
-            "name": "node1",
-            "ephemeral_id": "nMJBE9WSRQSWotk0zDPi_Q",
-            "transport_address": "10.142.0.2:9351",
-            "attributes": {
-              "ml.machine_memory": "15599742976",
-              "xpack.installed": "true",
-              "ml.max_jvm_size": "1073741824"
-            },
-            "roles": [
-              "data",
-              "master",
-              "ml"
-            ]
-          }
-        },
-        "routing_state": {
-          "routing_state": "started"
-        },
-        "inference_count": 0,
-        "average_inference_time_ms": 0.0
-      }
-    ]
+      ]
+    }
   }
 ]
 

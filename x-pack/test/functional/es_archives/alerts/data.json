@@ -346,6 +346,7 @@
         "consumer" : "alertsFixture",
         "params" : {
           "ruleId" : "4ec223b9-77fa-4895-8539-6b3e586a2858",
+          "type": "query",
           "exceptionsList" : [
             {
               "id" : "endpoint_list",
@@ -613,3 +614,52 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:92237b30-4e03-11ec-9ab9-d980518a2d28",
+    "index": ".kibana_1",
+    "source": {
+      "alert" : {
+        "alertTypeId" : "metrics.alert.inventory.threshold",
+        "consumer" : "infrastructure",
+        "params" : {
+        },
+        "schedule" : {
+          "interval" : "1m"
+        },
+        "enabled" : true,
+        "actions" : [
+          {
+            "actionTypeId" : ".server-log",
+            "params" : {
+              "level" : "info",
+              "message" : "Alert message"
+            },
+            "actionRef" : "action_0",
+            "group" : "metrics.invenotry_threshold.fired"
+          }
+        ],
+        "throttle" : null,
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt" : "2021-07-27T20:42:55.896Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "scheduledTaskId" : null,
+        "tags": []
+      },
+      "type" : "alert",
+      "migrationVersion" : {
+        "alert" : "7.8.0"
+      },
+      "updated_at" : "2021-08-13T23:00:11.985Z",
+      "references": [
+      ]
+    }
+  }
+}
+

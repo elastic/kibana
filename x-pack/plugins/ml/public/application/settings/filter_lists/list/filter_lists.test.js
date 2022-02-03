@@ -10,10 +10,6 @@ import React from 'react';
 
 import { FilterLists } from './filter_lists';
 
-jest.mock('../../../components/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />,
-}));
-
 jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));

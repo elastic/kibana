@@ -6,22 +6,21 @@
  */
 
 import uuid from 'uuid/v4';
-import { parse as parseUrl } from 'url';
 import { SOURCE_DATA_REQUEST_ID } from '../../../../../common/constants';
 import { Timeslice, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
 import { DataRequest } from '../../../util/data_request';
 import { DataRequestContext } from '../../../../actions';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
-import {
-  ITiledSingleLayerMvtParams,
-  ITiledSingleLayerVectorSource,
-} from '../../../sources/tiled_single_layer_vector_source';
+import { IMvtVectorSource } from '../../../sources/vector_source';
 
 // shape of sourceDataRequest.getData()
-export type MvtSourceData = ITiledSingleLayerMvtParams & {
-  urlTemplate: string;
-  urlToken: string;
-};
+export interface MvtSourceData {
+  tileSourceLayer: string;
+  tileMinZoom: number;
+  tileMaxZoom: number;
+  tileUrl: string;
+  refreshToken: string;
+}
 
 export async function syncMvtSourceData({
   layerId,
@@ -33,7 +32,7 @@ export async function syncMvtSourceData({
   layerId: string;
   prevDataRequest: DataRequest | undefined;
   requestMeta: VectorSourceRequestMeta;
-  source: ITiledSingleLayerVectorSource;
+  source: IMvtVectorSource;
   syncContext: DataRequestContext;
 }): Promise<void> {
   const requestToken: symbol = Symbol(`${layerId}-${SOURCE_DATA_REQUEST_ID}`);
@@ -42,9 +41,9 @@ export async function syncMvtSourceData({
 
   if (prevData) {
     const noChangesInSourceState: boolean =
-      prevData.layerName === source.getLayerName() &&
-      prevData.minSourceZoom === source.getMinZoom() &&
-      prevData.maxSourceZoom === source.getMaxZoom();
+      prevData.tileSourceLayer === source.getTileSourceLayer() &&
+      prevData.tileMinZoom === source.getMinZoom() &&
+      prevData.tileMaxZoom === source.getMaxZoom();
     const noChangesInSearchState: boolean = await canSkipSourceUpdate({
       extentAware: false, // spatial extent knowledge is already fully automated by tile-loading based on pan-zooming
       source,
@@ -54,7 +53,8 @@ export async function syncMvtSourceData({
         return true;
       },
     });
-    const canSkip = noChangesInSourceState && noChangesInSearchState;
+    const canSkip =
+      !syncContext.forceRefreshDueToDrawing && noChangesInSourceState && noChangesInSearchState;
 
     if (canSkip) {
       return;
@@ -63,26 +63,20 @@ export async function syncMvtSourceData({
 
   syncContext.startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
   try {
-    const urlToken =
-      !prevData || (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
+    const refreshToken =
+      !prevData ||
+      syncContext.forceRefreshDueToDrawing ||
+      (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
         ? uuid()
-        : prevData.urlToken;
+        : prevData.refreshToken;
 
-    const newUrlTemplateAndMeta = await source.getUrlTemplateWithMeta(requestMeta);
-
-    let urlTemplate;
-    if (newUrlTemplateAndMeta.refreshTokenParamName) {
-      const parsedUrl = parseUrl(newUrlTemplateAndMeta.urlTemplate, true);
-      const separator = !parsedUrl.query || Object.keys(parsedUrl.query).length === 0 ? '?' : '&';
-      urlTemplate = `${newUrlTemplateAndMeta.urlTemplate}${separator}${newUrlTemplateAndMeta.refreshTokenParamName}=${urlToken}`;
-    } else {
-      urlTemplate = newUrlTemplateAndMeta.urlTemplate;
-    }
-
+    const tileUrl = await source.getTileUrl(requestMeta, refreshToken);
     const sourceData = {
-      ...newUrlTemplateAndMeta,
-      urlToken,
-      urlTemplate,
+      tileUrl,
+      tileSourceLayer: source.getTileSourceLayer(),
+      tileMinZoom: source.getMinZoom(),
+      tileMaxZoom: source.getMaxZoom(),
+      refreshToken,
     };
     syncContext.stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, sourceData, {});
   } catch (error) {

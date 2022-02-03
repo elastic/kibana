@@ -19,7 +19,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
@@ -61,9 +61,7 @@ export async function getServiceTransactionDetailedStatistics({
   const metrics = {
     avg_duration: {
       avg: {
-        field: getTransactionDurationFieldForTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
     outcomes,

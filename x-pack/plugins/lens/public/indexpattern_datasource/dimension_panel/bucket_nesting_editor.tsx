@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
-import { hasField } from '../utils';
+import { hasField } from '../pure_utils';
 import { GenericIndexPatternColumn } from '../operations';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {

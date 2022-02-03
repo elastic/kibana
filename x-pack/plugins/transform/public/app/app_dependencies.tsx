@@ -30,6 +30,7 @@ export interface AppDependencies {
   savedObjects: CoreStart['savedObjects'];
   storage: Storage;
   overlays: CoreStart['overlays'];
+  theme: CoreStart['theme'];
   history: ScopedHistory;
   savedObjectsPlugin: SavedObjectsStart;
   share: SharePluginStart;

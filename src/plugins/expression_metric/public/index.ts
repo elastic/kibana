@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { ExpressionMetricPlugin } from './plugin';
 
 export type { ExpressionMetricPluginSetup, ExpressionMetricPluginStart } from './plugin';
@@ -17,4 +14,4 @@ export function plugin() {
   return new ExpressionMetricPlugin();
 }
 
-export * from './expression_renderers';
+export { metricRendererFactory, getMetricRenderer } from './expression_renderers';

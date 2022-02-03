@@ -5,7 +5,7 @@
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["node", "resize-observer-polyfill", "@emotion/react/types/css-prop"]
+    "types": ["node", "@emotion/react/types/css-prop"]
   },
   "include": [
     "**/*",
@@ -52,7 +52,7 @@
     { "path": "../src/plugins/url_forwarding/tsconfig.json" },
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../src/plugins/data_view_management/tsconfig.json" },
-    { "path": "../src/plugins/visualize/tsconfig.json" },
+    { "path": "../src/plugins/visualizations/tsconfig.json" },
     { "path": "interactive_setup_api_integration/fixtures/test_endpoints/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_app_status/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_provider_plugin/tsconfig.json" },

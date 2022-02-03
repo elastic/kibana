@@ -6,23 +6,18 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": [
-    "*.ts",
-    ".storybook/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
+  "include": ["*.ts", ".storybook/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../share/tsconfig.json" },
+    { "path": "../controls/tsconfig.json" },
     { "path": "../presentation_util/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },
     { "path": "../usage_collection/tsconfig.json" },
-    { "path": "../data/tsconfig.json"},
+    { "path": "../data/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" },
     { "path": "../home/tsconfig.json" },
     { "path": "../navigation/tsconfig.json" },
@@ -32,6 +27,6 @@
     { "path": "../charts/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },
     { "path": "../visualizations/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" }
   ]
 }

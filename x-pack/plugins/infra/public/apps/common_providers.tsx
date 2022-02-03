@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
+  KibanaThemeProvider,
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
@@ -25,14 +26,15 @@ export const CommonInfraProviders: React.FC<{
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage }) => {
+  theme$: AppMountParameters['theme$'];
+}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
-          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu}>
+          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
             <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
           </HeaderActionMenuProvider>
         </DataUIProviders>
@@ -44,7 +46,8 @@ export const CommonInfraProviders: React.FC<{
 export const CoreProviders: React.FC<{
   core: CoreStart;
   plugins: InfraClientStartDeps;
-}> = ({ children, core, plugins }) => {
+  theme$: AppMountParameters['theme$'];
+}> = ({ children, core, plugins, theme$ }) => {
   const { Provider: KibanaContextProviderForPlugin } = useMemo(
     () => createKibanaContextForPlugin(core, plugins),
     [core, plugins]
@@ -52,7 +55,9 @@ export const CoreProviders: React.FC<{
 
   return (
     <KibanaContextProviderForPlugin services={{ ...core, ...plugins }}>
-      <core.i18n.Context>{children}</core.i18n.Context>
+      <core.i18n.Context>
+        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+      </core.i18n.Context>
     </KibanaContextProviderForPlugin>
   );
 };

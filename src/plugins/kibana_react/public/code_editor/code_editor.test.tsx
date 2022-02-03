@@ -170,4 +170,43 @@ describe('<CodeEditor />', () => {
       expect((getHint().props() as any).className).not.toContain('isInactive');
     });
   });
+
+  /**
+   * Test whether our custom placeholder widget is being mounted based on our React logic. We cannot do a full
+   * test with Monaco so the parts handled by Monaco are all mocked out and we just check whether the element is mounted
+   * in the DOM.
+   */
+  describe('placeholder element', () => {
+    let component: ReactWrapper;
+    const getPlaceholderDomElement = (): HTMLElement | null =>
+      component.getDOMNode().querySelector('.kibanaCodeEditor__placeholderContainer');
+
+    beforeEach(() => {
+      component = mountWithIntl(
+        <CodeEditor
+          languageId="loglang"
+          height={250}
+          value=""
+          onChange={() => {}}
+          placeholder="myplaceholder"
+        />
+      );
+    });
+
+    it('displays placeholder element when placeholder text is provided', () => {
+      expect(getPlaceholderDomElement()?.innerText).toBe('myplaceholder');
+    });
+
+    it('does not display placeholder element when placeholder text is not provided', () => {
+      component.setProps({ ...component.props(), placeholder: undefined, value: '' });
+      component.update();
+      expect(getPlaceholderDomElement()).toBe(null);
+    });
+
+    it('does not display placeholder element when user input has been provided', () => {
+      component.setProps({ ...component.props(), value: 'some input' });
+      component.update();
+      expect(getPlaceholderDomElement()).toBe(null);
+    });
+  });
 });

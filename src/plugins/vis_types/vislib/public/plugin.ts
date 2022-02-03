@@ -13,6 +13,8 @@ import { VisualizationsSetup } from '../../../visualizations/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { LEGACY_PIE_CHARTS_LIBRARY } from '../../pie/common/index';
+import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../../heatmap/common/index';
+import { heatmapVisTypeDefinition } from './heatmap';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
@@ -54,6 +56,11 @@ export class VisTypeVislibPlugin
       // register vislib pie chart
       visualizations.createBaseVisualization(pieVisTypeDefinition);
       expressions.registerFunction(createPieVisFn());
+    }
+    if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
+      // register vislib heatmap chart
+      visualizations.createBaseVisualization(heatmapVisTypeDefinition);
+      expressions.registerFunction(createVisTypeVislibVisFn());
     }
   }
 

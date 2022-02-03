@@ -19,6 +19,8 @@ type OpenJsonModalFunc = () => void;
 
 interface Props {
   onJson(json: { [key: string]: any }): void;
+  /** List of plugins installed in the cluster nodes */
+  esNodesPlugins: string[];
   children: (openModal: OpenJsonModalFunc) => React.ReactNode;
 }
 
@@ -120,7 +122,7 @@ const getErrorMessage = (error: MappingsValidationError) => {
   }
 };
 
-export const LoadMappingsProvider = ({ onJson, children }: Props) => {
+export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
   const [totalErrorsToDisplay, setTotalErrorsToDisplay] = useState<number>(MAX_ERRORS_TO_DISPLAY);
   const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0'] | undefined>();
@@ -153,7 +155,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     if (isValidJson) {
       // Parse and validate the JSON to make sure it won't break the UI
       const unparsed = jsonContent.current.data.format();
-      const { value: parsed, errors } = validateMappings(unparsed);
+      const { value: parsed, errors } = validateMappings(unparsed, esNodesPlugins);
 
       if (errors) {
         setState({ isModalOpen: true, json: { unparsed, parsed }, errors });

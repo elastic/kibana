@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
           create_snapshot: true,
         },
         index: {
-          '.siem-signals-default': {
+          '.alerts-security.alerts-default': {
             all: true,
             manage_ilm: true,
             read: true,
@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
           create_snapshot: false,
         },
         index: {
-          '.siem-signals-default': {
+          '.alerts-security.alerts-default': {
             all: false,
             manage_ilm: false,
             read: true,
@@ -180,7 +180,7 @@ export default ({ getService }: FtrProviderContext) => {
           create_snapshot: false,
         },
         index: {
-          '.siem-signals-default': {
+          '.alerts-security.alerts-default': {
             all: false,
             manage_ilm: false,
             read: true,
@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
           create_snapshot: false,
         },
         index: {
-          '.siem-signals-default': {
+          '.alerts-security.alerts-default': {
             all: false,
             manage_ilm: false,
             read: true,
@@ -310,7 +310,7 @@ export default ({ getService }: FtrProviderContext) => {
           create_snapshot: false,
         },
         index: {
-          '.siem-signals-default': {
+          '.alerts-security.alerts-default': {
             all: false,
             manage_ilm: false,
             read: true,
@@ -375,7 +375,7 @@ export default ({ getService }: FtrProviderContext) => {
           create_snapshot: false,
         },
         index: {
-          '.siem-signals-default': {
+          '.alerts-security.alerts-default': {
             all: false,
             manage_ilm: false,
             read: true,
@@ -440,7 +440,7 @@ export default ({ getService }: FtrProviderContext) => {
           create_snapshot: false,
         },
         index: {
-          '.siem-signals-default': {
+          '.alerts-security.alerts-default': {
             all: false,
             manage_ilm: true,
             read: true,
@@ -505,7 +505,7 @@ export default ({ getService }: FtrProviderContext) => {
           create_snapshot: true,
         },
         index: {
-          '.siem-signals-default': {
+          '.alerts-security.alerts-default': {
             all: true,
             manage_ilm: true,
             read: true,
@@ -570,7 +570,7 @@ export default ({ getService }: FtrProviderContext) => {
           create_snapshot: true,
         },
         index: {
-          '.siem-signals-default': {
+          '.alerts-security.alerts-default': {
             all: false,
             manage_ilm: true,
             read: true,

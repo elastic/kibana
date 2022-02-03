@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import type { ScopedHistory } from 'src/core/public';
+import type { ScreenshottingSetup } from '../../../screenshotting/public';
 
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../common/constants';
 import { LocatorParams } from '../../common/types';
@@ -24,6 +25,7 @@ import './redirect_app.scss';
 interface Props {
   apiClient: ReportingAPIClient;
   history: ScopedHistory;
+  screenshotting: ScreenshottingSetup;
   share: SharePluginSetup;
 }
 
@@ -39,7 +41,9 @@ const i18nTexts = {
   ),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
+type ReportingContext = Record<string, LocatorParams>;
+
+export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotting, share }) => {
   const [error, setError] = useState<undefined | Error>();
 
   useEffect(() => {
@@ -53,9 +57,8 @@ export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
           const result = await apiClient.getInfo(jobId as string);
           locatorParams = result?.locatorParams?.[0];
         } else {
-          locatorParams = (window as unknown as Record<string, LocatorParams>)[
-            REPORTING_REDIRECT_LOCATOR_STORE_KEY
-          ];
+          locatorParams =
+            screenshotting.getContext<ReportingContext>()?.[REPORTING_REDIRECT_LOCATOR_STORE_KEY];
         }
 
         if (!locatorParams) {
@@ -70,7 +73,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
         throw e;
       }
     })();
-  }, [share, apiClient]);
+  }, [apiClient, screenshotting, share]);
 
   return (
     <div className="reportingRedirectApp__interstitialPage">

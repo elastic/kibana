@@ -22,7 +22,7 @@ export async function mountManagementSection(
   { http, getStartServices, notifications }: CoreSetup<StartDependencies>,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs, history } = params;
+  const { element, setBreadcrumbs, history, theme$ } = params;
   const [coreStart, depsStart] = await getStartServices();
   const {
     docLinks,
@@ -45,5 +45,5 @@ export async function mountManagementSection(
     fileUpload: depsStart.fileUpload,
   };
 
-  return renderApp(element, I18nContext, services, { http });
+  return renderApp(element, I18nContext, services, { http }, { theme$ });
 }

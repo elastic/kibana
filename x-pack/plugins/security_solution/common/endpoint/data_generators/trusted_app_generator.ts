@@ -67,13 +67,29 @@ export class TrustedAppGenerator extends BaseDataGenerator<TrustedApp> {
       ...(scopeType === 'policy' ? { policies: this.randomArray(5, () => this.randomUUID()) } : {}),
     }) as EffectScope;
 
+    const os = overrides.os ?? 'windows';
+    const pathEntry = this.randomChoice([
+      {
+        field: ConditionEntryField.PATH,
+        operator: 'included',
+        type: 'match',
+        value: os !== 'windows' ? '/one/two/three' : 'c:\\fol\\bin.exe',
+      },
+      {
+        field: ConditionEntryField.PATH,
+        operator: 'included',
+        type: 'wildcard',
+        value: os !== 'windows' ? '/one/t*/*re/three.app' : 'c:\\fol*\\*ub*\\bin.exe',
+      },
+    ]);
+
     // TS types are conditional when it comes to the combination of OS and ENTRIES
     // @ts-expect-error TS2322
     return merge(
       {
         description: `Generator says we trust ${name}`,
         name,
-        os: this.randomOSFamily(),
+        os,
         effectScope,
         entries: [
           {
@@ -82,12 +98,7 @@ export class TrustedAppGenerator extends BaseDataGenerator<TrustedApp> {
             type: 'match',
             value: '1234234659af249ddf3e40864e9fb241',
           },
-          {
-            field: ConditionEntryField.PATH,
-            operator: 'included',
-            type: 'match',
-            value: '/one/two/three',
-          },
+          pathEntry,
         ],
       },
       overrides

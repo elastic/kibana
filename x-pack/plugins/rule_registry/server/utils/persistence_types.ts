@@ -10,12 +10,13 @@ import {
   AlertExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertType,
+  RuleType,
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
 import { WithoutReservedActionGroups } from '../../../alerting/common';
 import { IRuleDataClient } from '../rule_data_client';
+import { BulkResponseErrorAggregation } from './utils';
 
 export type PersistenceAlertService = <T>(
   alerts: Array<{
@@ -27,6 +28,7 @@ export type PersistenceAlertService = <T>(
 
 export interface PersistenceAlertServiceResult<T> {
   createdAlerts: Array<T & { _id: string; _index: string }>;
+  errors: BulkResponseErrorAggregation;
 }
 
 export interface PersistenceServices {
@@ -39,7 +41,7 @@ export type PersistenceAlertType<
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
-  AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
 > & {
   executor: (
@@ -65,4 +67,4 @@ export type CreatePersistenceRuleTypeWrapper = (options: {
   TActionGroupIds extends string = never
 >(
   type: PersistenceAlertType<TParams, TState, TInstanceContext, TActionGroupIds>
-) => AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;

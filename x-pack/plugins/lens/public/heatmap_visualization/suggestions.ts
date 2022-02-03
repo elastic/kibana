@@ -19,9 +19,10 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   keptLayerIds,
 }) => {
   if (
-    state?.shape === CHART_SHAPES.HEATMAP &&
-    (state.xAccessor || state.yAccessor || state.valueAccessor) &&
-    table.changeType !== 'extended'
+    (state?.shape === CHART_SHAPES.HEATMAP &&
+      (state.xAccessor || state.yAccessor || state.valueAccessor) &&
+      table.changeType !== 'extended') ||
+    table.columns.some((col) => col.operation.isStaticValue)
   ) {
     return [];
   }
@@ -44,6 +45,10 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
   if (groups.length >= 3) {
+    return [];
+  }
+
+  if (metrics.length > 1) {
     return [];
   }
 
@@ -71,6 +76,8 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
       isCellLabelVisible: false,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: state?.gridConfig?.isYAxisTitleVisible ?? false,
+      isXAxisTitleVisible: state?.gridConfig?.isXAxisTitleVisible ?? false,
     },
   };
 

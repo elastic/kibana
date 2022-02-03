@@ -11,6 +11,7 @@ import {
   isValidLabel,
   isValidTimeRange,
   openCustomUrlWindow,
+  getQueryField,
 } from './custom_url_utils';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import {
@@ -127,7 +128,7 @@ describe('ML - custom URL utils', () => {
   describe('replaceTokensInUrlValue', () => {
     test('replaces tokens as expected for a Kibana Dashboard type URL', () => {
       expect(replaceTokensInUrlValue(TEST_DASHBOARD_URL, 300, TEST_DOC, 'timestamp')).toBe(
-        "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(filters:!(),query:(language:kuery,query:'airline:\"AAL\"'))"
+        "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(filters:!(),query:(language:kuery,query:'\"airline\":\"AAL\"'))"
       );
     });
 
@@ -135,7 +136,7 @@ describe('ML - custom URL utils', () => {
       expect(
         replaceTokensInUrlValue(TEST_DASHBOARD_URL, 300, TEST_RECORD_SPECIAL_CHARS, 'timestamp')
       ).toBe(
-        "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(filters:!(),query:(language:kuery,query:'airline:\"%3C%3E%3A%3B%5B%7D%5C%22)\"'))"
+        "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(filters:!(),query:(language:kuery,query:'\"airline\":\"%3C%3E%3A%3B%5B%7D%5C%22)\"'))"
       );
     });
 
@@ -154,7 +155,7 @@ describe('ML - custom URL utils', () => {
 
     test('replaces tokens as expected for a Kibana Discover type URL', () => {
       expect(replaceTokensInUrlValue(TEST_DISCOVER_URL, 300, TEST_DOC, 'timestamp')).toBe(
-        "discover#/?_g=(time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'airline:\"AAL\"'))"
+        "discover#/?_g=(time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'\"airline\":\"AAL\"'))"
       );
     });
 
@@ -167,7 +168,7 @@ describe('ML - custom URL utils', () => {
           'timestamp'
         )
       ).toBe(
-        "discover#/?_g=(time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'(airline:\"AAL\" OR airline:\"AWE\")'))"
+        'discover#/?_g=(time:(from:\'2017-02-09T16:05:00.000Z\',mode:absolute,to:\'2017-02-09T16:20:00.000Z\'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:\'("airline":"AAL" OR "airline":"AWE")\'))'
       );
     });
 
@@ -251,7 +252,7 @@ describe('ML - custom URL utils', () => {
           'timestamp'
         )
       ).toBe(
-        `discover#/11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:'2017-02-09T16:05:00.000Z',mode:absolute,to:'2017-02-09T16:20:00.000Z'))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7e06e310-dae4-11e9-8260-995f99197467',key:method,negate:!f,params:(query:POST),type:phrase,value:POST),query:(match:(method:(query:POST,type:phrase))))),index:'7e06e310-dae4-11e9-8260-995f99197467',interval:auto,query:(language:kuery,query:'(clientip:\"92.20.59.36\" OR clientip:\"92.20.59.41\") AND (action:\"dashboard-widgets\" OR action:\"edit\" OR action:\"delete\")'),sort:!(!('@timestamp',desc)))`
+        'discover#/11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:\'2017-02-09T16:05:00.000Z\',mode:absolute,to:\'2017-02-09T16:20:00.000Z\'))&_a=(columns:!(_source),filters:!((\'$state\':(store:appState),meta:(alias:!n,disabled:!f,index:\'7e06e310-dae4-11e9-8260-995f99197467\',key:method,negate:!f,params:(query:POST),type:phrase,value:POST),query:(match:(method:(query:POST,type:phrase))))),index:\'7e06e310-dae4-11e9-8260-995f99197467\',interval:auto,query:(language:kuery,query:\'("clientip":"92.20.59.36" OR "clientip":"92.20.59.41") AND ("action":"dashboard-widgets" OR "action":"edit" OR "action":"delete")\'),sort:!(!(\'@timestamp\',desc)))'
       );
     });
   });
@@ -259,19 +260,19 @@ describe('ML - custom URL utils', () => {
   describe('getUrlForRecord', () => {
     test('returns expected URL for a Kibana Dashboard type URL', () => {
       expect(getUrlForRecord(TEST_DASHBOARD_URL, TEST_RECORD)).toBe(
-        "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(filters:!(),query:(language:kuery,query:'airline:\"AAL\"'))"
+        "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(filters:!(),query:(language:kuery,query:'\"airline\":\"AAL\"'))"
       );
     });
 
     test('returns expected URL for a Kibana Discover type URL', () => {
       expect(getUrlForRecord(TEST_DISCOVER_URL, TEST_RECORD)).toBe(
-        "discover#/?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'airline:\"AAL\"'))"
+        "discover#/?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'\"airline\":\"AAL\"'))"
       );
     });
 
-    test.skip('returns expected URL for a Kibana Discover type URL when record field contains special characters', () => {
+    test('returns expected URL for a Kibana Discover type URL when record field contains special characters', () => {
       expect(getUrlForRecord(TEST_DISCOVER_URL, TEST_RECORD_SPECIAL_CHARS)).toBe(
-        "discover#/?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'airline:\"%3C%3E%3A%3B%5B%7D%5C%22)\" and odd:field,name:>:&12<''))"
+        'discover#/?_g=(time:(from:\'2017-02-09T15:10:00.000Z\',mode:absolute,to:\'2017-02-09T17:15:00.000Z\'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:\'"airline":"%3C%3E%3A%3B%5B%7D%5C%22)" AND "odd:field,name":"%3E%3A%2612%3C!\'"\'))'
       );
     });
 
@@ -317,7 +318,7 @@ describe('ML - custom URL utils', () => {
       };
 
       expect(getUrlForRecord(testUrl, testRecord)).toBe(
-        `dashboards#/view/351de820-f2bb-11ea-ab06-cb93221707e9?_a=(filters:!(),query:(language:kuery,query:'at@name:"contains%20a%20!'%20quote" AND singlequote!'name:"contains%20a%20!'%20quote"'))&_g=(filters:!(),time:(from:'2019-02-08T00:00:00.000Z',mode:absolute,to:'2019-02-08T23:59:59.999Z'))`
+        "dashboards#/view/351de820-f2bb-11ea-ab06-cb93221707e9?_a=(filters:!(),query:(language:kuery,query:'\"at@name\":\"contains%20a%20!'%20quote\" AND \"singlequote!'name\":\"contains%20a%20!'%20quote\"'))&_g=(filters:!(),time:(from:'2019-02-08T00:00:00.000Z',mode:absolute,to:'2019-02-08T23:59:59.999Z'))"
       );
     });
 
@@ -505,7 +506,7 @@ describe('ML - custom URL utils', () => {
       };
 
       expect(getUrlForRecord(urlConfig, testRecords)).toBe(
-        "security/hosts/ml-hosts/showcase?_g=()&query=(language:kuery,query:'process.name:\"seq\"')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-02-01T16:00:00.000Z',kind:absolute,to:'2019-02-01T18:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-02-01T16%3A00%3A00.000Z',kind:absolute,to:'2019-02-01T18%3A59%3A59.999Z')))"
+        "security/hosts/ml-hosts/showcase?_g=()&query=(language:kuery,query:'\"process.name\":\"seq\"')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-02-01T16:00:00.000Z',kind:absolute,to:'2019-02-01T18:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-02-01T16%3A00%3A00.000Z',kind:absolute,to:'2019-02-01T18%3A59%3A59.999Z')))"
       );
     });
 
@@ -621,8 +622,26 @@ describe('ML - custom URL utils', () => {
       };
 
       expect(getUrlForRecord(urlWithCustomFilter, testRecords)).toBe(
-        `discover#/?_g=(time:(from:'2019-02-01T16:00:00.000Z',mode:absolute,to:'2019-02-01T18:59:59.999Z'))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:subSystem.keyword,negate:!f,params:(query:JDBC),type:phrase),query:(match_phrase:(subSystem.keyword:JDBC)))),index:'eap_wls_server_12c*,*:eap_wls_server_12c*',query:(language:kuery,query:'wlscluster.keyword:\"AAL\"'))`
+        "discover#/?_g=(time:(from:'2019-02-01T16:00:00.000Z',mode:absolute,to:'2019-02-01T18:59:59.999Z'))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:subSystem.keyword,negate:!f,params:(query:JDBC),type:phrase),query:(match_phrase:(subSystem.keyword:JDBC)))),index:'eap_wls_server_12c*,*:eap_wls_server_12c*',query:(language:kuery,query:'\"wlscluster.keyword\":\"AAL\"'))"
       );
+    });
+  });
+
+  describe('getQueryField', () => {
+    test('accounts for colon : in field name', () => {
+      expect(getQueryField(`odd:field,name : " $odd:field,name$"`)).toBe('odd:field,name');
+      expect(getQueryField(`odd:field,name: $odd:field,name$ "`)).toBe('odd:field,name');
+      expect(getQueryField(`odd:field,name:$odd:field,name$"`)).toBe('odd:field,name');
+      expect(getQueryField(`odd:field,name: " $odd:field,name$"`)).toBe('odd:field,name');
+      expect(getQueryField(`odd:field,name&:$odd:field,name&$"`)).toBe('odd:field,name&');
+      expect(getQueryField('{air}line:${air}line$')).toBe('{air}line');
+      expect(getQueryField(`odd:field$name&:$odd:field$name&$`)).toBe('odd:field$name&');
+    });
+
+    test('accounts for spaces in query string', () => {
+      expect(getQueryField(`airline : $airline$"`)).toBe('airline');
+      expect(getQueryField(`airline:" $airline$""`)).toBe('airline');
+      expect(getQueryField(`airline:$airline$"`)).toBe('airline');
     });
   });
 

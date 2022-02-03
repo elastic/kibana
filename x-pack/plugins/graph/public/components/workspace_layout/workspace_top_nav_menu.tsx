@@ -11,7 +11,7 @@ import { Provider, useStore } from 'react-redux';
 import { AppMountParameters, Capabilities, CoreStart } from 'kibana/public';
 import { useHistory, useLocation } from 'react-router-dom';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../src/plugins/navigation/public';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint, wrapWithTheme } from '../../../../../../src/plugins/kibana_react/public';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
@@ -145,9 +145,12 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
 
       props.coreStart.overlays.openFlyout(
         toMountPoint(
-          <Provider store={store}>
-            <Settings observable={settingsObservable} />
-          </Provider>
+          wrapWithTheme(
+            <Provider store={store}>
+              <Settings observable={settingsObservable} />
+            </Provider>,
+            props.coreStart.theme.theme$
+          )
         ),
         {
           size: 'm',

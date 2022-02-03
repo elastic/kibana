@@ -18,10 +18,11 @@ import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/li
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { UptimeSettingsContext } from '../../../../contexts';
-import { Alert } from '../../../../../../triggers_actions_ui/public';
+import { Rule } from '../../../../../../triggers_actions_ui/public';
+import { getUrlForAlert } from '../../../../lib/alert_types/common';
 
 interface Props {
-  monitorAlerts: Alert[];
+  monitorAlerts: Rule[];
   loading: boolean;
 }
 
@@ -41,9 +42,9 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
 
   (monitorAlerts ?? []).forEach((alert, ind) => {
     listItems.push({
-      label: alert.name,
-      href: basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + alert.id,
       size: 's',
+      label: alert.name,
+      href: getUrlForAlert(alert.id, basePath),
       'data-test-subj': 'uptimeMonitorListDrawerAlert' + ind,
     });
   });

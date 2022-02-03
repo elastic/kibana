@@ -9,10 +9,7 @@
 import { IndexPatternsContract } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
-import {
-  createFiltersFromValueClickAction,
-  ValueClickDataContext,
-} from './create_filters_from_value_click';
+import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
 import { FieldFormatsGetConfigFn, BytesFormat } from '../../../../field_formats/common';
 import { RangeFilter } from '@kbn/es-query';
 
@@ -22,7 +19,7 @@ const mockField = {
 };
 
 describe('createFiltersFromValueClick', () => {
-  let dataPoints: ValueClickDataContext['data'];
+  let dataPoints: Parameters<typeof createFiltersFromValueClickAction>[0]['data'];
 
   beforeEach(() => {
     dataPoints = [

@@ -34,17 +34,14 @@ exports[`source editor geo_grid_source should not allow editing multiple metrics
       size="xs"
     >
       <h6>
-        <FormattedMessage
-          defaultMessage="Grid parameters"
-          id="xpack.maps.source.esGrid.geoTileGridLabel"
-          values={Object {}}
-        />
+        Heat map
       </h6>
     </EuiTitle>
     <EuiSpacer
       size="m"
     />
     <ResolutionEditor
+      isHeatmap={true}
       metrics={Array []}
       onChange={[Function]}
       resolution="COARSE"
@@ -94,17 +91,14 @@ exports[`source editor geo_grid_source should render editor 1`] = `
       size="xs"
     >
       <h6>
-        <FormattedMessage
-          defaultMessage="Grid parameters"
-          id="xpack.maps.source.esGrid.geoTileGridLabel"
-          values={Object {}}
-        />
+        Clusters and grids
       </h6>
     </EuiTitle>
     <EuiSpacer
       size="m"
     />
     <ResolutionEditor
+      isHeatmap={false}
       metrics={Array []}
       onChange={[Function]}
       resolution="COARSE"

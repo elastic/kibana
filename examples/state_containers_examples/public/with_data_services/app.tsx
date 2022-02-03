@@ -18,19 +18,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { CoreStart } from 'kibana/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
 import {
   connectToQueryState,
   DataPublicPluginStart,
-  esFilters,
-  Filter,
-  IndexPattern,
   Query,
   QueryState,
   syncQueryStateWithUrl,
 } from '../../../../src/plugins/data/public';
+import type { DataView } from '../../../../src/plugins/data_views/public';
 import {
   BaseStateContainer,
   createStateContainer,
@@ -73,13 +72,9 @@ export const App = ({
   useGlobalStateSyncing(data.query, kbnUrlStateStorage);
   useAppStateSyncing(appStateContainer, data.query, kbnUrlStateStorage);
 
-  const indexPattern = useIndexPattern(data);
-  if (!indexPattern)
-    return (
-      <div>
-        No index pattern found. Please create an index pattern before trying this example...
-      </div>
-    );
+  const dataView = useDataView(data);
+  if (!dataView)
+    return <div>No data view found. Please create a data view before trying this example...</div>;
 
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
@@ -102,7 +97,7 @@ export const App = ({
             <navigation.ui.TopNavMenu
               appName={'Example'}
               showSearchBar={true}
-              indexPatterns={[indexPattern]}
+              indexPatterns={[dataView]}
               useDefaultBehaviors={true}
               showSaveQuery={true}
             />
@@ -126,19 +121,19 @@ export const App = ({
   );
 };
 
-function useIndexPattern(data: DataPublicPluginStart) {
-  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
+function useDataView(data: DataPublicPluginStart) {
+  const [dataView, setDataView] = useState<DataView>();
   useEffect(() => {
-    const fetchIndexPattern = async () => {
-      const defaultIndexPattern = await data.indexPatterns.getDefault();
-      if (defaultIndexPattern) {
-        setIndexPattern(defaultIndexPattern);
+    const fetchDataView = async () => {
+      const defaultDataView = await data.dataViews.getDefault();
+      if (defaultDataView) {
+        setDataView(defaultDataView);
       }
     };
-    fetchIndexPattern();
-  }, [data.indexPatterns]);
+    fetchDataView();
+  }, [data.dataViews]);
 
-  return indexPattern;
+  return dataView;
 }
 
 function useGlobalStateSyncing(
@@ -167,7 +162,7 @@ function useAppStateSyncing<AppState extends QueryState>(
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       query,
       appStateContainer,
-      { filters: esFilters.FilterStateStore.APP_STATE, query: true }
+      { filters: FilterStateStore.APP_STATE, query: true }
     );
 
     // sets up syncing app state container with url

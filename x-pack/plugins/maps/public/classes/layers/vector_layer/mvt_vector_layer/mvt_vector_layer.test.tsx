@@ -34,8 +34,7 @@ const defaultConfig = {
 function createLayer(
   layerOptions: Partial<VectorLayerDescriptor> = {},
   sourceOptions: Partial<TiledSingleLayerVectorSourceDescriptor> = {},
-  isTimeAware: boolean = false,
-  includeToken: boolean = false
+  isTimeAware: boolean = false
 ): MvtVectorLayer {
   const sourceDescriptor: TiledSingleLayerVectorSourceDescriptor = {
     type: SOURCE_TYPES.MVT_SINGLE_LAYER,
@@ -51,19 +50,6 @@ function createLayer(
     };
     mvtSource.getApplyGlobalTime = () => {
       return true;
-    };
-  }
-
-  if (includeToken) {
-    mvtSource.getUrlTemplateWithMeta = async (...args) => {
-      const superReturn = await MVTSingleLayerVectorSource.prototype.getUrlTemplateWithMeta.call(
-        mvtSource,
-        ...args
-      );
-      return {
-        ...superReturn,
-        refreshTokenParamName: 'token',
-      };
     };
   }
 

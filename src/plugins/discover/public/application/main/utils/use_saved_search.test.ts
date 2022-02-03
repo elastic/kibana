@@ -28,6 +28,7 @@ describe('test useSavedSearch', () => {
     const { result } = renderHook(() => {
       return useSavedSearch({
         initialFetchStatus: FetchStatus.LOADING,
+        savedSearch: savedSearchMock,
         searchSessionManager,
         searchSource: savedSearchMock.searchSource.createCopy(),
         services: discoverServiceMock,
@@ -59,12 +60,14 @@ describe('test useSavedSearch', () => {
         services: discoverServiceMock,
         history,
         savedSearch: savedSearchMock,
+        setExpandedDoc: jest.fn(),
       });
     });
 
     const { result, waitForValueToChange } = renderHook(() => {
       return useSavedSearch({
         initialFetchStatus: FetchStatus.LOADING,
+        savedSearch: savedSearchMock,
         searchSessionManager,
         searchSource: resultState.current.searchSource,
         services: discoverServiceMock,
@@ -100,12 +103,14 @@ describe('test useSavedSearch', () => {
         services: discoverServiceMock,
         history,
         savedSearch: savedSearchMock,
+        setExpandedDoc: jest.fn(),
       });
     });
 
     const { result, waitForValueToChange } = renderHook(() => {
       return useSavedSearch({
         initialFetchStatus: FetchStatus.LOADING,
+        savedSearch: savedSearchMock,
         searchSessionManager,
         searchSource: resultState.current.searchSource,
         services: discoverServiceMock,

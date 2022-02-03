@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ELASTIC_NAME } from '../../../common';
+import { ELASTIC_NAME } from '../../../common/constants';
 
 export const computeTransformId = ({
   prefix,

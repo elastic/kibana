@@ -18,6 +18,7 @@ const mockInstallation: SavedObject<Installation> = {
   type: 'epm-packages',
   attributes: {
     id: 'test-pkg',
+    installed_kibana_space_id: 'default',
     installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
     package_assets: [],
@@ -37,6 +38,7 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
   type: 'epm-packages',
   attributes: {
     id: 'test-pkg',
+    installed_kibana_space_id: 'default',
     installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
     package_assets: [],

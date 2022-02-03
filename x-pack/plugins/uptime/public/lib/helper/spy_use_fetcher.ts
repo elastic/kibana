@@ -20,9 +20,12 @@ jest.mock('../../../../observability/public', () => {
   };
 });
 
-export function spyOnUseFetcher(payload: unknown) {
-  jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
-    status: observabilityPublic.FETCH_STATUS.SUCCESS,
+export function spyOnUseFetcher(
+  payload: unknown,
+  status = observabilityPublic.FETCH_STATUS.SUCCESS
+) {
+  return jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+    status,
     data: payload,
     refetch: () => null,
   });

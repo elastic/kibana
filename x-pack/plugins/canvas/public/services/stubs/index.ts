@@ -24,9 +24,11 @@ import { platformServiceFactory } from './platform';
 import { reportingServiceFactory } from './reporting';
 import { visualizationsServiceFactory } from './visualizations';
 import { workpadServiceFactory } from './workpad';
+import { filtersServiceFactory } from './filters';
 
 export { customElementServiceFactory } from './custom_element';
 export { expressionsServiceFactory } from './expressions';
+export { filtersServiceFactory } from './filters';
 export { labsServiceFactory } from './labs';
 export { navLinkServiceFactory } from './nav_link';
 export { notifyServiceFactory } from './notify';
@@ -38,7 +40,8 @@ export { workpadServiceFactory } from './workpad';
 export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
   customElement: new PluginServiceProvider(customElementServiceFactory),
   embeddables: new PluginServiceProvider(embeddablesServiceFactory),
-  expressions: new PluginServiceProvider(expressionsServiceFactory),
+  expressions: new PluginServiceProvider(expressionsServiceFactory, ['filters', 'notify']),
+  filters: new PluginServiceProvider(filtersServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
   navLink: new PluginServiceProvider(navLinkServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),

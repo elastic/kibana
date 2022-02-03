@@ -24,15 +24,18 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/lib/get_sort';
+import { ElasticSearchHit } from '../../../types';
 
 export function useDiscoverState({
   services,
   history,
   savedSearch,
+  setExpandedDoc,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
+  setExpandedDoc: (doc?: ElasticSearchHit) => void;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
@@ -89,14 +92,25 @@ export function useDiscoverState({
   const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
     initialFetchStatus,
     searchSessionManager,
+    savedSearch,
     searchSource,
     services,
     stateContainer,
     useNewFieldsApi,
   });
 
+  /**
+   * Reset to display loading spinner when savedSearch is changing
+   */
+  useEffect(() => reset(), [savedSearch.id, reset]);
+
+  /**
+   * Sync URL state with local app state on saved search load
+   * or dataView / savedSearch switch
+   */
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
+    setState(stateContainer.appStateContainer.getState());
 
     return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
@@ -186,8 +200,9 @@ export function useDiscoverState({
         );
         stateContainer.setAppState(nextAppState);
       }
+      setExpandedDoc(undefined);
     },
-    [config, indexPattern, indexPatterns, state.columns, state.sort, stateContainer]
+    [config, indexPattern, indexPatterns, setExpandedDoc, state.columns, state.sort, stateContainer]
   );
   /**
    * Function triggered when the user changes the query in the search bar
@@ -201,21 +216,6 @@ export function useDiscoverState({
     },
     [refetch$, searchSessionManager]
   );
-
-  useEffect(() => {
-    if (!savedSearch || !savedSearch.id) {
-      return;
-    }
-    // handling pushing to state of a persisted saved object
-    const newAppState = getStateDefaults({
-      config,
-      data,
-      savedSearch,
-      storage,
-    });
-    stateContainer.replaceUrlAppState(newAppState);
-    setState(newAppState);
-  }, [config, data, savedSearch, reset, stateContainer, storage]);
 
   /**
    * Trigger data fetching on indexPattern or savedSearch changes

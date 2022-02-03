@@ -11,12 +11,16 @@ import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public'
 import { HeaderMenuPortalProps } from './types';
 
 // eslint-disable-next-line import/no-default-export
-export default function HeaderMenuPortal({ children, setHeaderActionMenu }: HeaderMenuPortalProps) {
+export default function HeaderMenuPortal({
+  children,
+  setHeaderActionMenu,
+  theme$,
+}: HeaderMenuPortalProps) {
   const portalNode = useMemo(() => createPortalNode(), []);
 
   useEffect(() => {
     setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />);
+      const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$ });
       return mount(element);
     });
 
@@ -24,7 +28,7 @@ export default function HeaderMenuPortal({ children, setHeaderActionMenu }: Head
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-  }, [portalNode, setHeaderActionMenu]);
+  }, [portalNode, setHeaderActionMenu, theme$]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 }

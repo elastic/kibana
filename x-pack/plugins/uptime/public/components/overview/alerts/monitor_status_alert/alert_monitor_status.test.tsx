@@ -50,7 +50,7 @@ describe('alert monitor status component', () => {
 
   describe('AlertMonitorStatus', () => {
     const defaultProps: AlertMonitorStatusProps = {
-      alertParams: {
+      ruleParams: {
         numTimes: 3,
         search: 'monitor.id: foo',
         timerangeUnit: 'h',
@@ -61,7 +61,7 @@ describe('alert monitor status component', () => {
       snapshotCount: 0,
       snapshotLoading: false,
       numTimes: 14,
-      setAlertParams: jest.fn(),
+      setRuleParams: jest.fn(),
       timerange: { from: 'now-12h', to: 'now' },
     };
 

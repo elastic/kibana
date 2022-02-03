@@ -22,8 +22,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpaces(getService);
     });
 
-    // Basic
+    // Trial
     loadTestFile(require.resolve('./get_alert_by_id'));
     loadTestFile(require.resolve('./update_alert'));
+    loadTestFile(require.resolve('./create_rule'));
+    loadTestFile(require.resolve('./lifecycle_executor'));
   });
 };
