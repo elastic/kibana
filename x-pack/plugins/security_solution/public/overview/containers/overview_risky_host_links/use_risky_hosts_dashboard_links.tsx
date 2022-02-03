@@ -14,7 +14,7 @@ export const useRiskyHostsDashboardLinks = (
   from: string,
   listItems: LinkPanelListItem[]
 ) => {
-  const createDashboardUrl = useKibana().services.dashboard?.locator?.getLocation;
+  const createDashboardUrl = useKibana().services.dashboard?.locator?.getUrl;
   const dashboardId = useRiskyHostsDashboardId();
   const [listItemsWithLinks, setListItemsWithLinks] = useState<LinkPanelListItem[]>([]);
 
@@ -47,7 +47,7 @@ export const useRiskyHostsDashboardLinks = (
           setListItemsWithLinks(
             listItems.map((item, i) => ({
               ...item,
-              path: dashboardUrls[i] as unknown as string,
+              path: dashboardUrls[i],
             }))
           );
         }

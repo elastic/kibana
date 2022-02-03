@@ -16,7 +16,7 @@ export const DASHBOARD_REQUEST_BODY = {
 };
 
 export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
-  const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
+  const createDashboardUrl = useKibana().services.dashboard?.locator?.getUrl;
   const savedObjectsClient = useKibana().services.savedObjects.client;
 
   const [buttonHref, setButtonHref] = useState<string | undefined>();
