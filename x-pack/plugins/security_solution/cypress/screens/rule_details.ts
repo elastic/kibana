@@ -104,3 +104,9 @@ export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
 
 export const BACK_TO_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';
+
+export const hasIndexPatterns = (indexPatterns: string) => {
+  cy.get(DEFINITION_DETAILS).within(() => {
+    getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
+  });
+};

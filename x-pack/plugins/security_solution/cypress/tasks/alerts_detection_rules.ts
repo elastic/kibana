@@ -295,17 +295,32 @@ export const openBulkActionsMenu = () => {
   cy.get('[data-test-subj="bulkActions-popover"]').click();
 };
 
-export const openAddIndexPatterns = () => {
+export const openBulkEditAddIndexPatternsForm = () => {
   openBulkActionsMenu();
   cy.get('[data-test-subj="indexPatternsBulkEditRule"]').click();
   cy.get('[data-test-subj="addIndexPatternsBulkEditRule"]').click();
+
+  cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Add index patterns');
 };
 
-export const addCustomIndexPattern = (customIndex: string) => {
+export const openBulkEditDeleteIndexPatternsForm = () => {
+  openBulkActionsMenu();
+  cy.get('[data-test-subj="indexPatternsBulkEditRule"]').click();
+  cy.get('[data-test-subj="deleteIndexPatternsBulkEditRule"]').click();
+
+  cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Delete index patterns');
+};
+
+export const typeIndexPattern = (customIndex: string) => {
   cy.get('[data-test-subj="detectionEngineBulkEditIndexPatterns"]')
     .find('[data-test-subj="input"]')
     .type(`${customIndex}{enter}`);
 };
+
+export const getOverwriteCheckbox = () =>
+  cy.get('[data-test-subj="detectionEngineBulkEditOverwriteIndexPatterns"]');
+
+export const confirmBulkEditForm = () => cy.get('[data-test-subj="bulkEditFormSaveBtn"]').click();
 
 export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: number }) => {
   cy.get('[data-test-subj="bulkActions-popover"]').should('not.exist');
