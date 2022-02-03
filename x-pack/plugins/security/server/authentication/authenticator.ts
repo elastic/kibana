@@ -690,7 +690,7 @@ export class Authenticator {
       this.logger.debug(
         'Session is authenticated, existing unauthenticated session will be invalidated.'
       );
-      await this.invalidateSessionValue(request, existingSessionValue);
+      await this.invalidateSessionValue(request, existingSessionValue, true); // Skip writing an audit event when we are replacing an intermediate session with a fullly authenticated session
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.debug('Username has changed, existing session will be invalidated.');
@@ -731,9 +731,14 @@ export class Authenticator {
    * Invalidates session value associated with the specified request.
    * @param request Request instance.
    * @param sessionValue Value of the existing session if any.
+   * @param skipAuditEvent If enabled, skips writing a `user_logout` audit event for this session
    */
-  private async invalidateSessionValue(request: KibanaRequest, sessionValue: SessionValue | null) {
-    if (sessionValue) {
+  private async invalidateSessionValue(
+    request: KibanaRequest,
+    sessionValue: SessionValue | null,
+    skipAuditEvent?: boolean
+  ) {
+    if (sessionValue && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(
         userLogoutEvent({

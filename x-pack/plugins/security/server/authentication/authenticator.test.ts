@@ -1020,7 +1020,7 @@ describe('Authenticator', () => {
           })
         );
         expectAuditEvents(
-          { action: 'user_logout', outcome: 'unknown' },
+          // We do not record a user_logout event for "intermediate" sessions that are deleted, only user_login for the new session
           { action: 'user_login', outcome: 'success' }
         );
       });
