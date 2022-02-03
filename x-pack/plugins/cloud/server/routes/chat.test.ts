@@ -44,14 +44,16 @@ describe('chat route', () => {
       `);
   });
 
-  test('returns user information and a token', async () => {
+  test('returns user information taken from saml metadata and a token', async () => {
     const security = securityMock.createSetup();
     const username = 'user.name';
     const email = 'user@elastic.co';
 
     security.authc.getCurrentUser.mockReturnValueOnce({
       username,
-      email,
+      metadata: {
+        saml_email: [email],
+      },
     });
 
     const router = httpServiceMock.createRouter();
