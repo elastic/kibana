@@ -5,52 +5,39 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-// @ts-ignore: no module definition
-import concat from 'concat-stream';
+import { SerializableRecord } from '@kbn/utility-types';
 import _ from 'lodash';
 import path from 'path';
-import Printer from 'pdfmake';
+import { Worker } from 'worker_threads';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import type { Layout } from '../../../../../screenshotting/server';
-import { getDocOptions, REPORTING_TABLE_LAYOUT } from './get_doc_options';
+import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
-import { getTemplate } from './get_template';
+import {
+  headingHeight,
+  pageMarginBottom,
+  pageMarginTop,
+  pageMarginWidth,
+  subheadingHeight,
+  tableBorderWidth,
+} from './constants';
+import { PdfWorkerOutOfMemoryError } from './pdf_generate_errors';
 
-const assetPath = path.resolve(__dirname, '..', '..', 'common', 'assets');
-const tableBorderWidth = 1;
+import type { PdfWorkerData } from './worker';
 
 export class PdfMaker {
   private _layout: Layout;
   private _logo: string | undefined;
   private _title: string;
   private _content: Content[];
-  private _printer: Printer;
-  private _pdfDoc: PDFKit.PDFDocument | undefined;
+
+  private worker?: Worker;
 
   constructor(layout: Layout, logo: string | undefined) {
-    const fontPath = (filename: string) => path.resolve(assetPath, 'fonts', filename);
-    const fonts = {
-      Roboto: {
-        normal: fontPath('roboto/Roboto-Regular.ttf'),
-        bold: fontPath('roboto/Roboto-Medium.ttf'),
-        italics: fontPath('roboto/Roboto-Italic.ttf'),
-        bolditalics: fontPath('roboto/Roboto-Italic.ttf'),
-      },
-      'noto-cjk': {
-        // Roboto does not support CJK characters, so we'll fall back on this font if we detect them.
-        normal: fontPath('noto/NotoSansCJKtc-Regular.ttf'),
-        bold: fontPath('noto/NotoSansCJKtc-Medium.ttf'),
-        italics: fontPath('noto/NotoSansCJKtc-Regular.ttf'),
-        bolditalics: fontPath('noto/NotoSansCJKtc-Medium.ttf'),
-      },
-    };
-
     this._layout = layout;
     this._logo = logo;
     this._title = '';
     this._content = [];
-    this._printer = new Printer(fonts);
   }
 
   _addContents(contents: Content[]) {
@@ -124,37 +111,63 @@ export class PdfMaker {
     this._title = title;
   }
 
-  generate() {
-    const docTemplate = _.assign(
-      getTemplate(this._layout, this._logo, this._title, tableBorderWidth, assetPath),
-      {
-        content: this._content,
-      }
-    );
-    this._pdfDoc = this._printer.createPdfKitDocument(docTemplate, getDocOptions(tableBorderWidth));
-    return this;
+  private getWorkerData(): PdfWorkerData {
+    return {
+      layout: {
+        hasFooter: this._layout.hasFooter,
+        hasHeader: this._layout.hasHeader,
+        orientation: this._layout.getPdfPageOrientation(),
+        useReportingBranding: this._layout.useReportingBranding,
+        pageSize: this._layout.getPdfPageSize({
+          pageMarginTop,
+          pageMarginBottom,
+          pageMarginWidth,
+          tableBorderWidth,
+          headingHeight,
+          subheadingHeight,
+        }),
+      },
+      title: this._title,
+      logo: this._logo,
+      content: this._content as unknown as SerializableRecord[],
+    };
   }
 
-  getBuffer(): Promise<Buffer | null> {
-    return new Promise((resolve, reject) => {
-      if (!this._pdfDoc) {
-        throw new Error(
-          i18n.translate(
-            'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
-            {
-              defaultMessage: 'Document stream has not been generated',
-            }
-          )
-        );
-      }
+  public async generate(): Promise<Buffer> {
+    if (this.worker) throw new Error('PDF generation already in progress!');
 
-      const concatStream = concat(function (pdfBuffer: Buffer) {
-        resolve(pdfBuffer);
+    return await new Promise<Buffer>((resolve, reject) => {
+      let buffer: undefined | Buffer;
+      this.worker = new Worker(path.resolve(__dirname, './worker.js'), {
+        resourceLimits: {
+          maxOldGenerationSizeMb: 128, // We should consider making this number dynamic?
+        },
+        workerData: this.getWorkerData(),
+      });
+      this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
+        if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
+          reject(new PdfWorkerOutOfMemoryError(workerError.message));
+        } else {
+          reject(workerError);
+        }
       });
 
-      this._pdfDoc.on('error', reject);
-      this._pdfDoc.pipe(concatStream);
-      this._pdfDoc.end();
+      // We expect one message from the work container the PDF buffer.
+      this.worker.on('message', (pdfBuffer: Buffer) => (buffer = pdfBuffer));
+
+      this.worker.on('exit', (code) => {
+        if (code !== 0) {
+          reject(new Error(`Worker exited with code ${code}`));
+          return;
+        }
+        if (buffer) {
+          resolve(buffer);
+          return;
+        }
+        reject(new Error('Worker exited without generating a PDF'));
+      });
+    }).finally(() => {
+      this.worker = undefined;
     });
   }
 }
