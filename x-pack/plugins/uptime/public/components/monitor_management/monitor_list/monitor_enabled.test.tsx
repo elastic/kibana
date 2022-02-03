@@ -15,7 +15,7 @@ import { spyOnUseFetcher } from '../../../lib/helper/spy_use_fetcher';
 import { MonitorEnabled } from './monitor_enabled';
 
 describe('<MonitorEnabled />', () => {
-  const setRefresh = jest.fn();
+  const onUpdate = jest.fn();
   const testMonitor = {
     [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
     [ConfigKey.ENABLED]: true,
@@ -34,7 +34,7 @@ describe('<MonitorEnabled />', () => {
   });
 
   it('correctly renders "enabled" state', () => {
-    render(<MonitorEnabled id="test-id" monitor={testMonitor} setRefresh={setRefresh} />);
+    render(<MonitorEnabled id="test-id" monitor={testMonitor} onUpdate={onUpdate} />);
 
     const switchButton = screen.getByRole('switch') as HTMLButtonElement;
     assertMonitorEnabled(switchButton);
@@ -45,7 +45,7 @@ describe('<MonitorEnabled />', () => {
       <MonitorEnabled
         id="test-id"
         monitor={{ ...testMonitor, [ConfigKey.ENABLED]: false }}
-        setRefresh={setRefresh}
+        onUpdate={onUpdate}
       />
     );
 
@@ -54,7 +54,7 @@ describe('<MonitorEnabled />', () => {
   });
 
   it('toggles on click', () => {
-    render(<MonitorEnabled id="test-id" monitor={testMonitor} setRefresh={setRefresh} />);
+    render(<MonitorEnabled id="test-id" monitor={testMonitor} onUpdate={onUpdate} />);
 
     const switchButton = screen.getByRole('switch') as HTMLButtonElement;
     userEvent.click(switchButton);
@@ -70,7 +70,7 @@ describe('<MonitorEnabled />', () => {
       refetch: () => {},
     });
 
-    render(<MonitorEnabled id="test-id" monitor={testMonitor} setRefresh={setRefresh} />);
+    render(<MonitorEnabled id="test-id" monitor={testMonitor} onUpdate={onUpdate} />);
     const switchButton = screen.getByRole('switch') as HTMLButtonElement;
     userEvent.click(switchButton);
 
