@@ -298,6 +298,31 @@ export class Embeddable
     return ret?.length ? ret : undefined;
   }
 
+  private maybeAddTimeRangeError(
+    errors: ErrorMessage[] | undefined,
+    input: LensEmbeddableInput,
+    indexPatterns: IndexPattern[]
+  ) {
+    // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
+    if (
+      input.timeRange == null &&
+      indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
+    ) {
+      return [
+        ...(errors || []),
+        {
+          shortMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.shortMessage', {
+            defaultMessage: `Missing timeRange property`,
+          }),
+          longMessage: i18n.translate('xpack.lens.embeddable.missingTimeRangeParam.longMessage', {
+            defaultMessage: `The timeRange property is required for the given configuration`,
+          }),
+        },
+      ];
+    }
+    return errors;
+  }
+
   async initializeSavedVis(input: LensEmbeddableInput) {
     const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
       .unwrapAttributes(input)
@@ -324,15 +349,12 @@ export class Embeddable
     this.expression = expression;
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
-    if (this.errors) {
-      this.logError('validation');
-    }
     await this.initializeOutput();
     this.isInitialized = true;
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState)) this.reload();
+    if (this.handleContainerStateChanged(containerState) || this.errors?.length) this.reload();
   }
 
   handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
@@ -572,6 +594,13 @@ export class Embeddable
     // the container to pick them up and use them to configure filter bar and
     // config dropdown correctly.
     const input = this.getInput();
+
+    this.errors = this.maybeAddTimeRangeError(this.errors, input, indexPatterns);
+
+    if (this.errors) {
+      this.logError('validation');
+    }
+
     const title = input.hidePanelTitles ? '' : input.title || this.savedVis.title;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
