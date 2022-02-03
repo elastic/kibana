@@ -35,7 +35,7 @@ elasticsearch.ignoreVersionMismatch: true
 # (settings below assume you are using elastic/apm-integration-testing)
 # Adjust as necessary
 
-elasticsearch.hosts: "http://localtesting_8.0.0_elasticsearch:9200"
+elasticsearch.hosts: "http://localhost:9200"
 elasticsearch.username: "kibana_system_user"
 elasticsearch.password: "changeme"
 
