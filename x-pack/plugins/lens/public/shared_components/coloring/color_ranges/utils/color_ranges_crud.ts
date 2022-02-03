@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { getDataMinMax, roundValue } from '../../utils';
-import { calculateMaxStep } from './utils';
 
 import type { ColorRange, ColorRangeAccessor } from '../types';
 import type { DataBounds } from '../../types';
@@ -43,12 +42,7 @@ export const addColorRange = (
   const { max: dataMax } = getDataMinMax(rangeType, dataBounds);
   const max = Math.max(dataMax, lastEnd);
 
-  const step = calculateMaxStep(
-    newColorRanges.map((item) => item.start),
-    max
-  );
-
-  let insertEnd = roundValue(Math.min(lastStart + step, max));
+  let insertEnd = roundValue(Math.min(lastStart + 1, max));
 
   if (insertEnd === Number.NEGATIVE_INFINITY) {
     insertEnd = 1;

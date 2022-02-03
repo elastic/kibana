@@ -151,10 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.testExecution.logTestStep('should have the destination inputs enabled');
         await transform.editFlyout.openTransformEditAccordionDestinationSettings();
         await transform.editFlyout.assertTransformEditFlyoutInputEnabled('DestinationIndex', true);
-        await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
-          'DestinationPipeline',
-          true
-        );
+        await transform.editFlyout.assertTransformEditFlyoutIngestPipelineFieldSelectExists();
 
         await transform.testExecution.logTestStep(
           'should have the retention policy inputs enabled'

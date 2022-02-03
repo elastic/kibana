@@ -247,6 +247,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                       policyId: agentPolicy.id,
                       packagePolicyId: packagePolicy.id,
                     })}?from=integrations-policy-list`}
+                    data-test-subj="integrationPolicyUpgradeBtn"
                     isDisabled={!canWriteIntegrationPolicies}
                   >
                     <FormattedMessage
