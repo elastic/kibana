@@ -6,6 +6,14 @@
 
 Merges two saved object migration maps.
 
+If there is a migration for a given version on only one of the maps, that migration function will be used:
+
+mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '4.5.6': g }<!-- -->) -<!-- -->&gt; { '1.2.3': f, '4.5.6': g }
+
+If there is a migration for a given version on both maps, the migrations will be composed:
+
+mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '1.2.3': g }<!-- -->) -<!-- -->&gt; { '1.2.3': (doc, context) =<!-- -->&gt; f(g(doc, context), context) }
+
 <b>Signature:</b>
 
 ```typescript
