@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useLinkProps, Options } from './use_link_props';
+import { useLinkProps, Options, LinkProps } from './use_link_props';
 
-export function useRulesLink(options?: Options) {
+export function useRulesLink(options?: Options): LinkProps {
   const manageRulesLinkProps = useLinkProps(
     {
       app: 'management',

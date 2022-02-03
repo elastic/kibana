@@ -21,7 +21,7 @@ export interface LinkDescriptor {
   search?: Search;
 }
 
-interface LinkProps {
+export interface LinkProps {
   href?: string;
   onClick?: (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
 }
