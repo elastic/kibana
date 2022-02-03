@@ -33,6 +33,7 @@ import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
 import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../application/contexts/header_action_menu_context';
+import { useSetupModeSupported } from './use_setup_mode_supported';
 
 export interface TabMenuItem {
   id: string;
@@ -115,6 +116,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   };
 
   const setupModeState = getSetupModeState();
+  const shouldShowSetupModeToggle = useSetupModeSupported(window.location.hash);
 
   return (
     <EuiPage data-test-subj="monitoringAppContainer">
@@ -122,10 +124,12 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
         <EuiPageContent>
           {setHeaderActionMenu && theme$ && (
             <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-              <SetupModeToggleButton
-                enabled={setupModeState.enabled}
-                toggleSetupMode={toggleSetupMode}
-              />
+              {shouldShowSetupModeToggle && (
+                <SetupModeToggleButton
+                  enabled={setupModeState.enabled}
+                  toggleSetupMode={toggleSetupMode}
+                />
+              )}
               <AlertsDropdown />
             </HeaderMenuPortal>
           )}
