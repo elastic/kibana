@@ -11,6 +11,8 @@ import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 
 import type { AgentPolicySOAttributes } from '../types';
 
+import { useDockerRegistry } from './docker_registry_helper';
+
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 type Root = ReturnType<typeof kbnTestServer.createRoot>;
@@ -35,6 +37,8 @@ const waitForFleetSetup = async (root: Root) => {
 describe.skip('Fleet preconfiguration rest', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
+
+  const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
     const { startES } = kbnTestServer.createTestServers({
