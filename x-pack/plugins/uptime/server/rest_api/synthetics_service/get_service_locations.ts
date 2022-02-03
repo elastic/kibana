@@ -18,6 +18,6 @@ export const getServiceLocationsRoute: UMRestApiRouteFactory = () => ({
       return { locations: server.syntheticsService.locations };
     }
 
-    return getServiceLocations({ manifestUrl: server.config.service!.manifestUrl! });
+    return getServiceLocations(server);
   },
 });
