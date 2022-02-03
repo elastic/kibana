@@ -6,12 +6,14 @@
 
 experimental[] Update an existing runtime field
 
+
 [[data-views-runtime-field-update-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
+`POST <kibana host>:<port>/api/data_views/data_view/<data_view_id>/runtime_field/<name>`
 
-`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
+`POST <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<data_view_id>/runtime_field/<name>`
+
 
 [[data-views-runtime-field-update-params]]
 ==== Path parameters
@@ -19,11 +21,12 @@ experimental[] Update an existing runtime field
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-`index_pattern_id`::
+`data_view_id`::
 (Required, string) The ID of the data view.
 
 `name`::
 (Required, string) The name of the runtime field you want to update.
+
 
 [[data-views-runtime-field-update-body]]
 ==== Request body
@@ -37,6 +40,7 @@ You can update following fields:
 
 
 
+
 [[data-views-runtime-field-update-example]]
 ==== Examples
 
@@ -44,7 +48,7 @@ Update an existing runtime field on a data view:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<runtime_field_name>
+$ curl -X POST api/data_views/data_view/<data_view_id>/runtime_field/<runtime_field_name>
 {
   "runtimeField": {
      "script": {
@@ -55,12 +59,13 @@ $ curl -X POST api/index_patterns/index_pattern/<index_pattern_id>/runtime_field
 --------------------------------------------------
 // KIBANA
 
-The API returns updated runtime field object and updated data view object:
+The API returns updated runtime field object array and updated data view object:
 
 [source,sh]
 --------------------------------------------------
 {
-    "index_pattern": {...},
-    "field": {...}
+    "data_view": {...},
+    "fields": [...]
 }
 --------------------------------------------------
+
