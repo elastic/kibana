@@ -290,3 +290,30 @@ export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };
+
+export const openBulkActionsMenu = () => {
+  cy.get('[data-test-subj="bulkActions-popover"]').click();
+};
+
+export const openAddIndexPatterns = () => {
+  openBulkActionsMenu();
+  cy.get('[data-test-subj="indexPatternsBulkEditRule"]').click();
+  cy.get('[data-test-subj="addIndexPatternsBulkEditRule"]').click();
+};
+
+export const addCustomIndexPattern = (customIndex: string) => {
+  cy.get('[data-test-subj="detectionEngineBulkEditIndexPatterns"]')
+    .find('[data-test-subj="input"]')
+    .type(`${customIndex}{enter}`);
+};
+
+export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: number }) => {
+  cy.get('[data-test-subj="bulkActions-popover"]').should('not.exist');
+  cy.get('[data-test-subj="bulkActions-progress"]').find('button').should('be.disabled');
+  //  cy.get('[data-test-subj="euiToastHeader"]').should('have.text', 'Rule changes updated');
+  // cy.get('[data-test-subj="euiToastHeader"]').should('have.text', 'Rule changes updated');
+  // cy.get('').contains(`You’ve successfully updated ${rulesCount} rule`);
+  cy.get('[data-test-subj="globalToastList"]').contains(
+    `You’ve successfully updated ${rulesCount} rule`
+  );
+};

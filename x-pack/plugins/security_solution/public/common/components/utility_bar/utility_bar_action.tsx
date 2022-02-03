@@ -95,7 +95,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
   }) => {
     if (inProgress) {
       return (
-        <BarAction data-test-subj={dataTestSubj}>
+        <BarAction data-test-subj={`${dataTestSubj}-progress`}>
           <LoadingButtonEmpty size="xs" className="eui-alignTop" isLoading iconSide="right">
             {children}
           </LoadingButtonEmpty>

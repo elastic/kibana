@@ -46,7 +46,7 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
   return (
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby={simpleFlyoutTitleId} size="s">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="m" data-test-subj="bulkEditFormTitle">
           <h2 id={simpleFlyoutTitleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -56,12 +56,22 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+              data-test-subj="bulkEditFormCancelBtn"
+            >
               {i18n.BULK_EDIT_FLYOUT_FORM_CLOSE}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSubmit} fill disabled={isValid === false}>
+            <EuiButton
+              onClick={onSubmit}
+              fill
+              disabled={isValid === false}
+              data-test-subj="bulkEditFormSaveBtn"
+            >
               {i18n.BULK_EDIT_FLYOUT_FORM_SAVE}
             </EuiButton>
           </EuiFlexItem>
