@@ -64,8 +64,8 @@ export default function ({ getService }: FtrProviderContext) {
             `${config.path}/${indexPattern.id}/runtime_field/foo`
           );
 
-          expect(response2.status).to.be(400);
-          expect(response2.body.statusCode).to.be(400);
+          expect(response2.status).to.be(404);
+          expect(response2.body.statusCode).to.be(404);
           expect(response2.body.message).to.be('Only runtime fields can be deleted.');
         });
 
