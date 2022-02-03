@@ -53,6 +53,7 @@ import { LazyAlertsFlyout } from '../../../..';
 import { parseAlert } from '../../components/parse_alert';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { translations, paths } from '../../../../config';
+import { addDisplayNames } from './add_display_names';
 
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
@@ -361,7 +362,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       casesOwner: observabilityFeatureId,
       casePermissions,
       type,
-      columns: tGridState?.columns ?? columns,
+      columns: (tGridState?.columns ?? columns).map(addDisplayNames),
       deletedEventIds,
       disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
