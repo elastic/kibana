@@ -18,6 +18,7 @@ import { UpdateDateRange } from '../../common/components/charts/common';
 import { HOSTS_PATH } from '../../../common/constants';
 import {
   HostsQueryTabBody,
+  HostRiskScoreQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
   EventsQueryTabBody,
@@ -84,6 +85,9 @@ export const HostsTabs = memo<HostsTabsProps>(
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.authentications})`}>
           <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
+        </Route>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.risk})`}>
+          <HostRiskScoreQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />

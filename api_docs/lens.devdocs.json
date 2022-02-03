@@ -2299,7 +2299,15 @@
           },
           " | ",
           "LensByReferenceInput",
-          ") & { withActions?: boolean | undefined; }"
+          ") & { withDefaultActions?: boolean | undefined; extraActions?: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<object>[] | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx",
         "deprecated": false,
@@ -3333,6 +3341,25 @@
                 "docId": "kibDataPluginApi",
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/lens/server/plugin.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.PluginStartContract.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "server",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-server.DataViewsServerPluginStart",
+                "text": "DataViewsServerPluginStart"
               }
             ],
             "path": "x-pack/plugins/lens/server/plugin.tsx",
@@ -4457,6 +4484,20 @@
         "description": [],
         "signature": [
           "\"lens\""
+        ],
+        "path": "x-pack/plugins/lens/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-common.DOCUMENT_FIELD_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DOCUMENT_FIELD_NAME",
+        "description": [],
+        "signature": [
+          "\"___records___\""
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
         "deprecated": false,

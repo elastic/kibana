@@ -103,15 +103,19 @@ export class VisualizeEmbeddableFactory
       })`;
     },
     showSavedObject: (savedObject) => {
-      const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-      const visType = getTypes().get(typeName);
-      if (!visType) {
+      try {
+        const typeName: string = JSON.parse(savedObject.attributes.visState).type;
+        const visType = getTypes().get(typeName);
+        if (!visType) {
+          return false;
+        }
+        if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTING)) {
+          return true;
+        }
+        return visType.stage !== 'experimental';
+      } catch {
         return false;
       }
-      if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTING)) {
-        return true;
-      }
-      return visType.stage !== 'experimental';
     },
     getSavedObjectSubType: (savedObject) => {
       return JSON.parse(savedObject.attributes.visState).type;
