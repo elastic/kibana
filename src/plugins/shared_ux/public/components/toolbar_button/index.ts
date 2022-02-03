@@ -8,7 +8,7 @@
 /* eslint-disable import/no-default-export */
 
 import { ToolbarButton } from './toolbar_button';
-export { ToolbarButton } from './toolbar_button';
+export * from './toolbar_button';
 
 /**
  * Exporting the ExitFullScreenButton component as a default export so it can be

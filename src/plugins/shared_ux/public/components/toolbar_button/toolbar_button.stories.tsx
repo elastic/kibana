@@ -24,5 +24,5 @@ export const ConnectedComponent = () => {
 };
 
 export const PureComponent = () => {
-  return <ToolbarButtonComponent />;
+  return <ToolbarButtonComponent hasArrow={false} />;
 };
