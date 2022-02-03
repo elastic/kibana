@@ -30,7 +30,7 @@ import { IDataPluginServices, IIndexPattern } from '../..';
 
 import { UI_SETTINGS } from '../../../common';
 
-interface Props {
+export interface FilterBarProps {
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   className: string;
@@ -40,7 +40,7 @@ interface Props {
   timeRangeForSuggestionsOverride?: boolean;
 }
 
-const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
+const FilterBarUI = React.memo(function FilterBarUI(props: FilterBarProps) {
   const groupRef = useRef<HTMLDivElement>(null);
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
@@ -229,3 +229,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 });
 
 export const FilterBar = injectI18n(FilterBarUI);
+
+// eslint-disable-next-line import/no-default-export
+export default FilterBar;

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, ISearchSource } from 'src/plugins/data/common';
 import { showOpenSearchPanel } from './show_open_search_panel';
@@ -17,6 +18,8 @@ import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
 import type { TopNavMenuData } from '../../../../../../navigation/public';
+import { openAlertsPopover } from './open_alerts_popover';
+import { toMountPoint, wrapWithTheme, MarkdownSimple } from '../../../../../../kibana_react/public';
 
 /**
  * Helper function to build the top nav links
@@ -56,6 +59,43 @@ export const getTopNavLinks = ({
         services,
       }),
     testId: 'discoverOptionsButton',
+  };
+
+  const alerts = {
+    id: 'alerts',
+    label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
+      defaultMessage: 'Alerts',
+    }),
+    description: i18n.translate('discover.localMenu.alertsDescription', {
+      defaultMessage: 'Alerts',
+    }),
+    run: (anchorElement: HTMLElement) => {
+      if (savedSearch.searchSource.getField('index')?.timeFieldName) {
+        openAlertsPopover({
+          I18nContext: services.core.i18n.Context,
+          anchorElement,
+          searchSource: savedSearch.searchSource,
+          services,
+        });
+      } else {
+        services.toastNotifications.addDanger({
+          title: i18n.translate('discover.alert.errorHeader', {
+            defaultMessage: "Cant't create alert",
+          }),
+          text: toMountPoint(
+            wrapWithTheme(
+              <MarkdownSimple>
+                {i18n.translate('discover.alert.dataViewDoesNotHaveTimeFieldErrorMessage', {
+                  defaultMessage: 'Data view does not have time field.',
+                })}
+              </MarkdownSimple>,
+              services.core.theme.theme$
+            )
+          ),
+        });
+      }
+    },
+    testId: 'discoverAlertsButton',
   };
 
   const newSearch = {
@@ -161,6 +201,7 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
+    ...(services.triggersActionsUi ? [alerts] : []),
     shareSearch,
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),

@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import type { FilterBarProps } from './filter_bar';
 
 const Fallback = () => <div />;
 
@@ -21,5 +22,12 @@ const LazyFilterItem = React.lazy(() => import('./filter_item'));
 export const FilterItem = (props: React.ComponentProps<typeof LazyFilterItem>) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyFilterItem {...props} />
+  </React.Suspense>
+);
+
+const LazyFilterBar = React.lazy(() => import('./filter_bar'));
+export const FilterBar = (props: FilterBarProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyFilterBar {...props} />
   </React.Suspense>
 );

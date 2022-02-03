@@ -37,6 +37,7 @@ import {
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
+import { ISearchStartSearchSource } from '../../../../src/plugins/data/common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -67,6 +68,7 @@ export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: IScopedClusterClient;
+  searchSourceClient: Promise<ISearchStartSearchSource>;
 }
 
 export interface AlertServices<

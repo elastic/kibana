@@ -7,7 +7,7 @@
  */
 
 export type { IndexPatternSelectProps } from './index_pattern_select';
-export { FilterLabel, FilterItem } from './filter_bar';
+export { FilterLabel, FilterItem, FilterBar } from './filter_bar';
 export type { QueryStringInputProps } from './query_string_input';
 export { QueryStringInput } from './query_string_input';
 export type { SearchBarProps, StatefulSearchBarProps } from './search_bar';

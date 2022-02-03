@@ -64,6 +64,7 @@ import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 import { useDiscoverServices } from './utils/use_discover_services';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -191,6 +192,7 @@ export interface DiscoverStartPlugins {
   usageCollection?: UsageCollectionSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 /**

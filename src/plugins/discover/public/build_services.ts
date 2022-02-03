@@ -18,6 +18,8 @@ import {
   IUiSettingsClient,
   PluginInitializerContext,
   HttpStart,
+  NotificationsStart,
+  ApplicationStart,
 } from 'kibana/public';
 import {
   FilterManager,
@@ -41,12 +43,14 @@ import { EmbeddableStart } from '../../embeddable/public';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
 export interface HistoryLocationState {
   referrer: string;
 }
 
 export interface DiscoverServices {
+  application: ApplicationStart;
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
   chrome: ChromeStart;
@@ -66,6 +70,7 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
+  notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -73,6 +78,7 @@ export interface DiscoverServices {
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export const buildServices = memoize(function (
@@ -84,6 +90,7 @@ export const buildServices = memoize(function (
   const storage = new Storage(localStorage);
 
   return {
+    application: core.application,
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
@@ -105,6 +112,7 @@ export const buildServices = memoize(function (
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
+    notifications: core.notifications,
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
@@ -112,5 +120,6 @@ export const buildServices = memoize(function (
     http: core.http,
     spaces: plugins.spaces,
     dataViewEditor: plugins.dataViewEditor,
+    triggersActionsUi: plugins.triggersActionsUi,
   };
 });

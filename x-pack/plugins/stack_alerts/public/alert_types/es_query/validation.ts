@@ -10,8 +10,16 @@ import { EsQueryAlertParams } from './types';
 import { ValidationResult, builtInComparators } from '../../../../triggers_actions_ui/public';
 
 export const validateExpression = (alertParams: EsQueryAlertParams): ValidationResult => {
-  const { index, timeField, esQuery, size, threshold, timeWindowSize, thresholdComparator } =
-    alertParams;
+  const {
+    index,
+    timeField,
+    esQuery,
+    size,
+    threshold,
+    timeWindowSize,
+    thresholdComparator,
+    searchType,
+  } = alertParams;
   const validationResult = { errors: {} };
   const errors = {
     index: new Array<string>(),
@@ -24,44 +32,6 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
     timeWindowSize: new Array<string>(),
   };
   validationResult.errors = errors;
-  if (!index || index.length === 0) {
-    errors.index.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredIndexText', {
-        defaultMessage: 'Index is required.',
-      })
-    );
-  }
-  if (!timeField) {
-    errors.timeField.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeFieldText', {
-        defaultMessage: 'Time field is required.',
-      })
-    );
-  }
-  if (!esQuery) {
-    errors.esQuery.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
-        defaultMessage: 'Elasticsearch query is required.',
-      })
-    );
-  } else {
-    try {
-      const parsedQuery = JSON.parse(esQuery);
-      if (!parsedQuery.query) {
-        errors.esQuery.push(
-          i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
-            defaultMessage: `Query field is required.`,
-          })
-        );
-      }
-    } catch (err) {
-      errors.esQuery.push(
-        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.jsonQueryText', {
-          defaultMessage: 'Query must be valid JSON.',
-        })
-      );
-    }
-  }
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {
@@ -95,6 +65,54 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
         defaultMessage: 'Time window size is required.',
       })
     );
+  }
+  if (!timeField) {
+    errors.timeField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeFieldText', {
+        defaultMessage: 'Time field is required.',
+      })
+    );
+  }
+
+  /**
+   * Skip esQuery, size, timeField, index checks if it is .index-threshold,
+   * since it should contain searchConfiguration
+   */
+  if (searchType === 'searchSource') {
+    return validationResult;
+  }
+
+  if (!index || index.length === 0) {
+    errors.index.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredIndexText', {
+        defaultMessage: 'Index is required.',
+      })
+    );
+  }
+
+  if (!esQuery) {
+    errors.esQuery.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
+        defaultMessage: 'Elasticsearch query is required.',
+      })
+    );
+  } else {
+    try {
+      const parsedQuery = JSON.parse(esQuery);
+      if (!parsedQuery.query) {
+        errors.esQuery.push(
+          i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
+            defaultMessage: `Query field is required.`,
+          })
+        );
+      }
+    } catch (err) {
+      errors.esQuery.push(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.jsonQueryText', {
+          defaultMessage: 'Query must be valid JSON.',
+        })
+      );
+    }
   }
   if (!size) {
     errors.size.push(

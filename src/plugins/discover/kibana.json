@@ -16,7 +16,7 @@
     "dataViewFieldEditor",
     "dataViewEditor"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi"],
   "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "dataViews"],
   "extraPublicDirs": ["common"],
   "owner": {

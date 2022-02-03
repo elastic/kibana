@@ -6,6 +6,7 @@
  */
 
 import { AlertTypeParams } from '../../../../alerting/common';
+import { SerializedSearchSourceFields } from '../../../../../../src/plugins/data/common';
 
 export interface Comparator {
   text: string;
@@ -22,4 +23,6 @@ export interface EsQueryAlertParams extends AlertTypeParams {
   threshold: number[];
   timeWindowSize: number;
   timeWindowUnit: string;
+  searchType: string;
+  searchConfiguration: SerializedSearchSourceFields;
 }
