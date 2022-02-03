@@ -33,13 +33,15 @@ interface ClientApiMockInstance<T, Y extends any[]> extends jest.MockInstance<T,
    * Helper API around `mockReturnValue` returning either the body or the whole TransportResult
    * depending on the `meta` parameter used during the call
    */
-  mockReturnResponse(value: Awaited<T>, opts?: Partial<Omit<TransportResult<T>, 'body'>>): this;
+  mockResponse(value: Awaited<T>, opts?: Partial<Omit<TransportResult<T>, 'body'>>): this;
 
   /**
    * Helper API around `mockReturnValueOnce` returning either the body or the whole TransportResult
    * depending on the `meta` parameter used during the call
    */
-  mockReturnResponseOnce(value: Awaited<T>, opts?: Partial<Omit<TransportResult<T>, 'body'>>): this;
+  mockResponseOnce(value: Awaited<T>, opts?: Partial<Omit<TransportResult<T>, 'body'>>): this;
+
+  mockResponseImplementation(handler: (...args: Y) => Partial<TransportResult<Awaited<T>>>): this;
 }
 
 const createMockedApi = <
@@ -48,7 +50,7 @@ const createMockedApi = <
 >(): ClientApiMockInstance<T, Y> => {
   const mock: ClientApiMockInstance<T, Y> = jest.fn() as any;
 
-  mock.mockReturnResponse = (value: T, opts?: Partial<Omit<TransportResult<T>, 'body'>>) => {
+  mock.mockResponse = (value: T, opts?: Partial<Omit<TransportResult<T>, 'body'>>) => {
     mock.mockImplementation((args: unknown, options?: TransportRequestOptions) => {
       const meta = options?.meta ?? false;
       if (meta) {
@@ -60,13 +62,29 @@ const createMockedApi = <
     return mock;
   };
 
-  mock.mockReturnResponseOnce = (value: T, opts?: Partial<Omit<TransportResult<T>, 'body'>>) => {
+  mock.mockResponseOnce = (value: T, opts?: Partial<Omit<TransportResult<T>, 'body'>>) => {
     mock.mockImplementationOnce((args: unknown, options?: TransportRequestOptions) => {
       const meta = options?.meta ?? false;
       if (meta) {
         return Promise.resolve(createApiResponse({ ...opts, body: value })) as any;
       } else {
         return Promise.resolve(value) as Promise<T>;
+      }
+    });
+    return mock;
+  };
+
+  mock.mockResponseImplementation = (
+    handler: (...args: Y) => Partial<TransportResult<Awaited<T>>>
+  ) => {
+    mock.mockImplementation((args: unknown, options?: TransportRequestOptions) => {
+      const meta = options?.meta ?? false;
+      // @ts-expect-error couldn't do better while keeping compatibility this jest.MockInstance
+      const response = handler(args, options);
+      if (meta) {
+        return Promise.resolve(createApiResponse(response)) as any;
+      } else {
+        return Promise.resolve(response.body ?? {}) as Promise<T>;
       }
     });
     return mock;

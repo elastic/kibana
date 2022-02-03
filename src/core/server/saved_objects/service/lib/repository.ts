@@ -1369,8 +1369,8 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
-    const { body } = await this.client
-      .update<SavedObjectsRawDocSource>({
+    const body = await this.client
+      .update<unknown, unknown, SavedObjectsRawDocSource>({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult?.rawDocSource),
@@ -1925,7 +1925,7 @@ export class SavedObjectsRepository {
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
-    const body = await this.client.update<SavedObjectsRawDocSource>({
+    const body = await this.client.update<unknown, unknown, SavedObjectsRawDocSource>({
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
@@ -2091,7 +2091,7 @@ export class SavedObjectsRepository {
     id: string,
     options?: SavedObjectsClosePointInTimeOptions
   ): Promise<SavedObjectsClosePointInTimeResponse> {
-    return await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
+    return await this.client.closePointInTime({
       body: { id },
     });
   }
