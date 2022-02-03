@@ -91,7 +91,6 @@ export function EditFilterModal({
   multipleFilters,
   indexPatterns,
   timeRangeForSuggestionsOverride,
-  savedQueryManagement,
   initialAddFilterMode,
   onRemoveFilterGroup,
 }: {
@@ -103,13 +102,13 @@ export function EditFilterModal({
   multipleFilters?: Filter[];
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
-  savedQueryManagement?: JSX.Element;
   initialAddFilterMode?: string;
   onRemoveFilterGroup: (groupId: string) => void;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
   );
+  // debugger
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
@@ -655,7 +654,6 @@ export function EditFilterModal({
         <EuiForm className="kbnQueryBar__filterModalForm">
           {addFilterMode === 'quick_form' && renderGroupedFilters()}
           {addFilterMode === 'query_builder' && renderCustomEditor()}
-          {addFilterMode === 'saved_filters' && savedQueryManagement}
         </EuiForm>
       </EuiModalBody>
       <EuiHorizontalRule margin="none" />

@@ -232,12 +232,11 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
             applySavedQueries={() => props.toggleEditFilterModal?.(false)}
             onCancel={() => props.toggleEditFilterModal?.(false)}
-            filter={props.multipleFilters[0]}
+            filter={currentEditFilters[0]}
             multipleFilters={currentEditFilters}
             indexPatterns={props.indexPatterns!}
             onRemoveFilterGroup={onDeleteFilterGroup}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-            savedQueryManagement={undefined}
             initialAddFilterMode={undefined}
           />
         )}
