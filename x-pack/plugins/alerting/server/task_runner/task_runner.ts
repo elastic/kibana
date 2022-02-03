@@ -283,7 +283,7 @@ export class TaskRunner<
     }
   }
 
-  async executeAlert(
+  private async executeAlert(
     alertId: string,
     alert: AlertInstance<InstanceState, InstanceContext>,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>
@@ -299,7 +299,7 @@ export class TaskRunner<
     return executionHandler({ actionGroup, actionSubgroup, context, state, alertId });
   }
 
-  async executeAlerts(
+  private async executeAlerts(
     services: Services,
     rule: SanitizedAlert<Params>,
     params: Params,
@@ -539,7 +539,7 @@ export class TaskRunner<
     };
   }
 
-  async validateAndExecuteRule(
+  private async validateAndExecuteRule(
     services: Services,
     apiKey: RawRule['apiKey'],
     rule: SanitizedAlert<Params>,
@@ -564,7 +564,7 @@ export class TaskRunner<
     return this.executeAlerts(services, rule, validatedParams, executionHandler, spaceId, event);
   }
 
-  async loadRuleAttributesAndRun(
+  private async loadRuleAttributesAndRun(
     event: Event
   ): Promise<Resultable<RuleTaskRunResultWithActions, Error>> {
     const {
