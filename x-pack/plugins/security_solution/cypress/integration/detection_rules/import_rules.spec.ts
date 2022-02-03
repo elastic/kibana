@@ -6,11 +6,6 @@
  */
 
 import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import {
   getRulesImportExportToast,
   importRules,
   importRulesWithOverwriteAll,
@@ -18,16 +13,13 @@ import {
 import { cleanKibana, reload } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 describe('Import rules', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', '/api/detection_engine/rules/_import*').as('import');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   it('Imports a custom rule with exceptions', function () {

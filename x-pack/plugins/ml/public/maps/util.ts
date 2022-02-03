@@ -7,11 +7,14 @@
 
 import { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
 import { VectorSourceRequestMeta } from '../../../maps/common';
+import { SEARCH_QUERY_LANGUAGE } from '../../common/constants/search';
+import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
@@ -37,19 +40,38 @@ export async function getResultsForJobId(
   locationType: MlAnomalyLayersType,
   searchFilters: VectorSourceRequestMeta
 ): Promise<FeatureCollection> {
-  const { timeFilters } = searchFilters;
+  const { query, timeFilters } = searchFilters;
+  const hasQuery = query && query.query !== '';
+  let queryFilter;
+  // @ts-ignore missing properties from ExplorerJob - those fields aren't required for this
+  const indexPattern = getIndexPattern([{ id: jobId }]);
+
+  if (hasQuery && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+    queryFilter = toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
+  } else if (hasQuery && query?.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
+    queryFilter = luceneStringToDsl(query.query);
+  }
 
   const must: estypes.QueryDslQueryContainer[] = [
     { term: { job_id: jobId } },
     { term: { result_type: 'record' } },
   ];
 
+  let bool: estypes.QueryDslBoolQuery = {
+    must,
+  };
+
+  if (queryFilter && queryFilter.bool) {
+    bool = { ...bool, ...queryFilter.bool };
+  } else if (queryFilter) {
+    // @ts-ignore push doesn't exist on type QueryDslQueryContainer | QueryDslQueryContainer[] | undefined
+    bool.must.push(queryFilter);
+  }
+
   // Query to look for the highest scoring anomaly.
   const body: estypes.SearchRequest['body'] = {
     query: {
-      bool: {
-        must,
-      },
+      bool,
     },
     size: 1000,
     _source: {

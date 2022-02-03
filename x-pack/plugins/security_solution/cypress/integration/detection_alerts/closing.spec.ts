@@ -21,9 +21,7 @@ import {
   goToOpenedAlerts,
   openAlerts,
   selectNumberOfAlerts,
-  waitForAlertsPanelToBeLoaded,
   waitForAlerts,
-  waitForAlertsIndexToBeCreated,
 } from '../../tasks/alerts';
 import { createCustomRuleActivated, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -37,8 +35,6 @@ describe('Closing alerts', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(getNewRule(), '1', '100m', 100);
     refreshPage();
     waitForAlertsToPopulate(100);
