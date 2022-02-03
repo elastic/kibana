@@ -17,6 +17,7 @@ import type {
   TypedLensByValueInput,
   XYLayerConfig,
 } from '../../../../../../../lens/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '../../../../../../../lens/common/constants';
 import { FieldVisConfig } from '../../stats_table/types';
 import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
 
@@ -52,7 +53,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
         label: COUNT,
         dataType: 'number',
         isBucketed: false,
-        sourceField: 'Records',
+        sourceField: RECORDS_FIELD,
         operationType: 'count',
       },
     };
@@ -107,7 +108,7 @@ export function getDateSettings(item: FieldVisConfig) {
       label: COUNT,
       operationType: 'count',
       scale: 'ratio',
-      sourceField: 'Records',
+      sourceField: RECORDS_FIELD,
     },
     col1: {
       dataType: 'date',
@@ -148,7 +149,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
       label: COUNT,
       dataType: 'number',
       isBucketed: false,
-      sourceField: 'Records',
+      sourceField: RECORDS_FIELD,
       operationType: 'count',
     },
   };
@@ -181,7 +182,7 @@ export function getBooleanSettings(item: FieldVisConfig) {
       label: COUNT,
       dataType: 'number',
       isBucketed: false,
-      sourceField: 'Records',
+      sourceField: RECORDS_FIELD,
       operationType: 'count',
     },
   };
