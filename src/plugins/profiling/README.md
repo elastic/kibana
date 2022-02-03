@@ -56,7 +56,7 @@ You should expect some of these commands to take several minutes to finish.
 1. `yarn kbn bootstrap` to install dependencies and prepare the development environment
 1. `yarn start` to start the hot-reloading development server
 1. Open `http://localhost:5601` in your favorite browser to view the Kibana UI
-1. Enter credentials as needed for your Elasticsearch cluster
+1. Enter username `admin` and password `changeme` at login prompt
 1. Open left sidebar and click on "Prodfiler" at the bottom
 
 ## Set up environment to use fixtures instead of Elasticsearch
