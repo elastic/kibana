@@ -3,6 +3,7 @@
 exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
+  offset={10}
 >
   <div
     className="euiPopover__anchor"
@@ -33,6 +34,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
 exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
+  offset={10}
 >
   <div
     className="euiPopover__anchor"
@@ -77,6 +79,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
 exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
+  offset={10}
 >
   <div
     className="euiPopover__anchor"

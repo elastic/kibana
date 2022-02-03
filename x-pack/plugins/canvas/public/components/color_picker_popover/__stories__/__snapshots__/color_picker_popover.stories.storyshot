@@ -5,6 +5,7 @@ exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
   <div
     className="euiPopover euiPopover--anchorDownCenter"
     id="color-picker-popover"
+    offset={10}
   >
     <div
       className="euiPopover__anchor"
@@ -62,6 +63,7 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
   id="color-picker-popover"
+  offset={10}
 >
   <div
     className="euiPopover__anchor"
@@ -102,6 +104,7 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors, value missin
 <div
   className="euiPopover euiPopover--anchorDownCenter"
   id="color-picker-popover"
+  offset={10}
 >
   <div
     className="euiPopover__anchor"
@@ -142,6 +145,7 @@ exports[`Storyshots components/Color/ColorPickerPopover three colors 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
   id="color-picker-popover"
+  offset={10}
 >
   <div
     className="euiPopover__anchor"

@@ -377,6 +377,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <div
               className="euiPopover euiPopover--anchorUpCenter"
               id="color-picker-popover"
+              offset={10}
             >
               <div
                 className="euiPopover__anchor"
@@ -783,6 +784,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           <div
             className="euiPopover euiPopover--anchorUpCenter"
             id="color-picker-popover"
+            offset={10}
           >
             <div
               className="euiPopover__anchor"
@@ -1201,6 +1203,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <div
               className="euiPopover euiPopover--anchorUpCenter"
               id="color-picker-popover"
+              offset={10}
             >
               <div
                 className="euiPopover__anchor"
