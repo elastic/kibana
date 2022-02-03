@@ -250,9 +250,6 @@ export class CasesService {
   }: {
     searchOptions: SavedObjectFindOptionsKueryNode;
   }): Promise<{
-    // When I try to do `[CaseStatuses[in-progress]]: number TS gives me a:
-    // A computed property name in a type literal must refer to an expression whose type is a literal type or a 'unique symbol' type.ts(1170)
-    // error
     [status in CaseStatuses]: number;
   }> {
     const cases = await this.unsecuredSavedObjectsClient.find<
@@ -273,8 +270,7 @@ export class CasesService {
         statuses: {
           terms: {
             field: `${CASE_SAVED_OBJECT}.attributes.status`,
-            // Do 1 more than the actual size we need just in case
-            size: caseStatuses.length + 1,
+            size: caseStatuses.length,
             order: { _key: 'asc' },
           },
         },
@@ -289,7 +285,9 @@ export class CasesService {
     };
   }
 
-  private static getStatusBuckets(buckets: Array<{ key: string; doc_count: number }> | undefined) {
+  private static getStatusBuckets(
+    buckets: Array<{ key: string; doc_count: number }> | undefined
+  ): Map<string, number> | undefined {
     return buckets?.reduce((acc, bucket) => {
       acc.set(bucket.key, bucket.doc_count);
       return acc;

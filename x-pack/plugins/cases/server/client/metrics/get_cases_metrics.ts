@@ -10,42 +10,20 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { CasesClientArgs } from '..';
 import {
   CasesStatusRequest,
   CasesStatusResponse,
-  CasesStatusResponseRt,
-  throwErrors,
   excess,
   CasesStatusRequestRt,
+  throwErrors,
+  CasesStatusResponseRt,
 } from '../../../common/api';
+import { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../utils';
+import { createCaseError } from '../../common/error';
 
-/**
- * Statistics API contract.
- */
-export interface StatsSubClient {
-  /**
-   * Retrieves the total number of open, closed, and in-progress cases.
-   */
-  getStatusTotalsByType(params: CasesStatusRequest): Promise<CasesStatusResponse>;
-}
-
-/**
- * Creates the interface for retrieving the number of open, closed, and in progress cases.
- *
- * @ignore
- */
-export function createStatsSubClient(clientArgs: CasesClientArgs): StatsSubClient {
-  return Object.freeze({
-    getStatusTotalsByType: (params: CasesStatusRequest) =>
-      getStatusTotalsByType(params, clientArgs),
-  });
-}
-
-async function getStatusTotalsByType(
+export async function getStatusTotalsByType(
   params: CasesStatusRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesStatusResponse> {

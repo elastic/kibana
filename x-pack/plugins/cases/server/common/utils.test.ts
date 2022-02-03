@@ -28,6 +28,7 @@ import {
   flattenCommentSavedObject,
   extractLensReferencesFromCommentString,
   getOrUpdateLensReferences,
+  asArray,
 } from './utils';
 
 interface CommentReference {
@@ -938,6 +939,28 @@ describe('common utils', () => {
 
       expect(expectedReferences.length).toEqual(updatedReferences.length);
       expect(expectedReferences).toEqual(expect.arrayContaining(updatedReferences));
+    });
+  });
+
+  describe('asArray', () => {
+    it('returns undefined when the field is undefined', () => {
+      expect(asArray(undefined)).toBeUndefined();
+    });
+
+    it('returns undefined when the field is null', () => {
+      expect(asArray(null)).toBeUndefined();
+    });
+
+    it('leaves the string array as is when it is already an array', () => {
+      expect(asArray(['value'])).toEqual(['value']);
+    });
+
+    it('returns an array of one item when passed a string', () => {
+      expect(asArray('value')).toEqual(['value']);
+    });
+
+    it('returns an array of one item when passed a number', () => {
+      expect(asArray(100)).toEqual([100]);
     });
   });
 });

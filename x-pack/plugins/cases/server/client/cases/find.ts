@@ -20,7 +20,7 @@ import {
 } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
-import { transformCases } from '../../common/utils';
+import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
@@ -95,12 +95,4 @@ export const find = async (
       logger,
     });
   }
-};
-
-const asArray = <T>(field?: T | T[] | null): T[] | undefined => {
-  if (field === undefined || field === null) {
-    return;
-  }
-
-  return Array.isArray(field) ? field : [field];
 };
