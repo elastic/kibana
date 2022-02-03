@@ -31,6 +31,13 @@ export const ServiceLocationCodec = t.interface({
 
 export const ServiceLocationsCodec = t.array(ServiceLocationCodec);
 
+export const LocationCodec = t.intersection([
+  ServiceLocationCodec,
+  t.partial({ isServiceManaged: t.boolean }),
+]);
+
+export const LocationsCodec = t.array(LocationCodec);
+
 export const isServiceLocationInvalid = (location: ServiceLocation) =>
   isLeft(ServiceLocationCodec.decode(location));
 
@@ -42,3 +49,5 @@ export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
 export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;
 export type ServiceLocations = t.TypeOf<typeof ServiceLocationsCodec>;
 export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;
+
+export type Locations = t.TypeOf<typeof LocationsCodec>;

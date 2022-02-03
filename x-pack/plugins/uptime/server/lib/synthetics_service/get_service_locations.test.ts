@@ -49,6 +49,7 @@ describe('getServiceLocations', function () {
           id: 'us_central',
           label: 'US Central',
           url: 'https://local.dev',
+          isServiceManaged: true,
         },
       ],
     });
