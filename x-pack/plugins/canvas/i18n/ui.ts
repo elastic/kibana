@@ -771,11 +771,14 @@ export const ModelStrings = {
         defaultMessage: 'Defines the format of the values',
       }),
     getValuesFormatPercentOption: () =>
-      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.valuesFormatDisplayName', {
-        defaultMessage: 'Percent',
-      }),
+      i18n.translate(
+        'xpack.canvas.uis.models.partitionLabels.args.valuesFormatPercentDisplayName',
+        {
+          defaultMessage: 'Percent',
+        }
+      ),
     getValuesFormatValueOption: () =>
-      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.valuesFormatHelp', {
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.valuesFormatValueDisplayName', {
         defaultMessage: 'Value',
       }),
   },
@@ -1773,11 +1776,14 @@ export const ViewStrings = {
         defaultMessage: 'Size of the donut hole',
       }),
     getStartFromSecondLargestSliceDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioDisplayName', {
-        defaultMessage: 'Starts placement with the second largest slice',
-      }),
+      i18n.translate(
+        'xpack.canvas.uis.views.partitionVis.args.startFromSecondLargestSliceDisplayName',
+        {
+          defaultMessage: 'Starts placement with the second largest slice',
+        }
+      ),
     getStartFromSecondLargestSliceHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioHelp', {
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.startFromSecondLargestSliceHelp', {
         defaultMessage: 'Starts placement with the second largest slice',
       }),
     getLabelsDisplayName: () =>
