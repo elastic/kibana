@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
     }
   };
 
-  describe.only('scripted fields preview', () => {
+  describe('scripted fields preview', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await PageObjects.settings.navigateTo();
