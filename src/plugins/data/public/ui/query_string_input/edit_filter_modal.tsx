@@ -268,10 +268,10 @@ export function EditFilterModal({
             placeholder={
               selectedField
                 ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                  defaultMessage: 'Operator',
+                defaultMessage: 'Operator',
                 })
                 : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                  defaultMessage: 'Waiting',
+                defaultMessage: 'Waiting',
                 })
             }
             options={operators}
