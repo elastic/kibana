@@ -847,14 +847,14 @@ describe('getAll()', () => {
         ],
       };
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      scopedClusterClient.asInternalUser.search.mockResponse(
         // @ts-expect-error not full search response
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             '1': { doc_count: 6 },
             testPreconfigured: { doc_count: 2 },
           },
-        })
+        }
       );
 
       actionsClient = new ActionsClient({
@@ -924,14 +924,14 @@ describe('getAll()', () => {
           },
         ],
       });
-      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      scopedClusterClient.asInternalUser.search.mockResponse(
         // @ts-expect-error not full search response
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             '1': { doc_count: 6 },
             testPreconfigured: { doc_count: 2 },
           },
-        })
+        }
       );
 
       await actionsClient.getAll();
@@ -986,14 +986,14 @@ describe('getAll()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+    scopedClusterClient.asInternalUser.search.mockResponse(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           '1': { doc_count: 6 },
           testPreconfigured: { doc_count: 2 },
         },
-      })
+      }
     );
 
     actionsClient = new ActionsClient({
@@ -1063,14 +1063,14 @@ describe('getBulk()', () => {
           },
         ],
       });
-      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      scopedClusterClient.asInternalUser.search.mockResponse(
         // @ts-expect-error not full search response
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             '1': { doc_count: 6 },
             testPreconfigured: { doc_count: 2 },
           },
-        })
+        }
       );
 
       actionsClient = new ActionsClient({
@@ -1137,14 +1137,14 @@ describe('getBulk()', () => {
           },
         ],
       });
-      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      scopedClusterClient.asInternalUser.search.mockResponse(
         // @ts-expect-error not full search response
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             '1': { doc_count: 6 },
             testPreconfigured: { doc_count: 2 },
           },
-        })
+        }
       );
 
       await actionsClient.getBulk(['1']);
@@ -1196,14 +1196,14 @@ describe('getBulk()', () => {
         },
       ],
     });
-    scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+    scopedClusterClient.asInternalUser.search.mockResponse(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           '1': { doc_count: 6 },
           testPreconfigured: { doc_count: 2 },
         },
-      })
+      }
     );
 
     actionsClient = new ActionsClient({

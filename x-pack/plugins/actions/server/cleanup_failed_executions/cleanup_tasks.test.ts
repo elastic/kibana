@@ -11,7 +11,6 @@ import { spacesMock } from '../../../spaces/server/mocks';
 import { CleanupTasksOpts, cleanupTasks } from './cleanup_tasks';
 import { TaskInstance } from '../../../task_manager/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/elasticsearch';
 
 describe('cleanupTasks', () => {
   const logger = loggingSystemMock.create().get();
@@ -70,19 +69,27 @@ describe('cleanupTasks', () => {
   });
 
   it('should delete action_task_params and task objects', async () => {
-    esClient.bulk.mockResolvedValue({
-      body: { items: [], errors: false, took: 1 },
-    } as unknown as TransportResult<estypes.BulkResponse, unknown>);
+    esClient.bulk.mockResponse({
+      items: [],
+      errors: false,
+      took: 1,
+    } as unknown as estypes.BulkResponse);
     const result = await cleanupTasks({
       ...cleanupTasksOpts,
       tasks: [taskSO],
     });
-    expect(esClient.bulk).toHaveBeenCalledWith({
-      body: [{ delete: { _index: cleanupTasksOpts.kibanaIndex, _id: 'action_task_params:123' } }],
-    });
-    expect(esClient.bulk).toHaveBeenCalledWith({
-      body: [{ delete: { _index: cleanupTasksOpts.taskManagerIndex, _id: 'task:123' } }],
-    });
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      {
+        body: [{ delete: { _index: cleanupTasksOpts.kibanaIndex, _id: 'action_task_params:123' } }],
+      },
+      { meta: true }
+    );
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      {
+        body: [{ delete: { _index: cleanupTasksOpts.taskManagerIndex, _id: 'task:123' } }],
+      },
+      { meta: true }
+    );
     expect(result).toEqual({
       success: true,
       successCount: 1,
@@ -91,33 +98,37 @@ describe('cleanupTasks', () => {
   });
 
   it('should not delete the task if the action_task_params failed to delete', async () => {
-    esClient.bulk.mockResolvedValue({
-      body: {
-        items: [
-          {
-            delete: {
-              _index: cleanupTasksOpts.kibanaIndex,
-              _id: 'action_task_params:123',
-              status: 500,
-              result: 'Failure',
-              error: true,
-            },
+    esClient.bulk.mockResponse({
+      items: [
+        {
+          delete: {
+            _index: cleanupTasksOpts.kibanaIndex,
+            _id: 'action_task_params:123',
+            status: 500,
+            result: 'Failure',
+            error: true,
           },
-        ],
-        errors: true,
-        took: 1,
-      },
-    } as unknown as TransportResult<estypes.BulkResponse, unknown>);
+        },
+      ],
+      errors: true,
+      took: 1,
+    } as unknown as estypes.BulkResponse);
     const result = await cleanupTasks({
       ...cleanupTasksOpts,
       tasks: [taskSO],
     });
-    expect(esClient.bulk).toHaveBeenCalledWith({
-      body: [{ delete: { _index: cleanupTasksOpts.kibanaIndex, _id: 'action_task_params:123' } }],
-    });
-    expect(esClient.bulk).not.toHaveBeenCalledWith({
-      body: [{ delete: { _index: cleanupTasksOpts.taskManagerIndex, _id: 'task:123' } }],
-    });
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      {
+        body: [{ delete: { _index: cleanupTasksOpts.kibanaIndex, _id: 'action_task_params:123' } }],
+      },
+      { meta: true }
+    );
+    expect(esClient.bulk).not.toHaveBeenCalledWith(
+      {
+        body: [{ delete: { _index: cleanupTasksOpts.taskManagerIndex, _id: 'task:123' } }],
+      },
+      { meta: true }
+    );
     expect(result).toEqual({
       success: false,
       successCount: 0,
