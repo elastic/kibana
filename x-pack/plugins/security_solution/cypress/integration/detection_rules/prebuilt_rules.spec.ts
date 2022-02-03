@@ -13,11 +13,10 @@ import {
   RULES_EMPTY_PROMPT,
   RULE_SWITCH,
   SHOWING_RULES_TEXT,
-  RULES_MONIROTING_TABLE,
+  RULES_MONITORING_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 
-import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
   deleteFirstRule,
@@ -25,7 +24,6 @@ import {
   loadPrebuiltDetectionRules,
   reloadDeletedRules,
   selectNumberOfRules,
-  waitForRulesTableToBeLoaded,
   waitForPrebuiltDetectionRulesToBeLoaded,
   selectAllRules,
   confirmRulesDelete,
@@ -36,7 +34,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
@@ -52,10 +50,7 @@ describe('Alerts rules, prebuilt rules', () => {
     const expectedNumberOfPages = Math.ceil(totalNumberOfPrebuiltRules / rowsPerPage);
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
@@ -74,10 +69,7 @@ describe('Actions with prebuilt rules', () => {
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
@@ -183,7 +175,7 @@ describe('Actions with prebuilt rules', () => {
 
   context('Rule monitoring table', () => {
     it('Allows to activate/deactivate all rules at once', () => {
-      cy.get(RULES_MONIROTING_TABLE).click();
+      cy.get(RULES_MONITORING_TABLE).click();
 
       cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
       activateSelectedRules();

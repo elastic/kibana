@@ -28,7 +28,7 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Exceptions',
+  defaultMessage: 'Exception lists',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {

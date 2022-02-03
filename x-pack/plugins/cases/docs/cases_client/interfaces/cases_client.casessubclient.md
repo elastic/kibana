@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [cases/client](../modules/cases_client.md) / CasesSubClient
+[Cases Client API Interface](../README.md) / [cases/client](../modules/cases_client.md) / CasesSubClient
 
 # Interface: CasesSubClient
 
@@ -10,21 +10,22 @@ API for interacting with the cases entities.
 
 ### Methods
 
-- [create](cases_client.casessubclient.md#create)
-- [delete](cases_client.casessubclient.md#delete)
-- [find](cases_client.casessubclient.md#find)
-- [get](cases_client.casessubclient.md#get)
-- [getCasesByAlertID](cases_client.casessubclient.md#getcasesbyalertid)
-- [getReporters](cases_client.casessubclient.md#getreporters)
-- [getTags](cases_client.casessubclient.md#gettags)
-- [push](cases_client.casessubclient.md#push)
-- [update](cases_client.casessubclient.md#update)
+- [create](cases_client.CasesSubClient.md#create)
+- [delete](cases_client.CasesSubClient.md#delete)
+- [find](cases_client.CasesSubClient.md#find)
+- [get](cases_client.CasesSubClient.md#get)
+- [getCasesByAlertID](cases_client.CasesSubClient.md#getcasesbyalertid)
+- [getReporters](cases_client.CasesSubClient.md#getreporters)
+- [getTags](cases_client.CasesSubClient.md#gettags)
+- [push](cases_client.CasesSubClient.md#push)
+- [resolve](cases_client.CasesSubClient.md#resolve)
+- [update](cases_client.CasesSubClient.md#update)
 
 ## Methods
 
 ### create
 
-▸ **create**(`data`: [*ICasePostRequest*](typedoc_interfaces.icasepostrequest.md)): *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
+▸ **create**(`data`): `Promise`<[`ICaseResponse`](typedoc_interfaces.ICaseResponse.md)\>
 
 Creates a case.
 
@@ -32,17 +33,21 @@ Creates a case.
 
 | Name | Type |
 | :------ | :------ |
-| `data` | [*ICasePostRequest*](typedoc_interfaces.icasepostrequest.md) |
+| `data` | [`ICasePostRequest`](typedoc_interfaces.ICasePostRequest.md) |
 
-**Returns:** *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
+#### Returns
 
-Defined in: [cases/client.ts:49](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/client.ts#L49)
+`Promise`<[`ICaseResponse`](typedoc_interfaces.ICaseResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:51](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L51)
 
 ___
 
 ### delete
 
-▸ **delete**(`ids`: *string*[]): *Promise*<void\>
+▸ **delete**(`ids`): `Promise`<`void`\>
 
 Delete a case and all its comments.
 
@@ -52,17 +57,21 @@ Delete a case and all its comments.
 
 | Name | Type |
 | :------ | :------ |
-| `ids` | *string*[] |
+| `ids` | `string`[] |
 
-**Returns:** *Promise*<void\>
+#### Returns
 
-Defined in: [cases/client.ts:73](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/client.ts#L73)
+`Promise`<`void`\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:80](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L80)
 
 ___
 
 ### find
 
-▸ **find**(`params`: [*ICasesFindRequest*](typedoc_interfaces.icasesfindrequest.md)): *Promise*<[*ICasesFindResponse*](typedoc_interfaces.icasesfindresponse.md)\>
+▸ **find**(`params`): `Promise`<[`ICasesFindResponse`](typedoc_interfaces.ICasesFindResponse.md)\>
 
 Returns cases that match the search criteria.
 
@@ -72,17 +81,21 @@ If the `owner` field is left empty then all the cases that the user has access t
 
 | Name | Type |
 | :------ | :------ |
-| `params` | [*ICasesFindRequest*](typedoc_interfaces.icasesfindrequest.md) |
+| `params` | [`ICasesFindRequest`](typedoc_interfaces.ICasesFindRequest.md) |
 
-**Returns:** *Promise*<[*ICasesFindResponse*](typedoc_interfaces.icasesfindresponse.md)\>
+#### Returns
 
-Defined in: [cases/client.ts:55](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/client.ts#L55)
+`Promise`<[`ICasesFindResponse`](typedoc_interfaces.ICasesFindResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:57](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L57)
 
 ___
 
 ### get
 
-▸ **get**(`params`: [*GetParams*](cases_get.getparams.md)): *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
+▸ **get**(`params`): `Promise`<[`ICaseResponse`](typedoc_interfaces.ICaseResponse.md)\>
 
 Retrieves a single case with the specified ID.
 
@@ -90,17 +103,21 @@ Retrieves a single case with the specified ID.
 
 | Name | Type |
 | :------ | :------ |
-| `params` | [*GetParams*](cases_get.getparams.md) |
+| `params` | [`GetParams`](cases_get.GetParams.md) |
 
-**Returns:** *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
+#### Returns
 
-Defined in: [cases/client.ts:59](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/client.ts#L59)
+`Promise`<[`ICaseResponse`](typedoc_interfaces.ICaseResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:61](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L61)
 
 ___
 
 ### getCasesByAlertID
 
-▸ **getCasesByAlertID**(`params`: [*CasesByAlertIDParams*](cases_get.casesbyalertidparams.md)): *Promise*<{ `id`: *string* ; `title`: *string*  }[]\>
+▸ **getCasesByAlertID**(`params`): `Promise`<{ `id`: `string` = rt.string; `title`: `string` = rt.string }[]\>
 
 Retrieves the cases ID and title that have the requested alert attached to them
 
@@ -108,17 +125,21 @@ Retrieves the cases ID and title that have the requested alert attached to them
 
 | Name | Type |
 | :------ | :------ |
-| `params` | [*CasesByAlertIDParams*](cases_get.casesbyalertidparams.md) |
+| `params` | [`CasesByAlertIDParams`](cases_get.CasesByAlertIDParams.md) |
 
-**Returns:** *Promise*<{ `id`: *string* ; `title`: *string*  }[]\>
+#### Returns
 
-Defined in: [cases/client.ts:85](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/client.ts#L85)
+`Promise`<{ `id`: `string` = rt.string; `title`: `string` = rt.string }[]\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:92](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L92)
 
 ___
 
 ### getReporters
 
-▸ **getReporters**(`params`: { `owner`: *undefined* \| *string* \| *string*[]  }): *Promise*<{ `email`: *undefined* \| ``null`` \| *string* ; `full_name`: *undefined* \| ``null`` \| *string* ; `username`: *undefined* \| ``null`` \| *string*  }[]\>
+▸ **getReporters**(`params`): `Promise`<{ `email`: `undefined` \| ``null`` \| `string` ; `full_name`: `undefined` \| ``null`` \| `string` ; `username`: `undefined` \| ``null`` \| `string`  }[]\>
 
 Retrieves all the reporters across all accessible cases.
 
@@ -126,18 +147,22 @@ Retrieves all the reporters across all accessible cases.
 
 | Name | Type |
 | :------ | :------ |
-| `params` | *object* |
-| `params.owner` | *undefined* \| *string* \| *string*[] |
+| `params` | `Object` |
+| `params.owner` | `undefined` \| `string` \| `string`[] |
 
-**Returns:** *Promise*<{ `email`: *undefined* \| ``null`` \| *string* ; `full_name`: *undefined* \| ``null`` \| *string* ; `username`: *undefined* \| ``null`` \| *string*  }[]\>
+#### Returns
 
-Defined in: [cases/client.ts:81](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/client.ts#L81)
+`Promise`<{ `email`: `undefined` \| ``null`` \| `string` ; `full_name`: `undefined` \| ``null`` \| `string` ; `username`: `undefined` \| ``null`` \| `string`  }[]\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:88](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L88)
 
 ___
 
 ### getTags
 
-▸ **getTags**(`params`: { `owner`: *undefined* \| *string* \| *string*[]  }): *Promise*<string[]\>
+▸ **getTags**(`params`): `Promise`<`string`[]\>
 
 Retrieves all the tags across all cases the user making the request has access to.
 
@@ -145,18 +170,22 @@ Retrieves all the tags across all cases the user making the request has access t
 
 | Name | Type |
 | :------ | :------ |
-| `params` | *object* |
-| `params.owner` | *undefined* \| *string* \| *string*[] |
+| `params` | `Object` |
+| `params.owner` | `undefined` \| `string` \| `string`[] |
 
-**Returns:** *Promise*<string[]\>
+#### Returns
 
-Defined in: [cases/client.ts:77](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/client.ts#L77)
+`Promise`<`string`[]\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:84](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L84)
 
 ___
 
 ### push
 
-▸ **push**(`args`: [*PushParams*](cases_push.pushparams.md)): *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
+▸ **push**(`args`): `Promise`<[`ICaseResponse`](typedoc_interfaces.ICaseResponse.md)\>
 
 Pushes a specific case to an external system.
 
@@ -164,17 +193,44 @@ Pushes a specific case to an external system.
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [*PushParams*](cases_push.pushparams.md) |
+| `args` | [`PushParams`](cases_push.PushParams.md) |
 
-**Returns:** *Promise*<[*ICaseResponse*](typedoc_interfaces.icaseresponse.md)\>
+#### Returns
 
-Defined in: [cases/client.ts:63](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/client.ts#L63)
+`Promise`<[`ICaseResponse`](typedoc_interfaces.ICaseResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:70](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L70)
+
+___
+
+### resolve
+
+▸ **resolve**(`params`): `Promise`<[`ICaseResolveResponse`](typedoc_interfaces.ICaseResolveResponse.md)\>
+
+**`experimental`**
+Retrieves a single case resolving the specified ID.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params` | [`GetParams`](cases_get.GetParams.md) |
+
+#### Returns
+
+`Promise`<[`ICaseResolveResponse`](typedoc_interfaces.ICaseResolveResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:66](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L66)
 
 ___
 
 ### update
 
-▸ **update**(`cases`: [*ICasesPatchRequest*](typedoc_interfaces.icasespatchrequest.md)): *Promise*<[*ICasesResponse*](typedoc_interfaces.icasesresponse.md)\>
+▸ **update**(`cases`): `Promise`<[`ICasesResponse`](typedoc_interfaces.ICasesResponse.md)\>
 
 Update the specified cases with the passed in values.
 
@@ -182,8 +238,12 @@ Update the specified cases with the passed in values.
 
 | Name | Type |
 | :------ | :------ |
-| `cases` | [*ICasesPatchRequest*](typedoc_interfaces.icasespatchrequest.md) |
+| `cases` | [`ICasesPatchRequest`](typedoc_interfaces.ICasesPatchRequest.md) |
 
-**Returns:** *Promise*<[*ICasesResponse*](typedoc_interfaces.icasesresponse.md)\>
+#### Returns
 
-Defined in: [cases/client.ts:67](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/cases/client.ts#L67)
+`Promise`<[`ICasesResponse`](typedoc_interfaces.ICasesResponse.md)\>
+
+#### Defined in
+
+[x-pack/plugins/cases/server/client/cases/client.ts:74](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L74)

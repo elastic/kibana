@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+
 import { loggingSystemMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
-import type { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
+import type {
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateResponse,
+} from 'kibana/server';
 
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
@@ -284,5 +290,31 @@ export const getExceptionListSavedObjectClientMock = (
     return undefined as unknown as SavedObjectsFindResponse;
   });
 
+  // Mock `.bulkUpdate()` (used in import)
+  soClient.bulkUpdate.mockImplementation(async (...args) => {
+    const [importObjects] = args as [Array<SavedObjectsBulkUpdateObject<ExceptionListSoSchema>>];
+
+    return {
+      saved_objects: importObjects.map((item) => {
+        return getExceptionListItemSavedObject(item.attributes);
+      }),
+    };
+  });
+
   return soClient;
+};
+
+/**
+ * Converts a list of items to a NodeJS `Readable` stream
+ * @param items
+ */
+export const toReadable = (items: unknown[]): Readable => {
+  const stringOfExceptions = items.map((item) => JSON.stringify(item));
+
+  return new Readable({
+    read(): void {
+      this.push(stringOfExceptions.join('\n'));
+      this.push(null);
+    },
+  });
 };

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { GetInfoResponse, Installed } from '../../../../plugins/fleet/common';
+import { GetInfoResponse, InstalledRegistry } from '../../../../plugins/fleet/common';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -46,7 +46,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/epm/packages/endpoint/${latestEndpointVersion}`)
           .expect(200));
         expect(body.item).to.have.property('savedObject');
-        expect((body.item as Installed).savedObject.attributes.install_version).to.eql(
+        expect((body.item as InstalledRegistry).savedObject.attributes.install_version).to.eql(
           latestEndpointVersion
         );
       });
@@ -82,12 +82,24 @@ export default function (providerContext: FtrProviderContext) {
         .set('Authorization', `Bearer ${token.value}`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
-      const response = await supertestWithoutAuth
+      await supertest
+        .post('/api/fleet/agent_policies')
+        .set('Authorization', `Bearer ${token.value}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ id: 'policy-1', name: 'Agent policy 1', namespace: 'default' })
+        .expect(200);
+      await supertestWithoutAuth
         .get('/api/fleet/enrollment_api_keys')
         .set('Authorization', `Bearer ${token.value}`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
-      const enrollmentApiKeyId = response.body.items[0].id;
+      const response = await supertest
+        .post('/api/fleet/enrollment_api_keys')
+        .set('Authorization', `Bearer ${token.value}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ policy_id: 'policy-1' })
+        .expect(200);
+      const enrollmentApiKeyId = response.body.item.id;
       await supertestWithoutAuth
         .get(`/api/fleet/enrollment_api_keys/${enrollmentApiKeyId}`)
         .set('Authorization', `Bearer ${token.value}`)

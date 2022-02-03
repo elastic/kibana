@@ -13,9 +13,9 @@ import {
   RegisterDeprecationsConfig,
 } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternAttributes } from '../../common';
+import { DataViewAttributes } from '../../common';
 
-type IndexPatternAttributesWithFields = Pick<IndexPatternAttributes, 'title' | 'fields'>;
+type IndexPatternAttributesWithFields = Pick<DataViewAttributes, 'title' | 'fields'>;
 
 export const createScriptedFieldsDeprecationsConfig: (
   core: CoreSetup

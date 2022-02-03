@@ -237,6 +237,7 @@ describe('Transform: Common', () => {
       transformSettingsMaxPageSearchSize: 100,
       transformSettingsDocsPerSecond: 400,
       destinationIndex: 'the-destination-index',
+      destinationIngestPipeline: 'the-destination-ingest-pipeline',
       touched: true,
       valid: true,
     };
@@ -249,7 +250,7 @@ describe('Transform: Common', () => {
 
     expect(request).toEqual({
       description: 'the-transform-description',
-      dest: { index: 'the-destination-index' },
+      dest: { index: 'the-destination-index', pipeline: 'the-destination-ingest-pipeline' },
       frequency: '1m',
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
@@ -315,6 +316,7 @@ describe('Transform: Common', () => {
       transformSettingsMaxPageSearchSize: 100,
       transformSettingsDocsPerSecond: 400,
       destinationIndex: 'the-destination-index',
+      destinationIngestPipeline: 'the-destination-ingest-pipeline',
       touched: true,
       valid: true,
     };
@@ -327,7 +329,7 @@ describe('Transform: Common', () => {
 
     expect(request).toEqual({
       description: 'the-transform-description',
-      dest: { index: 'the-destination-index' },
+      dest: { index: 'the-destination-index', pipeline: 'the-destination-ingest-pipeline' },
       frequency: '1m',
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },

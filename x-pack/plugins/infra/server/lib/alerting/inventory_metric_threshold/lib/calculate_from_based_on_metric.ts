@@ -6,14 +6,14 @@
  */
 
 import { Moment } from 'moment';
+import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
+import { findInventoryModel } from '../../../../../common/inventory_models';
 import {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
-import { InventoryMetricConditions } from '../types';
 import { isRate } from './is_rate';
-import { findInventoryModel } from '../../../../../common/inventory_models';
 
 export const calcualteFromBasedOnMetric = (
   to: Moment,
