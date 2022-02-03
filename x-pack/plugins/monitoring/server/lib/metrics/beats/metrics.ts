@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   BeatsEventsRateClusterMetric,
   BeatsByteRateClusterMetric,
@@ -14,7 +15,6 @@ import {
   BeatsMetric,
 } from './classes';
 import { LARGE_FLOAT, LARGE_BYTES, SMALL_FLOAT } from '../../../../common/formatting';
-import { i18n } from '@kbn/i18n';
 
 const eventsRateTitle = i18n.translate('xpack.monitoring.metrics.beats.eventsRateTitle', {
   defaultMessage: 'Events Rate',
