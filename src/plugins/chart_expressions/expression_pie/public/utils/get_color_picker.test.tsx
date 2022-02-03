@@ -10,8 +10,12 @@ import React from 'react';
 import { LegendColorPickerProps } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
-import { ComponentType, ReactWrapper } from 'enzyme';
-import { getColorPicker } from './get_color_picker';
+import { ReactWrapper } from 'enzyme';
+import {
+  LegendColorPickerWrapper,
+  LegendColorPickerWrapperContext,
+  LegendColorPickerWrapperContextType,
+} from './get_color_picker';
 import { ColorPicker } from '../../../../charts/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
@@ -28,7 +32,7 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-describe('getColorPicker', function () {
+describe('LegendColorPickerWrapper', () => {
   const mockState = new Map();
   const uiState = {
     get: jest
@@ -40,15 +44,6 @@ describe('getColorPicker', function () {
   } as unknown as PersistedState;
 
   let wrapperProps: LegendColorPickerProps;
-  const Component: ComponentType<LegendColorPickerProps> = getColorPicker(
-    'left',
-    jest.fn(),
-    bucketColumns,
-    'default',
-    visData.rows,
-    uiState,
-    false
-  );
   let wrapper: ReactWrapper<LegendColorPickerProps>;
 
   beforeAll(() => {
@@ -66,50 +61,73 @@ describe('getColorPicker', function () {
     };
   });
 
+  const mount = (
+    props: LegendColorPickerProps = wrapperProps,
+    context: LegendColorPickerWrapperContextType = {
+      legendPosition: 'left',
+      setColor: jest.fn(),
+      bucketColumns,
+      palette: 'default',
+      data: visData.rows,
+      uiState,
+      distinctColors: false,
+    }
+  ) =>
+    mountWithIntl(
+      <LegendColorPickerWrapperContext.Provider value={context}>
+        <LegendColorPickerWrapper {...props} />
+      </LegendColorPickerWrapperContext.Provider>
+    );
+
   it('renders the color picker for default palette and inner layer', () => {
-    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    wrapper = mount();
     expect(wrapper.find(ColorPicker).length).toBe(1);
   });
 
   it('renders the picker on the correct position', () => {
-    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    wrapper = mount();
     expect(wrapper.find(EuiPopover).prop('anchorPosition')).toEqual('rightCenter');
   });
 
   it('converts the color to the right hex and passes it to the color picker', () => {
-    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    wrapper = mount();
     expect(wrapper.find(ColorPicker).prop('color')).toEqual('#6dccb1');
   });
 
   it('doesnt render the picker for default palette and not inner layer', () => {
-    const newProps = { ...wrapperProps, seriesIdentifier: { key: '1', specId: 'pie' } };
-    wrapper = mountWithIntl(<Component {...newProps} />);
+    wrapper = mount({
+      ...wrapperProps,
+      seriesIdentifier: { key: '1', specId: 'pie' },
+    } as LegendColorPickerProps);
+
     expect(wrapper).toEqual({});
   });
 
   it('renders the color picker with the colorIsOverwritten prop set to false if color is not overwritten for the specific series', () => {
-    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    wrapper = mount();
     expect(wrapper.find(ColorPicker).prop('colorIsOverwritten')).toBe(false);
   });
 
   it('renders the color picker with the colorIsOverwritten prop set to true if color is overwritten for the specific series', () => {
     uiState.set('vis.colors', { 'Logstash Airways': '#6092c0' });
-    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    wrapper = mount();
     expect(wrapper.find(ColorPicker).prop('colorIsOverwritten')).toBe(true);
   });
 
   it('renders the picker for kibana palette and not distinctColors', () => {
-    const LegacyPaletteComponent: ComponentType<LegendColorPickerProps> = getColorPicker(
-      'left',
-      jest.fn(),
-      bucketColumns,
-      'kibana_palette',
-      visData.rows,
-      uiState,
-      true
+    wrapper = mount(
+      { ...wrapperProps, seriesIdentifier: { key: '1', specId: 'pie' } } as LegendColorPickerProps,
+      {
+        legendPosition: 'left',
+        setColor: jest.fn(),
+        bucketColumns,
+        palette: 'kibana_palette',
+        data: visData.rows,
+        uiState,
+        distinctColors: true,
+      }
     );
-    const newProps = { ...wrapperProps, seriesIdentifier: { key: '1', specId: 'pie' } };
-    wrapper = mountWithIntl(<LegacyPaletteComponent {...newProps} />);
+
     expect(wrapper.find(ColorPicker).length).toBe(1);
     expect(wrapper.find(ColorPicker).prop('useLegacyColors')).toBe(true);
   });
