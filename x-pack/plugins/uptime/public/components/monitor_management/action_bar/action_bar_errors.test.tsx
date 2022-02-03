@@ -49,7 +49,7 @@ describe('<ActionBar /> Service Errors', () => {
     jest.spyOn(kibana, 'useKibana').mockReturnValue({
       notifications: {
         toasts: {
-          danger: toast,
+          warning: toast,
         },
       },
     } as unknown as ReturnType<typeof kibana.useKibana>);
@@ -68,28 +68,36 @@ describe('<ActionBar /> Service Errors', () => {
       expect(toast).toBeCalledTimes(2);
       expect(toast).toBeCalledWith({
         body: (
-          <p>
-            {
-              'There was a problem saving your monitor configuration for location US Central. Please try again, or contact Support. '
-            }
-            {'Status: 400. '}
-            {'Reason: Invalid config.'}
-          </p>
+          <>
+            <p>
+              {
+                'Your monitor was saved, but there was a problem syncing the configuration for US Central. We will automatically try again later. If this problem continues, your monitors will stop running in US Central. Please contact Support for assistance.'
+              }
+            </p>
+            <p>
+              {'Status: 400. '}
+              {'Reason: Invalid config.'}
+            </p>
+          </>
         ),
-        title: <p data-test-subj="uptimeAddMonitorFailure">Unable to save monitor.</p>,
+        title: <p data-test-subj="uptimeAddMonitorFailure">Unable to sync monitor config</p>,
         toastLifeTimeMs: 3000,
       });
       expect(toast).toBeCalledWith({
         body: (
-          <p>
-            {
-              'There was a problem saving your monitor configuration for location US Central. Please try again, or contact Support. '
-            }
-            {'Status: 500. '}
-            {'Reason: Cannot schedule.'}
-          </p>
+          <>
+            <p>
+              {
+                'Your monitor was saved, but there was a problem syncing the configuration for US Central. We will automatically try again later. If this problem continues, your monitors will stop running in US Central. Please contact Support for assistance.'
+              }
+            </p>
+            <p>
+              {'Status: 500. '}
+              {'Reason: Cannot schedule.'}
+            </p>
+          </>
         ),
-        title: <p data-test-subj="uptimeAddMonitorFailure">Unable to save monitor.</p>,
+        title: <p data-test-subj="uptimeAddMonitorFailure">Unable to sync monitor config</p>,
         toastLifeTimeMs: 3000,
       });
     });

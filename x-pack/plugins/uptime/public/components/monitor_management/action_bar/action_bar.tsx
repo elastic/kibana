@@ -46,6 +46,7 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
 
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSuccessful, setIsSuccessful] = useState(false);
 
   const { notifications } = useKibana();
 
@@ -60,6 +61,7 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
   }, [monitor, monitorId, isValid, isSaving]);
 
   const hasErrors = data && Object.keys(data).length;
+  const loading = status === FETCH_STATUS.LOADING;
 
   const handleOnSave = useCallback(() => {
     if (onSave) {
@@ -85,7 +87,7 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
         title: <p data-test-subj="uptimeAddMonitorFailure">{MONITOR_FAILURE_LABEL}</p>,
         toastLifeTimeMs: 3000,
       });
-    } else if (status === FETCH_STATUS.SUCCESS && !hasErrors) {
+    } else if (status === FETCH_STATUS.SUCCESS && !hasErrors && !loading) {
       notifications.toasts.success({
         title: (
           <p data-test-subj="uptimeAddMonitorSuccess">
@@ -94,49 +96,62 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
         ),
         toastLifeTimeMs: 3000,
       });
-    } else if (hasErrors) {
+      setIsSuccessful(true);
+    } else if (hasErrors && !loading) {
       Object.values(data).forEach((location) => {
         const { status: responseStatus, reason } = location.error || {};
-        notifications.toasts.danger({
+        notifications.toasts.warning({
           title: (
             <p data-test-subj="uptimeAddMonitorFailure">
               {i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
-                defaultMessage: `Unable to {action}.`,
-                values: {
-                  action: (monitorId ? UPDATE_MONITOR_LABEL : SAVE_MONITOR_LABEL).toLowerCase(),
-                },
+                defaultMessage: `Unable to sync monitor config`,
               })}
             </p>
           ),
           body: (
-            <p>
-              {i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
-                defaultMessage: `There was a problem saving your monitor configuration for location {location}. Please try again, or contact Support. `,
-                values: {
-                  location: locations?.find((loc) => loc?.id === location.locationId)?.label,
-                },
-              })}
-              {status
-                ? i18n.translate('xpack.uptime.monitorManagement.service.error.status', {
-                    defaultMessage: 'Status: {status}. ',
-                    values: { status: responseStatus },
-                  })
-                : null}
-              {reason
-                ? i18n.translate('xpack.uptime.monitorManagement.service.error.reason', {
-                    defaultMessage: 'Reason: {reason}.',
-                    values: { reason },
-                  })
-                : null}
-            </p>
+            <>
+              <p>
+                {i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
+                  defaultMessage: `Your monitor was saved, but there was a problem syncing the configuration for {location}. We will automatically try again later. If this problem continues, your monitors will stop running in {location}. Please contact Support for assistance.`,
+                  values: {
+                    location: locations?.find((loc) => loc?.id === location.locationId)?.label,
+                  },
+                })}
+              </p>
+              <p>
+                {status
+                  ? i18n.translate('xpack.uptime.monitorManagement.service.error.status', {
+                      defaultMessage: 'Status: {status}. ',
+                      values: { status: responseStatus },
+                    })
+                  : null}
+                {reason
+                  ? i18n.translate('xpack.uptime.monitorManagement.service.error.reason', {
+                      defaultMessage: 'Reason: {reason}.',
+                      values: { reason },
+                    })
+                  : null}
+              </p>
+            </>
           ),
           toastLifeTimeMs: 3000,
         });
       });
+      setIsSuccessful(true);
     }
-  }, [data, status, notifications.toasts, isSaving, isValid, monitorId, hasErrors, locations]);
+  }, [
+    data,
+    status,
+    notifications.toasts,
+    isSaving,
+    isValid,
+    monitorId,
+    hasErrors,
+    locations,
+    loading,
+  ]);
 
-  return status === FETCH_STATUS.SUCCESS && !hasErrors ? (
+  return isSuccessful ? (
     <Redirect to={MONITOR_MANAGEMENT_ROUTE} />
   ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
