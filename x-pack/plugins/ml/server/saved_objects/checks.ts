@@ -70,17 +70,27 @@ export function checksFactory(
   jobSavedObjectService: JobSavedObjectService
 ) {
   async function checkStatus(): Promise<StatusResponse> {
-    const jobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
-    const modelObjects = await jobSavedObjectService.getAllModelObjects(false);
-
-    // load all non-space jobs and datafeeds
-    const { body: adJobs } = await client.asInternalUser.ml.getJobs();
-    const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds();
-    const { body: dfaJobs } =
-      (await client.asInternalUser.ml.getDataFrameAnalytics()) as unknown as {
+    const [
+      jobObjects,
+      allJobObjects,
+      modelObjects,
+      allModelObjects,
+      { body: adJobs },
+      { body: datafeeds },
+      { body: dfaJobs },
+      { body: models },
+    ] = await Promise.all([
+      jobSavedObjectService.getAllJobObjects(undefined, false),
+      jobSavedObjectService.getAllJobObjectsForAllSpaces(),
+      jobSavedObjectService.getAllModelObjects(false),
+      jobSavedObjectService.getAllModelObjectsForAllSpaces(),
+      client.asInternalUser.ml.getJobs(),
+      client.asInternalUser.ml.getDatafeeds(),
+      client.asInternalUser.ml.getDataFrameAnalytics() as unknown as {
         body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
-      };
-    const { body: models } = await client.asInternalUser.ml.getTrainedModels();
+      },
+      client.asInternalUser.ml.getTrainedModels(),
+    ]);
 
     const jobSavedObjectsStatus: JobSavedObjectStatus[] = jobObjects.map(
       ({ attributes, namespaces }) => {
@@ -147,9 +157,6 @@ export function checksFactory(
         };
       }
     );
-
-    const allJobObjects = await jobSavedObjectService.getAllJobObjectsForAllSpaces();
-    const allModelObjects = await jobSavedObjectService.getAllModelObjectsForAllSpaces();
 
     const nonSpaceADObjectIds = new Set(
       allJobObjects

@@ -39,15 +39,15 @@ export function syncSavedObjectsFactory(
       datafeedsRemoved: {},
     };
 
-    const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
-      datafeeds: Datafeed[];
-    }>();
-
-    const { body: models } = await client.asInternalUser.ml.getTrainedModels();
+    const [{ body: datafeeds }, { body: models }, status] = await Promise.all([
+      client.asInternalUser.ml.getDatafeeds<{
+        datafeeds: Datafeed[];
+      }>(),
+      client.asInternalUser.ml.getTrainedModels(),
+      checkStatus(),
+    ]);
 
     const tasks: Array<() => Promise<void>> = [];
-
-    const status = await checkStatus();
 
     const adJobsById = status.jobs['anomaly-detector'].reduce((acc, j) => {
       acc[j.jobId] = j;
