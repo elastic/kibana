@@ -30,7 +30,7 @@ describe('loadAlerts', () => {
     });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/rules/_find",
+        "/internal/alerting/rules/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -65,7 +65,7 @@ describe('loadAlerts', () => {
     });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/rules/_find",
+        "/internal/alerting/rules/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -104,7 +104,7 @@ describe('loadAlerts', () => {
     });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/rules/_find",
+        "/internal/alerting/rules/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -143,7 +143,7 @@ describe('loadAlerts', () => {
     });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/rules/_find",
+        "/internal/alerting/rules/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -183,7 +183,7 @@ describe('loadAlerts', () => {
     });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/rules/_find",
+        "/internal/alerting/rules/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -223,7 +223,7 @@ describe('loadAlerts', () => {
     });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alerting/rules/_find",
+        "/internal/alerting/rules/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",

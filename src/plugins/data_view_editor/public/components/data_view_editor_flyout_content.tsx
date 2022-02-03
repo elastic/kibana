@@ -51,7 +51,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (indexPatternSpec: DataViewSpec) => void;
+  onSave: (dataViewSpec: DataViewSpec) => void;
   /**
    * Handler for the "cancel" footer button
    */
