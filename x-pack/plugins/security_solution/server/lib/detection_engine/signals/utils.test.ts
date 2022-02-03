@@ -63,7 +63,7 @@ import {
   sampleAlertDocAADNoSortIdWithTimestamp,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
-import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -663,7 +663,7 @@ describe('utils', () => {
           },
         },
       };
-      const ruleExecutionLogger = ruleExecutionLogMock.logger.create();
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
       mockLogger.warn.mockClear();
 
       const res = await hasTimestampFields({
@@ -714,7 +714,7 @@ describe('utils', () => {
         },
       };
 
-      const ruleExecutionLogger = ruleExecutionLogMock.logger.create();
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
       mockLogger.warn.mockClear();
 
       const res = await hasTimestampFields({
@@ -750,7 +750,7 @@ describe('utils', () => {
         },
       };
 
-      const ruleExecutionLogger = ruleExecutionLogMock.logger.create({
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'Endpoint Security',
       });
       mockLogger.warn.mockClear();
@@ -789,7 +789,7 @@ describe('utils', () => {
       };
 
       // SUT uses rule execution logger's context to check the rule name
-      const ruleExecutionLogger = ruleExecutionLogMock.logger.create({
+      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'NOT Endpoint Security',
       });
 

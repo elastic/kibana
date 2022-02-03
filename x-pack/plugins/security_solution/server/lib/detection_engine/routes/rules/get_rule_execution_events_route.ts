@@ -39,7 +39,7 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const executionLog = context.securitySolution.getExecutionLogClient();
+        const executionLog = context.securitySolution.getRuleExecutionLog();
         const { events, maxEvents } = await executionLog.getAggregateExecutionEvents({
           ruleId,
           start,

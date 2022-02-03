@@ -8,7 +8,10 @@
 import { EuiBasicTableColumn, EuiHealth } from '@elastic/eui';
 
 import React from 'react';
-import { AggregateRuleExecutionEvent } from '../../../../../../../common/detection_engine/schemas/common';
+import {
+  AggregateRuleExecutionEvent,
+  RuleExecutionStatus,
+} from '../../../../../../../common/detection_engine/schemas/common';
 import {
   getEmptyTagValue,
   getEmptyValue,
@@ -25,7 +28,7 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
   {
     name: i18n.COLUMN_STATUS,
     field: 'kibana.alert.rule.execution.status',
-    render: (value: string, data) =>
+    render: (value: RuleExecutionStatus, data) =>
       value ? <EuiHealth color={getStatusColor(value)}>{value}</EuiHealth> : getEmptyTagValue(),
     sortable: true,
     truncateText: false,

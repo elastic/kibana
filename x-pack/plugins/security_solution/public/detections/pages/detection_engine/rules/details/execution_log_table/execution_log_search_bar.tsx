@@ -61,7 +61,7 @@ const filters: SearchFilterConfig[] = [
     multiSelect: 'or',
     options: statuses.map((status) => ({
       value: status,
-      view: <EuiHealth color={getStatusColor(status)}>{status}</EuiHealth>,
+      view: <EuiHealth color={getStatusColor(status as RuleExecutionStatus)}>{status}</EuiHealth>,
     })),
   },
 ];

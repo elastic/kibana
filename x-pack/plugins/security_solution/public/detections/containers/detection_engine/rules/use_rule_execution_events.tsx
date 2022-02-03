@@ -27,13 +27,13 @@ export const useRuleExecutionEvents = ({
   const { addError } = useAppToasts();
 
   return useQuery<GetAggregateRuleExecutionEventsResponse>(
-    ['ruleExecutionEvents', start, end, filters],
+    ['ruleExecutionEvents', ruleId, start, end, filters],
     async ({ signal }) => {
       return fetchRuleExecutionEvents({ ruleId, start, end, filters, signal });
     },
     {
       onError: (e) => {
-        addError(e, { title: i18n.RULE_EXECUTION_FETCH_FAILURE });
+        addError(e, { title: i18n.RULE_EXECUTION_EVENTS_FETCH_FAILURE });
       },
     }
   );
