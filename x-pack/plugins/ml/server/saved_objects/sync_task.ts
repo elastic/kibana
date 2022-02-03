@@ -26,12 +26,7 @@ export class SavedObjectsSyncService {
   private log: { [l: string]: (t: string, e?: Error) => void };
 
   constructor(logger: Logger) {
-    const preText = `Task ${SAVED_OBJECTS_SYNC_TASK_ID}: `;
-    this.log = {
-      info: (text: string) => logger.info(`${preText}${text}`),
-      warn: (text: string) => logger.warn(`${preText}${text}`),
-      error: (text: string, e: any) => logger.error(`${preText}${text}`, e),
-    };
+    this.log = createLocalLogger(logger, `Task ${SAVED_OBJECTS_SYNC_TASK_ID}: `);
   }
 
   public registerSyncTask(
@@ -84,7 +79,11 @@ export class SavedObjectsSyncService {
               const { jobs, models } = await initSavedObjects(false);
               const count = jobs.length + models.length;
 
-              this.log.info(`${count} ML saved objects synced`);
+              this.log.info(
+                count
+                  ? `${count} ML saved objects synced`
+                  : 'No ML saved objects in need of synchronization'
+              );
 
               return {
                 state: {
@@ -131,4 +130,12 @@ export class SavedObjectsSyncService {
       return null;
     }
   }
+}
+
+function createLocalLogger(logger: Logger, preText: string) {
+  return {
+    info: (text: string) => logger.info(`${preText}${text}`),
+    warn: (text: string) => logger.warn(`${preText}${text}`),
+    error: (text: string, e: any) => logger.error(`${preText}${text}`, e),
+  };
 }
