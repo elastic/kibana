@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, Dispatch, useContext } from 'react';
+import React, { useState, useEffect, Dispatch } from 'react';
 
 import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
 
@@ -22,8 +22,6 @@ import type { PaletteConfigurationActions } from '../types';
 
 import { defaultPaletteParams } from '../constants';
 
-import { ColorRangesContext } from './color_ranges_context';
-
 export interface ColorRangesProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
@@ -37,7 +35,6 @@ export function ColorRanges({
   showExtraActions = true,
   dispatch,
 }: ColorRangesProps) {
-  const { dataBounds } = useContext(ColorRangesContext);
   const [colorRangesValidity, setColorRangesValidity] = useState<
     Record<string, ColorRangeValidation>
   >({});
@@ -48,8 +45,8 @@ export function ColorRanges({
   const rangeType = paletteConfiguration?.rangeType ?? defaultPaletteParams.rangeType;
 
   useEffect(() => {
-    setColorRangesValidity(validateColorRanges(colorRanges, dataBounds, rangeType));
-  }, [colorRanges, rangeType, dataBounds]);
+    setColorRangesValidity(validateColorRanges(colorRanges));
+  }, [colorRanges]);
 
   return (
     <EuiFlexGroup

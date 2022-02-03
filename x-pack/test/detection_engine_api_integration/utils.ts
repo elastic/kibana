@@ -39,9 +39,10 @@ import {
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
+  RuleExecutionStatus,
   Status,
   SignalIds,
-} from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
+} from '../../plugins/security_solution/common/detection_engine/schemas/common';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 import {
   DETECTION_ENGINE_INDEX_URL,
@@ -1345,7 +1346,7 @@ export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   id: string,
-  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded',
+  status: RuleExecutionStatus = RuleExecutionStatus.succeeded,
   afterDate?: Date
 ): Promise<void> => {
   await waitFor(
