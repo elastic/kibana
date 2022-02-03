@@ -841,10 +841,8 @@ describe('EPM template', () => {
   describe('updateCurrentWriteIndices', () => {
     it('update all the index matching, index template index pattern', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResolvedValue({
-        body: {
-          data_streams: [{ name: 'test.prefix1-default' }],
-        },
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
@@ -868,13 +866,11 @@ describe('EPM template', () => {
     });
     it('update non replicated datastream', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResolvedValue({
-        body: {
-          data_streams: [
-            { name: 'test-non-replicated' },
-            { name: 'test-replicated', replicated: true },
-          ],
-        },
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [
+          { name: 'test-non-replicated' },
+          { name: 'test-replicated', replicated: true },
+        ],
       } as any);
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [

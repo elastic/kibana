@@ -675,7 +675,7 @@ class AgentPolicyService {
       return null;
     }
 
-    return res.body.hits.hits[0]._source;
+    return res.hits.hits[0]._source;
   }
 
   public async getFullAgentConfigMap(

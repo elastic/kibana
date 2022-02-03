@@ -51,12 +51,12 @@ export async function listEnrollmentApiKeys(
   });
 
   // @ts-expect-error @elastic/elasticsearch _source is optional
-  const items = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+  const items = res.hits.hits.map(esDocToEnrollmentApiKey);
 
   return {
     items,
     // @ts-expect-error value is number | TotalHits
-    total: res.body.hits.total.value,
+    total: res.hits.total.value,
     page,
     perPage,
   };
@@ -207,7 +207,7 @@ export async function generateEnrollmentAPIKey(
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
 
-  const { body: key } = await esClient.security
+  const key = await esClient.security
     .createApiKey({
       body: {
         name,
@@ -264,7 +264,7 @@ export async function generateEnrollmentAPIKey(
   });
 
   return {
-    id: res.body._id,
+    id: res._id,
     ...body,
   };
 }
