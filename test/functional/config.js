@@ -26,6 +26,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
       require.resolve('./apps/visualize'),
+      require.resolve('../functional_ccs/apps/discover'),
     ],
     pageObjects,
     services,
