@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, mapValues } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { Filter } from '@kbn/es-query';
-import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../src/plugins/kibana_utils/common';
+import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
@@ -190,30 +186,16 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715): LensD
   return newAttributes as LensDocShape810;
 };
 
-const getApplyFilterMigrationToLens = (filterMigration: MigrateFunction<Filter[]>) => {
-  return (savedObject: { attributes: LensDocShape }) => {
-    return {
-      ...savedObject,
-      attributes: {
-        ...savedObject.attributes,
-        state: {
-          ...savedObject.attributes.state,
-          filters: filterMigration(savedObject.attributes.state.filters as unknown as Filter[]),
-        },
-      },
-    };
-  };
-};
-
 /**
  * This creates a migration map that applies filter migrations to Lens visualizations
  */
-export const getLensFilterMigrations = (filterMigrations: MigrateFunctionsObject) => {
-  const migrationMap: MigrateFunctionsObject = {};
-  for (const version in filterMigrations) {
-    if (filterMigrations.hasOwnProperty(version)) {
-      migrationMap[version] = getApplyFilterMigrationToLens(filterMigrations[version]);
-    }
-  }
-  return migrationMap;
-};
+export const getLensFilterMigrations = (
+  filterMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
+  mapValues(filterMigrations, (migrate) => (lensDoc: { attributes: LensDocShape }) => ({
+    ...lensDoc,
+    attributes: {
+      ...lensDoc.attributes,
+      state: { ...lensDoc.attributes.state, filters: migrate(lensDoc.attributes.state.filters) },
+    },
+  }));
