@@ -682,6 +682,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async setTransformId(transformId: string) {
       await ml.commonUI.setValueWithChecks('transformIdInput', transformId, {
         clearWithKeyboard: true,
+        enforceDataTestSubj: true,
       });
       await this.assertTransformIdValue(transformId);
     },

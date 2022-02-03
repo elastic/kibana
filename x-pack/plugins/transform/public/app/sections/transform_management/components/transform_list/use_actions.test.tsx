@@ -33,6 +33,7 @@ describe('Transform: Transform List Actions', () => {
       'transformActionEdit',
       'transformActionClone',
       'transformActionDelete',
+      'transformActionReset',
     ]);
   });
 });

@@ -35,7 +35,8 @@
     "data",
     "dataViews",
     "kibanaReact",
-    "kibanaUtils"
+    "kibanaUtils",
+    "lens"
   ],
   "extraPublicDirs": [
     "common"
