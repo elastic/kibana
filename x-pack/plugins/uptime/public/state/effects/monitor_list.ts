@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { takeLatest } from 'redux-saga/effects';
+import { takeEvery, takeLatest } from 'redux-saga/effects';
 import {
   getMonitorList,
   getMonitorListSuccess,
@@ -31,7 +31,7 @@ export function* fetchUpdatedMonitorEffect() {
 }
 
 export function* fetchRunNowMonitorEffect() {
-  yield takeLatest(
+  yield takeEvery(
     testNowMonitorAction.get,
     fetchEffectFactory(testNowMonitor, testNowMonitorAction.success, testNowMonitorAction.fail)
   );
