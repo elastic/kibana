@@ -1639,6 +1639,20 @@ export const ViewStrings = {
         defaultMessage: '(New) Treemap Visualization',
       }),
   },
+  WaffleVis: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.waffleVisTitle', {
+        defaultMessage: '(New) Waffle Visualization',
+      }),
+    getShowValuesInLegendDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.waffleVis.args.showValuesInLegendDisplayName', {
+        defaultMessage: 'Show values in the legend',
+      }),
+    getShowValuesInLegendHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.waffleVis.args.showValuesInLegendHelp', {
+        defaultMessage: 'Show values in the legend',
+      }),
+  },
   PartitionVis: {
     getMetricColumnDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.metricDisplayName', {
