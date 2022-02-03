@@ -91,7 +91,7 @@ describe('#updateObjectsSpaces', () => {
 
   /** Mocks the saved objects client so it returns the expected results */
   function mockMgetResults(...results: Array<{ found: boolean }>) {
-    client.mget.mockReturnResponseOnce({
+    client.mget.mockResponseOnce({
       docs: results.map((x) =>
         x.found
           ? {
@@ -112,7 +112,7 @@ describe('#updateObjectsSpaces', () => {
 
   /** Mocks the saved objects client so as to test unsupported server responding with 404 */
   function mockMgetResultsNotFound(...results: Array<{ found: boolean }>) {
-    client.mget.mockReturnResponseOnce(
+    client.mget.mockResponseOnce(
       {
         docs: results.map((x) =>
           x.found
@@ -149,7 +149,7 @@ describe('#updateObjectsSpaces', () => {
         mockGetBulkOperationError.mockReturnValueOnce(undefined);
       }
     });
-    client.bulk.mockReturnResponseOnce({
+    client.bulk.mockResponseOnce({
       items: results.map(() => ({})), // as long as the result does not contain an error field, it is treated as a success
       errors: false,
       took: 0,

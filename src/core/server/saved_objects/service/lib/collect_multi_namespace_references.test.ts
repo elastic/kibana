@@ -85,7 +85,7 @@ describe('collectMultiNamespaceReferences', () => {
       references?: Array<{ type: string; id: string }>;
     }>
   ) {
-    client.mget.mockReturnResponseOnce({
+    client.mget.mockResponseOnce({
       docs: results.map((x) => {
         const references =
           x.references?.map(({ type, id }) => ({ type, id, name: 'ref-name' })) ?? [];

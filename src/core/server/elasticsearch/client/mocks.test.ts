@@ -47,7 +47,7 @@ describe('Mocked client', () => {
   it('`child` should be mocked and return a mocked Client', () => {
     expectMocked(client.child);
 
-    const child = client.child();
+    const child = client.child({});
 
     expect(child).not.toBe(client);
     expectMocked(child.search);
