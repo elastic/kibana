@@ -35,6 +35,7 @@ import { timefilterControl } from './timefilterControl';
 import { heatmap } from './heatmap';
 import { pieVis } from './pie_vis';
 import { treemapVis } from './treemap_vis';
+import { mosaicVis } from './mosaic_vis';
 
 import { SetupInitializer } from '../../plugin';
 
@@ -55,6 +56,7 @@ export const viewSpecs = [
   heatmap,
   pieVis,
   treemapVis,
+  mosaicVis,
 ];
 
 export const viewInitializers = [metricInitializer];

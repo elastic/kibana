@@ -1639,6 +1639,12 @@ export const ViewStrings = {
         defaultMessage: '(New) Treemap Visualization',
       }),
   },
+  MosaicVis: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.mosaicVisTitle', {
+        defaultMessage: '(New) Mosaic Visualization',
+      }),
+  },
   PartitionVis: {
     getMetricColumnDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.metricDisplayName', {
