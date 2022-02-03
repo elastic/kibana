@@ -3002,9 +3002,14 @@
             ]
           },
           "is_default": {
-            "type": "boolean"
+            "type": "boolean",
+            "deprecated": true
           },
           "is_default_fleet_server": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "has_fleet_server": {
             "type": "boolean"
           },
           "data_output_id": {
@@ -3759,6 +3764,9 @@
         "title": "New agent policy",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -3778,7 +3786,11 @@
               ]
             }
           }
-        }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ]
       },
       "new_package_policy": {
         "title": "New package policy",
