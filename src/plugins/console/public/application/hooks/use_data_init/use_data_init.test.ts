@@ -13,9 +13,14 @@ jest.mock('../../contexts', () => ({
   useServicesContext: jest.fn(),
 }));
 
+jest.mock('./data_migration', () => ({
+  migrateToTextObjects: jest.fn(),
+}));
+
 import { renderHook } from '@testing-library/react-hooks';
 import { ContextValue, useEditorActionContext, useServicesContext } from '../../contexts';
 import { serviceContextMock } from '../../contexts/services_context.mock';
+import { migrateToTextObjects } from './data_migration';
 
 import { useDataInit } from './use_data_init';
 
@@ -35,7 +40,7 @@ describe('useDataInit', () => {
     text: string;
   }
 
-  const callMockFuncWithArg = (arg: MockObjectData[] | Function) => ({
+  const callMockFuncWithArg = (arg: MockObjectData[] | Function | any) => ({
     ...mockContextValue,
     services: {
       ...mockContextValue.services,
@@ -53,6 +58,7 @@ describe('useDataInit', () => {
     useStateMock = (state: any) => [state, setStateMock];
     mockContextValue = serviceContextMock.create();
     dispatch = jest.fn();
+    // migrateToTextObjects = jest.fn();
     (useEditorActionContext as jest.Mock).mockReturnValue(dispatch);
     (useServicesContext as jest.Mock).mockReturnValue({
       ...mockContextValue,
@@ -66,6 +72,7 @@ describe('useDataInit', () => {
         },
       },
     });
+    // (migrateToTextObjects as jest.Mock).mockImplementation()
   });
 
   afterEach(() => {
@@ -145,10 +152,16 @@ describe('useDataInit', () => {
       })
     );
 
+    const setDoneMock = jest.fn();
     const setErrorMock = jest.fn();
+    const setRetryTokenMock = jest.fn();
+    const useDoneMock: UseStateMock = (state: any) => [state, setDoneMock];
     const useErrorMock: UseStateMock = (state: any) => [state, setErrorMock];
+    const useRetryTokenMock: UseStateMock = (state: any) => [state, setRetryTokenMock];
 
     jest.spyOn(React, 'useState').mockImplementationOnce(useErrorMock);
+    jest.spyOn(React, 'useState').mockImplementationOnce(useDoneMock);
+    jest.spyOn(React, 'useState').mockImplementationOnce(useRetryTokenMock);
 
     renderHook(() => useDataInit(), {});
 
@@ -160,16 +173,29 @@ describe('useDataInit', () => {
   it('should update the done state when we get into the finally block', async () => {
     const setDoneMock = jest.fn();
     const setErrorMock = jest.fn();
+    const setRetryTokenMock = jest.fn();
     const useDoneMock: UseStateMock = (state: any) => [state, setDoneMock];
     const useErrorMock: UseStateMock = (state: any) => [state, setErrorMock];
+    const useRetryTokenMock: UseStateMock = (state: any) => [state, setRetryTokenMock];
 
     jest.spyOn(React, 'useState').mockImplementationOnce(useErrorMock);
     jest.spyOn(React, 'useState').mockImplementationOnce(useDoneMock);
+    jest.spyOn(React, 'useState').mockImplementationOnce(useRetryTokenMock);
 
     renderHook(() => useDataInit(), {});
 
     await wait(0);
 
     expect(setDoneMock).toHaveBeenCalledWith(true);
+  });
+
+  it('should call migrateToTextObjects function', async () => {
+    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
+
+    renderHook(() => useDataInit(), {});
+
+    await wait(0);
+
+    expect(migrateToTextObjects).toBeCalledTimes(1);
   });
 });
