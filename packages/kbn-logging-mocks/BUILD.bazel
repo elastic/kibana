@@ -2,9 +2,9 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-logging"
-PKG_REQUIRE_NAME = "@kbn/logging"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__logging"
+PKG_BASE_NAME = "kbn-logging-mocks"
+PKG_REQUIRE_NAME = "@kbn/logging-mocks"
+TYPES_PKG_REQUIRE_NAME = "@types/kbn__logging-mocks"
 
 SOURCE_FILES = glob(
   [
@@ -24,15 +24,14 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md"
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-std"
+  "//packages/kbn-logging"
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-std:npm_module_types",
+  "//packages/kbn-logging:npm_module_types",
   "@npm//@types/jest",
   "@npm//@types/node",
 ]
