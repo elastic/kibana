@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     const apiCalls: ApiCallsInterface<
-      Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>
+      Pick<ExceptionListItemSchema, 'item_id' | 'namespace_type' | 'os_types' | 'tags' | 'entries'>
     > = [
       {
         method: 'post',
@@ -216,17 +216,9 @@ export default function ({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(200);
-          });
 
-          it(`[${apiCall.method}] and accept all OSs for os_types`, async () => {
-            const body = apiCall.getBody();
-
-            body.os_types = ['linux', 'windows', 'macos'];
-
-            await supertest[apiCall.method](apiCall.path)
-              .set('kbn-xsrf', 'true')
-              .send(body)
-              .expect(200);
+            const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${body.item_id}&namespace_type=${body.namespace_type}`;
+            await supertest.delete(deleteUrl).set('kbn-xsrf', 'true');
           });
         }
       });
@@ -276,23 +268,6 @@ export default function ({ getService }: FtrProviderContext) {
             return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${existingExceptionData.artifact.list_id}&namespace_type=${existingExceptionData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
           },
           getBody: () => undefined,
-        },
-        {
-          method: 'post',
-          info: 'create item',
-          path: EXCEPTION_LIST_ITEM_URL,
-          getBody: () => exceptionsGenerator.generateHostIsolationExceptionForCreate(),
-        },
-        {
-          method: 'put',
-          info: 'update item',
-          path: EXCEPTION_LIST_ITEM_URL,
-          getBody: () =>
-            exceptionsGenerator.generateHostIsolationExceptionForUpdate({
-              id: existingExceptionData.artifact.id,
-              item_id: existingExceptionData.artifact.item_id,
-              _version: existingExceptionData.artifact._version,
-            }),
         },
       ];
 
