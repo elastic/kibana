@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.assertKibanaNavMLEntryExists();
           });
 
-          it('should display tabs in the ML app correctly', async () => {
+          it('should display side nav in the ML app correctly', async () => {
             await ml.testExecution.logTestStep('should load the ML app');
             await ml.navigation.navigateToMl();
 
@@ -52,20 +52,30 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.assertOverviewTabEnabled(true);
 
             await ml.testExecution.logTestStep(
-              'should display the enabled "Anomaly Detection" tab'
+              'should display the enabled "Anomaly Detection" section correctly'
             );
             await ml.navigation.assertAnomalyDetectionTabEnabled(true);
+            await ml.navigation.assertAnomalyExplorerNavItemEnabled(true);
+            await ml.navigation.assertSingleMetricViewerNavItemEnabled(true);
+            await ml.navigation.assertSettingsTabEnabled(true);
 
             await ml.testExecution.logTestStep(
-              'should display the enabled "Data Frame Analytics" tab'
+              'should display the enabled "Data Frame Analytics" section'
             );
             await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
 
-            await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
-            await ml.navigation.assertDataVisualizerTabEnabled(true);
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Model Management" section'
+            );
+            await ml.navigation.assertTrainedModelsNavItemEnabled(true);
+            await ml.navigation.assertNodesNavItemEnabled(true);
 
-            await ml.testExecution.logTestStep('should display the enabled "Settings" tab');
-            await ml.navigation.assertSettingsTabEnabled(true);
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Data Visualizer" section'
+            );
+            await ml.navigation.assertDataVisualizerTabEnabled(true);
+            await ml.navigation.assertFileDataVisualizerNavItemEnabled(true);
+            await ml.navigation.assertIndexDataVisualizerNavItemEnabled(true);
           });
 
           it('should display elements on ML Overview page correctly', async () => {
