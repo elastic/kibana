@@ -24,6 +24,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.TAGS]: (fields) => arrayToJsonFormatter(fields[ConfigKey.TAGS]),
   [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT] || undefined),
   [ConfigKey.NAMESPACE]: null,
+  [ConfigKey.REVISION]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>
