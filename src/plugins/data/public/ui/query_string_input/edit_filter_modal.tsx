@@ -9,7 +9,14 @@
 import React, { useState } from 'react';
 import { groupBy } from 'lodash';
 import classNames from 'classnames';
-import { Filter, buildFilter, buildCustomFilter, cleanFilter } from '@kbn/es-query';
+import {
+  Filter,
+  buildFilter,
+  buildCustomFilter,
+  cleanFilter,
+  getFilterParams,
+  FieldFilter,
+} from '@kbn/es-query';
 import {
   EuiFormRow,
   EuiFlexGroup,
@@ -38,6 +45,8 @@ import { getIndexPatternFromFilter } from '../../query';
 import {
   getFilterableFields,
   getOperatorOptions,
+  getFieldFromFilter,
+  getOperatorFromFilter,
 } from '../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../filter_bar/filter_editor/lib/filter_operators';
 
@@ -45,7 +54,6 @@ import { GenericComboBox } from '../filter_bar/filter_editor/generic_combo_box';
 import { PhraseValueInput } from '../filter_bar/filter_editor/phrase_value_input';
 import { PhrasesValuesInput } from '../filter_bar/filter_editor/phrases_values_input';
 import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
-import { SavedQueryMeta } from '../saved_query_form';
 
 import { IIndexPattern, IFieldType } from '../..';
 
@@ -61,13 +69,7 @@ const tabs = [
     label: i18n.translate('data.filter.filterEditor.queryBuilderLabel', {
       defaultMessage: 'Query builder',
     }),
-  },
-  {
-    type: 'saved_filters',
-    label: i18n.translate('data.filter.filterEditor.savedFiltersLabel', {
-      defaultMessage: 'Saved filters',
-    }),
-  },
+  }
 ];
 
 export interface FilterGroup {
@@ -80,17 +82,18 @@ export interface FilterGroup {
   subGroupId?: number;
 }
 
-export function AddFilterModal({
+export function EditFilterModal({
   onSubmit,
   onMultipleFiltersSubmit,
   onCancel,
   applySavedQueries,
   filter,
+  multipleFilters,
   indexPatterns,
   timeRangeForSuggestionsOverride,
   savedQueryManagement,
   initialAddFilterMode,
-  saveFilters,
+  onRemoveFilterGroup,
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
@@ -102,7 +105,7 @@ export function AddFilterModal({
   timeRangeForSuggestionsOverride?: boolean;
   savedQueryManagement?: JSX.Element;
   initialAddFilterMode?: string;
-  saveFilters: (savedQueryMeta: SavedQueryMeta) => void;
+  onRemoveFilterGroup: (groupId: string) => void;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -110,18 +113,38 @@ export function AddFilterModal({
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
-  const [localFilters, setLocalFilters] = useState<FilterGroup[]>([
-    {
-      field: undefined,
-      operator: undefined,
-      value: undefined,
-      groupId: 1,
-      id: 0,
-      subGroupId: 1,
-      relationship: undefined,
-    },
-  ]);
+  const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
+    convertFilterToFilterGroup(multipleFilters)
+  );
   const [groupsCount, setGroupsCount] = useState<number>(1);
+
+  function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
+    if (!convertibleFilters) {
+      return [
+        {
+          field: undefined,
+          operator: undefined,
+          value: undefined,
+          groupId: 1,
+          id: 0,
+          subGroupId: 1,
+          relationship: undefined,
+        },
+      ];
+    }
+
+    return convertibleFilters.map((convertedfilter) => {
+      return {
+        field: getFieldFromFilter(convertedfilter as FieldFilter, selectedIndexPattern),
+        operator: getOperatorFromFilter(convertedfilter),
+        value: getFilterParams(convertedfilter),
+        groupId: convertedfilter.groupId,
+        id: convertedfilter.id,
+        subGroupId: convertedfilter.subGroupId,
+        relationship: convertedfilter.relationship
+      };
+    });
+  }
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
@@ -267,9 +290,6 @@ export function AddFilterModal({
   };
 
   const renderParamsEditor = (localFilterIndex: number) => {
-    if (!selectedIndexPattern) {
-      return null;
-    }
     const selectedOperator = localFilters.filter(
       (localFilter) => localFilter.id === localFilterIndex
     )[0]?.operator;
@@ -350,7 +370,7 @@ export function AddFilterModal({
     );
   };
 
-  const onAddFilter = () => {
+  const onUpdateFilter = () => {
     const { $state } = filter;
     if (!$state || !$state.store) {
       return; // typescript validation
@@ -369,13 +389,6 @@ export function AddFilterModal({
         $state.store
       );
       onSubmit([builtCustomFilter]);
-      saveFilters({
-        title: customLabel,
-        description: '',
-        shouldIncludeFilters: false,
-        shouldIncludeTimefilter: false,
-        filters: [builtCustomFilter],
-      });
     } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
         if (localFilter.field && localFilter.operator) {
@@ -397,19 +410,18 @@ export function AddFilterModal({
         ) as Filter[];
         // onSubmit(finalFilters);
         onMultipleFiltersSubmit(localFilters, finalFilters);
-        if (alias) {
-          saveFilters({
-            title: customLabel,
-            description: '',
-            shouldIncludeFilters: false,
-            shouldIncludeTimefilter: false,
-            filters: finalFilters,
-          });
-        }
       }
     } else if (addFilterMode === 'saved_filters') {
       applySavedQueries();
     }
+  };
+
+  const onApplyChangesFilter = () => {
+    onUpdateFilter();
+  };
+
+  const onDeliteFilter = () => {
+    onRemoveFilterGroup(multipleFilters[0]?.groupId);
   };
 
   const renderGroupedFilters = () => {
@@ -434,8 +446,8 @@ export function AddFilterModal({
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                ? 'kbnQueryBar__filterModalGroups'
-                : '';
+                  ? 'kbnQueryBar__filterModalGroups'
+                  : '';
             return (
               <>
                 <div className={classNames(classes)}>
@@ -510,8 +522,7 @@ export function AddFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId:
-                                      filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
+                                    groupId: filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
                                     subGroupId,
                                     id: localFilters.length,
                                   },
@@ -617,8 +628,8 @@ export function AddFilterModal({
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
-            {i18n.translate('data.filter.addFilterModal.headerTitle', {
-              defaultMessage: 'Add filter',
+            {i18n.translate('data.filter.editFilterModal.headerTitle', {
+              defaultMessage: 'Edit filter',
             })}
           </h3>
         </EuiModalHeaderTitle>
@@ -677,15 +688,29 @@ export function AddFilterModal({
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  iconType="plusInCircleFilled"
+                  iconType="trash"
+                  onClick={onDeliteFilter}
+                  data-test-subj="canvasCustomElementForm-submit"
+                  color="danger"
+                >
+                  {i18n.translate('data.filter.addFilterModal.deleteFilterBtnLabel', {
+                    defaultMessage: 'Delete filter',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="checkInCircleFilled"
                   fill
-                  onClick={onAddFilter}
+                  onClick={onApplyChangesFilter}
                   data-test-subj="canvasCustomElementForm-submit"
                 >
-                  {i18n.translate('data.filter.addFilterModal.addFilterBtnLabel', {
-                    defaultMessage: 'Add filter',
+                  {i18n.translate('data.filter.addFilterModal.applyChangesFilterBtnLabel', {
+                    defaultMessage: 'Apply changes',
                   })}
                 </EuiButton>
               </EuiFlexItem>

@@ -6,33 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { groupBy, isEqual } from 'lodash';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import {
-  buildEmptyFilter,
-  Filter,
-  // enableFilter,
-  // disableFilter,
-  // pinFilter,
-  // toggleFilterDisabled,
-  toggleFilterNegated,
-  // unpinFilter,
-} from '@kbn/es-query';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { Filter, toggleFilterNegated } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FilterEditor } from './filter_editor';
-import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
-// import { FilterOptions } from './filter_options';
+import { FilterItem } from './filter_item';
 import { useKibana } from '../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern } from '../..';
 import type { SavedQuery } from '../../query';
 import { SavedQueriesItem } from './saved_queries_item';
 import { FilterExpressionItem } from './filter_expression_item';
 
-import { UI_SETTINGS } from '../../../common';
+import { EditFilterModal } from '../query_string_input/edit_filter_modal';
+import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
+import { FilterGroup } from '../query_string_input/edit_filter_modal';
 import { SavedQueryMeta } from '../saved_query_form';
 import { SavedQueryService } from '../..';
 
@@ -48,6 +39,9 @@ interface Props {
   selectedSavedQueries?: SavedQuery[];
   removeSelectedSavedQuery: (savedQuery: SavedQuery) => void;
   onMultipleFiltersUpdated?: (filters: Filter[]) => void;
+  toggleEditFilterModal: (value: boolean) => void;
+  isEditFilterModalOpen?: boolean;
+  editFilterMode?: string;
   savedQueryService: SavedQueryService;
   onFilterSave: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   onFilterBadgeSave: (groupId: number, alias: string) => void;
@@ -55,9 +49,9 @@ interface Props {
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
-  const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
+  const [groupId, setGroupId] = useState<number | null>(null);
   if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
@@ -68,10 +62,59 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     }
   }
 
-  const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
+  const onEditFilterClick = (groupId: number) => {
+    setGroupId(groupId);
+    props.toggleEditFilterModal?.(true);
+  };
+
+  const onDeleteFilterGroup = (groupId: string) => {
+    const multipleFilters = [...props.multipleFilters];
+    const updatedMultipleFilters = multipleFilters.filter(
+      (filter) => filter.groupId !== Number(groupId)
+    );
+    const filters = [...props.filters];
+    const updatedFilters: Filter[] = [];
+
+    updatedMultipleFilters.forEach((filter) => {
+      filters.forEach((f) => {
+        if (isEqual(f.query, filter.query)) {
+          updatedFilters.push(f);
+        }
+      });
+    });
+    onFiltersUpdated(updatedFilters);
+    props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
+
+    props.toggleEditFilterModal?.(false);
+  };
+
+  function onAddMultipleFilters(selectedFilters: Filter[]) {
+    props.toggleEditFilterModal?.(false);
+
+    const filters = [...props.filters, ...selectedFilters];
+    props?.onFiltersUpdated?.(filters);
+  }
+
+  function onEditMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+    const mappedFilters = mapAndFlattenFilters(buildFilters);
+    const mergedFilters = mappedFilters.map((filter, idx) => {
+      return {
+        ...filter,
+        groupId: selectedFilters[idx].groupId,
+        id: selectedFilters[idx].id,
+        relationship: selectedFilters[idx].relationship,
+        subGroupId: selectedFilters[idx].subGroupId,
+      };
+    });
+    props.toggleEditFilterModal?.(false);
+    props?.onMultipleFiltersUpdated?.(mergedFilters);
+
+    const filters = [...props.filters, ...buildFilters];
+    props?.onFiltersUpdated?.(filters);
+  }
 
   function renderItems() {
-    return props.filters.map((filter, i) => {
+    return props.multipleFilters.map((filter, i) => {
       // Do not display filters from saved queries
       if (filter.meta.isFromSavedQuery) return null;
       return (
@@ -117,10 +160,11 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={groupId}
           groupedFilters={groupedFilters}
           indexPatterns={props?.indexPatterns}
-          onClick={() => {}}
+          onClick={() => { }}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
+          onEditFilterClick={onEditFilterClick}
           savedQueryService={props.savedQueryService}
           onFilterSave={props.onFilterSave}
           onFilterBadgeSave={props.onFilterBadgeSave}
@@ -139,11 +183,15 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={groupId}
           groupedFilters={groupedByAlias[label]}
           indexPatterns={props?.indexPatterns}
-          onClick={() => {}}
+          onClick={() => { }}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
+          onEditFilterClick={onEditFilterClick}
           filtersGroupsCount={1}
           customLabel={label}
+          savedQueryService={props.savedQueryService}
+          onFilterSave={props.onFilterSave}
+          onFilterBadgeSave={props.onFilterBadgeSave}
         />
       );
       GroupBadge.push(labelBadge);
@@ -152,63 +200,30 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     return GroupBadge;
   }
 
-  function renderAddFilter() {
-    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
-    const [indexPattern] = props.indexPatterns;
-    const index = indexPattern && indexPattern.id;
-    const newFilter = buildEmptyFilter(isPinned, index);
-
-    const button = (
-      <EuiButtonEmpty
-        size="s"
-        onClick={onAddFilterClick}
-        data-test-subj="addFilter"
-        className="globalFilterBar__addButton"
-      >
-        +{' '}
-        <FormattedMessage
-          id="data.filter.filterBar.addFilterButtonLabel"
-          defaultMessage="Add filter"
-        />
-      </EuiButtonEmpty>
+  function renderEditFilter() {
+    const currentEditFilters = props.multipleFilters.filter(
+      (filter) => filter.groupId == Number(groupId)
     );
 
     return (
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="addFilterPopover"
-          button={button}
-          isOpen={isAddFilterPopoverOpen}
-          closePopover={() => setIsAddFilterPopoverOpen(false)}
-          anchorPosition="downLeft"
-          panelPaddingSize="none"
-          initialFocus=".filterEditor__hiddenItem"
-          ownFocus
-          repositionOnScroll
-        >
-          <EuiFlexItem grow={false}>
-            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
-              <FilterEditor
-                filter={newFilter}
-                indexPatterns={props.indexPatterns}
-                onSubmit={onAdd}
-                onCancel={() => setIsAddFilterPopoverOpen(false)}
-                key={JSON.stringify(newFilter)}
-                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-              />
-            </div>
-          </EuiFlexItem>
-        </EuiPopover>
+        {props.isEditFilterModalOpen && (
+          <EditFilterModal
+            onSubmit={onAddMultipleFilters}
+            onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
+            applySavedQueries={() => props.toggleEditFilterModal?.(false)}
+            onCancel={() => props.toggleEditFilterModal?.(false)}
+            filter={props.multipleFilters[0]}
+            multipleFilters={currentEditFilters}
+            indexPatterns={props.indexPatterns!}
+            onRemoveFilterGroup={onDeleteFilterGroup}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            savedQueryManagement={undefined}
+            initialAddFilterMode={undefined}
+          />
+        )}
       </EuiFlexItem>
     );
-  }
-
-  function onAdd(filter: Filter) {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
-    setIsAddFilterPopoverOpen(false);
-
-    const filters = [...props.filters, filter];
-    onFiltersUpdated(filters);
   }
 
   function onRemove(i: number) {
@@ -272,47 +287,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     onFiltersUpdated(filters);
   }
 
-  // function onEnableAll() {
-  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
-  //   const filters = props.filters.map(enableFilter);
-  //   onFiltersUpdated(filters);
-  // }
-
-  // function onDisableAll() {
-  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:disable_all`);
-  //   const filters = props.filters.map(disableFilter);
-  //   onFiltersUpdated(filters);
-  // }
-
-  // function onPinAll() {
-  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:pin_all`);
-  //   const filters = props.filters.map(pinFilter);
-  //   onFiltersUpdated(filters);
-  // }
-
-  // function onUnpinAll() {
-  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:unpin_all`);
-  //   const filters = props.filters.map(unpinFilter);
-  //   onFiltersUpdated(filters);
-  // }
-
-  // function onToggleAllNegated() {
-  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:invert_all`);
-  //   const filters = props.filters.map(toggleFilterNegated);
-  //   onFiltersUpdated(filters);
-  // }
-
-  // function onToggleAllDisabled() {
-  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:toggle_all`);
-  //   const filters = props.filters.map(toggleFilterDisabled);
-  //   onFiltersUpdated(filters);
-  // }
-
-  // function onRemoveAll() {
-  //   reportUiCounter?.(METRIC_TYPE.CLICK, `filter:remove_all`);
-  //   onFiltersUpdated([]);
-  // }
-
   const classes = classNames('globalFilterBar', props.className);
 
   return (
@@ -322,18 +296,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       alignItems="flexStart"
       responsive={false}
     >
-      {/* <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
-        <FilterOptions
-          onEnableAll={onEnableAll}
-          onDisableAll={onDisableAll}
-          onPinAll={onPinAll}
-          onUnpinAll={onUnpinAll}
-          onToggleAllNegated={onToggleAllNegated}
-          onToggleAllDisabled={onToggleAllDisabled}
-          onRemoveAll={onRemoveAll}
-        />
-      </EuiFlexItem> */}
-
       <EuiFlexItem className="globalFilterGroup__filterFlexItem">
         <EuiFlexGroup
           ref={groupRef}
@@ -347,7 +309,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           {renderMultipleFilters()}
           {renderSelectedSavedQueries()}
           {props.multipleFilters.length === 0 && renderItems()}
-          {/* {renderAddFilter()} */}
+          {renderEditFilter()}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
