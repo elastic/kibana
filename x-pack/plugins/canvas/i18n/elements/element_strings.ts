@@ -254,4 +254,12 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'Pie visualization',
     }),
   },
+  treemapVis: {
+    displayName: i18n.translate('xpack.canvas.elements.treemapVisDisplayName', {
+      defaultMessage: '(New) Treemap Vis',
+    }),
+    help: i18n.translate('xpack.canvas.elements.treemapVisHelpText', {
+      defaultMessage: 'Treemap visualization',
+    }),
+  },
 });
