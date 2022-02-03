@@ -8,7 +8,7 @@
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { HttpStart } from 'kibana/public';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
-import { EVENT_FILTER_LIST } from '../constants';
+import { EVENT_FILTER_LIST_DEFINITION } from '../constants';
 
 /**
  * Event filters Api client class using ExceptionsListApiClient as base class
@@ -17,10 +17,10 @@ import { EVENT_FILTER_LIST } from '../constants';
  */
 export class EventFiltersApiClient extends ExceptionsListApiClient {
   constructor(http: HttpStart) {
-    super(http, ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST);
+    super(http, ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_DEFINITION);
   }
 
   public static getInstance(http: HttpStart): ExceptionsListApiClient {
-    return super.getInstance(http, ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST);
+    return super.getInstance(http, ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_DEFINITION);
   }
 }

@@ -53,6 +53,18 @@ export class ExceptionsListApiClient {
   }
 
   /**
+   * Private method that throws an error when some of the checks to ensure the instance
+   * we are using is the right one fail
+   */
+  private checkIfIsUsingTheRightInstance(listId: ListId): void {
+    if (listId !== this.listId) {
+      throw new Error(
+        `The list id you are using is not valid, expected [${this.listId}] list id but received [${listId}] list id`
+      );
+    }
+  }
+
+  /**
    * Static method to get a fresh or existing instance.
    * It will ensure we only check and create the list once.
    */
@@ -157,6 +169,7 @@ export class ExceptionsListApiClient {
    */
   async create(exception: CreateExceptionListItemSchema): Promise<ExceptionListItemSchema> {
     await this.ensureListExists;
+    this.checkIfIsUsingTheRightInstance(exception.list_id);
     return this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
     });
@@ -196,7 +209,6 @@ export class ExceptionsListApiClient {
     return this.http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
       query: {
         filter,
-        list_id: this.listId,
         namespace_type: 'agnostic',
       },
     });

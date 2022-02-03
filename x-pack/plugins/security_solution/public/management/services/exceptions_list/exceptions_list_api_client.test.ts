@@ -115,13 +115,31 @@ describe('Exceptions List Api Client', () => {
     it('Create method calls http.post with params', async () => {
       const exceptionsListApiClientInstance = getInstance();
 
-      const exceptionItem = new ExceptionsListItemGenerator('seed').generate();
+      const exceptionItem = {
+        ...new ExceptionsListItemGenerator('seed').generate(),
+        list_id: getFakeListId(),
+      };
       await exceptionsListApiClientInstance.create(exceptionItem);
 
       expect(fakeHttpServices.post).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.post).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
         body: JSON.stringify(exceptionItem),
       });
+    });
+
+    it('Throws when create method has wrong listId', async () => {
+      const wrongListId = 'wrong';
+      const expectedError = new Error(
+        `The list id you are using is not valid, expected [${getFakeListId()}] list id but received [${wrongListId}] list id`
+      );
+      const exceptionsListApiClientInstance = getInstance();
+
+      const exceptionItem = new ExceptionsListItemGenerator('seed').generate();
+      try {
+        await exceptionsListApiClientInstance.create({ ...exceptionItem, list_id: wrongListId });
+      } catch (err) {
+        expect(err).toEqual(expectedError);
+      }
     });
 
     it('Update method calls http.put with params', async () => {
@@ -161,7 +179,6 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_URL}/summary`, {
         query: {
           filter: fakeQklFilter,
-          list_id: getFakeListId(),
           namespace_type: 'agnostic',
         },
       });
