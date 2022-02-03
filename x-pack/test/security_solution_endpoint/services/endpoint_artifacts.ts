@@ -16,7 +16,7 @@ import { FtrService } from '../../functional/ftr_provider_context';
 import { ExceptionsListItemGenerator } from '../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/trusted_apps/constants';
 import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
-import { EVENT_FILTER_LIST } from '../../../plugins/security_solution/public/management/pages/event_filters/constants';
+import { EVENT_FILTER_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/event_filters/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/host_isolation_exceptions/constants';
 
 export interface ArtifactTestData {
@@ -94,7 +94,7 @@ export class EndpointArtifactsTestResources extends FtrService {
   async createEventFilter(
     overrides: Partial<CreateExceptionListItemSchema> = {}
   ): Promise<ArtifactTestData> {
-    await this.ensureListExists(EVENT_FILTER_LIST);
+    await this.ensureListExists(EVENT_FILTER_LIST_DEFINITION);
     const eventFilter = this.exceptionsGenerator.generateEventFilterForCreate(overrides);
 
     return this.createExceptionItem(eventFilter);
