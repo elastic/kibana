@@ -8,6 +8,4 @@
 export * from './rule_status';
 export * from './rule_status_badge';
 export * from './rule_status_failed_callout';
-
-// TODO: https://github.com/elastic/kibana/pull/121644 clean up
 export * as ruleStatusI18n from './translations';
