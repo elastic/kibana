@@ -184,8 +184,12 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           onClick={() => {}}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
+          onEditFilterClick={onEditFilterClick}
           filtersGroupsCount={1}
           customLabel={label}
+          savedQueryService={props.savedQueryService}
+          onFilterSave={props.onFilterSave}
+          onFilterBadgeSave={props.onFilterBadgeSave}
         />
       );
       GroupBadge.push(labelBadge);
