@@ -357,8 +357,7 @@ describe('heatmap suggestions', () => {
             },
           },
           title: 'Heatmap',
-          // Temp hide all suggestions while heatmap is in beta
-          hide: true,
+          hide: false,
           previewIcon: 'empty',
           score: 0.6,
         },
@@ -432,8 +431,7 @@ describe('heatmap suggestions', () => {
             },
           },
           title: 'Heatmap',
-          // Temp hide all suggestions while heatmap is in beta
-          hide: true,
+          hide: false,
           previewIcon: 'empty',
           score: 0.9,
         },
