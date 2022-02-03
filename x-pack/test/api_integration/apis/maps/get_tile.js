@@ -53,7 +53,7 @@ export default function ({ getService }) {
       expect(feature.extent).to.be(4096);
       expect(feature.id).to.be(undefined);
       expect(feature.properties).to.eql({
-        "@timestamp": "1442709961071",
+        '@timestamp': '1442709961071',
         _id: 'AU_x3_BsGFA8no6Qjjug',
         _index: 'logstash-2015.09.20',
         bytes: 9252,
