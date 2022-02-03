@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
-import { useRulesLink } from '../../../../../../plugins/observability/public';
+import { useRulesLink } from '../../../../../observability/public';
 type VisibleFlyoutType = 'inventory' | 'threshold' | null;
 
 export const MetricsAlertDropdown = () => {
