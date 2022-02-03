@@ -42,14 +42,11 @@ export const UserActionCommonAttributesRt = rt.type({
   action: ActionsRt,
 });
 
-export const CaseUserActionSavedObjectIdsRt = rt.intersection([
-  rt.type({
-    action_id: rt.string,
-    case_id: rt.string,
-    comment_id: rt.union([rt.string, rt.null]),
-  }),
-  rt.partial({ sub_case_id: rt.string }),
-]);
+export const CaseUserActionSavedObjectIdsRt = rt.type({
+  action_id: rt.string,
+  case_id: rt.string,
+  comment_id: rt.union([rt.string, rt.null]),
+});
 
 export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
 export type UserActionWithResponse<T> = T & rt.TypeOf<typeof CaseUserActionSavedObjectIdsRt>;
