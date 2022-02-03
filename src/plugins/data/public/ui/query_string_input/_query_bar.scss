@@ -29,7 +29,16 @@
 }
 
 .kbnQueryBar__filterModalWrapper {
-  width: 700px;
+  @media only screen and (min-width: map-get($euiBreakpoints, 'm')) {
+    & {
+      width: 700px;
+    }
+
+    .kbnQueryBar-isInputGroupVertical {
+      margin-top: 0;
+      margin-bottom: 0;    
+    }
+  }
 
   .kbnQueryBar__filterModalForm {
     border-radius: 8px;
@@ -61,6 +70,12 @@
 
   .kqlQueryBar__filterModalGroup:last-child {
     margin-top: 12px;
+  }
+
+  .kbnQueryBar__inputGroup > .euiFlexItem {
+    @media only screen and (max-width: map-get($euiBreakpoints, 'm')) {
+      margin-bottom: 0 !important;
+    }
   }
 }
 
