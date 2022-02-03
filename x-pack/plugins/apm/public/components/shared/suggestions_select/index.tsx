@@ -61,6 +61,11 @@ export function SuggestionsSelect({
   const handleChange = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedOptions(changedOptions);
+
+      if (changedOptions.length === 0) {
+        onChange('');
+      }
+
       if (changedOptions.length === 1) {
         onChange(
           changedOptions[0].value
