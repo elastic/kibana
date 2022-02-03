@@ -26,6 +26,9 @@ describe('SuperUser - Packs', () => {
   describe('Create and edit a pack', () => {
     before(() => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_2');
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_3');
     });
     beforeEach(() => {
       login();
@@ -34,6 +37,9 @@ describe('SuperUser - Packs', () => {
 
     after(() => {
       runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_2');
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_3');
     });
 
     it('should add a pack from a saved query', () => {
@@ -144,6 +150,46 @@ describe('SuperUser - Packs', () => {
       cy.contains(`${PACK_NAME}`).click();
       cy.contains(`${PACK_NAME} details`);
       cy.contains(/^No items found/);
+    });
+
+    it('enable changing saved queries and ecs_mappings', () => {
+      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      cy.contains(/^Edit$/).click();
+
+      findAndClickButton('Add query');
+
+      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+        .click()
+        .type('Multiple {downArrow} {enter}');
+      cy.contains('Custom key/value pairs');
+      cy.contains('Days of uptime');
+      cy.contains('List of keywords used to tag each');
+      cy.contains('Seconds of uptime');
+      cy.contains('Client network address.');
+      cy.contains('Total uptime seconds');
+
+      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+        .click()
+        .type('NOMAPPING {downArrow} {enter}');
+      cy.contains('Custom key/value pairs').should('not.exist');
+      cy.contains('Days of uptime').should('not.exist');
+      cy.contains('List of keywords used to tag each').should('not.exist');
+      cy.contains('Seconds of uptime').should('not.exist');
+      cy.contains('Client network address.').should('not.exist');
+      cy.contains('Total uptime seconds').should('not.exist');
+
+      cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+        .click()
+        .type('ONEMAPPING {downArrow} {enter}');
+      cy.contains('Custom key/value pairs');
+      cy.contains('Days of uptime');
+
+      findAndClickButton('Save');
+      cy.react('CustomItemAction', {
+        props: { index: 0, item: { id: 'ONEMAPPING' } },
+      }).click();
+      cy.contains('Custom key/value pairs');
+      cy.contains('Days of uptime');
     });
 
     it('to click delete button', () => {
