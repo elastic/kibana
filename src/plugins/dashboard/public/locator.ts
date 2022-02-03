@@ -8,7 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
-import { type Filter, isFilterPinned } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import type { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
@@ -119,6 +119,8 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
 
   constructor(protected readonly deps: DashboardAppLocatorDependencies) {}
 
+  private esQueryFilterPinned: ((filter: Filter) => boolean | undefined) | undefined = undefined;
+
   public readonly getLocation = async (params: DashboardAppLocatorParams) => {
     const {
       filters,
@@ -152,12 +154,17 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...params.filters,
     ];
 
+    if (!this.esQueryFilterPinned) {
+      const { isFilterPinned } = await import('@kbn/es-query');
+      this.esQueryFilterPinned = isFilterPinned;
+    }
+
     let path = `#/${hash}`;
     path = setStateToKbnUrl<QueryState>(
       '_g',
       cleanEmptyKeys({
         time: params.timeRange,
-        filters: filters?.filter((f) => isFilterPinned(f)),
+        filters: filters?.filter((f) => this.esQueryFilterPinned?.(f)),
         refreshInterval: params.refreshInterval,
       }),
       { useHash },

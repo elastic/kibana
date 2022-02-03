@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { type Filter, isFilterPinned } from '@kbn/es-query';
-import { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
+import {
+  TimeRange,
+  Filter,
+  Query,
+  esFilters,
+  QueryState,
+  RefreshInterval,
+} from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
@@ -135,7 +141,7 @@ export const createDashboardUrlGenerator = (
       STATE_STORAGE_KEY,
       cleanEmptyKeys({
         query: state.query,
-        filters: filters?.filter((f) => !isFilterPinned(f)),
+        filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
         viewMode: state.viewMode,
         panels: state.panels,
         savedQuery: state.savedQuery,
@@ -148,7 +154,7 @@ export const createDashboardUrlGenerator = (
       GLOBAL_STATE_STORAGE_KEY,
       cleanEmptyKeys({
         time: state.timeRange,
-        filters: filters?.filter((f) => isFilterPinned(f)),
+        filters: filters?.filter((f) => esFilters.isFilterPinned(f)),
         refreshInterval: state.refreshInterval,
       }),
       { useHash },
