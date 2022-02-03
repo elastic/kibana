@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison, { RisonValue } from 'rison-node';
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -29,13 +29,15 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { escapeDoubleQuotes } from '../../explorer/explorer_utils';
 import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { CustomUrlAnomalyRecordDoc, KibanaUrlConfig } from '../../../../common/types/custom_urls';
-import { TimeRangeBounds } from '../../util/time_buckets';
-import { MlKibanaReactContextValue } from '../../contexts/kibana';
+import type {
+  CustomUrlAnomalyRecordDoc,
+  KibanaUrlConfig,
+} from '../../../../common/types/custom_urls';
+import type { TimeRangeBounds } from '../../util/time_buckets';
+import { useMlKibana } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
-import { AnomaliesTableRecord } from '../../../../common/types/anomalies';
+import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 
 interface LinksMenuProps {
   anomaly: AnomaliesTableRecord;
@@ -44,19 +46,25 @@ interface LinksMenuProps {
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
   showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
-  kibana: MlKibanaReactContextValue;
+  onItemClick: () => void;
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
+
+  const isCategorizationAnomalyRecord = isCategorizationAnomaly(props.anomaly);
+
+  const closePopover = props.onItemClick;
+
+  const kibana = useMlKibana();
 
   useEffect(() => {
     let unmounted = false;
+
     const generateDiscoverUrl = async () => {
       const {
         services: { share },
-      } = props.kibana;
+      } = kibana;
       const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
       if (!discoverLocator) {
@@ -125,7 +133,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
     };
 
-    if (!isCategorizationAnomaly(props.anomaly)) {
+    if (!isCategorizationAnomalyRecord) {
       generateDiscoverUrl();
     }
 
@@ -133,10 +141,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       unmounted = true;
     };
   }, [JSON.stringify(props.anomaly)]);
-
-  const onButtonClick = () => setPopoverOpen(!isPopoverOpen);
-
-  const closePopover = () => setPopoverOpen(false);
 
   const openCustomUrl = (customUrl: KibanaUrlConfig) => {
     const { anomaly, interval, isAggregatedData } = props;
@@ -151,7 +155,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval =
       customUrl.time_range !== undefined ? parseInterval(customUrl.time_range) : null;
-    const basePath = props.kibana.services.http.basePath.get();
+    const basePath = kibana.services.http.basePath.get();
 
     if (configuredUrlValue.includes('$earliest$')) {
       let earliestMoment = moment(timestamp);
@@ -213,7 +217,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         .catch((resp) => {
           // eslint-disable-next-line no-console
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
-          const { toasts } = props.kibana.services.notifications;
+          const { toasts } = kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToOpenLinkErrorMessage', {
               defaultMessage:
@@ -235,7 +239,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const viewSeries = async () => {
     const {
       services: { share },
-    } = props.kibana;
+    } = kibana;
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
     const record = props.anomaly.source;
@@ -319,7 +323,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     if (job === undefined) {
       // eslint-disable-next-line no-console
       console.log(`viewExamples(): no job found with ID: ${props.anomaly.jobId}`);
-      const { toasts } = props.kibana.services.notifications;
+      const { toasts } = kibana.services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToViewExamplesErrorMessage', {
           defaultMessage: 'Unable to view examples as no details could be found for job ID {jobId}',
@@ -346,7 +350,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
         datafeedIndices
       );
-      const { toasts } = props.kibana.services.notifications;
+      const { toasts } = kibana.services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
           defaultMessage:
@@ -425,7 +429,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           const _a = rison.encode(appStateProps);
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
-          const { basePath } = props.kibana.services.http;
+          const { basePath } = kibana.services.http;
           let path = basePath.get();
           path += '/app/discover#/';
           path += '?_g=' + _g;
@@ -435,7 +439,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         .catch((resp) => {
           // eslint-disable-next-line no-console
           console.log('viewExamples(): error loading categoryDefinition:', resp);
-          const { toasts } = props.kibana.services.notifications;
+          const { toasts } = kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.loadingDetailsErrorMessage', {
               defaultMessage:
@@ -470,20 +474,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const { anomaly, showViewSeriesLink } = props;
   const canConfigureRules = isRuleSupported(anomaly.source) && checkPermission('canUpdateJob');
-
-  const button = (
-    <EuiButtonIcon
-      size="s"
-      color="text"
-      onClick={onButtonClick}
-      iconType="gear"
-      aria-label={i18n.translate('xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel', {
-        defaultMessage: 'Select action for anomaly at {time}',
-        values: { time: formatHumanReadableDateTimeSeconds(anomaly.time) },
-      })}
-      data-test-subj="mlAnomaliesListRowActionsButton"
-    />
-  );
 
   const items = [];
   if (anomaly.customUrls !== undefined) {
@@ -539,7 +529,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     );
   }
 
-  if (isCategorizationAnomaly(anomaly)) {
+  if (isCategorizationAnomalyRecord) {
     items.push(
       <EuiContextMenuItem
         key="view_examples"
@@ -577,17 +567,40 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     );
   }
 
-  return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />
-    </EuiPopover>
-  );
+  return <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />;
 };
 
-export const LinksMenu = withKibana(LinksMenuUI);
+export const LinksMenu: FC<LinksMenuProps> = (props) => {
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  const onButtonClick = setPopoverOpen.bind(null, !isPopoverOpen);
+  const closePopover = setPopoverOpen.bind(null, false);
+
+  const button = (
+    <EuiButtonIcon
+      size="s"
+      color="text"
+      onClick={onButtonClick}
+      iconType="gear"
+      aria-label={i18n.translate('xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel', {
+        defaultMessage: 'Select action for anomaly at {time}',
+        values: { time: formatHumanReadableDateTimeSeconds(props.anomaly.time) },
+      })}
+      data-test-subj="mlAnomaliesListRowActionsButton"
+    />
+  );
+
+  return (
+    <div>
+      <EuiPopover
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <LinksMenuUI {...props} onItemClick={closePopover} />
+      </EuiPopover>
+    </div>
+  );
+};
