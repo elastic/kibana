@@ -8,7 +8,7 @@
   },
   "kibanaVersion": "kibana",
   "optionalPlugins": ["fleet", "home", "usageCollection", "lens"],
-  "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact"],
+  "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact", "lens"],
   "requiredPlugins": [
     "actions",
     "data",
