@@ -112,7 +112,7 @@ describe('interpreter/functions#treemapVis', () => {
       fn(context, {
         ...visConfig,
         legendPosition: 'some not valid position',
-      })
+      } as any)
     ).toThrowErrorMatchingSnapshot();
   });
 

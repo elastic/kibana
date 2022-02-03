@@ -12,9 +12,10 @@ export const pieVis: ElementFactory = () => ({
   type: 'chart',
   help: 'Pie visualization',
   icon: 'visPie',
-  expression: `filters
-  | demodata
-  | head 10
-  | pieVis metric={visdimension "age"} buckets={visdimension "project"} buckets={visdimension "cost"} legendDisplay="default"
-  | render`,
+  expression: `kibana
+| selectFilter
+| demodata
+| head 10
+| pieVis metric={visdimension "age"} buckets={visdimension "project"} buckets={visdimension "cost"} legendDisplay="default"
+| render`,
 });

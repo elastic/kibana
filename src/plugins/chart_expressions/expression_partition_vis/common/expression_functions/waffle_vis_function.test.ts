@@ -83,7 +83,7 @@ describe('interpreter/functions#waffleVis', () => {
       fn(context, {
         ...visConfig,
         legendPosition: 'some not valid position',
-      })
+      } as any)
     ).toThrowErrorMatchingSnapshot();
   });
 
