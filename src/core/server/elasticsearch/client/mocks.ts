@@ -22,13 +22,13 @@ const omittedProps = [
   'helpers',
 ] as Array<PublicKeys<Client>>;
 
-type DeeplyMockedApi<T> = {
+export type DeeplyMockedApi<T> = {
   [P in keyof T]: T[P] extends (...args: any[]) => any
     ? ClientApiMockInstance<ReturnType<T[P]>, Parameters<T[P]>>
     : DeeplyMockedApi<T[P]>;
 } & T;
 
-interface ClientApiMockInstance<T, Y extends any[]> extends jest.MockInstance<T, Y> {
+export interface ClientApiMockInstance<T, Y extends any[]> extends jest.MockInstance<T, Y> {
   /**
    * Helper API around `mockReturnValue` returning either the body or the whole TransportResult
    * depending on the `meta` parameter used during the call
