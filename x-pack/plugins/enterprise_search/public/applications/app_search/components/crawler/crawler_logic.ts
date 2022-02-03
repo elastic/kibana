@@ -40,6 +40,7 @@ export interface CrawlerValues {
   mostRecentCrawlRequest: CrawlRequest | null;
   mostRecentCrawlRequestStatus: CrawlerStatus | null;
   timeoutId: NodeJS.Timeout | null;
+  startCrawlError?: string;
 }
 
 interface CrawlerActions {
@@ -49,6 +50,8 @@ interface CrawlerActions {
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
   startCrawl(overrides?: object): { overrides?: object };
+  startCrawlSuccess(): void;
+  startCrawlError(error: string): { error: string };
   stopCrawl(): void;
 }
 
@@ -61,6 +64,8 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
     onReceiveCrawlerData: (data) => ({ data }),
     startCrawl: (overrides) => ({ overrides }),
+    startCrawlSuccess: true,
+    startCrawlError: (error: string) => ({ error }),
     stopCrawl: () => null,
   },
   reducers: {
@@ -93,6 +98,14 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       {
         clearTimeoutId: () => null,
         onCreateNewTimeout: (_, { timeoutId }) => timeoutId,
+      },
+    ],
+    startCrawlError: [
+      null,
+      {
+        startCrawl: () => null,
+        startCrawlSuccess: () => null,
+        startCrawlError: (_, { error }) => error,
       },
     ],
   },
@@ -143,11 +156,13 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`, {
           body: JSON.stringify({ overrides }),
         });
-        actions.fetchCrawlerData();
+        actions.startCrawlSuccess();
       } catch (e) {
+        actions.startCrawlError(e);
         flashAPIErrors(e);
       }
     },
+    startCrawlSuccess: () => actions.fetchCrawlerData(),
     stopCrawl: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;

@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { CrawlerLogic } from '../../crawler_logic';
+
 import { CrawlerDomain } from '../../types';
 
 export interface CrawlSelectDomainsLogicProps {
@@ -52,5 +54,10 @@ export const CrawlSelectDomainsModalLogic = kea<
         onSelectDomainUrls: (_, { domainUrls }) => domainUrls,
       },
     ],
+  }),
+  listeners: ({ actions }) => ({
+    [CrawlerLogic.actionTypes.startCrawlSuccess]: () => {
+      actions.hideModal();
+    },
   }),
 });
