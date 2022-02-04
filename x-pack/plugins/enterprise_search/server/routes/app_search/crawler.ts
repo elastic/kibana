@@ -59,14 +59,21 @@ export function registerCrawlerRoutes({
   );
 
   router.post(
-    skipBodyValidation({
+    {
       path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
       validate: {
         params: schema.object({
           name: schema.string(),
         }),
+        body: schema.object({
+          overrides: schema.maybe(
+            schema.object({
+              domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+            })
+          ),
+        }),
       },
-    }),
+    },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v1/engines/:name/crawler/crawl_requests',
     })
