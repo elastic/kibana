@@ -7,12 +7,18 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useCallback, useMemo } from 'react';
-import { AnyArtifact, ArtifactEntryCardProps } from '../../artifact_entry_card';
+import {
+  AnyArtifact,
+  ArtifactEntryCardProps,
+  useEndpointPoliciesToArtifactPolicies,
+} from '../../artifact_entry_card';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+import { getLoadPoliciesError } from '../../../common/translations';
+import { useToasts } from '../../../../common/lib/kibana';
 
 export interface UseArtifactCardPropsProviderProps {
   artifacts: ExceptionListItemSchema[];
-  policies: ArtifactEntryCardProps['policies'];
   cardActionEditLabel: string;
   cardActionDeleteLabel: string;
   dataTestSubj?: string;
@@ -28,12 +34,22 @@ export type ArtifactCardPropsProvider = (
  */
 export const useArtifactCardPropsProvider = ({
   artifacts,
-  policies,
   cardActionDeleteLabel,
   cardActionEditLabel,
   dataTestSubj,
 }: UseArtifactCardPropsProviderProps): ArtifactCardPropsProvider => {
   const getTestId = useTestIdGenerator(dataTestSubj);
+  const toasts = useToasts();
+
+  const { data: policyData } = useGetEndpointSpecificPolicies({
+    onError: (error) => {
+      toasts.addDanger(getLoadPoliciesError(error));
+    },
+  });
+
+  const policies: ArtifactEntryCardProps['policies'] = useEndpointPoliciesToArtifactPolicies(
+    policyData?.items
+  );
 
   const artifactCardPropsPerItem = useMemo(() => {
     const cachedCardProps: Record<string, ArtifactEntryCardProps> = {};

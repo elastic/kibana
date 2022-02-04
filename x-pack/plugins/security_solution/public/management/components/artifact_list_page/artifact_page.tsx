@@ -71,8 +71,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     }, [_labels]);
 
     const handleCardProps = useArtifactCardPropsProvider({
-      artifacts: [],
-      policies: {},
+      artifacts: [], // FIXME:PT provide list of items
       cardActionDeleteLabel: labels.cardActionDeleteLabel,
       cardActionEditLabel: labels.cardActionEditLabel,
       dataTestSubj: getTestId('card'),
@@ -151,8 +150,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
             <EuiText color="subdued" size="xs" data-test-subj={getTestId('showCount')}>
               {
-                // FIXME:PT provide total count
-                labels.getShowingCountLabel(0)
+                labels.getShowingCountLabel(0) // FIXME:PT provide total count
               }
             </EuiText>
 

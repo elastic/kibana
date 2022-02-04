@@ -100,7 +100,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     'data-test-subj': dataTestSubj,
     size = 'm',
   }) => {
-    // FIXME:PT should handle cases where we find the `id` to be invalid (show toast, close flyout)
+    // FIXME:PT should handle cases where we find the `id` to be invalid (show toast, close flyout ?)
     // FIXME:PT should the flyout be made `reusable` for use cases where it gets opened in other areas of security (like Event filters)
     // FIXME:PT handle cases where the "create" does not call the actual create api (ex. upload) (maybe defer from first iteration
 
@@ -138,7 +138,6 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     }
 
     return (
-      // FIXME:PT implement onClose
       <EuiFlyout size={size} onClose={handleFlyoutClose} data-test-subj={dataTestSubj}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
