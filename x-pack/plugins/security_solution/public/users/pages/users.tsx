@@ -14,15 +14,12 @@ import { isTab } from '../../../../timelines/public';
 import { SecurityPageName } from '../../app/types';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
-import { LastEventTime } from '../../common/components/last_event_time';
 import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { TimelineId } from '../../../common/types';
-import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { inputsSelectors } from '../../common/store';
@@ -38,13 +35,11 @@ import { usersModel } from '../store';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../timelines/components/timeline/helpers';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import { UsersDetailsLink } from '../../common/components/links';
 
 const ID = 'UsersQueryId';
 
@@ -59,13 +54,6 @@ const StyledFullHeightContainer = styled.div`
 
 const UsersComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
-  // const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const graphEventId = undefined;
-
-  // = useShallowEqualSelector(
-  //   (state) =>
-  //     (getTimeline(state, TimelineId.usersPageExternalAlerts) ?? timelineDefaults).graphEventId
-  // );
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -133,7 +121,7 @@ const UsersComponent = () => {
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
@@ -143,6 +131,8 @@ const UsersComponent = () => {
             <SecuritySolutionTabNavigation navTabs={navTabsUsers} />
 
             <EuiSpacer />
+
+            <UsersDetailsLink userName="TODO user details" />
 
             <UsersTabs
               deleteQuery={deleteQuery}
