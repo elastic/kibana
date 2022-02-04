@@ -397,10 +397,10 @@ export const QueryBarTopRow = React.memo(
         let id = selectedFilters[idx].id;
         // groupId starts from 1; id starts from 0
 
-        // if (lastFilter !== undefined) {
+        if (lastFilter !== undefined) {
         //   groupId += lastFilter.groupId;
         //   id += lastFilter.id + 1;
-        // }
+        }
 
         return {
           ...filter,

@@ -111,9 +111,7 @@ export function AddFilterModal({
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
-  const [groupsCount, setGroupsCount] = useState<number>(
-    multipleFilters?.length ? multipleFilters?.length : 1
-  );
+  const [groupsCount, setGroupsCount] = useState<number>(1);
 
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>([
     {
@@ -514,7 +512,7 @@ export function AddFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId: groupsCount + 1,
+                                    groupId: Number(multipleFilters?.length) + localFilters.length + 1,
                                     subGroupId,
                                     id: Number(multipleFilters?.length) + localFilters.length,
                                   },

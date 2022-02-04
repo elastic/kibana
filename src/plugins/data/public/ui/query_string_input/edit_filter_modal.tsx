@@ -117,7 +117,7 @@ export function EditFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(multipleFilters?.length ? multipleFilters?.length : 1);
+  const [groupsCount, setGroupsCount] = useState<number>(1);
 
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
@@ -483,7 +483,7 @@ export function EditFilterModal({
                                       value: undefined,
                                       relationship: undefined,
                                       groupId: localfilter.groupId,
-                                      id: multipleFilters.length + localFilters.length,
+                                      id: Number(multipleFilters?.length) + localFilters.length,
                                       subGroupId,
                                     },
                                   ]);
@@ -514,6 +514,9 @@ export function EditFilterModal({
                                   (f) => f.id === localfilter.id && f.groupId === Number(groupId)
                                 );
                                 localFilters[idx] = updatedLocalFilter;
+                                const countOfFilterBeforeFilterEdit = multipleFilters.filter(
+                                  (f) => f.groupId === Number(groupId)
+                                );
                                 setLocalFilters([
                                   ...localFilters,
                                   {
@@ -521,15 +524,14 @@ export function EditFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId:
-                                      groupsCount + 1,
+                                    groupId: Number(multipleFilters?.length) - countOfFilterBeforeFilterEdit.length + localFilters.length + 1,
                                     subGroupId,
-                                    id: multipleFilters.length + localFilters.length - 1,
+                                    id: Number(multipleFilters.length) - countOfFilterBeforeFilterEdit.length + localFilters.length,
                                   },
                                 ]);
-                                // if (filtersOnGroup.length <= 1) {
-                                setGroupsCount((groupsCount) => groupsCount + 1);
-                                // }
+                                if (filtersOnGroup.length <= 1) {
+                                  setGroupsCount((groupsCount) => groupsCount + 1);
+                                }
                               }}
                               iconType="plus"
                               size="s"
