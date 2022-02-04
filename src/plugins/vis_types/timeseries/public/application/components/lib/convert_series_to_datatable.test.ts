@@ -210,5 +210,26 @@ describe('convert series to datatables', () => {
       });
       expect(tables.series1.rows).toEqual([...expected1, ...expected2]);
     });
+
+    test('for series aggregation split by terms, no column is added', async () => {
+      const updatedModel = {
+        ...model,
+        series: [
+          {
+            ...model.series[0],
+            metrics: [
+              {
+                field: 'test2',
+                id: 'series1',
+                function: 'sum',
+                type: 'series_agg',
+              },
+            ],
+          },
+        ],
+      } as TimeseriesVisParams;
+      const tables = await convertSeriesToDataTable(updatedModel, series, indexPattern);
+      expect(tables.series1.columns.length).toEqual(2);
+    });
   });
 });

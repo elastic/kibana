@@ -459,6 +459,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                           });
                         }
                       }}
+                      step="any"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -504,6 +505,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                           });
                         }
                       }}
+                      step="any"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
