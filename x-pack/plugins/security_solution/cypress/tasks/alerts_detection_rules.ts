@@ -295,6 +295,12 @@ export const openBulkActionsMenu = () => {
   cy.get('[data-test-subj="bulkActions-popover"]').click();
 };
 
+export const clickAddIndexPatternsMenuItem = () => {
+  openBulkActionsMenu();
+  cy.get('[data-test-subj="indexPatternsBulkEditRule"]').click();
+  cy.get('[data-test-subj="addIndexPatternsBulkEditRule"]').click();
+};
+
 export const openBulkEditAddIndexPatternsForm = () => {
   openBulkActionsMenu();
   cy.get('[data-test-subj="indexPatternsBulkEditRule"]').click();
@@ -311,10 +317,24 @@ export const openBulkEditDeleteIndexPatternsForm = () => {
   cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Delete index patterns');
 };
 
+export const openBulkEditTagsPatternsForm = () => {
+  openBulkActionsMenu();
+  cy.get('[data-test-subj="tagsBulkEditRule"]').click();
+  cy.get('[data-test-subj="addTagsBulkEditRule"]').click();
+
+  cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Add tags');
+};
+
 export const typeIndexPattern = (customIndex: string) => {
   cy.get('[data-test-subj="detectionEngineBulkEditIndexPatterns"]')
     .find('[data-test-subj="input"]')
     .type(`${customIndex}{enter}`);
+};
+
+export const typeTags = (tags: string[]) => {
+  cy.get('[data-test-subj="detectionEngineBulkEditTags"]')
+    .find('[data-test-subj="input"]')
+    .type(tags.join('{enter}'));
 };
 
 export const getOverwriteCheckbox = () =>
@@ -331,4 +351,38 @@ export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: numb
   cy.get('[data-test-subj="globalToastList"]').contains(
     `You’ve successfully updated ${rulesCount} rule`
   );
+};
+
+export const waitForElasticRulesBulkEditModal = (rulesCount: number) => {
+  cy.get('[data-test-subj="confirmModalTitleText"]').should(
+    'have.text',
+    `${rulesCount} Elastic rules cannot be edited`
+  );
+};
+
+export const waitForMixedRulesBulkEditModal = (
+  elasticRulesCount: number,
+  customRulesCount: number
+) => {
+  cy.get('[data-test-subj="confirmModalTitleText"]').should(
+    'have.text',
+    `${elasticRulesCount} Elastic rules cannot be edited`
+  );
+
+  cy.contains(
+    `The update action will only be applied to ${customRulesCount} Custom rules you’ve selected.`
+  );
+};
+
+export const testAllTagsBadges = (tags: string[]) => {
+  cy.get('[data-test-subj="tagsDisplayPopoverButton"]')
+    .should('have.length', 6)
+    .each(($el) => {
+      $el.trigger('click');
+      cy.get('[data-test-subj="tagsDisplayPopoverWrapper"]')
+        .should('be.visible')
+        .should('have.text', tags.join(''));
+      $el.trigger('click');
+      cy.get('[data-test-subj="tagsDisplayPopoverWrapper"]').should('be.hidden');
+    });
 };
