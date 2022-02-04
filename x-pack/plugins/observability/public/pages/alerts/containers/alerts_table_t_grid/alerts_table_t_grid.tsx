@@ -391,7 +391,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           sortDirection,
         },
       ],
-
+      additionalFieldsToFetch: ['*'],
       leadingControlColumns,
       trailingControlColumns,
       unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),

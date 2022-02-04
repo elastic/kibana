@@ -121,6 +121,7 @@ export interface TGridStandaloneProps {
   data?: DataPublicPluginStart;
   unit?: (total: number) => React.ReactNode;
   showCheckboxes?: boolean;
+  additionalFieldsToFetch?: string[];
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
@@ -155,6 +156,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   data,
   unit,
   showCheckboxes = true,
+  additionalFieldsToFetch = [],
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -225,7 +227,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     docValueFields: [],
     entityType,
     excludeEcsData: true,
-    fields,
+    fields: additionalFieldsToFetch ? [...fields, ...additionalFieldsToFetch] : fields,
     filterQuery: combinedQueries?.filterQuery,
     id: STANDALONE_ID,
     indexNames,
