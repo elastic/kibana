@@ -47,7 +47,7 @@ export const createRulesRoute = (
 
       try {
         const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution.getAppClient();
@@ -104,9 +104,7 @@ export const createRulesRoute = (
           await rulesClient.muteAll({ id: createdRule.id });
         }
 
-        const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(
-          createdRule.id
-        );
+        const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
 
         const [validated, errors] = newTransformValidate(
           createdRule,
