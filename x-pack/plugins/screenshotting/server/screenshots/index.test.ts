@@ -7,6 +7,7 @@
 
 import { of, throwError, NEVER } from 'rxjs';
 import type { Logger } from 'src/core/server';
+import type { ConfigType } from '../config';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
 import * as Layouts from '../layouts/create_layout';
@@ -46,7 +47,7 @@ describe('Screenshot Observable Pipeline', () => {
       },
       urls: ['/welcome/home/start/index.htm'],
     } as unknown as typeof options;
-    screenshots = new Screenshots(driverFactory, logger);
+    screenshots = new Screenshots(driverFactory, logger, { poolSize: 1 } as ConfigType);
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
 

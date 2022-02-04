@@ -75,7 +75,7 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
       const browserDriverFactory = await this.browserDriverFactory;
       const logger = this.logger.get('screenshot');
 
-      return new Screenshots(browserDriverFactory, logger);
+      return new Screenshots(browserDriverFactory, logger, this.config);
     })();
     // Already handled in `browserDriverFactory`
     this.screenshots.catch(() => {});

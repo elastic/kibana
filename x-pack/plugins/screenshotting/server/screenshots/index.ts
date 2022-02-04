@@ -19,11 +19,13 @@ import {
 } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import { LayoutParams } from '../../common';
+import type { ConfigType } from '../config';
 import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import { createLayout } from '../layouts';
 import type { Layout } from '../layouts';
 import { ScreenshotObservableHandler } from './observable';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
+import { Semaphore } from './semaphore';
 
 export interface ScreenshotOptions extends ScreenshotObservableOptions {
   layout: LayoutParams;
@@ -52,10 +54,15 @@ const DEFAULT_SETUP_RESULT = {
 };
 
 export class Screenshots {
+  private semaphore: Semaphore;
+
   constructor(
     private readonly browserDriverFactory: HeadlessChromiumDriverFactory,
-    private readonly logger: Logger
-  ) {}
+    private readonly logger: Logger,
+    { poolSize }: ConfigType
+  ) {
+    this.semaphore = new Semaphore(poolSize);
+  }
 
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
     const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
@@ -80,6 +87,7 @@ export class Screenshots {
         this.logger
       )
       .pipe(
+        this.semaphore.acquire(),
         mergeMap(({ driver, unexpectedExit$, metrics$, close }) => {
           apmCreatePage?.end();
           metrics$.subscribe(({ cpu, memory }) => {
