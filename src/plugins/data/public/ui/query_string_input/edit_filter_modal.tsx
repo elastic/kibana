@@ -483,7 +483,7 @@ export function EditFilterModal({
                                       value: undefined,
                                       relationship: undefined,
                                       groupId: localfilter.groupId,
-                                      id: multipleFilters.length,
+                                      id: multipleFilters.length + localFilters.length,
                                       subGroupId,
                                     },
                                   ]);
