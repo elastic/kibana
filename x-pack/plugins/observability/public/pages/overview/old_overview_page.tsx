@@ -100,13 +100,22 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={6}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={4}>
               {/* Data sections */}
               {hasAnyData && <DataSections bucketSize={bucketSize} />}
               <EmptySections />
-              <EuiSpacer size="l" />
-              <EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiSpacer size="l" />
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {hasDataMap?.alert?.hasData && (
+                  <EuiFlexItem>
+                    <EuiPanel hasBorder={true}>
+                      <AlertsSection />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem>
                   {/* Resources / What's New sections */}
                   <EuiPanel hasBorder={true}>
@@ -115,13 +124,6 @@ export function OverviewPage({ routeParams }: Props) {
                     {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
                   </EuiPanel>
                 </EuiFlexItem>
-                {hasDataMap?.alert?.hasData && (
-                  <EuiFlexItem>
-                    <EuiPanel hasBorder={true}>
-                      <AlertsSection />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                )}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

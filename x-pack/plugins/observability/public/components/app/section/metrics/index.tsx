@@ -207,7 +207,7 @@ export function MetricsSection({ bucketSize }: Props) {
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.metrics.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Open in app',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}

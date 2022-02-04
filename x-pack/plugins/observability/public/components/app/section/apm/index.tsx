@@ -98,7 +98,7 @@ export function APMSection({ bucketSize }: Props) {
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.apm.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Open in app',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}
