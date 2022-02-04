@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
           trackTotalHits: true,
         },
         title: 'Untitled discover search',
-        version: '8.2.0',
+        version: '8.1.0',
       });
       expect(res.status).to.eql(200);
       expect(res.body.path).to.match(/download/);
