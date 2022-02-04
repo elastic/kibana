@@ -7,7 +7,15 @@
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
 
-import { EuiComboBox, EuiForm, EuiAccordion, EuiSpacer, EuiSelect, EuiFormRow } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiComboBox,
+  EuiForm,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -28,9 +36,11 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   editTransformFlyout: [state, dispatch],
   indexPatternId,
 }) => {
-  const formFields = state.formFields;
+  const { formFields, formSections } = state;
   const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
   const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
+
+  const isRetentionPolicyAvailable = dateFieldNames.length > 0;
 
   const appDeps = useAppDependencies();
   const indexPatternsClient = appDeps.data.indexPatterns;
@@ -204,17 +214,25 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
 
       <EuiSpacer size="l" />
 
-      <EuiAccordion
-        data-test-subj="transformEditAccordionRetentionPolicy"
-        id="transformEditAccordionRetentionPolicy"
-        buttonContent={i18n.translate(
-          'xpack.transform.transformList.editFlyoutFormRetentionPolicyButtonContent',
+      <EuiSwitch
+        name="transformEditRetentionPolicySwitch"
+        label={i18n.translate(
+          'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
           {
             defaultMessage: 'Retention policy',
           }
         )}
-        paddingSize="s"
-      >
+        checked={formSections.retentionPolicy.enabled}
+        onChange={(e) =>
+          dispatch({
+            section: 'retentionPolicy',
+            enabled: e.target.checked,
+          })
+        }
+        disabled={!isRetentionPolicyAvailable}
+        data-test-subj="transformEditRetentionPolicySwitch"
+      />
+      {formSections.retentionPolicy.enabled && (
         <div data-test-subj="transformEditAccordionRetentionPolicyContent">
           {
             // If data view or date fields info not available
@@ -285,7 +303,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             value={formFields.retentionPolicyMaxAge.value}
           />
         </div>
-      </EuiAccordion>
+      )}
 
       <EuiSpacer size="l" />
 
