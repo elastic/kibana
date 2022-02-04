@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  CoreStart,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  ISavedObjectsRepository,
-} from 'src/core/server';
+import { Logger, CoreStart, ElasticsearchClient, ISavedObjectsRepository } from 'src/core/server';
 import {
   AggregationsAggregate,
   SearchRequest,
