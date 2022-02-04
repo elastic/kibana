@@ -831,7 +831,41 @@ export default ({ getService }: FtrProviderContext): void => {
                     type: 'detection',
                     namespace_type: 'single',
                   },
-                  getImportExceptionsListItemSchemaMock('test_item_id', 'i_exist'),
+                  {
+                    comments: [
+                      {
+                        comment: 'This is an exception to the rule',
+                        created_at: '2022-02-04T02:27:40.938Z',
+                        created_by: 'elastic',
+                        id: '845fc456-91ff-4530-bcc1-5b7ebd2f75b5',
+                      },
+                    ],
+                    description: 'some description',
+                    entries: [
+                      {
+                        entries: [
+                          {
+                            field: 'nested.field',
+                            operator: 'included',
+                            type: 'match',
+                            value: 'some value',
+                          },
+                        ],
+                        field: 'some.parentField',
+                        type: 'nested',
+                      },
+                      {
+                        field: 'some.not.nested.field',
+                        operator: 'included',
+                        type: 'match',
+                        value: 'some value',
+                      },
+                    ],
+                    item_id: 'item_id_1',
+                    list_id: 'i_exist',
+                    name: 'Query with a rule id',
+                    type: 'simple',
+                  },
                 ])
               ),
               'rules.ndjson'
