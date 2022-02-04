@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   PluginInitializerContext,
   CoreStart,
   CoreSetup,
   Plugin as PluginType,
   Logger,
-  SavedObjectsClient,
   SavedObjectsClientContract,
-} from '../../../../src/core/server';
+  ServiceStatus,
+} from 'src/core/server';
+import { BehaviorSubject } from 'rxjs';
+import { SavedObjectsClient, ServiceStatusLevels } from '../../../../src/core/server';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
 import {
@@ -32,6 +34,10 @@ import { syntheticsServiceApiKey } from './lib/saved_objects/service_api_key';
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
 export class Plugin implements PluginType {
+  private readonly status$ = new BehaviorSubject<ServiceStatus>({
+    level: ServiceStatusLevels.unavailable,
+    summary: 'Initializing service',
+  });
   private savedObjectsClient?: SavedObjectsClientContract;
   private initContext: PluginInitializerContext;
   private logger: Logger;
@@ -45,6 +51,8 @@ export class Plugin implements PluginType {
 
   public setup(core: CoreSetup, plugins: UptimeCorePluginsSetup) {
     const config = this.initContext.config.get<UptimeConfig>();
+
+    core.status.set(this.status$.asObservable());
 
     savedObjectsAdapter.config = config;
 
@@ -117,11 +125,21 @@ export class Plugin implements PluginType {
     }
 
     if (this.server?.config?.service?.enabled) {
-      this.syntheticService?.init();
+      this.syntheticService?.init().then(() => {
+        this.status$.next({
+          level: ServiceStatusLevels.available,
+          summary: 'Ready',
+        });
+      });
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
       if (this.server && this.syntheticService) {
         this.server.syntheticsService = this.syntheticService;
       }
+    } else {
+      this.status$.next({
+        level: ServiceStatusLevels.available,
+        summary: 'Ready',
+      });
     }
   }
 

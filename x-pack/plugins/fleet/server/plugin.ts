@@ -414,8 +414,10 @@ export class FleetPlugin
       try {
         // Fleet remains `available` during setup as to excessively delay Kibana's boot process.
         // This should be reevaluated as Fleet's setup process is optimized and stabilized.
+        //
+        // UPDATE: Back to `degraded` because CI is affected by the load generating during installing the artifacts (randomly timing out some tests)
         this.fleetStatus$.next({
-          level: ServiceStatusLevels.available,
+          level: ServiceStatusLevels.degraded,
           summary: 'Fleet is setting up',
         });
 

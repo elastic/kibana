@@ -69,11 +69,11 @@ export class SyntheticsService {
     //   }
     // });
 
-    this.setupIndexTemplates();
+    return this.setupIndexTemplates();
   }
 
   private setupIndexTemplates() {
-    installSyntheticsIndexTemplates(this.server).then(
+    return installSyntheticsIndexTemplates(this.server).then(
       (result) => {
         if (result.name === 'synthetics' && result.install_status === 'installed') {
           this.logger.info('Installed synthetics index templates');
