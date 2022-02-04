@@ -231,7 +231,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await ml.navigation.navigateToDataVisualizer();
       });
 
-      it(`${testData.suiteTitle} loads the source data in the data visualizer`, async () => {
+      it(`${testData.suiteTitle} loads lens charts`, async () => {
         await ml.testExecution.logTestStep(
           `${testData.suiteTitle} loads the saved search selection page`
         );
@@ -254,20 +254,16 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         const lensMetricField = testData.expected.metricFields![0];
 
         if (lensMetricField) {
-          await ml.dataVisualizerTable.assertLensActionShowChart(
-            lensMetricField.type,
-            lensMetricField.fieldName
-          );
+          await ml.dataVisualizerTable.assertLensActionShowChart(lensMetricField.fieldName);
+          await ml.navigation.browserBackTo('dataVisualizerTable');
         }
         const lensNonMetricField = testData.expected.nonMetricFields?.find(
           (f) => f.type === ML_JOB_FIELD_TYPES.KEYWORD
         );
 
         if (lensNonMetricField) {
-          await ml.dataVisualizerTable.assertLensActionShowChart(
-            lensNonMetricField.type,
-            lensNonMetricField.fieldName
-          );
+          await ml.dataVisualizerTable.assertLensActionShowChart(lensNonMetricField.fieldName);
+          await ml.navigation.browserBackTo('dataVisualizerTable');
         }
       });
     });
