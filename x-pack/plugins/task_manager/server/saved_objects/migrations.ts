@@ -13,15 +13,15 @@ import {
   SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
 } from '../../../../../src/core/server';
-import { TaskInstance, TaskInstanceWithDeprecatedFields, TaskStatus } from '../task';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
 
 interface TaskInstanceLogMeta extends LogMeta {
-  migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> };
+  migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<ConcreteTaskInstance> };
 }
 
 type TaskInstanceMigration = (
-  doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
-) => SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>;
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+) => SavedObjectUnsanitizedDoc<ConcreteTaskInstance>;
 
 export function getMigrations(): SavedObjectMigrationMap {
   return {
@@ -45,14 +45,11 @@ export function getMigrations(): SavedObjectMigrationMap {
 }
 
 function executeMigrationWithErrorHandling(
-  migrationFunc: SavedObjectMigrationFn<
-    TaskInstanceWithDeprecatedFields,
-    TaskInstanceWithDeprecatedFields
-  >,
+  migrationFunc: SavedObjectMigrationFn<ConcreteTaskInstance, ConcreteTaskInstance>,
   version: string
 ) {
   return (
-    doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>,
+    doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -72,8 +69,8 @@ function executeMigrationWithErrorHandling(
 }
 
 function alertingTaskLegacyIdToSavedObjectIds(
-  doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
-): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
     let params: { spaceId?: string; alertId?: string } = {};
     params = JSON.parse(doc.attributes.params as unknown as string);
@@ -98,8 +95,8 @@ function alertingTaskLegacyIdToSavedObjectIds(
 }
 
 function actionsTasksLegacyIdToSavedObjectIds(
-  doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
-): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('actions:')) {
     let params: { spaceId?: string; actionTaskParamsId?: string } = {};
     params = JSON.parse(doc.attributes.params as unknown as string);
@@ -130,7 +127,7 @@ function actionsTasksLegacyIdToSavedObjectIds(
 function moveIntervalIntoSchedule({
   attributes: { interval, ...attributes },
   ...doc
-}: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>): SavedObjectUnsanitizedDoc<TaskInstance> {
+}: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
   return {
     ...doc,
     attributes: {
@@ -147,22 +144,22 @@ function moveIntervalIntoSchedule({
 }
 
 function pipeMigrations(...migrations: TaskInstanceMigration[]): TaskInstanceMigration {
-  return (doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>) =>
+  return (doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
 }
 
 function resetAttemptsAndStatusForTheTasksWithoutSchedule(
-  doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
-): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
-    if (!doc.attributes.schedule?.interval) {
+    if (!doc.attributes.schedule?.interval && doc.attributes.status === TaskStatus.Failed) {
       return {
         ...doc,
         attributes: {
           ...doc.attributes,
           attempts: 0,
           status: TaskStatus.Idle,
-        } as TaskInstanceWithDeprecatedFields,
+        },
       };
     }
   }
