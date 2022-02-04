@@ -99,7 +99,7 @@ describe('get_input_output_index', () => {
       expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
     });
 
-    test('Returns a saved object inputIndex default along with experimental features when uebaEnabled=true', async () => {
+    test('Returns a saved object inputIndex default along with technical preview features when uebaEnabled=true', async () => {
       servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
         id,
         type,

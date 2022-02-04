@@ -366,7 +366,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                               <EuiBadge color="hollow">
                                 <FormattedMessage
                                   id="xpack.lens.chartSwitch.experimentalLabel"
-                                  defaultMessage="Experimental"
+                                  defaultMessage="Technical preview"
                                 />
                               </EuiBadge>
                             </EuiFlexItem>
