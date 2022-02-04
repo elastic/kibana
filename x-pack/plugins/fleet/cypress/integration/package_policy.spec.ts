@@ -10,7 +10,7 @@ describe('Edit package policy', () => {
     id: 'policy-1',
     name: 'fleet_server-1',
     namespace: 'default',
-    package: { name: 'fleet_server', title: 'Fleet Server', version: '1.1.1' },
+    package: { name: 'fleet_server', title: 'Fleet Server', version: '1.1.0' },
     enabled: true,
     policy_id: 'fleet-server-policy',
     output_id: 'fleet-default-output',
@@ -62,6 +62,47 @@ describe('Edit package policy', () => {
         monitoring_enabled: ['logs', 'metrics'],
         status: 'active',
         package_policies: [{ id: 'policy-1', name: 'fleet_server-1' }],
+      },
+    });
+    cy.intercept('/api/fleet/epm/packages/fleet_server*', {
+      item: {
+        name: 'fleet_server',
+        title: 'Fleet Server',
+        version: '1.1.0',
+        release: 'ga',
+        description: 'Centrally manage Elastic Agents with the Fleet Server integration',
+        type: 'integration',
+        download: '/epr/fleet_server/fleet_server-1.1.0.zip',
+        path: '/package/fleet_server/1.1.0',
+        icons: [],
+        conditions: { kibana: { version: '^7.16.0 || ^8.0.0' } },
+        owner: { github: 'elastic/ingest-management' },
+        categories: ['elastic_stack'],
+        format_version: '1.0.0',
+        readme: '/package/fleet_server/1.1.0/docs/README.md',
+        license: 'basic',
+        assets: {},
+        policy_templates: [
+          {
+            name: 'fleet_server',
+            title: 'Fleet Server',
+            description: 'Fleet Server setup',
+            inputs: [
+              {
+                type: 'fleet-server',
+                vars: [],
+                title: 'Fleet Server',
+                description: 'Fleet Server Configuration',
+                template_path: 'agent.yml.hbs',
+              },
+            ],
+            multiple: true,
+          },
+        ],
+        latestVersion: '1.1.0',
+        removable: true,
+        keepPoliciesUpToDate: false,
+        status: 'not_installed',
       },
     });
   });
