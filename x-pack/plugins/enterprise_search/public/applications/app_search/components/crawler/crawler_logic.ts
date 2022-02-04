@@ -45,14 +45,12 @@ export interface CrawlerValues {
 }
 
 interface CrawlerActions {
-  clearStartCrawlError(): void;
   clearTimeoutId(): void;
   createNewTimeoutForCrawlerData(duration: number): { duration: number };
   fetchCrawlerData(): void;
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
-  onStartCrawlError(error: HttpResponse<ErrorResponse>): { error: HttpResponse<ErrorResponse> };
-  onStartCrawlSuccess(): void;
+  onStartCrawlRequestComplete(): void;
   startCrawl(overrides?: object): { overrides?: object };
   stopCrawl(): void;
 }
@@ -60,14 +58,12 @@ interface CrawlerActions {
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
   path: ['enterprise_search', 'app_search', 'crawler_logic'],
   actions: {
-    clearStartCrawlError: true,
     clearTimeoutId: true,
     createNewTimeoutForCrawlerData: (duration) => ({ duration }),
     fetchCrawlerData: true,
     onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
     onReceiveCrawlerData: (data) => ({ data }),
-    onStartCrawlError: (error) => ({ error }),
-    onStartCrawlSuccess: true,
+    onStartCrawlRequestComplete: true,
     startCrawl: (overrides) => ({ overrides }),
     stopCrawl: () => null,
   },
@@ -143,8 +139,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         actions.createNewTimeoutForCrawlerData(POLLING_DURATION_ON_FAILURE);
       }
     },
-    onStartCrawlError: ({ error }) => flashAPIErrors(error),
-    onStartCrawlSuccess: () => actions.fetchCrawlerData(),
     startCrawl: async ({ overrides = {} }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
@@ -153,9 +147,11 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`, {
           body: JSON.stringify({ overrides }),
         });
-        actions.onStartCrawlSuccess();
+        actions.fetchCrawlerData();
       } catch (e) {
-        actions.onStartCrawlError(e);
+        flashAPIErrors(e);
+      } finally {
+        actions.onStartCrawlRequestComplete();
       }
     },
     stopCrawl: async () => {
