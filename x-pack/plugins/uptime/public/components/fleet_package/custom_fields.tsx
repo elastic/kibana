@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, memo, useState, useLayoutEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -57,6 +57,14 @@ export const CustomFields = memo<Props>(
   ({ validate, dataStreams = [], children, appendAdvancedFields }) => {
     const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled, isEditable } =
       usePolicyConfigContext();
+
+    // The following workaround is needed to fix a bug which only occurs in Firefox, see issue: elastic/uptime/issues/444
+    const [monitorTypeInterimState, setMonitorTypeInterimState] = useState<DataStream | undefined>(
+      monitorType
+    );
+    useLayoutEffect(() => {
+      setMonitorTypeInterimState(undefined);
+    }, []);
 
     const isHTTP = monitorType === DataStream.HTTP;
     const isTCP = monitorType === DataStream.TCP;
@@ -128,7 +136,7 @@ export const CustomFields = memo<Props>(
                 >
                   <EuiSelect
                     options={dataStreamOptions}
-                    value={monitorType}
+                    value={monitorTypeInterimState}
                     onChange={(event) => setMonitorType(event.target.value as DataStream)}
                     data-test-subj="syntheticsMonitorTypeField"
                   />
