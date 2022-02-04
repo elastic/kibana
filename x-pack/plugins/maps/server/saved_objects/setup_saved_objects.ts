@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/server';
+import { mapValues } from 'lodash';
+import type { CoreSetup, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import type { SavedObjectMigrationMap } from 'src/core/server';
 import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
 import { APP_ICON, getFullPath } from '../../common/constants';
-import { getMapFilterMigrations } from '../../common/migrations/get_map_filter_migrations';
+import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
+import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(
@@ -50,7 +52,7 @@ export function setupSavedObjects(
     migrations: () => {
       return mergeSavedObjectMigrationMaps(
         savedObjectMigrations,
-        getMapFilterMigrations(getFilterMigrations()) as unknown as SavedObjectMigrationMap
+        getPersistedStateMigrations(getFilterMigrations()) as unknown as SavedObjectMigrationMap
       );
     },
   });
@@ -72,3 +74,27 @@ export function setupSavedObjects(
     },
   });
 }
+
+/**
+ * This creates a migration map that applies external plugin migrations to persisted state stored in Maps
+ */
+export const getPersistedStateMigrations = (
+  filterMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
+  mapValues(
+    filterMigrations,
+    (migrate) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
+      try {
+        const attributes = migrateDataPersistedState(doc, filterMigrations);
+
+        return {
+          ...doc,
+          attributes,
+        };
+      } catch (e) {
+        // Do not fail migration
+        // Maps application can display error when saved object is viewed
+        return doc;
+      }
+    }
+  );
