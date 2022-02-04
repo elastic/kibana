@@ -465,6 +465,26 @@ const getDataStreams = async (
   }));
 };
 
+const getTemplateWithNameEndingIn = (composedOfTemplates: TemplateMap, suffix: string) => {
+  const mappingComponentTemplateName =
+    Object.keys(composedOfTemplates).find((templateName) => templateName.endsWith(suffix)) || '';
+
+  return composedOfTemplates[mappingComponentTemplateName];
+};
+
+const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
+  try {
+    // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
+    const path = `/${dataStreamName}/_rollover`;
+    return esClient.transport.request({
+      method: 'POST',
+      path,
+    });
+  } catch (error) {
+    throw new Error(`cannot rollover data stream ${dataStreamName} - ${error}`);
+  }
+};
+
 const updateAllDataStreams = async (
   indexNameWithTemplates: CurrentDataStream[],
   esClient: ElasticsearchClient,
@@ -488,20 +508,17 @@ const updateExistingDataStream = async ({
   indexTemplate: IndexTemplate;
   composedOfTemplates: TemplateMap;
 }) => {
-  const { settings } = indexTemplate.template;
+  const mappingComponentTemplate = getTemplateWithNameEndingIn(
+    composedOfTemplates,
+    MAPPINGS_TEMPLATE_SUFFIX
+  );
+  // @ts-expect-error 2339
+  const mappings = mappingComponentTemplate?.template?.mappings;
 
-  // try to update the mappings first
   try {
-    const mappingComponentTemplateName =
-      Object.keys(composedOfTemplates).find((templateName) =>
-        templateName.endsWith(MAPPINGS_TEMPLATE_SUFFIX)
-      ) || '';
-    const mappingComponentTemplate = composedOfTemplates[mappingComponentTemplateName];
-    // @ts-expect-error 2339
-    const mappings = mappingComponentTemplate?.template?.mappings;
-
     if (!mappingComponentTemplate || !mappings?.properties) {
-      throw new Error('mapping not found');
+      await rolloverDataStream(dataStreamName, esClient);
+      return;
     }
 
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
@@ -520,20 +537,13 @@ const updateExistingDataStream = async ({
     );
     // if update fails, rollover data stream
   } catch (err) {
-    try {
-      // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-      const path = `/${dataStreamName}/_rollover`;
-      await esClient.transport.request({
-        method: 'POST',
-        path,
-      });
-    } catch (error) {
-      throw new Error(`cannot rollover data stream ${error}`);
-    }
+    await rolloverDataStream(dataStreamName, esClient);
+    return;
   }
   // update settings after mappings was successful to ensure
   // pointing to the new pipeline is safe
   // for now, only update the pipeline
+  const { settings } = indexTemplate.template;
   if (!settings.index.default_pipeline) return;
   try {
     await retryTransientEsErrors(
