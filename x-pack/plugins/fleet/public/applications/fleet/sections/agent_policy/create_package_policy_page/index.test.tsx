@@ -117,6 +117,21 @@ describe('when on the package policy create page', () => {
   });
 
   describe('submit page', () => {
+    const newPackagePolicy = {
+      description: '',
+      enabled: true,
+      inputs: [],
+      name: 'nginx-1',
+      namespace: 'default',
+      output_id: '',
+      package: {
+        name: 'nginx',
+        title: 'Nginx',
+        version: '0.3.7',
+      },
+      vars: undefined,
+    };
+
     test('should create package policy on submit when query param agent policy id is set', async () => {
       (useLocation as jest.MockedFunction<any>).mockImplementationOnce(() => ({
         search: 'policyId=agent-policy-1',
@@ -136,19 +151,8 @@ describe('when on the package policy create page', () => {
       });
 
       expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
-        description: '',
-        enabled: true,
-        inputs: [],
-        name: 'nginx-1',
-        namespace: 'default',
-        output_id: '',
-        package: {
-          name: 'nginx',
-          title: 'Nginx',
-          version: '0.3.7',
-        },
+        ...newPackagePolicy,
         policy_id: 'agent-policy-1',
-        vars: undefined,
       });
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
 
@@ -157,44 +161,86 @@ describe('when on the package policy create page', () => {
       });
     });
 
-    test('should create agent policy before creating package policy on submit when new hosts is selected', async () => {
-      render();
+    describe('without query param', () => {
+      beforeEach(() => {
+        render();
 
-      await waitFor(() => {
-        renderResult.getByDisplayValue('Agent policy 2');
+        (sendCreateAgentPolicy as jest.MockedFunction<any>).mockClear();
+        (sendCreatePackagePolicy as jest.MockedFunction<any>).mockClear();
       });
 
-      await act(async () => {
-        fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+      test('should create agent policy before creating package policy on submit when new hosts is selected', async () => {
+        await waitFor(() => {
+          renderResult.getByDisplayValue('Agent policy 2');
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
+          {
+            description: '',
+            monitoring_enabled: ['logs', 'metrics'],
+            name: 'Agent policy 2',
+            namespace: 'default',
+          },
+          { withSysMonitoring: true }
+        );
+        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
+          ...newPackagePolicy,
+          policy_id: 'agent-policy-2',
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+        });
       });
 
-      expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
-        {
-          description: '',
-          monitoring_enabled: ['logs', 'metrics'],
-          name: 'Agent policy 2',
-          namespace: 'default',
-        },
-        { withSysMonitoring: true }
-      );
-      expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
-        description: '',
-        enabled: true,
-        inputs: [],
-        name: 'nginx-1',
-        namespace: 'default',
-        output_id: '',
-        package: {
-          name: 'nginx',
-          title: 'Nginx',
-          version: '0.3.7',
-        },
-        policy_id: 'agent-policy-2',
-        vars: undefined,
+      test('should creating package policy with existing host', async () => {
+        await act(async () => {
+          fireEvent.click(renderResult.getByText('Existing hosts')!);
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
+        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
+          ...newPackagePolicy,
+          policy_id: 'agent-policy-1',
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+        });
       });
 
-      await waitFor(() => {
-        expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+      test('should disable submit button on invalid form with empty name', async () => {
+        await act(async () => {
+          fireEvent.change(renderResult.getByLabelText('Integration name'), {
+            target: { value: '' },
+          });
+        });
+
+        renderResult.getByText(
+          'Your integration policy has errors. Please fix them before saving.'
+        );
+        expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
+      });
+
+      test('should disable submit button on invalid form with empty agent policy name', async () => {
+        await act(async () => {
+          fireEvent.change(renderResult.getByLabelText('New agent policy name'), {
+            target: { value: '' },
+          });
+        });
+
+        renderResult.getByText(
+          'Your integration policy has errors. Please fix them before saving.'
+        );
+        expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
       });
     });
   });
