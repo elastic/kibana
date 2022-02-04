@@ -476,9 +476,11 @@ Array [
             }
           }
           handleOnEventClosed={[Function]}
+          handlePanelChange={[Function]}
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          preventTakeActionDropdown={false}
           timelineId="test"
         >
           <Memo()
@@ -493,9 +495,11 @@ Array [
             }
             globalQuery={Array []}
             handleOnEventClosed={[Function]}
+            handlePanelChange={[Function]}
             isHostIsolationPanelOpen={false}
             loadingEventDetails={true}
             onAddIsolationStatusClick={[Function]}
+            preventTakeActionDropdown={false}
             timelineId="test"
             timelineQuery={
               Object {
@@ -760,9 +764,11 @@ Array [
           }
         }
         handleOnEventClosed={[Function]}
+        handlePanelChange={[Function]}
         isHostIsolationPanelOpen={false}
         loadingEventDetails={true}
         onAddIsolationStatusClick={[Function]}
+        preventTakeActionDropdown={false}
         timelineId="test"
       >
         <Memo()
@@ -777,9 +783,11 @@ Array [
           }
           globalQuery={Array []}
           handleOnEventClosed={[Function]}
+          handlePanelChange={[Function]}
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          preventTakeActionDropdown={false}
           timelineId="test"
           timelineQuery={
             Object {
