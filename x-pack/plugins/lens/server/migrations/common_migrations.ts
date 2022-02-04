@@ -7,7 +7,12 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
+import { SerializableRecord } from '@kbn/utility-types';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunction,
+  MigrateFunctionsObject,
+} from '../../../../../src/plugins/kibana_utils/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
@@ -18,6 +23,7 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  CustomVisualizationMigrations,
   LensDocShape810,
 } from './types';
 import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
@@ -184,6 +190,51 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715): LensD
     delete filter.meta.indexRefName;
   }
   return newAttributes as LensDocShape810;
+};
+
+const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
+  return (savedObject: { attributes: LensDocShape }) => {
+    if (savedObject.attributes.visualizationType !== id) return savedObject;
+    return {
+      ...savedObject,
+      attributes: {
+        ...savedObject.attributes,
+        state: {
+          ...savedObject.attributes.state,
+          visualization: migration(
+            savedObject.attributes.state.visualization as SerializableRecord
+          ),
+        },
+      },
+    };
+  };
+};
+
+/**
+ * This creates a migration map that applies custom visualization migrations
+ */
+export const getLensCustomVisualizationMigrations = (
+  customVisualizationMigrations: CustomVisualizationMigrations
+) => {
+  return Object.entries(customVisualizationMigrations)
+    .map(([id, migrationGetter]) => {
+      const migrationMap: MigrateFunctionsObject = {};
+      const currentMigrations = migrationGetter();
+      for (const version in currentMigrations) {
+        if (currentMigrations.hasOwnProperty(version)) {
+          migrationMap[version] = getApplyCustomVisualizationMigrationToLens(
+            id,
+            currentMigrations[version]
+          );
+        }
+      }
+      return migrationMap;
+    })
+    .reduce(
+      (fullMigrationMap, currentVisualizationTypeMigrationMap) =>
+        mergeMigrationFunctionMaps(fullMigrationMap, currentVisualizationTypeMigrationMap),
+      {}
+    );
 };
 
 /**

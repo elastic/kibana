@@ -47,6 +47,9 @@ export function EditorFrame(props: EditorFrameProps) {
   const visualization = useLensSelector(selectVisualization);
   const areDatasourcesLoaded = useLensSelector(selectAreDatasourcesLoaded);
   const isVisualizationLoaded = !!visualization.state;
+  const visualizationTypeIsKnown = Boolean(
+    visualization.activeId && props.visualizationMap[visualization.activeId]
+  );
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
     selectFramePublicAPI(state, datasourceMap)
   );
@@ -121,6 +124,7 @@ export function EditorFrame(props: EditorFrameProps) {
           )
         }
         suggestionsPanel={
+          visualizationTypeIsKnown &&
           areDatasourcesLoaded && (
             <SuggestionPanelWrapper
               ExpressionRenderer={props.ExpressionRenderer}
