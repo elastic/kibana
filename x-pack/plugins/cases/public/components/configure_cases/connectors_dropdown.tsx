@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -41,16 +41,12 @@ const EuiIconExtended = styled(EuiIcon)`
 const noConnectorOption = {
   value: 'none',
   label: i18n.NO_CONNECTOR,
-  // inputDisplay: (
-  // ),
   'data-test-subj': 'dropdown-connector-no-connector',
 };
 
 const addNewConnector = {
   value: 'add-connector',
   label: i18n.ADD_NEW_CONNECTOR,
-  // inputDisplay: (
-  // ),
   'data-test-subj': 'dropdown-connector-add-connector',
 };
 
@@ -68,6 +64,18 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   appendAddConnectorButton = false,
 }) => {
   const { triggersActionsUi } = useKibana().services;
+
+  const getConnectorIconSuspended = useCallback(
+    (connector: ActionConnector) => {
+      const LazyIcon = getConnectorIcon(triggersActionsUi, connector.actionTypeId);
+      return (
+        <Suspense fallback="<span></span>">
+          <LazyIcon />
+        </Suspense>
+      );
+    },
+    [triggersActionsUi]
+  );
 
   const connectorsAsDropdownOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
@@ -117,7 +125,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
 
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => {
-      const connector = connectors.find((currentConnector) => currentConnector.id === option.value);
       if (option.value === 'add-connector') {
         return (
           <span className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft">
@@ -137,14 +144,12 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
           </EuiFlexGroup>
         );
       }
+      const connector = connectors.find((currentConnector) => currentConnector.id === option.value);
       if (connector) {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIconExtended
-                type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}
-                size={ICON_SIZE}
-              />
+              <EuiIconExtended type={() => getConnectorIconSuspended(connector)} size={ICON_SIZE} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <span>
@@ -167,83 +172,24 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
         );
       }
     },
-    [connectors, triggersActionsUi]
+    [connectors]
   );
-
-  // const connectorsAsOptions = useMemo(() => {
-  //   const connectorsFormatted = connectors.reduce(
-  //     (acc, connector) => {
-  //       return [
-  //         ...acc,
-  //         {
-  //           value: connector.id,
-  //           inputDisplay: (
-  //             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-  //               <EuiFlexItem grow={false}>
-  //                 <EuiIconExtended
-  //                   type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}
-  //                   size={ICON_SIZE}
-  //                 />
-  //               </EuiFlexItem>
-  //               <EuiFlexItem grow={false}>
-  //                 <span>
-  //                   {connector.name}
-  //                   {isDeprecatedConnector(connector) && ` (${i18n.DEPRECATED_TOOLTIP_TEXT})`}
-  //                 </span>
-  //               </EuiFlexItem>
-  //               {isDeprecatedConnector(connector) && (
-  //                 <EuiFlexItem grow={false}>
-  //                   <StyledEuiIconTip
-  //                     aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
-  //                     size={ICON_SIZE}
-  //                     type="alert"
-  //                     color="warning"
-  //                     content={i18n.DEPRECATED_TOOLTIP_CONTENT}
-  //                   />
-  //                 </EuiFlexItem>
-  //               )}
-  //             </EuiFlexGroup>
-  //           ),
-  //           'data-test-subj': `dropdown-connector-${connector.id}`,
-  //         },
-  //       ];
-  //     },
-  //     [noConnectorOption]
-  //   );
-
-  //   if (appendAddConnectorButton) {
-  //     return [...connectorsFormatted, addNewConnector];
-  //   }
-
-  //   return connectorsFormatted;
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [connectors]);
 
   return (
     <EuiComboBox
       aria-label={i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}
       data-test-subj="dropdown-connectors"
       isDisabled={disabled}
+      renderOption={renderOption}
       fullWidth
       isLoading={isLoading}
       onChange={innerOnChange}
       singleSelection={{ asPlainText: true }}
       options={connectorsAsDropdownOptions}
       selectedOptions={selected}
-      renderOption={renderOption}
     />
   );
 };
-// <EuiSuperSelect
-//   aria-label={i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}
-//   data-test-subj="dropdown-connectors"
-//   disabled={disabled}
-//   fullWidth
-//   isLoading={isLoading}
-//   onChange={onChange}
-//   options={connectorsAsOptions}
-//   valueOfSelected={selectedConnector}
-// />
 
 ConnectorsDropdownComponent.displayName = 'ConnectorsDropdown';
 

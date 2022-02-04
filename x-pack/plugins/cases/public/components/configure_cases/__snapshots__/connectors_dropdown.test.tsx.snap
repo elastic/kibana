@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConnectorsDropdown it formats the connectors correctly 1`] = `
+Array [
+  Object {
+    "data-test-subj": "dropdown-connector-no-connector",
+    "label": "No connector selected",
+    "value": "none",
+  },
+  Object {
+    "data-test-subj": "dropdown-connector-servicenow-1",
+    "label": "My Connector",
+    "value": "servicenow-1",
+  },
+  Object {
+    "data-test-subj": "dropdown-connector-resilient-2",
+    "label": "My Connector 2",
+    "value": "resilient-2",
+  },
+  Object {
+    "data-test-subj": "dropdown-connector-jira-1",
+    "label": "Jira",
+    "value": "jira-1",
+  },
+  Object {
+    "data-test-subj": "dropdown-connector-servicenow-sir",
+    "label": "My Connector SIR",
+    "value": "servicenow-sir",
+  },
+  Object {
+    "data-test-subj": "dropdown-connector-servicenow-uses-table-api",
+    "label": "My Connector",
+    "value": "servicenow-uses-table-api",
+  },
+]
+`;
