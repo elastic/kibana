@@ -7,6 +7,7 @@
  */
 
 import { CustomIntegration } from '../common';
+import type { PresentationUtilPluginStart } from '../../presentation_util/public';
 
 export interface CustomIntegrationsSetup {
   getAppendCustomIntegrations: () => Promise<CustomIntegration[]>;
@@ -17,5 +18,6 @@ export interface CustomIntegrationsStart {
   ContextProvider: React.FC;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CustomIntegrationsStartDependencies {}
+export interface CustomIntegrationsStartDependencies {
+  presentationUtil: PresentationUtilPluginStart;
+}

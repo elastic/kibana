@@ -9,8 +9,12 @@
   "description": "Add custom data integrations so they can be displayed in the Fleet integrations app",
   "ui": true,
   "server": true,
-  "extraPublicDirs": ["common"],
-  "requiredPlugins": [],
-  "requiredBundles": ["presentationUtil"],
+  "extraPublicDirs": [
+    "common"
+  ],
+  "requiredPlugins": [
+    "presentationUtil"
+  ],
+  "requiredBundles": [],
   "optionalPlugins": []
 }
