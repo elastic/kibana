@@ -11,10 +11,13 @@ enables you to see if you are using deprecated features,
 and guides you through the process of resolving issues.
 
 If you have indices that were created prior to 7.0,
-you can use the assistant to reindex them so they can be accessed from 8.0. 
+you can use the assistant to reindex them so they can be accessed from 8.0+. 
 
 IMPORTANT: To see the most up-to-date deprecation information before 
-upgrading to 8.0, upgrade to the latest 7.n release.
+upgrading to 8.0, upgrade to the latest {prev-major-last} release.
+
+For more information about upgrading, 
+refer to {stack-ref}/upgrading-elastic-stack.html[Upgrading to Elastic {version}.]
 
 [discrete]
 === Required permissions

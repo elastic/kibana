@@ -1,5 +1,6 @@
-[[upgrade-migrations]]
-=== Upgrade migrations
+[float]
+[[saved-object-migrations]]
+=== Saved object migrations
 
 Every time {kib} is upgraded it will perform an upgrade migration to ensure that all <<managing-saved-objects,saved objects>> are compatible with the new version.
 
