@@ -32,7 +32,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await uptime.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId);
       });
-
+      // CHANGEME
       it('should select the ping list location filter', async () => {
         await uptimeService.common.selectFilterItem('Location', 'mpls');
       });

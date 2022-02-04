@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   // FLAKY: https://github.com/elastic/kibana/issues/111667
-  describe.skip('uptime anomaly alert', () => {
+  describe('uptime anomaly alert', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
@@ -43,7 +43,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await uptime.navigation.refreshApp();
       }
     });
-
+    // CHANGEME
     it('can open ml flyout', async () => {
       await uptime.ml.openMLFlyout();
     });
