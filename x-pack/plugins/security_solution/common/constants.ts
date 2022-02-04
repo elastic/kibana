@@ -113,7 +113,6 @@ export enum SecurityPageName {
   policies = 'policies',
   rules = 'rules',
   trustedApps = 'trusted_apps',
-  ueba = 'ueba',
   uncommonProcesses = 'uncommon_processes',
 }
 
@@ -126,7 +125,6 @@ export const RULES_PATH = '/rules' as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
-export const UEBA_PATH = '/ueba' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
@@ -146,7 +144,6 @@ export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}` as const;
 
 export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}` as const;
 export const APP_USERS_PATH = `${APP_PATH}${USERS_PATH}` as const;
-export const APP_UEBA_PATH = `${APP_PATH}${UEBA_PATH}` as const;
 export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}` as const;
 export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
@@ -168,11 +165,6 @@ export const DEFAULT_INDEX_PATTERN = [
   'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
-];
-
-export const DEFAULT_INDEX_PATTERN_EXPERIMENTAL = [
-  // TODO: Steph/ueba TEMP for testing UEBA data
-  'ml_host_risk_score_*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */

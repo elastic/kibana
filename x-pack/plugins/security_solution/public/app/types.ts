@@ -54,7 +54,6 @@ export type SecuritySubPluginKeyStore =
   | 'hosts'
   | 'users'
   | 'network'
-  | 'ueba'
   | 'timeline'
   | 'hostList'
   | 'alertList'

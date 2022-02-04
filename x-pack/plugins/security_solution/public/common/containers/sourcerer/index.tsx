@@ -24,7 +24,6 @@ import {
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  UEBA_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -396,7 +395,7 @@ export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
   matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${UEBA_PATH}/:id`, `${CASES_PATH}/:detailName`],
+    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`],
     strict: false,
   }) == null
     ? SourcererScopeName.default
@@ -408,7 +407,6 @@ export const sourcererPaths = [
   HOSTS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
-  UEBA_PATH,
 ];
 
 export const showSourcererByPath = (pathname: string): boolean =>

@@ -17,6 +17,6 @@ export interface UsersPluginState {
   users: usersModel.UsersModel;
 }
 
-export interface UserPluginReducer {
+export interface UsersPluginReducer {
   users: Reducer<usersModel.UsersModel, AnyAction>;
 }

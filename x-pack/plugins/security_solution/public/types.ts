@@ -39,7 +39,6 @@ import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
-import type { Ueba } from './ueba';
 import type { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
@@ -99,7 +98,6 @@ export interface SubPlugins {
   hosts: Hosts;
   users: Users;
   network: Network;
-  ueba: Ueba;
   overview: Overview;
   timelines: Timelines;
   management: Management;
@@ -114,7 +112,6 @@ export interface StartedSubPlugins {
   hosts: ReturnType<Hosts['start']>;
   users: ReturnType<Users['start']>;
   network: ReturnType<Network['start']>;
-  ueba: ReturnType<Ueba['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;

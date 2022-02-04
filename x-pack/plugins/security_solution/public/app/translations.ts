@@ -19,10 +19,6 @@ export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network
   defaultMessage: 'Network',
 });
 
-export const UEBA = i18n.translate('xpack.securitySolution.navigation.ueba', {
-  defaultMessage: 'Users & Entities',
-});
-
 export const USERS = i18n.translate('xpack.securitySolution.navigation.users', {
   defaultMessage: 'Users',
 });

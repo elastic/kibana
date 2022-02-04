@@ -39,7 +39,7 @@ import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
-import { getUebaDetailsUrl } from '../link_to/redirect_to_ueba';
+import { getUsersDetailsUrl } from '../link_to/redirect_to_users';
 import { LinkButton, LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
 import { HostsTableType } from '../../../hosts/store/model';
 
@@ -48,44 +48,45 @@ export { LinkButton, LinkAnchor } from './helpers';
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
 // Internal Links
-const UebaDetailsLinkComponent: React.FC<{
+const UsersDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
-  hostName: string;
+  userName: string;
   isButton?: boolean;
-}> = ({ children, hostName, isButton }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.ueba);
+}> = ({ children, userName, isButton }) => {
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const { navigateToApp } = useKibana().services.application;
-  const goToUebaDetails = useCallback(
+  const goToUsersDetails = useCallback(
     (ev) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.ueba,
-        path: getUebaDetailsUrl(encodeURIComponent(hostName), search),
+        deepLinkId: SecurityPageName.users,
+        path: getUsersDetailsUrl(encodeURIComponent(userName), search),
       });
     },
-    [hostName, navigateToApp, search]
+    [userName, navigateToApp, search]
   );
 
   return isButton ? (
     <LinkButton
-      data-test-subj={'ueba-link-button'}
-      onClick={goToUebaDetails}
-      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj={'users-link-button'}
+      onClick={goToUsersDetails}
+      href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
     >
-      {children ? children : hostName}
+      {children ? children : userName}
     </LinkButton>
   ) : (
     <LinkAnchor
-      data-test-subj={'ueba-link-anchor'}
-      onClick={goToUebaDetails}
-      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj={'users-link-anchor'}
+      onClick={goToUsersDetails}
+      href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
     >
-      {children ? children : hostName}
+      {children ? children : userName}
     </LinkAnchor>
   );
 };
 
-export const UebaDetailsLink = React.memo(UebaDetailsLinkComponent);
+// TODO use it for creating links to user details
+export const UsersDetailsLink = React.memo(UsersDetailsLinkComponent);
 
 const HostDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;

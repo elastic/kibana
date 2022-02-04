@@ -138,17 +138,7 @@ const UsersComponent = () => {
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <HeaderPage
-              subtitle={
-                'TODO oi'
-                // <LastEventTime
-                //   docValueFields={docValueFields}
-                //   indexKey={LastEventIndexKey.users}
-                //   indexNames={selectedPatterns}
-                // />
-              }
-              title={i18n.PAGE_TITLE}
-            />
+            <HeaderPage subtitle={'TODO <LastEventTime />'} title={i18n.PAGE_TITLE} />
 
             <SecuritySolutionTabNavigation navTabs={navTabsUsers} />
 

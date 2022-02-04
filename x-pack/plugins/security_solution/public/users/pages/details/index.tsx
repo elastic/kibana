@@ -101,19 +101,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             {/* <Display show={!globalFullScreen}> */}
-            <HeaderPage
-              border
-              subtitle={
-                'Hi'
-                // <LastEventTime
-                //   docValueFields={docValueFields}
-                //   indexKey={LastEventIndexKey.ueba}
-                //   hostName={detailName}
-                //   indexNames={selectedPatterns}
-                // />
-              }
-              title={detailName}
-            />
+            <HeaderPage border subtitle={'TODO <LastEventTime />'} title={detailName} />
             <SecuritySolutionTabNavigation navTabs={navTabsUsersDetails(detailName)} />
 
             <EuiSpacer />

@@ -35,5 +35,4 @@ export type UrlStateType =
   | 'network'
   | 'overview'
   | 'rules'
-  | 'timeline'
-  | 'ueba';
+  | 'timeline';

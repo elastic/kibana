@@ -49,9 +49,6 @@ import { useStateToaster } from '../toasters';
 import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
-import { RiskScoreColumns } from '../../../ueba/components/risk_score_table';
-import { HostRulesColumns } from '../../../ueba/components/host_rules_table';
-import { HostTacticsColumns } from '../../../ueba/components/host_tactics_table';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 

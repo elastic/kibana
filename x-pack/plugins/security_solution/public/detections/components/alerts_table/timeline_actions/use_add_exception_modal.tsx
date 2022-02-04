@@ -36,18 +36,13 @@ export const useExceptionModal = ({
 }: UseExceptionModalProps): UseExceptionModal => {
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
 
-  // TODO: Steph/ueba remove when past experimental
-  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
-
   const ruleIndices = useMemo((): string[] => {
     if (ruleIndex != null) {
       return ruleIndex;
     } else {
-      return uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN;
+      return DEFAULT_INDEX_PATTERN;
     }
-  }, [ruleIndex, uebaEnabled]);
+  }, [ruleIndex]);
 
   const onAddExceptionTypeClick = useCallback((exceptionListType: ExceptionListType): void => {
     setOpenAddExceptionModal(exceptionListType);

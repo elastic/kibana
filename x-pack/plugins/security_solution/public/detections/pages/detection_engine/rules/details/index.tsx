@@ -245,9 +245,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
-  // TODO: Steph/ueba remove when past experimental
-  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
-
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const {
@@ -448,14 +445,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     ),
     [ruleDetailTab, setRuleDetailTab, pageTabs]
   );
-  const ruleIndices = useMemo(
-    () =>
-      rule?.index ??
-      (uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN),
-    [rule?.index, uebaEnabled]
-  );
+  const ruleIndices = useMemo(() => rule?.index ?? DEFAULT_INDEX_PATTERN, [rule?.index]);
 
   const lastExecution = rule?.execution_summary?.last_execution;
   const lastExecutionStatus = lastExecution?.status;

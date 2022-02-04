@@ -16,9 +16,6 @@ export class Users {
   public start(storage: Storage): SecuritySubPluginWithStore<'users', usersModel.UsersModel> {
     return {
       routes,
-      // storageTimelines: {
-      //   timelineById: getTimelinesInStorageByIds(storage, [TimelineId.uebaPageExternalAlerts]),
-      // },
       store: {
         initialState: { users: initialUsersState },
         reducer: { users: usersReducer },

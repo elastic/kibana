@@ -26,7 +26,6 @@ import {
   APP_TRUSTED_APPS_PATH,
   APP_EVENT_FILTERS_PATH,
   APP_BLOCKLIST_PATH,
-  APP_UEBA_PATH,
   SecurityPageName,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
   APP_USERS_PATH,
@@ -81,13 +80,6 @@ export const navTabs: SecurityNav = {
     href: APP_NETWORK_PATH,
     disabled: false,
     urlKey: 'network',
-  },
-  [SecurityPageName.ueba]: {
-    id: SecurityPageName.ueba,
-    name: i18n.UEBA,
-    href: APP_UEBA_PATH,
-    disabled: false,
-    urlKey: 'ueba',
   },
   [SecurityPageName.timelines]: {
     id: SecurityPageName.timelines,

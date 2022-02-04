@@ -75,7 +75,7 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
       queries: {
         ...state[usersType].queries,
         [tableType]: {
-          // TODO: Steph/ueba fix active page/limit on ueba tables. is broken because multiple UsersTableType.userRules tables
+          // TODO: Steph/users fix active page/limit on users tables. is broken because multiple UsersTableType.userRules tables
           ...state[usersType].queries[tableType],
           activePage,
         },
@@ -89,7 +89,7 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
       queries: {
         ...state[usersType].queries,
         [tableType]: {
-          // TODO: Steph/ueba fix active page/limit on ueba tables. is broken because multiple UsersTableType.userRules tables
+          // TODO: Steph/users fix active page/limit on users tables. is broken because multiple UsersTableType.userRules tables
           ...state[usersType].queries[tableType],
           limit,
         },

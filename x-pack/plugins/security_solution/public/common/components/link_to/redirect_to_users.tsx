@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UsersTableType } from '../../../ueba/store/model';
-import { UEBA_PATH } from '../../../../common/constants';
+import { UsersTableType } from '../../../users/store/model';
+import { USERS_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
 
 export const getUsersUrl = (search?: string) => `${USERS_PATH}${appendSearch(search)}`;
