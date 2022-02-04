@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { BASE_PATH } from '../../../../../../../common';
 import { ComponentTemplateEdit } from '../../../component_template_wizard';
 
