@@ -80,3 +80,7 @@ export interface InventoryMetricThresholdParams {
   sourceId?: string;
   alertOnNoData?: boolean;
 }
+
+export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
+
+export type FilterQuery = string | typeof QUERY_INVALID;

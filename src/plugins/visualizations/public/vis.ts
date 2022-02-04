@@ -188,7 +188,7 @@ export class Vis<TVisParams = VisParams> {
       data: {
         aggs: aggs as any,
         searchSource: this.data.searchSource ? this.data.searchSource.getSerializedFields() : {},
-        savedSearchId: this.data.savedSearchId,
+        ...(this.data.savedSearchId ? { savedSearchId: this.data.savedSearchId } : {}),
       },
     };
   }
