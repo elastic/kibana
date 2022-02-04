@@ -517,6 +517,8 @@ const updateExistingDataStream = async ({
 
   try {
     if (!mappingComponentTemplate || !mappings?.properties) {
+      // if there is no mapping component template then something has
+      // gone wrong, so rollover the stream to get the new mapping.
       await rolloverDataStream(dataStreamName, esClient);
       return;
     }
