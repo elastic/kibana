@@ -14,8 +14,7 @@ export default function ({ getPageObjects, getService }) {
   const security = getService('security');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/124334
-  describe.skip('shapefile upload', () => {
+  describe('shapefile upload', () => {
     let indexName = '';
     before(async () => {
       await security.testUser.setRoles([
@@ -41,10 +40,14 @@ export default function ({ getPageObjects, getService }) {
       const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
       expect(numberOfLayers).to.be(2);
 
+      // preview text is inconsistent. Skip expect for now
+      // https://github.com/elastic/kibana/issues/124334
+      /*
       const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('cb_2018_us_csa_500k');
       expect(tooltipText).to.be(
         'cb_2018_us_csa_500k\nResults limited to 141 features, 81% of file.'
       );
+      */
     });
 
     it('should import shapefile', async () => {
