@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test/jest';
+import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { EuiSuperSelect } from '@elastic/eui';
 import { MissingValuesOptions } from './missing_values_option';
 

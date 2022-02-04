@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
+import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eui';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
