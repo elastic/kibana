@@ -17,6 +17,13 @@
   }
 }
 
+.euiDataGridHeaderCell {
+  font-size: 12px;
+}
+
+.euiDataGridRowCell:not(.euiDataGridRowCell--lastColumn) {
+  border-right: none;
+}
 
 /**
  * 1. Only visually hide the action, so that it's still accessible to screen readers.
