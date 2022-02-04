@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import ResilientConnectorFields from './resilient_connectors';
 import { ResilientActionConnector } from './types';
 jest.mock('../../../../common/lib/kibana');

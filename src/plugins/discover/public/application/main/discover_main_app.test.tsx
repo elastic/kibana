@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
 import { savedSearchMock } from '../../__mocks__/saved_search';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
