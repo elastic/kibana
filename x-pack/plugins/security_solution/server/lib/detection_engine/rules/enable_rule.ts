@@ -15,7 +15,7 @@ interface EnableRuleArgs {
 }
 
 /**
- * Enables the rule and updates its status to 'going to run'
+ * Enables the rule
  *
  * @param rule - rule to enable
  * @param rulesClient - Alerts client

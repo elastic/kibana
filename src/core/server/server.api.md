@@ -426,6 +426,7 @@ export interface CoreServicesUsageData {
             docsDeleted: number;
             storeSizeBytes: number;
             primaryStoreSizeBytes: number;
+            savedObjectsDocsCount: number;
         }[];
         legacyUrlAliases: {
             activeCount: number;
@@ -1466,6 +1467,9 @@ export { LogRecord }
 export type MakeUsageFromSchema<T> = {
     [Key in keyof T]?: T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
 };
+
+// @public
+export const mergeSavedObjectMigrationMaps: (map1: SavedObjectMigrationMap, map2: SavedObjectMigrationMap) => SavedObjectMigrationMap;
 
 // @public
 export interface MetricsServiceSetup {

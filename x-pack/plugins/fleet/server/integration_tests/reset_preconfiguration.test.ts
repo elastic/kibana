@@ -14,6 +14,8 @@ import type { HttpMethod } from 'src/core/test_helpers/kbn_server';
 
 import type { AgentPolicySOAttributes } from '../types';
 
+import { useDockerRegistry } from './docker_registry_helper';
+
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 type Root = ReturnType<typeof kbnTestServer.createRoot>;
@@ -42,9 +44,11 @@ const waitForFleetSetup = async (root: Root) => {
   }
 };
 
-describe('Fleet preconfiguration rest', () => {
+describe('Fleet preconfiguration reset', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
+
+  const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
     const { startES } = kbnTestServer.createTestServers({
@@ -63,6 +67,13 @@ describe('Fleet preconfiguration rest', () => {
         {
           xpack: {
             fleet: {
+              registryUrl,
+              packages: [
+                {
+                  name: 'fleet_server',
+                  version: 'latest',
+                },
+              ],
               // Preconfigure two policies test-12345 and test-456789
               agentPolicies: [
                 {
@@ -189,8 +200,7 @@ describe('Fleet preconfiguration rest', () => {
     await stopServers();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/123103
-  describe.skip('Reset all policy', () => {
+  describe('Reset all policy', () => {
     it('Works and reset all preconfigured policies', async () => {
       const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
@@ -219,9 +229,7 @@ describe('Fleet preconfiguration rest', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/123104
-  // FLAKY: https://github.com/elastic/kibana/issues/123105
-  describe.skip('Reset one preconfigured policy', () => {
+  describe('Reset one preconfigured policy', () => {
     const POLICY_ID = 'test-12345';
 
     it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {
