@@ -16,6 +16,7 @@ export interface CrawlSelectDomainsLogicProps {
 }
 
 export interface CrawlSelectDomainsLogicValues {
+  isDataLoading: boolean;
   isModalVisible: boolean;
   selectedDomainUrls: string[];
 }
@@ -40,11 +41,19 @@ export const CrawlSelectDomainsModalLogic = kea<
     showModal: true,
   }),
   reducers: () => ({
+    isDataLoading: [
+      false,
+      {
+        [CrawlerLogic.actionTypes.startCrawl]: () => true,
+      },
+    ],
     isModalVisible: [
       false,
       {
         showModal: () => true,
         hideModal: () => false,
+        [CrawlerLogic.actionTypes.onStartCrawlSuccess]: () => false,
+        [CrawlerLogic.actionTypes.onStartCrawlError]: () => false,
       },
     ],
     selectedDomainUrls: [
@@ -54,10 +63,5 @@ export const CrawlSelectDomainsModalLogic = kea<
         onSelectDomainUrls: (_, { domainUrls }) => domainUrls,
       },
     ],
-  }),
-  listeners: ({ actions }) => ({
-    [CrawlerLogic.actionTypes.startCrawlSuccess]: () => {
-      actions.hideModal();
-    },
   }),
 });

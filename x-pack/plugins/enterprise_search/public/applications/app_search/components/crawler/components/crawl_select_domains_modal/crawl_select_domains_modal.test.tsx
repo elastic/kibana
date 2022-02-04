@@ -19,6 +19,7 @@ import { CrawlSelectDomainsModal } from './crawl_select_domains_modal';
 import { SimplifiedSelectable } from './simplified_selectable';
 
 const MOCK_VALUES = {
+  // CrawlerLogic
   domains: [{ url: 'https://www.elastic.co' }, { url: 'https://www.swiftype.com' }],
   // CrawlSelectDomainsModalLogic
   selectedDomainUrls: ['https://www.elastic.co'],

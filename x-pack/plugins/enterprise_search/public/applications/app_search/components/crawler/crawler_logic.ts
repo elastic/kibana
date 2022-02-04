@@ -6,8 +6,10 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { HttpResponse } from 'kibana/public';
 
 import { flashAPIErrors } from '../../../shared/flash_messages';
+import { ErrorResponse } from '../../../shared/flash_messages/handle_api_errors';
 
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
@@ -40,32 +42,33 @@ export interface CrawlerValues {
   mostRecentCrawlRequest: CrawlRequest | null;
   mostRecentCrawlRequestStatus: CrawlerStatus | null;
   timeoutId: NodeJS.Timeout | null;
-  startCrawlError?: string;
 }
 
 interface CrawlerActions {
+  clearStartCrawlError(): void;
   clearTimeoutId(): void;
   createNewTimeoutForCrawlerData(duration: number): { duration: number };
   fetchCrawlerData(): void;
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
+  onStartCrawlError(error: HttpResponse<ErrorResponse>): { error: HttpResponse<ErrorResponse> };
+  onStartCrawlSuccess(): void;
   startCrawl(overrides?: object): { overrides?: object };
-  startCrawlSuccess(): void;
-  startCrawlError(error: string): { error: string };
   stopCrawl(): void;
 }
 
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
   path: ['enterprise_search', 'app_search', 'crawler_logic'],
   actions: {
+    clearStartCrawlError: true,
     clearTimeoutId: true,
     createNewTimeoutForCrawlerData: (duration) => ({ duration }),
     fetchCrawlerData: true,
     onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
     onReceiveCrawlerData: (data) => ({ data }),
+    onStartCrawlError: (error) => ({ error }),
+    onStartCrawlSuccess: true,
     startCrawl: (overrides) => ({ overrides }),
-    startCrawlSuccess: true,
-    startCrawlError: (error: string) => ({ error }),
     stopCrawl: () => null,
   },
   reducers: {
@@ -98,14 +101,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       {
         clearTimeoutId: () => null,
         onCreateNewTimeout: (_, { timeoutId }) => timeoutId,
-      },
-    ],
-    startCrawlError: [
-      null,
-      {
-        startCrawl: () => null,
-        startCrawlSuccess: () => null,
-        startCrawlError: (_, { error }) => error,
       },
     ],
   },
@@ -148,6 +143,8 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         actions.createNewTimeoutForCrawlerData(POLLING_DURATION_ON_FAILURE);
       }
     },
+    onStartCrawlError: ({ error }) => flashAPIErrors(error),
+    onStartCrawlSuccess: () => actions.fetchCrawlerData(),
     startCrawl: async ({ overrides = {} }) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
@@ -156,13 +153,11 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
         await http.post(`/internal/app_search/engines/${engineName}/crawler/crawl_requests`, {
           body: JSON.stringify({ overrides }),
         });
-        actions.startCrawlSuccess();
+        actions.onStartCrawlSuccess();
       } catch (e) {
-        actions.startCrawlError(e);
-        flashAPIErrors(e);
+        actions.onStartCrawlError(e);
       }
     },
-    startCrawlSuccess: () => actions.fetchCrawlerData(),
     stopCrawl: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
