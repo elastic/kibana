@@ -322,6 +322,25 @@
                         }
                     }
                 },
+                "data": {
+                  "properties": {
+                    "appId": {
+                      "type": "keyword"
+                    },
+                    "sessionId": {
+                      "type": "keyword"
+                    },
+                    "took": {
+                      "type": "long"
+                    },
+                    "searchCount": {
+                      "type": "long"
+                    },
+                    "bfetch": {
+                      "type": "boolean"
+                    }
+                  }
+                },
                 "saved_objects": {
                     "type": "nested",
                     "properties": {

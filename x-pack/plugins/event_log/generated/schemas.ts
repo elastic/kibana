@@ -147,6 +147,15 @@ export const EventSchema = schema.maybe(
             byteSize: ecsNumber(),
           })
         ),
+        data: schema.maybe(
+          schema.object({
+            searchCount: ecsNumber(),
+            appId: ecsString(),
+            sessionId: ecsString(),
+            took: ecsNumber(),
+            bfetch: ecsBoolean(),
+          })
+        ),
         saved_objects: schema.maybe(
           schema.arrayOf(
             schema.object({
@@ -171,6 +180,10 @@ function ecsStringMulti() {
 
 function ecsString() {
   return schema.maybe(schema.string());
+}
+
+function ecsBoolean() {
+  return schema.maybe(schema.boolean());
 }
 
 function ecsNumber() {

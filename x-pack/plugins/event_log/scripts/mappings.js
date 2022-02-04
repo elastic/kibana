@@ -105,6 +105,26 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
+      // reporting specific fields
+      data: {
+        properties: {
+          appId: {
+            type: 'keyword',
+          },
+          sessionId: {
+            type: 'keyword',
+          },
+          took: {
+            type: 'long',
+          },
+          searchCount: {
+            type: 'long',
+          },
+          bfetch: {
+            type: 'boolean',
+          },
+        },
+      },
       // array of saved object references, for "linking" via search
       saved_objects: {
         type: 'nested',

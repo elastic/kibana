@@ -97,6 +97,8 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
    */
   pendingSearches: SearchDescriptor[];
 
+  totalSearches: number;
+
   /**
    * There was at least a single search in this session
    */
@@ -133,6 +135,7 @@ const createSessionDefaultState: <
   isCanceled: false,
   isStarted: false,
   pendingSearches: [],
+  totalSearches: 0,
 });
 
 export interface SessionPureTransitions<
@@ -182,6 +185,7 @@ export const sessionPureTransitions: SessionPureTransitions = {
     return {
       ...state,
       isStarted: true,
+      totalSearches: state.totalSearches + 1,
       pendingSearches: state.pendingSearches.concat(search),
       completedTime: undefined,
     };
@@ -199,6 +203,7 @@ export const sessionPureTransitions: SessionPureTransitions = {
     if (state.isRestore) throw new Error("Can't cancel searches when restoring older searches");
     return {
       ...state,
+      totalSearch: 0,
       pendingSearches: [],
       isCanceled: true,
       canceledTime: new Date(),

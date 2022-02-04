@@ -27,5 +27,6 @@
     { "path": "../task_manager/tsconfig.json" },
 
     { "path": "../features/tsconfig.json" },
+    { "path": "../event_log/tsconfig.json" }
   ]
 }
