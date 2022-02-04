@@ -307,7 +307,7 @@ export interface ConcreteTaskInstance extends TaskInstance {
   id: string;
 
   /**
-   * This field has been moved under schedule (deprecated) with version 7.6.0
+   * @deprecated This field has been moved under schedule (deprecated) with version 7.6.0
    */
   interval?: string;
 
