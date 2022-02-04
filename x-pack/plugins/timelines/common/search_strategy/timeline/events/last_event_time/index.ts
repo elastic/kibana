@@ -14,8 +14,6 @@ export enum LastEventIndexKey {
   hosts = 'hosts',
   ipDetails = 'ipDetails',
   network = 'network',
-  ueba = 'ueba', // TODO: Steph/ueba implement this
-  users = 'users', // TODO: Pablo/users implement this
 }
 
 export interface LastTimeDetails {

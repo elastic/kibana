@@ -83,7 +83,6 @@ export const buildLastEventTimeQuery = ({
         throw new Error('buildLastEventTimeQuery - no hostName argument provided');
       case LastEventIndexKey.hosts:
       case LastEventIndexKey.network:
-      case LastEventIndexKey.ueba:
         return {
           allow_no_indices: true,
           index: indicesToQuery[indexKey],
