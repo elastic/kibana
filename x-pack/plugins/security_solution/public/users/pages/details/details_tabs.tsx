@@ -17,7 +17,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { UsersDetailsTabsProps } from './types';
 import { type } from './utils';
 
-import { RiskScoreQueryTabBody } from '../navigation';
+import { AllUsersQueryTabBody } from '../navigation';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -74,8 +74,8 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     };
     return (
       <Switch>
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.riskScore})`}>
-          <RiskScoreQueryTabBody {...tabProps} />
+        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.allUsers})`}>
+          <AllUsersQueryTabBody {...tabProps} />
         </Route>
       </Switch>
     );

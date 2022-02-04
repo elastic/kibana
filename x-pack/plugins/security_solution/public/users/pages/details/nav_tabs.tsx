@@ -15,23 +15,11 @@ const getTabsOnUsersDetailsUrl = (hostName: string, tabName: UsersTableType) =>
 
 export const navTabsUsersDetails = (hostName: string): UsersDetailsNavTab => {
   return {
-    [UsersTableType.riskScore]: {
-      id: UsersTableType.riskScore,
-      name: i18n.RISK_SCORE_TITLE,
-      href: getTabsOnUsersDetailsUrl(hostName, UsersTableType.riskScore),
+    [UsersTableType.allUsers]: {
+      id: UsersTableType.allUsers,
+      name: i18n.ALL_USERS_TITLE,
+      href: getTabsOnUsersDetailsUrl(hostName, UsersTableType.allUsers),
       disabled: false,
     },
-    // [UsersTableType.hostTactics]: {
-    //   id: UsersTableType.hostTactics,
-    //   name: i18n.HOST_TACTICS,
-    //   href: getTabsOnUsersDetailsUrl(hostName, UsersTableType.hostTactics),
-    //   disabled: false,
-    // },
-    // [UsersTableType.userRules]: {
-    //   id: UsersTableType.userRules,
-    //   name: i18n.USER_RULES,
-    //   href: getTabsOnUsersDetailsUrl(hostName, UsersTableType.userRules),
-    //   disabled: false,
-    // },
   };
 };

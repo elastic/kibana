@@ -13,5 +13,5 @@ import { UsersPageModel, UsersTableType } from './model';
 
 const selectUserPage = (state: State): UsersPageModel => state.users.page;
 
-export const riskScoreSelector = () =>
-  createSelector(selectUserPage, (users) => users.queries[UsersTableType.riskScore]);
+export const allUsersSelector = () =>
+  createSelector(selectUserPage, (users) => users.queries[UsersTableType.allUsers]);

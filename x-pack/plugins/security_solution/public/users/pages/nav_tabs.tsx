@@ -13,10 +13,10 @@ import { USERS_PATH } from '../../../common/constants';
 const getTabsOnUsersUrl = (tabName: UsersTableType) => `${USERS_PATH}/${tabName}`;
 
 export const navTabsUsers: UsersNavTab = {
-  [UsersTableType.riskScore]: {
-    id: UsersTableType.riskScore,
-    name: 'TODO TBD', // i18n.RISK_SCORE_TITLE,
-    href: getTabsOnUsersUrl(UsersTableType.riskScore),
+  [UsersTableType.allUsers]: {
+    id: UsersTableType.allUsers,
+    name: i18n.ALL_USERS_TITLE,
+    href: getTabsOnUsersUrl(UsersTableType.allUsers),
     disabled: false,
   },
 };

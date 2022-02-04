@@ -7,7 +7,6 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { get } from 'lodash/fp';
-import { Direction, RiskScoreFields } from '../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
 import {
@@ -22,13 +21,27 @@ import { UsersTableType, UsersModel } from './model';
 export const initialUsersState: UsersModel = {
   page: {
     queries: {
-      [UsersTableType.riskScore]: {
+      [UsersTableType.allUsers]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        sort: {
-          field: RiskScoreFields.riskScore,
-          direction: Direction.desc,
-        },
+        // TODO Fix me
+        // sort: {
+        //   field: AllUsersFields.allUsers,
+        //   direction: Direction.desc,
+        // },
+      },
+    },
+  },
+  details: {
+    queries: {
+      [UsersTableType.allUsers]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        // TODO Fix me
+        // sort: {
+        //   field: HostRulesFields.riskScore,
+        //   direction: Direction.desc,
+        // },
       },
     },
   },
@@ -63,7 +76,6 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
         ...state[usersType].queries,
         [tableType]: {
           // TODO: Steph/ueba fix active page/limit on ueba tables. is broken because multiple UsersTableType.userRules tables
-          // @ts-expect-error TS7053
           ...state[usersType].queries[tableType],
           activePage,
         },
@@ -78,7 +90,6 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
         ...state[usersType].queries,
         [tableType]: {
           // TODO: Steph/ueba fix active page/limit on ueba tables. is broken because multiple UsersTableType.userRules tables
-          // @ts-expect-error TS7053
           ...state[usersType].queries[tableType],
           limit,
         },

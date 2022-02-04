@@ -12,11 +12,11 @@ import { UsersTableType } from '../store/model';
 import { Users } from './users';
 import { UsersDetails } from './details';
 
-const usersTabPath = `${USERS_PATH}/:tabName(${UsersTableType.riskScore})`;
+const usersTabPath = `${USERS_PATH}/:tabName(${UsersTableType.allUsers})`;
 
 import { usersDetailsPagePath } from './types';
 
-const usersDetailsTabPath = `${usersDetailsPagePath}/:tabName(${UsersTableType.riskScore})`;
+const usersDetailsTabPath = `${usersDetailsPagePath}/:tabName(${UsersTableType.allUsers})`;
 
 export const UsersContainer = React.memo(() => (
   <Switch>
@@ -25,7 +25,7 @@ export const UsersContainer = React.memo(() => (
       strict
       path={USERS_PATH}
       render={({ location: { search = '' } }) => (
-        <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.riskScore}`, search }} />
+        <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />
       )}
     />
 
@@ -51,7 +51,7 @@ export const UsersContainer = React.memo(() => (
       }) => (
         <Redirect
           to={{
-            pathname: `${USERS_PATH}/${detailName}/${UsersTableType.riskScore}`,
+            pathname: `${USERS_PATH}/${detailName}/${UsersTableType.allUsers}`,
             search,
           }}
         />

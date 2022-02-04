@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './risk_score_query_tab_body';
+export * from './all_users_query_tab_body';

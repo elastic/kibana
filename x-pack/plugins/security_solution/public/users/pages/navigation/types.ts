@@ -14,7 +14,7 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 import { NarrowDateRange } from '../../../common/components/ml/types';
 import { NavTab } from '../../../common/components/navigation/types';
 
-type KeyUsersNavTab = UsersTableType.riskScore;
+type KeyUsersNavTab = UsersTableType.allUsers;
 
 export type UsersNavTab = Record<KeyUsersNavTab, NavTab>;
 export interface QueryTabBodyProps {
@@ -24,7 +24,7 @@ export interface QueryTabBodyProps {
   filterQuery?: string | ESTermQuery;
 }
 
-export type RiskScoreQueryProps = QueryTabBodyProps & {
+export type AllUsersQueryProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   docValueFields?: DocValueFields[];
   indexNames: string[];
@@ -34,6 +34,6 @@ export type RiskScoreQueryProps = QueryTabBodyProps & {
   updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
 };
-export type HostQueryProps = RiskScoreQueryProps & {
+export type HostQueryProps = AllUsersQueryProps & {
   hostName: string;
 };

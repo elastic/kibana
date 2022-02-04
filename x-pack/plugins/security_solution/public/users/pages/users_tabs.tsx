@@ -14,7 +14,7 @@ import { Anomaly } from '../../common/components/ml/types';
 import { UsersTableType } from '../store/model';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { USERS_PATH } from '../../../common/constants';
-import { RiskScoreQueryTabBody } from './navigation';
+import { AllUsersQueryTabBody } from './navigation';
 
 export const UsersTabs = memo<UsersTabsProps>(
   ({
@@ -71,8 +71,8 @@ export const UsersTabs = memo<UsersTabsProps>(
 
     return (
       <Switch>
-        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.riskScore})`}>
-          <RiskScoreQueryTabBody docValueFields={docValueFields} {...tabProps} />
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}>
+          <AllUsersQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
       </Switch>
     );

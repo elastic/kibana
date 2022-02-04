@@ -10,8 +10,8 @@ import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../common/store/constants';
 
 export const setUsersPageQueriesActivePageToZero = (state: UsersModel): UsersQueries => ({
   ...state.page.queries,
-  [UsersTableType.riskScore]: {
-    ...state.page.queries[UsersTableType.riskScore],
+  [UsersTableType.allUsers]: {
+    ...state.page.queries[UsersTableType.allUsers],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
 });

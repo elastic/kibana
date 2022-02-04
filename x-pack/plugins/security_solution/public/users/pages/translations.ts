@@ -11,6 +11,6 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.users.pageTitle
   defaultMessage: 'Users',
 });
 
-export const RISK_SCORE_TITLE = i18n.translate('xpack.securitySolution.ueba.riskScore', {
-  defaultMessage: 'Risk score',
+export const ALL_USERS_TITLE = i18n.translate('xpack.securitySolution.users.allUsers', {
+  defaultMessage: 'All users',
 });

@@ -44,7 +44,7 @@ export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
   UsersDetailsComponentDispatchProps &
   UsersQueryProps;
 
-type KeyUsersDetailsNavTab = UsersTableType.riskScore;
+type KeyUsersDetailsNavTab = UsersTableType.allUsers;
 
 export type UsersDetailsNavTab = Record<KeyUsersDetailsNavTab, NavTab>;
 
