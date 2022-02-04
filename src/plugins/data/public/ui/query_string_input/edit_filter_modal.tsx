@@ -527,7 +527,7 @@ export function EditFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId: Number(multipleFilters?.length) - countOfFilterBeforeFilterEdit.length + localFilters.length + 1,
+                                    groupId: filtersOnGroup.length > 1 ? groupsCount : (Number(multipleFilters?.length) - countOfFilterBeforeFilterEdit.length + localFilters.length + 1),
                                     subGroupId,
                                     id: Number(multipleFilters.length) - countOfFilterBeforeFilterEdit.length + localFilters.length,
                                   },
