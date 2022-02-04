@@ -147,11 +147,7 @@ export const useRulesFeatureTourContextOptional = (): RulesFeatureTourContextTyp
 
 /**
  * This component can be used for tour steps, for the components outside of RulesFeatureTourContext
- * if step props are not supplied, step will not be rendered, only children component will be
- * @param stepProps EuiTourStepProps - optional props for tour steps
- * @param children ReactNode
- *
- * @returns ReactNode
+ * if stepProps are not supplied, step will not be rendered, only children component will be
  */
 export const OptionalEuiTourStep: FC<{ stepProps: EuiTourStepProps | undefined }> = ({
   children,
