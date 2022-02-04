@@ -365,13 +365,15 @@ export function AddFilterModal({
         $state.store
       );
       onSubmit([builtCustomFilter]);
-      saveFilters({
-        title: customLabel,
-        description: '',
-        shouldIncludeFilters: false,
-        shouldIncludeTimefilter: false,
-        filters: [builtCustomFilter],
-      });
+      if (alias) {
+        saveFilters({
+          title: customLabel,
+          description: '',
+          shouldIncludeFilters: false,
+          shouldIncludeTimefilter: false,
+          filters: [builtCustomFilter],
+        });
+      }
     } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
         if (localFilter.field && localFilter.operator) {

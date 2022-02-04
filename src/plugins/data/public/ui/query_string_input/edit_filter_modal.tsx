@@ -54,6 +54,7 @@ import { GenericComboBox } from '../filter_bar/filter_editor/generic_combo_box';
 import { PhraseValueInput } from '../filter_bar/filter_editor/phrase_value_input';
 import { PhrasesValuesInput } from '../filter_bar/filter_editor/phrases_values_input';
 import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
+import { SavedQueryMeta } from '../saved_query_form';
 
 import { IIndexPattern, IFieldType } from '../..';
 
@@ -94,6 +95,7 @@ export function EditFilterModal({
   savedQueryManagement,
   initialAddFilterMode,
   onRemoveFilterGroup,
+  saveFilters,
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
@@ -106,6 +108,7 @@ export function EditFilterModal({
   savedQueryManagement?: JSX.Element;
   initialAddFilterMode?: string;
   onRemoveFilterGroup: (groupId: string) => void;
+  saveFilters: (savedQueryMeta: SavedQueryMeta) => void;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -385,6 +388,15 @@ export function EditFilterModal({
         $state.store
       );
       onSubmit([builtCustomFilter]);
+      if (alias) {
+        saveFilters({
+          title: customLabel,
+          description: '',
+          shouldIncludeFilters: false,
+          shouldIncludeTimefilter: false,
+          filters: [builtCustomFilter],
+        });
+      }
     } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
         if (localFilter.field && localFilter.operator) {
@@ -406,6 +418,15 @@ export function EditFilterModal({
         ) as Filter[];
         // onSubmit(finalFilters);
         onMultipleFiltersSubmit(localFilters, finalFilters);
+        if (alias) {
+          saveFilters({
+            title: customLabel,
+            description: '',
+            shouldIncludeFilters: false,
+            shouldIncludeTimefilter: false,
+            filters: finalFilters,
+          });
+        }
       }
     } else if (addFilterMode === 'saved_filters') {
       applySavedQueries();

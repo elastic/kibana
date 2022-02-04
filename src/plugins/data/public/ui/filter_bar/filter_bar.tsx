@@ -220,6 +220,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             savedQueryManagement={undefined}
             initialAddFilterMode={undefined}
+            saveFilters={props.onFilterSave}
           />
         )}
       </EuiFlexItem>
