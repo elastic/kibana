@@ -127,7 +127,7 @@ export const FEATURE_TOUR_BULK_ACTIONS_STEP_TITLE = i18n.translate(
 export const FEATURE_TOUR_BULK_ACTIONS_STEP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepDescription',
   {
-    defaultMessage: 'You can now bulk update index patterns and tags for multiple rules at once.',
+    defaultMessage: 'You can now bulk update index patterns and tags for multiple custom rules at once.',
   }
 );
 
