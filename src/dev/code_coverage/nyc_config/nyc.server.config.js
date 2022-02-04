@@ -14,4 +14,18 @@ module.exports = {
     ? path.resolve(process.env.KIBANA_DIR, 'target/kibana-coverage/server')
     : 'target/kibana-coverage/server',
   reporter: ['json'],
+  all: true,
+  include: [
+    'src/{core,plugins}/**/*.{js,mjs,jsx,ts,tsx}',
+    'x-pack/plugins/**/*.{js,mjs,jsx,ts,tsx}',
+  ],
+  exclude: [
+    '**/{__test__,__snapshots__,__examples__,*mock*,.storybook,target,tests,test_helpers,integration_tests,types}/**/*',
+    '**/*mock*.{ts,tsx}',
+    '**/*.test.{ts,tsx}',
+    '**/*.spec.{ts,tsx}',
+    '**/types.ts',
+    '**/*.d.ts',
+    '**/index.{js,ts,tsx}',
+  ],
 };

@@ -7,7 +7,16 @@
  */
 
 const defaultExclude = require('@istanbuljs/schema/default-exclude');
-const extraExclude = ['data/optimize/**', '**/{test, types}/**/*'];
+const extraExclude = [
+  'data/optimize/**',
+  '**/{__test__,__snapshots__,__examples__,*mock*,.storybook,target,tests,test_helpers,integration_tests,types}/**/*',
+  '**/*mock*.{ts,tsx}',
+  '**/*.test.{ts,tsx}',
+  '**/*.spec.{ts,tsx}',
+  '**/types.ts',
+  '**/*.d.ts',
+  '**/index.{js,ts,tsx}',
+];
 const path = require('path');
 
 module.exports = {
@@ -16,5 +25,9 @@ module.exports = {
     : 'target/kibana-coverage/functional',
   'report-dir': 'target/kibana-coverage/functional-combined',
   reporter: ['html', 'json-summary'],
+  include: [
+    'src/{core,plugins}/**/*.{js,mjs,jsx,ts,tsx}',
+    'x-pack/plugins/**/*.{js,mjs,jsx,ts,tsx}',
+  ],
   exclude: extraExclude.concat(defaultExclude),
 };
