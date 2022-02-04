@@ -22,3 +22,4 @@ export { TypeAutocompleteComponent } from './type_autocomplete_component';
 export { IdAutocompleteComponent } from './id_autocomplete_component';
 export { TemplateAutocompleteComponent } from './template_autocomplete_component';
 export { UsernameAutocompleteComponent } from './username_autocomplete_component';
+export { IndexTemplateAutocompleteComponent } from './index_template_autocomplete_component';

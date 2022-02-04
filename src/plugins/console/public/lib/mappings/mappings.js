@@ -15,6 +15,7 @@ let pollTimeoutId;
 let perIndexTypes = {};
 let perAliasIndexes = [];
 let templates = [];
+let indexTemplates = [];
 
 const mappingObj = {};
 
@@ -48,6 +49,10 @@ export function expandAliases(indicesOrAliases) {
 
 export function getTemplates() {
   return [...templates];
+}
+
+export function getIndexTemplates() {
+  return [...indexTemplates];
 }
 
 export function getFields(indices, types) {
@@ -186,6 +191,10 @@ function loadTemplates(templatesObject = {}) {
   templates = Object.keys(templatesObject);
 }
 
+function loadIndexTemplates(data) {
+  indexTemplates = _.map(data.index_templates, 'name');
+}
+
 export function loadMappings(mappings) {
   perIndexTypes = {};
 
@@ -236,6 +245,7 @@ export function clear() {
   perIndexTypes = {};
   perAliasIndexes = {};
   templates = [];
+  indexTemplates = [];
 }
 
 function retrieveSettings(settingsKey, settingsToRetrieve) {
@@ -243,6 +253,7 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
     fields: '_mapping',
     indices: '_aliases',
     templates: '_template',
+    indexTemplates: '_index_template',
   };
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
@@ -292,42 +303,52 @@ export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
   const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
   const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
-
-  $.when(mappingPromise, aliasesPromise, templatesPromise).done((mappings, aliases, templates) => {
-    let mappingsResponse;
-    if (mappings) {
-      const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
-      if (maxMappingSize) {
-        console.warn(
-          `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
-        );
-        mappingsResponse = '[{}]';
-      } else {
-        mappingsResponse = mappings[0];
-      }
-      loadMappings(JSON.parse(mappingsResponse));
-    }
-
-    if (aliases) {
-      loadAliases(JSON.parse(aliases[0]));
-    }
-
-    if (templates) {
-      loadTemplates(JSON.parse(templates[0]));
-    }
-
-    if (mappings && aliases) {
-      // Trigger an update event with the mappings, aliases
-      $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
-    }
-
-    // Schedule next request.
-    pollTimeoutId = setTimeout(() => {
-      // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
-      // a scheduled request if the user turns off polling.
-      if (settings.getPolling()) {
-        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
-      }
-    }, settings.getPollInterval());
+  const indexTemplatesPromise = retrieveSettings('indexTemplates', {
+    ...settingsToRetrieve,
+    indexTemplates: settingsToRetrieve.templates,
   });
+
+  $.when(mappingPromise, aliasesPromise, templatesPromise, indexTemplatesPromise).done(
+    (mappings, aliases, templates, indexTemplates) => {
+      let mappingsResponse;
+      if (mappings) {
+        const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
+        if (maxMappingSize) {
+          console.warn(
+            `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
+          );
+          mappingsResponse = '[{}]';
+        } else {
+          mappingsResponse = mappings[0];
+        }
+        loadMappings(JSON.parse(mappingsResponse));
+      }
+
+      if (aliases) {
+        loadAliases(JSON.parse(aliases[0]));
+      }
+
+      if (templates) {
+        loadTemplates(JSON.parse(templates[0]));
+      }
+
+      if (indexTemplates) {
+        loadIndexTemplates(JSON.parse(indexTemplates[0]));
+      }
+
+      if (mappings && aliases) {
+        // Trigger an update event with the mappings, aliases
+        $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
+      }
+
+      // Schedule next request.
+      pollTimeoutId = setTimeout(() => {
+        // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
+        // a scheduled request if the user turns off polling.
+        if (settings.getPolling()) {
+          retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+        }
+      }, settings.getPollInterval());
+    }
+  );
 }
