@@ -6,7 +6,7 @@
  */
 
 import { ConcreteTaskInstance } from '../../../../task_manager/server';
-import { eventLogServiceMock } from '../../../../event_log/server/mocks';
+import { createMockLevelLogger } from '../../test_helpers';
 import { BasePayload } from '../../types';
 import { Report } from '../store';
 import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
@@ -21,7 +21,7 @@ describe('Event Logger', () => {
   let factory: ReportingEventLogger;
 
   beforeEach(() => {
-    factory = reportingEventLoggerFactory(eventLogServiceMock.create());
+    factory = reportingEventLoggerFactory(createMockLevelLogger());
   });
 
   it(`should construct with an internal seed object`, () => {
@@ -118,7 +118,6 @@ describe('Event Logger', () => {
       ]
     `);
     expect(result.message).toMatchInlineSnapshot(`"starting csv execution"`);
-    expect(logger.completionLogger.startTiming).toBeCalled();
   });
 
   it(`logExecutionComplete`, () => {
@@ -144,8 +143,6 @@ describe('Event Logger', () => {
       ]
     `);
     expect(result.message).toMatchInlineSnapshot(`"completed csv execution"`);
-    expect(logger.completionLogger.startTiming).toBeCalled();
-    expect(logger.completionLogger.stopTiming).toBeCalled();
   });
 
   it(`logError`, () => {

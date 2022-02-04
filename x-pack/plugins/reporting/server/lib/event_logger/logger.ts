@@ -6,7 +6,8 @@
  */
 
 import deepMerge from 'deepmerge';
-import { IEventLogger, IEventLogService } from '../../../../event_log/server';
+import { LevelLogger } from '../';
+import type { IEvent, IEventLogger } from '../../../../event_log/server';
 import { PLUGIN_ID } from '../../../common/constants';
 import { IReport } from '../store';
 import { ActionType } from './';
@@ -27,9 +28,21 @@ export interface ExecutionCompleteMetrics {
   byteSize: number;
 }
 
+const getEventLog = (logger: LevelLogger) => ({
+  getLogger(lProperties: IEvent): IEventLogger {
+    return {
+      logEvent(properties: IEvent) {
+        logger.debug(JSON.stringify([lProperties, properties]), ['reporting-event-log']);
+      },
+      startTiming(_event: IEvent) {},
+      stopTiming(_event: IEvent) {},
+    };
+  },
+});
+
 /** @internal */
-export function reportingEventLoggerFactory(eventLog: IEventLogService) {
-  const genericLogger = eventLog.getLogger({ event: { provider: PLUGIN_ID } });
+export function reportingEventLoggerFactory(logger: LevelLogger) {
+  const genericLogger = getEventLog(logger).getLogger({ event: { provider: PLUGIN_ID } });
 
   return class ReportingEventLogger {
     readonly eventObj: {
@@ -61,7 +74,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       };
 
       // create a "complete" logger that will use EventLog helpers to calculate timings
-      this.completionLogger = eventLog.getLogger({ event: { provider: PLUGIN_ID } });
+      this.completionLogger = getEventLog(logger).getLogger({ event: { provider: PLUGIN_ID } });
     }
 
     logScheduleTask(): ScheduledTask {
