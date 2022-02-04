@@ -29,7 +29,7 @@ import { emsBoundariesSpecProvider } from './tutorials/ems';
 import { initRoutes } from './routes';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/server';
-import { embeddableMigrations } from './embeddable_migrations';
+import { setupEmbeddable } from './embeddable';
 import { registerIntegrations } from './register_integrations';
 import { StartDeps, SetupDeps } from './types';
 
@@ -198,10 +198,7 @@ export class MapsPlugin implements Plugin {
     setupSavedObjects(core, getFilterMigrations);
     registerMapsUsageCollector(usageCollection);
 
-    plugins.embeddable.registerEmbeddableFactory({
-      id: MAP_SAVED_OBJECT_TYPE,
-      migrations: embeddableMigrations,
-    });
+    setupEmbeddable(plugins.embeddable, getFilterMigrations);
 
     return {
       config: config$,

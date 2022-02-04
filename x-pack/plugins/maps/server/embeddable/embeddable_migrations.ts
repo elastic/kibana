@@ -6,10 +6,10 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
-import { moveAttribution } from '../common/migrations/move_attribution';
-import { setEmsTmsDefaultModes } from '../common/migrations/set_ems_tms_default_modes';
-import { renameLayerTypes } from '../common/migrations/rename_layer_types';
+import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import { moveAttribution } from '../../common/migrations/move_attribution';
+import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
+import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
 
 /*
  * Embeddables such as Maps, Lens, and Visualize can be embedded by value or by reference on a dashboard.
