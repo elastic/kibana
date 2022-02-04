@@ -8,7 +8,7 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import { setHTMLElementClientSizes, setSVGElementGetBBox } from '@kbn/test/jest';
+import { setHTMLElementClientSizes, setSVGElementGetBBox } from '@kbn/test-jest-helpers';
 
 import data from '../../fixtures/mock_data/terms/_series_multiple';
 import { getMockUiState } from '../../fixtures/mocks';

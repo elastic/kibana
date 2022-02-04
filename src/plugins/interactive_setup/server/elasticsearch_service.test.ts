@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import { BehaviorSubject } from 'rxjs';
 import tls from 'tls';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import { pollEsNodesVersion } from '../../../../src/core/server';

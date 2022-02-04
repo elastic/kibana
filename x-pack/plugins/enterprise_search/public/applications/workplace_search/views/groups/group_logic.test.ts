@@ -14,7 +14,7 @@ import {
 import { groups } from '../../__mocks__/groups.mock';
 import { mockGroupValues } from './__mocks__/group_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { GROUPS_PATH } from '../../routes';

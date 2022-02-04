@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import {
   LegendSettingsPopover,
   LegendSettingsPopoverProps,

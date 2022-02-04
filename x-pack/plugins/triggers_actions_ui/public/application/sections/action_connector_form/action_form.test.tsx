@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiAccordion } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { act } from 'react-dom/test-utils';

@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import type {

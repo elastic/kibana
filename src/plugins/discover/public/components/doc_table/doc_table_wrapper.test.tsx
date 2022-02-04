@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DocTableWrapper } from './doc_table_wrapper';
 import { DocTableRow } from './components/table_row';

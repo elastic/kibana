@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EmptyIndexPatternPrompt } from '../empty_index_pattern_prompt';
-import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
 describe('EmptyIndexPatternPrompt', () => {
   it('should render normally', () => {

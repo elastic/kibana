@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Chance from 'chance';
-
-const chance = new Chance();
-const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
-
-export const getRandomNumber = (range: { min: number; max: number } = { min: 1, max: 20 }) =>
-  chance.integer(range);
-
-export const getRandomString = (options = {}) =>
-  `${chance.string({ pool: CHARS_POOL, ...options })}-${Date.now()}`;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-test-jest-helpers'],
+};

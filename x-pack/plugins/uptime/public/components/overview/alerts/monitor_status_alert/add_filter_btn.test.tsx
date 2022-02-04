@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { AddFilterButton } from './add_filter_btn';
 import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 

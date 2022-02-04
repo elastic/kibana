@@ -21,7 +21,7 @@ import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
 } from './dimension_panel';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { generateId } from '../../id_generator';
