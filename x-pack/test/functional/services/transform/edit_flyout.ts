@@ -95,14 +95,18 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail('transformEditAccordionDestinationContent');
     },
 
-    async openTransformEditAccordionRetentionPolicySettings() {
-      await testSubjects.click('transformEditAccordionRetentionPolicy');
-      await testSubjects.existOrFail('transformEditAccordionRetentionPolicyContent');
-    },
-
     async openTransformEditAccordionAdvancedSettings() {
       await testSubjects.click('transformEditAccordionAdvancedSettings');
       await testSubjects.existOrFail('transformEditAccordionAdvancedSettingsContent');
+    },
+
+    async clickTransformEditRetentionPolicySettings(expectEnabled: boolean) {
+      await testSubjects.click('transformEditRetentionPolicySwitch');
+      if (expectEnabled) {
+        await testSubjects.existOrFail('transformEditRetentionPolicyContent');
+      } else {
+        await testSubjects.missingOrFail('transformEditRetentionPolicyContent');
+      }
     },
 
     async setTransformEditFlyoutInputValue(input: string, value: string) {

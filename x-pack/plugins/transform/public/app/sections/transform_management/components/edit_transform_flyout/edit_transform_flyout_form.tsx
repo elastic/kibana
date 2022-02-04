@@ -233,7 +233,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         data-test-subj="transformEditRetentionPolicySwitch"
       />
       {formSections.retentionPolicy.enabled && (
-        <div data-test-subj="transformEditAccordionRetentionPolicyContent">
+        <div data-test-subj="transformEditRetentionPolicyContent">
           {
             // If data view or date fields info not available
             // gracefully defaults to text input
