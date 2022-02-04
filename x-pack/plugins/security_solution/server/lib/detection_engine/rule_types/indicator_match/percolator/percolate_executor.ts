@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import chunk from 'lodash/chunk';
 import { PercolateExecutorOptions } from '../../../signals/types';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { getInputIndex } from '../../../signals/get_input_output_index';
 import { createSearchAfterReturnType, mergeReturns } from '../../../signals/utils';
-import { fetchSourceEvents } from './fetch_source_events';
+import { fetchPercolateEnrichEvents } from './fetch_source_events';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DETECTION_ENGINE_MAX_PER_PAGE,
 } from '../../../../../../common/constants';
-import { percolateSourceEvents } from './percolate_source_events';
-import { enrichEvents } from './enrich_events';
 import { updatePercolatorIndex } from './update_percolator_index';
 import { getEventCount } from '../../../signals/threat_mapping/get_event_count';
 import { buildReasonMessageForThreatMatchAlert } from '../../../signals/reason_formatters';
@@ -124,10 +121,10 @@ export const percolateExecutor = ({
       const start = performance.now();
 
       const {
-        eventHits: sourceEventHits,
+        enrichedHits,
         errors: fetchSourceEventsErrors,
         success: fetchSourceEventsSuccess,
-      } = await fetchSourceEvents({
+      } = await fetchPercolateEnrichEvents({
         buildRuleMessage,
         exceptionsList: exceptionItems,
         filters,
@@ -138,8 +135,12 @@ export const percolateExecutor = ({
         logger,
         perPage,
         query,
-        timestampOverride,
+        threatIndicatorPath,
         tuple,
+        percolatorRuleDataClient,
+        ruleId,
+        ruleVersion,
+        spaceId,
       });
 
       if (!fetchSourceEventsSuccess) {
@@ -150,44 +151,12 @@ export const percolateExecutor = ({
         };
       }
 
-      const chunkedSourceEventHits = chunk(sourceEventHits, perPage);
-
-      const {
-        percolatorResponses,
-        success: percolatorSuccess,
-        errors: percolatorErrors,
-      } = await percolateSourceEvents({
-        chunkedSourceEventHits,
-        percolatorRuleDataClient,
-        ruleId,
-        ruleVersion,
-        spaceId,
-      });
-
-      if (!percolatorSuccess) {
-        return {
-          ...results,
-          success: false,
-          errors: percolatorErrors,
-        };
-      }
-
       const end = performance.now();
 
       results.searchAfterTimes = [(end - start).toString()];
 
-      if (!percolatorResponses[0]) {
-        return results;
-      }
-
-      const enrichedEvents = enrichEvents({
-        chunkedSourceEventHits,
-        percolatorResponses,
-        threatIndicatorPath,
-      });
-
       const alertCandidates = wrapHits(
-        enrichedEvents.slice(0, tuple.maxSignals),
+        enrichedHits.slice(0, tuple.maxSignals),
         buildReasonMessageForThreatMatchAlert
       );
 

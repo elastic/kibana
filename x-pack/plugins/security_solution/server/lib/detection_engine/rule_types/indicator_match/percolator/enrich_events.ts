@@ -12,8 +12,8 @@ import { SignalSource } from '../../../signals/types';
 import { BaseHit, SearchTypes } from '../../../../../../common/detection_engine/types';
 
 interface EnrichEventsOptions {
-  chunkedSourceEventHits: Array<Array<BaseHit<SignalSource>>>;
-  percolatorResponses: Array<estypes.SearchResponse<unknown, unknown>>;
+  hits: Array<estypes.SearchHit<SignalSource>>;
+  percolatorResponse: estypes.SearchResponse<unknown, unknown>;
   threatIndicatorPath: string;
 }
 
@@ -37,24 +37,22 @@ export type EnrichedEvent = BaseHit<SignalSource> & {
 };
 
 export const enrichEvents = ({
-  chunkedSourceEventHits,
-  percolatorResponses,
+  hits,
+  percolatorResponse,
   threatIndicatorPath,
 }: EnrichEventsOptions) => {
   const enrichedEvents: EnrichedEvent[] = [];
 
-  chunkedSourceEventHits.forEach((sourceEventHits, chunkIndex) => {
-    const percolatorHits = percolatorResponses[chunkIndex].hits.hits;
+  const percolatorHits = percolatorResponse.hits.hits;
 
-    percolatorHits.forEach((percolatorHit) => {
-      const enrichment = createEnrichmentFromPercolatorHit(percolatorHit, threatIndicatorPath);
+  percolatorHits.forEach((percolatorHit) => {
+    const enrichment = createEnrichmentFromPercolatorHit(percolatorHit, threatIndicatorPath);
 
-      const indicesOfEventsToBeEnriched: number[] =
-        (percolatorHit.fields?._percolator_document_slot as number[]) ?? [];
+    const indicesOfEventsToBeEnriched: number[] =
+      (percolatorHit.fields?._percolator_document_slot as number[]) ?? [];
 
-      indicesOfEventsToBeEnriched.forEach((indexOfEvent: number) => {
-        enrichedEvents.push(enrichEvent(sourceEventHits[indexOfEvent], enrichment));
-      });
+    indicesOfEventsToBeEnriched.forEach((indexOfEvent: number) => {
+      enrichedEvents.push(enrichEvent(hits[indexOfEvent], enrichment));
     });
   });
 
@@ -77,7 +75,7 @@ export const mergeDuplicates = (events: EnrichedEvent[]) =>
   }, []);
 
 export const enrichEvent = (
-  event: BaseHit<SignalSource>,
+  event: estypes.SearchHit<SignalSource>,
   enrichment: ThreatEnrichment
 ): EnrichedEvent => {
   const _source = (event._source as { threat?: object }) ?? {};

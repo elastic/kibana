@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IRuleDataClient } from '../../../../../../../rule_registry/server';
 import { SignalSource } from '../../../signals/types';
-import { BaseHit } from '../../../../../../common/detection_engine/types';
 
 interface PercolateSourceEventsOptions {
-  chunkedSourceEventHits: Array<Array<BaseHit<SignalSource>>>;
+  hits: Array<estypes.SearchHit<SignalSource>>;
   percolatorRuleDataClient: IRuleDataClient;
   ruleId: string;
   ruleVersion: number;
@@ -19,7 +17,7 @@ interface PercolateSourceEventsOptions {
 }
 
 export const percolateSourceEvents = async ({
-  chunkedSourceEventHits,
+  hits,
   percolatorRuleDataClient,
   ruleId,
   ruleVersion,
@@ -27,35 +25,37 @@ export const percolateSourceEvents = async ({
 }: PercolateSourceEventsOptions) => {
   let success = true;
   const errors: string[] = [];
-  let percolatorResponses: Array<estypes.SearchResponse<unknown, unknown>> = [];
+  // TODO: response type of ruleDataClient.getReader.search is awkward
+  //  it doesn't work with estypes.SearchResponse<unknown, unknown>
+  let percolatorResponse: unknown;
 
   try {
-    percolatorResponses = await Promise.all(
-      chunkedSourceEventHits.map((hits) =>
-        percolatorRuleDataClient.getReader({ namespace: spaceId }).search({
-          body: {
-            query: {
-              constant_score: {
-                filter: {
-                  percolate: {
-                    field: 'query',
-                    documents: hits.map((event) => ({
-                      ...event._source,
-                      rule_id: ruleId,
-                      rule_version: ruleVersion,
-                    })),
-                  },
-                },
+    percolatorResponse = percolatorRuleDataClient.getReader({ namespace: spaceId }).search({
+      body: {
+        query: {
+          constant_score: {
+            filter: {
+              percolate: {
+                field: 'query',
+                documents: hits.map((event) => ({
+                  ...event._source,
+                  rule_id: ruleId,
+                  rule_version: ruleVersion,
+                })),
               },
             },
           },
-        })
-      )
-    );
+        },
+      },
+    });
   } catch (e) {
     success = false;
     errors.push(`${e}`);
   }
 
-  return { success, errors, percolatorResponses };
+  return {
+    success,
+    errors,
+    percolatorResponse: percolatorResponse as estypes.SearchResponse<unknown, unknown>,
+  };
 };

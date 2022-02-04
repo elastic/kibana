@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Logger } from '@kbn/logging';
 import { RuleRangeTuple, SignalSource } from '../../../signals/types';
@@ -19,7 +20,9 @@ import {
 } from '../../../../../../../alerting/server';
 import { BuildRuleMessage } from '../../../signals/rule_messages';
 import { ListClient } from '../../../../../../../lists/server';
-import { BaseHit } from '../../../../../../common/detection_engine/types';
+import { percolateSourceEvents } from './percolate_source_events';
+import { enrichEvents } from './enrich_events';
+import { IRuleDataClient } from '../../../../../../../rule_registry/server';
 
 export interface FetchSourceEventsOptions {
   buildRuleMessage: BuildRuleMessage;
@@ -29,14 +32,19 @@ export interface FetchSourceEventsOptions {
   language: 'eql' | 'kuery' | 'lucene' | undefined;
   listClient: ListClient;
   logger: Logger;
+  percolatorRuleDataClient: IRuleDataClient;
   perPage: number;
   query: string;
+  ruleId: string;
+  ruleVersion: number;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  spaceId: string;
+  threatIndicatorPath: string;
   timestampOverride?: string;
   tuple: RuleRangeTuple;
 }
 
-export const fetchSourceEvents = async ({
+export const fetchPercolateEnrichEvents = async ({
   buildRuleMessage,
   exceptionsList,
   filters,
@@ -44,14 +52,19 @@ export const fetchSourceEvents = async ({
   language,
   listClient,
   logger,
+  percolatorRuleDataClient,
   perPage,
   query,
+  ruleId,
+  ruleVersion,
   services,
+  spaceId,
+  threatIndicatorPath,
   timestampOverride,
   tuple,
 }: FetchSourceEventsOptions) => {
   let success = true;
-  let eventHits: Array<BaseHit<SignalSource>> = [];
+  let enrichedHits: Array<estypes.SearchHit<SignalSource>> = [];
   const errors: string[] = [];
 
   try {
@@ -69,7 +82,11 @@ export const fetchSourceEvents = async ({
     let iterationCount = 0;
     let lastResult = createSearchResultReturnType();
 
-    while (success && (iterationCount === 0 || lastResult.hits.hits.length > 0)) {
+    while (
+      success &&
+      (iterationCount === 0 || lastResult.hits.hits.length > 0) &&
+      enrichedHits.length < tuple.maxSignals
+    ) {
       const { searchResult, searchErrors } = await singleSearchAfter({
         buildRuleMessage,
         filter: esFilter,
@@ -89,6 +106,7 @@ export const fetchSourceEvents = async ({
       if (searchErrors.length) {
         searchErrors.forEach((error) => errors.push(error));
         success = false;
+        break;
       }
 
       const filteredEvents = await filterEventsAgainstList({
@@ -99,7 +117,33 @@ export const fetchSourceEvents = async ({
         buildRuleMessage,
       });
 
-      eventHits = [...eventHits, ...(filteredEvents.hits.hits as Array<BaseHit<SignalSource>>)];
+      const filteredHits = filteredEvents.hits.hits;
+
+      const {
+        percolatorResponse,
+        success: percolatorSuccess,
+        errors: percolateErrors,
+      } = await percolateSourceEvents({
+        hits: filteredHits,
+        percolatorRuleDataClient,
+        ruleId,
+        ruleVersion,
+        spaceId,
+      });
+
+      if (!percolatorSuccess || percolateErrors.length) {
+        percolateErrors.forEach((error) => errors.push(error));
+        success = false;
+        break;
+      }
+
+      const currentEnrichedHits = enrichEvents({
+        hits: filteredHits,
+        percolatorResponse,
+        threatIndicatorPath,
+      });
+
+      enrichedHits = [...enrichedHits, ...currentEnrichedHits];
 
       lastResult = searchResult;
       iterationCount++;
@@ -111,7 +155,7 @@ export const fetchSourceEvents = async ({
   }
 
   return {
-    eventHits,
+    enrichedHits,
     errors,
     success,
   };
