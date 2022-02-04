@@ -41,6 +41,19 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail(`transformEditFlyoutDestinationIngestPipelineFieldSelect`);
     },
 
+    async assertTransformEditFlyoutRetentionPolicySwitchEnabled(expectedValue: boolean) {
+      await testSubjects.existOrFail(`transformEditRetentionPolicySwitch`, {
+        timeout: 1000,
+      });
+      const isEnabled = await testSubjects.isEnabled(`transformEditRetentionPolicySwitch`);
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected 'transformEditRetentionPolicySwitch' input to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
     async assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(expectedValue: boolean) {
       await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
         timeout: 1000,
@@ -100,9 +113,9 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail('transformEditAccordionAdvancedSettingsContent');
     },
 
-    async clickTransformEditRetentionPolicySettings(expectEnabled: boolean) {
+    async clickTransformEditRetentionPolicySettings(expectExists: boolean) {
       await testSubjects.click('transformEditRetentionPolicySwitch');
-      if (expectEnabled) {
+      if (expectExists) {
         await testSubjects.existOrFail('transformEditRetentionPolicyContent');
       } else {
         await testSubjects.missingOrFail('transformEditRetentionPolicyContent');
