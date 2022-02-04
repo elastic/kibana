@@ -5,18 +5,29 @@ NOTE: The UI settings service is available both server and client side.
 
 === Overview
 
-UI settings control the behavior of {kib}, are configurable and non-default values are stored in a `config` saved object. The `uiSettings` service is the programmatic interface to {kib} <<advanced-options, Advanced Settings UI>>. {kib} plugins use the service to extend Kibana UI Settings Management with custom settings for their plugin.
+UI settings are confuigurable from the Advanced Settings page in Management and control the behavior of {kib}. uiSettings are stored in a config saved object and, as such, conform to the same conditions as other saved objects.
 
 There are several ways to configure an advanced setting:
 
-- Through the <<client-side-usage, client-side>> `uiSettings` Service
-- Through the <<server-side-usage, server-side>> `uiSettings` Service
-- Through the <<advanced-options, Advanced Settings UI>>
-- Locked with <<uisettings-overrides, uiSettings.overrides>> in kibana.yml
+- <<advanced-settings-ui, Through the Advanced Settings UI>>
+- <<uisettings-overrides, Locked via kibana.yml's uiSettings.overrides>>
+- <<client-side-usage, Through the client-side uiSettings Service>>
+- <<server-side-usage, Through the server-side uiSettings Service>>
+
+Keep in mind that once you add a new advanced setting, you cannot change or remove it without <<uisettings-migrations, registering a migration in core>>.
+
+[[advanced-settings-ui]]
+=== Configuration with Advanced Settings UI
+The uiSettings service is the programmatic interface to Kibana's Advanced Settings UI. Kibana plugins use the service to extend Kibana UI Settings Management with custom settings for thei plugin.
+
+Configuration through the Advanced Settings UI is restricted to users authorised to acces the Advanced Settings page. Users who don't have permissions to change these values default to using the settings configured to the space they are in. Config saved objects can be shared between spaces.
+
+[[uisettings-overrides]]
+==== Overrides
+When a setting is configured as an override in kibana.yml, it will override any other value stored in the config saved object. If an override is misconfigured, it will fail config validation and will prevent Kibana from starting up. The override applies to Kibana as a whole for all spaces and users and the option will be disabled in the Advanced Settings page. We refer to these as "global" overrides.
 
 [[client-side-usage]]
 === Client side usage
-
 On the client, the `uiSettings` service is exposed directly from `core`.
 
 Users can adjust the settings via Management Advanced Settings UI. The client-side `uiSettings` {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.iuisettingsclient.md[client] provides plugins access to the `config` entries stored in {es}.
@@ -89,6 +100,7 @@ export class MyPlugin implements Plugin {
 
 Registration only requires a schema for validation on read and write, all other {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsparams.md[parameters] are optional.
 
+[[uisettings-migrations]]
 ==== Migrations
 To change or remove a `uiSetting`, the whole `config` saved object needs to be migrated. For example, if we wanted to remove a `custom` setting, or rename `my_setting:fourtyTwo` to `my_other_setting:fourtyTwo`, we'd need two migration entries, one for each change targeting the version in which these changes apply:
 [source,typescript]
@@ -139,20 +151,4 @@ export const migrations = {
 }
 ----
 `uiSettings` {kib-repo}blob/{branch}/src/core/server/ui_settings/saved_objects/migrations.ts[migrations] are declared directly in the service.
-
-[[uisettings-overrides]]
-==== Overrides
-
-[IMPORTANT]
-==============================================
-Overrides should only be used when there is no other way to configure a setting or if the setting is to be applied to Kibana globally. Overrides are not validated to the same extent as through the public APIs. Deprecated and malformed override keys will not be detected.
-==============================================
-
-When a setting is configured as an override in kibana.yml, all other values set for the setting are ignored. Overrides apply to Kibana as a whole and the option will be disabled in the Advanced Settings page for all spaces. We refer to these as "global" overrides.
-
-[[security-related-considerations]]
-==== Security-related considerations
-Configuration through the Advanced settings UI is restricted to users authorised to access the Advanced Settings page. Users who don't have permissions to change these values default to using the settings configured to the space they are in.
-Config saved objects can be shared between spaces.
-
 
