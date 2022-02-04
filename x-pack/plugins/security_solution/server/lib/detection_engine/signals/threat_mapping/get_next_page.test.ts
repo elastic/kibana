@@ -27,8 +27,8 @@ describe('getNextPage', () => {
       logDebugMessage: jest.fn(),
       searchAfter: undefined,
       perPage: 10001,
-      sortOrder: 'desc',
       query: '*:*',
+      threatListConfig: { _source: true, fields: undefined },
     }).catch((e) => expect(e.message).toEqual('perPage cannot exceed the size of 10000'));
   });
 
@@ -42,15 +42,15 @@ describe('getNextPage', () => {
       logDebugMessage: jest.fn(),
       searchAfter: undefined,
       perPage: DETECTION_ENGINE_MAX_PER_PAGE,
-      sortOrder: 'asc',
       query: '*:*',
+      threatListConfig: { _source: true, fields: undefined },
     });
 
     expect(abortableEsClient.search).toHaveBeenCalledWith({
       body: {
         query: { bool: { must: [], filter: [], should: [], must_not: [] } },
-        fields: [{ field: '*', include_unmapped: true }],
-        sort: { '@timestamp': 'asc' },
+        sort: ['_doc', { '@timestamp': 'asc' }],
+        _source: true,
       },
       track_total_hits: false,
       ignore_unavailable: true,
@@ -59,7 +59,7 @@ describe('getNextPage', () => {
     });
   });
 
-  it('can override @timestamp', () => {
+  it('can override threatListConfig', () => {
     getNextPage({
       abortableEsClient,
       exceptionItems: [],
@@ -70,15 +70,15 @@ describe('getNextPage', () => {
       searchAfter: undefined,
       perPage: DETECTION_ENGINE_MAX_PER_PAGE,
       query: '*:*',
-      sortOrder: 'desc',
-      timestampOverride: 'event.ingested',
+      threatListConfig: { _source: false, fields: ['test-field'] },
     });
 
     expect(abortableEsClient.search).toHaveBeenCalledWith({
       body: {
         query: { bool: { must: [], filter: [], should: [], must_not: [] } },
-        fields: [{ field: '*', include_unmapped: true }],
-        sort: { 'event.ingested': 'desc' },
+        sort: ['_doc', { '@timestamp': 'asc' }],
+        _source: false,
+        fields: ['test-field'],
       },
       track_total_hits: false,
       ignore_unavailable: true,
@@ -96,17 +96,17 @@ describe('getNextPage', () => {
       language: 'kuery',
       logDebugMessage: jest.fn(),
       searchAfter: [13371337],
-      sortOrder: 'asc',
       perPage: DETECTION_ENGINE_MAX_PER_PAGE,
       query: '*:*',
+      threatListConfig: { _source: true, fields: undefined },
     });
 
     expect(abortableEsClient.search).toHaveBeenCalledWith({
       body: {
         query: { bool: { must: [], filter: [], should: [], must_not: [] } },
-        fields: [{ field: '*', include_unmapped: true }],
-        sort: { '@timestamp': 'asc' },
         search_after: [13371337],
+        sort: ['_doc', { '@timestamp': 'asc' }],
+        _source: true,
       },
       track_total_hits: false,
       ignore_unavailable: true,
@@ -124,16 +124,16 @@ describe('getNextPage', () => {
       language: 'kuery',
       logDebugMessage: jest.fn(),
       searchAfter: undefined,
-      sortOrder: 'desc',
       perPage: 999,
       query: '*:*',
+      threatListConfig: { _source: true, fields: undefined },
     });
 
     expect(abortableEsClient.search).toHaveBeenCalledWith({
       body: {
         query: { bool: { must: [], filter: [], should: [], must_not: [] } },
-        fields: [{ field: '*', include_unmapped: true }],
-        sort: { '@timestamp': 'desc' },
+        sort: ['_doc', { '@timestamp': 'asc' }],
+        _source: true,
       },
       track_total_hits: false,
       ignore_unavailable: true,

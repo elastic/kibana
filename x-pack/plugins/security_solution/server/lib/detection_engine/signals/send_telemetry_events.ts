@@ -53,7 +53,7 @@ export function sendAlertTelemetryEvents(
 
 export function sendAlertTelemetryEventsFromHits(
   logger: Logger,
-  eventsTelemetry: TelemetryEventsSender | undefined,
+  eventsTelemetry: ITelemetryEventsSender | undefined,
   filteredEventHits: SimpleHit[],
   buildRuleMessage: BuildRuleMessage
 ) {

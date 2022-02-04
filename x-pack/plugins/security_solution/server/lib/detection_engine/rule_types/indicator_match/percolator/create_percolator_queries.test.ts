@@ -45,7 +45,6 @@ describe('createPercolatorQueries', () => {
         { entries: [{ field: 'mockThreatField', value: 'mockValue', type: 'mapping' }] },
       ],
       threatQuery: 'timestamp > now-30m',
-      timestampOverride: 'event.ingested',
     });
 
     expect(getNextPageMock.mock.calls.length).toEqual(1);
@@ -66,8 +65,10 @@ describe('createPercolatorQueries', () => {
       perPage: 10000,
       query: 'timestamp > now-30m',
       searchAfter: ['5555'],
-      sortOrder: 'asc',
-      timestampOverride: 'event.ingested',
+      threatListConfig: {
+        _source: ['*'],
+        fields: undefined,
+      },
     };
 
     expect(isEqual(expectedGetNextPageArgs, actualGetNextPageArgs)).toBe(true);
@@ -91,7 +92,6 @@ describe('createPercolatorQueries', () => {
         { entries: [{ field: 'mockThreatField', value: 'mockValue', type: 'mapping' }] },
       ],
       threatQuery: 'timestamp > now-30m',
-      timestampOverride: 'event.ingested',
     });
 
     const createPercolateQueriesArgs = createPercolateQueriesMock.mock.calls[0][0];

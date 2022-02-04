@@ -207,8 +207,6 @@ export interface GetNextPageOptions {
   perPage?: number;
   query: string;
   searchAfter: SortResults | undefined;
-  timestampOverride?: string;
-  tuple?: RuleRangeTuple;
   threatListConfig: ThreatListConfig;
 }
 

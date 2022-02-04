@@ -388,7 +388,7 @@ export interface ThreatMatchExecutorOptions {
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   completeRule: CompleteRule<ThreatRuleParams>;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;
   listClient: ListClient;

@@ -25,7 +25,6 @@ export const createPercolatorQueries = async ({
   threatLanguage: language,
   threatMapping,
   threatQuery: query,
-  timestampOverride,
 }: CreatePercolatorQueriesOptions) => {
   const threatListConfig = {
     _source: ['*'],
@@ -44,7 +43,6 @@ export const createPercolatorQueries = async ({
     perPage,
     query,
     searchAfter,
-    timestampOverride,
     threatListConfig,
   });
 
@@ -70,7 +68,6 @@ export const createPercolatorQueries = async ({
       perPage,
       query,
       searchAfter: updatedSearchAfter,
-      timestampOverride,
       threatListConfig,
     });
   }
