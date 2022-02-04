@@ -11,7 +11,6 @@ import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
-  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -36,7 +35,6 @@ import type { MapsStartApi } from '../../maps/public';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
 import {
   FetchDataParams,
-  HasDataParams,
   METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -152,23 +150,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   { label: serviceMapTitle, app: 'apm', path: '/service-map' },
                 ],
               },
-
-              // UX navigation
-              {
-                label: 'User Experience',
-                sortKey: 600,
-                entries: [
-                  {
-                    label: i18n.translate('xpack.apm.ux.overview.heading', {
-                      defaultMessage: 'Dashboard',
-                    }),
-                    app: 'ux',
-                    path: '/',
-                    matchFullPath: true,
-                    ignoreTrailingSlash: true,
-                  },
-                ],
-              },
             ];
           }
 
@@ -236,32 +217,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    const getUxDataHelper = async () => {
-      const { fetchUxOverviewDate, hasRumData } = await import(
-        './components/app/rum_dashboard/ux_overview_fetchers'
-      );
-      const { createCallApmApi } = await import(
-        './services/rest/create_call_apm_api'
-      );
-      // have to do this here as well in case app isn't mounted yet
-      createCallApmApi(core);
-
-      return { fetchUxOverviewDate, hasRumData };
-    };
-
     const { observabilityRuleTypeRegistry } = plugins.observability;
-
-    plugins.observability.dashboard.register({
-      appName: 'ux',
-      hasData: async (params?: HasDataParams) => {
-        const dataHelper = await getUxDataHelper();
-        return await dataHelper.hasRumData(params!);
-      },
-      fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getUxDataHelper();
-        return await dataHelper.fetchUxOverviewDate(params);
-      },
-    });
 
     core.application.register({
       id: 'apm',
@@ -297,49 +253,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     registerApmAlerts(observabilityRuleTypeRegistry);
-
-    core.application.register({
-      id: 'ux',
-      title: 'User Experience',
-      order: 8500,
-      euiIconType: 'logoObservability',
-      category: DEFAULT_APP_CATEGORIES.observability,
-      navLinkStatus: config.ui.enabled
-        ? AppNavLinkStatus.default
-        : AppNavLinkStatus.hidden,
-      keywords: [
-        'RUM',
-        'Real User Monitoring',
-        'DEM',
-        'Digital Experience Monitoring',
-        'EUM',
-        'End User Monitoring',
-        'UX',
-        'Javascript',
-        'APM',
-        'Mobile',
-        'digital',
-        'performance',
-        'web performance',
-        'web perf',
-      ],
-      async mount(appMountParameters: AppMountParameters<unknown>) {
-        // Load application bundle and Get start service
-        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/ux_app'),
-          core.getStartServices(),
-        ]);
-
-        return renderApp({
-          core: coreStart,
-          deps: pluginSetupDeps,
-          appMountParameters,
-          config,
-          corePlugins: corePlugins as ApmPluginStartDeps,
-          observabilityRuleTypeRegistry,
-        });
-      },
-    });
 
     return {};
   }

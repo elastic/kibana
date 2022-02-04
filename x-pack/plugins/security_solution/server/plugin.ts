@@ -69,7 +69,7 @@ import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_m
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import {
   registerEventLogProvider,
-  ruleExecutionLoggerFactory,
+  ruleExecutionLogForExecutorsFactory,
 } from './lib/detection_engine/rule_execution_log';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -232,7 +232,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
       ruleDataClient,
       eventLogService,
-      ruleExecutionLoggerFactory,
+      ruleExecutionLoggerFactory: ruleExecutionLogForExecutorsFactory,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);

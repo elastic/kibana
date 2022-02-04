@@ -6,8 +6,8 @@
  */
 
 import { render, fireEvent, act, screen } from '@testing-library/react';
-import React from 'react';
-import { CreateFieldButton } from './index';
+import React, { MutableRefObject } from 'react';
+import { CreateFieldButton, CreateFieldEditorActions } from './index';
 import {
   indexPatternFieldEditorPluginMock,
   Start,
@@ -107,5 +107,39 @@ describe('CreateFieldButton', () => {
 
     fireEvent.click(screen.getByRole('button'));
     expect(onClickParam).toHaveBeenCalled();
+  });
+
+  it("stores 'closeEditor' in the actions ref when editor is open", async () => {
+    const mockCloseEditor = jest.fn();
+    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
+
+    const editorActionsRef: MutableRefObject<CreateFieldEditorActions> = React.createRef();
+    await act(async () => {
+      render(
+        <CreateFieldButton
+          selectedDataViewId={'dataViewId'}
+          onClick={() => undefined}
+          timelineId={TimelineId.detectionsPage}
+          editorActionsRef={editorActionsRef}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+      await runAllPromises();
+    });
+
+    expect(editorActionsRef?.current).toBeNull();
+
+    fireEvent.click(screen.getByRole('button'));
+
+    expect(mockCloseEditor).not.toHaveBeenCalled();
+    expect(editorActionsRef?.current?.closeEditor).toBeDefined();
+
+    editorActionsRef!.current!.closeEditor();
+
+    expect(mockCloseEditor).toHaveBeenCalled();
+    expect(editorActionsRef!.current).toBeNull();
   });
 });
