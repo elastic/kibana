@@ -144,6 +144,9 @@ export class DrawControl extends Component<Props> {
       this._mbDrawControl.changeMode(DRAW_POINT);
     } else if (this.props.drawShape === DRAW_SHAPE.DELETE) {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
+    } else if (this.props.drawShape === DRAW_SHAPE.INSERT) {
+      this.props.mbMap.getCanvas().style.cursor = 'wait';
+      this._mbDrawControl.changeMode(SIMPLE_SELECT);
     } else {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
     }

@@ -144,6 +144,7 @@ export enum DRAW_SHAPE {
   LINE = 'LINE',
   SIMPLE_SELECT = 'SIMPLE_SELECT',
   DELETE = 'DELETE',
+  INSERT = 'INSERT',
 }
 
 export const AGG_DELIMITER = '_of_';
