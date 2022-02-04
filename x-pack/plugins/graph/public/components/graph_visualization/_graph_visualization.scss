@@ -23,14 +23,21 @@
   stroke-width: 2;
   stroke-opacity: .5;
 
-  &:hover {
-    stroke-opacity: .95;
-    cursor: pointer;
-  }
-
   &--selected {
     stroke: $euiColorDarkShade;
     stroke-opacity: .95;
+  }
+}
+
+.gphEdge--clickable {
+  fill: transparent;
+  opacity: 0;
+}
+
+.gphEdge--wrapper:hover {
+  .gphEdge {
+    stroke-opacity: .95;
+    cursor: pointer;
   }
 }
 

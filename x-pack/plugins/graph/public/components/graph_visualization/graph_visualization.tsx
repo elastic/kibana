@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, Fragment } from 'react';
+import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { isColorDark, hexToRgb } from '@elastic/eui';
@@ -90,11 +90,12 @@ export function GraphVisualization({
         <g>
           {workspace.edges &&
             workspace.edges.map((edge) => (
-              <Fragment
+              <g
                 key={`${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
                   edge.target.data.field,
                   edge.target.data.term
                 )}`}
+                className="gphEdge--wrapper"
               >
                 {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
                 <line
@@ -116,14 +117,12 @@ export function GraphVisualization({
                   onClick={() => {
                     edgeClick(edge);
                   }}
-                  className="gphEdge gphEdgeClick"
+                  className="gphEdge gphEdge--clickable"
                   style={{
                     strokeWidth: Math.max(edge.width, 15),
-                    fill: 'transparent',
-                    opacity: 0,
                   }}
                 />
-              </Fragment>
+              </g>
             ))}
         </g>
         {workspace.nodes &&
