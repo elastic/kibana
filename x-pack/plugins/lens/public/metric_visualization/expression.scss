@@ -21,17 +21,14 @@
     }
   }
 
-  .lnsMetricExpression_container_scale {
+  .lnsMetricExpression__containerScale {
     display: flex;
     align-items: center;
     flex-direction: column;
-    &.rowDirection {
-      flex-direction: row;
-    }
-    &.alignStart {
+    &.alignLeft {
       align-items: start;
     }
-    &.alignEnd {
+    &.alignRight {
       align-items: end;
     }
     &.alignCenter {

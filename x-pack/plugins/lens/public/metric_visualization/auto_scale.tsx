@@ -9,13 +9,14 @@ import React from 'react';
 import { throttle } from 'lodash';
 import classNames from 'classnames';
 import { EuiResizeObserver } from '@elastic/eui';
+import { MetricState } from '../../common/expressions';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode | React.ReactNode[];
   minScale?: number;
-  size?: string;
-  titlePosition?: string;
-  textAlign?: string;
+  size?: MetricState['size'];
+  titlePosition?: MetricState['titlePosition'];
+  textAlign?: MetricState['textAlign'];
 }
 
 interface State {
@@ -89,11 +90,10 @@ export class AutoScale extends React.Component<Props, State> {
               style={{
                 transform: `scale(${scale})`,
               }}
-              className={classNames('lnsMetricExpression_container_scale', {
-                rowDirection: ['left', 'right'].includes(titlePosition ?? ''),
-                alignStart: ['left', 'top'].includes(textAlign ?? ''),
-                alignEnd: ['right', 'bottom'].includes(textAlign ?? ''),
-                alignCenter: ['center', 'middle'].includes(textAlign ?? ''),
+              className={classNames('lnsMetricExpression__containerScale', {
+                alignLeft: textAlign === 'left',
+                alignRight: textAlign === 'right',
+                alignCenter: textAlign === 'center',
                 [`titleSize${(size ?? 'xl').toUpperCase()}`]: true,
               })}
             >
