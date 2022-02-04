@@ -11,7 +11,7 @@ import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
-import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import type { DataViewField, DataView } from 'src/plugins/data/common';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -193,7 +193,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   async getFields(): Promise<IField[]> {
     try {
       const indexPattern = await this.getIndexPattern();
-      const fields: IndexPatternField[] = indexPattern.fields.filter((field) => {
+      const fields: DataViewField[] = indexPattern.fields.filter((field) => {
         // Ensure fielddata is enabled for field.
         // Search does not request _source
         return field.aggregatable;
@@ -279,7 +279,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       throw new Error('Cannot _getTopHits without topHitsSplitField');
     }
 
-    const indexPattern: IndexPattern = await this.getIndexPattern();
+    const indexPattern: DataView = await this.getIndexPattern();
 
     const fieldNames = searchFilters.fieldNames.filter(
       (fieldName) => fieldName !== this._descriptor.geoField
@@ -315,7 +315,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       };
     }
 
-    const topHitsSplitField: IndexPatternField = getField(indexPattern, topHitsSplitFieldName);
+    const topHitsSplitField: DataViewField = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -570,7 +570,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: IndexPattern) {
+  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: DataView) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
