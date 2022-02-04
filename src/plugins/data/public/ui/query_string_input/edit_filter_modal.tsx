@@ -504,7 +504,7 @@ export function EditFilterModal({
                                 const subGroupId =
                                   filtersOnGroup.length > 2
                                     ? localfilter?.subGroupId ?? 0
-                                    : (localfilter?.subGroupId ?? 0) + 1;
+                                    : localfilter?.subGroupId ?? 0;
                                 const updatedLocalFilter = {
                                   ...localfilter,
                                   relationship: 'AND',
@@ -521,9 +521,10 @@ export function EditFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId: multipleFilters.length + 1,
+                                    groupId:
+                                      filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
                                     subGroupId,
-                                    id: multipleFilters.length,
+                                    id: multipleFilters.length + localFilters.length,
                                   },
                                 ]);
                                 if (filtersOnGroup.length <= 1) {
