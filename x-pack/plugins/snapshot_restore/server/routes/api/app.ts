@@ -63,9 +63,7 @@ export function registerAppRoutes({
         privilegesResult.hasAllPrivileges = hasAllPrivileges;
 
         // Get all index privileges the user has
-        const {
-          body: { indices },
-        } = await clusterClient.asCurrentUser.security.getUserPrivileges();
+        const { indices } = await clusterClient.asCurrentUser.security.getUserPrivileges();
 
         // Check if they have all the required index privileges for at least one index
         const oneIndexWithAllPrivileges = indices.find(({ privileges }) => {

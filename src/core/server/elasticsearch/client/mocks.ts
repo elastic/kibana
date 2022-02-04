@@ -42,6 +42,10 @@ export interface ClientApiMockInstance<T, Y extends any[]> extends jest.MockInst
   mockResponseOnce(value: Awaited<T>, opts?: Partial<Omit<TransportResult<T>, 'body'>>): this;
 
   mockResponseImplementation(handler: (...args: Y) => Partial<TransportResult<Awaited<T>>>): this;
+
+  mockResponseImplementationOnce(
+    handler: (...args: Y) => Partial<TransportResult<Awaited<T>>>
+  ): this;
 }
 
 const createMockedApi = <
@@ -78,6 +82,22 @@ const createMockedApi = <
     handler: (...args: Y) => Partial<TransportResult<Awaited<T>>>
   ) => {
     mock.mockImplementation((args: unknown, options?: TransportRequestOptions) => {
+      const meta = options?.meta ?? false;
+      // @ts-expect-error couldn't do better while keeping compatibility this jest.MockInstance
+      const response = handler(args, options);
+      if (meta) {
+        return Promise.resolve(createApiResponse(response)) as any;
+      } else {
+        return Promise.resolve(response.body ?? {}) as Promise<T>;
+      }
+    });
+    return mock;
+  };
+
+  mock.mockResponseImplementationOnce = (
+    handler: (...args: Y) => Partial<TransportResult<Awaited<T>>>
+  ) => {
+    mock.mockImplementationOnce((args: unknown, options?: TransportRequestOptions) => {
       const meta = options?.meta ?? false;
       // @ts-expect-error couldn't do better while keeping compatibility this jest.MockInstance
       const response = handler(args, options);

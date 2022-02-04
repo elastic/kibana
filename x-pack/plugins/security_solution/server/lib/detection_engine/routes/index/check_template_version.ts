@@ -23,7 +23,7 @@ export const getTemplateVersion = async ({
 }): Promise<number> => {
   try {
     const response = await esClient.indices.getIndexTemplate({ name: alias });
-    return response.body.index_templates[0].index_template.version ?? 0;
+    return response.index_templates[0].index_template.version ?? 0;
   } catch (e) {
     return 0;
   }
