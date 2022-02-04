@@ -4,7 +4,7 @@
 To upgrade from 7.16 or earlier to {version}, 
 **You must first upgrade to {prev-major-last}**.
 This enables you to use the Upgrade Assistant to
-{stack-ref}/upgrading-stack.html#prepare-to-upgrade[prepare to upgrade].
+{stack-ref}/upgrading-elastic-stack.html#prepare-to-upgrade[prepare to upgrade].
 You must resolve all critical issues identified by the Upgrade Assistant
 before proceeding with the upgrade. 
 
