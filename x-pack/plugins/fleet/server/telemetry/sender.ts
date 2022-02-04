@@ -176,7 +176,7 @@ export class TelemetryEventsSender {
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
       this.logger.debug(
-        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
+        `Error sending events: ${err?.response?.status} ${JSON.stringify(err.response.data)}`
       );
     }
   }
