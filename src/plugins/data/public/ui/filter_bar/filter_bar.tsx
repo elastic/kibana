@@ -109,13 +109,10 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     });
 
     const multipleFilters = [...props.multipleFilters];
-    const index = multipleFilters.findIndex((filter) => filter.groupId === Number(groupId));
 
-    const filtersNew = [
-      ...multipleFilters.slice(0, index),
-      ...mergedFilters,
-      ...multipleFilters.slice(index + 1),
-    ];
+    const newMultipleFilters = multipleFilters.filter((filter) => filter.groupId !== Number(groupId));
+
+    const filtersNew = newMultipleFilters.concat(mergedFilters);
 
     const filters = [...props.filters];
     const updatedFilters: Filter[] = [];
