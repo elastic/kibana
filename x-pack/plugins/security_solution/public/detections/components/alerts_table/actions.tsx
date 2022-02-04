@@ -555,7 +555,7 @@ export const sendAlertToTimelineAction = async ({
         );
         // threshold with template
         if (isThresholdRule(ecsData)) {
-          return await createThresholdTimeline(ecsData, createTimeline, noteContent, {
+          return createThresholdTimeline(ecsData, createTimeline, noteContent, {
             filters,
             query,
             dataProviders,
