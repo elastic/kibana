@@ -73,8 +73,6 @@ const RulesFeatureTourContext = createContext<RulesFeatureTourContextType | null
  * Context for new rules features, displayed in demo tour(euiTour)
  * It has a common state in useEuiTour, which allows transition from one step to the next, for components within it[context]
  * It also stores tour's state in localStorage
- *
- * @returns ReactNode
  */
 export const RulesFeatureTourContextProvider: FC = ({ children }) => {
   const { storage } = useKibana().services;
