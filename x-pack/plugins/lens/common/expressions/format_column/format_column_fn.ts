@@ -43,7 +43,9 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
       const parentFormatId = parsedParentFormat.id;
       const parentFormatParams = parsedParentFormat.params ?? {};
 
-      if (!parentFormatId) {
+      // Be careful here to check for undefined custom format
+      const isDuplicateParentFormatter = parentFormatId === col.meta.params?.id && format == null;
+      if (!parentFormatId || isDuplicateParentFormatter) {
         return col;
       }
 

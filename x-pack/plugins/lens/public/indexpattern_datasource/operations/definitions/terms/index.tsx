@@ -81,17 +81,9 @@ function isScriptedField(fieldName: string | IndexPatternField, indexPattern?: I
   return fieldName.scripted;
 }
 
-function containsNumericFields(fields: IndexPatternField[]) {
-  return fields.some((f) => f.type === 'number');
-}
-
-function getParentFormatter(
-  params: Partial<TermsIndexPatternColumn['params']>,
-  hasNumericFields: boolean
-) {
-  if (hasNumericFields && params.format) {
-    return { id: params.secondaryFields?.length ? 'multi_terms' : 'terms' };
-  }
+// It is not always possible to know if there's a numeric field, so just ignore it for now
+function getParentFormatter(params: Partial<TermsIndexPatternColumn['params']>) {
+  return { id: params.secondaryFields?.length ? 'multi_terms' : 'terms' };
 }
 
 const idPrefix = htmlIdGenerator()();
@@ -142,15 +134,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     );
     const ret: Partial<TermsIndexPatternColumn['params']> = {
       secondaryFields: secondaryFieldsList,
-      parentFormat: getParentFormatter(
-        { ...targetColumn.params, secondaryFields: secondaryFieldsList },
-        containsNumericFields(
-          [
-            indexPattern.getFieldByName(targetColumn.sourceField!),
-            ...secondaryFieldsList.map((name) => indexPattern.getFieldByName(name)),
-          ].filter(Boolean) as IndexPatternField[]
-        )
-      ),
+      parentFormat: getParentFormatter({
+        ...targetColumn.params,
+        secondaryFields: secondaryFieldsList,
+      }),
     };
     return ret;
   },
@@ -248,7 +235,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
         missingBucket: false,
-        parentFormat: field.type === 'number' ? { id: 'terms' } : undefined,
+        parentFormat: { id: 'terms' },
       },
     };
   },
@@ -316,10 +303,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if ('format' in newParams) {
       if (field.type !== 'number') {
         delete newParams.format;
-      } else {
-        newParams.parentFormat = getParentFormatter(newParams, true);
       }
     }
+    newParams.parentFormat = getParentFormatter(newParams);
     return {
       ...oldColumn,
       dataType: field.type as DataType,
@@ -381,6 +367,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     const onFieldSelectChange = useCallback(
       (fields: string[]) => {
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
+        const secondaryFields = fields.length > 1 ? fields.slice(1) : undefined;
         updateLayer({
           ...layer,
           columns: {
@@ -395,18 +382,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               ),
               params: {
                 ...column.params,
-                secondaryFields: fields.length > 1 ? fields.slice(1) : undefined,
-                parentFormat: getParentFormatter(
-                  {
-                    ...column.params,
-                    secondaryFields: fields.length > 1 ? fields.slice(1) : undefined,
-                  },
-                  containsNumericFields(
-                    fields
-                      .map((f) => indexPattern.getFieldByName(f))
-                      .filter(Boolean) as IndexPatternField[]
-                  )
-                ),
+                secondaryFields,
+                parentFormat: getParentFormatter({
+                  ...column.params,
+                  secondaryFields,
+                }),
               },
             },
           } as Record<string, TermsIndexPatternColumn>,
