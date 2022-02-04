@@ -86,14 +86,9 @@ import { ManageLicenseModal } from './manage_license_modal';
 import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
 import { RuleEnabledSwitch } from './rule_enabled_switch';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
-import {
-  formatMillisForDisplay,
-  shouldShowDurationWarning,
-} from '../../../lib/execution_duration_utils';
-import {
-  getFormattedSuccessRatio,
-  getFormattedRuleExecutionPercentile,
-} from '../../../lib/monitoring_utils';
+import { RuleDurationFormat } from './rule_duration_format';
+import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
+import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 
 const ENTER_KEY = 13;
 
@@ -420,7 +415,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const renderPercentileCellValue = (value: number) => {
     return (
       <span data-test-subj={`${selectedPercentile}Percentile`}>
-        {typeof value === 'number' ? getFormattedRuleExecutionPercentile(value) : 'N/A'}
+        <RuleDurationFormat duration={value} />
       </span>
     );
   };
@@ -651,7 +646,7 @@ export const AlertsList: React.FunctionComponent = () => {
 
           return (
             <>
-              {`${formatMillisForDisplay(value)}`}
+              {<RuleDurationFormat duration={value} />}
               {showDurationWarning && (
                 <EuiIconTip
                   data-test-subj="ruleDurationWarning"
