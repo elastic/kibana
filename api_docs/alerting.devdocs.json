@@ -3437,6 +3437,19 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.AlertExecutionStatus.numberOfTriggeredActions",
+            "type": "number",
+            "tags": [],
+            "label": "numberOfTriggeredActions",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.AlertExecutionStatus.lastExecutionDate",
             "type": "Object",
             "tags": [],
@@ -4034,7 +4047,72 @@
             "label": "execution",
             "description": [],
             "signature": [
-              "{ history: { success: boolean; timestamp: number; }[]; calculated_metrics: { success_ratio: number; }; }"
+              "{ history: ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleMonitoringHistory",
+                "text": "RuleMonitoringHistory"
+              },
+              "[]; calculated_metrics: { p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; success_ratio: number; }; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleMonitoringHistory",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleMonitoringHistory",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleMonitoringHistory",
+            "text": "RuleMonitoringHistory"
+          },
+          " extends ",
+          "SavedObjectAttributes"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleMonitoringHistory.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleMonitoringHistory.timestamp",
+            "type": "number",
+            "tags": [],
+            "label": "timestamp",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleMonitoringHistory.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/alert.ts",
             "deprecated": false
@@ -4545,6 +4623,20 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.MONITORING_HISTORY_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "MONITORING_HISTORY_LIMIT",
+        "description": [],
+        "signature": [
+          "200"
+        ],
+        "path": "x-pack/plugins/alerting/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.RawAlertInstance",
         "type": "Type",
         "tags": [],
@@ -4651,6 +4743,20 @@
         "description": [],
         "signature": [
           "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleTaskStateWithActions",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTaskStateWithActions",
+        "description": [],
+        "signature": [
+          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { triggeredActions: { group?: string | undefined; id?: string | undefined; actionTypeId?: string | undefined; params?: { [x: string]: unknown; } | undefined; }[]; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,

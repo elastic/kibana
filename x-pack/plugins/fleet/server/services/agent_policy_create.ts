@@ -94,12 +94,12 @@ export async function createAgentPolicyWithPackages({
   spaceId,
   user,
 }: CreateAgentPolicyParams) {
-  let agentPolicyId;
+  let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
   if (hasFleetServer) {
     packagesToInstall.push(FLEET_SERVER_PACKAGE);
 
-    agentPolicyId = await getFleetServerAgentPolicyId(soRepo);
+    agentPolicyId = agentPolicyId || (await getFleetServerAgentPolicyId(soRepo));
     if (agentPolicyId === FLEET_SERVER_POLICY_ID) {
       // setting first fleet server policy to default, so that fleet server can enroll without setting policy_id
       newPolicy.is_default_fleet_server = true;
@@ -120,7 +120,9 @@ export async function createAgentPolicyWithPackages({
     });
   }
 
-  const agentPolicy = await agentPolicyService.create(soRepo, esClient, newPolicy, {
+  const { id, ...policy } = newPolicy; // omit id from create object
+
+  const agentPolicy = await agentPolicyService.create(soRepo, esClient, policy, {
     user,
     id: agentPolicyId,
   });

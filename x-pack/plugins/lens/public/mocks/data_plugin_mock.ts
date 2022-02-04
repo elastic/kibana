@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { Observable, Subject } from 'rxjs';
 import moment from 'moment';
 import { isFilterPinned, Filter } from '@kbn/es-query';
@@ -79,8 +80,9 @@ export function mockDataPlugin(
         if (subscriber) subscriber();
       }),
       setAppFilters: jest.fn((newFilters: unknown[]) => {
+        const isDifferent = !isEqual(newFilters, filters);
         filters = newFilters;
-        if (subscriber) subscriber();
+        if (isDifferent && subscriber) subscriber();
       }),
       getFilters: () => filters,
       getGlobalFilters: () => {
