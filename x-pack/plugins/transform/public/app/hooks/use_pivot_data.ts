@@ -110,6 +110,7 @@ export const usePivotData = (
       getDataGridSchemaFromESFieldType,
       formatHumanReadableDateTimeSeconds,
       multiColumnSortFactory,
+      getNestedOrEscapedVal,
       useDataGrid,
       INDEX_STATUS,
     },
@@ -235,7 +236,12 @@ export const usePivotData = (
   }, [indexPatternTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
 
   if (sortingColumns.length > 0) {
-    tableItems.sort(multiColumnSortFactory(sortingColumns));
+    const sortingColumnsWithTypes = sortingColumns.map((c) => ({
+      ...c,
+      // Since items might contain undefined/null values, we want to accurate find the data type
+      type: typeof tableItems.find((item) => getNestedOrEscapedVal(item, c.id) !== undefined),
+    }));
+    tableItems.sort(multiColumnSortFactory(sortingColumnsWithTypes));
   }
 
   const pageData = tableItems.slice(
