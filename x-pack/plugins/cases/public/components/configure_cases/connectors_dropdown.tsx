@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -21,6 +21,10 @@ import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon, isDeprecatedConnector } from '../utils';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+
+type ConnectorEuiComboBoxOptionOption<T> = EuiComboBoxOptionOption<T> & {
+  rendered: ReactNode;
+};
 
 export interface Props {
   connectors: ActionConnector[];
@@ -50,12 +54,27 @@ const noConnectorOption = {
   value: 'none',
   label: i18n.NO_CONNECTOR,
   'data-test-subj': 'dropdown-connector-no-connector',
+  rendered: (
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <span data-test-subj={`dropdown-connector-no-connector`}>{i18n.NO_CONNECTOR}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ),
 };
 
 const addNewConnector = {
   value: 'add-connector',
   label: i18n.ADD_NEW_CONNECTOR,
   'data-test-subj': 'dropdown-connector-add-connector',
+  render: (
+    <span className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft">
+      {i18n.ADD_NEW_CONNECTOR}
+    </span>
+  ),
 };
 
 const StyledEuiIconTip = euiStyled(EuiIconTip)`
@@ -85,27 +104,55 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
     [triggersActionsUi]
   );
 
-  const connectorsAsDropdownOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
-    const connectorsFormatted = connectors.reduce(
-      (acc, connector) => {
-        return [
-          ...acc,
-          {
-            value: connector.id,
-            label: connector.name,
-            'data-test-subj': `dropdown-connector-${connector.id}`,
-          },
-        ];
-      },
-      [noConnectorOption]
-    );
+  const connectorsAsDropdownOptions: Array<ConnectorEuiComboBoxOptionOption<string>> =
+    useMemo(() => {
+      const connectorsFormatted = connectors.reduce(
+        (acc, connector) => {
+          return [
+            ...acc,
+            {
+              value: connector.id,
+              label: connector.name,
+              'data-test-subj': `dropdown-connector-${connector.id}`,
+              rendered: (
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <FlexItemIconContainer grow={false}>
+                    <EuiIconExtended
+                      type={() => getConnectorIconSuspended(connector)}
+                      size={ICON_SIZE}
+                    />
+                  </FlexItemIconContainer>
+                  <EuiFlexItem grow={false}>
+                    <span>
+                      {connector.name}
+                      {isDeprecatedConnector(connector) && ` (${i18n.DEPRECATED_TOOLTIP_TEXT})`}
+                    </span>
+                  </EuiFlexItem>
+                  {isDeprecatedConnector(connector) && (
+                    <EuiFlexItem grow={false}>
+                      <StyledEuiIconTip
+                        aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
+                        size={ICON_SIZE}
+                        type="alert"
+                        color="warning"
+                        content={i18n.DEPRECATED_TOOLTIP_CONTENT}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              ),
+            },
+          ];
+        },
+        [noConnectorOption]
+      );
 
-    if (appendAddConnectorButton) {
-      return [...connectorsFormatted, addNewConnector];
-    }
+      if (appendAddConnectorButton) {
+        return [...connectorsFormatted, addNewConnector];
+      }
 
-    return connectorsFormatted;
-  }, [appendAddConnectorButton, connectors]);
+      return connectorsFormatted;
+    }, [appendAddConnectorButton, connectors, getConnectorIconSuspended]);
 
   const [selected, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>([
     noConnectorOption,
@@ -146,57 +193,9 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
     }
   };
 
-  const renderOption = useCallback(
-    (option: EuiComboBoxOptionOption<string>) => {
-      if (option.value === addNewConnector.value) {
-        return (
-          <span className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft">
-            {i18n.ADD_NEW_CONNECTOR}
-          </span>
-        );
-      }
-      if (option.value === noConnectorOption.value) {
-        return (
-          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <span data-test-subj={`dropdown-connector-no-connector`}>{i18n.NO_CONNECTOR}</span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      }
-      const connector = connectors.find((currentConnector) => currentConnector.id === option.value);
-      if (connector) {
-        return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <FlexItemIconContainer grow={false}>
-              <EuiIconExtended type={() => getConnectorIconSuspended(connector)} size={ICON_SIZE} />
-            </FlexItemIconContainer>
-            <EuiFlexItem grow={false}>
-              <span>
-                {connector.name}
-                {isDeprecatedConnector(connector) && ` (${i18n.DEPRECATED_TOOLTIP_TEXT})`}
-              </span>
-            </EuiFlexItem>
-            {isDeprecatedConnector(connector) && (
-              <EuiFlexItem grow={false}>
-                <StyledEuiIconTip
-                  aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
-                  size={ICON_SIZE}
-                  type="alert"
-                  color="warning"
-                  content={i18n.DEPRECATED_TOOLTIP_CONTENT}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      }
-    },
-    [connectors, getConnectorIconSuspended]
-  );
+  const renderOption = (option: EuiComboBoxOptionOption<string>, _searchString: string) => {
+    return (option as ConnectorEuiComboBoxOptionOption<string>).rendered;
+  };
 
   return (
     <EuiComboBox
