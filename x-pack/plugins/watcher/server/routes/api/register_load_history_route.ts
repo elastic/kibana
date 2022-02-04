@@ -29,7 +29,7 @@ function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: 
         },
       },
     })
-    .then(({ body }) => body);
+    .then((body) => body);
 }
 
 export function registerLoadHistoryRoute({

@@ -21,6 +21,7 @@ const NODE_ROLES = 'roles';
 interface NodesAttributes {
   roles: string[];
 }
+
 type Nodes = Record<string, NodesAttributes>;
 
 export const isNodes = (arg: unknown): arg is Nodes => {
@@ -64,9 +65,7 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
           }
         }
 
-        const {
-          body: { nodes },
-        } = await ctx.core.elasticsearch.client.asInternalUser.nodes.info({
+        const { nodes } = await ctx.core.elasticsearch.client.asInternalUser.nodes.info({
           filter_path: `nodes.*.${NODE_ROLES}`,
         });
 

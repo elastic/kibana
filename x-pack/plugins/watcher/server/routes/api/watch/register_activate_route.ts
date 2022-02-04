@@ -17,7 +17,7 @@ function activateWatch(dataClient: IScopedClusterClient, watchId: string) {
     .activateWatch({
       watch_id: watchId,
     })
-    .then(({ body }) => body);
+    .then((body) => body);
 }
 
 const paramsSchema = schema.object({

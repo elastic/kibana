@@ -18,7 +18,7 @@ function deleteWatch(dataClient: IScopedClusterClient, watchId: string) {
     .deleteWatch({
       id: watchId,
     })
-    .then(({ body }) => body);
+    .then((body) => body);
 }
 
 export function registerDeleteRoute({

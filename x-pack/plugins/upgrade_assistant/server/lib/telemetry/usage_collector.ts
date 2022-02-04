@@ -15,7 +15,7 @@ import {
 
 async function getDeprecationLoggingStatusValue(esClient: ElasticsearchClient): Promise<boolean> {
   try {
-    const { body: loggerDeprecationCallResult } = await esClient.cluster.getSettings({
+    const loggerDeprecationCallResult = await esClient.cluster.getSettings({
       include_defaults: true,
     });
 

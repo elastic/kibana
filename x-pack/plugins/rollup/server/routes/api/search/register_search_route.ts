@@ -36,7 +36,7 @@ export const registerSearchRoute = ({
               rest_total_hits_as_int: true,
               body: query,
             })
-            .then(({ body }) => body)
+            .then((body) => body)
         );
         const data = await Promise.all(requests);
         return response.ok({ body: data });

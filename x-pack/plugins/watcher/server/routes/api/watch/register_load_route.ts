@@ -21,7 +21,7 @@ function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
     .getWatch({
       id: watchId,
     })
-    .then(({ body }) => body);
+    .then((body) => body);
 }
 
 export function registerLoadRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {

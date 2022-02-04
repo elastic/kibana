@@ -21,7 +21,7 @@ function deactivateWatch(dataClient: IScopedClusterClient, watchId: string) {
     .deactivateWatch({
       watch_id: watchId,
     })
-    .then(({ body }) => body);
+    .then((body) => body);
 }
 
 export function registerDeactivateRoute({

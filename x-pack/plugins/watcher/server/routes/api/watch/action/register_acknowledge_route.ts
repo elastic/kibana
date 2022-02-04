@@ -23,7 +23,7 @@ function acknowledgeAction(dataClient: IScopedClusterClient, watchId: string, ac
       watch_id: watchId,
       action_id: actionId,
     })
-    .then(({ body }) => body);
+    .then((body) => body);
 }
 
 export function registerAcknowledgeRoute({
