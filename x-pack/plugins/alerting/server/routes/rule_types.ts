@@ -25,6 +25,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       authorizedConsumers,
       minimumScheduleInterval,
       defaultScheduleInterval,
+      doesSetRecoveryContext,
       ...rest
     }) => ({
       ...rest,
@@ -39,6 +40,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       authorized_consumers: authorizedConsumers,
       minimum_schedule_interval: minimumScheduleInterval,
       default_schedule_interval: defaultScheduleInterval,
+      does_set_recovery_context: doesSetRecoveryContext,
     })
   );
 };

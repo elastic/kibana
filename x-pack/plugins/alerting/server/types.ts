@@ -167,6 +167,7 @@ export interface RuleType<
   minimumScheduleInterval?: string;
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
+  doesSetRecoveryContext?: boolean;
 }
 export type UntypedRuleType = RuleType<
   AlertTypeParams,

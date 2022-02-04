@@ -224,6 +224,7 @@ export interface RuleType<
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'minimumScheduleInterval'
+    | 'doesSetRecoveryContext'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
