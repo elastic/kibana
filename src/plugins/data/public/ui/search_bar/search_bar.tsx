@@ -40,7 +40,6 @@ import type { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../.
 import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
-// import { FilterOptions } from '../filter_bar/filter_options';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 import { FilterSetMenu } from '../saved_query_management/filter_set_menu';
@@ -119,7 +118,9 @@ interface State {
   dateRangeFrom: string;
   dateRangeTo: string;
   isAddFilterModalOpen?: boolean;
+  isEditFilterModalOpen?: boolean;
   addFilterMode?: string;
+  editFilterMode?: string;
   filtersIdsFromSavedQueries?: string[];
   overrideTimeFilterModalShow: boolean;
 }
@@ -203,12 +204,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     currentProps: this.props,
     selectedSavedQueries: [],
     finalSelectedSavedQueries: [],
-    multipleFilters: [],
+    multipleFilters: this.props.filters?.length ? [...this.props.filters] : [],
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
     isAddFilterModalOpen: false,
+    isEditFilterModalOpen: false,
     addFilterMode: 'quick_form',
+    editFilterMode: 'quick_form',
     filtersIdsFromSavedQueries: [],
     overrideTimeFilterModalShow: false,
   };
@@ -541,6 +544,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
   };
 
+  public toggleEditFilterModal = (value: boolean, editFilterMode?: string) => {
+    this.setState({
+      isEditFilterModalOpen: value,
+      editFilterMode: editFilterMode || 'quick_form',
+    });
+  };
+
   public toggleFilterSetPopover = (value: boolean) => {
     this.setState({
       openFilterSetPopover: value,
@@ -615,15 +625,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           savedQueryManagement={savedQueryManagement}
           applySelectedSavedQueries={this.applyTimeFilterOverrideModal}
           fillSubmitButton={this.props.fillSubmitButton || false}
-          // prepend={
-          //   this.props.showFilterBar && this.state.query
-          //     ? this.renderSavedQueryManagement(
-          //         this.props.onClearSavedQuery,
-          //         this.props.showSaveQuery,
-          //         this.props.savedQuery
-          //       )
-          //     : undefined
-          // }
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
@@ -714,6 +715,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             removeSelectedSavedQuery={this.removeSelectedSavedQuery}
             onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
             multipleFilters={this.state.multipleFilters}
+            toggleEditFilterModal={this.toggleEditFilterModal}
+            isEditFilterModalOpen={this.state.isEditFilterModalOpen}
+            editFilterMode={this.state.editFilterMode}
             savedQueryService={this.savedQueryService}
             onFilterSave={this.onSave}
             onFilterBadgeSave={this.onFilterBadgeSave}

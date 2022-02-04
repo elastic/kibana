@@ -50,6 +50,7 @@ interface Props {
   groupId: string;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
+  onEditFilterClick: (groupId: number) => void;
   savedQueryService?: SavedQueryService;
   onFilterSave?: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   customLabel?: string;
@@ -64,6 +65,7 @@ export const FilterExpressionItem: FC<Props> = ({
   groupId,
   filtersGroupsCount,
   onUpdate,
+  onEditFilterClick,
   savedQueryService,
   onFilterSave,
   customLabel,
@@ -76,12 +78,11 @@ export const FilterExpressionItem: FC<Props> = ({
     query: filter.query,
   }));
   function handleBadgeClick() {
-    // if (e.shiftKey) {
-    //   onToggleDisabled();
-    // } else {
-    //   setIsPopoverOpen(!isPopoverOpen);
-    // }
     setIsPopoverOpen(!isPopoverOpen);
+  }
+
+  function onEdit(groupId: number) {
+    onEditFilterClick(groupId);
   }
 
   function onDuplicate() {
@@ -95,7 +96,11 @@ export const FilterExpressionItem: FC<Props> = ({
   function onToggleNegated() {
     const isNegated = groupedFilters[0].groupNegated;
     const multipleUpdatedFilters = groupedFilters?.map((filter: Filter) => {
-      return { ...filter, groupNegated: !isNegated };
+      if (filter.meta.negate) {
+        return { ...filter, meta: { ...filter.meta, negate: false } }
+      } else {
+        return { ...filter, groupNegated: !isNegated };
+      }
     });
 
     onUpdate?.(multipleUpdatedFilters, groupId, true);
@@ -113,7 +118,10 @@ export const FilterExpressionItem: FC<Props> = ({
           defaultMessage: `Edit`,
         }),
         icon: 'pencil',
-        panel: 1,
+        onClick: () => {
+          setIsPopoverOpen(false);
+          onEdit(groupId);
+        },
         'data-test-subj': 'editFilter',
       },
       {
@@ -141,11 +149,11 @@ export const FilterExpressionItem: FC<Props> = ({
       {
         name: groupedFilters[0].meta.disabled
           ? i18n.translate('data.filter.filterBar.enableFilterButtonLabel', {
-              defaultMessage: `Re-enable`,
-            })
+            defaultMessage: `Re-enable`,
+          })
           : i18n.translate('data.filter.filterBar.disableFilterButtonLabel', {
-              defaultMessage: `Temporarily disable`,
-            }),
+            defaultMessage: `Temporarily disable`,
+          }),
         icon: `${groupedFilters[0].meta.disabled ? 'eye' : 'eyeClosed'}`,
         onClick: () => {
           setIsPopoverOpen(false);
@@ -171,23 +179,6 @@ export const FilterExpressionItem: FC<Props> = ({
         id: 0,
         items: mainPanelItems,
       },
-      // {
-      //   id: 1,
-      //   width: FILTER_EDITOR_WIDTH,
-      //   content: (
-      //     <div>
-      //       <FilterEditor
-      //         filter={filter}
-      //         indexPatterns={indexPatterns}
-      //         onSubmit={onSubmit}
-      //         onCancel={() => {
-      //           setIsPopoverOpen(false);
-      //         }}
-      //         timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-      //       />
-      //     </div>
-      //   ),
-      // },
     ];
 
     if (!customLabel && savedQueryService && onFilterSave && onFilterBadgeSave) {
@@ -411,8 +402,8 @@ export const FilterExpressionItem: FC<Props> = ({
 
       const prefixText = filter.meta.negate
         ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
-            defaultMessage: 'NOT ',
-          })}`
+          defaultMessage: 'NOT ',
+        })}`
         : '';
       const prefix =
         filter.meta.negate && !filter.meta.disabled ? (
@@ -426,9 +417,8 @@ export const FilterExpressionItem: FC<Props> = ({
       filterExpression.push(filterContent);
 
       const text = label.title;
-      filterText += `${filter?.meta?.key}: ${text} ${
-        groupedFilters.length > 1 ? filter.relationship || '' : ''
-      } `;
+      filterText += `${filter?.meta?.key}: ${text} ${groupedFilters.length > 1 ? filter.relationship || '' : ''
+        } `;
     }
     if (needsParenthesis) {
       filterExpression.push(<EuiTextColor color="rgb(0, 113, 194)">)</EuiTextColor>);

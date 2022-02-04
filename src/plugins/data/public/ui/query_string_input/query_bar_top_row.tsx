@@ -8,7 +8,7 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState, ReactNode } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
@@ -22,10 +22,8 @@ import {
   EuiFieldText,
   prettyDuration,
   EuiIconProps,
-  EuiSuperUpdateButton,
   OnRefreshProps,
   EuiButtonIcon,
-  EuiPopover,
 } from '@elastic/eui';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
@@ -36,7 +34,6 @@ import { getQueryLog } from '../../query';
 import type { PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../../utils/shallow_equal';
-import { SavedQuery } from '../..';
 import { AddFilterModal, FilterGroup } from './add_filter_modal';
 import { SavedQueryMeta } from '../saved_query_form';
 
@@ -382,12 +379,6 @@ export const QueryBarTopRow = React.memo(
     }
 
     const onAddFilterClick = () => props.toggleAddFilterModal?.(!props.isAddFilterModalOpen);
-    function onAdd(filter: Filter) {
-      props.toggleAddFilterModal?.(false);
-
-      const filters = [...props.filters, filter];
-      props?.onFiltersUpdated?.(filters);
-    }
 
     function onAddMultipleFilters(selectedFilters: Filter[]) {
       props.toggleAddFilterModal?.(false);

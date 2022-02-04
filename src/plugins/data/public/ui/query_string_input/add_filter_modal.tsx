@@ -9,13 +9,7 @@
 import React, { useState } from 'react';
 import { groupBy } from 'lodash';
 import classNames from 'classnames';
-import {
-  Filter,
-  buildFilter,
-  buildCustomFilter,
-  cleanFilter,
-  getFilterParams,
-} from '@kbn/es-query';
+import { Filter, buildFilter, buildCustomFilter, cleanFilter } from '@kbn/es-query';
 import {
   EuiFormRow,
   EuiFlexGroup,
@@ -103,6 +97,7 @@ export function AddFilterModal({
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
+  multipleFilters?: Filter[];
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
   savedQueryManagement?: JSX.Element;
@@ -119,10 +114,11 @@ export function AddFilterModal({
     {
       field: undefined,
       operator: undefined,
-      value: getFilterParams(filter),
+      value: undefined,
       groupId: 1,
       id: 0,
       subGroupId: 1,
+      relationship: undefined,
     },
   ]);
   const [groupsCount, setGroupsCount] = useState<number>(1);
@@ -440,7 +436,7 @@ export function AddFilterModal({
               <>
                 <div className={classNames(classes)}>
                   {subGroup.map((localfilter, index) => {
-                    const overallLength =
+                    const overallLength: number =
                       localfilter.field?.displayName?.length +
                       localfilter.operator?.message?.length +
                       localfilter.value?.length;
