@@ -38,6 +38,14 @@ const EuiIconExtended = styled(EuiIcon)`
   margin-bottom: 0 !important;
 `;
 
+const FlexItemIconContainer = styled(EuiFlexItem)`
+  svg {
+    margin-right: 13px;
+    margin-bottom: 0 !important;
+    width: 20px;
+  }
+`;
+
 const noConnectorOption = {
   value: 'none',
   label: i18n.NO_CONNECTOR,
@@ -163,9 +171,9 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       if (connector) {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
+            <FlexItemIconContainer grow={false}>
               <EuiIconExtended type={() => getConnectorIconSuspended(connector)} size={ICON_SIZE} />
-            </EuiFlexItem>
+            </FlexItemIconContainer>
             <EuiFlexItem grow={false}>
               <span>
                 {connector.name}
