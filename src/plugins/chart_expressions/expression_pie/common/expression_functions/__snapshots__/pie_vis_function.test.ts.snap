@@ -32,6 +32,7 @@ Object {
     "visConfig": Object {
       "addLegend": true,
       "addTooltip": true,
+      "ariaLabel": undefined,
       "buckets": undefined,
       "dimensions": Object {
         "buckets": undefined,

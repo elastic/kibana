@@ -141,11 +141,15 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
         defaultMessage: 'The id of the split column or the corresponding dimension',
       }),
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('expressionGauge.functions.args.ariaLabelHelpText', {
+        defaultMessage: 'Specifies the aria label of the heat map',
+      }),
+      required: false,
+    },
   },
   fn(data, args, handlers) {
-    args.ariaLabel =
-      (handlers.variables?.embeddableTitle as string) ||
-      handlers.getExecutionContext?.()?.description;
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [];
       if (args.valueAccessor) {
@@ -206,7 +210,13 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       as: EXPRESSION_HEATMAP_NAME,
       value: {
         data,
-        args,
+        args: {
+          ...args,
+          ariaLabel:
+            args.ariaLabel ??
+            (handlers.variables?.embeddableTitle as string) ??
+            handlers.getExecutionContext?.()?.description,
+        },
       },
     };
   },

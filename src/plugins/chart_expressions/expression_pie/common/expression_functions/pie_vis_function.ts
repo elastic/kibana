@@ -123,10 +123,21 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       }),
       default: `{${PIE_LABELS_FUNCTION}}`,
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('expressionGauge.functions.args.ariaLabelHelpText', {
+        defaultMessage: 'Specifies the aria label of the pie chart',
+      }),
+      required: false,
+    },
   },
   fn(context, args, handlers) {
     const visConfig: PieVisParams = {
       ...args,
+      ariaLabel:
+        args.ariaLabel ??
+        (handlers.variables?.embeddableTitle as string) ??
+        handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
         metric: args.metric,

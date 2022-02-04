@@ -20,6 +20,7 @@ interface TagCloudCommonParams {
   minFontSize: number;
   maxFontSize: number;
   showLabel: boolean;
+  ariaLabel?: string;
 }
 
 export interface TagCloudVisConfig extends TagCloudCommonParams {
@@ -31,7 +32,6 @@ export interface TagCloudRendererParams extends TagCloudCommonParams {
   palette: PaletteOutput;
   metric: ExpressionValueVisDimension;
   bucket?: ExpressionValueVisDimension;
-  ariaLabel?: string;
 }
 
 export interface TagcloudRendererConfig {

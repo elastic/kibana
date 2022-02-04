@@ -382,6 +382,8 @@ const PieComponent = (props: PieComponentProps) => {
               ]}
               baseTheme={chartBaseTheme}
               onRenderChange={onRenderChange}
+              ariaLabel={props.visParams.ariaLabel}
+              ariaUseDefaultSummary={!props.visParams.ariaLabel}
             />
             <Partition
               id="pie"

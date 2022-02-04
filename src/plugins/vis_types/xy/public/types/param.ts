@@ -186,4 +186,5 @@ export interface XYVisConfig {
   seriesDimension?: ExpressionValueXYDimension[];
   splitRowDimension?: ExpressionValueXYDimension[];
   splitColumnDimension?: ExpressionValueXYDimension[];
+  ariaLabel?: string;
 }

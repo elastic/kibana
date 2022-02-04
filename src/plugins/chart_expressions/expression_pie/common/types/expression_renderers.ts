@@ -54,6 +54,7 @@ interface PieCommonParams {
   distinctColors: boolean;
   isDonut: boolean;
   emptySizeRatio?: EmptySizeRatios;
+  ariaLabel?: string;
 }
 
 export interface PieVisParams extends PieCommonParams {

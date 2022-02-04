@@ -57,6 +57,13 @@ export const getTimelionVisualizationConfig = (
       default: 'auto',
       help: '',
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('timelion.function.args.ariaLabelHelpText', {
+        defaultMessage: 'Specifies the aria label of the timelion',
+      }),
+      required: false,
+    },
   },
   async fn(input, args, { getSearchSessionId, getExecutionContext, variables }) {
     const { getTimelionRequestHandler } = await import('./async_services');
@@ -65,7 +72,10 @@ export const getTimelionVisualizationConfig = (
     const visParams = {
       expression: args.expression,
       interval: args.interval,
-      ariaLabel: (variables?.embeddableTitle as string) || getExecutionContext?.()?.description,
+      ariaLabel:
+        args.ariaLabel ??
+        (variables?.embeddableTitle as string) ??
+        getExecutionContext?.()?.description,
     };
 
     const response = await timelionRequestHandler({
