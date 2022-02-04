@@ -6,10 +6,8 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { HttpResponse } from 'kibana/public';
 
 import { flashAPIErrors } from '../../../shared/flash_messages';
-import { ErrorResponse } from '../../../shared/flash_messages/handle_api_errors';
 
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
