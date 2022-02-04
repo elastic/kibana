@@ -285,6 +285,18 @@ export const getEnvAuth = (): User => {
 };
 
 /**
+ * Saves in localStorage rules feature tour config with deactivated option
+ * It prevents tour to appear during tests and cover UI elements
+ * @param window - browser's window object
+ */
+const disableRulesFeatureTour = (window: Window) => {
+  const tourConfig = {
+    isTourActive: false,
+  };
+  window.localStorage.setItem('securitySolution.rulesFeatureTour', JSON.stringify(tourConfig));
+};
+
+/**
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
@@ -301,6 +313,7 @@ export const loginAndWaitForPage = (
         if (onBeforeLoadCallback) {
           onBeforeLoadCallback(win);
         }
+        disableRulesFeatureTour(win);
       },
     }
   );
@@ -308,20 +321,27 @@ export const loginAndWaitForPage = (
 };
 export const waitForPage = (url: string) => {
   cy.visit(
-    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
+    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
+    {
+      onBeforeLoad: disableRulesFeatureTour,
+    }
   );
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
 
 export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);
-  cy.visit(role ? getUrlWithRoute(role, url) : url);
+  cy.visit(role ? getUrlWithRoute(role, url) : url, {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
 export const loginWithUserAndWaitForPageWithoutDateRange = (url: string, user: User) => {
   loginWithUser(user);
-  cy.visit(constructUrlWithUser(user, url));
+  cy.visit(constructUrlWithUser(user, url), {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
@@ -329,7 +349,9 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
 
   login(role);
-  cy.visit(role ? getUrlWithRoute(role, route) : route);
+  cy.visit(role ? getUrlWithRoute(role, route) : route, {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
@@ -340,7 +362,9 @@ export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
-  cy.visit(role ? getUrlWithRoute(role, url) : url);
+  cy.visit(role ? getUrlWithRoute(role, url) : url, {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 

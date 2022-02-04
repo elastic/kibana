@@ -156,11 +156,14 @@ export const useRulesFeatureTourContextOptional = (): RulesFeatureTourContextTyp
 export const OptionalEuiTourStep: FC<{ stepProps: EuiTourStepProps | undefined }> = ({
   children,
   stepProps,
-}) =>
-  stepProps ? (
+}) => {
+  if (!stepProps) {
+    return <>{children}</>;
+  }
+
+  return (
     <EuiTourStep {...stepProps}>
       <>{children}</>
     </EuiTourStep>
-  ) : (
-    <>{children}</>
   );
+};
