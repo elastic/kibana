@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type * as React from 'react';
 import type { PresentationUtilPluginStart } from '../../presentation_util/public';
-
-import { CustomIntegration } from '../common';
+import type { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsSetup {
   getAppendCustomIntegrations: () => Promise<CustomIntegration[]>;
