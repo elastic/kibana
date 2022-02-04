@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ConnectorsDropdown it formats the connectors correctly 1`] = `
+exports[`ConnectorsDropdown formats the connectors correctly 1`] = `
 Array [
   Object {
     "data-test-subj": "dropdown-connector-no-connector",

@@ -15,6 +15,7 @@ import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
 import { useKibana } from '../../common/lib/kibana';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -36,17 +37,17 @@ describe('ConnectorsDropdown', () => {
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
   });
 
-  test('it renders', () => {
+  it('renders', () => {
     expect(wrapper.find('[data-test-subj="dropdown-connectors"]').first().exists()).toBe(true);
   });
 
-  test('it formats the connectors correctly', () => {
+  it('formats the connectors correctly', () => {
     const selectProps = wrapper.find(EuiComboBox).props();
 
     expect(selectProps.options).toMatchSnapshot();
   });
 
-  test('it disables the dropdown', () => {
+  it('disables the dropdown', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} disabled={true} />, {
       wrappingComponent: TestProviders,
     });
@@ -56,7 +57,7 @@ describe('ConnectorsDropdown', () => {
     ).toEqual(true);
   });
 
-  test('it shows loading correctly', () => {
+  it('shows loading correctly', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} isLoading={true} />, {
       wrappingComponent: TestProviders,
     });
@@ -66,7 +67,7 @@ describe('ConnectorsDropdown', () => {
     ).toEqual(true);
   });
 
-  test('it selects the correct connector', () => {
+  it('selects the previously selected connector correctly', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} selectedConnector={'servicenow-1'} />, {
       wrappingComponent: TestProviders,
     });
@@ -76,7 +77,7 @@ describe('ConnectorsDropdown', () => {
     );
   });
 
-  test('it does not throw when accessing the icon if the connector type is not registered', () => {
+  it('does not throw when accessing the icon if the connector type is not registered', () => {
     expect(() =>
       mount(
         <ConnectorsDropdown
@@ -98,24 +99,34 @@ describe('ConnectorsDropdown', () => {
     ).not.toThrowError();
   });
 
-  test('it shows the deprecated tooltip when the connector is deprecated', () => {
+  it('shows the deprecated tooltip when the connector is deprecated', () => {
     render(<ConnectorsDropdown {...props} selectedConnector="servicenow-uses-table-api" />, {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    act(() => {
-      fireEvent(
-        screen.getByTestId('comboBoxToggleListButton'),
-        new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-        })
-      );
-    });
+    userEvent.click(screen.getByTestId('comboBoxToggleListButton'));
 
     const tooltips = screen.getAllByLabelText(
       'This connector is deprecated. Update it, or create a new one.'
     );
     expect(tooltips[0]).toBeInTheDocument();
+  });
+
+  it('restores the previous connector if the user leaves the input empty', () => {
+    const onChangeHandler = jest.fn();
+    render(
+      <ConnectorsDropdown {...props} selectedConnector="jira-1" onChange={onChangeHandler} />,
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
+    );
+
+    userEvent.click(screen.getByTestId('comboBoxClearButton'));
+    act(() => {
+      screen.getByTestId('comboBoxSearchInput').blur();
+    });
+
+    expect(screen.getByTestId('comboBoxInput')).toHaveTextContent(/Jira/);
+    expect(onChangeHandler).toHaveBeenLastCalledWith('jira-1');
   });
 });

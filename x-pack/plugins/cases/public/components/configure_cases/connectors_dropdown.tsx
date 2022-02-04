@@ -195,7 +195,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       aria-label={i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}
       data-test-subj="dropdown-connectors"
       isDisabled={disabled}
-      isClearable={false}
       renderOption={renderOption}
       fullWidth
       isLoading={isLoading}
