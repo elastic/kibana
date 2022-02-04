@@ -11,7 +11,7 @@ import { chartPluginMock } from '../../../../charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
 import type { Datatable } from '../../../../expressions/public';
 import { DatatableColumn, DatatableRow } from 'src/plugins/expressions/common';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { GaugeRenderProps, GaugeArguments, GaugeLabelMajorMode, ColorStop } from '../../common';
 import GaugeComponent from './gauge_component';
 import { Chart, Goal } from '@elastic/charts';

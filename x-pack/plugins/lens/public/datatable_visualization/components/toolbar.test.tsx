@@ -6,7 +6,7 @@
  */
 
 import React, { FormEvent } from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataTableToolbar } from './toolbar';
 import { DatatableVisualizationState } from '../visualization';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../types';
