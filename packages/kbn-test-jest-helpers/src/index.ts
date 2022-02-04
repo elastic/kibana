@@ -8,8 +8,6 @@
 
 export * from './enzyme_helpers';
 
-export * from './get_url';
-
 export * from './find_test_subject';
 
 export * from './jsdom_svg_mocks';
