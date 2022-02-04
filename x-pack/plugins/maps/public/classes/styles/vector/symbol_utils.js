@@ -15,8 +15,9 @@ import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
 import { MAKI_ICONS } from './maki_icons';
 
-const MAKI_ICON_SIZE = 16;
-export const HALF_MAKI_ICON_SIZE = MAKI_ICON_SIZE / 2;
+export const CUSTOM_ICON_PREFIX_SDF = '__kbn__custom_icon_sdf__';
+const ICON_SIZE = 16;
+export const HALF_ICON_SIZE = ICON_SIZE / 2;
 
 export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
   return {
@@ -33,14 +34,14 @@ export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
  * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
  * @return {ImageData} Monochrome image that can be added to a MapLibre map
  */
-export async function createSdfIcon(svgString, cutoff = 0.25, radius = 0.25) {
+export async function createSdfIcon({ svg, cutoff = 0.25, radius = 0.25 }) {
   const buffer = 3;
-  const size = MAKI_ICON_SIZE + buffer * 4;
+  const size = ICON_SIZE + buffer * 4;
   const svgCanvas = document.createElement('canvas');
   svgCanvas.width = size;
   svgCanvas.height = size;
   const svgCtx = svgCanvas.getContext('2d');
-  const v = Canvg.fromString(svgCtx, svgString, {
+  const v = Canvg.fromString(svgCtx, svg, {
     ignoreDimensions: true,
     offsetX: buffer / 2,
     offsetY: buffer / 2,

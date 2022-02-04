@@ -359,12 +359,6 @@ export function updateEditLayer(layerId: string | null) {
   };
 }
 
-export function upsertCustomIcon(icons: CustomIcon[]) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    await dispatch(updateMapSetting('customIcons', icons));
-  };
-}
-
 export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,

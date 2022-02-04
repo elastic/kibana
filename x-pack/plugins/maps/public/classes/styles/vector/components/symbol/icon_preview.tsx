@@ -70,12 +70,13 @@ export class IconPreview extends Component<Props, State> {
   async _syncImageToMap() {
     if (this._isMounted && this.state.map && this.props.svg) {
       const map = this.state.map;
-      const { imageData, pixelRatio } = await createSdfIcon(this.props.svg, this.props.cutoff, this.props.radius);
+      const { svg, cutoff, radius } = this.props;
+      const imageData = await createSdfIcon({ svg, cutoff, radius });
       if (map.hasImage(IconPreview.iconId)) {
         // @ts-expect-error
         map.updateImage(IconPreview.iconId, imageData);
       } else {
-        map.addImage(IconPreview.iconId, imageData, { pixelRatio, sdf: true });
+        map.addImage(IconPreview.iconId, imageData, { sdf: true });
       }
       map.setLayoutProperty('icon-layer', 'icon-image', IconPreview.iconId);
       map.setLayoutProperty('icon-layer', 'icon-size', 6);

@@ -23,6 +23,7 @@ import { ILayer } from '../../classes/layers/layer';
 import { IVectorSource } from '../../classes/sources/vector_source';
 import { MapSettings } from '../../reducers/map';
 import {
+  CustomIcon,
   Goto,
   MapCenterAndZoom,
   TileMetaFeature,
@@ -78,6 +79,7 @@ export class MbMap extends Component<Props, State> {
   private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
+  private _prevCustomIcons?: CustomIcon[];
   private _prevDisableInteractive?: boolean;
   private _prevLayerList?: ILayer[];
   private _prevTimeslice?: Timeslice;
@@ -288,7 +290,7 @@ export class MbMap extends Component<Props, State> {
       const pixelRatio = Math.floor(window.devicePixelRatio);
       for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
         if (!mbMap.hasImage(symbolId)) {
-          const imageData = await createSdfIcon(svg, 0.25, 0.25);
+          const imageData = await createSdfIcon({ svg });
           mbMap.addImage(symbolId, imageData, {
             pixelRatio,
             sdf: true,
@@ -386,6 +388,19 @@ export class MbMap extends Component<Props, State> {
         this.state.mbMap.doubleClickZoom.enable();
         this.state.mbMap.dragPan.enable();
         this.state.mbMap.addControl(this._navigationControl, 'top-left');
+      }
+    }
+
+    if (this._prevCustomIcons === undefined || this._prevCustomIcons !== this.props.settings.customIcons) {
+      this._prevCustomIcons = this.props.settings.customIcons;
+      for (const { symbolId, svg, cutoff, radius } of this.props.settings.customIcons) {
+        if (!this.state.mbMap.hasImage(symbolId)) {
+          createSdfIcon({ svg, cutoff, radius }).then((imageData: ImageData) => {
+            this.state.mbMap!.addImage(symbolId, imageData, {
+              sdf: true
+            });
+          });
+        }
       }
     }
 

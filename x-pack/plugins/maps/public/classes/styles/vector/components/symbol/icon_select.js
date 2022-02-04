@@ -22,7 +22,7 @@ import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
 
 const DEFAULT_CUSTOM_ICON_CUTOFF = 0.25;
-const DEFAULT_CUSTOM_ICON_RADIUS = 0.5;
+const DEFAULT_CUSTOM_ICON_RADIUS = 0.25;
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;

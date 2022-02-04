@@ -11,7 +11,7 @@ import { DynamicStyleProperty } from './dynamic_style_property';
 import { OrdinalLegend } from '../components/legend/ordinal_legend';
 import { makeMbClampedNumberExpression } from '../style_util';
 import {
-  HALF_MAKI_ICON_SIZE,
+  HALF_ICON_SIZE,
   // @ts-expect-error
 } from '../symbol_utils';
 import { FieldFormatter, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
@@ -69,9 +69,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
           fieldName: targetName,
         }),
         rangeFieldMeta.min,
-        this._options.minSize / HALF_MAKI_ICON_SIZE,
+        this._options.minSize / HALF_ICON_SIZE,
         rangeFieldMeta.max,
-        this._options.maxSize / HALF_MAKI_ICON_SIZE,
+        this._options.maxSize / HALF_ICON_SIZE,
       ]);
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', null);

@@ -10,7 +10,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { StyleSettings } from './style_settings';
 import { getMapSettings, getSelectedLayer } from '../../../selectors/map_selectors';
-import { upsertCustomIcon, updateLayerStyleForSelectedLayer } from '../../../actions';
+import { updateMapSetting, updateLayerStyleForSelectedLayer } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { CustomIcon, StyleDescriptor } from '../../../../common/descriptor_types';
 
@@ -27,7 +27,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(updateLayerStyleForSelectedLayer(styleDescriptor));
     },
     updateCustomIcons: (customIcons: CustomIcon[]) => {
-      dispatch(upsertCustomIcon(customIcons)); // can also be await dispatch if race condition
+      dispatch(updateMapSetting('customIcons', customIcons));
     },
   };
 }
