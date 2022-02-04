@@ -142,12 +142,10 @@ export const push = async (
     /* Start of update case with push information */
     const [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
-        unsecuredSavedObjectsClient,
         id: caseId,
       }),
       caseConfigureService.find({ unsecuredSavedObjectsClient }),
       caseService.getAllCaseComments({
-        unsecuredSavedObjectsClient,
         id: caseId,
         options: {
           fields: [],
@@ -177,7 +175,6 @@ export const push = async (
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
         originalCase: myCase,
-        unsecuredSavedObjectsClient,
         caseId,
         updatedAttributes: {
           ...(shouldMarkAsClosed
