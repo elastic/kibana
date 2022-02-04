@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { AdministrationListPage as _AdministrationListPage } from '../administration_list_page';
 
 import { PaginatedContent } from '../paginated_content';
@@ -17,12 +18,15 @@ import { PaginatedContent } from '../paginated_content';
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
 import { MANAGEMENT_DEFAULT_PAGE_SIZE, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
-import { artifactListPageLabels } from './translations';
+import { ArtifactListPageLabels, artifactListPageLabels } from './translations';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
 import { SearchExceptions } from '../search_exceptions';
 import { useArtifactCardPropsProvider } from './hooks/use_artifact_card_props_provider';
 import { NoDataEmptyState } from './components/no_data_empty_state';
+import { ArtifactFlyoutProps, MaybeArtifactFlyout } from './components/artifact_flyout';
+import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
+import { useSetUrlParams } from './hooks/use_set_url_params';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -32,7 +36,10 @@ type ArtifactEntryCardType = typeof ArtifactEntryCard;
 // >;
 
 const AdministrationListPage = styled(_AdministrationListPage)`
-  .event-filter-container > * {
+  // TODO:PT Ask David - why do we have this here? because the Card already has similar code:
+  // https://github.com/elastic/kibana/blob/36ce6bda672c55551a175888fac0cf5131f5fd7f/x-pack/plugins/security_solution/public/management/components/artifact_entry_card/components/card_container_panel.tsx#L15
+  // Maybe this should be moved there?
+  .card-container > * {
     margin-bottom: ${({ theme }) => theme.eui.spacerSizes.l};
 
     &:last-child {
@@ -44,15 +51,17 @@ const AdministrationListPage = styled(_AdministrationListPage)`
 export interface ArtifactListPageProps {
   apiClient: unknown; // ExceptionsListApiClient;
   /** The artifact Component that will be displayed in the Flyout for Create and Edit flows */
-  ArtifactForm: React.ComponentType;
-  /** A list of labels for the given artifact page. */
-  labels?: Partial<typeof artifactListPageLabels>;
+  ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
+  flyoutSize?: EuiFlyoutSize;
+  /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
+  labels?: Partial<ArtifactListPageLabels>;
   'data-test-subj'?: string;
 }
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
-  ({ labels: _labels = {}, 'data-test-subj': dataTestSubj }) => {
+  ({ apiClient, ArtifactFormComponent, labels: _labels = {}, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isFlyoutOpened = useIsFlyoutOpened();
 
     const labels = useMemo<typeof artifactListPageLabels>(() => {
       return {
@@ -69,8 +78,14 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       dataTestSubj: getTestId('card'),
     });
 
+    const setUrlParams = useSetUrlParams();
+
+    const handleOpenCreateFlyoutClick = useCallback(() => {
+      setUrlParams({ show: 'create' });
+    }, [setUrlParams]);
+
     const isLoading = false; // FIXME: implement
-    const doesDataExist = false; // FIXME: implement
+    const doesDataExist = true; // FIXME: implement
 
     if (isLoading && !doesDataExist) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
@@ -88,8 +103,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             <EuiButton
               fill
               iconType="plusInCircle"
-              isDisabled={false} // FIXME: should be conditional if panel is opened
-              onClick={() => {}} // FIXME: implement
+              isDisabled={isFlyoutOpened}
+              onClick={handleOpenCreateFlyoutClick}
               data-test-subj={getTestId('pageAddButton')}
             >
               {labels.pageAddButtonTitle}
@@ -97,19 +112,22 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           )
         }
       >
-        {/* {showFlyout && (*/}
-        {/*  <EventFiltersFlyout*/}
-        {/*    onCancel={handleCancelButtonClick}*/}
-        {/*    id={location.id}*/}
-        {/*    type={location.show}*/}
-        {/*  />*/}
-        {/* )}*/}
+        {/* FIXME:PT implement callbacks */}
+        {/* Flyout component is driven by URL params and may or may not be displayed based on those */}
+        <MaybeArtifactFlyout
+          apiClient={apiClient}
+          onCancel={() => {}}
+          onSuccess={() => {}}
+          FormComponent={ArtifactFormComponent}
+          labels={labels}
+          data-test-subj={getTestId('flyout')}
+        />
 
         {/* {showDelete && <EventFilterDeleteModal />}*/}
 
         {!doesDataExist && (
           <NoDataEmptyState
-            onAdd={() => {}}
+            onAdd={handleOpenCreateFlyoutClick}
             titleLabel={labels.emptyStateTitle}
             aboutInfo={labels.emptyStateInfo}
             primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
@@ -153,22 +171,22 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                 pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
                 pageIndex: 0,
               }}
-              contentClassName="event-filter-container"
+              contentClassName="card-container"
               data-test-subj={getTestId('cardContent')}
               noItemsMessage={<>{'no items'}</>} // FIXME: implement no results message
             />
           </>
         )}
 
-        {/* DEV ONLY */}
-        {/* DEV ONLY */}
-        {/* DEV ONLY */}
+        {/* ----------------------------- DEV ONLY ----------------------------- */}
+        {/* ----------------------------- DEV ONLY ----------------------------- */}
+        {/* ----------------------------- DEV ONLY ----------------------------- */}
         <EuiCallOut style={{ marginTop: '3em' }} color="danger">
-          <p>{'ALPHA - In development'}</p>
+          <p style={{ fontSize: '8em' }}>{'ALPHA - In development'}</p>
         </EuiCallOut>
-        {/* DEV ONLY */}
-        {/* DEV ONLY */}
-        {/* DEV ONLY */}
+        {/* ----------------------------- DEV ONLY ----------------------------- */}
+        {/* ----------------------------- DEV ONLY ----------------------------- */}
+        {/* ----------------------------- DEV ONLY ----------------------------- */}
       </AdministrationListPage>
     );
   }
