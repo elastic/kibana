@@ -538,7 +538,7 @@ export function AddFilterModal({
                                     localFilters[currentIdx - 1].relationship = 'AND';
                                   }
                                   const updatedFilters = localFilters.filter(
-                                    (_, idx) => idx !== localfilter.id
+                                    (_, idx) => idx !== currentIdx
                                   );
                                   const filtersOnGroup = updatedFilters.filter(
                                     (f) => f.groupId === Number(groupId)
