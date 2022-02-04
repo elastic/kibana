@@ -549,6 +549,10 @@ const expectAssetsInstalled = ({
           type: 'component_template',
         },
         {
+          id: 'metrics-all_assets.test_metrics@mappings',
+          type: 'component_template',
+        },
+        {
           id: 'metrics-all_assets.test_metrics@settings',
           type: 'component_template',
         },

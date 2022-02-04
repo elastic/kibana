@@ -110,7 +110,7 @@ export default function (providerContext: FtrProviderContext) {
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
       expect(res.index_templates[0]?.index_template?.composed_of).to.contain(
-        '.fleet_component_template-1'
+        '.fleet_component_template-2'
       );
     });
 
