@@ -75,14 +75,10 @@ describe('Kibana user deprecation routes', () => {
     });
 
     it('fails if fails to update user', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.getUser.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            userA: createMockUser({ username: 'userA', roles: ['roleA', 'kibana_user'] }),
-            userB: createMockUser({ username: 'userB', roles: ['kibana_user'] }),
-          },
-        })
-      );
+      mockContext.core.elasticsearch.client.asCurrentUser.security.getUser.mockResponse({
+        userA: createMockUser({ username: 'userA', roles: ['roleA', 'kibana_user'] }),
+        userB: createMockUser({ username: 'userB', roles: ['kibana_user'] }),
+      });
       mockContext.core.elasticsearch.client.asCurrentUser.security.putUser.mockRejectedValue(
         new errors.ResponseError(
           securityMock.createApiResponse({ statusCode: 500, body: new Error('Oh no') })
@@ -105,9 +101,9 @@ describe('Kibana user deprecation routes', () => {
     });
 
     it('does nothing if there are no users with Kibana user role', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.getUser.mockResolvedValue(
-        securityMock.createApiResponse({ body: { userA: createMockUser() } })
-      );
+      mockContext.core.elasticsearch.client.asCurrentUser.security.getUser.mockResponse({
+        userA: createMockUser(),
+      });
 
       await expect(
         routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
@@ -119,20 +115,16 @@ describe('Kibana user deprecation routes', () => {
     });
 
     it('updates users with Kibana user role', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.getUser.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            userA: createMockUser({ username: 'userA', roles: ['roleA'] }),
-            userB: createMockUser({ username: 'userB', roles: ['roleB', 'kibana_user'] }),
-            userC: createMockUser({ username: 'userC', roles: ['roleC'] }),
-            userD: createMockUser({ username: 'userD', roles: ['kibana_user'] }),
-            userE: createMockUser({
-              username: 'userE',
-              roles: ['kibana_user', 'kibana_admin', 'roleE'],
-            }),
-          },
-        })
-      );
+      mockContext.core.elasticsearch.client.asCurrentUser.security.getUser.mockResponse({
+        userA: createMockUser({ username: 'userA', roles: ['roleA'] }),
+        userB: createMockUser({ username: 'userB', roles: ['roleB', 'kibana_user'] }),
+        userC: createMockUser({ username: 'userC', roles: ['roleC'] }),
+        userD: createMockUser({ username: 'userD', roles: ['kibana_user'] }),
+        userE: createMockUser({
+          username: 'userE',
+          roles: ['kibana_user', 'kibana_admin', 'roleE'],
+        }),
+      });
 
       await expect(
         routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
@@ -197,14 +189,10 @@ describe('Kibana user deprecation routes', () => {
     });
 
     it('fails if fails to update role mapping', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            mappingA: createMockRoleMapping({ roles: ['roleA', 'kibana_user'] }),
-            mappingB: createMockRoleMapping({ roles: ['kibana_user'] }),
-          },
-        })
-      );
+      mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResponse({
+        mappingA: createMockRoleMapping({ roles: ['roleA', 'kibana_user'] }),
+        mappingB: createMockRoleMapping({ roles: ['kibana_user'] }),
+      });
       mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping.mockRejectedValue(
         new errors.ResponseError(
           securityMock.createApiResponse({ statusCode: 500, body: new Error('Oh no') })
@@ -227,9 +215,9 @@ describe('Kibana user deprecation routes', () => {
     });
 
     it('does nothing if there are no role mappings with Kibana user role', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResolvedValue(
-        securityMock.createApiResponse({ body: { mappingA: createMockRoleMapping() } })
-      );
+      mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResponse({
+        mappingA: createMockRoleMapping(),
+      });
 
       await expect(
         routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
@@ -241,17 +229,13 @@ describe('Kibana user deprecation routes', () => {
     });
 
     it('updates role mappings with Kibana user role', async () => {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            mappingA: createMockRoleMapping({ roles: ['roleA'] }),
-            mappingB: createMockRoleMapping({ roles: ['roleB', 'kibana_user'] }),
-            mappingC: createMockRoleMapping({ roles: ['roleC'] }),
-            mappingD: createMockRoleMapping({ roles: ['kibana_user'] }),
-            mappingE: createMockRoleMapping({ roles: ['kibana_user', 'kibana_admin', 'roleE'] }),
-          },
-        })
-      );
+      mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResponse({
+        mappingA: createMockRoleMapping({ roles: ['roleA'] }),
+        mappingB: createMockRoleMapping({ roles: ['roleB', 'kibana_user'] }),
+        mappingC: createMockRoleMapping({ roles: ['roleC'] }),
+        mappingD: createMockRoleMapping({ roles: ['kibana_user'] }),
+        mappingE: createMockRoleMapping({ roles: ['kibana_user', 'kibana_admin', 'roleE'] }),
+      });
 
       await expect(
         routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
