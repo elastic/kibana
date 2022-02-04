@@ -29,7 +29,6 @@ export function sendTelemetryEvents(
 
   try {
     eventsTelemetry.queueTelemetryEvents(MONITOR_UPDATE_CHANNEL, [updateEvent]);
-    logger.info('successfully send telemetry event');
   } catch (exc) {
     logger.error(`queing telemetry events failed ${exc}`);
   }
