@@ -30,11 +30,13 @@ import {
   LensAppState,
   DispatchSetState,
   selectSavedObjectFormat,
+  enableAutoApply,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
+import { disableAutoApply } from '../state_management/lens_slice';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -84,6 +86,7 @@ export function App({
     sharingSavedObjectProps,
     isLinkedToOriginatingApp,
     searchSessionId,
+    appliedState,
     isLoading,
     isSaveable,
   } = useLensSelector((state) => state.lens);
@@ -291,6 +294,12 @@ export function App({
     ]
   );
 
+  const autoApplyEnabled = !Boolean(appliedState);
+  const toggleAutoApply = useCallback(
+    () => dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply()),
+    [dispatch, autoApplyEnabled]
+  );
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp">
@@ -306,6 +315,8 @@ export function App({
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
+          autoApplyEnabled={autoApplyEnabled}
+          onToggleAutoApply={toggleAutoApply}
         />
 
         {getLegacyUrlConflictCallout()}

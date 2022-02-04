@@ -85,6 +85,8 @@ export const getPreloadedState = ({
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
+export const enableAutoApply = createAction<void>('lens/enableAutoApply');
+export const disableAutoApply = createAction<void>('lens/disableAutoApply');
 export const updateState = createAction<{
   updater: (prevState: LensAppState) => LensAppState;
 }>('lens/updateState');
@@ -164,6 +166,8 @@ export const lensActions = {
   setState,
   onActiveDataChange,
   setSaveable,
+  enableAutoApply,
+  disableAutoApply,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -202,6 +206,18 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       return {
         ...state,
         isSaveable: payload,
+      };
+    },
+    [enableAutoApply.type]: (state) => {
+      state.visualization = state.appliedState!.visualization;
+      state.datasourceStates = state.appliedState!.datasourceStates;
+      delete state.appliedState;
+    },
+    [disableAutoApply.type]: (state) => {
+      // TODO does this make a deep copy?
+      state.appliedState = {
+        visualization: state.visualization,
+        datasourceStates: state.datasourceStates,
       };
     },
     [updateState.type]: (

@@ -20,6 +20,8 @@ export const {
   loadInitial,
   navigateAway,
   setState,
+  enableAutoApply,
+  disableAutoApply,
   setSaveable,
   onActiveDataChange,
   updateState,

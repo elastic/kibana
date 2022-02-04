@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EuiPanel, EuiSwitch } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import {
@@ -151,6 +152,8 @@ export const LensTopNavMenu = ({
   redirectToOrigin,
   datasourceMap,
   title,
+  autoApplyEnabled,
+  onToggleAutoApply,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -409,36 +412,42 @@ export const LensTopNavMenu = ({
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
   return (
-    <TopNavMenu
-      setMenuMountPoint={setHeaderActionMenu}
-      config={topNavConfig}
-      showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
-      savedQuery={savedQuery}
-      onQuerySubmit={onQuerySubmitWrapped}
-      onSaved={onSavedWrapped}
-      onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
-      onClearSavedQuery={onClearSavedQueryWrapped}
-      indexPatterns={indexPatterns}
-      query={query}
-      dateRangeFrom={from}
-      dateRangeTo={to}
-      indicateNoData={indicateNoData}
-      showSearchBar={true}
-      showDatePicker={
-        indexPatterns.some((ip) => ip.isTimeBased()) ||
-        Boolean(
-          allLoaded &&
-            activeDatasourceId &&
-            datasourceMap[activeDatasourceId].isTimeBased(
-              datasourceStates[activeDatasourceId].state
-            )
-        )
-      }
-      showQueryBar={true}
-      showFilterBar={true}
-      data-test-subj="lnsApp_topNav"
-      screenTitle={'lens'}
-      appName={'lens'}
-    />
+    <>
+      <TopNavMenu
+        setMenuMountPoint={setHeaderActionMenu}
+        config={topNavConfig}
+        showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
+        savedQuery={savedQuery}
+        onQuerySubmit={onQuerySubmitWrapped}
+        onSaved={onSavedWrapped}
+        onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
+        onClearSavedQuery={onClearSavedQueryWrapped}
+        indexPatterns={indexPatterns}
+        query={query}
+        dateRangeFrom={from}
+        dateRangeTo={to}
+        indicateNoData={indicateNoData}
+        showSearchBar={true}
+        showDatePicker={
+          indexPatterns.some((ip) => ip.isTimeBased()) ||
+          Boolean(
+            allLoaded &&
+              activeDatasourceId &&
+              datasourceMap[activeDatasourceId].isTimeBased(
+                datasourceStates[activeDatasourceId].state
+              )
+          )
+        }
+        showQueryBar={true}
+        showFilterBar={true}
+        data-test-subj="lnsApp_topNav"
+        screenTitle={'lens'}
+        appName={'lens'}
+      />
+
+      <EuiPanel grow={false} paddingSize="m">
+        <EuiSwitch label="Auto-Apply" checked={autoApplyEnabled} onChange={onToggleAutoApply} />
+      </EuiPanel>
+    </>
   );
 };

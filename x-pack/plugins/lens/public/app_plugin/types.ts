@@ -89,6 +89,8 @@ export interface LensTopNavMenuProps {
   datasourceMap: DatasourceMap;
   title?: string;
   lensInspector: LensInspector;
+  autoApplyEnabled: boolean;
+  onToggleAutoApply: () => void;
 }
 
 export interface HistoryLocationState {
