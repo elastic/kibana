@@ -41,6 +41,8 @@ const args: HeatmapArguments = {
     isCellLabelVisible: true,
     isYAxisLabelVisible: true,
     isXAxisLabelVisible: true,
+    isYAxisTitleVisible: true,
+    isXAxisTitleVisible: true,
     type: 'heatmap_grid',
   },
   palette: {
@@ -59,16 +61,18 @@ const args: HeatmapArguments = {
   highlightInHover: false,
   xAccessor: 'col-1-2',
   valueAccessor: 'col-0-1',
+  yAccessor: 'col-2-3',
 };
 const data: Datatable = {
   type: 'datatable',
   rows: [
-    { 'col-0-1': 0, 'col-1-2': 'a' },
-    { 'col-0-1': 148, 'col-1-2': 'b' },
+    { 'col-0-1': 0, 'col-1-2': 'a', 'col-2-3': 'd' },
+    { 'col-0-1': 148, 'col-1-2': 'b', 'col-2-3': 'c' },
   ],
   columns: [
     { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
     { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
+    { id: 'col-2-3', name: 'Test', meta: { type: 'string' } },
   ],
 };
 
@@ -95,6 +99,7 @@ describe('HeatmapComponent', function () {
       onSelectRange: jest.fn(),
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
+      interactive: true,
     };
   });
 
@@ -161,6 +166,25 @@ describe('HeatmapComponent', function () {
         type: 'bands',
       });
     });
+  });
+
+  it('renders the axis titles', () => {
+    const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
+    expect(component.find(Heatmap).prop('xAxisTitle')).toEqual('Dest');
+    expect(component.find(Heatmap).prop('yAxisTitle')).toEqual('Test');
+  });
+
+  it('renders custom axis titles if given', () => {
+    const newProps = {
+      ...wrapperProps,
+      args: {
+        ...wrapperProps.args,
+        gridConfig: { ...wrapperProps.args.gridConfig, xTitle: 'test1', yTitle: 'test2' },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = shallowWithIntl(<HeatmapComponent {...newProps} />);
+    expect(component.find(Heatmap).prop('xAxisTitle')).toEqual('test1');
+    expect(component.find(Heatmap).prop('yAxisTitle')).toEqual('test2');
   });
 
   it('hides the legend if the legend isVisible args is false', async () => {
@@ -242,5 +266,11 @@ describe('HeatmapComponent', function () {
       ],
     ]);
     expect(wrapperProps.onClickValue).toHaveBeenCalled();
+  });
+
+  it('does not add callbacks when not interactive', () => {
+    const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} interactive={false} />);
+    expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
+    expect(component.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
   });
 });

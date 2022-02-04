@@ -9,7 +9,6 @@ import { serverMock, requestContextMock } from '../__mocks__';
 import { getRuleExecutionEventsRequest, getLastFailures } from '../__mocks__/request_responses';
 import { getRuleExecutionEventsRoute } from './get_rule_execution_events_route';
 
-// TODO: https://github.com/elastic/kibana/pull/121644 clean up
 describe('getRuleExecutionEventsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -21,10 +20,10 @@ describe('getRuleExecutionEventsRoute', () => {
     getRuleExecutionEventsRoute(server.router);
   });
 
-  describe('success', () => {
-    it('returns 200 with found rule execution events', async () => {
+  describe('when it finds events in rule execution log', () => {
+    it('returns 200 response with the events', async () => {
       const lastFailures = getLastFailures();
-      clients.ruleExecutionLogClient.getLastFailures.mockResolvedValue(lastFailures);
+      clients.ruleExecutionLog.getLastFailures.mockResolvedValue(lastFailures);
 
       const response = await server.inject(getRuleExecutionEventsRequest(), context);
 
@@ -35,17 +34,15 @@ describe('getRuleExecutionEventsRoute', () => {
     });
   });
 
-  describe('errors', () => {
-    it('returns 500 when rule execution log client throws an exception', async () => {
-      clients.ruleExecutionLogClient.getLastFailures.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
+  describe('when rule execution log client throws an error', () => {
+    it('returns 500 response with it', async () => {
+      clients.ruleExecutionLog.getLastFailures.mockRejectedValue(new Error('Boom!'));
 
       const response = await server.inject(getRuleExecutionEventsRequest(), context);
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message: 'Test error',
+        message: 'Boom!',
         status_code: 500,
       });
     });

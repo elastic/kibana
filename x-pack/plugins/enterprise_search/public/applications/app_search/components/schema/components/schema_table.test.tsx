@@ -21,6 +21,7 @@ describe('SchemaTable', () => {
   const values = {
     schema: {},
     unconfirmedFields: [],
+    myRole: { canManageEngines: true },
   };
   const actions = {
     updateSchemaFieldType: jest.fn(),
@@ -81,5 +82,18 @@ describe('SchemaTable', () => {
 
     expect(wrapper.find(EuiHealth)).toHaveLength(1);
     expect(wrapper.find(EuiHealth).childAt(0).prop('children')).toEqual('Recently added');
+  });
+
+  it('disables table actions if access disallowed', () => {
+    setMockValues({
+      ...values,
+      schema: {
+        some_text_field: 'text',
+      },
+      myRole: { canManageEngines: false },
+    });
+    const wrapper = shallow(<SchemaTable />);
+
+    expect(wrapper.find(SchemaFieldTypeSelect).at(0).prop('disabled')).toEqual(true);
   });
 });

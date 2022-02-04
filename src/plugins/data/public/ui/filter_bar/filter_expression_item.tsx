@@ -454,8 +454,8 @@ export const FilterExpressionItem: FC<Props> = ({
         <div ref={ref}>
           {customLabel ? (
             <>
-              <EuiIcon type="save" />
-              {customLabel}
+              <EuiIcon type="save" className="globalFilterExpression__saveIcon" />
+              <span>{customLabel}</span>
             </>
           ) : (
             filterExpression.map((expression) => {

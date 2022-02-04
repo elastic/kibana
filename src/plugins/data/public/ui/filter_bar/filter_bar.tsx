@@ -114,17 +114,9 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
     const filtersNew = newMultipleFilters.concat(mergedFilters);
 
-    const filters = [...props.filters];
-    const updatedFilters: Filter[] = [];
+    const filters = [...props.filters, ...buildFilters];
+    props?.onFiltersUpdated?.(filters);
 
-    filtersNew.forEach((filter) => {
-      filters.forEach((f) => {
-        if (isEqual(f.query, filter.query)) {
-          updatedFilters.push(f);
-        }
-      });
-    });
-    onFiltersUpdated(updatedFilters);
     props?.onMultipleFiltersUpdated?.(filtersNew);
 
     props.toggleEditFilterModal?.(false);
@@ -237,6 +229,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             onRemoveFilterGroup={onDeleteFilterGroup}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             initialAddFilterMode={undefined}
+            saveFilters={props.onFilterSave}
           />
         )}
       </EuiFlexItem>

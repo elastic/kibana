@@ -14,7 +14,6 @@ import { DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL } from '../../../../../commo
 import { GetRuleExecutionEventsRequestParams } from '../../../../../common/detection_engine/schemas/request/get_rule_execution_events_request';
 import { GetRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response/get_rule_execution_events_response';
 
-// TODO: https://github.com/elastic/kibana/pull/121644 clean up
 /**
  * Returns execution events of a given rule (e.g. status changes) from Event Log.
  * Accepts rule's saved object ID (`rule.id`).
@@ -38,7 +37,7 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const executionLog = context.securitySolution.getExecutionLogClient();
+        const executionLog = context.securitySolution.getRuleExecutionLog();
         const executionEvents = await executionLog.getLastFailures(ruleId);
 
         const responseBody: GetRuleExecutionEventsResponse = {

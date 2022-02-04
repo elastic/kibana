@@ -19,6 +19,7 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
+import type { DocLinks } from '@kbn/doc-links';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
 import { Ecs } from '@kbn/logging';
@@ -425,6 +426,7 @@ export interface CoreServicesUsageData {
             docsDeleted: number;
             storeSizeBytes: number;
             primaryStoreSizeBytes: number;
+            savedObjectsDocsCount: number;
         }[];
         legacyUrlAliases: {
             activeCount: number;
@@ -445,6 +447,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     coreUsageData: CoreUsageDataSetup;
     // (undocumented)
     deprecations: DeprecationsServiceSetup;
+    // (undocumented)
+    docLinks: DocLinksServiceSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
@@ -475,6 +479,8 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
     coreUsageData: CoreUsageDataStart;
+    // (undocumented)
+    docLinks: DocLinksServiceStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
@@ -860,6 +866,16 @@ export interface DiscoveredPlugin {
     readonly requiredPlugins: readonly PluginName[];
     readonly type: PluginType;
 }
+
+// @public (undocumented)
+export interface DocLinksServiceSetup {
+    readonly elasticWebsiteUrl: string;
+    readonly links: DocLinks;
+    readonly version: string;
+}
+
+// @public (undocumented)
+export type DocLinksServiceStart = DocLinksServiceSetup;
 
 export { Ecs }
 
@@ -1451,6 +1467,9 @@ export { LogRecord }
 export type MakeUsageFromSchema<T> = {
     [Key in keyof T]?: T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
 };
+
+// @public
+export const mergeSavedObjectMigrationMaps: (map1: SavedObjectMigrationMap, map2: SavedObjectMigrationMap) => SavedObjectMigrationMap;
 
 // @public
 export interface MetricsServiceSetup {
