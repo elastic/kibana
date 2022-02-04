@@ -28,7 +28,7 @@ import { ISearchOptions } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
-import { onNextSessionCompletes$, waitUntilNextSessionCompletes$ } from './session_helpers';
+import { onNextSessionCompletes$ } from './session_helpers';
 import { DISABLE_BFETCH } from '../../../../bfetch/public';
 
 export type ISessionService = PublicContract<SessionService>;
