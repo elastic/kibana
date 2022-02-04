@@ -94,7 +94,7 @@ export class DataServerPlugin
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
-    core.uiSettings.register(getUiSettings());
+    core.uiSettings.register(getUiSettings(core.docLinks));
 
     const searchSetup = this.searchService.setup(core, {
       bfetch,
