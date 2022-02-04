@@ -274,9 +274,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     // adds a very small number to the max value to make sure the max value will be included
     const smattering = 0.00001;
-    let endValue = max + smattering;
+    let endValueDistinctBounds = max + smattering;
     if (paletteParams?.rangeMax || paletteParams?.rangeMax === 0) {
-      endValue =
+      endValueDistinctBounds =
         (paletteParams?.range === 'number'
           ? paletteParams.rangeMax
           : min + ((max - min) * paletteParams.rangeMax) / 100) + smattering;
@@ -286,27 +286,29 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     const bands = ranges.map((start, index, array) => {
       // by default the last range is right-open
-      let end = index === array.length - 1 ? Number.POSITIVE_INFINITY : array[index + 1];
+      let endValue = index === array.length - 1 ? Number.POSITIVE_INFINITY : array[index + 1];
+      const startValue = index === array.length - 1 && max === min ? min : start;
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
-        const lastBand = max === min ? Number.POSITIVE_INFINITY : endValue;
-        end = index === array.length - 1 ? lastBand : array[index + 1];
+        const lastBand = max === min ? Number.POSITIVE_INFINITY : endValueDistinctBounds;
+        endValue = index === array.length - 1 ? lastBand : array[index + 1];
       }
 
       let overwriteArrayIdx;
 
-      if (end === Number.POSITIVE_INFINITY) {
-        const startValue = index === array.length - 1 && max === min ? min : start;
+      if (endValue === Number.POSITIVE_INFINITY) {
         overwriteArrayIdx = `≥ ${metricFormatter.convert(startValue)}`;
       } else {
-        overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(end)}`;
+        overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
+          endValue
+        )}`;
       }
 
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
       return {
         // with the default continuity:above the every range is left-closed
-        start: index === array.length - 1 && max === min ? min : start,
-        end,
+        start: startValue,
+        end: endValue,
         // the current colors array contains a duplicated color at the beginning that we need to skip
         color: overwriteColor ?? colors[index + 1],
       };
