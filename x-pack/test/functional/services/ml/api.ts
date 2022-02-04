@@ -617,20 +617,6 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Datafeed deleted.');
     },
 
-    async updateDatafeed(datafeedConfig: estypes.MlUpdateDatafeedRequest, space?: string) {
-      const datafeedId = datafeedConfig.datafeed_id;
-      log.debug(
-        `Updating datafeed with id '${datafeedId}' ${space ? `in space '${space}' ` : ''}...`
-      );
-      await kbnSupertest
-        .post(`${space ? `/s/${space}` : ''}/api/ml/datafeeds/${datafeedId}/_update`)
-        .set(COMMON_REQUEST_HEADERS)
-        .send(datafeedConfig.body)
-        .expect(200);
-
-      log.debug('> Datafeed updated.');
-    },
-
     async openAnomalyDetectionJob(jobId: string) {
       log.debug(`Opening anomaly detection job '${jobId}'...`);
       const openResponse = await esSupertest
