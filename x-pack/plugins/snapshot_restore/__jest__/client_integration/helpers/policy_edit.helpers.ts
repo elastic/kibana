@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, AsyncTestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { PolicyEdit } from '../../../public/application/sections/policy_edit';
 import { WithAppDependencies } from './setup_environment';
 import { POLICY_NAME } from './constant';

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSelectable } from '@elastic/eui';
 import { ShallowWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';

@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import '../../../../common/mock/formatted_relative';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
