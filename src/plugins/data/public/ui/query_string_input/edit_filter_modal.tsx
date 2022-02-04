@@ -448,13 +448,6 @@ export function EditFilterModal({
               <>
                 <div className={classNames(classes)}>
                   {subGroup.map((localfilter, index) => {
-                    const overallLength =
-                      localfilter.field?.displayName?.length +
-                      localfilter.operator?.message?.length +
-                      localfilter.value?.length;
-
-                    const isColumn: boolean = overallLength > 16;
-
                     return (
                       <>
                         <EuiFlexGroup alignItems="center">
@@ -463,16 +456,9 @@ export function EditFilterModal({
                           </EuiFlexItem>
 
                           <EuiFlexItem grow={3}>
-                            <EuiFlexGroup
-                              direction={isColumn ? 'column' : 'row'}
-                              className="kbnQueryBar__inputGroup"
-                            >
+                            <EuiFlexGroup className="kbnQueryBar__inputGroup">
                               <EuiFlexItem>{renderFieldInput(localfilter.id)}</EuiFlexItem>
-                              <EuiFlexItem
-                                className={isColumn ? 'kbnQueryBar-isInputGroupVertical' : ''}
-                              >
-                                {renderOperatorInput(localfilter.id)}
-                              </EuiFlexItem>
+                              <EuiFlexItem>{renderOperatorInput(localfilter.id)}</EuiFlexItem>
                               <EuiFlexItem data-test-subj="filterParams">
                                 {renderParamsEditor(localfilter.id)}
                               </EuiFlexItem>

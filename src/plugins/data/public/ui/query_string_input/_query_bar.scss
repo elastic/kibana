@@ -31,12 +31,7 @@
 .kbnQueryBar__filterModalWrapper {
   @media only screen and (min-width: map-get($euiBreakpoints, 'm')) {
     & {
-      width: 700px;
-    }
-
-    .kbnQueryBar-isInputGroupVertical {
-      margin-top: 0;
-      margin-bottom: 0;    
+      width: 800px;
     }
   }
 
