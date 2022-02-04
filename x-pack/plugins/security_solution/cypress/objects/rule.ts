@@ -177,7 +177,7 @@ const getLookBack = (): Interval => ({
 
 export const getNewRule = (): CustomRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  index: ['exceptions-*'],
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
