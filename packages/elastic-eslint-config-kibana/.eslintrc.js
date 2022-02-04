@@ -96,6 +96,11 @@ module.exports = {
           to: false,
           disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`
         })),
+        {
+          from: '@kbn/test/jest',
+          to: '@kbn/test-jest-helpers',
+          disallowedMessage: `import from @kbn/test-jest-helpers instead`
+        },
       ],
     ],
 

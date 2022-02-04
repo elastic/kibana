@@ -20,7 +20,7 @@ interface Props {
 export const BrowserTestRunResult = ({ monitorId }: Props) => {
   const { data, loading, stepEnds, journeyStarted, summaryDoc, stepListData } =
     useBrowserRunOnceMonitors({
-      monitorId,
+      configId: monitorId,
     });
 
   const hits = data?.hits.hits;
