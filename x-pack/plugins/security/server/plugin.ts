@@ -46,6 +46,8 @@ import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
 import { securityFeatures } from './features';
+import type { ProfileServiceStart } from './profile/profile_service';
+import { ProfileService } from './profile/profile_service';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
 import type { Session } from './session_management';
@@ -101,6 +103,11 @@ export interface SecurityPluginStart {
    * Authorization services to manage and access the permissions a particular user has.
    */
   authz: AuthorizationServiceSetup;
+
+  /**
+   * Access and manage user profiles and application data.
+   */
+  profile: ProfileServiceStart;
 }
 
 export interface PluginSetupDependencies {
@@ -185,6 +192,15 @@ export class SecurityPlugin
     return this.anonymousAccessStart;
   };
 
+  private readonly profileService: ProfileService;
+  private profileStart?: ProfileServiceStart;
+  private readonly getProfileService = () => {
+    if (!this.profileStart) {
+      throw new Error(`profileStart is not registered!`);
+    }
+    return this.profileStart;
+  };
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
 
@@ -202,6 +218,7 @@ export class SecurityPlugin
       this.initializerContext.logger.get('anonymous-access'),
       this.getConfig
     );
+    this.profileService = new ProfileService(this.initializerContext.logger.get('profile'));
   }
 
   public setup(
@@ -308,6 +325,7 @@ export class SecurityPlugin
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
+      getProfileService: this.getProfileService,
     });
 
     return Object.freeze<SecurityPluginSetup>({
@@ -374,6 +392,8 @@ export class SecurityPlugin
       spaces: spaces?.spacesService,
     });
 
+    this.profileStart = this.profileService.start(clusterClient.asInternalUser);
+
     return Object.freeze<SecurityPluginStart>({
       authc: {
         apiKeys: this.authenticationStart.apiKeys,
@@ -388,6 +408,7 @@ export class SecurityPlugin
           this.authorizationSetup!.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup!.mode,
       },
+      profile: this.profileStart,
     });
   }
 
