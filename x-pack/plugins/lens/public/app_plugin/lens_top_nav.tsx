@@ -7,7 +7,8 @@
 
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiSwitch } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSwitch } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import {
@@ -154,6 +155,7 @@ export const LensTopNavMenu = ({
   title,
   autoApplyEnabled,
   onToggleAutoApply,
+  onApplyChanges,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -445,8 +447,29 @@ export const LensTopNavMenu = ({
         appName={'lens'}
       />
 
-      <EuiPanel grow={false} paddingSize="m">
-        <EuiSwitch label="Auto-Apply" checked={autoApplyEnabled} onChange={onToggleAutoApply} />
+      <EuiPanel grow={false} paddingSize="s">
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="flexEnd"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiSwitch label="Auto-Apply" checked={autoApplyEnabled} onChange={onToggleAutoApply} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              // data-test-subj="visualizeEditorRenderButton"
+              disabled={autoApplyEnabled}
+              fill
+              iconType="play"
+              onClick={onApplyChanges}
+              size="s"
+            >
+              <FormattedMessage id="xpack.lens.app.applyChangesLabel" defaultMessage="Apply" />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </>
   );

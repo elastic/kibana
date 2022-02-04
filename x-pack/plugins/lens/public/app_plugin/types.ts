@@ -91,6 +91,7 @@ export interface LensTopNavMenuProps {
   lensInspector: LensInspector;
   autoApplyEnabled: boolean;
   onToggleAutoApply: () => void;
+  onApplyChanges: () => void;
 }
 
 export interface HistoryLocationState {

@@ -317,6 +317,7 @@ export function App({
           lensInspector={lensInspector}
           autoApplyEnabled={autoApplyEnabled}
           onToggleAutoApply={toggleAutoApply}
+          onApplyChanges={() => {}}
         />
 
         {getLegacyUrlConflictCallout()}
