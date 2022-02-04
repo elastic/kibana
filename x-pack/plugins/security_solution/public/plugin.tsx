@@ -295,6 +295,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
+        users: new subPluginClasses.Users(),
         network: new subPluginClasses.Network(),
         ueba: new subPluginClasses.Ueba(),
         overview: new subPluginClasses.Overview(),
@@ -321,6 +322,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
       hosts: subPlugins.hosts.start(storage),
+      users: subPlugins.users.start(storage),
       network: subPlugins.network.start(storage),
       ueba: subPlugins.ueba.start(storage),
       timelines: subPlugins.timelines.start(),
@@ -405,6 +407,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         createInitialState(
           {
             ...subPlugins.hosts.store.initialState,
+            ...subPlugins.users.store.initialState,
             ...subPlugins.network.store.initialState,
             ...subPlugins.ueba.store.initialState,
             ...timelineInitialState,
@@ -419,6 +422,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ),
         {
           ...subPlugins.hosts.store.reducer,
+          ...subPlugins.users.store.reducer,
           ...subPlugins.network.store.reducer,
           ...subPlugins.ueba.store.reducer,
           timeline: timelineReducer,

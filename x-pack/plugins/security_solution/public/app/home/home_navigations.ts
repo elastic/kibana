@@ -29,6 +29,7 @@ import {
   APP_UEBA_PATH,
   SecurityPageName,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
+  APP_USERS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -66,6 +67,13 @@ export const navTabs: SecurityNav = {
     href: APP_HOSTS_PATH,
     disabled: false,
     urlKey: 'host',
+  },
+  [SecurityPageName.users]: {
+    id: SecurityPageName.users,
+    name: i18n.USERS,
+    href: APP_USERS_PATH,
+    disabled: false,
+    urlKey: 'users',
   },
   [SecurityPageName.network]: {
     id: SecurityPageName.network,

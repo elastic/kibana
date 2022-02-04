@@ -38,6 +38,12 @@ export const useSecuritySolutionNavigation = () => {
     enabledNavTabs = rest;
   }
 
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+  if (!usersEnabled) {
+    const { users, ...rest } = enabledNavTabs;
+    enabledNavTabs = rest;
+  }
+
   const setBreadcrumbs = useSetBreadcrumbs();
 
   useEffect(() => {

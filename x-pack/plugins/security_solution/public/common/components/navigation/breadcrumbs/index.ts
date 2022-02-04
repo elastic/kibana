@@ -152,6 +152,9 @@ export const getBreadcrumbsForRoute = (
       ),
     ];
   }
+
+  // TODO Pablo/Users isUsersRoutes
+
   if (isRulesRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: SecurityPageName.rules, isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];

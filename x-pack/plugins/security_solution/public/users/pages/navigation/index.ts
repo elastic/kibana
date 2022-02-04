@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './host_rules';
-export * from './host_tactics';
-export * from './risk_score';
-export * from './user_rules';
-
-export enum UebaQueries {
-  riskScore = 'riskScore',
-}
+export * from './risk_score_query_tab_body';

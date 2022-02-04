@@ -87,6 +87,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs.hosts,
                 navTabs.network,
                 ...(navTabs.ueba != null ? [navTabs.ueba] : []),
+                ...(navTabs.users != null ? [navTabs.users] : []),
               ],
             },
             {

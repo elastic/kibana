@@ -56,7 +56,8 @@ export type SecurityNavKey =
   | SecurityPageName.rules
   | SecurityPageName.timelines
   | SecurityPageName.trustedApps
-  | SecurityPageName.ueba;
+  | SecurityPageName.ueba
+  | SecurityPageName.users;
 
 export type SecurityNav = Record<SecurityNavKey, NavTab>;
 

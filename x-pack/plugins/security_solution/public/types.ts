@@ -33,6 +33,7 @@ import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
 import type { Hosts } from './hosts';
+import type { Users } from './users';
 import type { Network } from './network';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
@@ -96,6 +97,7 @@ export interface SubPlugins {
   exceptions: Exceptions;
   [CASES_SUB_PLUGIN_KEY]: Cases;
   hosts: Hosts;
+  users: Users;
   network: Network;
   ueba: Ueba;
   overview: Overview;
@@ -110,6 +112,7 @@ export interface StartedSubPlugins {
   exceptions: ReturnType<Exceptions['start']>;
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
   hosts: ReturnType<Hosts['start']>;
+  users: ReturnType<Users['start']>;
   network: ReturnType<Network['start']>;
   ueba: ReturnType<Ueba['start']>;
   overview: ReturnType<Overview['start']>;

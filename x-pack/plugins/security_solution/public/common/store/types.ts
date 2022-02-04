@@ -20,8 +20,10 @@ import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
 import { UebaPluginState } from '../../ueba/store';
 import { ManagementPluginState } from '../../management';
+import { UsersPluginState } from '../../users/store';
 
 export type StoreState = HostsPluginState &
+  UsersPluginState &
   NetworkPluginState &
   UebaPluginState &
   TimelinePluginState &

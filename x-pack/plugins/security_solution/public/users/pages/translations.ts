@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './host_rules';
-export * from './host_tactics';
-export * from './risk_score';
-export * from './user_rules';
+import { i18n } from '@kbn/i18n';
 
-export enum UebaQueries {
-  riskScore = 'riskScore',
-}
+export const PAGE_TITLE = i18n.translate('xpack.securitySolution.users.pageTitle', {
+  defaultMessage: 'Users',
+});
