@@ -28,6 +28,8 @@ import { ISearchOptions } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
+import { onNextSessionCompletes$ } from './session_helpers';
+import { DISABLE_BFETCH } from '../../../../bfetch/public';
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -152,6 +154,26 @@ export class SessionService {
             // eslint-disable-next-line no-console
             console.warn(message);
           }
+        })
+      );
+
+      this.subscription.add(
+        onNextSessionCompletes$(this).subscribe(() => {
+          const state = stateContainer.get();
+
+          const took = (state.completedTime?.getTime() ?? 0) - (state.startTime?.getTime() ?? 0);
+
+          const bfetch = !coreStart.uiSettings.get(DISABLE_BFETCH);
+
+          coreStart.http.post('/internal/log-session-complete', {
+            body: JSON.stringify({
+              took,
+              searchCount: state.totalSearches,
+              appId: this.currentApp,
+              bfetch,
+              sessionId: state.sessionId,
+            }),
+          });
         })
       );
     });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerSessionRoutes } from './routes';
 import { searchSessionSavedObjectType } from './saved_objects';
@@ -31,6 +32,53 @@ export class EnhancedDataServerPlugin
 
   public setup(core: CoreSetup<StartDependencies>, deps: SetupDependencies) {
     core.savedObjects.registerType(searchSessionSavedObjectType);
+    const eventLog = deps.eventLog;
+    eventLog.registerProviderActions('data', ['session-complete']);
+
+    const logger = eventLog.getLogger({ event: { provider: 'data' } });
+
+    core.http.createRouter().post(
+      {
+        path: '/internal/log-session-complete',
+        validate: {
+          body: schema.object({
+            sessionId: schema.string(),
+            bfetch: schema.boolean(),
+            appId: schema.string(),
+            searchCount: schema.number(),
+            took: schema.number(),
+          }),
+        },
+      },
+      (ctx, req, res) => {
+        const body = req.body as any;
+
+        const eventBody = {
+          data: {
+            took: body.took,
+            searchCount: body.searchCount,
+            appId: body.appId,
+            bfetch: body.bfetch,
+            sessionId: body.sessionId,
+          },
+        };
+        logger.logEvent({
+          message: 'session complete',
+          kibana: eventBody,
+          event: {
+            provider: 'data',
+            kind: 'event',
+            action: 'session-complete',
+          },
+          log: {
+            level: 'info',
+            logger: 'data',
+          },
+        });
+
+        return res.ok();
+      }
+    );
 
     this.sessionService = new SearchSessionService(
       this.logger,

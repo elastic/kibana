@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { debounceTime, first, skipUntil } from 'rxjs/operators';
+import { debounceTime, filter, first, skipUntil } from 'rxjs/operators';
 import { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
 
@@ -41,6 +41,26 @@ export function waitUntilNextSessionCompletes$(
     debounceTime(waitForIdle),
     // then wait until it finishes
     first(
+      (state) =>
+        state === SearchSessionState.Completed || state === SearchSessionState.BackgroundCompleted
+    )
+  );
+}
+
+export function onNextSessionCompletes$(
+  sessionService: ISessionService,
+  { waitForIdle = 1000 }: WaitUntilNextSessionCompletesOptions = { waitForIdle: 1000 }
+) {
+  return sessionService.state$.pipe(
+    // wait until new session starts
+    skipUntil(sessionService.state$.pipe(first((state) => state === SearchSessionState.None))),
+    // wait until new session starts loading
+    skipUntil(sessionService.state$.pipe(first((state) => state === SearchSessionState.Loading))),
+    // debounce to ignore quick switches from loading <-> completed.
+    // that could happen between sequential search requests inside a single session
+    debounceTime(waitForIdle),
+    // then wait until it finishes
+    filter(
       (state) =>
         state === SearchSessionState.Completed || state === SearchSessionState.BackgroundCompleted
     )

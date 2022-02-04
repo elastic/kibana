@@ -14,6 +14,7 @@ import {
 } from '../../../../src/plugins/data/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { IEventLogService } from '../../event_log/server';
 
 /**
  * @internal
@@ -30,6 +31,7 @@ export interface DataEnhancedSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   security?: SecurityPluginSetup;
+  eventLog: IEventLogService;
 }
 
 export interface DataEnhancedStartDependencies {

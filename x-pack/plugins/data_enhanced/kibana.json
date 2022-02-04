@@ -15,7 +15,8 @@
     "management",
     "share",
     "taskManager",
-    "screenshotMode"
+    "screenshotMode",
+    "eventLog"
   ],
   "optionalPlugins": ["kibanaUtils", "usageCollection", "security"],
   "server": true,
