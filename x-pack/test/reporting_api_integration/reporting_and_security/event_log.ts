@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const es = getService('es');
 
-  describe('Report generation event logging', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/124649
+  describe.skip('Report generation event logging', () => {
     before(async () => {
       await reportingAPI.initEcommerce();
     });
