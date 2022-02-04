@@ -14,6 +14,7 @@
  */
 
 import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n-react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
@@ -118,7 +119,7 @@ export function renderWithIntl<T>(
     context?: any;
     childContextTypes?: ValidationMap<any>;
   } = {}
-) {
+): any {
   const options = getOptions(context, childContextTypes, props);
 
   return render(nodeWithIntlProp(node), options);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`

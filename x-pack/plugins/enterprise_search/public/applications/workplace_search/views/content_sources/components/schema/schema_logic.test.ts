@@ -12,7 +12,7 @@ import {
 } from '../../../../../__mocks__/kea_logic';
 import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
