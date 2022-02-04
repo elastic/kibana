@@ -475,7 +475,7 @@ export function AddFilterModal({
                                       value: undefined,
                                       relationship: undefined,
                                       groupId: localfilter.groupId,
-                                      id: localFilters.length,
+                                      id: Number(multipleFilters?.length) + localFilters.length,
                                       subGroupId,
                                     },
                                   ]);
