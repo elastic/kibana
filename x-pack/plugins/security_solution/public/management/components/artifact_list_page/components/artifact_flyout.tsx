@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -24,6 +24,7 @@ import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useUrlParams } from '../hooks/use_url_params';
 import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useSetUrlParams } from '../hooks/use_set_url_params';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -62,9 +63,18 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   ),
 });
 
+interface ArtifactFormComponentProps {
+  item: object;
+  mode: 'edit' | 'create';
+  /** signals that the form should be made disabled (ex. during update) */
+  disabled: boolean;
+  /** reports the state of the form data and the current updated item */
+  onChange(formStatus: { isValid: boolean; item: object }): void;
+}
+
 export interface ArtifactFlyoutProps {
   apiClient: unknown; // ExceptionsListApiClient; // FIXME:PT use api client type
-  FormComponent: React.ComponentType; // FIXME:PT define expected props interface
+  FormComponent: React.ComponentType<ArtifactFormComponentProps>;
   onCancel(): void;
   onSuccess(): void;
   /**
@@ -92,10 +102,16 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
   }) => {
     // FIXME:PT should handle cases where we find the `id` to be invalid (show toast, close flyout)
     // FIXME:PT should the flyout be made `reusable` for use cases where it gets opened in other areas of security (like Event filters)
-    // FIXME:PT handle cases where the "create" does not call the actual create api (ex. upload)
+    // FIXME:PT handle cases where the "create" does not call the actual create api (ex. upload) (maybe defer from first iteration
 
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isFlyoutOpened = useIsFlyoutOpened();
+    const setUrlParams = useSetUrlParams();
+    const { urlParams } = useUrlParams<{
+      id?: string;
+      show?: string;
+      [key: string]: string | undefined;
+    }>();
 
     const labels = useMemo<typeof ARTIFACT_FLYOUT_LABELS>(() => {
       return {
@@ -104,14 +120,18 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
       };
     }, [_labels]);
 
-    const {
-      urlParams: { id, show },
-    } = useUrlParams<{
-      id?: string;
-      show?: string;
-    }>();
+    const isEditFlow = urlParams.show === 'edit';
 
-    const isEditFlow = show === 'edit';
+    const handleFlyoutClose = useCallback(() => {
+      // FIXME:PT Question: Prevent closing it if update is underway?
+
+      const { id, show, ...others } = urlParams;
+      setUrlParams(others, true);
+    }, [setUrlParams, urlParams]);
+
+    const handleSubmitClick = useCallback(() => {
+      // FIXME: implement submit
+    }, []);
 
     if (!isFlyoutOpened) {
       return null;
@@ -119,7 +139,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     return (
       // FIXME:PT implement onClose
-      <EuiFlyout size={size} onClose={() => {}} data-test-subj={dataTestSubj}>
+      <EuiFlyout size={size} onClose={handleFlyoutClose} data-test-subj={dataTestSubj}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>{isEditFlow ? labels.flyoutEditTitle : labels.flyoutCreateTitle}</h2>
@@ -140,28 +160,34 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         )}
 
         <EuiFlyoutBody>
-          <FormComponent />
+          <FormComponent
+            onChange={() => {}}
+            disabled={false}
+            item={{}}
+            mode={(urlParams.show ?? 'create') as ArtifactFormComponentProps['mode']}
+          />
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              {/* FIXME:PT implement cancel onclick handler */}
-              <EuiButtonEmpty data-test-subj={getTestId('cancelButton')} onClick={() => {}}>
+              <EuiButtonEmpty
+                data-test-subj={getTestId('cancelButton')}
+                onClick={handleFlyoutClose}
+              >
                 {labels.flyoutCancelButtonLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {/*
                 FIXME:PT implement disabled property
-                FIXME:PT implement click handler
                 FIXME:PT implement isLoading
                */}
               <EuiButton
                 data-test-subj={getTestId('submitButton')}
                 fill
                 disabled={false}
-                onClick={() => {}}
+                onClick={handleSubmitClick}
                 isLoading={false}
               >
                 {isEditFlow
