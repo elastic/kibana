@@ -30,6 +30,20 @@ describe('utils', () => {
       { color: '#ccc', start: 60, end: 80 },
       { color: '#bbb', start: 80, end: 90 },
     ]);
+
+    colorRanges = [
+      { color: '#aaa', start: 55, end: 90 },
+      { color: '#bbb', start: 90, end: 60 },
+      { color: '#ccc', start: 60, end: Infinity },
+    ];
+    expect(sortColorRanges(colorRanges)).toEqual([
+      { color: '#aaa', start: 55, end: 60 },
+      { color: '#ccc', start: 60, end: 90 },
+      { color: '#bbb', start: 90, end: Infinity },
+    ]);
+
+    colorRanges = [{ color: '#aaa', start: 90, end: 55 }];
+    expect(sortColorRanges(colorRanges)).toEqual([{ color: '#aaa', start: 55, end: 90 }]);
   });
 
   it('calculateMaxStep', () => {
