@@ -13,7 +13,7 @@ import {
   AsyncTestBedConfig,
   findTestSubject,
   nextTick,
-} from '@kbn/test/jest';
+} from '@kbn/test-jest-helpers';
 import { BASE_PATH } from '../../../../../../../common';
 import { WithAppDependencies } from './setup_environment';
 import { ComponentTemplateList } from '../../../component_template_list/component_template_list';
