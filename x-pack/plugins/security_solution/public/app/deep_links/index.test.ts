@@ -140,17 +140,16 @@ describe('deepLinks', () => {
     ).toBeTruthy();
   });
 
-  // TODO migrate to users
-  // it('should return NO ueba link when enableExperimental.uebaEnabled === false', () => {
-  //   const deepLinks = getDeepLinks(mockGlobalState.app.enableExperimental);
-  //   expect(findDeepLink(SecurityPageName.ueba, deepLinks)).toBeFalsy();
-  // });
+  it('should return NO users link when enableExperimental.usersEnabled === false', () => {
+    const deepLinks = getDeepLinks(mockGlobalState.app.enableExperimental);
+    expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeFalsy();
+  });
 
-  // it('should return ueba link when enableExperimental.uebaEnabled === true', () => {
-  //   const deepLinks = getDeepLinks({
-  //     ...mockGlobalState.app.enableExperimental,
-  //     uebaEnabled: true,
-  //   });
-  //   expect(findDeepLink(SecurityPageName.ueba, deepLinks)).toBeTruthy();
-  // });
+  it('should return ueba link when enableExperimental.uebaEnabled === true', () => {
+    const deepLinks = getDeepLinks({
+      ...mockGlobalState.app.enableExperimental,
+      usersEnabled: true,
+    });
+    expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeTruthy();
+  });
 });

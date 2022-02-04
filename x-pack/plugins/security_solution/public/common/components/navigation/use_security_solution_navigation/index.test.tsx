@@ -269,17 +269,17 @@ describe('useSecuritySolutionNavigation', () => {
   });
 
   // TODO: Steph/ueba remove when no longer experimental
-  // it('should include ueba when feature flag is on', async () => {
-  //   (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-  //   const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
-  //     () => useSecuritySolutionNavigation(),
-  //     { wrapper: TestProviders }
-  //   );
+  it('should include users when feature flag is on', async () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
+    );
 
-  //   // possibly undefined, but if undefined we want this test to fail
-  //   // @ts-expect-error TS2532
-  //   expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.ueba);
-  // });
+    // possibly undefined, but if undefined we want this test to fail
+    // @ts-expect-error TS2532
+    expect(result.current.items[2].items[2].id).toEqual(SecurityPageName.users);
+  });
 
   it('should omit host isolation exceptions if hook reports false', () => {
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValueOnce(false);
