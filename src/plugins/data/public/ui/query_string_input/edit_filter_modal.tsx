@@ -89,6 +89,7 @@ export function EditFilterModal({
   applySavedQueries,
   filter,
   multipleFilters,
+  currentEditFilters,
   indexPatterns,
   timeRangeForSuggestionsOverride,
   initialAddFilterMode,
@@ -100,6 +101,7 @@ export function EditFilterModal({
   onCancel: () => void;
   filter: Filter;
   multipleFilters?: Filter[];
+  currentEditFilters?: Filter[];
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
   initialAddFilterMode?: string;
@@ -113,9 +115,9 @@ export function EditFilterModal({
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
-    convertFilterToFilterGroup(multipleFilters)
+    convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(1);
+  const [groupsCount, setGroupsCount] = useState<number>(filter.groupId);
 
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
@@ -418,7 +420,7 @@ export function EditFilterModal({
   };
 
   const onDeliteFilter = () => {
-    onRemoveFilterGroup(multipleFilters[0]?.groupId);
+    onRemoveFilterGroup(filter?.groupId);
   };
 
   const renderGroupedFilters = () => {
@@ -481,7 +483,7 @@ export function EditFilterModal({
                                       value: undefined,
                                       relationship: undefined,
                                       groupId: localfilter.groupId,
-                                      id: localFilters.length,
+                                      id: multipleFilters.length,
                                       subGroupId,
                                     },
                                   ]);
@@ -519,9 +521,9 @@ export function EditFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId: filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
+                                    groupId: multipleFilters.length + 1,
                                     subGroupId,
-                                    id: localFilters.length,
+                                    id: multipleFilters.length,
                                   },
                                 ]);
                                 if (filtersOnGroup.length <= 1) {

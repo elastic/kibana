@@ -206,7 +206,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           onEditFilterClick={onEditFilterClick}
-          filtersGroupsCount={1}
+          filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
           customLabel={label}
           savedQueryService={props.savedQueryService}
           onFilterSave={props.onFilterSave}
@@ -233,7 +233,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             applySavedQueries={() => props.toggleEditFilterModal?.(false)}
             onCancel={() => props.toggleEditFilterModal?.(false)}
             filter={currentEditFilters[0]}
-            multipleFilters={currentEditFilters}
+            currentEditFilters={currentEditFilters}
+            multipleFilters={props.multipleFilters}
             indexPatterns={props.indexPatterns!}
             onRemoveFilterGroup={onDeleteFilterGroup}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
