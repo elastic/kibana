@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
 import { Index } from '../common/types';
 import {
@@ -41,9 +41,9 @@ const indexWithoutLifecyclePolicy: Index = {
   status: 'open',
   name: 'noPolicy',
   uuid: 'BJ-nrZYuSrG-jaofr6SeLg',
-  primary: '1',
-  replica: '1',
-  documents: '1',
+  primary: 1,
+  replica: 1,
+  documents: 1,
   documents_deleted: '0',
   size: '3.4kb',
   primary_size: '3.4kb',
@@ -61,9 +61,9 @@ const indexWithLifecyclePolicy: Index = {
   status: 'open',
   name: 'testy3',
   uuid: 'XL11TLa3Tvq298_dMUzLHQ',
-  primary: '1',
-  replica: '1',
-  documents: '2',
+  primary: 1,
+  replica: 1,
+  documents: 2,
   documents_deleted: '0',
   size: '6.5kb',
   primary_size: '6.5kb',
@@ -89,9 +89,9 @@ const indexWithLifecycleError = {
   status: 'open',
   name: 'testy3',
   uuid: 'XL11TLa3Tvq298_dMUzLHQ',
-  primary: '1',
-  replica: '1',
-  documents: '2',
+  primary: 1,
+  replica: 1,
+  documents: 2,
   documents_deleted: '0',
   size: '6.5kb',
   primary_size: '6.5kb',

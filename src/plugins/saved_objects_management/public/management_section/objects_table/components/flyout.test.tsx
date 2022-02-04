@@ -9,7 +9,7 @@
 import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 
 import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { coreMock, httpServiceMock } from '../../../../../../core/public/mocks';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
@@ -40,7 +40,7 @@ describe('Flyout', () => {
       close: jest.fn(),
       done: jest.fn(),
       newIndexPatternUrl: '',
-      indexPatterns: {
+      dataViews: {
         getCache: jest.fn().mockImplementation(() => [
           { id: '1', attributes: {} },
           { id: '2', attributes: {} },

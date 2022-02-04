@@ -112,7 +112,7 @@ pageLoadAssetSize:
   uiActionsEnhanced: 38494
   urlDrilldown: 30063
   dataViewEditor: 12000
-  dataViewFieldEditor: 20000
+  dataViewFieldEditor: 27000
   dataViewManagement: 5000
   reporting: 57003
   visTypeHeatmap: 25340
@@ -121,3 +121,4 @@ pageLoadAssetSize:
   controls: 34788
   expressionPie: 26338
   sharedUX: 16225
+  ux: 20784

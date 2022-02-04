@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { format as formatUrl } from 'url';
-import fs from 'fs';
-import { Client, HttpConnection, Transport } from '@elastic/elasticsearch';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { Client, Transport } from '@elastic/elasticsearch';
+import { createEsClientForFtrConfig } from '@kbn/test';
 import type {
   TransportRequestParams,
   TransportRequestOptions,
@@ -35,22 +33,7 @@ export function clusterClientProvider({ getService }: FtrProviderContext): Clien
     }
   }
 
-  if (process.env.TEST_CLOUD) {
-    return new Client({
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
-      Transport: KibanaTransport,
-      Connection: HttpConnection,
-    });
-  } else {
-    return new Client({
-      tls: {
-        ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
-      },
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
-      Transport: KibanaTransport,
-      Connection: HttpConnection,
-    });
-  }
+  return createEsClientForFtrConfig(config, {
+    Transport: KibanaTransport,
+  });
 }

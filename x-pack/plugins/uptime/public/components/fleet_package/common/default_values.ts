@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
 import { CommonFields, ConfigKey, ScheduleUnit, DataStream } from '../types';
 
 export const defaultValues: CommonFields = {
@@ -20,4 +21,5 @@ export const defaultValues: CommonFields = {
   [ConfigKey.TIMEOUT]: '16',
   [ConfigKey.NAME]: '',
   [ConfigKey.LOCATIONS]: [],
+  [ConfigKey.NAMESPACE]: DEFAULT_NAMESPACE_STRING,
 };
