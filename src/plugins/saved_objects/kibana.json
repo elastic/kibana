@@ -1,8 +1,8 @@
 {
   "id": "savedObjects",
   "owner": {
-    "name": "Kibana Core",
-    "githubTeam": "kibana-core"
+    "name": "Kibana Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   },
   "version": "kibana",
   "server": true,
