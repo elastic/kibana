@@ -56,9 +56,7 @@ export interface GenericFtrProviderContext<
    * Determine if a service is avaliable
    * @param serviceName
    */
-  hasService(
-    serviceName: 'config' | 'log' | 'lifecycle' | 'testMetadata' | 'dockerServers'
-  ): true;
+  hasService(serviceName: 'config' | 'log' | 'lifecycle' | 'testMetadata' | 'dockerServers'): true;
   hasService<K extends keyof ServiceMap>(serviceName: K): serviceName is K;
   hasService(serviceName: string): serviceName is Extract<keyof ServiceMap, string>;
 
