@@ -92,6 +92,51 @@ export const ComparatorToi18nMap = {
   ),
 };
 
+export const ComparatorToi18nSymbolsMap = {
+  [Comparator.GT]: i18n.translate('xpack.infra.logs.alerting.comparator.gt', {
+    defaultMessage: '>',
+  }),
+  [Comparator.GT_OR_EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.gtOrEq', {
+    defaultMessage: '≥',
+  }),
+  [Comparator.LT]: i18n.translate('xpack.infra.logs.alerting.comparator.lt', {
+    defaultMessage: '<',
+  }),
+  [Comparator.LT_OR_EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.ltOrEq', {
+    defaultMessage: '≤',
+  }),
+  [Comparator.EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.eq', {
+    defaultMessage: '=',
+  }),
+  [Comparator.NOT_EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.notEq', {
+    defaultMessage: '≠',
+  }),
+  [`${Comparator.EQ}:number`]: i18n.translate('xpack.infra.logs.alerting.comparator.eqNumber', {
+    defaultMessage: '=',
+  }),
+  [`${Comparator.NOT_EQ}:number`]: i18n.translate(
+    'xpack.infra.logs.alerting.comparator.notEqNumber',
+    {
+      defaultMessage: '≠',
+    }
+  ),
+  [Comparator.MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.match', {
+    defaultMessage: 'matches',
+  }),
+  [Comparator.NOT_MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.notMatch', {
+    defaultMessage: 'does not match',
+  }),
+  [Comparator.MATCH_PHRASE]: i18n.translate('xpack.infra.logs.alerting.comparator.matchPhrase', {
+    defaultMessage: 'matches phrase',
+  }),
+  [Comparator.NOT_MATCH_PHRASE]: i18n.translate(
+    'xpack.infra.logs.alerting.comparator.notMatchPhrase',
+    {
+      defaultMessage: 'does not match phrase',
+    }
+  ),
+};
+
 // Alert parameters //
 export enum AlertStates {
   OK,
