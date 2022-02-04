@@ -585,7 +585,8 @@ export const AlertForm = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
-          defaultMessage: 'Define how often to evaluate the condition.',
+          defaultMessage:
+            'Define how often to evaluate the condition. Rule checks are queued and run at the next opportunity.',
         })}
       />
     </>
