@@ -86,6 +86,25 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           return [];
         })
         .filter((marker) => marker);
+      const hasBuckets = layer.columnOrder.some((colId) => layer.columns[colId].isBucketed);
+      const hasOtherMetrics = layer.columnOrder.some((colId) => {
+        const col = layer.columns[colId];
+        return (
+          !col.isBucketed &&
+          !col.isStaticValue &&
+          col.operationType !== 'math' &&
+          col.operationType !== 'formula'
+        );
+      });
+
+      if (hasBuckets && !hasOtherMetrics) {
+        innerErrors.push({
+          message: i18n.translate('xpack.lens.indexPattern.noRealMetricError', {
+            defaultMessage:
+              'A layer with only static values will not show results, use at least one dynamic metric',
+          }),
+        });
+      }
 
       return innerErrors.length ? innerErrors.map(({ message }) => message) : undefined;
     },
