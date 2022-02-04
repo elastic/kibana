@@ -290,7 +290,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       let end = index === array.length - 1 ? Infinity : array[index + 1];
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
-        const lastBand = max === start ? Infinity : endValue;
+        const lastBand = max === min ? Infinity : endValue;
         end = index === array.length - 1 ? lastBand : array[index + 1];
       }
       const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
@@ -299,7 +299,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
       return {
         // with the default continuity:above the every range is left-closed
-        start,
+        start: index === array.length - 1 && max === min ? min : start,
         end,
         // the current colors array contains a duplicated color at the beginning that we need to skip
         color: overwriteColor ?? colors[index + 1],
