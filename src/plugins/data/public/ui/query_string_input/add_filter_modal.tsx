@@ -493,7 +493,7 @@ export function AddFilterModal({
                                 const subGroupId =
                                   filtersOnGroup.length > 2
                                     ? localfilter?.subGroupId ?? 0
-                                    : (localfilter?.subGroupId ?? 0) + 1;
+                                    : (localfilter?.subGroupId ?? 0);
                                 const updatedLocalFilter = {
                                   ...localfilter,
                                   relationship: 'AND',
