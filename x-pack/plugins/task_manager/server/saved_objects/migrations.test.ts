@@ -127,6 +127,25 @@ describe('successful migrations', () => {
         },
       });
     });
+
+    test('does not update the tasks that are not "failed"', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'idle',
+        attempts: 3,
+        schedule: undefined,
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          attempts: 3,
+          status: 'idle',
+        },
+      });
+    });
   });
 });
 
