@@ -13,7 +13,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '@kbn/test/jest';
+} from '@kbn/test-jest-helpers';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
 import { pieChartMockData } from './pie_chart_mock_data';
