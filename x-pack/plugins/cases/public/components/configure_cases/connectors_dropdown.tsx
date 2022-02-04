@@ -23,7 +23,7 @@ import { getConnectorIcon, isDeprecatedConnector } from '../utils';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 type ConnectorEuiComboBoxOptionOption<T> = EuiComboBoxOptionOption<T> & {
-  rendered: ReactNode;
+  render: ReactNode;
 };
 
 export interface Props {
@@ -54,7 +54,7 @@ const noConnectorOption = {
   value: 'none',
   label: i18n.NO_CONNECTOR,
   'data-test-subj': 'dropdown-connector-no-connector',
-  rendered: (
+  render: (
     <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
@@ -114,7 +114,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
               value: connector.id,
               label: connector.name,
               'data-test-subj': `dropdown-connector-${connector.id}`,
-              rendered: (
+              render: (
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <FlexItemIconContainer grow={false}>
                     <EuiIconExtended
@@ -194,7 +194,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   };
 
   const renderOption = (option: EuiComboBoxOptionOption<string>, _searchString: string) => {
-    return (option as ConnectorEuiComboBoxOptionOption<string>).rendered;
+    return (option as ConnectorEuiComboBoxOptionOption<string>).render;
   };
 
   return (
