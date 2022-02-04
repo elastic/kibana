@@ -83,9 +83,9 @@ export const getPersistedStateMigrations = (
 ): MigrateFunctionsObject =>
   mapValues(
     filterMigrations,
-    (migrate) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
+    (filterMigration) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
       try {
-        const attributes = migrateDataPersistedState(doc, filterMigrations);
+        const attributes = migrateDataPersistedState(doc, filterMigration);
 
         return {
           ...doc,

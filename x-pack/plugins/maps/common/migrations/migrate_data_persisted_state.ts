@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
+import { Filter } from '@kbn/es-query';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import { MigrateFunction } from '../../../../../src/plugins/kibana_utils/common';
 
 export function migrateDataPersistedState(
   {
@@ -14,35 +15,21 @@ export function migrateDataPersistedState(
   }: {
     attributes: MapSavedObjectAttributes;
   },
-  filterMigrations: MigrateFunctionsObject
+  filterMigration: MigrateFunction<Filter[], Filter[]>
 ): MapSavedObjectAttributes {
-  if (!attributes) {
-    return attributes;
+  let mapState: { filters: Filter[] } = { filters: [] };
+  if (attributes.mapStateJSON) {
+    try {
+      mapState = JSON.parse(attributes.mapStateJSON);
+    } catch (e) {
+      throw new Error('Unable to parse attribute mapStateJSON');
+    }
+
+    mapState.filters = filterMigration(mapState.filters);
   }
 
   return {
     ...attributes,
+    mapStateJSON: JSON.stringify(mapState),
   };
-
-  /* let layerList: LayerDescriptor[] = [];
-  try {
-    layerList = JSON.parse(attributes.layerListJSON);
-  } catch (e) {
-    throw new Error('Unable to parse attribute layerListJSON');
-  }*/
-
-  /* this._attributes!.layerListJSON = JSON.stringify(layerListConfigOnly);
-
-    this._attributes!.mapStateJSON = JSON.stringify({
-      zoom: getMapZoom(state),
-      center: getMapCenter(state),
-      timeFilters: getTimeFilters(state),
-      refreshConfig: {
-        isPaused: getTimeFilter().getRefreshInterval().pause,
-        interval: getTimeFilter().getRefreshInterval().value,
-      },
-      query: getQuery(state),
-      filters: getFilters(state),
-      settings: getMapSettings(state),
-    } as SerializedMapState);*/
 }
