@@ -323,11 +323,15 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       }),
     [visData.rows, metricColumn]
   );
+
   const flatLegend = isLegendFlat(visType, splitChartDimension);
+
   const canShowPieChart = !isAllZeros && !hasNegative;
+
   const chartContainerStyle = showToggleLegendElement
     ? partitionVisContainerWithToggleStyle
     : partitionVisContainerStyle;
+
   const partitionType = getPartitionType(visType);
 
   return (
