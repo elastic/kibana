@@ -45,6 +45,7 @@ export const CrawlSelectDomainsModalLogic = kea<
       false,
       {
         [CrawlerLogic.actionTypes.startCrawl]: () => true,
+        [CrawlerLogic.actionTypes.onStartCrawlRequestComplete]: () => false,
       },
     ],
     isModalVisible: [
@@ -52,8 +53,7 @@ export const CrawlSelectDomainsModalLogic = kea<
       {
         showModal: () => true,
         hideModal: () => false,
-        [CrawlerLogic.actionTypes.onStartCrawlSuccess]: () => false,
-        [CrawlerLogic.actionTypes.onStartCrawlError]: () => false,
+        [CrawlerLogic.actionTypes.onStartCrawlRequestComplete]: () => false,
       },
     ],
     selectedDomainUrls: [
