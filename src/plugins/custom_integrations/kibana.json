@@ -15,6 +15,5 @@
   "requiredPlugins": [
     "presentationUtil"
   ],
-  "requiredBundles": [],
   "optionalPlugins": []
 }
