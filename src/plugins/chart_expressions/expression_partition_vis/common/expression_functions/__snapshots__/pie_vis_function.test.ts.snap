@@ -284,3 +284,5 @@ Object {
   },
 }
 `;
+
+exports[`interpreter/functions#pieVis throws error if provided split row and split column at once 1`] = `"A split row and column are specified. Expression is supporting only one of them at once."`;

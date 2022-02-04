@@ -89,6 +89,10 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       throw new Error(errors.moreThanNBucketsAreNotSupportedError(maxSupportedBuckets));
     }
 
+    if (args.splitColumn && args.splitRow) {
+      throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
+    }
+
     const visConfig: PartitionVisParams = {
       ...args,
       palette: args.palette,
