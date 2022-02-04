@@ -24,7 +24,7 @@ export const CrawlerStatusIndicator: React.FC = () => {
   const { stopCrawl } = useActions(CrawlerLogic);
 
   const disabledButton = (
-    <EuiButton disabled>
+    <EuiButton disabled iconType="arrowDown" iconSide="right">
       {i18n.translate(
         'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.startACrawlButtonLabel',
         {
