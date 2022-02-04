@@ -9,17 +9,17 @@ import _ from 'lodash';
 import { type Filter, buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
 import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
-import { IndexPattern, IndexPatternField } from '../../../../../../src/plugins/data/public';
+import { DataView, DataViewField } from '../../../../../../src/plugins/data/common';
 
 export class ESTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
-  private readonly _indexPattern: IndexPattern;
+  private readonly _indexPattern: DataView;
   private readonly _field: IField;
   private readonly _applyGlobalQuery: boolean;
 
   constructor(
     tooltipProperty: ITooltipProperty,
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     field: IField,
     applyGlobalQuery: boolean
   ) {
@@ -41,7 +41,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getRawValue();
   }
 
-  _getIndexPatternField(): IndexPatternField | undefined {
+  _getIndexPatternField(): DataViewField | undefined {
     return this._indexPattern.fields.getByName(this._field.getRootName());
   }
 

@@ -41,7 +41,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { makePublicExecutionContext } from '../../../util';
@@ -211,7 +211,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
     precision: number;
     layerName: string;
     registerCancelCallback: (callback: () => void) => void;
@@ -317,7 +317,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
     precision: number;
     layerName: string;
     registerCancelCallback: (callback: () => void) => void;
@@ -385,7 +385,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       throw new Error('Cannot get GeoJson without searchFilter.buffer');
     }
 
-    const indexPattern: IndexPattern = await this.getIndexPattern();
+    const indexPattern: DataView = await this.getIndexPattern();
     const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('trackTotalHits', false);
 
