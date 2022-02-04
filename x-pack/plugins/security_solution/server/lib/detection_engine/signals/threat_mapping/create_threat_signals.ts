@@ -6,13 +6,13 @@
  */
 
 import chunk from 'lodash/fp/chunk';
-import { getNextPage } from './get_next_page';
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount } from './get_event_count';
+import { getNextPage } from './get_next_page';
 
 export const createThreatSignals = async ({
   alertId,
@@ -44,7 +44,8 @@ export const createThreatSignals = async ({
   wrapHits,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
-  logger.debug(buildRuleMessage('Indicator matching rule starting'));
+  const logDebugMessage = (message: string) => logger.debug(buildRuleMessage(message));
+  logDebugMessage('Indicator matching rule starting');
   const perPage = concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
     completeRule.ruleConfig.schedule.interval
@@ -62,6 +63,23 @@ export const createThreatSignals = async ({
     warningMessages: [],
   };
 
+  const eventCount = await getEventCount({
+    esClient: services.scopedClusterClient.asCurrentUser,
+    index: inputIndex,
+    exceptionItems,
+    tuple,
+    query,
+    language,
+    filters,
+  });
+
+  logger.debug(`Total event count: ${eventCount}`);
+
+  if (eventCount === 0) {
+    logger.debug(buildRuleMessage('Indicator matching rule has completed'));
+    return results;
+  }
+
   let threatListCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
@@ -70,24 +88,30 @@ export const createThreatSignals = async ({
     language: threatLanguage,
     index: threatIndex,
   });
+
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
+
+  const threatListConfig = {
+    fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
+    _source: false,
+  };
 
   let threatList = await getNextPage({
     abortableEsClient: services.search.asCurrentUser,
     exceptionItems,
     filters: threatFilters,
-    index: threatIndex,
-    language: threatLanguage,
-    logDebugMessage: (message) => logger.debug(buildRuleMessage(message)),
-    perPage,
     query: threatQuery,
+    language: threatLanguage,
+    index: threatIndex,
     searchAfter: undefined,
-    sortOrder: 'desc',
+    logDebugMessage,
+    perPage,
+    threatListConfig,
   });
 
   const threatEnrichment = buildThreatEnrichment({
     exceptionItems,
-    logDebugMessage: (message) => logger.debug(buildRuleMessage(message)),
+    logDebugMessage,
     services,
     threatFilters,
     threatIndex,
@@ -152,14 +176,14 @@ export const createThreatSignals = async ({
     threatList = await getNextPage({
       abortableEsClient: services.search.asCurrentUser,
       exceptionItems,
+      query: threatQuery,
+      language: threatLanguage,
       filters: threatFilters,
       index: threatIndex,
-      language: threatLanguage,
-      logDebugMessage: (message) => logger.debug(buildRuleMessage(message)),
-      perPage,
-      query: threatQuery,
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
-      sortOrder: 'desc',
+      logDebugMessage,
+      perPage,
+      threatListConfig,
     });
   }
 

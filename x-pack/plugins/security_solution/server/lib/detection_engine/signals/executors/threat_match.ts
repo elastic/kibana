@@ -9,6 +9,7 @@ import { getInputIndex } from '../get_input_output_index';
 import { ThreatMatchExecutorOptions } from '../types';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 
 export const threatMatchExecutor = async ({
   completeRule,
@@ -56,7 +57,7 @@ export const threatMatchExecutor = async ({
       services,
       threatFilters: ruleParams.threatFilters ?? [],
       threatIndex: ruleParams.threatIndex,
-      threatIndicatorPath: ruleParams.threatIndicatorPath,
+      threatIndicatorPath: ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH,
       threatLanguage: ruleParams.threatLanguage,
       threatMapping: ruleParams.threatMapping,
       threatQuery: ruleParams.threatQuery,

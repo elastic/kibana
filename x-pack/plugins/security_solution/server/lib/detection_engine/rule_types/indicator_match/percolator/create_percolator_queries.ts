@@ -27,6 +27,10 @@ export const createPercolatorQueries = async ({
   threatQuery: query,
   timestampOverride,
 }: CreatePercolatorQueriesOptions) => {
+  const threatListConfig = {
+    _source: ['*'],
+    fields: undefined,
+  };
   let items: PercolatorQuery[] = [];
   let updatedSearchAfter;
 
@@ -40,8 +44,8 @@ export const createPercolatorQueries = async ({
     perPage,
     query,
     searchAfter,
-    sortOrder: 'asc',
     timestampOverride,
+    threatListConfig,
   });
 
   while (eventPage.hits.hits.length) {
@@ -66,8 +70,8 @@ export const createPercolatorQueries = async ({
       perPage,
       query,
       searchAfter: updatedSearchAfter,
-      sortOrder: 'asc',
       timestampOverride,
+      threatListConfig,
     });
   }
 

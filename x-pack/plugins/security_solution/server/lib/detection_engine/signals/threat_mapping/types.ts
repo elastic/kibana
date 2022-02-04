@@ -13,7 +13,7 @@ import type {
   ThreatLanguageOrUndefined,
   ConcurrentSearches,
   ItemsPerSearch,
-  ThreatIndicatorPathOrUndefined,
+  ThreatIndicatorPath,
   LanguageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -27,7 +27,7 @@ import {
   IAbortableEsClient,
 } from '../../../../../../alerting/server';
 import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import {
   BulkCreate,
@@ -67,7 +67,7 @@ export interface CreateThreatSignalsOptions {
   bulkCreate: BulkCreate;
   completeRule: CompleteRule<ThreatRuleParams>;
   concurrentSearches: ConcurrentSearches;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
   inputIndex: string[];
@@ -82,7 +82,7 @@ export interface CreateThreatSignalsOptions {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
-  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
@@ -98,7 +98,7 @@ export interface CreateThreatSignalOptions {
   completeRule: CompleteRule<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
   currentThreatList: IndicatorHit[];
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
   inputIndex: string[];
@@ -124,7 +124,7 @@ export interface FetchSourceEventsOptions {
   completeRule: CompleteRule<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
   currentThreatList: IndicatorHit[];
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
   inputIndex: string[];
@@ -186,6 +186,11 @@ export interface BooleanFilter {
   bool: { should: unknown[]; minimum_should_match: number };
 }
 
+interface ThreatListConfig {
+  _source: string[] | boolean;
+  fields: string[] | undefined;
+}
+
 export interface PercolatorQuery {
   bool: { must: unknown[]; filter?: unknown[]; should?: unknown[]; minimum_should_match: number };
   _name?: string;
@@ -202,9 +207,9 @@ export interface GetNextPageOptions {
   perPage?: number;
   query: string;
   searchAfter: SortResults | undefined;
-  sortOrder: 'asc' | 'desc';
   timestampOverride?: string;
   tuple?: RuleRangeTuple;
+  threatListConfig: ThreatListConfig;
 }
 
 export interface CreatePercolatorQueriesOptions {
@@ -239,24 +244,6 @@ export interface FetchItemsOptions<T> {
   tuple?: RuleRangeTuple;
 }
 
-export interface EventCountOptions {
-  esClient: ElasticsearchClient;
-  exceptionItems: ExceptionListItemSchema[];
-  index: string[];
-  language: ThreatLanguageOrUndefined;
-  query: string;
-  filters: unknown[];
-  tuple?: RuleRangeTuple;
-  timestampOverride?: string;
-}
-
-export interface GetSortWithTieBreakerOptions {
-  index: string[];
-  listItemIndex: string;
-  sortField: string | undefined;
-  sortOrder: SortOrderOrUndefined;
-}
-
 export interface EventDoc {
   [key: string]: unknown;
 }
@@ -274,7 +261,7 @@ export type IndicatorHit = estypes.SearchHit<ThreatListDoc>;
 export interface ThreatEnrichment {
   feed: Record<string, unknown>;
   indicator: Record<string, unknown>;
-  matched: Record<string, unknown>;
+  matched: { id: string; index: string; field: string; atomic?: string; type: string };
 }
 
 export interface SortWithTieBreaker {
@@ -296,7 +283,18 @@ export interface BuildThreatEnrichmentOptions {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
-  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
+}
+
+export interface EventCountOptions {
+  esClient: ElasticsearchClient;
+  exceptionItems: ExceptionListItemSchema[];
+  index: string[];
+  language: ThreatLanguageOrUndefined;
+  query: string;
+  filters: unknown[];
+  tuple?: RuleRangeTuple;
+  timestampOverride?: string;
 }

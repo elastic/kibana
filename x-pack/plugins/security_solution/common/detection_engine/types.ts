@@ -55,3 +55,7 @@ export interface EqlSearchResponse<T> {
     events?: Array<BaseHit<T>>;
   };
 }
+
+export interface HTTPError extends Error {
+  body?: unknown;
+}

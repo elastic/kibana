@@ -23,8 +23,7 @@ export const getNextPage = async ({
   perPage,
   query,
   searchAfter,
-  sortOrder,
-  timestampOverride,
+  threatListConfig,
 }: GetNextPageOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? DETECTION_ENGINE_MAX_PER_PAGE;
   if (calculatedPerPage > ELASTICSEARCH_MAX_PER_PAGE) {
@@ -41,16 +40,9 @@ export const getNextPage = async ({
   >({
     body: {
       query: getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems),
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-      ],
       search_after: searchAfter,
-      sort: {
-        [timestampOverride ?? '@timestamp']: sortOrder,
-      },
+      sort: ['_doc', { '@timestamp': 'asc' }],
+      ...threatListConfig,
     },
     track_total_hits: false,
     ignore_unavailable: true,

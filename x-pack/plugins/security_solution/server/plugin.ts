@@ -60,8 +60,8 @@ import { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
-import { TelemetryEventsSender } from './lib/telemetry/sender';
-import { TelemetryReceiver } from './lib/telemetry/receiver';
+import { ITelemetryEventsSender, TelemetryEventsSender } from './lib/telemetry/sender';
+import { ITelemetryReceiver, TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
@@ -70,7 +70,7 @@ import previewPolicy from './lib/detection_engine/routes/index/preview_policy.js
 import percolatorPolicy from './lib/detection_engine/routes/index/percolator_policy.json';
 import {
   registerEventLogProvider,
-  ruleExecutionLoggerFactory,
+  ruleExecutionLogForExecutorsFactory,
 } from './lib/detection_engine/rule_execution_log';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -106,8 +106,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly appClientFactory: AppClientFactory;
 
   private readonly endpointAppContextService = new EndpointAppContextService();
-  private readonly telemetryReceiver: TelemetryReceiver;
-  private readonly telemetryEventsSender: TelemetryEventsSender;
+  private readonly telemetryReceiver: ITelemetryReceiver;
+  private readonly telemetryEventsSender: ITelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -225,6 +225,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
       ilmPolicy: previewIlmPolicy,
+      secondaryAlias: undefined,
     });
 
     const percolatorIlmPolicy = percolatorPolicy.policy;
@@ -256,7 +257,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
       ruleDataClient,
       eventLogService,
-      ruleExecutionLoggerFactory,
+      ruleExecutionLoggerFactory: ruleExecutionLogForExecutorsFactory,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -287,7 +288,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.getStartServices,
       securityRuleTypeOptions,
       previewRuleDataClient,
-      percolatorRuleDataClient
+      percolatorRuleDataClient,
+      this.telemetryReceiver
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -376,6 +378,19 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const exceptionListClient = this.lists!.getExceptionListClient(
+      savedObjectsClient,
+      'kibana',
+      // execution of Lists plugin server extension points callbacks should be turned off
+      // here because most of the uses of this client will be in contexts where some endpoint
+      // validations (specifically those around authz) can not be done (due ot the lack of a `KibanaRequest`
+      // from where authz can be derived)
+      false
+    );
+    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      plugins.fleet!;
     let manifestManager: ManifestManager | undefined;
 
     this.licensing$ = plugins.licensing.license$;
@@ -383,7 +398,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
       const taskManager = plugins.taskManager;
-      const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = new EndpointArtifactClient(
         plugins.fleet.createArtifactsClient('endpoint')
       );
@@ -423,13 +437,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       );
       this.policyWatcher.start(licenseService);
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
-
-    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      plugins.fleet!;
 
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
