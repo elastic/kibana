@@ -87,6 +87,10 @@ export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage',
   defaultMessage: 'Manage',
 });
 
+export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {
+  defaultMessage: 'Blocklist',
+});
+
 export const GO_TO_DOCUMENTATION = i18n.translate(
   'xpack.securitySolution.goToDocumentationButton',
   {

@@ -103,6 +103,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs.trusted_apps,
                 navTabs.event_filters,
                 ...(canSeeHostIsolationExceptions ? [navTabs.host_isolation_exceptions] : []),
+                navTabs.blocklist,
               ],
             },
           ]
