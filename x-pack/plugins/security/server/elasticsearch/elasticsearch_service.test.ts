@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import type { CoreStatus } from 'src/core/server';
 import { ServiceStatusLevels } from 'src/core/server';
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';

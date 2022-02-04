@@ -9,6 +9,7 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
 import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
+import type { DatePickerProps } from './date_picker/index';
 import type { FilterValueLabelProps } from './filter_value_label/filter_value_label';
 import type { SelectableUrlListProps } from './exploratory_view/components/url_search/selectable_url_list';
 import type { ExploratoryViewPageProps } from './exploratory_view/index';
@@ -73,6 +74,16 @@ export function ExploratoryView(props: ExploratoryViewPageProps) {
   return (
     <Suspense fallback={null}>
       <ExploratoryViewLazy {...props} />
+    </Suspense>
+  );
+}
+
+const DatePickerLazy = lazy(() => import('./date_picker/index'));
+
+export function DatePicker(props: DatePickerProps) {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <DatePickerLazy {...props} />
     </Suspense>
   );
 }
