@@ -12,9 +12,9 @@
   "extraPublicDirs": [
     "common"
   ],
-  "requiredPlugins": [],
-  "requiredBundles": [
+  "requiredPlugins": [
     "presentationUtil"
   ],
+  "requiredBundles": [],
   "optionalPlugins": []
 }
