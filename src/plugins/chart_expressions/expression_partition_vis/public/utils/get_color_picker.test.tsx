@@ -9,7 +9,7 @@
 import React from 'react';
 import { LegendColorPickerProps } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import {
   LegendColorPickerWrapper,

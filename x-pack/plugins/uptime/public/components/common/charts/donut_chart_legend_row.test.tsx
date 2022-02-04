@@ -6,7 +6,7 @@
  */
 
 import { DonutChartLegendRow } from './donut_chart_legend_row';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 describe('DonutChartLegendRow', () => {

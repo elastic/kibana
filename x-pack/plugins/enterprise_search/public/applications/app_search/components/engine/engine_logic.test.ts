@@ -11,7 +11,7 @@ import {
   mockFlashMessageHelpers,
 } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SchemaType } from '../../../shared/schema/types';
 import { ApiTokenTypes } from '../credentials/constants';
