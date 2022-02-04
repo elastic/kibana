@@ -475,6 +475,9 @@ export function EditFilterModal({
                                   if (subGroup.length < 2) {
                                     localFilters[idx] = updatedLocalFilter;
                                   }
+                                  const countOfFilterBeforeFilterEdit = multipleFilters.filter(
+                                    (f) => f.groupId === Number(groupId)
+                                  );
                                   setLocalFilters([
                                     ...localFilters,
                                     {
