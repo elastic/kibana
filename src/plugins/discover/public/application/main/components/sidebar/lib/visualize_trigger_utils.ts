@@ -14,7 +14,7 @@ import {
 } from '../../../../../../../ui_actions/public';
 import { getUiActions } from '../../../../../kibana_services';
 import { DataViewField, KBN_FIELD_TYPES } from '../../../../../../../data/common';
-import { APP_ID } from '../../../../../../common/index';
+import { APP_ID } from '../../../../../../common';
 
 function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE

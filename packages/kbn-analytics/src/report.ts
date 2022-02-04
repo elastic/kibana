@@ -12,7 +12,7 @@ import { ApplicationUsageTracker } from './application_usage_tracker';
 import { Metric, METRIC_TYPE } from './metrics';
 const REPORT_VERSION = 3;
 
-import type { UiCounterMetric } from './metrics/ui_counter';
+import type { UiCounterMetric, UiCounterMetricType } from './metrics/ui_counter';
 import type { UserAgentMetric } from './metrics/user_agent';
 import type { ApplicationUsageMetric } from './metrics/application_usage';
 
@@ -24,7 +24,7 @@ export interface Report {
       key: string;
       appName: string;
       eventName: string;
-      type: string;
+      type: UiCounterMetricType;
       total: number;
     }
   >;
