@@ -118,4 +118,9 @@ export const errors = {
       defaultMessage: 'More than {maxLength} buckets are not supported',
       values: { maxLength },
     }),
+  splitRowAndSplitColumnAreSpecifiedError: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.errors.splitRowAndColumnSpecified', {
+      defaultMessage:
+        'A split row and column are specified. Expression is supporting only one of them at once.',
+    }),
 };

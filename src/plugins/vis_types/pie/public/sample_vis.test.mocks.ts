@@ -37,7 +37,7 @@ export const samplePieVis = {
         labels: {
           show: false,
           values: true,
-          lastLevel: true,
+          last_level: true,
           valuesFormat: 'percent',
           percentDecimals: 2,
           truncate: 100,
@@ -146,7 +146,7 @@ export const samplePieVis = {
     labels: {
       show: true,
       values: true,
-      lastLevel: true,
+      last_level: true,
       truncate: 100,
     },
   },

@@ -43,7 +43,7 @@ export interface LabelsParams {
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   truncate?: number | null;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
-  lastLevel?: boolean;
+  last_level?: boolean;
 }
 
 interface VisCommonParams {

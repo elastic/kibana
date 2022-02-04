@@ -13,8 +13,9 @@ import {
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import { mosaicVisFunction } from './mosaic_vis_function';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { mosaicVisFunction } from './mosaic_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
 
 describe('interpreter/functions#mosaicVis', () => {
@@ -49,7 +50,7 @@ describe('interpreter/functions#mosaicVis', () => {
       valuesFormat: ValueFormats.PERCENT,
       percentDecimals: 2,
       truncate: 100,
-      lastLevel: false,
+      last_level: false,
     },
     metric: {
       type: 'vis_dimension',
@@ -103,6 +104,25 @@ describe('interpreter/functions#mosaicVis', () => {
             },
           },
         ],
+      })
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  it('throws error if provided split row and split column at once', async () => {
+    const splitDimension: ExpressionValueVisDimension = {
+      type: 'vis_dimension',
+      accessor: 3,
+      format: {
+        id: 'number',
+        params: {},
+      },
+    };
+
+    expect(() =>
+      fn(context, {
+        ...visConfig,
+        splitColumn: [splitDimension],
+        splitRow: [splitDimension],
       })
     ).toThrowErrorMatchingSnapshot();
   });

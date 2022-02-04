@@ -14,8 +14,9 @@ import {
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import { pieVisFunction } from './pie_vis_function';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { pieVisFunction } from './pie_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
 
 describe('interpreter/functions#pieVis', () => {
@@ -48,7 +49,7 @@ describe('interpreter/functions#pieVis', () => {
       valuesFormat: ValueFormats.PERCENT,
       percentDecimals: 2,
       truncate: 100,
-      lastLevel: false,
+      last_level: false,
     },
     metric: {
       type: 'vis_dimension',
@@ -98,6 +99,25 @@ describe('interpreter/functions#pieVis', () => {
   it('returns an object with the correct structure for donut', async () => {
     const actual = await fn(context, visConfig);
     expect(actual).toMatchSnapshot();
+  });
+
+  it('throws error if provided split row and split column at once', async () => {
+    const splitDimension: ExpressionValueVisDimension = {
+      type: 'vis_dimension',
+      accessor: 3,
+      format: {
+        id: 'number',
+        params: {},
+      },
+    };
+
+    expect(() =>
+      fn(context, {
+        ...visConfig,
+        splitColumn: [splitDimension],
+        splitRow: [splitDimension],
+      })
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('logs correct datatable to inspector', async () => {

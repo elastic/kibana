@@ -15,7 +15,7 @@ import {
   PARTITION_VIS_RENDERER_NAME,
   WAFFLE_VIS_EXPRESSION_NAME,
 } from '../constants';
-import { strings } from './i18n';
+import { errors, strings } from './i18n';
 
 export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
   name: WAFFLE_VIS_EXPRESSION_NAME,
@@ -83,6 +83,10 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     },
   },
   fn(context, args, handlers) {
+    if (args.splitColumn && args.splitRow) {
+      throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
+    }
+
     const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {
       ...args,

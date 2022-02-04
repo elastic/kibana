@@ -16,7 +16,7 @@ import {
   PIE_VIS_EXPRESSION_NAME,
   PARTITION_VIS_RENDERER_NAME,
 } from '../constants';
-import { strings } from './i18n';
+import { errors, strings } from './i18n';
 
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   name: PIE_VIS_EXPRESSION_NAME,
@@ -111,6 +111,10 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     },
   },
   fn(context, args, handlers) {
+    if (args.splitColumn && args.splitRow) {
+      throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
+    }
+
     const visConfig: PartitionVisParams = {
       ...args,
       palette: args.palette,

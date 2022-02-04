@@ -19,7 +19,7 @@ Object {
       },
       "isDonut": true,
       "labels": Object {
-        "lastLevel": true,
+        "last_level": true,
         "show": false,
         "truncate": 100,
         "values": true,
