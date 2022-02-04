@@ -89,13 +89,16 @@ export function registerListRoute({
     license.guardApiRoute(async (context, request, response) => {
       try {
         const settingsResponse =
-          await context.core.elasticsearch.client.asCurrentUser.transport.request({
-            method: 'GET',
-            path: '/_nodes/settings',
-            querystring: {
-              format: 'json',
+          await context.core.elasticsearch.client.asCurrentUser.transport.request(
+            {
+              method: 'GET',
+              path: '/_nodes/settings',
+              querystring: {
+                format: 'json',
+              },
             },
-          });
+            { meta: true }
+          );
         const body: ListNodesRouteResponse = convertSettingsIntoLists(
           settingsResponse.body as Settings,
           disallowedNodeAttributes
