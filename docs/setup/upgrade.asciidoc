@@ -3,7 +3,8 @@
 
 To upgrade from 7.16 or earlier to {version}, 
 **you must first upgrade to {prev-major-last}**.
-This enables you to use the Upgrade Assistant to <<prepare-to-upgrade, prepare to upgrade>>.
+This enables you to use the Upgrade Assistant to
+{stack-ref}/upgrading-stack.html#prepare-to-upgrade[prepare to upgrade].
 You must resolve all critical issues identified by the Upgrade Assistant
 before proceeding with the upgrade. 
 
@@ -13,7 +14,8 @@ Upgrading while older {kib} instances are running can cause data loss or upgrade
 
 [WARNING]
 ====
-{kib} automatically runs <<upgrade migrations, upgrade migrations>> when required. 
+{kib} automatically runs <<saved-object-migrations, saved object migrations>> 
+when required. 
 To roll back to an
 earlier version in case of an upgrade failure, you **must** have a
 {ref}/snapshot-restore.html[backup snapshot] that includes the `kibana` feature
@@ -27,32 +29,6 @@ IMPORTANT: You can upgrade to pre-release versions for testing,
 but upgrading from a pre-release to the final GA version is not supported.
 Pre-releases should only be used for testing in a temporary environment.
 
-
-
-
-
-[float]
-[[upgrade-5x-earlier]]
-=== Upgrade from 5.x or earlier
-{es} can read indices created in the previous major version. Before you upgrade
-to 7.0.0, you must reindex or delete any indices created in 5.x or earlier.
-For more information, refer to
-{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack].
-
-When your reindex is complete, follow the <<upgrade-standard, Standard upgrade>>
-instructions.
-
-[float]
-[[upgrade-6x]]
-=== Upgrade from 6.x
-
-The recommended path is to upgrade to 6.8 before upgrading to 7.0. This makes it
-easier to identify the required changes, and enables you to use the Upgrade
-Assistant to prepare for your upgrade to 7.0.
-
-TIP: The ability to import {kib} 6.x saved searches, visualizations, and
-dashboards is supported.
-
-include::upgrade/upgrade-migrations.asciidoc[]
+include::upgrade/upgrade-migrations.asciidoc[leveloffset=-1]
 
 include::upgrade/logging-configuration-changes.asciidoc[]

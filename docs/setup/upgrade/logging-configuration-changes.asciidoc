@@ -1,5 +1,5 @@
 [discrete]
-[[logging-conf-changes]]
+[[logging-config-changes]]
 === Logging configuration changes
 
 WARNING: {kib} 8.0 and later uses a new logging system. Be sure to read the documentation for your version of {kib} before proceeding.

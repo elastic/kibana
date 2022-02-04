@@ -1,4 +1,4 @@
-[discrete]
+[float]
 [[saved-object-migrations]]
 === Saved object migrations
 
