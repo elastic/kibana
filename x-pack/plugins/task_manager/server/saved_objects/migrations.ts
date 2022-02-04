@@ -37,9 +37,9 @@ export function getMigrations(): SavedObjectMigrationMap {
       pipeMigrations(alertingTaskLegacyIdToSavedObjectIds, actionsTasksLegacyIdToSavedObjectIds),
       '8.0.0'
     ),
-    '8.1.0': executeMigrationWithErrorHandling(
+    '8.2.0': executeMigrationWithErrorHandling(
       pipeMigrations(resetAttemptsAndStatusForTheTasksWithoutSchedule),
-      '8.1.0'
+      '8.2.0'
     ),
   };
 }

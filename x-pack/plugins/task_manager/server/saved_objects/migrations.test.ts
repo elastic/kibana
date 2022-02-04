@@ -109,9 +109,9 @@ describe('successful migrations', () => {
     });
   });
 
-  describe('8.1.0', () => {
+  describe('8.2.0', () => {
     test('resets attempts and status of the failed alerting tasks without schedule interval', () => {
-      const migration810 = getMigrations()['8.1.0'];
+      const migration810 = getMigrations()['8.2.0'];
       const taskInstance = getMockData({
         taskType: 'alerting:123',
         status: 'failed',

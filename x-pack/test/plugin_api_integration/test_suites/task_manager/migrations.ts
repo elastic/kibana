@@ -81,7 +81,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       );
     });
 
-    it('8.1.0 migrates alerting tasks that has no schedule.interval', async () => {
+    it('8.2.0 migrates alerting tasks that has no schedule.interval', async () => {
       const searchResult: TransportResult<
         estypes.SearchResponse<{ task: ConcreteTaskInstance }>,
         unknown
