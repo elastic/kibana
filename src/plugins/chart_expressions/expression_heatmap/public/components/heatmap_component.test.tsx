@@ -12,7 +12,7 @@ import { chartPluginMock } from '../../../../charts/public/mocks';
 import { EmptyPlaceholder } from '../../../../charts/public';
 import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
 import type { Datatable } from '../../../../expressions/public';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';

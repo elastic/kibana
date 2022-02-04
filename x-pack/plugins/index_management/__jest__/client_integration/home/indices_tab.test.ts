@@ -43,7 +43,7 @@ jest.mock('../../../public/application/lib/ace.js', () => {
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import { stubWebWorker } from '@kbn/test/jest';
+import { stubWebWorker } from '@kbn/test-jest-helpers';
 import { createMemoryHistory } from 'history';
 stubWebWorker();
 
