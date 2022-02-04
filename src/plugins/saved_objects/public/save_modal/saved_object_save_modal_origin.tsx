@@ -19,6 +19,10 @@ interface SaveModalDocumentInfo {
   description?: string;
 }
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface OriginSaveModalProps {
   originatingApp?: string;
   getAppNameFromId?: (appId: string) => string | undefined;
@@ -31,6 +35,10 @@ export interface OriginSaveModalProps {
   onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void;
 }
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
   const [returnToOriginMode, setReturnToOriginMode] = useState(Boolean(props.originatingApp));
   const { documentInfo } = props;

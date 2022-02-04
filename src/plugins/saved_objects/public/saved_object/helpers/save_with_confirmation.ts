@@ -18,6 +18,9 @@ import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 /**
+ * @deprecated
+ * @removeBy 8.0
+ *
  * Attempts to create the current object using the serialized source. If an object already
  * exists, a warning message requests an overwrite confirmation.
  * @param source - serialized version of this object what will be indexed into elasticsearch.

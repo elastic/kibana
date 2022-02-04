@@ -31,6 +31,10 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ * */
 export interface OnSaveProps {
   newTitle: string;
   newCopyOnSave: boolean;
@@ -55,6 +59,10 @@ interface Props {
   isValid?: boolean;
 }
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ * */
 export interface SaveModalState {
   title: string;
   copyOnSave: boolean;
@@ -66,7 +74,10 @@ export interface SaveModalState {
 
 const generateId = htmlIdGenerator();
 
-/** @deprecated */
+/**
+ * @deprecated
+ * @removeBy 8.0
+ * */
 export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   public readonly state = {

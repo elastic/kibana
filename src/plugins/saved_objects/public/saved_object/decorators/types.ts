@@ -8,6 +8,10 @@
 
 import { SavedObject, SavedObjectKibanaServices, SavedObjectConfig } from '../../types';
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface SavedObjectDecorator<T extends SavedObject = SavedObject> {
   /**
    * Id of the decorator
@@ -28,6 +32,10 @@ export interface SavedObjectDecorator<T extends SavedObject = SavedObject> {
   decorateObject: (object: T) => void;
 }
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export type SavedObjectDecoratorFactory<T extends SavedObject = SavedObject> = (
   services: SavedObjectKibanaServices
 ) => SavedObjectDecorator<T>;

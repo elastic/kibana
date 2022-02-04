@@ -10,6 +10,10 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectDecoratorFactory } from './types';
 import { SavedObjectKibanaServices, SavedObject } from '../../types';
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface SavedObjectDecoratorConfig<T extends SavedObject = SavedObject> {
   /**
    * The id of the decorator
@@ -28,6 +32,10 @@ export interface SavedObjectDecoratorConfig<T extends SavedObject = SavedObject>
 
 export type ISavedObjectDecoratorRegistry = PublicMethodsOf<SavedObjectDecoratorRegistry>;
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export class SavedObjectDecoratorRegistry {
   private readonly registry = new Map<string, SavedObjectDecoratorConfig<any>>();
 

@@ -17,6 +17,9 @@ import { I18nStart } from '../../../../core/public';
  * Contains an `id` if persisting was successful. If `id` and
  * `error` are undefined, persisting was not successful, but the
  * modal can still recover (e.g. the name of the saved object was already taken).
+ *
+ * @deprecated
+ * @removeBy 8.0
  */
 export type SaveResult = { id?: string } | { error: Error };
 
@@ -29,6 +32,10 @@ interface MinimalSaveModalProps {
   onClose: () => void;
 }
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export function showSaveModal(
   saveModal: React.ReactElement<MinimalSaveModalProps>,
   I18nContext: I18nStart['Context'],

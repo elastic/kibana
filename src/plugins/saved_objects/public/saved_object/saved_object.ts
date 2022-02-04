@@ -20,6 +20,10 @@ import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../ty
 import { ISavedObjectDecoratorRegistry } from './decorators';
 import { buildSavedObject } from './helpers/build_saved_object';
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export function createSavedObjectClass(
   services: SavedObjectKibanaServices,
   decoratorRegistry: ISavedObjectDecoratorRegistry

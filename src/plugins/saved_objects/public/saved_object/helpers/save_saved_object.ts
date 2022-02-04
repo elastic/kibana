@@ -17,6 +17,8 @@ import { createSource } from './create_source';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
 
 /**
+ * @deprecated
+ * @removeBy 8.0
  * @param error {Error} the error
  * @return {boolean}
  */

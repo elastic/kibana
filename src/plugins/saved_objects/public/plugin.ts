@@ -19,18 +19,42 @@ import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface SavedObjectSetup {
+  /**
+   * @deprecated
+   * @removeBy 8.0
+   */
   registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;
 }
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface SavedObjectsStart {
-  /** @deprecated */
+  /**
+   * @deprecated
+   * @removeBy 8.0
+   */
   SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
-  /** @deprecated */
+  /**
+   * @deprecated
+   * @removeBy 8.0
+   */
   settings: {
-    /** @deprecated */
+    /**
+     * @deprecated
+     * @removeBy 8.0
+     */
     getPerPage: () => number;
-    /** @deprecated */
+    /**
+     * @deprecated
+     * @removeBy 8.0
+     */
     getListingLimit: () => number;
   };
 }
@@ -52,6 +76,10 @@ export class SavedObjectsPublicPlugin
   }
   public start(core: CoreStart, { data, dataViews }: SavedObjectsStartDeps) {
     return {
+      /**
+       * @deprecated
+       * @removeBy 8.0
+       */
       SavedObjectClass: createSavedObjectClass(
         {
           dataViews,

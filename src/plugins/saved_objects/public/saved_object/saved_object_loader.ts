@@ -15,6 +15,10 @@ import {
 import { SavedObject } from '../types';
 import { StringUtils } from './helpers/string_utils';
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface SavedObjectLoaderFindOptions {
   size?: number;
   fields?: string[];
@@ -23,6 +27,8 @@ export interface SavedObjectLoaderFindOptions {
 
 /**
  * @deprecated
+ * @removeBy 8.0
+ *
  * The SavedObjectLoader class provides some convenience functions
  * to load and save one kind of saved objects (specified in the constructor).
  *

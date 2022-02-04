@@ -40,6 +40,10 @@ import {
 
 import { LISTING_LIMIT_SETTING } from '../../common';
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
   name: string;
@@ -96,11 +100,19 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
 
 export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export type SavedObjectFinderUiProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
 } & SavedObjectFinderProps;
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 class SavedObjectFinderUi extends React.Component<
   SavedObjectFinderUiProps,
   SavedObjectFinderState
@@ -525,6 +537,10 @@ class SavedObjectFinderUi extends React.Component<
   }
 }
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 const getSavedObjectFinder = (savedObject: SavedObjectsStart, uiSettings: IUiSettingsClient) => {
   return (props: SavedObjectFinderProps) => (
     <SavedObjectFinderUi {...props} savedObjects={savedObject} uiSettings={uiSettings} />
