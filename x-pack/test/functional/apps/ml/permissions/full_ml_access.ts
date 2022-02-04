@@ -82,11 +82,16 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should load the ML overview page');
             await ml.navigation.navigateToOverview();
 
-            await ml.testExecution.logTestStep('should display enabled AD create job button');
+            await ml.testExecution.logTestStep('should display a welcome callout');
+
+            await ml.testExecution.logTestStep('should display ML Nodes panel');
+            await ml.mlNodesPanel.assertNodeOverviewPanel();
+
+            await ml.testExecution.logTestStep('should display Anomaly Detection empty state');
             await ml.overviewPage.assertADCreateJobButtonExists();
             await ml.overviewPage.assertADCreateJobButtonEnabled(true);
 
-            await ml.testExecution.logTestStep('should display enabled DFA create job button');
+            await ml.testExecution.logTestStep('should display DFA empty state');
             await ml.overviewPage.assertDFACreateJobButtonExists();
             await ml.overviewPage.assertDFACreateJobButtonEnabled(true);
           });
