@@ -168,6 +168,29 @@ describe('HeatmapComponent', function () {
     });
   });
 
+  it('computes the bands correctly if only value accessor is provided', async () => {
+    const newData: Datatable = {
+      type: 'datatable',
+      rows: [{ 'col-0-1': 571.806 }],
+      columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    };
+    const newProps = {
+      ...wrapperProps,
+      data: newData,
+      args: { ...wrapperProps.args, lastRangeIsRightOpen: false },
+    } as unknown as HeatmapRenderProps;
+    const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    await act(async () => {
+      expect(component.find(Heatmap).prop('colorScale')).toEqual({
+        bands: [
+          { color: 'rgb(0, 0, 0)', end: 0, start: 0 },
+          { color: 'rgb(112, 38, 231)', end: Infinity, start: 571.806 },
+        ],
+        type: 'bands',
+      });
+    });
+  });
+
   it('renders the axis titles', () => {
     const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
     expect(component.find(Heatmap).prop('xAxisTitle')).toEqual('Dest');
