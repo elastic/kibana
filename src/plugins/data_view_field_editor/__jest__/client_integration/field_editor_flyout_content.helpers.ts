@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import { Context } from '../../public/components/field_editor_context';
 import {
