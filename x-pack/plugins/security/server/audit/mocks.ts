@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import type { AuditService } from './audit_service';
+import type { AuditLogger, AuditService } from './audit_service';
+
+export const auditLoggerMock = {
+  create() {
+    return {
+      log: jest.fn(),
+      enabled: true,
+    } as jest.Mocked<AuditLogger>;
+  },
+};
 
 export const auditServiceMock = {
   create() {
     return {
       getLogger: jest.fn(),
-      asScoped: jest.fn().mockReturnValue({
-        log: jest.fn(),
-        enabled: true,
-      }),
-      withoutRequest: {
-        log: jest.fn(),
-        enabled: true,
-      },
+      asScoped: jest.fn().mockReturnValue(auditLoggerMock.create()),
+      withoutRequest: auditLoggerMock.create(),
     } as jest.Mocked<ReturnType<AuditService['setup']>>;
   },
 };

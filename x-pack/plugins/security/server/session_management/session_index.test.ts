@@ -18,7 +18,7 @@ import type { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import type { AuditLogger } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditLoggerMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
 import { getSessionIndexTemplate, SessionIndex } from './session_index';
@@ -32,7 +32,7 @@ describe('Session index', () => {
   const indexTemplateName = '.kibana_some_tenant_security_session_index_template_1';
   beforeEach(() => {
     mockElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
-    auditLogger = auditServiceMock.create().withoutRequest;
+    auditLogger = auditLoggerMock.create();
     sessionIndex = new SessionIndex({
       logger: loggingSystemMock.createLogger(),
       kibanaIndexName: '.kibana_some_tenant',
@@ -364,7 +364,7 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
-        auditLogger: auditServiceMock.create().withoutRequest,
+        auditLogger,
       });
 
       await sessionIndex.cleanUp();
@@ -456,7 +456,7 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
-        auditLogger: auditServiceMock.create().withoutRequest,
+        auditLogger,
       });
 
       await sessionIndex.cleanUp();
@@ -542,7 +542,7 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
-        auditLogger: auditServiceMock.create().withoutRequest,
+        auditLogger,
       });
 
       await sessionIndex.cleanUp();
@@ -653,7 +653,7 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
-        auditLogger: auditServiceMock.create().withoutRequest,
+        auditLogger,
       });
 
       await sessionIndex.cleanUp();
