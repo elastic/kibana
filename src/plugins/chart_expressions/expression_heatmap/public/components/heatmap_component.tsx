@@ -289,14 +289,14 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       let end = index === array.length - 1 ? Number.POSITIVE_INFINITY : array[index + 1];
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
-        const lastBand = max === min ?  Number.POSITIVE_INFINITY : endValue;
+        const lastBand = max === min ? Number.POSITIVE_INFINITY : endValue;
         end = index === array.length - 1 ? lastBand : array[index + 1];
       }
 
       let overwriteArrayIdx;
 
       if (end === Number.POSITIVE_INFINITY) {
-        overwriteArrayIdx = `≥ ${start}`;
+        overwriteArrayIdx = `≥ ${metricFormatter.convert(start)}`;
       } else {
         overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(end)}`;
       }
