@@ -8,7 +8,6 @@
 
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type { Filter } from '@kbn/es-query';
 import { filter, map } from 'rxjs/operators';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
@@ -165,9 +164,6 @@ export class DashboardPlugin
   private dashboardUrlGenerator?: DashboardUrlGenerator;
   private locator?: DashboardAppLocator;
 
-  // using the es-query isFilterPinned method here directly would cause the entire 30kb of @kbn-esquery to be placed in the initial bundle.
-  private esQueryFilterPinned: ((filter: Filter) => boolean | undefined) | undefined = undefined;
-
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     {
@@ -258,13 +254,10 @@ export class DashboardPlugin
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
             map(async ({ state }) => {
-              if (!this.esQueryFilterPinned) {
-                const { isFilterPinned } = await import('@kbn/es-query');
-                this.esQueryFilterPinned = isFilterPinned;
-              }
+              const { isFilterPinned } = await import('@kbn/es-query');
               return {
                 ...state,
-                filters: state.filters?.filter(this.esQueryFilterPinned),
+                filters: state.filters?.filter(isFilterPinned),
               };
             })
           ),

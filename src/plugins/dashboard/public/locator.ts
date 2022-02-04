@@ -119,8 +119,6 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
 
   constructor(protected readonly deps: DashboardAppLocatorDependencies) {}
 
-  private esQueryFilterPinned: ((filter: Filter) => boolean | undefined) | undefined = undefined;
-
   public readonly getLocation = async (params: DashboardAppLocatorParams) => {
     const {
       filters,
@@ -154,17 +152,14 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...params.filters,
     ];
 
-    if (!this.esQueryFilterPinned) {
-      const { isFilterPinned } = await import('@kbn/es-query');
-      this.esQueryFilterPinned = isFilterPinned;
-    }
+    const { isFilterPinned } = await import('@kbn/es-query');
 
     let path = `#/${hash}`;
     path = setStateToKbnUrl<QueryState>(
       '_g',
       cleanEmptyKeys({
         time: params.timeRange,
-        filters: filters?.filter((f) => this.esQueryFilterPinned?.(f)),
+        filters: filters?.filter((f) => isFilterPinned(f)),
         refreshInterval: params.refreshInterval,
       }),
       { useHash },
