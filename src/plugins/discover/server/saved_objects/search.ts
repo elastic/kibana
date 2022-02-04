@@ -45,6 +45,7 @@ export const searchSavedObjectType: SavedObjectsType = {
       title: { type: 'text' },
       grid: { type: 'object', enabled: false },
       version: { type: 'integer' },
+      rowHeight: { type: 'text' },
     },
   },
   migrations: searchMigrations,
