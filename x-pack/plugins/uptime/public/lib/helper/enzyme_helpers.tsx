@@ -10,7 +10,7 @@ import { Router } from 'react-router-dom';
 import { MemoryHistory } from 'history/createMemoryHistory';
 import { createMemoryHistory, History } from 'history';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
 import { mockState } from '../__mocks__/uptime_store.mock';

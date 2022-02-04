@@ -10,8 +10,8 @@ import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
-import { UxUIFilters } from '../../typings/ui_filters';
 import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
+import { UxUIFilters } from '../../common/ux_ui_filter';
 
 interface Options {
   mockResponse?: (
