@@ -17,7 +17,6 @@ import {
 import { DataPublicPluginStart } from '../../data/public';
 import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
-import { SavedObject } from './types';
 
 export interface SavedObjectSetup {
   registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;
