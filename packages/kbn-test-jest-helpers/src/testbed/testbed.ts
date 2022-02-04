@@ -7,6 +7,7 @@
  */
 
 import { Component as ReactComponent } from 'react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { ComponentType, HTMLAttributes, ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '../find_test_subject';
@@ -41,7 +42,7 @@ const defaultConfig: TestBedConfig = {
  *
  * @example
   ```typescript
-  import { registerTestBed } from '@kbn/test/jest';
+  import { registerTestBed } from '@kbn/test-jest-helpers';
   import { RemoteClusterList } from '../../app/sections/remote_cluster_list';
   import { remoteClustersStore } from '../../app/store';
 

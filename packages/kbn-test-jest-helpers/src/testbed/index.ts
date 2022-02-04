@@ -14,4 +14,5 @@ export type {
   SetupFunc,
   SyncSetupFunc,
   AsyncSetupFunc,
+  EuiTableMetaData,
 } from './types';
