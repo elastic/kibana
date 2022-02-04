@@ -131,7 +131,9 @@ export class GraphPageObject extends FtrService {
       const elements = document.querySelectorAll('#graphSvg text.gphNode__label');
       return [...elements].map(element => element.innerHTML);
     `);
-    const graphElements = await this.find.allByCssSelector('#graphSvg line, #graphSvg circle');
+    const graphElements = await this.find.allByCssSelector(
+      '#graphSvg line:not(.gphEdge--clickable), #graphSvg circle'
+    );
     const nodes: Node[] = [];
     const nodePositionMap: Record<string, number> = {};
     const edges: Edge[] = [];
@@ -153,19 +155,16 @@ export class GraphPageObject extends FtrService {
       if (tagName === 'line') {
         const [sourcePosition, targetPosition] = await this.getLinePositions(element);
         const lineStyle = await element.getAttribute('style');
-        // Skip transparent lines
-        if (!/opacity/.test(lineStyle)) {
-          // grep out the width of the connection from the style attribute
-          const strokeWidth = Number(/stroke-width: ?(\d+(\.\d+)?)/.exec(lineStyle)![1]);
-          edges.push({
-            element,
-            width: strokeWidth,
-            // look up source and target node by matching start and end coordinates
-            // of the edges and the nodes
-            sourceNode: nodes[nodePositionMap[sourcePosition]],
-            targetNode: nodes[nodePositionMap[targetPosition]],
-          });
-        }
+        // grep out the width of the connection from the style attribute
+        const strokeWidth = Number(/stroke-width: ?(\d+(\.\d+)?)/.exec(lineStyle)![1]);
+        edges.push({
+          element,
+          width: strokeWidth,
+          // look up source and target node by matching start and end coordinates
+          // of the edges and the nodes
+          sourceNode: nodes[nodePositionMap[sourcePosition]],
+          targetNode: nodes[nodePositionMap[targetPosition]],
+        });
       }
     }
 
