@@ -28,7 +28,7 @@ export function registerPipelineLoadRoute(router: LogstashPluginRouter) {
         const { id } = request.params;
         const { client } = context.core.elasticsearch;
 
-        const { body: result } = await client.asCurrentUser.logstash.getPipeline(
+        const result = await client.asCurrentUser.logstash.getPipeline(
           { id },
           { ignore: [404] }
         );
