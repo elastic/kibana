@@ -10,3 +10,4 @@ export * from './ci_stats_reporter';
 export type { Config } from './ci_stats_config';
 export * from './ship_ci_stats_cli';
 export { getTimeReporter } from './report_time';
+export * from './ci_stats_test_group_types';
