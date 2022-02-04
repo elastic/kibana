@@ -275,32 +275,43 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     // adds a very small number to the max value to make sure the max value will be included
     const smattering = 0.00001;
-    let endValue = max + smattering;
+    let endValueDistinctBounds = max + smattering;
     if (paletteParams?.rangeMax || paletteParams?.rangeMax === 0) {
-      endValue =
+      endValueDistinctBounds =
         (paletteParams?.range === 'number'
           ? paletteParams.rangeMax
           : min + ((max - min) * paletteParams.rangeMax) / 100) + smattering;
     }
 
     const overwriteColors = uiState?.get('vis.colors') ?? null;
-
+    const hasSingleValue = max === min;
     const bands = ranges.map((start, index, array) => {
+      const isPenultimate = index === array.length - 1;
+      const nextValue = array[index + 1];
       // by default the last range is right-open
-      let end = index === array.length - 1 ? Infinity : array[index + 1];
+      let endValue = isPenultimate ? Number.POSITIVE_INFINITY : nextValue;
+      const startValue = isPenultimate && hasSingleValue ? min : start;
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
-        const lastBand = max === start ? Infinity : endValue;
-        end = index === array.length - 1 ? lastBand : array[index + 1];
+        const lastBand = hasSingleValue ? Number.POSITIVE_INFINITY : endValueDistinctBounds;
+        endValue = isPenultimate ? lastBand : nextValue;
       }
-      const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
-        end
-      )}`;
+
+      let overwriteArrayIdx;
+
+      if (endValue === Number.POSITIVE_INFINITY) {
+        overwriteArrayIdx = `≥ ${metricFormatter.convert(startValue)}`;
+      } else {
+        overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
+          endValue
+        )}`;
+      }
+
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
       return {
         // with the default continuity:above the every range is left-closed
-        start,
-        end,
+        start: startValue,
+        end: endValue,
         // the current colors array contains a duplicated color at the beginning that we need to skip
         color: overwriteColor ?? colors[index + 1],
       };
