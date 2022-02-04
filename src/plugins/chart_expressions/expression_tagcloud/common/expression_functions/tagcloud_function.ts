@@ -41,7 +41,7 @@ const strings = {
     bucket: i18n.translate('expressionTagcloud.functions.tagcloud.args.bucketHelpText', {
       defaultMessage: 'bucket dimension configuration',
     }),
-    ariaLabel: i18n.translate('expressionGauge.functions.tagcloud.args.ariaLabelHelpText', {
+    ariaLabel: i18n.translate('expressionTagcloud.functions.tagcloud.args.ariaLabelHelpText', {
       defaultMessage: 'Specifies the aria label of the tagcloud',
     }),
   },

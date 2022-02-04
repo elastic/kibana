@@ -143,7 +143,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     },
     ariaLabel: {
       types: ['string'],
-      help: i18n.translate('expressionGauge.functions.args.ariaLabelHelpText', {
+      help: i18n.translate('expressionHeatmap.functions.args.ariaLabelHelpText', {
         defaultMessage: 'Specifies the aria label of the heat map',
       }),
       required: false,

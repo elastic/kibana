@@ -125,7 +125,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     },
     ariaLabel: {
       types: ['string'],
-      help: i18n.translate('expressionGauge.functions.args.ariaLabelHelpText', {
+      help: i18n.translate('expressionPie.pieVis.functions.args.ariaLabelHelpText', {
         defaultMessage: 'Specifies the aria label of the pie chart',
       }),
       required: false,
