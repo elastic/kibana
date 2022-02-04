@@ -13,10 +13,14 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  TemplateMap,
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
-import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants';
+import {
+  FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+  MAPPINGS_TEMPLATE_SUFFIX,
+} from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
@@ -35,6 +39,7 @@ export interface CurrentDataStream {
   dataStreamName: string;
   replicated: boolean;
   indexTemplate: IndexTemplate;
+  composedOfTemplates: TemplateMap;
 }
 const DEFAULT_SCALING_FACTOR = 1000;
 const DEFAULT_IGNORE_ABOVE = 1024;
@@ -444,7 +449,7 @@ const getDataStreams = async (
   esClient: ElasticsearchClient,
   template: IndexTemplateEntry
 ): Promise<CurrentDataStream[] | undefined> => {
-  const { indexTemplate } = template;
+  const { indexTemplate, composedOfTemplates } = template;
 
   const body = await esClient.indices.getDataStream({
     name: indexTemplate.index_patterns.join(','),
@@ -456,6 +461,7 @@ const getDataStreams = async (
     dataStreamName: dataStream.name,
     replicated: dataStream.replicated,
     indexTemplate,
+    composedOfTemplates,
   }));
 };
 
@@ -464,11 +470,9 @@ const updateAllDataStreams = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
-  const updatedataStreamPromises = indexNameWithTemplates.map(
-    ({ dataStreamName, indexTemplate }) => {
-      return updateExistingDataStream({ dataStreamName, esClient, logger, indexTemplate });
-    }
-  );
+  const updatedataStreamPromises = indexNameWithTemplates.map((templateEntry) => {
+    return updateExistingDataStream({ esClient, logger, ...templateEntry });
+  });
   await Promise.all(updatedataStreamPromises);
 };
 const updateExistingDataStream = async ({
@@ -476,21 +480,35 @@ const updateExistingDataStream = async ({
   esClient,
   logger,
   indexTemplate,
+  composedOfTemplates,
 }: {
   dataStreamName: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   indexTemplate: IndexTemplate;
+  composedOfTemplates: TemplateMap;
 }) => {
-  const { settings, mappings } = indexTemplate.template;
+  const { settings } = indexTemplate.template;
 
-  // for now, remove from object so as not to update stream or data stream properties of the index until type and name
-  // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
-  // to skip updating and assume the value in the index mapping is correct
-  delete mappings.properties.stream;
-  delete mappings.properties.data_stream;
   // try to update the mappings first
   try {
+    const mappingComponentTemplateName =
+      Object.keys(composedOfTemplates).find((templateName) =>
+        templateName.endsWith(MAPPINGS_TEMPLATE_SUFFIX)
+      ) || '';
+    const mappingComponentTemplate = composedOfTemplates[mappingComponentTemplateName];
+    // @ts-expect-error 2339
+    const mappings = mappingComponentTemplate?.template?.mappings;
+
+    if (!mappingComponentTemplate || !mappings?.properties) {
+      throw new Error('mapping not found');
+    }
+
+    // for now, remove from object so as not to update stream or data stream properties of the index until type and name
+    // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
+    // to skip updating and assume the value in the index mapping is correct
+    delete mappings.properties.stream;
+    delete mappings.properties.data_stream;
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({

@@ -837,6 +837,12 @@ describe('EPM template', () => {
       await updateCurrentWriteIndices(esClient, logger, [
         {
           templateName: 'test',
+          composedOfTemplates: {
+            'test@mappings': {
+              _meta: {} as any,
+              template: { mappings: { properties: { hello: { type: 'text' } } } },
+            },
+          },
           indexTemplate: {
             index_patterns: ['test.*-*'],
             template: {
@@ -865,6 +871,12 @@ describe('EPM template', () => {
       await updateCurrentWriteIndices(esClient, logger, [
         {
           templateName: 'test',
+          composedOfTemplates: {
+            'test@mappings': {
+              _meta: {} as any,
+              template: { mappings: { properties: { hello: { type: 'text' } } } },
+            },
+          },
           indexTemplate: {
             index_patterns: ['test-*'],
             template: {

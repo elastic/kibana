@@ -18,6 +18,8 @@ import type {
   IndexTemplate,
   PackageInfo,
   IndexTemplateMappings,
+  TemplateMapEntry,
+  TemplateMap,
 } from '../../../../types';
 
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
@@ -28,9 +30,11 @@ import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../pack
 import {
   FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
   FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
+  MAPPINGS_TEMPLATE_SUFFIX,
+  SETTINGS_TEMPLATE_SUFFIX,
+  USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../../constants';
 
-import type { ESAssetMetadata } from '../meta';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
@@ -204,19 +208,6 @@ export async function installTemplateForDataStream({
   });
 }
 
-interface TemplateMapEntry {
-  _meta: ESAssetMetadata;
-  template:
-    | {
-        mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
-      }
-    | {
-        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
-      };
-}
-
-type TemplateMap = Record<string, TemplateMapEntry>;
-
 function putComponentTemplate(
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -225,7 +216,10 @@ function putComponentTemplate(
     name: string;
     create?: boolean;
   }
-): { clusterPromise: Promise<any>; name: string } {
+): {
+  clusterPromise: ReturnType<typeof esClient.cluster.putComponentTemplate>;
+  name: string;
+} {
   const { name, body, create = false } = params;
   return {
     clusterPromise: retryTransientEsErrors(
@@ -236,14 +230,11 @@ function putComponentTemplate(
   };
 }
 
-const mappingsSuffix = '@mappings';
-const settingsSuffix = '@settings';
-const userSettingsSuffix = '@custom';
 type TemplateBaseName = string;
-type UserSettingsTemplateName = `${TemplateBaseName}${typeof userSettingsSuffix}`;
+type UserSettingsTemplateName = `${TemplateBaseName}${typeof USER_SETTINGS_TEMPLATE_SUFFIX}`;
 
 const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
-  name.endsWith(userSettingsSuffix);
+  name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX);
 
 function buildComponentTemplates(params: {
   mappings: IndexTemplateMappings;
@@ -253,9 +244,9 @@ function buildComponentTemplates(params: {
   defaultSettings: IndexTemplate['template']['settings'];
 }) {
   const { templateName, registryElasticsearch, packageName, defaultSettings, mappings } = params;
-  const mappingsTemplateName = `${templateName}${mappingsSuffix}`;
-  const settingsTemplateName = `${templateName}${settingsSuffix}`;
-  const userSettingsTemplateName = `${templateName}${userSettingsSuffix}`;
+  const mappingsTemplateName = `${templateName}${MAPPINGS_TEMPLATE_SUFFIX}`;
+  const settingsTemplateName = `${templateName}${SETTINGS_TEMPLATE_SUFFIX}`;
+  const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
 
   const templatesMap: TemplateMap = {};
   const _meta = getESAssetMetadata({ packageName });
@@ -326,15 +317,14 @@ async function installDataStreamComponentTemplates(params: {
     logger,
     mappings,
   } = params;
-  const templates = buildComponentTemplates({
+  const componentTemplates = buildComponentTemplates({
     mappings,
     templateName,
     registryElasticsearch,
     packageName,
     defaultSettings,
   });
-  const templateNames = Object.keys(templates);
-  const templateEntries = Object.entries(templates);
+  const templateEntries = Object.entries(componentTemplates);
   // TODO: Check return values for errors
   await Promise.all(
     templateEntries.map(async ([name, body]) => {
@@ -360,7 +350,7 @@ async function installDataStreamComponentTemplates(params: {
     })
   );
 
-  return templateNames;
+  return { componentTemplateNames: Object.keys(componentTemplates), componentTemplates };
 }
 
 export async function ensureDefaultComponentTemplate(
@@ -467,7 +457,7 @@ export async function installTemplate({
     ilmPolicy: dataStream.ilm_policy,
   });
 
-  const composedOfTemplates = await installDataStreamComponentTemplates({
+  const { componentTemplateNames, componentTemplates } = await installDataStreamComponentTemplates({
     mappings,
     templateName,
     registryElasticsearch: dataStream.elasticsearch,
@@ -481,7 +471,7 @@ export async function installTemplate({
     templateIndexPattern,
     pipelineName,
     packageName,
-    composedOfTemplates,
+    composedOfTemplates: componentTemplateNames,
     templatePriority,
     hidden: dataStream.hidden,
   });
@@ -500,6 +490,7 @@ export async function installTemplate({
   return {
     templateName,
     indexTemplate: template,
+    composedOfTemplates: componentTemplates,
   };
 }
 
