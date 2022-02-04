@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 
 jest.mock('../../kibana_react/public', () => {
   const original = jest.requireActual('../../kibana_react/public');
