@@ -283,15 +283,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     }
 
     const overwriteColors = uiState?.get('vis.colors') ?? null;
-
+    const hasSingleValue = max === min;
     const bands = ranges.map((start, index, array) => {
+      const isPenultimate = index === array.length - 1;
+      const nextValue = array[index + 1];
       // by default the last range is right-open
-      let endValue = index === array.length - 1 ? Number.POSITIVE_INFINITY : array[index + 1];
-      const startValue = index === array.length - 1 && max === min ? min : start;
+      let endValue = isPenultimate ? Number.POSITIVE_INFINITY : nextValue;
+      const startValue = isPenultimate && hasSingleValue ? min : start;
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
-        const lastBand = max === min ? Number.POSITIVE_INFINITY : endValueDistinctBounds;
-        endValue = index === array.length - 1 ? lastBand : array[index + 1];
+        const lastBand = hasSingleValue ? Number.POSITIVE_INFINITY : endValueDistinctBounds;
+        endValue = isPenultimate ? lastBand : nextValue;
       }
 
       let overwriteArrayIdx;
