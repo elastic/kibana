@@ -666,6 +666,7 @@ export const AlertsList: React.FunctionComponent = () => {
           );
         },
       },
+      getPercentileColumn(),
       {
         field: 'monitoring.execution.calculated_metrics.success_ratio',
         width: '12%',
@@ -696,7 +697,6 @@ export const AlertsList: React.FunctionComponent = () => {
           );
         },
       },
-      getPercentileColumn(),
       {
         field: 'executionStatus.status',
         name: i18n.translate(
