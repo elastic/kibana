@@ -127,8 +127,8 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
   fn(input, args, handlers) {
     const convertedData = tableVisResponseHandler(input, args);
     const inspectorData = {
-      rows: convertedData?.table?.rows,
-      columns: convertedData?.table?.columns,
+      rows: convertedData?.table?.rows ?? input.rows,
+      columns: convertedData?.table?.columns ?? input.columns,
       type: 'datatable',
     } as Datatable;
 
