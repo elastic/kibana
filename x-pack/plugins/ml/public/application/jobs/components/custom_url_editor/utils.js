@@ -151,7 +151,9 @@ function buildDashboardUrlFromSettings(settings) {
         }
 
         const dashboardLocator = getDashboardLocator();
-        if (!dashboardLocator) return reject();
+        if (!dashboardLocator) {
+          throw new Error('Dashboard locator missing');
+        }
         return dashboardLocator
           .getUrl({
             dashboardId,
