@@ -76,10 +76,10 @@ export default function ({ getService }: FtrProviderContext) {
         if (testData.expected.jobType === 'anomaly-detector') {
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
           for (const id of testData.expected.jobIds) {
-            await ml.jobTable.filterWithSearchString(id, 1, 'stackMgmtJobList');
+            await ml.jobTable.filterWithSearchString(id, 1);
           }
           for (const id of testData.expected.skippedJobIds) {
-            await ml.jobTable.filterWithSearchString(id, 0, 'stackMgmtJobList');
+            await ml.jobTable.filterWithSearchString(id, 0);
           }
         } else {
           await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
