@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { mapValues } from 'lodash';
 import React, {
   createContext,
   useCallback,
@@ -14,13 +13,6 @@ import React, {
   useState,
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import {
-  UxLocalUIFilterName,
-  uxLocalUIFilterNames,
-} from '../../../common/ux_ui_filter';
-import { pickKeys } from '../../../common/utils/pick_keys';
-import { UxUIFilters } from '../../../typings/ui_filters';
-import { useDeepObjectIdentity } from '../../hooks/use_deep_object_identity';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
 import { UrlParams } from './types';
@@ -30,24 +22,11 @@ export interface TimeRange {
   rangeTo: string;
 }
 
-function useUxUiFilters(params: UrlParams): UxUIFilters {
-  const localUiFilters = mapValues(
-    pickKeys(params, ...uxLocalUIFilterNames),
-    (val) => (val ? val.split(',') : [])
-  ) as Partial<Record<UxLocalUIFilterName, string[]>>;
-
-  return useDeepObjectIdentity({
-    environment: params.environment,
-    ...localUiFilters,
-  });
-}
-
 const defaultRefresh = (_time: TimeRange) => {};
 
 const UrlParamsContext = createContext({
   rangeId: 0,
   refreshTimeRange: defaultRefresh,
-  uxUiFilters: {} as UxUIFilters,
   urlParams: {} as UrlParams,
 });
 
@@ -85,16 +64,13 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
       setRangeId((prevRangeId) => prevRangeId + 1);
     }, []);
 
-    const uxUiFilters = useUxUiFilters(urlParams);
-
     const contextValue = useMemo(() => {
       return {
         rangeId,
         refreshTimeRange,
         urlParams,
-        uxUiFilters,
       };
-    }, [rangeId, refreshTimeRange, uxUiFilters, urlParams]);
+    }, [rangeId, refreshTimeRange, urlParams]);
 
     return (
       <UrlParamsContext.Provider children={children} value={contextValue} />
@@ -102,4 +78,4 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
   }
 );
 
-export { UrlParamsContext, UrlParamsProvider, useUxUiFilters };
+export { UrlParamsContext, UrlParamsProvider };
