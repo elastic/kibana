@@ -239,7 +239,7 @@ export const usePivotData = (
     const sortingColumnsWithTypes = sortingColumns.map((c) => ({
       ...c,
       // Since items might contain undefined/null values, we want to accurate find the data type
-      type: typeof tableItems.findIndex((item) => getNestedOrEscapedVal(item, c.id) !== undefined),
+      type: typeof tableItems.find((item) => getNestedOrEscapedVal(item, c.id) !== undefined),
     }));
     tableItems.sort(multiColumnSortFactory(sortingColumnsWithTypes));
   }
