@@ -52,5 +52,6 @@ const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
     </h1>
   </EuiTitle>
 );
+TitleComponent.displayName = 'Title';
 
 export const Title = React.memo(TitleComponent);

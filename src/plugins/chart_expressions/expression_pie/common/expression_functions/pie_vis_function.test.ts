@@ -7,7 +7,12 @@
  */
 
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { PieVisConfig, EmptySizeRatios } from '../types/expression_renderers';
+import {
+  PieVisConfig,
+  EmptySizeRatios,
+  LabelPositions,
+  ValueFormats,
+} from '../types/expression_renderers';
 import { pieVisFunction } from './pie_vis_function';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
 
@@ -19,7 +24,7 @@ describe('interpreter/functions#pie', () => {
     columns: [{ id: 'col-0-1', name: 'Count' }],
   } as unknown as Datatable;
 
-  const visConfig = {
+  const visConfig: PieVisConfig = {
     addTooltip: true,
     addLegend: true,
     legendPosition: 'right',
@@ -27,26 +32,31 @@ describe('interpreter/functions#pie', () => {
     emptySizeRatio: EmptySizeRatios.SMALL,
     nestedLegend: true,
     truncateLegend: true,
-    maxLegendLines: true,
+    maxLegendLines: 2,
     distinctColors: false,
-    palette: 'kibana_palette',
+    palette: {
+      type: 'system_palette',
+      name: 'kibana_palette',
+    },
     labels: {
+      type: 'pie_labels_value',
       show: false,
       values: true,
-      position: 'default',
-      valuesFormat: 'percent',
+      position: LabelPositions.DEFAULT,
+      valuesFormat: ValueFormats.PERCENT,
       percentDecimals: 2,
       truncate: 100,
+      last_level: false,
     },
     metric: {
+      type: 'vis_dimension',
       accessor: 0,
       format: {
         id: 'number',
+        params: {},
       },
-      params: {},
-      aggType: 'count',
     },
-  } as unknown as PieVisConfig;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();

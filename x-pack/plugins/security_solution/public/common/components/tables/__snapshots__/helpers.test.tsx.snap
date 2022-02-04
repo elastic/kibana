@@ -1,5 +1,64 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`] = `
+<Fragment>
+  <Popover
+    count={2}
+    idPrefix="idPrefix"
+  >
+    <EuiText
+      size="xs"
+    >
+      <EuiFlexGroup
+        data-test-subj="overflow-items"
+        direction="column"
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          key="idPrefix-idPrefix-attrName-item2-0"
+        >
+          <Memo(OverflowItemComponent)
+            dataProvider={
+              Object {
+                "and": Array [],
+                "enabled": true,
+                "excluded": false,
+                "id": "idPrefix-attrName-item2-0",
+                "kqlQuery": "",
+                "name": "item2",
+                "queryMatch": Object {
+                  "displayValue": "item2",
+                  "field": "attrName",
+                  "operator": ":",
+                  "value": "item2",
+                },
+              }
+            }
+            field="attrName"
+            rowItem="item2"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <p
+        data-test-subj="popover-additional-overflow"
+      >
+        <EuiTextColor
+          color="subdued"
+        >
+          1
+           
+          <FormattedMessage
+            defaultMessage="more not shown"
+            id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
+            values={Object {}}
+          />
+        </EuiTextColor>
+      </p>
+    </EuiText>
+  </Popover>
+</Fragment>
+`;
+
 exports[`Table Helpers #getRowItemDraggable it returns correctly against snapshot 1`] = `
 <DraggableWrapper
   dataProvider={
@@ -88,43 +147,20 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
     render={[Function]}
   />
    
+  <Memo(RowItemOverflowComponent)
+    attrName="attrName"
+    idPrefix="idPrefix"
+    maxOverflowItems={5}
+    overflowIndexStart={5}
+    rowItems={
+      Array [
+        "item1",
+        "item2",
+        "item3",
+      ]
+    }
+  />
 </DragDropContext>
-`;
-
-exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot 1`] = `
-<div>
-  <Popover
-    count={2}
-    idPrefix="attrName"
-  >
-    <EuiText
-      size="xs"
-    >
-      <ul>
-        <li
-          key="attrName-item2"
-        >
-          item2
-        </li>
-      </ul>
-      <p
-        data-test-subj="popover-additional-overflow"
-      >
-        <EuiTextColor
-          color="subdued"
-        >
-          1
-           
-          <FormattedMessage
-            defaultMessage="more not shown"
-            id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
-            values={Object {}}
-          />
-        </EuiTextColor>
-      </p>
-    </EuiText>
-  </Popover>
-</div>
 `;
 
 exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] = `

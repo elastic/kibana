@@ -8,11 +8,14 @@
 
 import { openModal } from './shard_failure_open_modal_button.test.mocks';
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { themeServiceMock } from 'src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import ShardFailureOpenModalButton from './shard_failure_open_modal_button';
 import { shardFailureRequest } from './__mocks__/shard_failure_request';
 import { shardFailureResponse } from './__mocks__/shard_failure_response';
 import { findTestSubject } from '@elastic/eui/lib/test';
+
+const theme = themeServiceMock.createStartContract();
 
 describe('ShardFailureOpenModalButton', () => {
   it('triggers the openModal function when "Show details" button is clicked', () => {
@@ -20,6 +23,7 @@ describe('ShardFailureOpenModalButton', () => {
       <ShardFailureOpenModalButton
         request={shardFailureRequest}
         response={shardFailureResponse}
+        theme={theme}
         title="test"
       />
     );

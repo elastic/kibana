@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -20,10 +20,11 @@ import { FetchStatus } from '../../../types';
 import { Chart } from './point_series';
 import { DiscoverChart } from './discover_chart';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(isTimeBased: boolean = false) {
+function mountComponent(isTimeBased: boolean = false) {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -84,7 +85,7 @@ function getProps(isTimeBased: boolean = false) {
     },
   }) as DataCharts$;
 
-  return {
+  const props = {
     isTimeBased,
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
@@ -92,21 +93,26 @@ function getProps(isTimeBased: boolean = false) {
     savedSearchDataTotalHits$: totalHits$,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-    services,
     state: { columns: [] },
     stateContainer: {} as GetStateReturn,
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     setDiscoverViewMode: jest.fn(),
   };
+
+  return mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverChart {...props} />
+    </KibanaContextProvider>
+  );
 }
 
 describe('Discover chart', () => {
   test('render without timefield', () => {
-    const component = mountWithIntl(<DiscoverChart {...getProps()} />);
+    const component = mountComponent();
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
   test('render with filefield', () => {
-    const component = mountWithIntl(<DiscoverChart {...getProps(true)} />);
+    const component = mountComponent(true);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 });

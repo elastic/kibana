@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -23,17 +23,21 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 
+export type CreateFieldEditorActions = { closeEditor: () => void } | null;
+type CreateFieldEditorActionsRef = MutableRefObject<CreateFieldEditorActions>;
+
 interface CreateFieldButtonProps {
   selectedDataViewId: string;
   onClick: () => void;
   timelineId: TimelineId;
+  editorActionsRef?: CreateFieldEditorActionsRef;
 }
 const StyledButton = styled(EuiButton)`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
 export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
-  ({ selectedDataViewId, onClick: onClickParam, timelineId }) => {
+  ({ selectedDataViewId, onClick: onClickParam, timelineId, editorActionsRef }) => {
     const [dataView, setDataView] = useState<DataView | null>(null);
     const dispatch = useDispatch();
 
@@ -41,6 +45,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
     const {
       dataViewFieldEditor,
       data: { dataViews },
+      application: { capabilities },
     } = useKibana().services;
 
     useEffect(() => {
@@ -51,13 +56,13 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
 
     const onClick = useCallback(() => {
       if (dataView) {
-        dataViewFieldEditor?.openEditor({
+        const closeFieldEditor = dataViewFieldEditor?.openEditor({
           ctx: { dataView },
-          onSave: (field: DataViewField) => {
+          onSave: async (field: DataViewField) => {
             // Fetch the updated list of fields
-            indexFieldsSearch(selectedDataViewId);
+            await indexFieldsSearch(selectedDataViewId);
 
-            // Add the new field to the event table
+            // Add the new field to the event table, after waiting for browserFields to be stored
             dispatch(
               upsertColumn({
                 column: {
@@ -71,6 +76,14 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
             );
           },
         });
+        if (editorActionsRef) {
+          editorActionsRef.current = {
+            closeEditor: () => {
+              editorActionsRef.current = null;
+              closeFieldEditor();
+            },
+          };
+        }
       }
       onClickParam();
     }, [
@@ -81,9 +94,14 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       selectedDataViewId,
       dispatch,
       timelineId,
+      editorActionsRef,
     ]);
 
-    if (!dataViewFieldEditor?.userPermissions.editIndexPattern()) {
+    if (
+      !dataViewFieldEditor?.userPermissions.editIndexPattern() ||
+      // remove below check once resolved: https://github.com/elastic/kibana/issues/122462
+      !capabilities.indexPatterns.save
+    ) {
       return null;
     }
 
@@ -111,7 +129,8 @@ CreateFieldButton.displayName = 'CreateFieldButton';
  */
 export const useCreateFieldButton = (
   sourcererScope: SourcererScopeName,
-  timelineId: TimelineId
+  timelineId: TimelineId,
+  editorActionsRef?: CreateFieldEditorActionsRef
 ) => {
   const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
   const { missingPatterns, selectedDataViewId } = useDeepEqualSelector((state) =>
@@ -128,9 +147,10 @@ export const useCreateFieldButton = (
         selectedDataViewId={selectedDataViewId}
         onClick={onClick}
         timelineId={timelineId}
+        editorActionsRef={editorActionsRef}
       />
     );
 
     return CreateFieldButtonComponent;
-  }, [missingPatterns.length, selectedDataViewId, timelineId]);
+  }, [missingPatterns.length, selectedDataViewId, timelineId, editorActionsRef]);
 };

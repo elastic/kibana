@@ -9,6 +9,7 @@
   "requiredPlugins": [
     "data",
     "embeddable",
+    "controls",
     "inspector",
     "navigation",
     "savedObjects",

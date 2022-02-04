@@ -29,6 +29,8 @@ import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_e
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { TinymathAST } from 'packages/kbn-tinymath';
+import { SavedObjectReference } from 'kibana/server';
+import { cloneDeep } from 'lodash';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -222,7 +224,7 @@ describe('IndexPattern Data Source', () => {
         isBucketed: false,
         label: 'Foo',
         operationType: 'count',
-        sourceField: 'Records',
+        sourceField: '___records___',
       };
       const map = indexPatternDatasource.uniqueLabels({
         layers: {
@@ -351,7 +353,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
               col2: {
@@ -477,7 +479,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-0\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-1\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
+                  "{\\"col-0-0\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-1\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
                 ],
               },
               "function": "lens_rename_columns",
@@ -501,7 +503,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
               col2: {
@@ -547,7 +549,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
                 timeShift: '1d',
               },
@@ -584,7 +586,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
                 timeScale: 'h',
                 filter: {
@@ -714,7 +716,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
                 timeScale: 'h',
               },
@@ -807,7 +809,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
                 timeScale: 'h',
               },
@@ -846,7 +848,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
               bucket1: {
@@ -1023,7 +1025,7 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'count',
                   isBucketed: false,
                   scale: 'ratio',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   customLabel: true,
                 },
                 date: {
@@ -1055,7 +1057,7 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'count',
                   isBucketed: false,
                   scale: 'ratio',
-                  sourceField: 'Records',
+                  sourceField: '___records___',
                   customLabel: true,
                 },
                 math: {
@@ -1447,7 +1449,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should return mismatched time shifts', () => {
-      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI);
+      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI, () => {});
 
       expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
         Array [
@@ -1460,7 +1462,7 @@ describe('IndexPattern Data Source', () => {
     it('should show different types of warning messages', () => {
       framePublicAPI.activeData!.first.columns[0].meta.sourceParams!.hasPrecisionError = true;
 
-      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI);
+      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI, () => {});
 
       expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
         Array [
@@ -1587,7 +1589,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records2',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -1600,7 +1602,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
               bucket1: {
@@ -1643,7 +1645,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -1667,7 +1669,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -1696,7 +1698,7 @@ describe('IndexPattern Data Source', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -1735,6 +1737,79 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+    });
+  });
+
+  describe('#isEqual', () => {
+    const layerId = '8bd66b66-aba3-49fb-9ff2-4bf83f2be08e';
+
+    const persistableState: IndexPatternPersistedState = {
+      layers: {
+        [layerId]: {
+          columns: {
+            'fa649155-d7f5-49d9-af26-508287431244': {
+              label: 'Count of records',
+              dataType: 'number',
+              operationType: 'count',
+              isBucketed: false,
+              scale: 'ratio',
+              sourceField: '___records___',
+            },
+          },
+          columnOrder: ['fa649155-d7f5-49d9-af26-508287431244'],
+          incompleteColumns: {},
+        },
+      },
+    };
+
+    const currentIndexPatternReference = {
+      id: 'some-id',
+      name: 'indexpattern-datasource-current-indexpattern',
+      type: 'index-pattern',
+    };
+
+    const references1: SavedObjectReference[] = [
+      currentIndexPatternReference,
+      {
+        id: 'some-id',
+        name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
+        type: 'index-pattern',
+      },
+    ];
+
+    const references2: SavedObjectReference[] = [
+      currentIndexPatternReference,
+      {
+        id: 'some-DIFFERENT-id',
+        name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
+        type: 'index-pattern',
+      },
+    ];
+
+    it('should be false if datasource states are using different data views', () => {
+      expect(
+        indexPatternDatasource.isEqual(persistableState, references1, persistableState, references2)
+      ).toBe(false);
+    });
+
+    it('should be false if datasource states differ', () => {
+      const differentPersistableState = cloneDeep(persistableState);
+      differentPersistableState.layers[layerId].columnOrder = ['something else'];
+
+      expect(
+        indexPatternDatasource.isEqual(
+          persistableState,
+          references1,
+          differentPersistableState,
+          references1
+        )
+      ).toBe(false);
+    });
+
+    it('should be true if datasource states are identical and they refer to the same data view', () => {
+      expect(
+        indexPatternDatasource.isEqual(persistableState, references1, persistableState, references1)
+      ).toBe(true);
     });
   });
 });

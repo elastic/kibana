@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, DocLinksStart, ThemeServiceStart } from '../../../../core/public';
+import { FieldFormatsStart } from '../../../field_formats/public';
+import { CoreSetup, CoreStart, ThemeServiceStart } from '../../../../core/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { pieLabelsFunction, pieVisFunction } from '../common';
@@ -19,13 +20,14 @@ export interface VisTypePieDependencies {
   palettes: ChartsPluginSetup['palettes'];
   getStartDeps: () => Promise<{
     data: DataPublicPluginStart;
-    docLinks: DocLinksStart;
+    fieldFormats: FieldFormatsStart;
     kibanaTheme: ThemeServiceStart;
   }>;
 }
 
 export interface VisTypePiePluginStartDependencies {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export class ExpressionPiePlugin {
@@ -38,11 +40,9 @@ export class ExpressionPiePlugin {
 
     const getStartDeps = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      return {
-        data: deps.data,
-        docLinks: coreStart.docLinks,
-        kibanaTheme: coreStart.theme,
-      };
+      const { data, fieldFormats } = deps;
+      const { theme: kibanaTheme } = coreStart;
+      return { data, fieldFormats, kibanaTheme };
     };
 
     expressions.registerRenderer(

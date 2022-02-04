@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MetricExpressionParams } from '../types';
-import { getElasticsearchMetricQuery } from './metric_query';
 import moment from 'moment';
+import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   const expressionParams = {
@@ -24,7 +24,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   };
 
   describe('when passed no filterQuery', () => {
-    const searchBody = getElasticsearchMetricQuery(expressionParams, timeframe, groupBy);
+    const searchBody = getElasticsearchMetricQuery(expressionParams, timeframe, 100, groupBy);
     test('includes a range filter', () => {
       expect(
         searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
@@ -47,6 +47,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
+      100,
       groupBy,
       filterQuery
     );

@@ -12,7 +12,7 @@
   "extraPublicDirs": [
     "common"
   ],
-  "requiredPlugins": ["charts", "data", "expressions", "visualizations"],
+  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "fieldFormats"],
   "requiredBundles": ["kibanaReact"],
   "optionalPlugins": []
 }

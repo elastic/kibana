@@ -36,6 +36,7 @@ interface ExceptionsViewerItemsProps {
   showEmpty: boolean;
   showNoResults: boolean;
   isInitLoading: boolean;
+  disableActions: boolean;
   exceptions: ExceptionListItemSchema[];
   loadingItemIds: ExceptionListItemIdentifiers[];
   commentsAccordionId: string;
@@ -52,6 +53,7 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   commentsAccordionId,
   onDeleteException,
   onEditExceptionItem,
+  disableActions,
 }): JSX.Element => (
   <MyExceptionsContainer direction="column" className="eui-yScrollWithShadows">
     {showEmpty || showNoResults || isInitLoading ? (
@@ -93,6 +95,7 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
                   <EuiSpacer size="s" />
                 )}
                 <ExceptionItem
+                  disableActions={disableActions}
                   loadingItemIds={loadingItemIds}
                   commentsAccordionId={commentsAccordionId}
                   exceptionItem={exception}

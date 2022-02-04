@@ -9,7 +9,10 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
-import { IServiceSettings, FileLayer } from '../../../../maps_ems/public';
+import type {
+  IServiceSettings,
+  FileLayer,
+} from '../vega_view/vega_map_view/service_settings/service_settings_types';
 import { Data, UrlObject, EmsQueryRequest } from './types';
 
 /**

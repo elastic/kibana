@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import {
   httpServiceMock,
   notificationServiceMock,
+  themeServiceMock,
   uiSettingsServiceMock,
 } from 'src/core/public/mocks';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
@@ -20,6 +21,8 @@ jest.mock('./constants', () => ({
   getMaxUrlLength: jest.fn(() => 9999999),
 }));
 import * as constants from './constants';
+
+const theme = themeServiceMock.createSetupContract();
 
 describe('ReportingPanelContent', () => {
   const props: Partial<Props> = {
@@ -58,6 +61,7 @@ describe('ReportingPanelContent', () => {
         apiClient={apiClient}
         toasts={toasts}
         uiSettings={uiSettings}
+        theme={theme}
         {...props}
         {...newProps}
       />

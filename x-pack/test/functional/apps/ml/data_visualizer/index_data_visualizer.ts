@@ -168,6 +168,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
+    after(async () => {
+      await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
+    });
+
     describe('with farequote', function () {
       // Run tests on full farequote index.
       it(`${farequoteDataViewTestData.suiteTitle} loads the data visualizer selector page`, async () => {

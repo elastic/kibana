@@ -112,6 +112,18 @@ Object {
             "type": "expression",
           },
         ],
+        "palette": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {},
+                "function": "system_palette",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
       },
       "function": "pie_vis",
       "type": "function",

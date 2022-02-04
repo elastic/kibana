@@ -60,7 +60,7 @@ export class Sparkline extends React.Component {
       return;
     }
 
-    const tooltipHeightInPx = 36;
+    const tooltipHeightInPx = 56;
     const tooltipWidthInPx = 220;
     const caretWidthInPx = 6;
     const marginBetweenPointAndCaretInPx = 10;

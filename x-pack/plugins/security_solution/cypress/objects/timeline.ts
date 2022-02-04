@@ -34,11 +34,21 @@ export const getFilter = (): TimelineFilter => ({
   value: 'exists',
 });
 
+export const sharedTimelineTitleFragment = 'Timeline';
+
 export const getTimeline = (): CompleteTimeline => ({
-  title: 'Security Timeline',
+  title: `Security ${sharedTimelineTitleFragment}`,
   description: 'This is the best timeline',
   query: 'host.name: *',
   notes: 'Yes, the best timeline',
+  filter: getFilter(),
+});
+
+export const getFavoritedTimeline = (): CompleteTimeline => ({
+  title: `Darkest ${sharedTimelineTitleFragment}`,
+  description: 'This is the darkest timeline',
+  query: 'host.name: *',
+  notes: 'Yes, the darkest timeline, you heard me right',
   filter: getFilter(),
 });
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ControlStyle } from '../../presentation_util/public';
+import type { ControlStyle } from '../../controls/public';
 
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
 
