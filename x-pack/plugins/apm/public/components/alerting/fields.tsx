@@ -19,7 +19,7 @@ import { PopoverExpression } from './service_alert_trigger/popover_expression';
 import {
   allOption,
   environmentAllOption,
-} from '../../../common/select_all_option';
+} from '../shared/select_with_combo_box';
 
 export function ServiceField({
   allowAll = true,

@@ -9,7 +9,7 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SuggestionsSelect } from '../../../../../shared/suggestions_select';
-import { allOption } from '../../../../../../../common/select_all_option';
+import { allOption } from '../../../../../shared/select_with_combo_box';
 
 interface Props {
   title: string;

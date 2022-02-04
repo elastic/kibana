@@ -7,9 +7,9 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ENVIRONMENT_ALL } from './environment_filter_values';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
-const allOptionText = i18n.translate('xpack.apm.alerting.fields.allOption', {
+const allOptionText = i18n.translate('xpack.apm.allOption', {
   defaultMessage: 'All',
 });
 
