@@ -98,8 +98,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
 
   const formatters = useMemo(
-    () => generateFormatters(visParams, visData, services.fieldFormats.deserialize),
-    [services.fieldFormats.deserialize, visData, visParams]
+    () => generateFormatters(visData, services.fieldFormats.deserialize),
+    [services.fieldFormats.deserialize, visData]
   );
 
   const showLegendDefault = useCallback(() => {
