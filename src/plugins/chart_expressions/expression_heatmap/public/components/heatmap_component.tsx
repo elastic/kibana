@@ -296,7 +296,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       let overwriteArrayIdx;
 
       if (end === Number.POSITIVE_INFINITY) {
-        overwriteArrayIdx = `≥ ${metricFormatter.convert(start)}`;
+        const startValue = index === array.length - 1 && max === min ? min : start;
+        overwriteArrayIdx = `≥ ${metricFormatter.convert(startValue)}`;
       } else {
         overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(end)}`;
       }
