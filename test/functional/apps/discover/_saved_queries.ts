@@ -42,6 +42,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/date_nested.json'
+      );
       await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
       await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
 
