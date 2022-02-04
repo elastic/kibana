@@ -15,7 +15,7 @@ import { groups } from '../../__mocks__/groups.mock';
 import { users } from '../../__mocks__/users.mock';
 import { mockGroupsValues } from './__mocks__/groups_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { JSON_HEADER as headers } from '../../../../../common/constants';
 import { DEFAULT_META } from '../../../shared/constants';
