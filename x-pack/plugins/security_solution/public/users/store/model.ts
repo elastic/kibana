@@ -9,6 +9,7 @@ import { RiskScoreFields, RiskScoreSortField, SortField } from '../../../common/
 
 export enum UsersType {
   page = 'page',
+  details = 'details',
 }
 
 export enum UsersTableType {

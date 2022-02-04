@@ -16,6 +16,7 @@ import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/p
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
 import { getBreadcrumbs as getUebaBreadcrumbs } from '../../../../ueba/pages/details/utils';
+import { getBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
 import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import {
@@ -69,6 +70,9 @@ const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpySt
 
 const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.hosts;
+
+const isUsersRoutes = (spyState: RouteSpyState): spyState is UebaRouteSpyState =>
+  spyState != null && spyState.pageName === SecurityPageName.users;
 
 const isUebaRoutes = (spyState: RouteSpyState): spyState is UebaRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.ueba;
@@ -153,7 +157,25 @@ export const getBreadcrumbsForRoute = (
     ];
   }
 
-  // TODO Pablo/Users isUsersRoutes
+  if (isUsersRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'users', isDetailPage: false };
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
+    }
+
+    return [
+      siemRootBreadcrumb,
+      ...getUsersBreadcrumbs(
+        spyState,
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        ),
+        getUrlForApp
+      ),
+    ];
+  }
 
   if (isRulesRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: SecurityPageName.rules, isDetailPage: false };

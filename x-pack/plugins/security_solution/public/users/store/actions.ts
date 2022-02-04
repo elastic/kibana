@@ -18,6 +18,10 @@ export const updateUsersTable = actionCreator<{
 
 export const setUsersTablesActivePageToZero = actionCreator('SET_USERS_TABLES_ACTIVE_PAGE_TO_ZERO');
 
+export const setUsersDetailsTablesActivePageToZero = actionCreator(
+  'SET_USERS_DETAILS_TABLES_ACTIVE_PAGE_TO_ZERO'
+);
+
 export const updateTableLimit = actionCreator<{
   usersType: usersModel.UsersType;
   limit: number;

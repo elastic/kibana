@@ -11,6 +11,9 @@ import { GlobalTimeArgs } from '../../common/containers/use_global_time';
 import { usersModel } from '../../users/store';
 import { DocValueFields } from '../../../../timelines/common';
 import { InputsModelId } from '../../common/store/inputs/constants';
+import { USERS_PATH } from '../../../common/constants';
+
+export const usersDetailsPagePath = `${USERS_PATH}/:detailName`;
 
 export type UsersTabsProps = GlobalTimeArgs & {
   docValueFields: DocValueFields[];

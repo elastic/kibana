@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { UebaTableType } from '../../../ueba/store/model';
+import { UsersTableType } from '../../../ueba/store/model';
 import { UEBA_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
 
-export const getUebaUrl = (search?: string) => `${UEBA_PATH}${appendSearch(search)}`;
+export const getUsersUrl = (search?: string) => `${USERS_PATH}${appendSearch(search)}`;
 
-export const getTabsOnUebaUrl = (tabName: UebaTableType, search?: string) =>
+export const getTabsOnUsersUrl = (tabName: UsersTableType, search?: string) =>
   `/${tabName}${appendSearch(search)}`;
 
 export const getUsersDetailsUrl = (detailName: string, search?: string) =>
@@ -19,6 +19,6 @@ export const getUsersDetailsUrl = (detailName: string, search?: string) =>
 
 export const getTabsOnUsersDetailsUrl = (
   detailName: string,
-  tabName: UebaTableType,
+  tabName: UsersTableType,
   search?: string
 ) => `/${detailName}/${tabName}${appendSearch(search)}`;
