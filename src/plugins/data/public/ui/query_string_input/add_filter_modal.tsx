@@ -468,7 +468,7 @@ export function AddFilterModal({
                           </EuiFlexItem>
 
                           <EuiFlexItem grow={false}>
-                            <EuiFlexGroup responsive={false} justifyContent="spaceEvenly">
+                            <EuiFlexGroup responsive={false} justifyContent="center">
                               {subGroup.length < 2 && (
                                 <EuiFlexItem grow={false}>
                                   <EuiButtonIcon
