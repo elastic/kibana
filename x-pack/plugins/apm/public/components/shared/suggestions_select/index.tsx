@@ -16,7 +16,6 @@ interface SuggestionsSelectProps {
   defaultValue?: string;
   field: string;
   onChange: (value?: string) => void;
-  allowCustomOption?: boolean;
   isClearable?: boolean;
   isInvalid?: boolean;
   placeholder: string;
@@ -33,7 +32,6 @@ export function SuggestionsSelect({
   isInvalid,
   dataTestSubj,
   isClearable = true,
-  allowCustomOption = false,
 }: SuggestionsSelectProps) {
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -111,7 +109,7 @@ export function SuggestionsSelect({
       singleSelection={{ asPlainText: true }}
       isInvalid={isInvalid}
       style={{ minWidth: '256px' }}
-      onCreateOption={allowCustomOption ? handleCreateOption : undefined}
+      onCreateOption={handleCreateOption}
       data-test-subj={dataTestSubj}
     />
   );
