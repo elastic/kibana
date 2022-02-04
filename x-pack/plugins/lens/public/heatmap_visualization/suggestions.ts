@@ -104,7 +104,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     {
       state: newState,
       title: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
-        defaultMessage: 'Heatmap',
+        defaultMessage: 'Heat map',
       }),
       hide,
       previewIcon: 'empty',

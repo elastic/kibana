@@ -29,7 +29,10 @@ import type { DatatableColumn } from '../../../../expressions/public';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
-import { getColorPicker } from '../utils/get_color_picker';
+import {
+  LegendColorPickerWrapperContext,
+  LegendColorPickerWrapper,
+} from '../utils/get_color_picker';
 import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
 import { HeatmapIcon } from './heatmap_icon';
 import './index.scss';
@@ -172,10 +175,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       [uiState]
     );
 
-    const legendColorPicker = useMemo(
-      () => getColorPicker(args.legend.position, setColor, uiState),
-      [args.legend.position, setColor, uiState]
-    );
     const table = data;
     const valueAccessor = args.valueAccessor
       ? getAccessor(args.valueAccessor, table.columns)
@@ -287,15 +286,21 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     const bands = ranges.map((start, index, array) => {
       // by default the last range is right-open
-      let end = index === array.length - 1 ? Infinity : array[index + 1];
+      let end = index === array.length - 1 ? Number.POSITIVE_INFINITY : array[index + 1];
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
-        const lastBand = max === start ? Infinity : endValue;
+        const lastBand = max === start ? Number.POSITIVE_INFINITY : endValue;
         end = index === array.length - 1 ? lastBand : array[index + 1];
       }
-      const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
-        end
-      )}`;
+
+      let overwriteArrayIdx;
+
+      if (end === Number.POSITIVE_INFINITY) {
+        overwriteArrayIdx = `≥ ${start}`;
+      } else {
+        overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(end)}`;
+      }
+
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
       return {
         // with the default continuity:above the every range is left-closed
@@ -484,55 +489,63 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             legendPosition={args.legend.position}
           />
         )}
-        <Chart>
-          <Settings
-            onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
-            showLegend={showLegend ?? args.legend.isVisible}
-            legendPosition={args.legend.position}
-            legendColorPicker={uiState ? legendColorPicker : undefined}
-            debugState={window._echDebugStateFlag ?? false}
-            tooltip={tooltip}
-            theme={[themeOverrides, chartTheme]}
-            xDomain={{
-              min:
-                dateHistogramMeta && dateHistogramMeta.timeRange
-                  ? new Date(dateHistogramMeta.timeRange.from).getTime()
-                  : NaN,
-              max:
-                dateHistogramMeta && dateHistogramMeta.timeRange
-                  ? new Date(dateHistogramMeta.timeRange.to).getTime()
-                  : NaN,
-            }}
-            onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
-          />
-          <Heatmap
-            id="heatmap"
-            name={valueColumn.name}
-            colorScale={{
-              type: 'bands',
-              bands,
-            }}
-            timeZone={timeZone}
-            data={chartData}
-            xAccessor={xAccessor}
-            yAccessor={yAccessor || 'unifiedY'}
-            valueAccessor={valueAccessor}
-            valueFormatter={valueFormatter}
-            xScale={xScale}
-            ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
-            xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
-            xAxisLabelName={xAxisColumn?.name}
-            yAxisLabelName={yAxisColumn?.name}
-            xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
-            yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
-            xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
-            yAxisLabelFormatter={
-              yAxisColumn
-                ? (v) => `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
-                : undefined
-            }
-          />
-        </Chart>
+        <LegendColorPickerWrapperContext.Provider
+          value={{
+            uiState,
+            setColor,
+            legendPosition: args.legend.position,
+          }}
+        >
+          <Chart>
+            <Settings
+              onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
+              showLegend={showLegend ?? args.legend.isVisible}
+              legendPosition={args.legend.position}
+              legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
+              debugState={window._echDebugStateFlag ?? false}
+              tooltip={tooltip}
+              theme={[themeOverrides, chartTheme]}
+              xDomain={{
+                min:
+                  dateHistogramMeta && dateHistogramMeta.timeRange
+                    ? new Date(dateHistogramMeta.timeRange.from).getTime()
+                    : NaN,
+                max:
+                  dateHistogramMeta && dateHistogramMeta.timeRange
+                    ? new Date(dateHistogramMeta.timeRange.to).getTime()
+                    : NaN,
+              }}
+              onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
+            />
+            <Heatmap
+              id="heatmap"
+              name={valueColumn.name}
+              colorScale={{
+                type: 'bands',
+                bands,
+              }}
+              timeZone={timeZone}
+              data={chartData}
+              xAccessor={xAccessor}
+              yAccessor={yAccessor || 'unifiedY'}
+              valueAccessor={valueAccessor}
+              valueFormatter={valueFormatter}
+              xScale={xScale}
+              ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
+              xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
+              xAxisLabelName={xAxisColumn?.name}
+              yAxisLabelName={yAxisColumn?.name}
+              xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
+              yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
+              xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
+              yAxisLabelFormatter={
+                yAxisColumn
+                  ? (v) => `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                  : undefined
+              }
+            />
+          </Chart>
+        </LegendColorPickerWrapperContext.Provider>
       </>
     );
   }
