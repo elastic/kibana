@@ -15,7 +15,7 @@ export type {
 } from '../../../saved_objects/public';
 export {
   showSaveModal,
-  SavedObjectLoader,
   SavedObjectSaveModal,
   getSavedObjectFinder,
 } from '../../../saved_objects/public';
+export { SavedObjectLoader } from './saved_object_loader';

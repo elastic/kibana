@@ -10,7 +10,7 @@ import { createDashboardUrlGenerator } from './url_generator';
 import { hashedItemStore } from '../../kibana_utils/public';
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
 import { esFilters, Filter } from '../../data/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { SavedObjectLoader } from './services/saved_objects';
 
 const APP_BASE_PATH: string = 'xyz/app/dashboards';
 
