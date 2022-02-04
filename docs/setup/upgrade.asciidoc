@@ -23,7 +23,7 @@ state. Snapshots include this feature state by default.
 ====
 
 For more information about upgrading, 
-refer to {stack-ref}/upgrading-stack.html[Upgrading to Elastic {version}.]
+refer to {stack-ref}/upgrading-elastic-stack.html[Upgrading to Elastic {version}.]
 
 IMPORTANT: You can upgrade to pre-release versions for testing, 
 but upgrading from a pre-release to the General Available version is not supported.
