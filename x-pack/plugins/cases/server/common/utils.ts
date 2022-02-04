@@ -361,9 +361,9 @@ export const getOrUpdateLensReferences = (
   return currentNonLensReferences.concat(newCommentLensReferences);
 };
 
-export const asArray = <T>(field?: T | T[] | null): T[] | undefined => {
+export const asArray = <T>(field?: T | T[] | null): T[] => {
   if (field === undefined || field === null) {
-    return;
+    return [];
   }
 
   return Array.isArray(field) ? field : [field];

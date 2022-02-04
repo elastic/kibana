@@ -943,12 +943,12 @@ describe('common utils', () => {
   });
 
   describe('asArray', () => {
-    it('returns undefined when the field is undefined', () => {
-      expect(asArray(undefined)).toBeUndefined();
+    it('returns an empty array when the field is undefined', () => {
+      expect(asArray(undefined)).toEqual([]);
     });
 
-    it('returns undefined when the field is null', () => {
-      expect(asArray(null)).toBeUndefined();
+    it('returns an empty array when the field is null', () => {
+      expect(asArray(null)).toEqual([]);
     });
 
     it('leaves the string array as is when it is already an array', () => {
