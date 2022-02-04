@@ -144,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('should produce the correct category for ml view user', async () => {
+    it('should produce the correct category for ml viewer user', async () => {
       const resp = await getCategoryDefinition(
         jobIdSpace1,
         expectedCategoryDefinition.categoryId,
@@ -158,6 +158,16 @@ export default ({ getService }: FtrProviderContext) => {
         `response should be ${JSON.stringify(expectedCategoryDefinition)} (got ${JSON.stringify(
           resp
         )})`
+      );
+    });
+
+    it('should not produce the correct category for ml unauthorized user', async () => {
+      await getCategoryDefinition(
+        jobIdSpace1,
+        expectedCategoryDefinition.categoryId,
+        USER.ML_UNAUTHORIZED,
+        403,
+        idSpace1
       );
     });
   });
