@@ -321,10 +321,7 @@ export const loginAndWaitForPage = (
 };
 export const waitForPage = (url: string) => {
   cy.visit(
-    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
-    {
-      onBeforeLoad: disableRulesFeatureTour,
-    }
+    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
   );
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
@@ -362,9 +359,7 @@ export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
-  cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    onBeforeLoad: disableRulesFeatureTour,
-  });
+  cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
