@@ -22,7 +22,7 @@ import { IFlashMessage } from './types';
  * `errors` property in the response's data, which will contain messages we can
  * display to the user.
  */
-export interface ErrorResponse {
+interface ErrorResponse {
   statusCode: number;
   error: string;
   message: string;
