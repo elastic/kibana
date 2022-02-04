@@ -24,7 +24,7 @@ import { testPlugin } from './test_plugin';
 import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../plugin';
 import { createEmbeddablePanelMock } from '../mocks';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { OverlayStart } from 'kibana/public';
 
 let api: EmbeddableStart;
