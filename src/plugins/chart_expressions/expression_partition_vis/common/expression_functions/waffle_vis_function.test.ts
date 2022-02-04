@@ -49,7 +49,7 @@ describe('interpreter/functions#waffleVis', () => {
       valuesFormat: ValueFormats.PERCENT,
       percentDecimals: 2,
       truncate: 100,
-      lastLevel: false,
+      last_level: false,
     },
     metric: {
       type: 'vis_dimension',

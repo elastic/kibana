@@ -32,7 +32,7 @@ export const config: RenderValue['visConfig'] = {
     values: true,
     truncate: 0,
     valuesFormat: ValueFormats.PERCENT,
-    lastLevel: false,
+    last_level: false,
   },
   dimensions: {
     metric: {

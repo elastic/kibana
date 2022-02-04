@@ -2538,23 +2538,5 @@ describe('migration visualization', () => {
       expect(otherParams.legendDisplay).toBe('hide');
       expect(otherParams.addLegend).toBeUndefined();
     });
-
-    it('should migrate labels.last_level to labels.lastLevel', () => {
-      const pie = getDoc(true, false);
-      const migrated = migrate(pie);
-      const params = JSON.parse(migrated.attributes.visState).params;
-
-      expect(typeof params.labels).toBe('object');
-      expect(params.labels.last_level).toBeUndefined();
-      expect(params.labels.lastLevel).toBeFalsy();
-
-      const otherPie = getDoc(true, true);
-      const otherMigrated = migrate(otherPie);
-      const otherParams = JSON.parse(otherMigrated.attributes.visState).params;
-
-      expect(typeof otherParams.labels).toBe('object');
-      expect(otherParams.labels.last_level).toBeUndefined();
-      expect(otherParams.labels.lastLevel).toBeTruthy();
-    });
   });
 });

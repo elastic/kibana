@@ -90,7 +90,7 @@ Object {
         "splitRow": undefined,
       },
       "labels": Object {
-        "lastLevel": false,
+        "last_level": false,
         "percentDecimals": 2,
         "position": "default",
         "show": false,

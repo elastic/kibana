@@ -63,7 +63,7 @@ const getPieDonutWaffleCommonTheme: GetPieDonutWaffleThemeFn = (
   if (
     visParams.labels.show &&
     visParams.labels.position === LabelPositions.DEFAULT &&
-    visParams.labels.lastLevel
+    visParams.labels.last_level
   ) {
     theme.partition.linkLabel = {
       maxCount: Number.POSITIVE_INFINITY,

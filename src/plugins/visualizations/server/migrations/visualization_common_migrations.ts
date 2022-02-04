@@ -202,15 +202,13 @@ export const commonRemoveMarkdownLessFromTSVB = (visState: any) => {
 
 export const commonUpdatePieVisApi = (visState: any) => {
   if (visState && visState.type === 'pie') {
-    const { addLegend, labels, ...restParams } = visState.params;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { last_level, ...restLabels } = labels ?? {};
+    const { addLegend, ...restParams } = visState.params;
+
     return {
       ...visState,
       params: {
         ...restParams,
         legendDisplay: addLegend ? 'show' : 'hide',
-        labels: { ...restLabels, lastLevel: last_level ?? false },
       },
     };
   }
