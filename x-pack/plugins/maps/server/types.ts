@@ -11,10 +11,14 @@ import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { MapsEmsPluginServerSetup } from '../../../../src/plugins/maps_ems/server';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../src/plugins/data/server';
 import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
 
 export interface SetupDeps {
+  data: DataPluginSetup;
   features: FeaturesPluginSetupContract;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;

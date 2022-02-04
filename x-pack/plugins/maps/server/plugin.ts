@@ -22,7 +22,7 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
-import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
+import { setupSavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 import { setStartServices } from './kibana_server_services';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
@@ -145,6 +145,10 @@ export class MapsPlugin implements Plugin {
   }
 
   setup(core: CoreSetup, plugins: SetupDeps) {
+    const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
+      plugins.data.query.filterManager
+    );
+
     const { usageCollection, home, features, customIntegrations } = plugins;
     const config$ = this._initializerContext.config.create();
 
@@ -191,8 +195,7 @@ export class MapsPlugin implements Plugin {
       },
     });
 
-    core.savedObjects.registerType(mapsTelemetrySavedObjects);
-    core.savedObjects.registerType(mapSavedObjects);
+    setupSavedObjects(core, getFilterMigrations);
     registerMapsUsageCollector(usageCollection);
 
     plugins.embeddable.registerEmbeddableFactory({

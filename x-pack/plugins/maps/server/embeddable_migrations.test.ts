@@ -7,7 +7,6 @@
 
 import semverGte from 'semver/functions/gte';
 import { embeddableMigrations } from './embeddable_migrations';
-// @ts-ignore
 import { savedObjectMigrations } from './saved_objects/saved_object_migrations';
 
 describe('saved object migrations and embeddable migrations', () => {
