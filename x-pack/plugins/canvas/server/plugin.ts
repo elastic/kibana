@@ -62,9 +62,7 @@ export class CanvasPlugin implements Plugin {
       },
     });
 
-    const deps: CanvasSavedObjectTypeMigrationsDeps = {
-      expressions: expressionsFork,
-    };
+    const deps: CanvasSavedObjectTypeMigrationsDeps = { expressions: expressionsFork };
     coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType(deps));
     coreSetup.savedObjects.registerType(workpadTypeFactory(deps));
