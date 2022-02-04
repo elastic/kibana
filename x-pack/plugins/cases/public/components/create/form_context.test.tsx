@@ -103,7 +103,7 @@ const fillForm = (wrapper: ReactWrapper) => {
 
   act(() => {
     (
-      wrapper.find(EuiComboBox).props() as unknown as {
+      wrapper.find(EuiComboBox).first().props() as unknown as {
         onChange: (a: EuiComboBoxOptionOption[]) => void;
       }
     ).onChange(sampleTags.map((tag) => ({ label: tag })));
@@ -374,7 +374,7 @@ describe('Create case', () => {
 
       fillForm(wrapper);
       expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
 
       await waitFor(() => {
@@ -441,7 +441,7 @@ describe('Create case', () => {
 
       fillForm(wrapper);
       expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
 
       await waitFor(() => {
@@ -451,7 +451,7 @@ describe('Create case', () => {
 
       act(() => {
         (
-          wrapper.find(EuiComboBox).at(1).props() as unknown as {
+          wrapper.find(EuiComboBox).first().props() as unknown as {
             onChange: (a: EuiComboBoxOptionOption[]) => void;
           }
         ).onChange([{ value: '19', label: 'Denial of Service' }]);
@@ -511,7 +511,7 @@ describe('Create case', () => {
 
       fillForm(wrapper);
       expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-1"]`).simulate('click');
 
       await waitFor(() => {
@@ -606,7 +606,7 @@ describe('Create case', () => {
 
       fillForm(wrapper);
       expect(wrapper.find(`[data-test-subj="connector-fields-sn-sir"]`).exists()).toBeFalsy();
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-sir"]`).simulate('click');
 
       await waitFor(() => {
@@ -709,7 +709,7 @@ describe('Create case', () => {
 
     fillForm(wrapper);
     expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
     wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
 
     await waitFor(() => {
@@ -729,7 +729,7 @@ describe('Create case', () => {
     });
   });
 
-  it(`it should call callbacks in correct order`, async () => {
+  it.only(`it should call callbacks in correct order`, async () => {
     useConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       connectors: connectorsMock,
@@ -744,9 +744,11 @@ describe('Create case', () => {
       </TestProviders>
     );
 
+    console.log(wrapper.html());
+
     fillForm(wrapper);
     expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
     wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
 
     await waitFor(() => {

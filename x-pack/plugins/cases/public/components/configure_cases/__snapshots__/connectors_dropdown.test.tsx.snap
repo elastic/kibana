@@ -5,31 +5,169 @@ Array [
   Object {
     "data-test-subj": "dropdown-connector-no-connector",
     "label": "No connector selected",
+    "render": <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <Styled(EuiIcon)
+          size="m"
+          type="minusInCircle"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <span
+          data-test-subj="dropdown-connector-no-connector"
+        >
+          No connector selected
+        </span>
+      </EuiFlexItem>
+    </EuiFlexGroup>,
     "value": "none",
   },
   Object {
     "data-test-subj": "dropdown-connector-servicenow-1",
     "label": "My Connector",
+    "render": <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+    >
+      <Styled(EuiFlexItem)
+        grow={false}
+      >
+        <Styled(EuiIcon)
+          size="m"
+          type={[Function]}
+        />
+      </Styled(EuiFlexItem)>
+      <EuiFlexItem
+        grow={false}
+      >
+        <span>
+          My Connector
+        </span>
+      </EuiFlexItem>
+    </EuiFlexGroup>,
     "value": "servicenow-1",
   },
   Object {
     "data-test-subj": "dropdown-connector-resilient-2",
     "label": "My Connector 2",
+    "render": <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+    >
+      <Styled(EuiFlexItem)
+        grow={false}
+      >
+        <Styled(EuiIcon)
+          size="m"
+          type={[Function]}
+        />
+      </Styled(EuiFlexItem)>
+      <EuiFlexItem
+        grow={false}
+      >
+        <span>
+          My Connector 2
+        </span>
+      </EuiFlexItem>
+    </EuiFlexGroup>,
     "value": "resilient-2",
   },
   Object {
     "data-test-subj": "dropdown-connector-jira-1",
     "label": "Jira",
+    "render": <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+    >
+      <Styled(EuiFlexItem)
+        grow={false}
+      >
+        <Styled(EuiIcon)
+          size="m"
+          type={[Function]}
+        />
+      </Styled(EuiFlexItem)>
+      <EuiFlexItem
+        grow={false}
+      >
+        <span>
+          Jira
+        </span>
+      </EuiFlexItem>
+    </EuiFlexGroup>,
     "value": "jira-1",
   },
   Object {
     "data-test-subj": "dropdown-connector-servicenow-sir",
     "label": "My Connector SIR",
+    "render": <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+    >
+      <Styled(EuiFlexItem)
+        grow={false}
+      >
+        <Styled(EuiIcon)
+          size="m"
+          type={[Function]}
+        />
+      </Styled(EuiFlexItem)>
+      <EuiFlexItem
+        grow={false}
+      >
+        <span>
+          My Connector SIR
+        </span>
+      </EuiFlexItem>
+    </EuiFlexGroup>,
     "value": "servicenow-sir",
   },
   Object {
     "data-test-subj": "dropdown-connector-servicenow-uses-table-api",
     "label": "My Connector",
+    "render": <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+    >
+      <Styled(EuiFlexItem)
+        grow={false}
+      >
+        <Styled(EuiIcon)
+          size="m"
+          type={[Function]}
+        />
+      </Styled(EuiFlexItem)>
+      <EuiFlexItem
+        grow={false}
+      >
+        <span>
+          My Connector
+           (deprecated)
+        </span>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <Styled(EuiIconTip)
+          aria-label="This connector is deprecated. Update it, or create a new one."
+          color="warning"
+          content="This connector is deprecated. Update it, or create a new one."
+          size="m"
+          type="alert"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>,
     "value": "servicenow-uses-table-api",
   },
 ]

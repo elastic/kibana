@@ -194,9 +194,9 @@ describe('ConfigureCases', () => {
         wrappingComponentProps: { userCanCrud: false },
       });
 
-      expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
-        true
-      );
+      expect(
+        newWrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isDisabled')
+      ).toBe(true);
 
       expect(
         newWrapper
@@ -259,7 +259,7 @@ describe('ConfigureCases', () => {
 
     test('it disables correctly Connector when loading connectors', () => {
       expect(
-        wrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')
+        wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isDisabled')
       ).toBeTruthy();
     });
 
@@ -404,7 +404,7 @@ describe('ConfigureCases', () => {
     });
 
     test('it submits the configuration correctly when changing connector', () => {
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
       wrapper.update();
       wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
       wrapper.update();
@@ -446,7 +446,7 @@ describe('ConfigureCases', () => {
         wrappingComponent: TestProviders,
       });
 
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
       wrapper.update();
       wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
       wrapper.update();
@@ -542,7 +542,7 @@ describe('ConfigureCases', () => {
         wrappingComponent: TestProviders,
       });
 
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
       wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').simulate('click');
 
       await waitFor(() => {

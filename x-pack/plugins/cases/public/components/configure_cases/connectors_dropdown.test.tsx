@@ -129,4 +129,14 @@ describe('ConnectorsDropdown', () => {
     expect(screen.getByTestId('comboBoxInput')).toHaveTextContent(/Jira/);
     expect(onChangeHandler).toHaveBeenLastCalledWith('jira-1');
   });
+
+  it('shows the add connector button when appendAddConnectorButton is passed', () => {
+    render(<ConnectorsDropdown {...props} appendAddConnectorButton={true} />, {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    userEvent.click(screen.getByTestId('comboBoxToggleListButton'));
+
+    expect(screen.getByTestId('dropdown-connector-add-connector')).toBeTruthy();
+  });
 });

@@ -115,9 +115,9 @@ describe('Connector', () => {
       wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isLoading')
     ).toEqual(true);
 
-    expect(wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('disabled')).toEqual(
-      true
-    );
+    expect(
+      wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isDisabled')
+    ).toEqual(true);
   });
 
   it('it is disabled and loading when isLoading=true', async () => {
@@ -132,9 +132,9 @@ describe('Connector', () => {
     expect(
       wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isLoading')
     ).toEqual(true);
-    expect(wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('disabled')).toEqual(
-      true
-    );
+    expect(
+      wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isDisabled')
+    ).toEqual(true);
   });
 
   it(`it should change connector`, async () => {
@@ -147,7 +147,7 @@ describe('Connector', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.find('button[data-test-subj="comboBoxToggleListButton"]').simulate('click');
     wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
 
     await waitFor(() => {
@@ -157,7 +157,7 @@ describe('Connector', () => {
 
     act(() => {
       (
-        wrapper.find(EuiComboBox).props() as unknown as {
+        wrapper.find(EuiComboBox).at(1).props() as unknown as {
           onChange: (a: EuiComboBoxOptionOption[]) => void;
         }
       ).onChange([{ value: '19', label: 'Denial of Service' }]);
