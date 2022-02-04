@@ -103,8 +103,9 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
     noConnectorOption,
   ]);
 
+  // handle the existing external selection
   useEffect(() => {
-    if (selectedConnector !== selected[0].value) {
+    if (selected?.length > 0 && selectedConnector !== selected[0].value) {
       const selectedOption = connectorsAsDropdownOptions.find(
         (connector) => connector.value === selectedConnector
       );
@@ -116,23 +117,37 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
 
   const innerOnChange = (option: Array<EuiComboBoxOptionOption<string>>) => {
     setSelected(option);
-    if (option[0].value) {
+    if (option?.length > 0 && option[0].value) {
       onChange(option[0].value);
-    } else {
-      onChange('');
+    }
+  };
+
+  // if the user leaves the combobox with an empty input
+  // it will reset the one selected before or to no connector
+  // if none was selected before
+  const handleOnBlur = () => {
+    if (selected?.length === 0) {
+      const previousSelection = connectorsAsDropdownOptions.find(
+        (connector) => connector.value === selectedConnector
+      );
+      if (previousSelection) {
+        innerOnChange([previousSelection]);
+      } else {
+        innerOnChange([noConnectorOption]);
+      }
     }
   };
 
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => {
-      if (option.value === 'add-connector') {
+      if (option.value === addNewConnector.value) {
         return (
           <span className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft">
             {i18n.ADD_NEW_CONNECTOR}
           </span>
         );
       }
-      if (option.value === 'none') {
+      if (option.value === noConnectorOption.value) {
         return (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -172,7 +187,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
         );
       }
     },
-    [connectors]
+    [connectors, getConnectorIconSuspended]
   );
 
   return (
@@ -180,6 +195,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       aria-label={i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}
       data-test-subj="dropdown-connectors"
       isDisabled={disabled}
+      isClearable={false}
       renderOption={renderOption}
       fullWidth
       isLoading={isLoading}
@@ -187,6 +203,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       singleSelection={{ asPlainText: true }}
       options={connectorsAsDropdownOptions}
       selectedOptions={selected}
+      onBlur={handleOnBlur}
     />
   );
 };
