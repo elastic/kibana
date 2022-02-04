@@ -21,7 +21,6 @@ import { AutocompleteService } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 import { getUiSettings } from './ui_settings';
 import { QuerySetup } from './query';
-import { IEventLogService } from '../../../../x-pack/plugins/event_log/server';
 
 interface DataEnhancements {
   search: SearchEnhancements;
