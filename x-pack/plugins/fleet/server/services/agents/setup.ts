@@ -29,7 +29,7 @@ export async function ensureFleetServerAgentPoliciesExists(
       ));
 
       if (!policyChangeActionExist) {
-        return agentPolicyService.createFleetServerPolicy(soClient, agentPolicy.id);
+        return agentPolicyService.deployPolicy(soClient, agentPolicy.id);
       }
     })
   );
