@@ -19,6 +19,8 @@ import type {
   PackagePolicySOAttributes,
 } from '../types';
 
+import { useDockerRegistry } from './docker_registry_helper';
+
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 type Root = ReturnType<typeof kbnTestServer.createRoot>;
@@ -87,6 +89,8 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   // let esClient: Client;
   let roots: Root[] = [];
+
+  const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
     const { startES } = kbnTestServer.createTestServers({
@@ -162,140 +166,141 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
       await expectFleetSetupState(soClient);
     });
   });
-});
 
-const preconfiguration = {
-  packages: [
-    {
-      name: 'fleet_server',
-      version: 'latest',
-    },
-    {
-      name: 'apm',
-      version: 'latest',
-    },
-  ],
-  outputs: [
-    {
-      name: 'Preconfigured output',
-      id: 'preconfigured-output',
-      type: 'elasticsearch',
-      hosts: ['http://127.0.0.1:9200'],
-    },
-  ],
-  agentPolicies: [
-    {
-      name: 'managed-test',
-      id: 'managed-policy-test',
-      data_output_id: 'preconfigured-output',
-      monitoring_output_id: 'preconfigured-output',
-      is_managed: true,
-      is_default_fleet_server: true,
-      package_policies: [
-        {
-          name: 'fleet-server-123',
-          package: {
-            name: 'fleet_server',
-          },
-          inputs: [
-            {
-              type: 'fleet-server',
-              keep_enabled: true,
-              vars: [{ name: 'host', value: '127.0.0.1:8220', frozen: true }],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'nonmanaged-test',
-      id: 'nonmanaged-policy-test',
-      is_managed: false,
-      package_policies: [
-        {
-          name: 'apm-123',
-          package: {
-            name: 'apm',
-          },
-          inputs: [
-            {
-              type: 'apm',
-              keep_enabled: true,
-              vars: [
-                { name: 'api_key_enabled', value: true },
-                { name: 'host', value: '0.0.0.0:8200', frozen: true },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
-
-async function expectFleetSetupState(soClient: ISavedObjectsRepository) {
-  // Assert setup state
-  const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-    type: 'ingest-agent-policies',
-    perPage: 10000,
-  });
-  expect(agentPolicies.saved_objects).toHaveLength(2);
-  expect(agentPolicies.saved_objects.map((ap) => ap.attributes)).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
+  const preconfiguration = {
+    registryUrl,
+    packages: [
+      {
+        name: 'fleet_server',
+        version: 'latest',
+      },
+      {
+        name: 'apm',
+        version: 'latest',
+      },
+    ],
+    outputs: [
+      {
+        name: 'Preconfigured output',
+        id: 'preconfigured-output',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9200'],
+      },
+    ],
+    agentPolicies: [
+      {
         name: 'managed-test',
+        id: 'managed-policy-test',
+        data_output_id: 'preconfigured-output',
+        monitoring_output_id: 'preconfigured-output',
         is_managed: true,
         is_default_fleet_server: true,
-        data_output_id: 'preconfigured-output',
-      }),
-      expect.objectContaining({
+        package_policies: [
+          {
+            name: 'fleet-server-123',
+            package: {
+              name: 'fleet_server',
+            },
+            inputs: [
+              {
+                type: 'fleet-server',
+                keep_enabled: true,
+                vars: [{ name: 'host', value: '127.0.0.1:8220', frozen: true }],
+              },
+            ],
+          },
+        ],
+      },
+      {
         name: 'nonmanaged-test',
+        id: 'nonmanaged-policy-test',
         is_managed: false,
-      }),
-    ])
-  );
+        package_policies: [
+          {
+            name: 'apm-123',
+            package: {
+              name: 'apm',
+            },
+            inputs: [
+              {
+                type: 'apm',
+                keep_enabled: true,
+                vars: [
+                  { name: 'api_key_enabled', value: true },
+                  { name: 'host', value: '0.0.0.0:8200', frozen: true },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
 
-  const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
-    type: 'ingest-package-policies',
-    perPage: 10000,
-  });
-  expect(packagePolicies.saved_objects).toHaveLength(2);
-  expect(packagePolicies.saved_objects.map((pp) => pp.attributes.name)).toEqual(
-    expect.arrayContaining(['apm-123', 'fleet-server-123'])
-  );
+  async function expectFleetSetupState(soClient: ISavedObjectsRepository) {
+    // Assert setup state
+    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: 'ingest-agent-policies',
+      perPage: 10000,
+    });
+    expect(agentPolicies.saved_objects).toHaveLength(2);
+    expect(agentPolicies.saved_objects.map((ap) => ap.attributes)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'managed-test',
+          is_managed: true,
+          is_default_fleet_server: true,
+          data_output_id: 'preconfigured-output',
+        }),
+        expect.objectContaining({
+          name: 'nonmanaged-test',
+          is_managed: false,
+        }),
+      ])
+    );
 
-  const outputs = await soClient.find<OutputSOAttributes>({
-    type: 'ingest-outputs',
-    perPage: 10000,
-  });
-  expect(outputs.saved_objects).toHaveLength(2);
-  expect(outputs.saved_objects.map((o) => o.attributes)).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        name: 'default',
-        is_default: true,
-        is_default_monitoring: true,
-        type: 'elasticsearch',
-        output_id: 'fleet-default-output',
-        hosts: ['http://localhost:9200'],
-      }),
-      expect.objectContaining({
-        name: 'Preconfigured output',
-        is_default: false,
-        is_default_monitoring: false,
-        type: 'elasticsearch',
-        output_id: 'preconfigured-output',
-        hosts: ['http://127.0.0.1:9200'],
-      }),
-    ])
-  );
+    const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
+      type: 'ingest-package-policies',
+      perPage: 10000,
+    });
+    expect(packagePolicies.saved_objects).toHaveLength(2);
+    expect(packagePolicies.saved_objects.map((pp) => pp.attributes.name)).toEqual(
+      expect.arrayContaining(['apm-123', 'fleet-server-123'])
+    );
 
-  const packages = await soClient.find<Installation>({
-    type: 'epm-packages',
-    perPage: 10000,
-  });
-  expect(packages.saved_objects).toHaveLength(2);
-  expect(packages.saved_objects.map((p) => p.attributes.name)).toEqual(
-    expect.arrayContaining(['fleet_server', 'apm'])
-  );
-}
+    const outputs = await soClient.find<OutputSOAttributes>({
+      type: 'ingest-outputs',
+      perPage: 10000,
+    });
+    expect(outputs.saved_objects).toHaveLength(2);
+    expect(outputs.saved_objects.map((o) => o.attributes)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'default',
+          is_default: true,
+          is_default_monitoring: true,
+          type: 'elasticsearch',
+          output_id: 'fleet-default-output',
+          hosts: ['http://localhost:9200'],
+        }),
+        expect.objectContaining({
+          name: 'Preconfigured output',
+          is_default: false,
+          is_default_monitoring: false,
+          type: 'elasticsearch',
+          output_id: 'preconfigured-output',
+          hosts: ['http://127.0.0.1:9200'],
+        }),
+      ])
+    );
+
+    const packages = await soClient.find<Installation>({
+      type: 'epm-packages',
+      perPage: 10000,
+    });
+    expect(packages.saved_objects).toHaveLength(2);
+    expect(packages.saved_objects.map((p) => p.attributes.name)).toEqual(
+      expect.arrayContaining(['fleet_server', 'apm'])
+    );
+  }
+});
