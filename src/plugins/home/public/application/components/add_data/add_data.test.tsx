@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { AddData } from './add_data';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ApplicationStart } from 'kibana/public';
 
 jest.mock('../app_navigation_handler', () => {
