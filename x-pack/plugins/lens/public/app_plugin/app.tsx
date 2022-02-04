@@ -31,6 +31,7 @@ import {
   DispatchSetState,
   selectSavedObjectFormat,
   enableAutoApply,
+  applyWorkingState,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -317,7 +318,7 @@ export function App({
           lensInspector={lensInspector}
           autoApplyEnabled={autoApplyEnabled}
           onToggleAutoApply={toggleAutoApply}
-          onApplyChanges={() => {}}
+          onApplyChanges={() => dispatch(applyWorkingState())}
         />
 
         {getLegacyUrlConflictCallout()}

@@ -7,7 +7,7 @@
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { mapValues } from 'lodash';
+import { cloneDeep, mapValues } from 'lodash';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -87,6 +87,8 @@ export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onAc
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
+// this action is only relevant when auto-apply is disabled
+export const applyWorkingState = createAction<void>('lens/applyWorkingState');
 export const updateState = createAction<{
   updater: (prevState: LensAppState) => LensAppState;
 }>('lens/updateState');
@@ -168,6 +170,7 @@ export const lensActions = {
   setSaveable,
   enableAutoApply,
   disableAutoApply,
+  applyWorkingState,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -209,15 +212,20 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       };
     },
     [enableAutoApply.type]: (state) => {
-      state.visualization = state.appliedState!.visualization;
-      state.datasourceStates = state.appliedState!.datasourceStates;
+      state.visualization = cloneDeep(state.appliedState!.visualization);
+      state.datasourceStates = cloneDeep(state.appliedState!.datasourceStates);
       delete state.appliedState;
     },
     [disableAutoApply.type]: (state) => {
-      // TODO does this make a deep copy?
       state.appliedState = {
-        visualization: state.visualization,
-        datasourceStates: state.datasourceStates,
+        visualization: cloneDeep(state.visualization),
+        datasourceStates: cloneDeep(state.datasourceStates),
+      };
+    },
+    [applyWorkingState.type]: (state) => {
+      state.appliedState = {
+        visualization: cloneDeep(state.visualization),
+        datasourceStates: cloneDeep(state.datasourceStates),
       };
     },
     [updateState.type]: (

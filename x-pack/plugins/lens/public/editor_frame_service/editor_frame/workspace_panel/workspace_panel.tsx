@@ -62,6 +62,7 @@ import {
   selectDatasourceStates,
   selectActiveDatasourceId,
   selectSearchSessionId,
+  selectAppliedState,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 
@@ -129,6 +130,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const dispatchLens = useLensDispatch();
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const visualization = useLensSelector(selectVisualization);
+  const appliedState = useLensSelector(selectAppliedState);
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
 
@@ -184,9 +186,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
-          visualizationState: visualization.state,
+          visualizationState: appliedState?.visualization.state || visualization.state,
           datasourceMap,
-          datasourceStates,
+          datasourceStates: appliedState?.datasourceStates || datasourceStates,
           datasourceLayers,
         });
 
@@ -221,6 +223,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     configurationValidationError?.length,
     missingRefsErrors.length,
+    appliedState,
   ]);
 
   const expressionExists = Boolean(expression);
