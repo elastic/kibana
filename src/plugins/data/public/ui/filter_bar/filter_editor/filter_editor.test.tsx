@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { FilterEditor, Props } from '.';
 import React from 'react';
 
