@@ -20,6 +20,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiNotificationBadge,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -34,7 +35,7 @@ import { SimplifiedSelectable } from './simplified_selectable';
 import './crawl_select_domains_modal.scss';
 
 export const CrawlSelectDomainsModal: React.FC = () => {
-  const { domains } = useValues(CrawlerLogic);
+  const { domains, startCrawlError } = useValues(CrawlerLogic);
   const domainUrls = domains.map((domain) => domain.url);
 
   const crawlSelectDomainsModalLogic = CrawlSelectDomainsModalLogic({ domains });
@@ -84,13 +85,17 @@ export const CrawlSelectDomainsModal: React.FC = () => {
           onChange={onSelectDomainUrls}
         />
       </EuiModalBody>
+      {startCrawlError && (
+        <EuiText color="danger" size="s">
+          {startCrawlError}
+        </EuiText>
+      )}
       <EuiModalFooter>
         <EuiButtonEmpty onClick={hideModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
         <EuiButton
           fill
           onClick={() => {
             startCrawl({ domain_allowlist: selectedDomainUrls });
-            hideModal();
           }}
           disabled={selectedDomainUrls.length === 0}
         >
