@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-interface RuleSearchBody {
+export interface RuleSearchBody {
   query: {
     bool: {
       filter: {

@@ -33,6 +33,9 @@ import type {
 import { legacyRuleActionsSavedObjectType } from '../../lib/detection_engine/rule_actions/legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyIRuleActionsAttributesSavedObjectAttributes } from '../../lib/detection_engine/rule_actions/legacy_types';
+import { getDetectionRules } from './get_detection_rules';
+import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from './constants';
+import { getAlerts } from './get_alerts';
 
 /**
  * Initial detection metrics initialized.
@@ -338,8 +341,6 @@ export const updateDetectionRuleUsage = (
   return updatedUsage;
 };
 
-const MAX_RESULTS_WINDOW = 10_000; // elasticsearch index.max_result_window default value
-
 export const getDetectionRuleMetrics = async (
   kibanaIndex: string,
   signalsIndex: string,
@@ -347,59 +348,19 @@ export const getDetectionRuleMetrics = async (
   savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionRuleAdoption> => {
   let rulesUsage: DetectionRulesTypeUsage = initialDetectionRulesUsage;
-  const ruleSearchOptions: RuleSearchParams = {
-    body: {
-      query: {
-        bool: {
-          filter: {
-            terms: {
-              'alert.alertTypeId': [
-                SIGNALS_ID,
-                EQL_RULE_TYPE_ID,
-                ML_RULE_TYPE_ID,
-                QUERY_RULE_TYPE_ID,
-                SAVED_QUERY_RULE_TYPE_ID,
-                INDICATOR_RULE_TYPE_ID,
-                THRESHOLD_RULE_TYPE_ID,
-              ],
-            },
-          },
-        },
-      },
-    },
-    filter_path: [],
-    ignore_unavailable: true,
-    index: kibanaIndex,
-    size: MAX_RESULTS_WINDOW,
-  };
-
   try {
-    const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
-    const { body: detectionAlertsResp } = (await esClient.search({
-      index: `${signalsIndex}*`,
-      size: MAX_RESULTS_WINDOW,
-      body: {
-        aggs: {
-          detectionAlerts: {
-            terms: { field: ALERT_RULE_UUID },
-          },
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-24h',
-                    lte: 'now',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      },
-    })) as { body: AlertsAggregationResponse };
+    const ruleResults = await getDetectionRules({
+      esClient,
+      kibanaIndex,
+      maxPerPage: MAX_PER_PAGE,
+      maxSize: MAX_RESULTS_WINDOW,
+    });
+    const detectionAlertsResp = await getAlerts({
+      esClient,
+      signalsIndex: `${signalsIndex}*`,
+      maxPerPage: MAX_PER_PAGE,
+      maxSize: MAX_RESULTS_WINDOW,
+    });
 
     const cases = await savedObjectClient.find<CasesSavedObject>({
       type: CASE_COMMENT_SAVED_OBJECT,
@@ -449,8 +410,8 @@ export const getDetectionRuleMetrics = async (
 
     const alertsCache = new Map<string, number>();
     alertBuckets.map((bucket) => alertsCache.set(bucket.key, bucket.doc_count));
-    if (ruleResults.hits?.hits?.length > 0) {
-      const ruleObjects = ruleResults.hits.hits.map((hit) => {
+    if (ruleResults.length > 0) {
+      const ruleObjects = ruleResults.map((hit) => {
         const ruleId = hit._id.split(':')[1];
         const isElastic = isElasticRule(hit._source?.alert.tags);
 
