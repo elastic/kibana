@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegration } from '../common';
 import type { PresentationUtilPluginStart } from '../../presentation_util/public';
+
+import { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsSetup {
   getAppendCustomIntegrations: () => Promise<CustomIntegration[]>;
