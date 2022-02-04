@@ -117,7 +117,7 @@ export function EditFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(filter.groupId);
+  const [groupsCount, setGroupsCount] = useState<number>(multipleFilters?.length ? multipleFilters?.length : 1);
 
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
@@ -522,14 +522,14 @@ export function EditFilterModal({
                                     value: undefined,
                                     relationship: undefined,
                                     groupId:
-                                      filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
+                                      groupsCount + 1,
                                     subGroupId,
-                                    id: multipleFilters.length + localFilters.length,
+                                    id: multipleFilters.length + localFilters.length - 1,
                                   },
                                 ]);
-                                if (filtersOnGroup.length <= 1) {
-                                  setGroupsCount(groupsCount + 1);
-                                }
+                                // if (filtersOnGroup.length <= 1) {
+                                setGroupsCount((groupsCount) => groupsCount + 1);
+                                // }
                               }}
                               iconType="plus"
                               size="s"

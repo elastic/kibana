@@ -85,6 +85,7 @@ export function AddFilterModal({
   onMultipleFiltersSubmit,
   onCancel,
   applySavedQueries,
+  multipleFilters,
   filter,
   indexPatterns,
   timeRangeForSuggestionsOverride,
@@ -110,18 +111,21 @@ export function AddFilterModal({
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
+  const [groupsCount, setGroupsCount] = useState<number>(
+    multipleFilters?.length ? multipleFilters?.length : 1
+  );
+
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>([
     {
       field: undefined,
       operator: undefined,
       value: undefined,
-      groupId: 1,
-      id: 0,
+      groupId: multipleFilters?.length ? multipleFilters?.length + 1 : 1,
+      id: multipleFilters?.length ? multipleFilters?.length : 0,
       subGroupId: 1,
       relationship: undefined,
     },
   ]);
-  const [groupsCount, setGroupsCount] = useState<number>(1);
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
@@ -142,9 +146,7 @@ export function AddFilterModal({
     const index = localFilters.findIndex((f) => f.id === localFilterIndex);
     // Only reset params when the operator type changes
     const params =
-      localFilters[localFilterIndex].operator?.type === operator.type
-        ? localFilters[localFilterIndex].value
-        : undefined;
+      localFilters[index]?.operator?.type === operator.type ? localFilters[index].value : undefined;
     const updatedLocalFilter = { ...localFilters[index], operator, value: params };
     localFilters[index] = updatedLocalFilter;
     setLocalFilters([...localFilters]);
@@ -245,10 +247,10 @@ export function AddFilterModal({
             placeholder={
               selectedField
                 ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                defaultMessage: 'Operator',
+                  defaultMessage: 'Operator',
                 })
                 : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                defaultMessage: 'Waiting',
+                  defaultMessage: 'Waiting',
                 })
             }
             options={operators}
@@ -396,6 +398,7 @@ export function AddFilterModal({
           (value) => typeof value !== 'undefined'
         ) as Filter[];
         // onSubmit(finalFilters);
+
         onMultipleFiltersSubmit(localFilters, finalFilters);
         if (alias) {
           saveFilters({
@@ -434,8 +437,8 @@ export function AddFilterModal({
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                ? 'kbnQueryBar__filterModalGroups'
-                : '';
+                  ? 'kbnQueryBar__filterModalGroups'
+                  : '';
             return (
               <>
                 <div className={classNames(classes)}>
@@ -503,6 +506,7 @@ export function AddFilterModal({
                                   (f) => f.id === localfilter.id && f.groupId === Number(groupId)
                                 );
                                 localFilters[idx] = updatedLocalFilter;
+                                // debugger
                                 setLocalFilters([
                                   ...localFilters,
                                   {
@@ -510,10 +514,9 @@ export function AddFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId:
-                                      filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
+                                    groupId: groupsCount + 1,
                                     subGroupId,
-                                    id: localFilters.length,
+                                    id: Number(multipleFilters?.length) + localFilters.length,
                                   },
                                 ]);
                                 if (filtersOnGroup.length <= 1) {
