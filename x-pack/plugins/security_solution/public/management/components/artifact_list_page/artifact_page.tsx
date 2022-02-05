@@ -27,13 +27,9 @@ import { NoDataEmptyState } from './components/no_data_empty_state';
 import { ArtifactFlyoutProps, MaybeArtifactFlyout } from './components/artifact_flyout';
 import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
+import { useFetchArtifactData } from './hooks/use_fetch_artifact_data';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
-
-// type EventListPaginatedContent = PaginatedContentProps<
-//   Immutable<ExceptionListItemSchema>,
-//   typeof ExceptionItem
-// >;
 
 const AdministrationListPage = styled(_AdministrationListPage)`
   // TODO:PT Ask David - why do we have this here? because the Card already has similar code:
@@ -62,6 +58,13 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
   ({ apiClient, ArtifactFormComponent, labels: _labels = {}, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isFlyoutOpened = useIsFlyoutOpened();
+    const setUrlParams = useSetUrlParams();
+
+    const { isLoading, data: apiDataResponse } = useFetchArtifactData(apiClient);
+
+    const items = useMemo(() => {
+      return apiDataResponse?.data ?? [];
+    }, [apiDataResponse?.data]);
 
     const labels = useMemo<typeof artifactListPageLabels>(() => {
       return {
@@ -71,19 +74,16 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     }, [_labels]);
 
     const handleCardProps = useArtifactCardPropsProvider({
-      artifacts: [], // FIXME:PT provide list of items
+      items,
       cardActionDeleteLabel: labels.cardActionDeleteLabel,
       cardActionEditLabel: labels.cardActionEditLabel,
       dataTestSubj: getTestId('card'),
     });
 
-    const setUrlParams = useSetUrlParams();
-
     const handleOpenCreateFlyoutClick = useCallback(() => {
       setUrlParams({ show: 'create' });
     }, [setUrlParams]);
 
-    const isLoading = false; // FIXME: implement
     const doesDataExist = true; // FIXME: implement
 
     if (isLoading && !doesDataExist) {
@@ -157,7 +157,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             <EuiSpacer size="s" />
 
             <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
-              items={[]}
+              items={items}
               ItemComponent={ArtifactEntryCard}
               itemComponentProps={handleCardProps}
               onChange={() => {}}

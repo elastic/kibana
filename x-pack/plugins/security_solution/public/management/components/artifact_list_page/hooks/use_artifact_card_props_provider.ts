@@ -16,9 +16,10 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../common/translations';
 import { useToasts } from '../../../../common/lib/kibana';
+import { useSetUrlParams } from './use_set_url_params';
 
 export interface UseArtifactCardPropsProviderProps {
-  artifacts: ExceptionListItemSchema[];
+  items: ExceptionListItemSchema[];
   cardActionEditLabel: string;
   cardActionDeleteLabel: string;
   dataTestSubj?: string;
@@ -33,13 +34,14 @@ export type ArtifactCardPropsProvider = (
  * `ExceptionListItemSchema` on input
  */
 export const useArtifactCardPropsProvider = ({
-  artifacts,
+  items,
   cardActionDeleteLabel,
   cardActionEditLabel,
   dataTestSubj,
 }: UseArtifactCardPropsProviderProps): ArtifactCardPropsProvider => {
   const getTestId = useTestIdGenerator(dataTestSubj);
   const toasts = useToasts();
+  const setUrlParams = useSetUrlParams();
 
   const { data: policyData } = useGetEndpointSpecificPolicies({
     onError: (error) => {
@@ -56,7 +58,7 @@ export const useArtifactCardPropsProvider = ({
 
     // Casting `listItems` below to remove the `Immutable<>` from it in order to prevent errors
     // with common component's props
-    for (const artifactItem of artifacts as ExceptionListItemSchema[]) {
+    for (const artifactItem of items as ExceptionListItemSchema[]) {
       cachedCardProps[artifactItem.id] = {
         item: artifactItem as AnyArtifact,
         policies,
@@ -65,14 +67,7 @@ export const useArtifactCardPropsProvider = ({
           {
             icon: 'controlsHorizontal',
             onClick: () => {
-              // FIXME:PT implement url update
-              // history.push(
-              //   getEventFiltersListPath({
-              //     ...location,
-              //     show: 'edit',
-              //     id: eventFilter.id,
-              //   })
-              // );
+              setUrlParams({ show: 'edit', id: artifactItem.id });
             },
             'data-test-subj': getTestId('cardEditAction'),
             children: cardActionEditLabel,
@@ -80,7 +75,7 @@ export const useArtifactCardPropsProvider = ({
           {
             icon: 'trash',
             onClick: () => {
-              // FIXME:PT implement
+              // FIXME:PT implement delete individual item
             },
             'data-test-subj': getTestId('cardDeleteAction'),
             children: cardActionDeleteLabel,
@@ -92,7 +87,15 @@ export const useArtifactCardPropsProvider = ({
     }
 
     return cachedCardProps;
-  }, [artifacts, cardActionDeleteLabel, cardActionEditLabel, dataTestSubj, getTestId, policies]);
+  }, [
+    items,
+    policies,
+    dataTestSubj,
+    getTestId,
+    cardActionEditLabel,
+    cardActionDeleteLabel,
+    setUrlParams,
+  ]);
 
   return useCallback(
     (artifactItem: ExceptionListItemSchema) => {
