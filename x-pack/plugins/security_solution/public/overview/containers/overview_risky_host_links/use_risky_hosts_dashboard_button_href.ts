@@ -24,7 +24,7 @@ export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
   const [buttonHref, setButtonHref] = useState<string | undefined>();
 
   useEffect(() => {
-    if (dashboard && dashboard.locator && savedObjectsClient) {
+    if (dashboard?.locator && savedObjectsClient) {
       savedObjectsClient.find<SavedObjectAttributes>(DASHBOARD_REQUEST_BODY).then(
         async (DashboardsSO?: {
           savedObjects?: Array<{

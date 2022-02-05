@@ -22,33 +22,34 @@ export const useRiskyHostsDashboardLinks = (
   useEffect(() => {
     let cancelled = false;
     const createLinks = async () => {
-      if (dashboard && dashboard.locator && dashboard.locator.getUrl && dashboardId) {
+      if (dashboard?.locator && dashboardId) {
         const dashboardUrls = await Promise.all(
-          listItems.reduce((acc: Array<Promise<string>>, listItem) => {
-            if (dashboard && dashboard.locator) {
-              return [
-                ...acc,
-                dashboard.locator.getUrl({
-                  dashboardId,
-                  timeRange: {
-                    to,
-                    from,
-                  },
-                  filters: [
-                    {
-                      meta: {
-                        alias: null,
-                        disabled: false,
-                        negate: false,
+          listItems.reduce(
+            (acc: Array<Promise<string>>, listItem) =>
+              dashboard && dashboard.locator
+                ? [
+                    ...acc,
+                    dashboard.locator.getUrl({
+                      dashboardId,
+                      timeRange: {
+                        to,
+                        from,
                       },
-                      query: { match_phrase: { 'host.name': listItem.title } },
-                    },
-                  ],
-                }),
-              ];
-            }
-            return acc;
-          }, [])
+                      filters: [
+                        {
+                          meta: {
+                            alias: null,
+                            disabled: false,
+                            negate: false,
+                          },
+                          query: { match_phrase: { 'host.name': listItem.title } },
+                        },
+                      ],
+                    }),
+                  ]
+                : acc,
+            []
+          )
         );
         if (!cancelled && dashboardUrls.length) {
           setListItemsWithLinks(
