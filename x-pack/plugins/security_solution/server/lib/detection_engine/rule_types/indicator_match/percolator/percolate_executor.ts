@@ -86,6 +86,8 @@ export const percolateExecutor = ({
     });
     logDebugMessage(`matchable source event count: ${matchableSourceEventCount}`);
 
+    console.log('____matchableEventCOunt', matchableSourceEventCount);
+
     if (matchableSourceEventCount) {
       if (tupleIndex === 0) {
         try {
@@ -102,6 +104,7 @@ export const percolateExecutor = ({
             timestampOverride: indicatorTimestampOverride,
             threatFilters,
             threatIndex,
+            threatIndicatorPath,
             threatLanguage,
             threatMapping,
             threatQuery,
@@ -155,10 +158,14 @@ export const percolateExecutor = ({
 
       results.searchAfterTimes = [(end - start).toString()];
 
+      console.log(JSON.stringify(enrichedHits[0]));
+
       const alertCandidates = wrapHits(
         enrichedHits.slice(0, tuple.maxSignals),
         buildReasonMessageForThreatMatchAlert
       );
+
+      console.log(JSON.stringify(alertCandidates[0]));
 
       const {
         bulkCreateDuration: bulkDuration,

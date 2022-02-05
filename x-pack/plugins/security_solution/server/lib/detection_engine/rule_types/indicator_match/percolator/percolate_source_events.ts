@@ -30,7 +30,7 @@ export const percolateSourceEvents = async ({
   let percolatorResponse: unknown;
 
   try {
-    percolatorResponse = percolatorRuleDataClient.getReader({ namespace: spaceId }).search({
+    percolatorResponse = await percolatorRuleDataClient.getReader({ namespace: spaceId }).search({
       body: {
         query: {
           constant_score: {

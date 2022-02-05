@@ -107,7 +107,7 @@ export const fetchPercolateEnrichEvents = async ({
         searchErrors.forEach((error) => errors.push(error));
         success = false;
         break;
-      }
+      } else if (searchResult.hits.hits.length === 0) break;
 
       const filteredEvents = await filterEventsAgainstList({
         listClient,
@@ -119,31 +119,34 @@ export const fetchPercolateEnrichEvents = async ({
 
       const filteredHits = filteredEvents.hits.hits;
 
-      const {
-        percolatorResponse,
-        success: percolatorSuccess,
-        errors: percolateErrors,
-      } = await percolateSourceEvents({
-        hits: filteredHits,
-        percolatorRuleDataClient,
-        ruleId,
-        ruleVersion,
-        spaceId,
-      });
+      if (filteredHits.length > 0) {
+        const {
+          percolatorResponse,
+          success: percolatorSuccess,
+          errors: percolateErrors,
+        } = await percolateSourceEvents({
+          hits: filteredHits,
+          percolatorRuleDataClient,
+          ruleId,
+          ruleVersion,
+          spaceId,
+        });
 
-      if (!percolatorSuccess || percolateErrors.length) {
-        percolateErrors.forEach((error) => errors.push(error));
-        success = false;
-        break;
+        if (!percolatorSuccess || percolateErrors.length) {
+          percolateErrors.forEach((error) => errors.push(error));
+          success = false;
+          break;
+        }
+
+        if (percolatorResponse.hits.hits.length) {
+          const currentEnrichedHits = enrichEvents({
+            hits: filteredHits,
+            percolatorResponse,
+            threatIndicatorPath,
+          });
+          enrichedHits = [...enrichedHits, ...currentEnrichedHits];
+        }
       }
-
-      const currentEnrichedHits = enrichEvents({
-        hits: filteredHits,
-        percolatorResponse,
-        threatIndicatorPath,
-      });
-
-      enrichedHits = [...enrichedHits, ...currentEnrichedHits];
 
       lastResult = searchResult;
       iterationCount++;

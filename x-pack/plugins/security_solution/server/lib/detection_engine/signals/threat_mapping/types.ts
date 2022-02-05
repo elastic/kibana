@@ -54,6 +54,7 @@ export interface UpdatePercolatorIndexOptions {
   spaceId: string;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
+  threatIndicatorPath: string;
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
@@ -220,6 +221,7 @@ export interface CreatePercolatorQueriesOptions {
   searchAfter: SortResults | undefined;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
+  threatIndicatorPath: string;
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;

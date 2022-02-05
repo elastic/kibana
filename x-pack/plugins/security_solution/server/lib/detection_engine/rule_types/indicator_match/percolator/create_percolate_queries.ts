@@ -19,6 +19,7 @@ export const createPercolateQueries = ({
   threatList,
 }: CreatePercolateQueriesOptions): PercolatorQuery[] => {
   const must = [{ match: { rule_id: ruleId } }, { match: { rule_version: ruleVersion } }];
+
   return threatList.reduce<PercolatorQuery[]>((queries, indicator) => {
     const query = threatMapping.reduce<PercolatorQuery[]>((clauses, threatMapItem) => {
       const filters = threatMapItem.entries.reduce<PercolatorQuery[]>((clauseParts, entry) => {

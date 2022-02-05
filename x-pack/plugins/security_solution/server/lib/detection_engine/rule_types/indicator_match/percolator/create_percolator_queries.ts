@@ -22,18 +22,19 @@ export const createPercolatorQueries = async ({
   searchAfter,
   threatFilters: filters,
   threatIndex: index,
+  threatIndicatorPath,
   threatLanguage: language,
   threatMapping,
   threatQuery: query,
 }: CreatePercolatorQueriesOptions) => {
-  const threatListConfig = {
-    _source: ['*'],
-    fields: undefined,
-  };
   let items: PercolatorQuery[] = [];
   let updatedSearchAfter;
+  const threatListConfig = {
+    _source: [`${threatIndicatorPath}.*`, 'threat.feed.name'],
+    fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
+  };
 
-  let eventPage = await getNextPage({
+  let indicatorPage = await getNextPage({
     abortableEsClient,
     exceptionItems,
     filters,
@@ -46,19 +47,19 @@ export const createPercolatorQueries = async ({
     threatListConfig,
   });
 
-  while (eventPage.hits.hits.length) {
+  while (indicatorPage.hits.hits.length) {
     items = items.concat(
       createPercolateQueries({
         ruleId,
         ruleVersion,
-        threatList: eventPage.hits.hits,
+        threatList: indicatorPage.hits.hits,
         threatMapping,
       })
     );
 
-    updatedSearchAfter = eventPage.hits.hits[eventPage.hits.hits.length - 1].sort;
+    updatedSearchAfter = indicatorPage.hits.hits[indicatorPage.hits.hits.length - 1].sort;
 
-    eventPage = await getNextPage({
+    indicatorPage = await getNextPage({
       abortableEsClient,
       exceptionItems,
       filters,

@@ -46,8 +46,9 @@ export const enrichEvents = ({
   const percolatorHits = percolatorResponse.hits.hits;
 
   percolatorHits.forEach((percolatorHit) => {
+    console.log('____AAAAA_____AAAA', JSON.stringify(percolatorHit));
     const enrichment = createEnrichmentFromPercolatorHit(percolatorHit, threatIndicatorPath);
-
+    console.log('____CCCCCCCCC', JSON.stringify(enrichment));
     const indicesOfEventsToBeEnriched: number[] =
       (percolatorHit.fields?._percolator_document_slot as number[]) ?? [];
 
@@ -55,6 +56,7 @@ export const enrichEvents = ({
       enrichedEvents.push(enrichEvent(hits[indexOfEvent], enrichment));
     });
   });
+  console.log('______SSSSSSS', JSON.stringify(enrichedEvents[0]));
 
   return mergeDuplicates(enrichedEvents);
 };
