@@ -247,10 +247,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       if (!flyoutOpen) {
         return { visualizationTypes: [], visualizationsLookup: {} };
       }
-      const subVisualizationId = getCurrentVisualizationId(
-        props.visualizationMap[visualization.activeId || ''],
-        visualization.state
-      );
+      const subVisualizationId =
+        visualization.activeId && props.visualizationMap[visualization.activeId]
+          ? getCurrentVisualizationId(
+              props.visualizationMap[visualization.activeId],
+              visualization.state
+            )
+          : undefined;
       const lowercasedSearchTerm = searchTerm.toLowerCase();
       // reorganize visualizations in groups
       const grouped: Record<
