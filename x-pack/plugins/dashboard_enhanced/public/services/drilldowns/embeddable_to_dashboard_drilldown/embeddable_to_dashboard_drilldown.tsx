@@ -6,7 +6,11 @@
  */
 
 import type { KibanaLocation } from 'src/plugins/share/public';
-import { DashboardAppLocatorParams } from '../../../../../../../src/plugins/dashboard/public';
+import {
+  DashboardAppLocatorParams,
+  cleanEmptyKeys,
+} from '../../../../../../../src/plugins/dashboard/public';
+import { setStateToKbnUrl } from '../../../../../../../src/plugins/kibana_utils/public';
 import {
   ApplyGlobalFilterActionContext,
   APPLY_FILTER_TRIGGER,
@@ -49,7 +53,11 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
 
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER];
 
-  protected async getLocation(config: Config, context: Context): Promise<KibanaLocation> {
+  protected async getLocation(
+    config: Config,
+    context: Context,
+    useUrl: boolean
+  ): Promise<KibanaLocation> {
     const params: DashboardAppLocatorParams = {
       dashboardId: config.dashboardId,
     };
@@ -85,8 +93,25 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
     }
 
     const location = await this.locator.getLocation(params);
+    if (useUrl) {
+      this.useUrlForState(location);
+    }
 
     return location;
+  }
+
+  private useUrlForState(location: KibanaLocation<DashboardAppLocatorParams>) {
+    const state = location.state;
+    location.path = setStateToKbnUrl(
+      '_a',
+      cleanEmptyKeys({
+        query: state.query,
+        filters: state.filters?.filter((f) => !esFilters.isFilterPinned(f)),
+        savedQuery: state.savedQuery,
+      }),
+      { useHash: false, storeInHashQuery: true },
+      location.path
+    );
   }
 
   public readonly inject = createInject({ drilldownId: this.id });
