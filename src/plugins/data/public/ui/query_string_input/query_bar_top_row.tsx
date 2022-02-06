@@ -388,7 +388,6 @@ export const QueryBarTopRow = React.memo(
     }
 
     function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
-      // debugger
       const lastFilter: any = props.multipleFilters[props.multipleFilters.length - 1];
       const mappedFilters = mapAndFlattenFilters(buildFilters);
       // if (lastFilter !== undefined) lastFilter.relationship = 'AND';

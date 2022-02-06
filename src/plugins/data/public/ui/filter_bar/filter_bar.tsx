@@ -96,7 +96,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function onEditMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
-    // debugger
     const mappedFilters = mapAndFlattenFilters(buildFilters);
     const mergedFilters = mappedFilters.map((filter, idx) => {
       return {

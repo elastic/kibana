@@ -499,7 +499,7 @@ export function AddFilterModal({
                                     const subGroupId =
                                       filtersOnGroup.length > 2
                                         ? localfilter?.subGroupId ?? 0
-                                        : (localfilter?.subGroupId ?? 0) + 1;
+                                        : (localfilter?.subGroupId ?? 0);
                                     const updatedLocalFilter = {
                                       ...localfilter,
                                       relationship: 'AND',
@@ -509,7 +509,6 @@ export function AddFilterModal({
                                       (f) => f.id === localfilter.id && f.groupId === Number(groupId)
                                     );
                                     localFilters[idx] = updatedLocalFilter;
-                                    // debugger
                                     setLocalFilters([
                                       ...localFilters,
                                       {
