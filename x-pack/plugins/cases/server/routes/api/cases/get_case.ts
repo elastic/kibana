@@ -20,6 +20,9 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
           case_id: schema.string(),
         }),
         query: schema.object({
+          /**
+           * @deprecated since version 8.1.0
+           */
           includeComments: schema.boolean({ defaultValue: true }),
         }),
       },
@@ -30,6 +33,9 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
         const id = request.params.case_id;
 
         return response.ok({
+          headers: {
+            ...getWarningHeader('', 'Deprecated query parameter includeComments'),
+          },
           body: await casesClient.cases.get({
             id,
             includeComments: request.query.includeComments,

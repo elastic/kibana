@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { IncomingHttpHeaders } from 'http';
 import { Boom, boomify, isBoom } from '@hapi/boom';
-
 import { schema } from '@kbn/config-schema';
 import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 import { CaseError, isCaseError, HTTPError, isHTTPError } from '../../common/error';
@@ -35,3 +35,10 @@ export function wrapError(
 }
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
+
+export const getWarningHeader = (
+  kibanaVersion: string,
+  msg: string | undefined = 'Deprecated endpoint'
+): { warning: string } => ({
+  warning: `299 Kibana-${kibanaVersion} "${msg}"`,
+});

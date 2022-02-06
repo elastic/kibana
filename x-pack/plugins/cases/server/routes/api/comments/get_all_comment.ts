@@ -8,9 +8,12 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
+import { wrapError, getWarningHeader } from '../utils';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 
+/**
+ * @deprecated since version 8.1.0
+ */
 export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
   router.get(
     {
@@ -26,6 +29,9 @@ export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
         const client = await context.cases.getCasesClient();
 
         return response.ok({
+          headers: {
+            ...getWarningHeader(),
+          },
           body: await client.attachments.getAll({
             caseID: request.params.case_id,
           }),

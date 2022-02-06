@@ -8,9 +8,12 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
+import { getWarningHeader, wrapError } from '../utils';
 import { CASE_USER_ACTIONS_URL } from '../../../../common/constants';
 
+/**
+ * @deprecated since version 8.1.0
+ */
 export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
   router.get(
     {
@@ -31,6 +34,9 @@ export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
         const caseId = request.params.case_id;
 
         return response.ok({
+          headers: {
+            ...getWarningHeader(),
+          },
           body: await casesClient.userActions.getAll({ caseId }),
         });
       } catch (error) {
