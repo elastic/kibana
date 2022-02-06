@@ -1,9 +1,10 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-storybook"
 PKG_REQUIRE_NAME = "@kbn/storybook"
+TYPES_PKG_REQUIRE_NAME = "@types/kbn__storybook"
 
 SOURCE_FILES = glob(
   [
@@ -64,7 +65,6 @@ TYPES_DEPS = [
   "@npm//@storybook/node-logger",
   "@npm//@storybook/react",
   "@npm//@storybook/theming",
-  "@npm//@types/express", # necessary for storybook which is missing the types
   "@npm//@types/loader-utils",
   "@npm//@types/node",
   "@npm//@types/react",
@@ -104,7 +104,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -123,3 +123,21 @@ filegroup(
   ],
   visibility = ["//visibility:public"],
 )
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = TYPES_PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
+  ],
+  visibility = ["//visibility:public"],
+)
+
