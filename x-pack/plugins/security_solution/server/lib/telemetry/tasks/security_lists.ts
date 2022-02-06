@@ -18,8 +18,8 @@ import {
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
 import { batchTelemetryRecords, templateExceptionList } from '../helpers';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
+import { ITelemetryEventsSender } from '../sender';
+import { ITelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 
 export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
@@ -32,8 +32,8 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: TelemetryReceiver,
-      sender: TelemetryEventsSender,
+      receiver: ITelemetryReceiver,
+      sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       let count = 0;
@@ -65,9 +65,10 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         logger.debug(`Trusted Apps: ${trustedAppsJson}`);
         count += trustedAppsJson.length;
 
-        batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch).forEach((batch) =>
-          sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
-        );
+        const batches = batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+        }
       }
 
       // Lists Telemetry: Endpoint Exceptions
@@ -83,9 +84,10 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         logger.debug(`EP Exceptions: ${epExceptionsJson}`);
         count += epExceptionsJson.length;
 
-        batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch).forEach((batch) =>
-          sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
-        );
+        const batches = batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+        }
       }
 
       // Lists Telemetry: Endpoint Event Filters
@@ -101,9 +103,10 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         logger.debug(`EP Event Filters: ${epFiltersJson}`);
         count += epFiltersJson.length;
 
-        batchTelemetryRecords(epFiltersJson, maxTelemetryBatch).forEach((batch) =>
-          sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
-        );
+        const batches = batchTelemetryRecords(epFiltersJson, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+        }
       }
 
       return count;
