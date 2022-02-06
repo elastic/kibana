@@ -885,6 +885,18 @@ module.exports = {
         ],
       },
     },
+    {
+      // require explicit return types in route handlers for performance reasons
+      files: ['x-pack/plugins/apm/server/**/route.ts'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': [
+          'error',
+          {
+            allowTypedFunctionExpressions: false,
+          },
+        ],
+      },
+    },
 
     /**
      * Fleet overrides

@@ -105,16 +105,25 @@ const fleetAgentsRoute = createApmServerRoute({
     return {
       cloudStandaloneSetup,
       isFleetEnabled: true,
-      fleetAgents: fleetAgents.map((agent) => {
-        const packagePolicy = policiesGroupedById[agent.id];
-        const packagePolicyVars = packagePolicy.inputs[0]?.vars;
-        return {
-          id: agent.id,
-          name: agent.name,
-          apmServerUrl: packagePolicyVars?.url?.value,
-          secretToken: packagePolicyVars?.secret_token?.value,
-        };
-      }),
+      fleetAgents: fleetAgents.map(
+        (
+          agent
+        ): {
+          id: string;
+          name: string;
+          apmServerUrl: string | undefined;
+          secretToken: string | undefined;
+        } => {
+          const packagePolicy = policiesGroupedById[agent.id];
+          const packagePolicyVars = packagePolicy.inputs[0]?.vars;
+          return {
+            id: agent.id,
+            name: agent.name,
+            apmServerUrl: packagePolicyVars?.url?.value,
+            secretToken: packagePolicyVars?.secret_token?.value,
+          };
+        }
+      ),
     };
   },
 });
