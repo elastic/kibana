@@ -84,6 +84,7 @@ export enum SecurityPageName {
    * Warning: Computed values are not permitted in an enum with string valued members
    * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
    */
+  blocklist = 'blocklist',
   case = 'cases',
   caseConfigure = 'cases_configure',
   caseCreate = 'cases_create',
@@ -132,6 +133,7 @@ export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
+export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
@@ -151,6 +153,7 @@ export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}` as const;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as const;
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
+export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -266,6 +269,14 @@ export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
 export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
+
+/**
+ * Telemetry detection endpoint for any previews requested of what data we are
+ * providing through UI/UX and for e2e tests.
+ *   curl http//localhost:5601/internal/security_solution/telemetry
+ * to see the contents
+ */
+export const SECURITY_TELEMETRY_URL = `/internal/security_solution/telemetry` as const;
 
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;

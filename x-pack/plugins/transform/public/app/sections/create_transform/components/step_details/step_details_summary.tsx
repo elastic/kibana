@@ -26,6 +26,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
     transformFrequency,
     transformSettingsMaxPageSearchSize,
     destinationIndex,
+    destinationIngestPipeline,
     touched,
     indexPatternTimeField,
   } = props;
@@ -75,6 +76,19 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
           })}
         >
           <span>{indexPatternTimeField}</span>
+        </EuiFormRow>
+      )}
+
+      {destinationIngestPipeline !== undefined && destinationIngestPipeline !== '' && (
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.transform.stepDetailsSummary.destinationIngestPipelineLabel',
+            {
+              defaultMessage: 'Destination ingest pipeline',
+            }
+          )}
+        >
+          <span>{destinationIngestPipeline}</span>
         </EuiFormRow>
       )}
 
