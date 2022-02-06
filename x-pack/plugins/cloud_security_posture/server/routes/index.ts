@@ -8,8 +8,10 @@
 import type { IRouter, Logger } from '../../../../../src/core/server';
 import { defineGetStatsRoute } from './stats/stats';
 import { defineFindingsIndexRoute as defineGetFindingsIndexRoute } from './findings/findings';
+import { defineSaveDataYamlRoute } from './configuration/save_data_yaml';
 
 export function defineRoutes(router: IRouter, logger: Logger) {
   defineGetStatsRoute(router, logger);
   defineGetFindingsIndexRoute(router, logger);
+  defineSaveDataYamlRoute(router, logger);
 }

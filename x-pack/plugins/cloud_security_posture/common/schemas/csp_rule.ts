@@ -28,3 +28,7 @@ export const cspRuleSchema = rt.object({
 });
 
 export type CspRuleSchema = TypeOf<typeof cspRuleSchema>;
+
+export const cspDataYamlSchema = rt.string();
+
+export type CspDataYamlSchema = TypeOf<typeof cspDataYamlSchema>;

@@ -18,44 +18,6 @@ import {
   cspRuleAssetSavedObjectType,
 } from '../../../common/schemas/csp_rule';
 
-const validationMap: SavedObjectsValidationMap = {
-  '1.0.0': cspRuleSchema,
-};
-
-export const ruleAssetSavedObjectMappings: SavedObjectsType<CspRuleSchema>['mappings'] = {
-  dynamic: false,
-  properties: {
-    name: {
-      type: 'text', // search
-      fields: {
-        raw: {
-          type: 'keyword', // sort
-        },
-      },
-    },
-    description: {
-      type: 'text',
-    },
-  },
-};
-
-export const cspRuleAssetType: SavedObjectsType<CspRuleSchema> = {
-  name: cspRuleAssetSavedObjectType,
-  hidden: false,
-  namespaceType: 'agnostic',
-  mappings: ruleAssetSavedObjectMappings,
-  schemas: validationMap,
-  // migrations: {}
-  management: {
-    importableAndExportable: true,
-    visibleInManagement: true,
-    getTitle: (savedObject) =>
-      i18n.translate('xpack.csp.cspSettings.rules', {
-        defaultMessage: `CSP Security Rules - ${savedObject.attributes.benchmark.name} ${savedObject.attributes.benchmark.version} ${savedObject.attributes.name}`,
-      }),
-  },
-};
-
 const yamlValidationMap: SavedObjectsValidationMap = {
   '1.0.0': cspDataYamlSchema,
 };
@@ -82,7 +44,7 @@ export const cspConfigurationAssetType: SavedObjectsType<CspDataYamlSchema> = {
   hidden: false,
   namespaceType: 'agnostic',
   mappings: ruleAssetSavedObjectMappings,
-  schemas: validationMap,
+  schemas: yamlValidationMap,
   // migrations: {}
   management: {
     importableAndExportable: true,

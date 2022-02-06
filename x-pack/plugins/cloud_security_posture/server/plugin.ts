@@ -21,7 +21,10 @@ import type {
 } from './types';
 import { defineRoutes } from './routes';
 import { initUiSettings } from './uiSettings';
-import { cspRuleAssetType } from './saved_objects/benchmark_rules/csp_rule_type';
+import {
+  cspRuleAssetType,
+  cspConfigurationAssetType,
+} from './saved_objects/benchmark_rules/csp_rule_type';
 import { initializeCspRules } from './saved_objects/benchmark_rules/initialize_rules';
 
 export class CspPlugin
@@ -45,6 +48,7 @@ export class CspPlugin
     this.logger.debug('csp: Setup');
 
     core.savedObjects.registerType(cspRuleAssetType);
+    core.savedObjects.registerType(cspConfigurationAssetType);
 
     const router = core.http.createRouter();
 
