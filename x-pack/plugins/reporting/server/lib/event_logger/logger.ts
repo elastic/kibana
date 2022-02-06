@@ -29,14 +29,32 @@ export interface ExecutionCompleteMetrics {
 }
 
 const getEventLog = (logger: LevelLogger) => ({
-  getLogger(lProperties: IEvent): IEventLogger {
-    return {
-      logEvent(properties: IEvent) {
-        logger.debug(JSON.stringify([lProperties, properties]), ['reporting-event-log']);
-      },
-      startTiming(_event: IEvent) {},
-      stopTiming(_event: IEvent) {},
-    };
+  getLogger(lProperties: Partial<IEvent>): IEventLogger {
+    return (function () {
+      let start: Date | undefined;
+      let end: Date | undefined;
+      let duration: number | undefined;
+
+      return {
+        logEvent(properties: IEvent) {
+          if (start && !end) {
+            end = start ? new Date() : undefined;
+          }
+          duration = end && start ? end.valueOf() - start.valueOf() : undefined;
+          const timing: Partial<IEvent> = {
+            event: { duration, start: start?.toISOString(), end: end?.toISOString() },
+          };
+          const mProperties: Partial<IEvent> = deepMerge(lProperties, timing);
+          logger.debug(JSON.stringify(deepMerge(mProperties, properties)), ['reporting-event-log']);
+        },
+        startTiming(_event: IEvent) {
+          start = new Date();
+        },
+        stopTiming(_event: IEvent) {
+          end = new Date();
+        },
+      };
+    })();
   },
 });
 

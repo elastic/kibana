@@ -101,6 +101,8 @@ describe('Event Logger', () => {
 
   it(`logExecutionStart`, () => {
     const logger = new factory(mockReport);
+    jest.spyOn(logger.completionLogger, 'startTiming');
+    jest.spyOn(logger.completionLogger, 'stopTiming');
     const result = logger.logExecutionStart();
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
@@ -118,10 +120,14 @@ describe('Event Logger', () => {
       ]
     `);
     expect(result.message).toMatchInlineSnapshot(`"starting csv execution"`);
+    expect(logger.completionLogger.startTiming).toBeCalled();
+    expect(logger.completionLogger.stopTiming).not.toBeCalled();
   });
 
   it(`logExecutionComplete`, () => {
     const logger = new factory(mockReport);
+    jest.spyOn(logger.completionLogger, 'startTiming');
+    jest.spyOn(logger.completionLogger, 'stopTiming');
     logger.logExecutionStart();
 
     const result = logger.logExecutionComplete({ byteSize: 444 });
@@ -143,6 +149,8 @@ describe('Event Logger', () => {
       ]
     `);
     expect(result.message).toMatchInlineSnapshot(`"completed csv execution"`);
+    expect(logger.completionLogger.startTiming).toBeCalled();
+    expect(logger.completionLogger.stopTiming).toBeCalled();
   });
 
   it(`logError`, () => {
