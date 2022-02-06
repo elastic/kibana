@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookParamsFields from './webhook_params';
 import { MockCodeEditor } from '../../../code_editor.mock';
 
