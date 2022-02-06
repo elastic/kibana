@@ -23,7 +23,7 @@ import {
   EuiModalBody,
   EuiTabs,
   EuiTab,
-  EuiForm,
+  EuiPanel,
   EuiSpacer,
   EuiHorizontalRule,
   EuiButtonIcon,
@@ -422,7 +422,8 @@ export function AddFilterModal({
       }
 
       const temp = (
-        <div
+        <EuiPanel
+          color="subdued"
           className={classNames(
             filtersInGroup > 1 && groupsCount > 1 ? 'kbnQueryBar__filterModalGroups' : ''
           )}
@@ -616,7 +617,7 @@ export function AddFilterModal({
               </>
             );
           })}
-        </div>
+        </EuiPanel>
       );
       GroupComponent.push(temp);
     }
@@ -654,11 +655,9 @@ export function AddFilterModal({
       <EuiHorizontalRule margin="none" />
 
       <EuiModalBody className="kbnQueryBar__filterModalWrapper">
-        <EuiForm className="kbnQueryBar__filterModalForm">
-          {addFilterMode === 'quick_form' && renderGroupedFilters()}
-          {addFilterMode === 'query_builder' && renderCustomEditor()}
-          {addFilterMode === 'saved_filters' && savedQueryManagement}
-        </EuiForm>
+        {addFilterMode === 'quick_form' && renderGroupedFilters()}
+        {addFilterMode === 'query_builder' && renderCustomEditor()}
+        {addFilterMode === 'saved_filters' && savedQueryManagement}
       </EuiModalBody>
       <EuiHorizontalRule margin="none" />
       <EuiModalFooter>
