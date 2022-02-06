@@ -10,5 +10,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["navigation", "data", "fleet"],
-  "requiredBundles": ["kibanaReact", "fleet"]
+  "requiredBundles": ["kibanaReact"]
 }
