@@ -10,19 +10,13 @@ import type {
   SavedObjectsType,
   SavedObjectsValidationMap,
 } from '../../../../../../src/core/server';
-import {
-  type CspRuleSchema,
-  type CspDataYamlSchema,
-  cspDataYamlSchema,
-  cspRuleSchema,
-  cspRuleAssetSavedObjectType,
-} from '../../../common/schemas/csp_rule';
+import { type CspConfigSchema, cspConfigSchema } from '../../../common/schemas/csp_configuration';
 
-const yamlValidationMap: SavedObjectsValidationMap = {
-  '1.0.0': cspDataYamlSchema,
+const configValidationMap: SavedObjectsValidationMap = {
+  '1.0.0': cspConfigSchema,
 };
 
-export const configAssetSavedObjectMappings: SavedObjectsType<CspRuleSchema>['mappings'] = {
+export const configAssetSavedObjectMappings: SavedObjectsType<CspConfigSchema>['mappings'] = {
   dynamic: false,
   properties: {
     name: {
@@ -39,19 +33,18 @@ export const configAssetSavedObjectMappings: SavedObjectsType<CspRuleSchema>['ma
   },
 };
 
-export const cspConfigurationAssetType: SavedObjectsType<CspDataYamlSchema> = {
-  name: 'data_yaml',
+export const cspConfigurationAssetType: SavedObjectsType<CspConfigSchema> = {
+  name: 'csp_config',
   hidden: false,
   namespaceType: 'agnostic',
-  mappings: ruleAssetSavedObjectMappings,
-  schemas: yamlValidationMap,
-  // migrations: {}
+  mappings: configAssetSavedObjectMappings,
+  schemas: configValidationMap,
   management: {
     importableAndExportable: true,
     visibleInManagement: true,
-    getTitle: (savedObject) =>
-      i18n.translate('xpack.csp.cspSettings.rules', {
-        defaultMessage: `CSP Data Yaml Config`,
-      }),
+    // getTitle: (savedObject) =>
+    //   i18n.translate('xpack.csp.cspSettings.rules', {
+    // defaultMessage: `CSP Config }`,
+    //   }),
   },
 };

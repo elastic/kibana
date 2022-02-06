@@ -12,15 +12,12 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from 'src/core/server';
-import {
-  CspRuleSchema,
-  cspRuleAssetSavedObjectType,
-  CspDataYamlSchema,
-} from '../../../common/schemas/csp_rule';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import yaml from 'js-yaml';
 
+import { CspConfigSchema } from 'x-pack/plugins/cloud_security_posture/common/schemas/csp_configuration';
 import { SAVE_DATA_YAML_ROUTE_PATH } from '../../../common/constants';
+import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
 export const DEFAULT_FINDINGS_PER_PAGE = 20;
 
 // type FindingsQuerySchema = TypeOf<typeof schema>;
@@ -37,27 +34,21 @@ const getCspRule = async (soClient: SavedObjectsClientContract) => {
   return cspRules;
 };
 
-const createDataYaml = async (
+const createConfig = async (
   cspRules: SavedObjectsFindResponse<CspRuleSchema>
-): Promise<string> => {
-  // activated_rules:
-  // cis_k8s:
-  //   - cis_1_1_1
-  //   - cis_1_1_2
-  // cis_eks:
-  //   - cis_1_1_1
-  //   const foo = { activated_rules: { cis_k8s: [cis_1_1_1, cis_1_1_2] }, cis_eks: [cis_1_1_3] } };
-  let data = {
+): Promise<CspConfigSchema> => {
+  const config = {
     activated_rules: {
       cis_k8s: cspRules.saved_objects.map((cspRule) => cspRule.id),
     },
   };
+  return config;
+};
 
-  // Write to file
-  const dataYaml = yaml.safeDump(data);
+const convertConfigToYaml = (config: CspConfigSchema): string => {
+  const dataYaml = yaml.safeDump(config);
   console.log(dataYaml);
   return dataYaml;
-  //   return dataYaml;
 };
 
 export const defineSaveDataYamlRoute = (router: IRouter, logger: Logger): void =>
@@ -71,9 +62,12 @@ export const defineSaveDataYamlRoute = (router: IRouter, logger: Logger): void =
       try {
         const soClient = context.core.savedObjects.client;
         const cspRules = await getCspRule(soClient);
-        const dataYaml = await createDataYaml(cspRules);
-        const tmp = await soClient.create('data_yaml', { dataYaml });
+        const config = await createConfig(cspRules);
+
+        const tmp = await soClient.create('csp_config', { config });
         console.log({ tmp });
+
+        convertConfigToYaml(config);
 
         return response.ok({ body: cspRules });
       } catch (err) {

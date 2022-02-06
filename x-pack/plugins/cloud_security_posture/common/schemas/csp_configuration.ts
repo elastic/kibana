@@ -9,6 +9,10 @@ import { schema as rt, TypeOf } from '@kbn/config-schema';
 // TODO: snake case
 export const cspRuleAssetSavedObjectType = 'csp_config';
 
-export const cspDataYamlSchema = rt.string();
+export const cspConfigSchema = rt.object({
+  activated_rules: rt.object({
+    cis_k8s: rt.arrayOf(rt.string()),
+  }),
+});
 
-export type CspConfigSchema = TypeOf<typeof cspDataYamlSchema>;
+export type CspConfigSchema = TypeOf<typeof cspConfigSchema>;

@@ -21,10 +21,8 @@ import type {
 } from './types';
 import { defineRoutes } from './routes';
 import { initUiSettings } from './uiSettings';
-import {
-  cspRuleAssetType,
-  cspConfigurationAssetType,
-} from './saved_objects/benchmark_rules/csp_rule_type';
+import { cspRuleAssetType } from './saved_objects/benchmark_rules/csp_rule_type';
+import { cspConfigurationAssetType } from './saved_objects/configurations/csp_config_type';
 import { initializeCspRules } from './saved_objects/benchmark_rules/initialize_rules';
 
 export class CspPlugin
