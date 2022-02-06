@@ -55,30 +55,22 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
 export const EXPERIMENTAL_ON = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalOn',
   {
-    defaultMessage: 'Experimental: On',
+    defaultMessage: 'Technical preview: On',
   }
 );
 
-export const EXPERIMENTAL_ON_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOnDescription',
+export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
   {
     defaultMessage:
-      'The experimental rules table view allows for advanced sorting and filtering capabilities. If you experience performance issues when working with the table, you can turn the experimental view off in Security Solution Advanced Settings.',
+      'The experimental rules table view is in technical preview and allows for advanced sorting capabilities. If you experience performance issues when working with the table, you can turn this setting off.',
   }
 );
 
 export const EXPERIMENTAL_OFF = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalOff',
   {
-    defaultMessage: 'Experimental: Off',
-  }
-);
-
-export const EXPERIMENTAL_OFF_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOffDescription',
-  {
-    defaultMessage:
-      "The experimental rules table view allows for advanced sorting and filtering capabilities. It is turned off because you have more than 3000 rules. If you'd like to turn it on, you can do that in Security Solutions Advanced Settings.",
+    defaultMessage: 'Technical preview: Off',
   }
 );
 

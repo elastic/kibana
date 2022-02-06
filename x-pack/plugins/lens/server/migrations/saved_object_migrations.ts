@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { cloneDeep, flow, mergeWith } from 'lodash';
+import { cloneDeep, flow } from 'lodash';
 import { fromExpression, toExpression, Ast, AstFunction } from '@kbn/interpreter';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationContext,
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
+import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
 import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
 import {
@@ -27,6 +27,7 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  CustomVisualizationMigrations,
   LensDocShape810,
 } from './types';
 import {
@@ -36,6 +37,7 @@ import {
   commonMakeReversePaletteAsCustom,
   commonRenameFilterReferences,
   getLensFilterMigrations,
+  getLensCustomVisualizationMigrations,
   commonRenameRecordsField,
 } from './common_migrations';
 
@@ -472,22 +474,14 @@ const lensMigrations: SavedObjectMigrationMap = {
   '8.1.0': flow(renameFilterReferences, renameRecordsField),
 };
 
-export const mergeSavedObjectMigrationMaps = (
-  obj1: SavedObjectMigrationMap,
-  obj2: SavedObjectMigrationMap
-): SavedObjectMigrationMap => {
-  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
-    if (!srcValue || !objValue) {
-      return srcValue || objValue;
-    }
-    return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
-      objValue(srcValue(state, context), context);
-  };
-
-  return mergeWith({ ...obj1 }, obj2, customizer);
-};
-
 export const getAllMigrations = (
-  filterMigrations: MigrateFunctionsObject
+  filterMigrations: MigrateFunctionsObject,
+  customVisualizationMigrations: CustomVisualizationMigrations
 ): SavedObjectMigrationMap =>
-  mergeSavedObjectMigrationMaps(lensMigrations, getLensFilterMigrations(filterMigrations));
+  mergeSavedObjectMigrationMaps(
+    mergeSavedObjectMigrationMaps(
+      lensMigrations,
+      getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+    ),
+    getLensCustomVisualizationMigrations(customVisualizationMigrations)
+  );
