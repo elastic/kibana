@@ -190,6 +190,20 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.securityUI.logout();
           });
 
+          it('should display elements on ML Overview page correctly', async () => {
+            await ml.testExecution.logTestStep('should load the Overview page');
+            await ml.navigation.navigateToOverview();
+
+            await ml.testExecution.logTestStep('should display ML Nodes panel');
+            await ml.mlNodesPanel.assertNodeOverviewPanel();
+
+            await ml.testExecution.logTestStep('should display Anomaly Detection panel');
+            await ml.overviewPage.assertAdJobsOverviewPanelExist();
+
+            await ml.testExecution.logTestStep('should display DFA panel');
+            await ml.overviewPage.assertDFAJobsOverviewPanelExist();
+          });
+
           it('should display elements on Anomaly Detection page correctly', async () => {
             await ml.testExecution.logTestStep('should load the AD job management page');
             await ml.navigation.navigateToMl();

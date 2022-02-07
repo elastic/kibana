@@ -45,6 +45,10 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
       );
     },
 
+    async assertAdJobsOverviewPanelExist() {
+      await testSubjects.existOrFail('mlOverviewTableAnomalyDetection');
+    },
+
     async assertDFAEmptyStateExists() {
       await testSubjects.existOrFail('mlNoDataFrameAnalyticsFound');
     },
@@ -61,6 +65,10 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
           isEnabled ? 'enabled' : 'disabled'
         }')`
       );
+    },
+
+    async assertDFAJobsOverviewPanelExist() {
+      await testSubjects.existOrFail('mlOverviewTableAnalytics');
     },
 
     async assertJobSyncRequiredWarningExists() {
