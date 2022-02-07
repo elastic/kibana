@@ -351,8 +351,7 @@ export class AttachmentService {
           caseIds: {
             terms: {
               field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
-              // +1 to make sure we request more than the number of ids that were asked for
-              size: ids.length + 1,
+              size: ids.length,
             },
             aggregations: {
               reverse: {

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
+import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import type { ServerVersion } from '../../../../types/status';
 import { VersionHeader } from './version_header';
 
