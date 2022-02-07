@@ -38,3 +38,8 @@
     fill: makeGraphicContrastColor($euiColorVis0, $euiColorDarkShade);
   }
 }
+
+.lnsNavItem__goBack > span {
+  border-right: 1px solid $euiColorLightShade;
+  height: 70%;
+}

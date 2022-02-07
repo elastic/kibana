@@ -46,6 +46,8 @@ import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER } from '../../../../ui_actions/public';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
+import './visualize_navigation.scss';
+
 interface VisualizeCapabilities {
   createShortUrl: boolean;
   delete: boolean;
@@ -293,6 +295,7 @@ export const getTopNavConfig = (
             description: i18n.translate('visualizations.topNavMenu.goToLensButtonAriaLabel', {
               defaultMessage: 'Go to Lens with your current configuration',
             }),
+            className: 'visNavItem__goToLens',
             disableButton: !editInLensConfig,
             testId: 'visualizeEditInLensButton',
             run: async () => {

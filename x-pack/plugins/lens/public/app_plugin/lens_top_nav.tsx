@@ -80,6 +80,7 @@ function getLensTopNavConfig(options: {
         values: { contextOriginatingApp },
       }),
       run: actions.goBack,
+      className: 'lnsNavItem__goBack',
       testId: 'lnsApp_goBackToAppButton',
       description: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
