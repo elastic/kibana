@@ -10,6 +10,7 @@ import {
   SavedObjectsServiceStart,
   Logger,
   ElasticsearchClient,
+  PluginInitializerContext,
 } from 'kibana/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
@@ -31,6 +32,7 @@ import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 
 interface CasesClientFactoryArgs {
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   getSpace: GetSpaceFn;
@@ -113,6 +115,7 @@ export class CasesClientFactory {
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
+      kibanaVersion: this.options.kibanaVersion,
     });
   }
 }

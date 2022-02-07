@@ -30,7 +30,7 @@ export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
 
         return response.ok({
           headers: {
-            ...getWarningHeader(),
+            ...getWarningHeader(client.kibanaVersion),
           },
           body: await client.attachments.getAll({
             caseID: request.params.case_id,

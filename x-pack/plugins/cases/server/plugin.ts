@@ -59,11 +59,13 @@ export interface PluginStartContract {
 
 export class CasePlugin {
   private readonly log: Logger;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
   private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.log = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.log);
   }
@@ -121,6 +123,7 @@ export class CasePlugin {
        */
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
+      kibanaVersion: this.kibanaVersion,
     });
 
     const client = core.elasticsearch.client;

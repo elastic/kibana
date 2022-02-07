@@ -35,7 +35,7 @@ export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
 
         return response.ok({
           headers: {
-            ...getWarningHeader(),
+            ...getWarningHeader(casesClient.kibanaVersion),
           },
           body: await casesClient.userActions.getAll({ caseId }),
         });

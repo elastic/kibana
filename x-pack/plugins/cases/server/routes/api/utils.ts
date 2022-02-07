@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IncomingHttpHeaders } from 'http';
 import { Boom, boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
