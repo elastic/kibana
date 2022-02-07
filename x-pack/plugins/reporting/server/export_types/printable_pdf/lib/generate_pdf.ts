@@ -68,18 +68,14 @@ export function generatePdfObservable(
       try {
         tracker.startCompile();
         logger.info(`Compiling PDF using "${layout.id}" layout...`);
-        pdfOutput.generate();
+        buffer = await pdfOutput.generate();
         tracker.endCompile();
 
-        tracker.startGetBuffer();
         logger.debug(`Generating PDF Buffer...`);
-        buffer = await pdfOutput.getBuffer();
 
         const byteLength = buffer?.byteLength ?? 0;
         logger.debug(`PDF buffer byte length: ${byteLength}`);
         tracker.setByteLength(byteLength);
-
-        tracker.endGetBuffer();
       } catch (err) {
         logger.error(`Could not generate the PDF buffer!`);
         logger.error(err);
