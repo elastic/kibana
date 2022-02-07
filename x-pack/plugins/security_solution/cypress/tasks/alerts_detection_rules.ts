@@ -317,12 +317,20 @@ export const openBulkEditDeleteIndexPatternsForm = () => {
   cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Delete index patterns');
 };
 
-export const openBulkEditTagsPatternsForm = () => {
+export const openBulkEditAddTagsForm = () => {
   openBulkActionsMenu();
   cy.get('[data-test-subj="tagsBulkEditRule"]').click();
   cy.get('[data-test-subj="addTagsBulkEditRule"]').click();
 
   cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Add tags');
+};
+
+export const openBulkEditDeleteTagsForm = () => {
+  openBulkActionsMenu();
+  cy.get('[data-test-subj="tagsBulkEditRule"]').click();
+  cy.get('[data-test-subj="deleteTagsBulkEditRule"]').click();
+
+  cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Delete tags');
 };
 
 export const typeIndexPattern = (customIndex: string) => {
@@ -336,6 +344,8 @@ export const typeTags = (tags: string[]) => {
     .find('[data-test-subj="input"]')
     .type(tags.join('{enter}'));
 };
+export const getOverwriteTagsCheckbox = () =>
+  cy.get('[data-test-subj="detectionEngineBulkEditOverwriteTags"]');
 
 export const getOverwriteCheckbox = () =>
   cy.get('[data-test-subj="detectionEngineBulkEditOverwriteIndexPatterns"]');
@@ -378,11 +388,21 @@ export const testAllTagsBadges = (tags: string[]) => {
   cy.get('[data-test-subj="tagsDisplayPopoverButton"]')
     .should('have.length', 6)
     .each(($el) => {
-      $el.trigger('click');
+      // open tags popover
+      cy.wrap($el).click();
+
+      // .then(() => {
+      // cy.get('[data-test-subj="tagsDisplayPopoverWrapper"]')
+      //   //   .should('be.visible')
+      //   .should('have.text', tags.join(''));
+      // });
+      //   $el.trigger('click');
       cy.get('[data-test-subj="tagsDisplayPopoverWrapper"]')
-        .should('be.visible')
+        //   .should('be.visible')
         .should('have.text', tags.join(''));
-      $el.trigger('click');
-      cy.get('[data-test-subj="tagsDisplayPopoverWrapper"]').should('be.hidden');
+      // close tags popover
+      cy.wrap($el).click();
+      //  $el.trigger('click');
+      //   cy.get('[data-test-subj="tagsDisplayPopoverWrapper"]').should('be.hidden');
     });
 };

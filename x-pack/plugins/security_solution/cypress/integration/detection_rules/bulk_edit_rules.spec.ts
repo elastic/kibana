@@ -34,12 +34,14 @@ import {
   getOverwriteCheckbox,
   loadPrebuiltDetectionRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
+  getOverwriteTagsCheckbox,
   waitForRulesTableToBeRefreshed,
   selectNumberOfRules,
   clickAddIndexPatternsMenuItem,
   waitForElasticRulesBulkEditModal,
   waitForMixedRulesBulkEditModal,
-  openBulkEditTagsPatternsForm,
+  openBulkEditAddTagsForm,
+  openBulkEditDeleteTagsForm,
   testAllTagsBadges,
   typeTags,
 } from '../../tasks/alerts_detection_rules';
@@ -60,8 +62,14 @@ const RULE_NAME = 'Custom rule for bulk actions';
 
 const CUSTOM_INDEX_PATTERN_1 = 'custom-cypress-test-*';
 const DEFAULT_INDEX_PATTERNS = ['index-1-*', 'index-2-*'];
+const DEFAULT_TAGS = ['default-tag'];
 
-const customRule = { ...getNewRule(), index: DEFAULT_INDEX_PATTERNS, name: RULE_NAME };
+const customRule = {
+  ...getNewRule(),
+  index: DEFAULT_INDEX_PATTERNS,
+  name: RULE_NAME,
+  tags: DEFAULT_TAGS,
+};
 
 describe('Detection rules, bulk edit', () => {
   beforeEach(() => {
@@ -197,21 +205,51 @@ describe('Detection rules, bulk edit', () => {
 
   describe('tags', () => {
     it.only('Adds new tags to all rules', () => {
+      // First step: add tags to all rules
       // switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
       changeRowsPerPageTo(5);
       selectAllRules();
-
-      openBulkEditTagsPatternsForm();
-
+      // open add tags from and add save 2 new tags
+      openBulkEditAddTagsForm();
       typeTags(['tag1', 'tag2']);
+      confirmBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: 6 });
+      // check if all rule have been updated
+      changeRowsPerPageTo(20);
+      testAllTagsBadges(['tag1', 'tag2']);
+
+      // Second step: remove one tag from all rules
+      changeRowsPerPageTo(5);
+      selectAllRules();
+
+      openBulkEditDeleteTagsForm();
+      typeTags(['tag1']);
+      confirmBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: 6 });
+
+      changeRowsPerPageTo(20);
+      testAllTagsBadges(['tag2']);
+
+      // Third step: overwrite all tags
+      changeRowsPerPageTo(5);
+      selectAllRules();
+
+      openBulkEditAddTagsForm();
+      getOverwriteTagsCheckbox().should('have.text', 'Overwrite all selected rules tags').click();
+
+      cy.contains(
+        'You’re about to overwrite tags for 6 selected rules, press Save to apply changes.'
+      );
+      typeTags(['overwrite-tag']);
+
       confirmBulkEditForm();
 
       waitForBulkEditActionToFinish({ rulesCount: 6 });
 
       changeRowsPerPageTo(20);
 
-      // check if rule has been updated
-      testAllTagsBadges(['tag1', 'tag2']);
+      // check if all rule have been updated
+      testAllTagsBadges(['overwrite-tag']);
     });
 
     it('Delete index pattern from all rules', () => {
