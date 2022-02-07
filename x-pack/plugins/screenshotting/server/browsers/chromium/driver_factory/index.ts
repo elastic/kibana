@@ -151,6 +151,7 @@ export class HeadlessChromiumDriverFactory {
           // browser reflow. In most cases only the height needs to be adjusted
           // before taking a screenshot.
           // NOTE: _.defaults assigns to the target object, so we copy it.
+          // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
           defaultViewport: _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT),
           env: {
             TZ: browserTimezone,
