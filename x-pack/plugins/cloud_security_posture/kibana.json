@@ -1,0 +1,14 @@
+{
+  "id": "csp",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "csp",
+    "githubTeam": "csp"
+  },
+  "description": "the cloud security posture plugin",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation", "data"],
+  "requiredBundles": ["kibanaReact"]
+}
