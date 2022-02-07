@@ -242,11 +242,11 @@ export function AddFilterModal({
           placeholder={
             selectedField
               ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                defaultMessage: 'Operator',
-              })
+                  defaultMessage: 'Operator',
+                })
               : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                defaultMessage: 'Waiting',
-              })
+                  defaultMessage: 'Waiting',
+                })
           }
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
@@ -428,14 +428,15 @@ export function AddFilterModal({
           className={classNames(
             filtersInGroup > 1 && groupsCount > 1 ? 'kbnQueryBar__filterModalGroups' : ''
           )}
+          paddingSize="s"
         >
           {subGroups.map((subGroup, subGroupIdx) => {
             const classes =
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                  ? 'kbnQueryBar__filterModalGroups'
-                  : '';
+                ? 'kbnQueryBar__filterModalGroups'
+                : '';
             return (
               <>
                 <div className={classNames(classes)}>
@@ -457,15 +458,18 @@ export function AddFilterModal({
                             </EuiFlexGroup>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-
                             <EuiFlexGroup responsive={false} justifyContent="center">
                               {subGroup.length < 2 && (
                                 <EuiFlexItem grow={false}>
                                   <EuiButtonIcon
                                     onClick={() => {
-                                      const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
+                                      const updatedLocalFilter = {
+                                        ...localfilter,
+                                        relationship: 'OR',
+                                      };
                                       const idx = localFilters.findIndex(
-                                        (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                                        (f) =>
+                                          f.id === localfilter.id && f.groupId === Number(groupId)
                                       );
                                       const subGroupId = (localfilter?.subGroupId ?? 0) + 1;
                                       if (subGroup.length < 2) {
@@ -500,14 +504,15 @@ export function AddFilterModal({
                                     const subGroupId =
                                       filtersOnGroup.length > 2
                                         ? localfilter?.subGroupId ?? 0
-                                        : (localfilter?.subGroupId ?? 0);
+                                        : localfilter?.subGroupId ?? 0;
                                     const updatedLocalFilter = {
                                       ...localfilter,
                                       relationship: 'AND',
                                       subGroupId: filtersOnGroup.length > 1 ? subGroupId : 1,
                                     };
                                     const idx = localFilters.findIndex(
-                                      (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                                      (f) =>
+                                        f.id === localfilter.id && f.groupId === Number(groupId)
                                     );
                                     localFilters[idx] = updatedLocalFilter;
                                     setLocalFilters([
@@ -517,7 +522,12 @@ export function AddFilterModal({
                                         operator: undefined,
                                         value: undefined,
                                         relationship: undefined,
-                                        groupId: filtersOnGroup.length > 1 ? groupsCount : (Number(multipleFilters?.length) + localFilters.length + 1),
+                                        groupId:
+                                          filtersOnGroup.length > 1
+                                            ? groupsCount
+                                            : Number(multipleFilters?.length) +
+                                              localFilters.length +
+                                              1,
                                         subGroupId,
                                         id: Number(multipleFilters?.length) + localFilters.length,
                                       },

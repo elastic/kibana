@@ -21,9 +21,9 @@ import {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
+import { IndexPattern } from 'src/plugins/data/public';
 import { IndexPatternRef } from './types';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { IndexPattern } from 'src/plugins/data/public';
 import { DiscoverServices } from '../../../../build_services';
 
 export type ChangeIndexPatternTriggerProps = EuiButtonProps & {
@@ -61,7 +61,7 @@ export function ChangeIndexPattern({
     return (
       <EuiButton
         fullWidth
-        color="text"
+        color="primary"
         iconSide="right"
         iconType="arrowDown"
         title={title}

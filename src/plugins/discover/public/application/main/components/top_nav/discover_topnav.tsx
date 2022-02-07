@@ -7,6 +7,18 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { isEqual, sortBy } from 'lodash';
+import {
+  EuiAccordion,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiText,
+  EuiTitle,
+  EuiSpacer,
+  EuiNotificationBadge,
+  EuiPageSideBar,
+  useResizeObserver,
+} from '@elastic/eui';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
@@ -14,6 +26,7 @@ import { Query, TimeRange } from '../../../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { DataViewType } from '../../../../../../data_views/common';
+import { DiscoverIndexPattern } from '../sidebar/discover_index_pattern';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -38,6 +51,8 @@ export const DiscoverTopNav = ({
   navigateTo,
   savedSearch,
   resetSavedSearch,
+  indexPatternList,
+  onChangeIndexPattern,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(
@@ -100,20 +115,33 @@ export const DiscoverTopNav = ({
   }, []);
 
   return (
-    <TopNavMenu
-      appName="discover"
-      config={topNavMenu}
-      indexPatterns={[indexPattern]}
-      onQuerySubmit={updateQuery}
-      onSavedQueryIdChange={updateSavedQueryId}
-      query={query}
-      setMenuMountPoint={setMenuMountPoint}
-      savedQueryId={savedQuery}
-      screenTitle={savedSearch.title}
-      showDatePicker={showDatePicker}
-      showSaveQuery={!!services.capabilities.discover.saveQuery}
-      showSearchBar={true}
-      useDefaultBehaviors={true}
-    />
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false} className="dscSidebar__indexPatternSwitcher">
+        <DiscoverIndexPattern
+          selectedIndexPattern={indexPattern}
+          indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+          onChangeIndexPattern={onChangeIndexPattern}
+          useNewFieldsApi={false}
+          editField={() => {}}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <TopNavMenu
+          appName="discover"
+          config={topNavMenu}
+          indexPatterns={[indexPattern]}
+          onQuerySubmit={updateQuery}
+          onSavedQueryIdChange={updateSavedQueryId}
+          query={query}
+          setMenuMountPoint={setMenuMountPoint}
+          savedQueryId={savedQuery}
+          screenTitle={savedSearch.title}
+          showDatePicker={showDatePicker}
+          showSaveQuery={!!services.capabilities.discover.saveQuery}
+          showSearchBar={true}
+          useDefaultBehaviors={true}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

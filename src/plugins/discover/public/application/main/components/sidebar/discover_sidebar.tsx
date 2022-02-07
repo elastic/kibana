@@ -327,27 +327,6 @@ export function DiscoverSidebarComponent({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
-              <DiscoverIndexPattern
-                selectedIndexPattern={selectedIndexPattern}
-                indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-                onChangeIndexPattern={onChangeIndexPattern}
-                useNewFieldsApi={useNewFieldsApi}
-                editField={editField}
-              />
-            </EuiFlexItem>
-            {/* <EuiFlexItem grow={false}>
-              <DiscoverIndexPatternManagement
-                selectedIndexPattern={selectedIndexPattern}
-                useNewFieldsApi={useNewFieldsApi}
-                editField={editField}
-                createNewDataView={createNewDataView}
-              />
-            </EuiFlexItem> */}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <form>
             <DiscoverFieldSearch
               onChange={onChangeFieldSearch}
