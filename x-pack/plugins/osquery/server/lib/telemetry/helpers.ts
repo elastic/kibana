@@ -11,22 +11,6 @@ import { copyAllowlistedFields, packEventFields, savedQueryEventFields } from '.
 import type { ESClusterInfo, ESLicense, ListTemplate, TelemetryEvent } from './types';
 
 /**
- * Chunks an Array<T> into an Array<Array<T>>
- * This is to prevent overloading the telemetry channel + user resources
- *
- * @param telemetryRecords
- * @param batchSize
- * @returns the batch of records
- */
-export const batchTelemetryRecords = (
-  telemetryRecords: unknown[],
-  batchSize: number
-): unknown[][] =>
-  [...Array(Math.ceil(telemetryRecords.length / batchSize))].map(() =>
-    telemetryRecords.splice(0, batchSize)
-  );
-
-/**
  * Constructs the packs telemetry schema from a collection of packs saved objects
  */
 export const templatePacks = (

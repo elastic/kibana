@@ -7,12 +7,12 @@
 
 import { Logger } from 'src/core/server';
 import { TELEMETRY_CHANNEL_SAVED_QUERIES } from '../constants';
-import { batchTelemetryRecords, templateSavedQueries } from '../helpers';
+import { templateSavedQueries } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense } from '../types';
 
-export function createTelemetrySavedQueriesTaskConfig(maxTelemetryBatch: number) {
+export function createTelemetrySavedQueriesTaskConfig() {
   return {
     type: 'osquery:telemetry-saved-queries',
     title: 'Osquery Saved Queries Telemetry',
@@ -52,9 +52,7 @@ export function createTelemetrySavedQueriesTaskConfig(maxTelemetryBatch: number)
         licenseInfo
       );
 
-      batchTelemetryRecords(savedQueriesJson, maxTelemetryBatch).forEach((batch) => {
-        sender.sendOnDemand(TELEMETRY_CHANNEL_SAVED_QUERIES, batch);
-      });
+      sender.sendOnDemand(TELEMETRY_CHANNEL_SAVED_QUERIES, savedQueriesJson);
 
       return savedQueriesResponse.total;
     },

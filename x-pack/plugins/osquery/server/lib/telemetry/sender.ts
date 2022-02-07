@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
@@ -164,7 +163,7 @@ export class TelemetryEventsSender {
         `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
       );
 
-      const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
+      const toSend: TelemetryEvent[] = this.queue.slice().map((event) => ({
         ...event,
         ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
         cluster_uuid: clusterInfo?.cluster_uuid,
@@ -182,7 +181,6 @@ export class TelemetryEventsSender {
         licenseInfo?.uid
       );
     } catch (err) {
-      this.logger.warn(`Error sending telemetry events data: ${err}`);
       this.queue = [];
     }
     this.isSending = false;

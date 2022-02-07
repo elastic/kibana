@@ -8,11 +8,7 @@
 import { OsqueryTelemetryTaskConfig } from '../task';
 import { createTelemetryPacksTaskConfig } from './packs';
 import { createTelemetrySavedQueriesTaskConfig } from './saved_queries';
-import { MAX_PACK_TELEMETRY_BATCH } from '../constants';
 
 export function createTelemetryTaskConfigs(): OsqueryTelemetryTaskConfig[] {
-  return [
-    createTelemetryPacksTaskConfig(MAX_PACK_TELEMETRY_BATCH),
-    createTelemetrySavedQueriesTaskConfig(MAX_PACK_TELEMETRY_BATCH),
-  ];
+  return [createTelemetryPacksTaskConfig(), createTelemetrySavedQueriesTaskConfig()];
 }

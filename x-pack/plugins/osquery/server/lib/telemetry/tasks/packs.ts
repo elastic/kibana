@@ -7,12 +7,12 @@
 
 import { Logger } from 'src/core/server';
 import { TELEMETRY_CHANNEL_PACKS } from '../constants';
-import { batchTelemetryRecords, templatePacks } from '../helpers';
+import { templatePacks } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense } from '../types';
 
-export function createTelemetryPacksTaskConfig(maxTelemetryBatch: number) {
+export function createTelemetryPacksTaskConfig() {
   return {
     type: 'osquery:telemetry-packs',
     title: 'Osquery Packs Telemetry',
@@ -48,9 +48,7 @@ export function createTelemetryPacksTaskConfig(maxTelemetryBatch: number) {
 
       const packsJson = templatePacks(packsResponse?.saved_objects, clusterInfo, licenseInfo);
 
-      batchTelemetryRecords(packsJson, maxTelemetryBatch).forEach((batch) => {
-        sender.sendOnDemand(TELEMETRY_CHANNEL_PACKS, batch);
-      });
+      sender.sendOnDemand(TELEMETRY_CHANNEL_PACKS, packsJson);
 
       return packsResponse.total;
     },

@@ -24,7 +24,7 @@ export class TelemetryReceiver {
   private esClient?: ElasticsearchClient;
   private soClient?: SavedObjectsClientContract;
   private clusterInfo?: ESClusterInfo;
-  private readonly max_records = 10_000;
+  private readonly max_records = 100;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
