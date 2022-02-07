@@ -230,4 +230,11 @@ export class ExceptionsListApiClient {
       },
     });
   }
+
+  /**
+   * Checks if the given list has any data in it
+   */
+  async hasData(): Promise<boolean> {
+    return (await this.find({ perPage: 1, page: 1 })).total > 0;
+  }
 }

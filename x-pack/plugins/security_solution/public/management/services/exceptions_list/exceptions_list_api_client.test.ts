@@ -207,5 +207,32 @@ describe('Exceptions List Api Client', () => {
         },
       });
     });
+
+    it('hasData method returns true when list has data', async () => {
+      fakeHttpServices.get.mockResolvedValue({
+        total: 1,
+      });
+
+      const exceptionsListApiClientInstance = getInstance();
+
+      await expect(exceptionsListApiClientInstance.hasData()).resolves.toBe(true);
+
+      expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+        query: expect.objectContaining({
+          page: 1,
+          per_page: 1,
+        }),
+      });
+    });
+
+    it('hasData method returns false when list has no data', async () => {
+      fakeHttpServices.get.mockResolvedValue({
+        total: 0,
+      });
+
+      const exceptionsListApiClientInstance = getInstance();
+
+      await expect(exceptionsListApiClientInstance.hasData()).resolves.toBe(false);
+    });
   });
 });
