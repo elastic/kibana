@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { capitalize, sortBy } from 'lodash';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, ReactNode } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -107,6 +107,14 @@ interface AlertState {
   data: Rule[];
   totalItemCount: number;
 }
+
+type TableItem = Rule & {
+  index: number;
+  actionsCount: number;
+  alertType: string;
+  isEditable: boolean;
+  enabledInLicense: boolean;
+};
 
 const defaultSort = {
   id: 'name',
@@ -492,7 +500,7 @@ export const AlertsList: React.FunctionComponent = () => {
     },
   ];
 
-  const alertDataGridCellValueRenderers = {
+  const alertDataGridCellValueRenderers: Record<string, (row: TableItem) => ReactNode> = {
     enabled: (row) => (
       <EuiFlexItem style={{ alignItems: 'center' }} data-test-subj="alertsTableCell-enabled">
         <RuleEnabledSwitch
@@ -623,7 +631,7 @@ export const AlertsList: React.FunctionComponent = () => {
       const { lastDuration } = executionStatus;
       const showDurationWarning = shouldShowDurationWarning(
         alertTypesState.data.get(alertTypeId),
-        lastDuration
+        lastDuration ?? 0
       );
 
       return (
@@ -648,7 +656,7 @@ export const AlertsList: React.FunctionComponent = () => {
       );
     },
     'monitoring.execution.calculated_metrics.success_ratio': ({ monitoring }) => {
-      const value = monitoring.execution.calculated_metrics.success_ratio;
+      const value = monitoring?.execution.calculated_metrics.success_ratio;
       return (
         <span data-test-subj="successRatio">
           {value !== undefined ? getFormattedSuccessRatio(value) : 'N/A'}
@@ -1039,6 +1047,7 @@ export const AlertsList: React.FunctionComponent = () => {
           return (
             <div ref={(el) => measureRef(el)}>
               <EuiDataGrid
+                aria-label="Rules list"
                 gridStyle={{
                   border: 'horizontal',
                 }}
@@ -1242,7 +1251,7 @@ function convertAlertsToTableItems(
   alerts: Rule[],
   ruleTypeIndex: RuleTypeIndex,
   canExecuteActions: boolean
-) {
+): TableItem[] {
   return alerts.map((alert, index: number) => ({
     ...alert,
     index,
