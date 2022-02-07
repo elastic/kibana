@@ -27,6 +27,7 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
+
   public setup(core: CoreSetup, plugins: SetupPlugins) {}
 
   public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
