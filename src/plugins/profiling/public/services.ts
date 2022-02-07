@@ -21,7 +21,7 @@ function getFetchQuery(seconds: string): HttpFetchQuery {
     index: 'profiling-events',
     projectID: 5,
     timeFrom: unixTime - parseInt(seconds),
-    timeTo: unixTime
+    timeTo: unixTime,
   } as HttpFetchQuery;
 }
 
