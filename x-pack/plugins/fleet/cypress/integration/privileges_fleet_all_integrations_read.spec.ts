@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FLEET, INTEGRATIONS } from '../tasks/navigation';
+import { FLEET, INTEGRATIONS, navigateTo } from '../tasks/navigation';
 import {
   createUsersAndRoles,
   FleetAllIntegrReadRole,
@@ -13,13 +13,23 @@ import {
   deleteUsersAndRoles,
 } from '../tasks/privileges';
 import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
+import { navigateToTab, createAgentPolicy } from '../tasks/fleet';
+import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 
 import {
   FLEET_SERVER_MISSING_PRIVILEGES_TITLE,
   FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE,
   ADD_AGENT_BUTTON_TOP,
+  AGENT_POLICIES_TAB,
+  AGENT_POLICY_SAVE_INTEGRATION,
+  ADD_PACKAGE_POLICY_BTN,
 } from '../screens/fleet';
-import { ADD_POLICY_BTN } from '../screens/integrations';
+import {
+  ADD_POLICY_BTN,
+  AGENT_POLICY_NAME_LINK,
+  POLICIES_TAB,
+  ADVANCED_TAB,
+} from '../screens/integrations';
 
 const rolesToCreate = [FleetAllIntegrReadRole];
 const usersToCreate = [FleetAllIntegrReadUser];
@@ -32,23 +42,54 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
   after(() => {
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
   });
+
   afterEach(() => {
     logout();
   });
 
-  it('If fleet server is not set up, Fleet shows a callout', () => {
-    loginWithUserAndWaitForPage(FLEET, FleetAllIntegrReadUser);
-    cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES_TITLE).should('have.text', 'Permission denied');
-    cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE).should(
-      'contain',
-      'Fleet Server needs to be set up.'
-    );
-    cy.getBySel(ADD_AGENT_BUTTON_TOP).should('not.be.disabled');
+  describe('When there are agent policies', () => {
+    before(() => {
+      navigateTo(FLEET);
+      createAgentPolicy();
+    });
+
+    it('Some elements in the UI are not enabled', () => {
+      logout();
+      loginWithUserAndWaitForPage(FLEET, FleetAllIntegrReadUser);
+      navigateToTab(AGENT_POLICIES_TAB);
+
+      cy.getBySel(AGENT_POLICY_NAME_LINK).click();
+      cy.getBySel(ADD_PACKAGE_POLICY_BTN).should('be.disabled');
+
+      cy.get('a[title="system-1"]').click();
+      cy.getBySel(AGENT_POLICY_SAVE_INTEGRATION).should('be.disabled');
+    });
+
+    after(() => {
+      unenrollAgent();
+      cleanupAgentPolicies();
+    });
   });
 
-  it('Integrations are visible but cannot be added', () => {
-    loginWithUserAndWaitForPage(INTEGRATIONS, FleetAllIntegrReadUser);
-    cy.getBySel('integration-card:epr:apache').click();
-    cy.getBySel(ADD_POLICY_BTN).should('be.disabled');
+  describe('When there are no agent policies', () => {
+    it('If fleet server is not set up, Fleet shows a callout', () => {
+      loginWithUserAndWaitForPage(FLEET, FleetAllIntegrReadUser);
+      cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES_TITLE).should('have.text', 'Permission denied');
+      cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE).should(
+        'contain',
+        'Fleet Server needs to be set up.'
+      );
+      cy.getBySel(ADD_AGENT_BUTTON_TOP).should('not.be.disabled');
+    });
+  });
+
+  describe('Integrations', () => {
+    it('are visible but cannot be added', () => {
+      loginWithUserAndWaitForPage(INTEGRATIONS, FleetAllIntegrReadUser);
+      cy.getBySel('integration-card:epr:apache').click();
+      cy.getBySel(ADD_POLICY_BTN).should('be.disabled');
+      cy.getBySel(POLICIES_TAB).should('not.exist');
+      cy.getBySel(ADVANCED_TAB).should('not.exist');
+    });
   });
 });
