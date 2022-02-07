@@ -258,7 +258,10 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.dot_expander', {
-        defaultMessage: 'Expands "{field}" into an object field',
+        defaultMessage:
+          field === '*'
+            ? 'All top-level fields will be expanded'
+            : 'Expands "{field}" into an object field',
         values: {
           field,
         },
