@@ -13,6 +13,10 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
   const testSubjects = getService('testSubjects');
 
   return {
+    async assertADEmptyStateExists() {
+      await testSubjects.existOrFail('mlAnomalyDetectionEmptyState');
+    },
+
     async assertADCreateJobButtonExists() {
       await testSubjects.existOrFail('mlCreateNewJobButton');
     },
@@ -25,6 +29,10 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
           isEnabled ? 'enabled' : 'disabled'
         }')`
       );
+    },
+
+    async assertDFAEmptyStateExists() {
+      await testSubjects.existOrFail('mlNoDataFrameAnalyticsFound');
     },
 
     async assertDFACreateJobButtonExists() {

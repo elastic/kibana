@@ -88,10 +88,12 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.mlNodesPanel.assertNodeOverviewPanel();
 
             await ml.testExecution.logTestStep('should display Anomaly Detection empty state');
+            await ml.overviewPage.assertADEmptyStateExists();
             await ml.overviewPage.assertADCreateJobButtonExists();
             await ml.overviewPage.assertADCreateJobButtonEnabled(true);
 
             await ml.testExecution.logTestStep('should display DFA empty state');
+            await ml.overviewPage.assertDFAEmptyStateExists();
             await ml.overviewPage.assertDFACreateJobButtonExists();
             await ml.overviewPage.assertDFACreateJobButtonEnabled(true);
           });
