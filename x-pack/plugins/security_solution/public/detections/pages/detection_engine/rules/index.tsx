@@ -215,55 +215,54 @@ const RulesPageComponent: React.FC = () => {
                   >
                     {i18n.IMPORT_RULE}
                   </EuiButton>
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="rules-import-modal-button"
-                  iconType="importAction"
-                  isDisabled={!userHasPermissions(canUserCRUD) || loading}
-                  onClick={showImportModal}
-                >
-                  {i18n.IMPORT_RULE}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <LinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  onClick={goToNewRule}
-                  href={formatUrl(getCreateRuleUrl())}
-                  iconType="plusInCircle"
-                  isDisabled={!userHasPermissions(canUserCRUD) || loading}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </LinkButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </HeaderPage>
-          {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
-            prePackagedTimelineStatus === 'timelineNeedUpdate') && (
-            <UpdatePrePackagedRulesCallOut
-              data-test-subj="update-callout-button"
-              loading={loadingCreatePrePackagedRules}
-              numberOfUpdatedRules={rulesNotUpdated ?? 0}
-              numberOfUpdatedTimelines={timelinesNotUpdated ?? 0}
-              updateRules={handleCreatePrePackagedRules}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="rules-import-modal-button"
+                    iconType="importAction"
+                    isDisabled={!userHasPermissions(canUserCRUD) || loading}
+                    onClick={showImportModal}
+                  >
+                    {i18n.IMPORT_RULE}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <LinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    onClick={goToNewRule}
+                    href={formatUrl(getCreateRuleUrl())}
+                    iconType="plusInCircle"
+                    isDisabled={!userHasPermissions(canUserCRUD) || loading}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </LinkButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </HeaderPage>
+            {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
+              prePackagedTimelineStatus === 'timelineNeedUpdate') && (
+              <UpdatePrePackagedRulesCallOut
+                data-test-subj="update-callout-button"
+                loading={loadingCreatePrePackagedRules}
+                numberOfUpdatedRules={rulesNotUpdated ?? 0}
+                numberOfUpdatedTimelines={timelinesNotUpdated ?? 0}
+                updateRules={handleCreatePrePackagedRules}
+              />
+            )}
+            <AllRules
+              createPrePackagedRules={createPrePackagedRules}
+              data-test-subj="all-rules"
+              loading={loading || prePackagedRuleLoading}
+              loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
+              hasPermissions={userHasPermissions(canUserCRUD)}
+              rulesCustomInstalled={rulesCustomInstalled}
+              rulesInstalled={rulesInstalled}
+              rulesNotInstalled={rulesNotInstalled}
+              rulesNotUpdated={rulesNotUpdated}
             />
-          )}
-          <AllRules
-            createPrePackagedRules={createPrePackagedRules}
-            data-test-subj="all-rules"
-            loading={loading || prePackagedRuleLoading}
-            loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-            hasPermissions={userHasPermissions(canUserCRUD)}
-            rulesCustomInstalled={rulesCustomInstalled}
-            rulesInstalled={rulesInstalled}
-            rulesNotInstalled={rulesNotInstalled}
-            rulesNotUpdated={rulesNotUpdated}
-          />
-        </SecuritySolutionPageWrapper>
-      </RulesTableContextProvider>
+          </SecuritySolutionPageWrapper>
+        </RulesTableContextProvider>
       </RulesFeatureTourContextProvider>
       <SpyRoute pageName={SecurityPageName.rules} />
     </>
