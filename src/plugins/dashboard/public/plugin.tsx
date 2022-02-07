@@ -33,7 +33,7 @@ import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
 import { PresentationUtilPluginStart } from './services/presentation_util';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
-import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
+import { DataPublicPluginSetup, DataPublicPluginStart } from './services/data';
 import { SharePluginSetup, SharePluginStart } from './services/share';
 import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
 import type {
@@ -211,10 +211,13 @@ export class DashboardPlugin
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
-            }))
+            map(async ({ state }) => {
+              const { isFilterPinned } = await import('@kbn/es-query');
+              return {
+                ...state,
+                filters: state.filters?.filter(isFilterPinned),
+              };
+            })
           ),
         },
       ],
