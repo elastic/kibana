@@ -362,6 +362,8 @@ export class ApplicationService {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
         'data-test-subj': 'appLeaveConfirmModal',
+        confirmButtonText: action.confirmButtonText,
+        buttonColor: action.buttonColor,
       });
       if (!confirmed) {
         if (action.callback) {

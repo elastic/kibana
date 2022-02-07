@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ButtonColor } from '@elastic/eui';
 import {
   AppLeaveActionFactory,
   AppLeaveActionType,
@@ -15,8 +15,21 @@ import {
 } from './types';
 
 const appLeaveActionFactory: AppLeaveActionFactory = {
-  confirm(text: string, title?: string, callback?: () => void) {
-    return { type: AppLeaveActionType.confirm, text, title, callback };
+  confirm(
+    text: string,
+    title?: string,
+    callback?: () => void,
+    confirmButtonText?: string,
+    buttonColor?: ButtonColor
+  ) {
+    return {
+      type: AppLeaveActionType.confirm,
+      text,
+      title,
+      confirmButtonText,
+      buttonColor,
+      callback,
+    };
   },
   default() {
     return { type: AppLeaveActionType.default };

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ButtonColor } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -597,6 +597,8 @@ export interface AppLeaveConfirmAction {
   type: AppLeaveActionType.confirm;
   text: string;
   title?: string;
+  confirmButtonText?: string;
+  buttonColor?: ButtonColor;
   callback?: () => void;
 }
 
@@ -623,7 +625,13 @@ export interface AppLeaveActionFactory {
    * @param callback (optional) to know that the user want to stay on the page
    * so we can show to the user the right UX for him to saved his/her/their changes
    */
-  confirm(text: string, title?: string, callback?: () => void): AppLeaveConfirmAction;
+  confirm(
+    text: string,
+    title?: string,
+    callback?: () => void,
+    confirmButtonText?: string,
+    buttonColor?: ButtonColor
+  ): AppLeaveConfirmAction;
 
   /**
    * Returns a default action, resulting on executing the default behavior when

@@ -333,6 +333,7 @@ describe('getTopNavConfig', () => {
     expect(topNavLinks).toMatchInlineSnapshot(`
       Array [
         Object {
+          "className": "visNavItem__goToLens",
           "description": "Go to Lens with your current configuration",
           "disableButton": false,
           "emphasize": false,

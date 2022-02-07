@@ -170,14 +170,19 @@ export function App({
           return actions.default();
         } else {
           return actions.confirm(
-            i18n.translate('xpack.lens.app.goBackModal.message', {
+            i18n.translate('xpack.lens.app.goBackModalMessage', {
               defaultMessage:
                 'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
               values: { contextOriginatingApp },
             }),
-            i18n.translate('xpack.lens.app.goBackModal.title', {
+            i18n.translate('xpack.lens.app.goBackModalTitle', {
               defaultMessage: 'Discard changes?',
-            })
+            }),
+            undefined,
+            i18n.translate('xpack.lens.app.unsavedWorkConfirmBtn', {
+              defaultMessage: 'Discard changes',
+            }),
+            'danger'
           );
         }
       }
@@ -193,7 +198,12 @@ export function App({
           }),
           i18n.translate('xpack.lens.app.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
-          })
+          }),
+          undefined,
+          i18n.translate('xpack.lens.app.unsavedWorkConfirmBtn', {
+            defaultMessage: 'Discard changes',
+          }),
+          'danger'
         );
       } else {
         return actions.default();
