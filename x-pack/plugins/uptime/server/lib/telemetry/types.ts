@@ -17,7 +17,7 @@ export interface MonitorUpdateEvent {
   locations: string[];
   locationsCount: number;
   scriptType?: 'inline' | 'recorder' | 'zip';
-  revision: number;
+  revision?: number;
   error?: Array<{ locationId: string; error: Error }>;
   configId: string;
 }
@@ -25,6 +25,7 @@ export interface MonitorUpdateEvent {
 export interface MonitorUpdateTelemetryChannelEvents {
   // channel name => event type
   'synthetics-monitor-update': MonitorUpdateEvent;
+  'synthetics-monitor-current': MonitorUpdateEvent;
 }
 
 export type MonitorUpdateTelemetryChannel = keyof MonitorUpdateTelemetryChannelEvents;

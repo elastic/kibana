@@ -6,3 +6,4 @@
  */
 
 export const MONITOR_UPDATE_CHANNEL = 'synthetics-monitor-update';
+export const MONITOR_CURRENT_CHANNEL = 'synthetics-monitor-current';

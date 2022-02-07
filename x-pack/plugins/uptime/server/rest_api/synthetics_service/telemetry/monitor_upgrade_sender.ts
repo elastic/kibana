@@ -11,7 +11,7 @@ import { MonitorFields, SyntheticsMonitor, ConfigKey } from '../../../../common/
 import type { MonitorUpdateEvent } from '../../../lib/telemetry/types';
 
 import { TelemetryEventsSender } from '../../../lib/telemetry/sender';
-import { MONITOR_UPDATE_CHANNEL } from '../../../lib/telemetry/constants';
+import { MONITOR_UPDATE_CHANNEL, MONITOR_CURRENT_CHANNEL } from '../../../lib/telemetry/constants';
 
 export interface UpgradeError {
   key?: string;
@@ -29,6 +29,7 @@ export function sendTelemetryEvents(
 
   try {
     eventsTelemetry.queueTelemetryEvents(MONITOR_UPDATE_CHANNEL, [updateEvent]);
+    eventsTelemetry.queueTelemetryEvents(MONITOR_CURRENT_CHANNEL, [updateEvent]);
   } catch (exc) {
     logger.error(`queing telemetry events failed ${exc}`);
   }
