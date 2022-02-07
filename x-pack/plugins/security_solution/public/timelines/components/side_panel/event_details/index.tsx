@@ -278,9 +278,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const handlePanelChange = (panelType: ACTIVE_PANEL | null) => {
     if (isActivePanel === ACTIVE_PANEL.OSQUERY && panelType === null) {
       showAlertDetails();
-      return;
+    } else {
+      setIsActivePanel(panelType);
     }
-    setIsActivePanel(panelType);
   };
 
   return isFlyoutView ? (

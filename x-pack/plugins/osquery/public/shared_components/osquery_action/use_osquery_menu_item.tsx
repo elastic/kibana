@@ -25,15 +25,19 @@ export const useOsqueryMenuItem = ({ agentId, onClick }: IProps) => {
   const [isAvailable, setIsAvailable] = useState(false);
   useEffect(() => {
     (async () => {
-      const result: { item: boolean } = await http.get(
-        `/internal/osquery/fleet_wrapper/agents/${agentId}/available`
-      );
-      setIsAvailable(result.item);
+      try {
+        const result: { item: boolean } = await http.get(
+          `/internal/osquery/fleet_wrapper/agents/${agentId}/available`
+        );
+        setIsAvailable(result.item);
+      } catch (err) {
+        return;
+      }
     })();
   }, [agentId, http]);
 
   if (!isAvailable) {
-    return <></>;
+    return null;
   }
   return (
     <EuiContextMenuItem
