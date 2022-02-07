@@ -45,6 +45,7 @@ describe('createPercolatorQueries', () => {
         { entries: [{ field: 'mockThreatField', value: 'mockValue', type: 'mapping' }] },
       ],
       threatQuery: 'timestamp > now-30m',
+      threatIndicatorPath: 'threat.indicator',
     });
 
     expect(getNextPageMock.mock.calls.length).toEqual(1);
@@ -92,6 +93,7 @@ describe('createPercolatorQueries', () => {
         { entries: [{ field: 'mockThreatField', value: 'mockValue', type: 'mapping' }] },
       ],
       threatQuery: 'timestamp > now-30m',
+      threatIndicatorPath: 'threat.indicator',
     });
 
     const createPercolateQueriesArgs = createPercolateQueriesMock.mock.calls[0][0];

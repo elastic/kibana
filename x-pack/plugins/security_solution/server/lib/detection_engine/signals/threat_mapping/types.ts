@@ -193,8 +193,7 @@ interface ThreatListConfig {
 }
 
 export interface PercolatorQuery {
-  bool: { must: unknown[]; filter?: unknown[]; should?: unknown[]; minimum_should_match: number };
-  _name?: string;
+  bool: { must: unknown[]; should: unknown[]; minimum_should_match: number };
   indicator?: IndicatorHit;
 }
 
@@ -246,6 +245,7 @@ export interface FetchItemsOptions<T> {
 
 export interface EventDoc {
   [key: string]: unknown;
+  fields?: Record<string, string[]>;
 }
 
 export type ThreatListDoc = EventDoc;

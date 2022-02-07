@@ -15,54 +15,67 @@ import { encodeThreatMatchNamedQuery } from '../../../signals/threat_mapping/uti
 export const createPercolateQueries = ({
   ruleId,
   ruleVersion,
-  threatMapping,
+  threatMapping: orItemsWithAndSubItems,
   threatList,
 }: CreatePercolateQueriesOptions): PercolatorQuery[] => {
   const must = [{ match: { rule_id: ruleId } }, { match: { rule_version: ruleVersion } }];
 
-  return threatList.reduce<PercolatorQuery[]>((queries, indicator) => {
-    const query = threatMapping.reduce<PercolatorQuery[]>((clauses, threatMapItem) => {
-      const filters = threatMapItem.entries.reduce<PercolatorQuery[]>((clauseParts, entry) => {
-        const value = get(entry.value, indicator.fields);
-        if (value != null && value.length === 1) {
-          clauseParts.push({
-            bool: {
-              must,
-              should: [
-                {
-                  match: {
-                    [entry.field]: {
-                      query: value[0],
+  return threatList.reduce<PercolatorQuery[]>((allQueries, indicator) => {
+    const { fields, ...indicatorWithoutFields } = indicator;
+
+    const queriesFromOneIndicator = orItemsWithAndSubItems.reduce<PercolatorQuery[]>(
+      (orQueries, orItem) => {
+        const andItems = orItem.entries;
+
+        const isIndicatorMatchingAndItems = andItems.every((andItem) => {
+          const val = get(andItem.value, fields);
+          return val != null && val.length === 1;
+        });
+
+        if (isIndicatorMatchingAndItems) {
+          const andQuery = andItems.reduce<PercolatorQuery>(
+            (percolatorQuery, andItem) => ({
+              bool: {
+                ...percolatorQuery.bool,
+                should: [
+                  ...percolatorQuery.bool.should,
+                  {
+                    match: {
+                      [andItem.field]: {
+                        query: get(andItem.value, fields)[0],
+                      },
                     },
+                    _name: encodeThreatMatchNamedQuery({
+                      id: indicator._id,
+                      index: indicator._index,
+                      field: andItem.field,
+                      value: andItem.value,
+                    }),
                   },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-            _name: encodeThreatMatchNamedQuery({
-              id: indicator._id,
-              index: indicator._index,
-              field: entry.field,
-              value: entry.value,
+                ],
+                minimum_should_match: percolatorQuery.bool.minimum_should_match + 1,
+              },
             }),
-            indicator,
+            {
+              bool: {
+                must,
+                should: [],
+                minimum_should_match: 0,
+              },
+            }
+          );
+          orQueries.push({
+            ...andQuery,
+            indicator: {
+              ...indicatorWithoutFields,
+            },
           });
         }
-        return clauseParts;
-      }, []);
-      if (filters.length === 1) {
-        clauses.push({ ...filters[0] });
-      } else if (filters.length > 1) {
-        // for an AND threat mapping, the first _name is used for creating the threat.enrichments.matched* values
-        clauses.push({
-          bool: { filter: filters, must, minimum_should_match: filters.length },
-          _name: filters[0]._name,
-          indicator,
-        });
-      }
-      return clauses;
-    }, []);
-    queries.push(...query);
-    return queries;
+        return orQueries;
+      },
+      []
+    );
+    allQueries.push(...queriesFromOneIndicator);
+    return allQueries;
   }, []);
 };
