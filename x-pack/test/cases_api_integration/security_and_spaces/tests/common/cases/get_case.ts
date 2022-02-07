@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
+import { AttributesTypeUser, getCaseDetailsUrl } from '../../../../../../plugins/cases/common/api';
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   defaultUser,
@@ -24,6 +24,8 @@ import {
   createComment,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromSavedObject,
+  assertWarningHeader,
+  extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
   secOnly,
@@ -189,6 +191,19 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 403,
           auth: { user: secOnly, space: 'space2' },
         });
+      });
+    });
+
+    describe('deprecations', () => {
+      it('should return a warning header', async () => {
+        const theCase = await createCase(supertest, postCaseReq);
+        const res = await supertest.get(getCaseDetailsUrl(theCase.id)).expect(200);
+        const warningHeader = res.header.warning;
+
+        assertWarningHeader(warningHeader);
+
+        const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+        expect(warningValue).to.be('Deprecated query parameter includeComments');
       });
     });
   });

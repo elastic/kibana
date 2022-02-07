@@ -13,6 +13,7 @@ import {
   CaseStatuses,
   CommentType,
   ConnectorTypes,
+  getCaseUserActionUrl,
 } from '../../../../../../plugins/cases/common/api';
 import { CreateCaseUserAction } from '../../../../../../plugins/cases/common/api/cases/user_actions/create_case';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
@@ -26,6 +27,8 @@ import {
   createComment,
   updateComment,
   deleteComment,
+  assertWarningHeader,
+  extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -353,6 +356,19 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+    });
+
+    describe('deprecations', () => {
+      it('should return a warning header', async () => {
+        const theCase = await createCase(supertest, postCaseReq);
+        const res = await supertest.get(getCaseUserActionUrl(theCase.id)).expect(200);
+        const warningHeader = res.header.warning;
+
+        assertWarningHeader(warningHeader);
+
+        const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+        expect(warningValue).to.be('Deprecated endpoint');
+      });
     });
   });
 };

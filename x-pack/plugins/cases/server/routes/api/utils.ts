@@ -35,6 +35,11 @@ export function wrapError(
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
+/**
+ * Creates a warning header with a message formatted according to RFC7234.
+ * We follow the same formatting as Elasticsearch
+ * https://github.com/elastic/elasticsearch/blob/5baabff6670a8ed49297488ca8cac8ec12a2078d/server/src/main/java/org/elasticsearch/common/logging/HeaderWarning.java#L55
+ */
 export const getWarningHeader = (
   kibanaVersion: string,
   msg: string | undefined = 'Deprecated endpoint'

@@ -15,6 +15,8 @@ import {
   createComment,
   getAllComments,
   superUserSpace1Auth,
+  assertWarningHeader,
+  extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -27,6 +29,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { getCaseCommentsUrl } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -146,6 +149,19 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: secOnly, space: 'space2' },
           expectedHttpCode: 403,
         });
+      });
+    });
+
+    describe('deprecations', () => {
+      it('should return a warning header', async () => {
+        const theCase = await createCase(supertest, postCaseReq);
+        const res = await supertest.get(getCaseCommentsUrl(theCase.id)).expect(200);
+        const warningHeader = res.header.warning;
+
+        assertWarningHeader(warningHeader);
+
+        const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+        expect(warningValue).to.be('Deprecated endpoint');
       });
     });
   });
