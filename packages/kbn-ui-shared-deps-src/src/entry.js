@@ -54,6 +54,7 @@ export const Fflate = { unzlibSync, strFromU8 };
 export const TsLib = require('tslib');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnStd = require('@kbn/std');
+export const KbnEsQuery = require('@kbn/es-query');
 export const SaferLodashSet = require('@elastic/safer-lodash-set');
 export const RisonNode = require('rison-node');
 export const History = require('history');
