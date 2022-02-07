@@ -9,7 +9,7 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { Capabilities } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
