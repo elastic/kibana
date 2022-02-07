@@ -88,7 +88,7 @@ export function mockSearchResult(
 ): UptimeESClient {
   const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-  mockEsClient.search.mockResponseOnce({
+  mockEsClient.search.mockResponse({
     took: 18,
     timed_out: false,
     _shards: {
