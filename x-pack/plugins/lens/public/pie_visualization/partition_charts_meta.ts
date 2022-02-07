@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ArrayEntry, PartitionLayout } from '@elastic/charts';
 import type { EuiIconProps } from '@elastic/eui';
 
 import type { DatatableColumn } from '../../../../../src/plugins/expressions';
@@ -21,7 +20,6 @@ import type { PieChartType } from '../../common/types';
 interface PartitionChartMeta {
   icon: ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => JSX.Element;
   label: string;
-  partitionType: PartitionLayout;
   groupLabel: string;
   maxBuckets: number;
   isExperimental?: boolean;
@@ -48,10 +46,6 @@ interface PartitionChartMeta {
     hideNestedLegendSwitch?: boolean;
     getShowLegendDefault?: (bucketColumns: DatatableColumn[]) => boolean;
   };
-  sortPredicate?: (
-    bucketColumns: DatatableColumn[],
-    sortingMap: Record<string, number>
-  ) => (node1: ArrayEntry, node2: ArrayEntry) => number;
 }
 
 const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
@@ -145,7 +139,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     label: i18n.translate('xpack.lens.pie.donutLabel', {
       defaultMessage: 'Donut',
     }),
-    partitionType: PartitionLayout.sunburst,
     groupLabel,
     maxBuckets: 3,
     toolbarPopover: {
@@ -162,7 +155,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     label: i18n.translate('xpack.lens.pie.pielabel', {
       defaultMessage: 'Pie',
     }),
-    partitionType: PartitionLayout.sunburst,
     groupLabel,
     maxBuckets: 3,
     toolbarPopover: {
@@ -178,7 +170,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     label: i18n.translate('xpack.lens.pie.treemaplabel', {
       defaultMessage: 'Treemap',
     }),
-    partitionType: PartitionLayout.treemap,
     groupLabel,
     maxBuckets: 2,
     toolbarPopover: {
@@ -194,7 +185,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     label: i18n.translate('xpack.lens.pie.mosaiclabel', {
       defaultMessage: 'Mosaic',
     }),
-    partitionType: PartitionLayout.mosaic,
     groupLabel,
     maxBuckets: 2,
     isExperimental: true,
@@ -206,23 +196,12 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       getShowLegendDefault: () => false,
     },
     requiredMinDimensionCount: 2,
-    sortPredicate:
-      (bucketColumns, sortingMap) =>
-      ([name1, node1], [, node2]) => {
-        // Sorting for first group
-        if (bucketColumns.length === 1 || (node1.children.length && name1 in sortingMap)) {
-          return sortingMap[name1];
-        }
-        // Sorting for second group
-        return node2.value - node1.value;
-      },
   },
   waffle: {
     icon: LensIconChartWaffle,
     label: i18n.translate('xpack.lens.pie.wafflelabel', {
       defaultMessage: 'Waffle',
     }),
-    partitionType: PartitionLayout.waffle,
     groupLabel,
     maxBuckets: 1,
     isExperimental: true,
@@ -237,9 +216,5 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       hideNestedLegendSwitch: true,
       getShowLegendDefault: () => true,
     },
-    sortPredicate:
-      () =>
-      ([, node1], [, node2]) =>
-        node2.value - node1.value,
   },
 };
