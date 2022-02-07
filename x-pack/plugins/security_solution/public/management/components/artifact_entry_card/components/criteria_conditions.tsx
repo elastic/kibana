@@ -68,10 +68,6 @@ const StyledCondition = styled('span')`
   margin-right: 6px;
 `;
 
-const StyledEuiExpressionLargeValues = styled(EuiExpression)`
-  max-width: 100%;
-`;
-
 export type CriteriaConditionsProps = Pick<ArtifactInfo, 'os' | 'entries'> &
   Pick<CommonProps, 'data-test-subj'>;
 
@@ -125,10 +121,12 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
                     <EuiExpression description={''} value={nestedField} color="subdued" />
                   </EuiFlexItemNested>
                   <EuiFlexItemNested grow={false}>
-                    <StyledEuiExpressionLargeValues
-                      description={getEntryOperator(nestedType, nestedOperator)}
-                      value={getEntryValue(nestedType, nestedValue)}
-                    />
+                    <div className="eui-xScroll">
+                      <EuiExpression
+                        description={getEntryOperator(nestedType, nestedOperator)}
+                        value={getEntryValue(nestedType, nestedValue)}
+                      />
+                    </div>
                   </EuiFlexItemNested>
                 </EuiFlexGroupNested>
               );
@@ -155,10 +153,12 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
                 value={field}
                 color="subdued"
               />
-              <StyledEuiExpressionLargeValues
-                description={getEntryOperator(type, operator)}
-                value={getEntryValue(type, value)}
-              />
+              <div className="eui-xScroll">
+                <EuiExpression
+                  description={getEntryOperator(type, operator)}
+                  value={getEntryValue(type, value)}
+                />
+              </div>
               {getNestedEntriesContent(type, nestedEntries)}
             </div>
           );
