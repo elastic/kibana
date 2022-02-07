@@ -19,11 +19,13 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { Fragment, ReactNode } from 'react';
+import React, { useMemo, Fragment, ReactNode } from 'react';
 import styled from 'styled-components';
 
+import { useLocation } from 'react-router-dom';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
+import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
   @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.s}) {
@@ -41,9 +43,8 @@ DescriptionListStyled.displayName = 'DescriptionListStyled';
 
 interface ModalInspectProps {
   closeModal: () => void;
-  isShowing: boolean;
-  request: string | null;
-  response: string | null;
+  request: string;
+  response: string;
   additionalRequests?: string[] | null;
   additionalResponses?: string[] | null;
   title: string | React.ReactElement | React.ReactNode;
@@ -102,17 +103,14 @@ export const formatIndexPatternRequested = (indices: string[] = []) => {
 
 export const ModalInspectQuery = ({
   closeModal,
-  isShowing = false,
   request,
   response,
   additionalRequests,
   additionalResponses,
   title,
 }: ModalInspectProps) => {
-  if (!isShowing || request == null || response == null) {
-    return null;
-  }
-
+  const { pathname } = useLocation();
+  const { selectedPatterns } = useSourcererDataView(getScopeFromPath(pathname));
   const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
   const responses: string[] = [
     response,
@@ -121,6 +119,11 @@ export const ModalInspectQuery = ({
 
   const inspectRequests: Request[] = parseInspectStrings(requests);
   const inspectResponses: Response[] = parseInspectStrings(responses);
+
+  const isSourcererPattern = useMemo(
+    () => (inspectRequests[0]?.index ?? []).every((pattern) => selectedPatterns.includes(pattern)),
+    [inspectRequests, selectedPatterns]
+  );
 
   const statistics: Array<{
     title: NonNullable<ReactNode | string>;
@@ -135,7 +138,15 @@ export const ModalInspectQuery = ({
       ),
       description: (
         <span data-test-subj="index-pattern-description">
-          {formatIndexPatternRequested(inspectRequests[0]?.index ?? [])}
+          <p>{formatIndexPatternRequested(inspectRequests[0]?.index ?? [])}</p>
+
+          {!isSourcererPattern && (
+            <p>
+              <small>
+                <i>{i18n.INSPECT_PATTERN_DIFFERENT}</i>
+              </small>
+            </p>
+          )}
         </span>
       ),
     },

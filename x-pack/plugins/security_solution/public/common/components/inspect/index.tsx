@@ -134,16 +134,17 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           onClick={handleClick}
         />
       )}
-      <ModalInspectQuery
-        closeModal={handleCloseModal}
-        isShowing={isShowingModal}
-        request={request}
-        response={response}
-        additionalRequests={additionalRequests}
-        additionalResponses={additionalResponses}
-        title={title}
-        data-test-subj="inspect-modal"
-      />
+      {isShowingModal && request !== null && response !== null && (
+        <ModalInspectQuery
+          closeModal={handleCloseModal}
+          request={request}
+          response={response}
+          additionalRequests={additionalRequests}
+          additionalResponses={additionalResponses}
+          title={title}
+          data-test-subj="inspect-modal"
+        />
+      )}
     </>
   );
 };
