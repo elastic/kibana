@@ -52,7 +52,7 @@ const getEventLog = (logger: LevelLogger) => ({
             event: { duration, start: start?.toISOString(), end: end?.toISOString() },
           };
           const mProperties: LogMeta = deepMerge(lProperties, logMeta);
-          logger.debug(message, ['reporting-event-log'], deepMerge(mProperties, properties));
+          logger.debug(message, ['events'], deepMerge(mProperties, properties));
         },
         startTiming() {
           start = new Date();
