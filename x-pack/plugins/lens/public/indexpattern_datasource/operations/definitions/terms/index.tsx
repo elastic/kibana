@@ -129,9 +129,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if (field && !isScriptedField(field)) {
       secondaryFields.add(field.name);
     }
-    const secondaryFieldsList: string[] = [...secondaryFields].filter(
-      (f) => targetColumn.sourceField !== f
-    );
+    // remove the sourceField
+    secondaryFields.delete(targetColumn.sourceField);
+
+    const secondaryFieldsList: string[] = [...secondaryFields];
     const ret: Partial<TermsIndexPatternColumn['params']> = {
       secondaryFields: secondaryFieldsList,
       parentFormat: getParentFormatter({
@@ -300,10 +301,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       secondaryFields: undefined,
       ...(params as Partial<TermsIndexPatternColumn['params']>),
     };
-    if ('format' in newParams) {
-      if (field.type !== 'number') {
-        delete newParams.format;
-      }
+    if ('format' in newParams && field.type !== 'number') {
+      delete newParams.format;
     }
     newParams.parentFormat = getParentFormatter(newParams);
     return {
