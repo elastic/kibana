@@ -99,7 +99,8 @@ export function createInternalESClient({
     ) => {
       return callEs(operationName, {
         requestType: 'indices.create',
-        cb: (signal) => asInternalUser.indices.create(params, { signal, meta: true }),
+        cb: (signal) =>
+          asInternalUser.indices.create(params, { signal, meta: true }),
         params,
       });
     },
