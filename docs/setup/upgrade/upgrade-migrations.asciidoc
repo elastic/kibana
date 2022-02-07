@@ -103,7 +103,7 @@ DELETE .kibana_7.12.0_001/_doc/marketing_space:dashboard:e3c5fc71-ac71-4805-bcab
 --------------------------------------------
 
 . Restart {kib}.
-
++
 In this example, the Dashboard with ID `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` that belongs to the space `marketing_space` **will no longer be available**.
 
 Be sure you have a snapshot before you delete the corrupt document. If restoring from a snapshot is not an option, it is recommended to also delete the `temp` and `target` indices the migration created before restarting {kib} and retrying.
