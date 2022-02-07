@@ -9,9 +9,9 @@
 const defaultExclude = require('@istanbuljs/schema/default-exclude');
 const extraExclude = [
   'data/optimize/**',
-  '**/{__jest__,__test__,__examples__,__fixtures__ ,__snapshots__,__stories__ ,*mock*,.storybook,target,types}/**/*',
-  '**/{integration_tests,test,tests,test_helpers,test_data,test_samples,test_utils,test_utilities,scripts}/**/*',
-  '**/{__fixtures__,__stories__}/**',
+  '**/{__jest__,__test__,__examples__,__fixtures__,__snapshots__,__stories__,*mock*,*storybook,target,types}/**/*',
+  '**/{integration_tests,test,tests,test_helpers,test_data,test_samples,test_utils,test_utilities,*scripts}/**/*',
+  '**/{*e2e*,fixtures,manual_tests,stubs}/**',
   '**/*mock*.{ts,tsx}',
   '**/*.test.{ts,tsx}',
   '**/*.spec.{ts,tsx}',
