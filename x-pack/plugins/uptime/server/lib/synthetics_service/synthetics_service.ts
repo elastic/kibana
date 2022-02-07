@@ -31,6 +31,8 @@ import {
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
+import { hydrateSavedObjects } from './hydrate_saved_object';
+import { SyntheticsMonitorSavedObject } from '../../../common/types';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -278,6 +280,11 @@ export class SyntheticsService {
     const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
       namespaces: ['*'],
+    });
+
+    hydrateSavedObjects({
+      monitors: findResult.saved_objects as unknown as SyntheticsMonitorSavedObject[],
+      server: this.server,
     });
 
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
