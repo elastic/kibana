@@ -179,6 +179,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                   all: [
                     PACKAGE_POLICY_SAVED_OBJECT_TYPE,
                     ASSETS_SAVED_OBJECT_TYPE,
+                    AGENT_POLICY_SAVED_OBJECT_TYPE,
                     packSavedObjectType,
                   ],
                   read: [],
