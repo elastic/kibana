@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data/common';
 import { AGG_TYPE } from '../../../../common/constants';
 import { TileMetaFeature } from '../../../../common/descriptor_types';
 import { CountAggField } from './count_agg_field';
@@ -61,7 +61,7 @@ export class AggField extends CountAggField {
     return this._aggType;
   }
 
-  getValueAggDsl(indexPattern: IndexPattern): unknown {
+  getValueAggDsl(indexPattern: DataView): unknown {
     const field = getField(indexPattern, this.getRootName());
     const aggType = this._getAggType();
     const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: TERMS_AGG_SHARD_SIZE } : {};
