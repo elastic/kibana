@@ -37,7 +37,7 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
-  defaultViewport?: {
+  defaultViewport: {
     /** Size in pixels */
     width?: number;
     /** Size in pixels */
