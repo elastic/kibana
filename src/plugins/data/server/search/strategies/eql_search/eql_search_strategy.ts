@@ -42,7 +42,8 @@ export const eqlSearchStrategyProvider = (
 
       const search = async () => {
         const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(
-          uiSettingsClient
+          uiSettingsClient,
+          request.params?.body
         );
         const params = id
           ? getDefaultAsyncGetParams(null, options)
