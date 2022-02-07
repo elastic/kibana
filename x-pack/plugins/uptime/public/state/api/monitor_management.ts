@@ -68,3 +68,13 @@ export const runOnceMonitor = async ({
 }): Promise<{ errors: Array<{ error: Error }> }> => {
   return await apiService.post(API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor);
 };
+
+export interface TestNowResponse {
+  errors?: Array<{ error: Error }>;
+  testRunId: string;
+  monitorId: string;
+}
+
+export const testNowMonitor = async (configId: string): Promise<TestNowResponse | undefined> => {
+  return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
+};
