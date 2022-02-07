@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { visualizationSavedObjectTypeMigrations } from './visualization_saved_object_migrations';
-import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
+import { getAllMigrations } from './visualization_saved_object_migrations';
+import {
+  SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
+  SavedObjectUnsanitizedDoc,
+} from 'kibana/server';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
@@ -56,6 +60,8 @@ const testMigrateMatchAllQuery = (migrate: Function) => {
 };
 
 describe('migration visualization', () => {
+  const visualizationSavedObjectTypeMigrations = getAllMigrations({});
+
   describe('6.7.2', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['6.7.2'](
@@ -2430,6 +2436,107 @@ describe('migration visualization', () => {
           "drop_last_bucket": 0,
         }
       `);
+    });
+  });
+
+  it('should apply search source migrations within visualization', () => {
+    const visualizationDoc = {
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            some: 'prop',
+            migrated: false,
+          }),
+        },
+      },
+    } as SavedObjectUnsanitizedDoc;
+
+    const versionToTest = '1.2.3';
+    const visMigrations = getAllMigrations({
+      [versionToTest]: (state) => ({ ...state, migrated: true }),
+    });
+
+    expect(
+      visMigrations[versionToTest](visualizationDoc, {} as SavedObjectMigrationContext)
+    ).toEqual({
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            some: 'prop',
+            migrated: true,
+          }),
+        },
+      },
+    });
+  });
+
+  describe('8.1.0 pie - labels and addLegend migration', () => {
+    const getDoc = (addLegend: boolean, lastLevel: boolean = false) => ({
+      attributes: {
+        title: 'Pie Vis',
+        description: 'Pie vis',
+        visState: JSON.stringify({
+          type: 'pie',
+          title: 'Pie vis',
+          params: {
+            addLegend,
+            addTooltip: true,
+            isDonut: true,
+            labels: {
+              position: 'default',
+              show: true,
+              truncate: 100,
+              values: true,
+              valuesFormat: 'percent',
+              percentDecimals: 2,
+              last_level: lastLevel,
+            },
+            legendPosition: 'right',
+            nestedLegend: false,
+            maxLegendLines: 1,
+            truncateLegend: true,
+            distinctColors: false,
+            palette: {
+              name: 'default',
+              type: 'palette',
+            },
+            dimensions: {
+              metric: {
+                type: 'vis_dimension',
+                accessor: 1,
+                format: {
+                  id: 'number',
+                  params: {
+                    id: 'number',
+                  },
+                },
+              },
+              buckets: [],
+            },
+          },
+        }),
+      },
+    });
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['8.1.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    it('should migrate addLegend to legendDisplay', () => {
+      const pie = getDoc(true);
+      const migrated = migrate(pie);
+      const params = JSON.parse(migrated.attributes.visState).params;
+
+      expect(params.legendDisplay).toBe('show');
+      expect(params.addLegend).toBeUndefined();
+
+      const otherPie = getDoc(false);
+      const otherMigrated = migrate(otherPie);
+      const otherParams = JSON.parse(otherMigrated.attributes.visState).params;
+
+      expect(otherParams.legendDisplay).toBe('hide');
+      expect(otherParams.addLegend).toBeUndefined();
     });
   });
 });

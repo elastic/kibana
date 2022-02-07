@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { CrossClusterReplicationHome } from '../../../app/sections/home/home';
 import { ccrStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';

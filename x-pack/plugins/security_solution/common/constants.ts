@@ -6,7 +6,6 @@
  */
 
 import type { TransformConfigSchema } from './transforms/types';
-import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 
 /**
  * as const
@@ -64,7 +63,6 @@ export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*' as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
-export const DEFAULT_RULES_TABLE_IN_MEMORY_THRESHOLD = 3000; // rules
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
@@ -86,6 +84,7 @@ export enum SecurityPageName {
    * Warning: Computed values are not permitted in an enum with string valued members
    * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
    */
+  blocklist = 'blocklist',
   case = 'cases',
   caseConfigure = 'cases_configure',
   caseCreate = 'cases_create',
@@ -134,6 +133,7 @@ export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
+export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
@@ -153,6 +153,7 @@ export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}` as const;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as const;
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
+export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -176,10 +177,6 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
-
-/** This Kibana Advanced Setting sets the threshold number of rules for which in-memory implementation is enabled */
-export const RULES_TABLE_ADVANCED_FILTERING_THRESHOLD =
-  'securitySolution:advancedFilteringMaxRules' as const;
 
 /** This Kibana Advanced Setting specifies the URL of the News feed widget */
 export const NEWS_FEED_URL_SETTING = 'securitySolution:newsFeedUrl' as const;
@@ -273,6 +270,14 @@ export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
 export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 
+/**
+ * Telemetry detection endpoint for any previews requested of what data we are
+ * providing through UI/UX and for e2e tests.
+ *   curl http//localhost:5601/internal/security_solution/telemetry
+ * to see the contents
+ */
+export const SECURITY_TELEMETRY_URL = `/internal/security_solution/telemetry` as const;
+
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;
@@ -339,10 +344,6 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.teams',
   '.webhook',
 ];
-
-if (ENABLE_CASE_CONNECTOR) {
-  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
-}
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
@@ -411,3 +412,13 @@ export const WARNING_TRANSFORM_STATES = new Set([
 export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
+
+/**
+ * Max number of rules to display on UI in table, max number of rules that can be edited in a single bulk edit API request
+ * We limit number of rules in bulk edit API, because rulesClient doesn't support bulkGet of rules by ids.
+ * Given this limitation, current implementation fetches each rule separately through rulesClient.resolve method.
+ * As max number of rules displayed on a page is 100, max 100 rules can be bulk edited by passing their ids to API.
+ * We decided add this limit(number of ids less than 100) in bulk edit API as well, to prevent a huge number of single rule fetches
+ */
+export const RULES_TABLE_MAX_PAGE_SIZE = 100;
+export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];

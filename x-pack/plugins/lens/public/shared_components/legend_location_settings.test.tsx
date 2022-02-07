@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test/jest';
+import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { LegendLocationSettings, LegendLocationSettingsProps } from './legend_location_settings';
 
 describe('Legend Location Settings', () => {

@@ -39,7 +39,7 @@ export const hostsKpiRiskyHosts: SecuritySolutionFactory<HostsKpiQueries.kpiRisk
     const riskyHosts: Record<HostRiskSeverity, number> = riskBuckets.reduce(
       (cummulative: Record<string, number>, bucket: AggBucket) => ({
         ...cummulative,
-        [bucket.key]: bucket.doc_count,
+        [bucket.key]: getOr(0, 'unique_hosts.value', bucket),
       }),
       {}
     );
