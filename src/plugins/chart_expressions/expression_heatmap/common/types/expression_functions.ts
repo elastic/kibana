@@ -48,16 +48,16 @@ export interface HeatmapGridConfig {
   // grid
   strokeWidth?: number;
   strokeColor?: string;
-  cellHeight?: number;
-  cellWidth?: number;
   // cells
   isCellLabelVisible: boolean;
   // Y-axis
   isYAxisLabelVisible: boolean;
-  yAxisLabelWidth?: number;
-  yAxisLabelColor?: string;
+  isYAxisTitleVisible: boolean;
+  yTitle?: string;
   // X-axis
   isXAxisLabelVisible: boolean;
+  isXAxisTitleVisible: boolean;
+  xTitle?: string;
 }
 
 export type HeatmapGridConfigResult = HeatmapGridConfig & {

@@ -73,7 +73,7 @@ export class AttachmentService {
     try {
       this.log.debug(`Attempting to count alerts for case id ${caseId}`);
       const alertsFilter = buildFilter({
-        filters: [CommentType.alert, CommentType.generatedAlert],
+        filters: [CommentType.alert],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -122,7 +122,7 @@ export class AttachmentService {
     try {
       this.log.debug(`Attempting to GET all alerts for case id ${caseId}`);
       const alertsFilter = buildFilter({
-        filters: [CommentType.alert, CommentType.generatedAlert],
+        filters: [CommentType.alert],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,

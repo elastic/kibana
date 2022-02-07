@@ -104,6 +104,7 @@ export const EventSchema = schema.maybe(
         server_uuid: ecsString(),
         task: schema.maybe(
           schema.object({
+            id: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsNumber(),
           })
@@ -127,6 +128,7 @@ export const EventSchema = schema.maybe(
                     status_order: ecsNumber(),
                     metrics: schema.maybe(
                       schema.object({
+                        number_of_triggered_actions: ecsNumber(),
                         total_indexing_duration_ms: ecsNumber(),
                         total_search_duration_ms: ecsNumber(),
                         execution_gap_duration_s: ecsNumber(),
@@ -136,6 +138,13 @@ export const EventSchema = schema.maybe(
                 ),
               })
             ),
+          })
+        ),
+        reporting: schema.maybe(
+          schema.object({
+            id: ecsString(),
+            jobType: ecsString(),
+            byteSize: ecsNumber(),
           })
         ),
         saved_objects: schema.maybe(

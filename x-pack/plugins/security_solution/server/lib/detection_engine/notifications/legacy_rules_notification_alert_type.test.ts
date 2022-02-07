@@ -39,6 +39,7 @@ describe('legacyRules_notification_alert_type', () => {
 
     payload = {
       alertId: '1111',
+      executionId: 'b33f65d7-b33f-4aae-8d20-c93613dec9f9',
       services: alertServices,
       params: { ruleAlertId: '2222' },
       state: {},
@@ -88,7 +89,7 @@ describe('legacyRules_notification_alert_type', () => {
       });
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalledWith(
-        `Security Solution notification (Legacy) saved object for alert ${payload.params.ruleAlertId} was not found`
+        `Security Solution notification (Legacy) saved object for alert ${payload.params.ruleAlertId} was not found with id: \"1111\". space id: \"\" This indicates a dangling (Legacy) notification alert. You should delete this rule through \"Kibana UI -> Stack Management -> Rules and Connectors\" to remove this error message.`
       );
     });
 

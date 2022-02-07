@@ -10,6 +10,8 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NavigateToPath } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
@@ -37,12 +39,19 @@ import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_upda
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
 import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
+import { MlPageHeader } from '../../components/page_header';
+import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
+import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'explorer',
   path: '/explorer',
+  title: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorer.docTitle', {
+    defaultMessage: 'Anomaly Explorer',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -51,9 +60,10 @@ export const explorerRouteFactory = (
       text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
         defaultMessage: 'Anomaly Explorer',
       }),
-      href: '',
     },
   ],
+  enableDatePicker: true,
+  'data-test-subj': 'mlPageAnomalyExplorer',
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
@@ -285,19 +295,33 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
   return (
     <div className="ml-explorer">
-      <Explorer
-        {...{
-          explorerState,
-          setSelectedCells,
-          showCharts: explorerState.showCharts,
-          severity: tableSeverity.val,
-          stoppedPartitions,
-          invalidTimeRangeError,
-          selectedJobsRunning,
-          timeBuckets,
-          timefilter,
-        }}
-      />
+      <MlPageHeader>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <AnomalyResultsViewSelector viewId="explorer" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </MlPageHeader>
+      {jobsWithTimeRange.length === 0 ? (
+        <AnomalyDetectionEmptyState />
+      ) : (
+        <Explorer
+          {...{
+            explorerState,
+            setSelectedCells,
+            showCharts: explorerState.showCharts,
+            severity: tableSeverity.val,
+            stoppedPartitions,
+            invalidTimeRangeError,
+            selectedJobsRunning,
+            timeBuckets,
+            timefilter,
+          }}
+        />
+      )}
     </div>
   );
 };

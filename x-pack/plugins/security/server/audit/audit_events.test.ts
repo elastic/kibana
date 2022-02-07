@@ -15,6 +15,7 @@ import {
   httpRequestEvent,
   SavedObjectAction,
   savedObjectEvent,
+  sessionCleanupEvent,
   SpaceAuditAction,
   spaceAuditEvent,
   userLoginEvent,
@@ -347,6 +348,37 @@ describe('#userLogoutEvent', () => {
         },
         "message": "User [undefined] is logging out using basic provider [name=basic1]",
         "user": undefined,
+      }
+    `);
+  });
+});
+
+describe('#sessionCleanupEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      sessionCleanupEvent({
+        usernameHash: 'abcdef',
+        sessionId: 'sid',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "session_cleanup",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+          "session_id": "sid",
+        },
+        "message": "Removing invalid or expired session for user [hash=abcdef]",
+        "user": Object {
+          "hash": "abcdef",
+        },
       }
     `);
   });

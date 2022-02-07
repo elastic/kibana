@@ -12,14 +12,13 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IndexPattern,
   TimeRange,
   Query,
-  esFilters,
   TimefilterContract,
 } from '../../../../plugins/data/public';
 import {
@@ -239,7 +238,7 @@ export class VisualizeEmbeddable
     }
 
     // Check if filters has changed
-    if (!esFilters.onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
+    if (!onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
       this.filters = this.input.filters;
       dirty = true;
     }
@@ -456,10 +455,8 @@ export class VisualizeEmbeddable
     const input = {
       savedVis: this.vis.serialize(),
     };
-    if (this.getTitle()) {
-      input.savedVis.title = this.getTitle();
-    }
     delete input.savedVis.id;
+    _.unset(input, 'savedVis.title');
     return new Promise<VisualizeByValueInput>((resolve) => {
       resolve({ ...(input as VisualizeByValueInput) });
     });

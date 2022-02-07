@@ -34,9 +34,6 @@ const mockReq = (
             if (prop === 'server.uuid') {
               return 'kibana-1234';
             }
-            if (prop === 'monitoring.ui.metricbeat.index') {
-              return 'metricbeat-*';
-            }
           }),
         };
       },

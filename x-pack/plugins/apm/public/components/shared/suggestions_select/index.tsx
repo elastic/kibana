@@ -44,8 +44,7 @@ export function SuggestionsSelect({
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi({
-        endpoint: 'GET /internal/apm/suggestions',
+      return callApmApi('GET /internal/apm/suggestions', {
         params: {
           query: { field, string: searchValue },
         },

@@ -4,5 +4,6 @@ exports[`Executor .inject .getAllMigrations returns list of all registered migra
 Object {
   "7.10.0": [Function],
   "7.10.1": [Function],
+  "8.1.0": [Function],
 }
 `;

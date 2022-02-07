@@ -7,31 +7,31 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
-
-jest.mock('../../../../kibana_services', () => {
-  return {
-    getServices: () => ({
-      docLinks: {
-        links: {
-          query: {
-            luceneQuerySyntax: 'documentation-link',
-          },
-        },
-      },
-    }),
-  };
-});
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 function mountAndFindSubjects(props: Omit<DiscoverNoResultsProps, 'onDisableFilters'>) {
-  const component = mountWithIntl(<DiscoverNoResults onDisableFilters={() => {}} {...props} />);
+  const services = {
+    docLinks: {
+      links: {
+        query: {
+          luceneQuerySyntax: 'documentation-link',
+        },
+      },
+    },
+  };
+  const component = mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverNoResults onDisableFilters={() => {}} {...props} />
+    </KibanaContextProvider>
+  );
   return {
     mainMsg: findTestSubject(component, 'discoverNoResults').exists(),
     timeFieldMsg: findTestSubject(component, 'discoverNoResultsTimefilter').exists(),

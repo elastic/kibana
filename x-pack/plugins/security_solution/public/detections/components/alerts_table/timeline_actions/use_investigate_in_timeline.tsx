@@ -6,6 +6,7 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { isEmpty } from 'lodash';
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -26,12 +27,14 @@ interface UseInvestigateInTimelineActionProps {
   nonEcsRowData?: TimelineNonEcsData[];
   alertIds?: string[] | null | undefined;
   onInvestigateInTimelineAlertClick?: () => void;
+  timelineId?: string;
 }
 
 export const useInvestigateInTimeline = ({
   ecsRowData,
   alertIds,
   onInvestigateInTimelineAlertClick,
+  timelineId,
 }: UseInvestigateInTimelineActionProps) => {
   const {
     data: { search: searchStrategyClient, query },
@@ -64,8 +67,7 @@ export const useInvestigateInTimeline = ({
         timeline: {
           ...timeline,
           filterManager,
-          // by setting as an empty array, it will default to all in the reducer because of the event type
-          indexNames: [],
+          indexNames: timeline.indexNames ?? [],
           show: true,
         },
         to: toTimeline,
@@ -78,23 +80,21 @@ export const useInvestigateInTimeline = ({
   const showInvestigateInTimelineAction = alertIds != null;
   const { isLoading: isFetchingAlertEcs, alertsEcsData } = useFetchEcsAlertsData({
     alertIds,
-    skip: ecsRowData != null || alertIds == null,
+    skip: alertIds == null || timelineId !== undefined,
   });
 
   const investigateInTimelineAlertClick = useCallback(async () => {
     if (onInvestigateInTimelineAlertClick) {
       onInvestigateInTimelineAlertClick();
     }
-    if (alertsEcsData != null) {
+    if (!isEmpty(alertsEcsData) && alertsEcsData !== null) {
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: alertsEcsData,
         searchStrategyClient,
         updateTimelineIsLoading,
       });
-    }
-
-    if (ecsRowData != null) {
+    } else if (ecsRowData != null) {
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: ecsRowData,

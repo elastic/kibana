@@ -24,10 +24,12 @@ import { platformServiceFactory } from './platform';
 import { reportingServiceFactory } from './reporting';
 import { visualizationsServiceFactory } from './visualizations';
 import { workpadServiceFactory } from './workpad';
+import { filtersServiceFactory } from './filters';
 
 export { customElementServiceFactory } from './custom_element';
 export { embeddablesServiceFactory } from './embeddables';
 export { expressionsServiceFactory } from './expressions';
+export { filtersServiceFactory } from './filters';
 export { labsServiceFactory } from './labs';
 export { notifyServiceFactory } from './notify';
 export { platformServiceFactory } from './platform';
@@ -41,7 +43,8 @@ export const pluginServiceProviders: PluginServiceProviders<
 > = {
   customElement: new PluginServiceProvider(customElementServiceFactory),
   embeddables: new PluginServiceProvider(embeddablesServiceFactory),
-  expressions: new PluginServiceProvider(expressionsServiceFactory),
+  expressions: new PluginServiceProvider(expressionsServiceFactory, ['filters', 'notify']),
+  filters: new PluginServiceProvider(filtersServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
   navLink: new PluginServiceProvider(navLinkServiceFactory),
   notify: new PluginServiceProvider(notifyServiceFactory),

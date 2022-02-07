@@ -20,15 +20,18 @@ import { performBulkActionRoute } from './perform_bulk_action_route';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { isElasticRule } from '../../../../usage/detections';
+import { readRules } from '../../rules/read_rules';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../../../usage/detections', () => ({ isElasticRule: jest.fn() }));
+jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
 
 describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
   const isElasticRuleMock = isElasticRule as jest.Mock;
+  const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -70,13 +73,6 @@ describe.each([
         message: 'More than 10000 rules matched the filter query. Try to narrow it down.',
         status_code: 400,
       });
-    });
-
-    it('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const response = await server.inject(getBulkActionRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
   });
 
@@ -256,6 +252,48 @@ describe.each([
       expect(response.status).toEqual(500);
       expect(response.body.attributes.errors[0].message.length).toEqual(1000);
     });
+
+    it('returns partial failure error if one if rules from ids params can`t be fetched', async () => {
+      readRulesMock
+        .mockImplementationOnce(() => Promise.resolve(mockRule))
+        .mockImplementationOnce(() => Promise.resolve(null));
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionSchemaMock(),
+          ids: [mockRule.id, 'failed-mock-id'],
+          query: undefined,
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          rules: {
+            failed: 1,
+            succeeded: 1,
+            total: 2,
+          },
+          errors: [
+            {
+              message: 'Can`t fetch a rule',
+              status_code: 500,
+              rules: [
+                {
+                  id: 'failed-mock-id',
+                },
+              ],
+            },
+          ],
+        },
+        message: 'Bulk edit partially failed',
+        status_code: 500,
+      });
+    });
   });
 
   describe('request validation', () => {
@@ -303,6 +341,52 @@ describe.each([
       const result = server.validate(request);
 
       expect(result.ok).toHaveBeenCalled();
+    });
+
+    it('rejects payloads with incorrect typing for ids', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: { ...getPerformBulkActionSchemaMock(), ids: 'test fake' },
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "test fake" supplied to "ids"');
+    });
+
+    it('rejects payload if there is more than 100 ids in payload', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionSchemaMock(),
+          query: undefined,
+          ids: Array.from({ length: 101 }).map(() => 'fake-id'),
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual('More than 100 ids sent for bulk edit action.');
+    });
+
+    it('rejects payload if both query and ids defined', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionSchemaMock(),
+          query: '',
+          ids: ['fake-id'],
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'Both query and ids are sent. Define either ids or query in request payload.'
+      );
     });
   });
 

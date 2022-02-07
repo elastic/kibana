@@ -48,7 +48,7 @@ To create *Controls* panels:
 
 . Select the control panel type from the dropdown, then click *Add*.
 
-. Enter the *Control Label*, then select the *{Data-Source}* and *Field*.
+. Enter the *Control Label*, then select the *{data-source-caps}* and *Field*.
 
 . If you are adding a *Range slider*, enter the *Step Size* and *Decimal Places*.
 

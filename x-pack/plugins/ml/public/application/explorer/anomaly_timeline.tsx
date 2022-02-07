@@ -156,7 +156,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     return (
       <>
-        <EuiPanel paddingSize="m">
+        <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
           <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="baseline">
             <EuiFlexItem grow={false}>
               <EuiTitle className="panel-title">

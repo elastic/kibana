@@ -327,7 +327,13 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               data-timeline-id={id}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
+              <UpdatedFlexGroup
+                alignItems={alignItems}
+                data-test-subj="updated-flex-group"
+                gutterSize="m"
+                justifyContent="flexEnd"
+                $view={tableView}
+              >
                 <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>

@@ -20,7 +20,6 @@ import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
-  createMockPackageService,
   createRouteHandlerContext,
 } from '../../mocks';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
@@ -49,6 +48,8 @@ import { legacyMetadataSearchResponseMock } from '../metadata/support/test_suppo
 import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '../../../../../fleet/common';
 import { CasesClientMock } from '../../../../../cases/server/client/mocks';
 import { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { PackageClient } from '../../../../../fleet/server';
+import { createMockPackageService } from '../../../../../fleet/server/mocks';
 
 interface CallRouteInterface {
   body?: HostIsolationRequestBody;
@@ -135,31 +136,29 @@ describe('Host Isolation', () => {
       endpointAppContextService = new EndpointAppContextService();
       const mockSavedObjectClient = savedObjectsClientMock.create();
       const mockPackageService = createMockPackageService();
-      mockPackageService.getInstallation.mockReturnValue(
-        Promise.resolve({
-          installed_kibana: [],
-          package_assets: [],
-          es_index_patterns: {},
-          name: '',
-          version: '',
-          install_status: 'installed',
-          install_version: '',
-          install_started_at: '',
-          install_source: 'registry',
-          installed_es: [
-            {
-              dupa: true,
-              id: 'logs-endpoint.events.security',
-              type: ElasticsearchAssetType.indexTemplate,
-            },
-            {
-              id: `${metadataTransformPrefix}-0.16.0-dev.0`,
-              type: ElasticsearchAssetType.transform,
-            },
-          ],
-          keep_policies_up_to_date: false,
-        })
-      );
+      const mockedPackageClient = mockPackageService.asInternalUser as jest.Mocked<PackageClient>;
+      mockedPackageClient.getInstallation.mockResolvedValue({
+        installed_kibana: [],
+        package_assets: [],
+        es_index_patterns: {},
+        name: '',
+        version: '',
+        install_status: 'installed',
+        install_version: '',
+        install_started_at: '',
+        install_source: 'registry',
+        installed_es: [
+          {
+            id: 'logs-endpoint.events.security',
+            type: ElasticsearchAssetType.indexTemplate,
+          },
+          {
+            id: `${metadataTransformPrefix}-0.16.0-dev.0`,
+            type: ElasticsearchAssetType.transform,
+          },
+        ],
+        keep_policies_up_to_date: false,
+      });
 
       licenseEmitter = new Subject();
       licenseService = new LicenseService();

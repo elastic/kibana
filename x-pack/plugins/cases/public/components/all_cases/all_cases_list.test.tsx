@@ -14,15 +14,10 @@ import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import {
-  casesStatus,
-  useGetCasesMockState,
-  collectionCase,
-  connectorsMock,
-} from '../../containers/mock';
+import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses, CaseType } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -207,7 +202,6 @@ describe('AllCasesListGeneric', () => {
             createdAt: null,
             createdBy: null,
             status: null,
-            subCases: null,
             tags: null,
             title: null,
             totalComment: null,
@@ -256,43 +250,6 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it.skip('should enable correct actions for sub cases', async () => {
-    useGetCasesMock.mockReturnValue({
-      ...defaultGetCases,
-      data: {
-        ...defaultGetCases.data,
-        cases: [
-          {
-            ...defaultGetCases.data.cases[0],
-            id: 'my-case-with-subcases',
-            createdAt: null,
-            createdBy: null,
-            status: null,
-            subCases: [
-              {
-                id: 'sub-case-id',
-              },
-            ],
-            tags: null,
-            title: null,
-            totalComment: null,
-            totalAlerts: null,
-            type: CaseType.collection,
-          },
-        ],
-      },
-    });
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toEqual(
-      false
-    );
-  });
-
   it('should tableHeaderSortButton AllCasesList', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -339,7 +296,7 @@ describe('AllCasesListGeneric', () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
-      selectedCases: [...useGetCasesMockState.data.cases, collectionCase],
+      selectedCases: [...useGetCasesMockState.data.cases, mockCase],
     });
 
     useDeleteCasesMock
@@ -372,11 +329,10 @@ describe('AllCasesListGeneric', () => {
       expect(handleToggleModal).toBeCalled();
 
       expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual([
-        ...useGetCasesMockState.data.cases.map(({ id, type, title }) => ({ id, type, title })),
+        ...useGetCasesMockState.data.cases.map(({ id, title }) => ({ id, title })),
         {
-          id: collectionCase.id,
-          title: collectionCase.title,
-          type: collectionCase.type,
+          id: mockCase.id,
+          title: mockCase.title,
         },
       ]);
     });
@@ -403,49 +359,6 @@ describe('AllCasesListGeneric', () => {
         false
       );
       expect(wrapper.find('[data-test-subj="cases-bulk-close-button"]').exists()).toEqual(false);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
-      ).toEqual(false);
-    });
-  });
-
-  it('Renders correct bulk actions for case collection when filter status is set to all - enable only bulk delete if any collection is selected', async () => {
-    useGetCasesMock.mockReturnValue({
-      ...defaultGetCases,
-      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
-      selectedCases: [
-        ...useGetCasesMockState.data.cases,
-        {
-          ...useGetCasesMockState.data.cases[0],
-          type: CaseType.collection,
-        },
-      ],
-    });
-
-    useDeleteCasesMock
-      .mockReturnValueOnce({
-        ...defaultDeleteCases,
-        isDisplayConfirmDeleteModal: false,
-      })
-      .mockReturnValue({
-        ...defaultDeleteCases,
-        isDisplayConfirmDeleteModal: true,
-      });
-
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
-    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').first().props().disabled
-      ).toEqual(true);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-close-button"]').first().props().disabled
-      ).toEqual(true);
       expect(
         wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
       ).toEqual(false);
@@ -637,12 +550,10 @@ describe('AllCasesListGeneric', () => {
         id: '1',
         owner: SECURITY_SOLUTION_OWNER,
         status: 'open',
-        subCaseIds: [],
         tags: ['coke', 'pepsi'],
         title: 'Another horrible breach!!',
         totalAlerts: 0,
         totalComment: 0,
-        type: CaseType.individual,
         updatedAt: '2020-02-20T15:02:57.995Z',
         updatedBy: {
           email: 'leslie.knope@elastic.co',
@@ -792,8 +703,10 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const solutionHeader = wrapper.find({ children: 'Solution' });
-    expect(solutionHeader.exists()).toBeTruthy();
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeTruthy();
+    });
   });
 
   it('hides Solution column if there is a set owner', async () => {
@@ -805,8 +718,10 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const solutionHeader = wrapper.find({ children: 'Solution' });
-    expect(solutionHeader.exists()).toBeFalsy();
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeFalsy();
+    });
   });
 
   it('should deselect cases when refreshing', async () => {

@@ -7,22 +7,16 @@
  */
 
 import React from 'react';
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
-import { setServices } from '../../kibana_services';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
+import { DocTableWrapper } from './doc_table_wrapper';
 import { DocTableRow } from './components/table_row';
 import { discoverServiceMock } from '../../__mocks__/services';
-
-const mountComponent = (props: DocTableWrapperProps) => {
-  return mountWithIntl(<DocTableWrapper {...props} />);
-};
+import { KibanaContextProvider } from '../../../../kibana_react/public';
 
 describe('Doc table component', () => {
-  let defaultProps: DocTableWrapperProps;
-
-  const initDefaults = (rows?: DocTableRow[]) => {
-    defaultProps = {
+  const mountComponent = (rows?: DocTableRow[]) => {
+    const props = {
       columns: ['_source'],
       indexPattern: indexPatternMock,
       rows: rows || [
@@ -53,21 +47,23 @@ describe('Doc table component', () => {
       },
     };
 
-    setServices(discoverServiceMock);
+    return mountWithIntl(
+      <KibanaContextProvider services={discoverServiceMock}>
+        <DocTableWrapper {...props} />
+      </KibanaContextProvider>
+    );
   };
 
   it('should render infinite table correctly', () => {
-    initDefaults();
-    const component = mountComponent(defaultProps);
-    expect(findTestSubject(component, defaultProps.dataTestSubj).exists()).toBeTruthy();
+    const component = mountComponent();
+    expect(findTestSubject(component, 'discoverDocTable').exists()).toBeTruthy();
     expect(findTestSubject(component, 'docTable').exists()).toBeTruthy();
     expect(component.find('.kbnDocTable__error').exists()).toBeFalsy();
   });
 
   it('should render error fallback if rows array is empty', () => {
-    initDefaults([]);
-    const component = mountComponent(defaultProps);
-    expect(findTestSubject(component, defaultProps.dataTestSubj).exists()).toBeTruthy();
+    const component = mountComponent([]);
+    expect(findTestSubject(component, 'discoverDocTable').exists()).toBeTruthy();
     expect(findTestSubject(component, 'docTable').exists()).toBeFalsy();
     expect(component.find('.kbnDocTable__error').exists()).toBeTruthy();
   });

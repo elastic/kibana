@@ -21,7 +21,7 @@ import { parsePoliciesToKQL } from '../../../../../../common/utils';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import { LinkWithIcon } from './link_with_icon';
 import { StyledEuiFlexItem } from './styled_components';
-import { EventFiltersHttpService } from '../../../../../event_filters/service';
+import { getSummary } from '../../../../../event_filters/service/service_actions';
 
 export const FleetIntegrationEventFiltersCard = memo<{
   policyId: string;
@@ -32,7 +32,6 @@ export const FleetIntegrationEventFiltersCard = memo<{
   const isMounted = useRef<boolean>();
   const { getAppUrl } = useAppUrl();
 
-  const eventFiltersApi = useMemo(() => new EventFiltersHttpService(http), [http]);
   const policyEventFiltersPath = getPolicyEventFiltersPath(policyId);
 
   const policyEventFiltersRouteState = useMemo<PolicyDetailsRouteState>(() => {
@@ -86,18 +85,9 @@ export const FleetIntegrationEventFiltersCard = memo<{
     isMounted.current = true;
     const fetchStats = async () => {
       try {
-        const summary = await eventFiltersApi.getList({
-          perPage: 1,
-          page: 1,
-          filter: parsePoliciesToKQL([policyId, 'all']),
-        });
+        const summary = await getSummary({ http, filter: parsePoliciesToKQL([policyId, 'all']) });
         if (isMounted.current) {
-          setStats({
-            total: summary.total,
-            windows: 0,
-            linux: 0,
-            macos: 0,
-          });
+          setStats(summary);
         }
       } catch (error) {
         if (isMounted.current) {
@@ -117,7 +107,7 @@ export const FleetIntegrationEventFiltersCard = memo<{
     return () => {
       isMounted.current = false;
     };
-  }, [eventFiltersApi, policyId, toasts]);
+  }, [http, policyId, toasts]);
 
   return (
     <EuiPanel

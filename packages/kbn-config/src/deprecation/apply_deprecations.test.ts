@@ -109,8 +109,8 @@ describe('applyDeprecations', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated', renamed: 'renamed' };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated')),
-      wrapHandler(deprecations.rename('renamed', 'newname')),
+      wrapHandler(deprecations.unused('deprecated', { level: 'critical' })),
+      wrapHandler(deprecations.rename('renamed', 'newname', { level: 'critical' })),
     ]);
 
     expect(migrated).toEqual({ foo: 'bar', newname: 'renamed' });
@@ -131,8 +131,10 @@ describe('applyDeprecations', () => {
     };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated.nested')),
-      wrapHandler(deprecations.rename('nested.from.rename', 'nested.to.renamed')),
+      wrapHandler(deprecations.unused('deprecated.nested', { level: 'critical' })),
+      wrapHandler(
+        deprecations.rename('nested.from.rename', 'nested.to.renamed', { level: 'critical' })
+      ),
     ]);
 
     expect(migrated).toStrictEqual({
@@ -150,7 +152,7 @@ describe('applyDeprecations', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated')),
+      wrapHandler(deprecations.unused('deprecated', { level: 'critical' })),
     ]);
 
     expect(initialConfig).toEqual({ foo: 'bar', deprecated: 'deprecated' });

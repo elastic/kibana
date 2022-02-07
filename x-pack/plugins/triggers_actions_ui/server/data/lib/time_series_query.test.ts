@@ -11,8 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { Logger } from '../../../../../../src/core/server';
 import { TimeSeriesQuery, timeSeriesQuery, getResultFromEs } from './time_series_query';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { alertsMock } from '../../../../alerting/server/mocks';
 
 const DefaultQueryParams: TimeSeriesQuery = {
   index: 'index-name',
@@ -30,16 +29,16 @@ const DefaultQueryParams: TimeSeriesQuery = {
 };
 
 describe('timeSeriesQuery', () => {
-  const esClient = elasticsearchClientMock.createClusterClient().asScoped().asCurrentUser;
+  const abortableEsClient = alertsMock.createAlertServices().search.asCurrentUser;
   const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   const params = {
     logger,
-    esClient,
+    abortableEsClient,
     query: DefaultQueryParams,
   };
 
   it('fails as expected when the callCluster call fails', async () => {
-    esClient.search = jest.fn().mockRejectedValue(new Error('woopsie'));
+    abortableEsClient.search = jest.fn().mockRejectedValue(new Error('woopsie'));
     await timeSeriesQuery(params);
     expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
