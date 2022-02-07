@@ -76,8 +76,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionMetricVis.function.autoScale.help', {
         defaultMessage: 'Enable auto scale',
       }),
-      required: false
-    }
+      required: false,
+    },
   },
   fn(input, args, handlers) {
     if (args.percentageMode && !args.palette?.params) {
