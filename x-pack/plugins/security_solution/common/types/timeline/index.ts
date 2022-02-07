@@ -523,10 +523,20 @@ export type TimelineExpandedNetworkType =
     }
   | EmptyObject;
 
+export type TimelineExpandedUserType =
+  | {
+      panelView?: 'userDetail';
+      params?: {
+        userName: string;
+      };
+    }
+  | EmptyObject;
+
 export type TimelineExpandedDetailType =
   | TimelineExpandedEventType
   | TimelineExpandedHostType
-  | TimelineExpandedNetworkType;
+  | TimelineExpandedNetworkType
+  | TimelineExpandedUserType;
 
 export type TimelineExpandedDetail = {
   [tab in TimelineTabs]?: TimelineExpandedDetailType;

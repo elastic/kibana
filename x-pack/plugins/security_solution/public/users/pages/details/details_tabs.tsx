@@ -18,47 +18,13 @@ import { UsersDetailsTabsProps } from './types';
 import { type } from './utils';
 
 import { AllUsersQueryTabBody } from '../navigation';
+import { AllUsersQueryProps } from '../navigation/types';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
-  ({
-    detailName,
-    docValueFields,
-    filterQuery,
-    indexNames,
-    indexPattern,
-    pageFilters,
-    setAbsoluteRangeDatePicker,
-    usersDetailsPagePath,
-  }) => {
+  ({ docValueFields, filterQuery, indexNames, usersDetailsPagePath }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
-    const narrowDateRange = useCallback(
-      (score: Anomaly, interval: string) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
 
-    const updateDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
-    const tabProps = {
+    const tabProps: AllUsersQueryProps = {
       deleteQuery,
       endDate: to,
       filterQuery,
@@ -66,12 +32,10 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       setQuery,
       startDate: from,
       type,
-      indexPattern,
       indexNames,
-      hostName: detailName,
-      narrowDateRange,
-      updateDateRange,
+      docValueFields,
     };
+
     return (
       <Switch>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.allUsers})`}>

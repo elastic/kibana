@@ -40,7 +40,7 @@ import { isUrlInvalid } from '../../utils/validators';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
 import { getUsersDetailsUrl } from '../link_to/redirect_to_users';
-import { LinkButton, LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
+import { LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
 import { HostsTableType } from '../../../hosts/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
@@ -48,11 +48,15 @@ export { LinkButton, LinkAnchor } from './helpers';
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
 // Internal Links
-const UsersDetailsLinkComponent: React.FC<{
+const UserDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   userName: string;
+  title?: string;
   isButton?: boolean;
-}> = ({ children, userName, isButton }) => {
+  onClick?: (e: SyntheticEvent) => void;
+}> = ({ children, Component, userName, isButton, onClick, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const { navigateToApp } = useKibana().services.application;
   const goToUsersDetails = useCallback(
@@ -67,17 +71,19 @@ const UsersDetailsLinkComponent: React.FC<{
   );
 
   return isButton ? (
-    <LinkButton
+    <GenericLinkButton
+      Component={Component}
       data-test-subj={'users-link-button'}
-      onClick={goToUsersDetails}
       href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
+      onClick={onClick ?? goToUsersDetails}
+      title={title ?? userName}
     >
       {children ? children : userName}
-    </LinkButton>
+    </GenericLinkButton>
   ) : (
     <LinkAnchor
       data-test-subj={'users-link-anchor'}
-      onClick={goToUsersDetails}
+      onClick={onClick ?? goToUsersDetails}
       href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
     >
       {children ? children : userName}
@@ -85,8 +91,7 @@ const UsersDetailsLinkComponent: React.FC<{
   );
 };
 
-// TODO use it for creating links to user details
-export const UsersDetailsLink = React.memo(UsersDetailsLinkComponent);
+export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 
 const HostDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;

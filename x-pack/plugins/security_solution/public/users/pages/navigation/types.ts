@@ -10,8 +10,6 @@ import { UsersTableType, UsersType } from '../../store/model';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { DocValueFields } from '../../../../../timelines/common';
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { NarrowDateRange } from '../../../common/components/ml/types';
 import { NavTab } from '../../../common/components/navigation/types';
 
 type KeyUsersNavTab = UsersTableType.allUsers;
@@ -28,12 +26,6 @@ export type AllUsersQueryProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   docValueFields?: DocValueFields[];
   indexNames: string[];
-  pageFilters?: Filter[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
-  updateDateRange?: UpdateDateRange;
-  narrowDateRange?: NarrowDateRange;
-};
-export type HostQueryProps = AllUsersQueryProps & {
-  hostName: string;
 };

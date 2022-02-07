@@ -70,9 +70,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   );
   const getFilters = () => [...usersDetailsPageFilters, ...filters];
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(kibana.services.uiSettings),

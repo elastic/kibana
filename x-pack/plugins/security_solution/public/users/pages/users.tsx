@@ -9,6 +9,7 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { isTab } from '../../../../timelines/public';
 
 import { SecurityPageName } from '../../app/types';
@@ -39,7 +40,8 @@ import {
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
-import { UsersDetailsLink } from '../../common/components/links';
+import { UsersKpiComponent } from '../components/kpi_users';
+import { UpdateDateRange } from '../../common/components/charts/common';
 
 const ID = 'UsersQueryId';
 
@@ -53,6 +55,7 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const UsersComponent = () => {
+  const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -116,6 +119,23 @@ const UsersComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const narrowDateRange = useCallback<UpdateDateRange>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        })
+      );
+    },
+    [dispatch]
+  );
+
   return (
     <>
       {indicesExist ? (
@@ -128,11 +148,19 @@ const UsersComponent = () => {
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <HeaderPage subtitle={'TODO <LastEventTime />'} title={i18n.PAGE_TITLE} />
 
+            <UsersKpiComponent
+              filterQuery={filterQuery}
+              indexNames={selectedPatterns}
+              from={from}
+              setQuery={setQuery}
+              to={to}
+              skip={isInitializing || !filterQuery}
+              narrowDateRange={narrowDateRange}
+            />
+
             <SecuritySolutionTabNavigation navTabs={navTabsUsers} />
 
             <EuiSpacer />
-
-            <UsersDetailsLink userName="TODO user details" />
 
             <UsersTabs
               deleteQuery={deleteQuery}

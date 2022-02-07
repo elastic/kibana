@@ -56,6 +56,8 @@ export const AllUsersQueryTabBody = ({
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       setQuery={setQuery}
       totalCount={totalCount}
+      docValueFields={docValueFields}
+      indexNames={indexNames}
       // TODO Fix me
       // @ts-ignore
       type={type}

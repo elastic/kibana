@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { UsersTabsProps } from './types';
-import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_interval_to_datetime';
-import { Anomaly } from '../../common/components/ml/types';
 import { UsersTableType } from '../store/model';
-import { UpdateDateRange } from '../../common/components/charts/common';
 import { USERS_PATH } from '../../../common/constants';
 import { AllUsersQueryTabBody } from './navigation';
+import { AllUsersQueryProps } from './navigation/types';
 
 export const UsersTabs = memo<UsersTabsProps>(
   ({
@@ -24,39 +22,11 @@ export const UsersTabs = memo<UsersTabsProps>(
     from,
     indexNames,
     isInitializing,
-    setAbsoluteRangeDatePicker,
     setQuery,
     to,
     type,
   }) => {
-    const narrowDateRange = useCallback(
-      (score: Anomaly, interval: string) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
-    const updateDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
-    const tabProps = {
+    const tabProps: AllUsersQueryProps = {
       deleteQuery,
       endDate: to,
       filterQuery,
@@ -65,14 +35,13 @@ export const UsersTabs = memo<UsersTabsProps>(
       setQuery,
       startDate: from,
       type,
-      narrowDateRange,
-      updateDateRange,
+      docValueFields,
     };
 
     return (
       <Switch>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}>
-          <AllUsersQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <AllUsersQueryTabBody {...tabProps} />
         </Route>
       </Switch>
     );

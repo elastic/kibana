@@ -21,7 +21,7 @@ interface UsersDetailsComponentReduxProps {
   filters: Filter[];
 }
 
-interface HostBodyComponentDispatchProps {
+interface UserBodyComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: string;
@@ -31,7 +31,7 @@ interface HostBodyComponentDispatchProps {
   usersDetailsPagePath: string;
 }
 
-interface UsersDetailsComponentDispatchProps extends HostBodyComponentDispatchProps {
+interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchProps {
   setUsersDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
@@ -48,7 +48,7 @@ type KeyUsersDetailsNavTab = UsersTableType.allUsers;
 
 export type UsersDetailsNavTab = Record<KeyUsersDetailsNavTab, NavTab>;
 
-export type UsersDetailsTabsProps = HostBodyComponentDispatchProps &
+export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {
     docValueFields?: DocValueFields[];
     indexNames: string[];

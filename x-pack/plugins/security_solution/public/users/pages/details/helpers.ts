@@ -6,42 +6,24 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { escapeQueryValue } from '../../../common/lib/keury';
 
-/** Returns the kqlQueryExpression for the `Events` widget on the `Host Details` page */
-export const getUsersDetailsEventsKqlQueryExpression = ({
-  filterQueryExpression,
-  hostName,
-}: {
-  filterQueryExpression: string;
-  hostName: string;
-}): string => {
-  if (filterQueryExpression.length) {
-    return `${filterQueryExpression}${
-      hostName.length ? ` and host.name: ${escapeQueryValue(hostName)}` : ''
-    }`;
-  } else {
-    return hostName.length ? `host.name: ${escapeQueryValue(hostName)}` : '';
-  }
-};
-
-export const getUsersDetailsPageFilters = (hostName: string): Filter[] => [
+export const getUsersDetailsPageFilters = (userName: string): Filter[] => [
   {
     meta: {
       alias: null,
       negate: false,
       disabled: false,
       type: 'phrase',
-      key: 'host.name',
-      value: hostName,
+      key: 'user.name',
+      value: userName,
       params: {
-        query: hostName,
+        query: userName,
       },
     },
     query: {
       match: {
-        'host.name': {
-          query: hostName,
+        'user.name': {
+          query: userName,
           type: 'phrase',
         },
       },
