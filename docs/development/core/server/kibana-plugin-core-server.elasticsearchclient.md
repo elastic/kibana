@@ -9,9 +9,7 @@ Client used to query the elasticsearch cluster.
 <b>Signature:</b>
 
 ```typescript
-export declare type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'> & {
-    transport: {
-        request<TResponse = unknown>(params: TransportRequestParams, options?: TransportRequestOptions): Promise<TransportResult<TResponse>>;
-    };
+export declare type ElasticsearchClient = Omit<Client, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'> & {
+    transport: Client['transport'];
 };
 ```
