@@ -23,6 +23,7 @@ import { journeyReducer } from './journey';
 import { networkEventsReducer } from './network_events';
 import { syntheticsReducer } from './synthetics';
 import { monitorManagementListReducer } from './monitor_management';
+import { testNowRunsReducer } from './test_now_runs';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -42,4 +43,5 @@ export const rootReducer = combineReducers({
   journeys: journeyReducer,
   networkEvents: networkEventsReducer,
   synthetics: syntheticsReducer,
+  testNowRuns: testNowRunsReducer,
 });
