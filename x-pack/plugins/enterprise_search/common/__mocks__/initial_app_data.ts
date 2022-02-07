@@ -8,7 +8,6 @@
 export const DEFAULT_INITIAL_APP_DATA = {
   kibanaVersion: '7.16.0',
   enterpriseSearchVersion: '7.16.0',
-  errorConnectingMessage: '',
   readOnlyMode: false,
   searchOAuth: {
     clientId: 'someUID',

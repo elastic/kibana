@@ -8,6 +8,10 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;
@@ -33,15 +37,20 @@ const getTopHits = (threadType: string, order: 'asc' | 'desc') => ({
 export async function fetchThreadPoolRejectionStats(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   size: number,
   threadType: string,
   duration: string,
   filterQuery?: string
 ): Promise<AlertThreadPoolRejectionsStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'node_stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: ['aggregations'],
     body: {
       size: 0,
@@ -53,11 +62,7 @@ export async function fetchThreadPoolRejectionStats(
                 cluster_uuid: clustersIds,
               },
             },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {

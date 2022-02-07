@@ -127,7 +127,9 @@ describe('#preboot', () => {
       expect(clusterClient).toBe(mockClusterClientInstance);
 
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
-      expect(MockClusterClient.mock.calls[0][0]).toEqual(expect.objectContaining(customConfig));
+      expect(MockClusterClient.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ config: expect.objectContaining(customConfig) })
+      );
     });
 
     it('creates a new client on each call', async () => {
@@ -151,7 +153,7 @@ describe('#preboot', () => {
       };
 
       prebootContract.createClient('some-custom-type', customConfig);
-      const config = MockClusterClient.mock.calls[0][0];
+      const config = MockClusterClient.mock.calls[0][0].config;
 
       expect(config).toMatchInlineSnapshot(`
         Object {
@@ -334,7 +336,9 @@ describe('#start', () => {
       expect(clusterClient).toBe(mockClusterClientInstance);
 
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
-      expect(MockClusterClient.mock.calls[0][0]).toEqual(expect.objectContaining(customConfig));
+      expect(MockClusterClient.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ config: expect.objectContaining(customConfig) })
+      );
     });
     it('creates a new client on each call', async () => {
       await elasticsearchService.setup(setupDeps);
@@ -365,7 +369,7 @@ describe('#start', () => {
       };
 
       startContract.createClient('some-custom-type', customConfig);
-      const config = MockClusterClient.mock.calls[0][0];
+      const config = MockClusterClient.mock.calls[0][0].config;
 
       expect(config).toMatchInlineSnapshot(`
         Object {

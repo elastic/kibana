@@ -101,6 +101,7 @@ const OwnerSelector = ({
     </EuiFormRow>
   );
 };
+OwnerSelector.displayName = 'OwnerSelector';
 
 const CaseOwnerSelector: React.FC<Props> = ({ availableOwners, isLoading }) => {
   return (

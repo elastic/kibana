@@ -17,7 +17,8 @@ export default function (ftrContext: FtrProviderContext) {
 
   const scenario = createScenario(ftrContext);
 
-  describe('changes in license types', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/110938
+  describe.skip('changes in license types', () => {
     after(async () => {
       await scenario.teardown();
     });

@@ -9,6 +9,7 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import {
   buildResultColumns,
+  Datatable,
   ExecutionContext,
 } from '../../../../../../src/plugins/expressions/common';
 import {
@@ -76,38 +77,45 @@ export const timeScaleFn =
     }
     // the datemath plugin always parses dates by using the current default moment time zone.
     // to use the configured time zone, we are switching just for the bounds calculation.
+
+    // The code between this call and the reset in the finally block is not allowed to get async,
+    // otherwise the timezone setting can leak out of this function.
     const defaultTimezone = moment().zoneName();
-    moment.tz.setDefault(timeInfo.timeZone);
+    let result: Datatable;
+    try {
+      moment.tz.setDefault(timeInfo.timeZone);
 
-    const timeBounds = timeInfo.timeRange && calculateBounds(timeInfo.timeRange);
+      const timeBounds = timeInfo.timeRange && calculateBounds(timeInfo.timeRange);
 
-    const result = {
-      ...input,
-      columns: resultColumns,
-      rows: input.rows.map((row) => {
-        const newRow = { ...row };
+      result = {
+        ...input,
+        columns: resultColumns,
+        rows: input.rows.map((row) => {
+          const newRow = { ...row };
 
-        let startOfBucket = moment(row[dateColumnId]);
-        let endOfBucket = startOfBucket.clone().add(intervalDuration);
-        if (timeBounds && timeBounds.min) {
-          startOfBucket = moment.max(startOfBucket, timeBounds.min);
-        }
-        if (timeBounds && timeBounds.max) {
-          endOfBucket = moment.min(endOfBucket, timeBounds.max);
-        }
-        const bucketSize = endOfBucket.diff(startOfBucket);
-        const factor = bucketSize / targetUnitInMs;
+          let startOfBucket = moment(row[dateColumnId]);
+          let endOfBucket = startOfBucket.clone().add(intervalDuration);
+          if (timeBounds && timeBounds.min) {
+            startOfBucket = moment.max(startOfBucket, timeBounds.min);
+          }
+          if (timeBounds && timeBounds.max) {
+            endOfBucket = moment.min(endOfBucket, timeBounds.max);
+          }
+          const bucketSize = endOfBucket.diff(startOfBucket);
+          const factor = bucketSize / targetUnitInMs;
 
-        const currentValue = newRow[inputColumnId];
-        if (currentValue != null) {
-          newRow[outputColumnId] = Number(currentValue) / factor;
-        }
+          const currentValue = newRow[inputColumnId];
+          if (currentValue != null) {
+            newRow[outputColumnId] = Number(currentValue) / factor;
+          }
 
-        return newRow;
-      }),
-    };
-    // reset default moment timezone
-    moment.tz.setDefault(defaultTimezone);
+          return newRow;
+        }),
+      };
+    } finally {
+      // reset default moment timezone
+      moment.tz.setDefault(defaultTimezone);
+    }
 
     return result;
   };

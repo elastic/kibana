@@ -20,7 +20,7 @@ import {
   ReferenceOrValueEmbeddable,
 } from '.';
 import { EmbeddablePublicPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../core/public/mocks';
 import { UiActionsService } from './lib/ui_actions';
 import { CoreStart } from '../../../core/public';
 import { Start as InspectorStart } from '../../inspector/public';
@@ -43,6 +43,8 @@ interface CreateEmbeddablePanelMockArgs {
   SavedObjectFinder: React.ComponentType<any>;
 }
 
+const theme = themeServiceMock.createStartContract();
+
 export const createEmbeddablePanelMock = ({
   getActions,
   getEmbeddableFactory,
@@ -64,6 +66,7 @@ export const createEmbeddablePanelMock = ({
       overlays={overlays || ({} as any)}
       inspector={inspector || ({} as any)}
       SavedObjectFinder={SavedObjectFinder || (() => null)}
+      theme={theme}
     />
   );
 };

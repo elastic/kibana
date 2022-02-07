@@ -79,7 +79,7 @@ export const IndexPatternTable = ({
     uiSettings,
     indexPatternManagementStart,
     chrome,
-    data,
+    dataViews,
     IndexPatternEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
@@ -91,18 +91,18 @@ export const IndexPatternTable = ({
     (async function () {
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
         uiSettings.get('defaultIndex'),
-        data.dataViews
+        dataViews
       );
       setIndexPatterns(gettedIndexPatterns);
       setIsLoadingIndexPatterns(false);
       if (
         gettedIndexPatterns.length === 0 ||
-        !(await data.dataViews.hasUserDataView().catch(() => false))
+        !(await dataViews.hasUserDataView().catch(() => false))
       ) {
         setShowCreateDialog(true);
       }
     })();
-  }, [indexPatternManagementStart, uiSettings, data]);
+  }, [indexPatternManagementStart, uiSettings, dataViews]);
 
   chrome.docTitle.change(title);
 

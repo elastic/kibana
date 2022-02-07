@@ -21,17 +21,11 @@ import {
   AlertLicenseState,
 } from '../../common/types/alerts';
 import { AlertExecutorOptions, AlertInstance } from '../../../alerting/server';
-import {
-  RULE_LICENSE_EXPIRATION,
-  LEGACY_RULE_DETAILS,
-  INDEX_PATTERN_ELASTICSEARCH,
-} from '../../common/constants';
+import { RULE_LICENSE_EXPIRATION, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
@@ -80,14 +74,9 @@ export class LicenseExpirationRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
-    const licenses = await fetchLicenses(esClient, clusters, esIndexPattern, params.filterQuery);
+    const licenses = await fetchLicenses(esClient, clusters, params.filterQuery);
 
     return licenses.map((license) => {
       const { clusterUuid, type, expiryDateMS, status, ccs } = license;

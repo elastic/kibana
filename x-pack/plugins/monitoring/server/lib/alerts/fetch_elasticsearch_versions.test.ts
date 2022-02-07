@@ -11,6 +11,19 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchElasticsearchVersions } from './fetch_elasticsearch_versions';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+import { Globals } from '../../static_globals';
+
 describe('fetchElasticsearchVersions', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 
@@ -45,7 +58,7 @@ describe('fetchElasticsearchVersions', () => {
       } as estypes.SearchResponse)
     );
 
-    const result = await fetchElasticsearchVersions(esClient, clusters, index, size);
+    const result = await fetchElasticsearchVersions(esClient, clusters, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,
@@ -53,5 +66,53 @@ describe('fetchElasticsearchVersions', () => {
         versions,
       },
     ]);
+  });
+  it('should call ES with correct query', async () => {
+    await fetchElasticsearchVersions(esClient, clusters, size);
+    expect(esClient.search).toHaveBeenCalledWith({
+      index:
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+      filter_path: [
+        'hits.hits._source.cluster_stats.nodes.versions',
+        'hits.hits._index',
+        'hits.hits._source.cluster_uuid',
+      ],
+      body: {
+        size: 1,
+        sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+        query: {
+          bool: {
+            filter: [
+              { terms: { cluster_uuid: ['cluster123'] } },
+              {
+                bool: {
+                  should: [
+                    { term: { type: 'cluster_stats' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              { range: { timestamp: { gte: 'now-2m' } } },
+            ],
+          },
+        },
+        collapse: { field: 'cluster_uuid' },
+      },
+    });
+  });
+  it('should call ES with correct query when ccs disabled', async () => {
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = false;
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(
+        {} as estypes.SearchResponse
+      );
+    });
+    await fetchElasticsearchVersions(esClient, clusters, size);
+    // @ts-ignore
+    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
   });
 });
