@@ -101,18 +101,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       if (currentPkgKey !== pkgKey) {
         // Retrieve highest number appended to package policy name and increment it by one
         const pkgPoliciesNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-        const pkgPoliciesWithMatchingNames = packagePolicyData?.items
-          ? packagePolicyData.items
-              .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-              .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-              .sort((a, b) => a - b)
-          : [];
+        const maxPkgPolicyName = Math.max(
+          ...(packagePolicyData?.items ?? [])
+            .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+            .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
+          0
+        );
 
-        const incrementedName = `${packageInfo.name}-${
-          pkgPoliciesWithMatchingNames.length
-            ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-            : 1
-        }`;
+        const incrementedName = `${packageInfo.name}-${maxPkgPolicyName + 1}`;
 
         updatePackagePolicy(
           packageToPackagePolicy(
