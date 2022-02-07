@@ -20,8 +20,9 @@ import {
 } from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 import { AlertsDropdown } from '../../alerts/alerts_dropdown';
-import { ActionMenu } from '../../components/action_menu';
 import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
+import { HeaderMenuPortal } from '../../../../observability/public';
+import { HeaderActionMenuContext } from '../../application/contexts/header_action_menu_context';
 
 export interface TabMenuItem {
   id: string;
@@ -53,6 +54,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   const history = useHistory();
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
+  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
   const getPageDataResponseHandler = useCallback(
     (result: any) => {
@@ -104,9 +106,11 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   return (
     <div className="app-container" data-test-subj="monitoringAppContainer">
-      <ActionMenu>
-        <AlertsDropdown />
-      </ActionMenu>
+      {setHeaderActionMenu && theme$ && (
+        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+          <AlertsDropdown />
+        </HeaderMenuPortal>
+      )}
       <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
       {tabs && (
         <EuiTabs>
