@@ -72,10 +72,6 @@ Before you upgrade {kib}:
   the same Elasticseach index is unsupported. Upgrading while older {kib}
   instances are running can cause data loss or upgrade failures.
 
-To identify the changes you need to make to upgrade, and to enable you to
-perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to
-6.8 before you upgrade to {version}.
-
 For a comprehensive overview of the upgrade process, refer to
 *{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack]*.
 
@@ -83,8 +79,12 @@ For a comprehensive overview of the upgrade process, refer to
 [float]
 [[upgrade-5x-earlier]]
 === Upgrade from 5.6 or earlier
+To identify the changes you need to make to upgrade, and to enable you to
+perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to
+6.8 before you upgrade to {version}.
+
 {es} {version} can't read indices created in 5.6 or earlier versions. Before you
-upgrade to {version}, you must reindex or delete these indices. For more information, refer to
+upgrade from 6.8 to {version}, you must reindex or delete these indices. For more information, refer to
 {stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack].
 
 When your reindex is complete, follow the <<upgrade-standard, Standard upgrade>>
