@@ -17,7 +17,7 @@
     "usageCollection",
     "taskManager",
     "actions",
-    "alerts",
+    "alerting",
     "observability",
     "security",
     "maps"
