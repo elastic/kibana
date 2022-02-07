@@ -29,7 +29,6 @@ describe('Event Logger', () => {
     expect(logger.eventObj).toMatchInlineSnapshot(`
       Object {
         "event": Object {
-          "provider": "reporting",
           "timezone": "UTC",
         },
         "kibana": Object {
@@ -37,9 +36,6 @@ describe('Event Logger', () => {
             "id": "12348",
             "jobType": "csv",
           },
-        },
-        "log": Object {
-          "logger": "reporting",
         },
         "user": undefined,
       }
@@ -51,7 +47,6 @@ describe('Event Logger', () => {
     expect(logger.eventObj).toMatchInlineSnapshot(`
       Object {
         "event": Object {
-          "provider": "reporting",
           "timezone": "UTC",
         },
         "kibana": Object {
@@ -59,9 +54,6 @@ describe('Event Logger', () => {
             "id": "12348",
             "jobType": "csv",
           },
-        },
-        "log": Object {
-          "logger": "reporting",
         },
         "user": Object {
           "name": "thundercat",
@@ -77,7 +69,6 @@ describe('Event Logger', () => {
     expect(logger.eventObj).toMatchInlineSnapshot(`
       Object {
         "event": Object {
-          "provider": "reporting",
           "timezone": "UTC",
         },
         "kibana": Object {
@@ -88,9 +79,6 @@ describe('Event Logger', () => {
           "task": Object {
             "id": "some-task-id-123",
           },
-        },
-        "log": Object {
-          "logger": "reporting",
         },
         "user": Object {
           "name": "thundercat",
@@ -107,12 +95,10 @@ describe('Event Logger', () => {
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "action": "execute-start",
-          "kind": "event",
-          "provider": "reporting",
           "timezone": "UTC",
         },
         Object {
+          "actionType": "execute-start",
           "id": "12348",
           "jobType": "csv",
         },
@@ -134,13 +120,10 @@ describe('Event Logger', () => {
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "action": "execute-complete",
-          "kind": "metrics",
-          "outcome": "success",
-          "provider": "reporting",
           "timezone": "UTC",
         },
         Object {
+          "actionType": "execute-complete",
           "byteSize": 444,
           "id": "12348",
           "jobType": "csv",
@@ -159,13 +142,10 @@ describe('Event Logger', () => {
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "action": "execute-complete",
-          "kind": "error",
-          "outcome": "failure",
-          "provider": "reporting",
           "timezone": "UTC",
         },
         Object {
+          "actionType": "execute-error",
           "id": "12348",
           "jobType": "csv",
         },
@@ -181,12 +161,10 @@ describe('Event Logger', () => {
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "action": "claim-task",
-          "kind": "event",
-          "provider": "reporting",
           "timezone": "UTC",
         },
         Object {
+          "actionType": "claim-task",
           "id": "12348",
           "jobType": "csv",
         },
@@ -201,12 +179,10 @@ describe('Event Logger', () => {
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "action": "fail-report",
-          "kind": "event",
-          "provider": "reporting",
           "timezone": "UTC",
         },
         Object {
+          "actionType": "fail-report",
           "id": "12348",
           "jobType": "csv",
         },
@@ -220,12 +196,10 @@ describe('Event Logger', () => {
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "action": "save-report",
-          "kind": "event",
-          "provider": "reporting",
           "timezone": "UTC",
         },
         Object {
+          "actionType": "save-report",
           "id": "12348",
           "jobType": "csv",
         },
@@ -239,12 +213,10 @@ describe('Event Logger', () => {
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "action": "retry",
-          "kind": "event",
-          "provider": "reporting",
           "timezone": "UTC",
         },
         Object {
+          "actionType": "retry",
           "id": "12348",
           "jobType": "csv",
         },

@@ -13,4 +13,5 @@ export enum ActionType {
   SAVE_REPORT = 'save-report',
   RETRY = 'retry',
   FAIL_REPORT = 'fail-report',
+  EXECUTE_ERROR = 'execute-error',
 }
