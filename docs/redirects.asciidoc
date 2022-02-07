@@ -386,12 +386,12 @@ This content has moved. Refer to <<managing-data-views>>.
 
 This content has moved. Refer to <<kibana-role-management>>.
 
-[role="exclude" logging-configuration-changes]
-== Logging configuration changes 
+[role="exclude",id="logging-configuration-changes"]
+== Logging configuration changes
 
 This content has moved. Refer to <<logging-config-changes>>.
 
-[role="exclude" upgrade-migrations]
+[role="exclude",id="upgrade-migrations"]
 == Upgrade migrations
 
 This content has moved. Refer to <<saved-object-migrations>>.
