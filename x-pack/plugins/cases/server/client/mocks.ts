@@ -91,6 +91,7 @@ export interface CasesClientMock extends CasesClient {
 
 export const createCasesClientMock = (): CasesClientMock => {
   const client: PublicContract<CasesClient> = {
+    kibanaVersion: '8.2.0',
     cases: createCasesSubClientMock(),
     attachments: createAttachmentsSubClientMock(),
     userActions: createUserActionsSubClientMock(),
