@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { ArtifactListPage } from '../../../components/artifact_list_page/artifact_page';
+import { ArtifactListPage } from '../../../components/artifact_list_page/artifact_list_page';
 
 export interface EventFiltersListPageProps {
   foo?: string;

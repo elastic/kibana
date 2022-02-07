@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ArtifatListPage } from './artifact_page';
+export { ArtifatListPage } from './artifact_list_page';

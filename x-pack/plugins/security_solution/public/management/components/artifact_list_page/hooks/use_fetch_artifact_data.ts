@@ -12,5 +12,13 @@ export const useFetchArtifactData = (
 ) => {
   // FIXME:PT replace once generic hooks are available
 
+  // {
+  //    //==  used to show/hide entire UI and show the loaderThis will be true until we can determine
+  //    //    if the empty state or the actual list page should be shown
+  //    isInitializing: boolean;
+  //
+  //    isLoading
+  // }
+
   return useFetchHostIsolationExceptionsList({ page: 0, perPage: 20 });
 };
