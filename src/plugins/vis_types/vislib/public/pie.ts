@@ -11,7 +11,13 @@ import { VisTypeDefinition } from '../../../visualizations/public';
 import { CommonVislibParams } from './types';
 import { toExpressionAst } from './to_ast_pie';
 
-export interface PieVisParams extends CommonVislibParams {
+export enum LegendDisplay {
+  SHOW = 'show',
+  HIDE = 'hide',
+  DEFAULT = 'default',
+}
+
+export type PieVisParams = Omit<CommonVislibParams, 'addLegend'> & {
   type: 'pie';
   isDonut: boolean;
   labels: {
@@ -20,7 +26,8 @@ export interface PieVisParams extends CommonVislibParams {
     last_level: boolean;
     truncate: number | null;
   };
-}
+  legendDisplay: LegendDisplay;
+};
 
 export const pieVisTypeDefinition = {
   ...pieVisType({}),
