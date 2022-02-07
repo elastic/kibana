@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,6 +24,8 @@ import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUrlState } from '../../../util/url_state';
 import { useMlKibana } from '../../../contexts/kibana';
+import { useRefreshIntervalUpdates } from '../../../contexts/kibana/use_timefilter';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
 
 interface TimePickerQuickRange {
   from: string;
@@ -57,6 +60,8 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
   mlTimefilterRefresh$.next({ lastRefresh: Date.now(), ...(timeRange ? { timeRange } : {}) });
 }
 
+const DEFAULT_REFRESH_INTERVAL_MS = 1000;
+
 export const DatePickerWrapper: FC = () => {
   const { services } = useMlKibana();
   const config = services.uiSettings;
@@ -65,11 +70,33 @@ export const DatePickerWrapper: FC = () => {
 
   const { timefilter, history } = services.data.query.timefilter;
 
+  const { displayWarningToast } = useToastNotificationService();
+
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
 
-  const refreshInterval: RefreshInterval =
-    globalState?.refreshInterval ?? timefilter.getRefreshInterval();
+  const timeFilterRefreshInterval = useRefreshIntervalUpdates();
+
+  const refreshInterval = useMemo((): RefreshInterval => {
+    const resultInterval = globalState?.refreshInterval ?? timeFilterRefreshInterval;
+
+    let value = resultInterval.value;
+    if (resultInterval.value < DEFAULT_REFRESH_INTERVAL_MS) {
+      displayWarningToast(
+        i18n.translate('xpack.ml.datePicker.shortRefreshIntervalWarningMessage', {
+          defaultMessage: 'Configured refresh interval is too short.',
+        })
+      );
+      value = DEFAULT_REFRESH_INTERVAL_MS;
+    }
+
+    /**
+     * Enforce pause when it's set to false with 0 refresh interval.
+     */
+    const pause = resultInterval.pause || (!resultInterval.pause && resultInterval.value <= 0);
+
+    return { value, pause };
+  }, [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]);
 
   const setRefreshInterval = useCallback(
     debounce((refreshIntervalUpdate: RefreshInterval) => {
@@ -105,7 +132,6 @@ export const DatePickerWrapper: FC = () => {
 
   useEffect(() => {
     const subscriptions = new Subscription();
-    const refreshIntervalUpdate$ = timefilter.getRefreshIntervalUpdate$();
 
     subscriptions.add(
       httpService.getLoadingCount$.subscribe((v) => {
@@ -113,13 +139,6 @@ export const DatePickerWrapper: FC = () => {
       })
     );
 
-    if (refreshIntervalUpdate$ !== undefined) {
-      subscriptions.add(
-        refreshIntervalUpdate$.subscribe((r) => {
-          setRefreshInterval(timefilter.getRefreshInterval());
-        })
-      );
-    }
     const timeUpdate$ = timefilter.getTimeUpdate$();
     if (timeUpdate$ !== undefined) {
       subscriptions.add(
@@ -161,11 +180,6 @@ export const DatePickerWrapper: FC = () => {
     setRefreshInterval({ pause, value });
   }
 
-  /**
-   * Enforce pause when it's set to false with 0 refresh interval.
-   */
-  const isPaused = refreshInterval.pause || (!refreshInterval.pause && !refreshInterval.value);
-
   return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
     <EuiFlexGroup
       gutterSize="s"
@@ -177,7 +191,7 @@ export const DatePickerWrapper: FC = () => {
           isLoading={isLoading}
           start={time.from}
           end={time.to}
-          isPaused={isPaused}
+          isPaused={refreshInterval.pause}
           isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
           refreshInterval={refreshInterval.value}
           onTimeChange={updateFilter}
