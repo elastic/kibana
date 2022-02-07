@@ -27,6 +27,7 @@ import {
 import { getDataStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import type { IndexPatternValue, Panel } from '../common/types';
+import { RequestAdapter } from '../../../inspector/public';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -50,6 +51,19 @@ export const withReplacedIds = (
 
   return vis;
 };
+
+async function withDefaultIndexPattern(
+  vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
+): Promise<Vis<TimeseriesVisParams>> {
+  const { indexPatterns } = getDataStart();
+
+  const defaultIndex = await indexPatterns.getDefault();
+  if (!defaultIndex || !defaultIndex.id) return vis;
+  vis.params.index_pattern = {
+    id: defaultIndex.id,
+  };
+  return vis;
+}
 
 async function resolveIndexPattern(
   indexPatternValue: IndexPatternValue,
@@ -137,7 +151,7 @@ export const metricsVisDefinition: VisTypeDefinition<
       drop_last_bucket: 0,
     },
   },
-  setup: (vis) => Promise.resolve(withReplacedIds(vis)),
+  setup: (vis) => withDefaultIndexPattern(withReplacedIds(vis)),
   editorConfig: {
     editor: TSVB_EDITOR_NAME,
   },
@@ -153,7 +167,9 @@ export const metricsVisDefinition: VisTypeDefinition<
     }
     return [];
   },
-  inspectorAdapters: {},
+  inspectorAdapters: () => ({
+    requests: new RequestAdapter(),
+  }),
   requiresSearch: true,
   getUsedIndexPattern: getUsedIndexPatterns,
 };

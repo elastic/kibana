@@ -20,7 +20,7 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -33,7 +33,7 @@ export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
   security: SetupPlugins['security'],
-  sender: TelemetryEventsSender
+  sender: ITelemetryEventsSender
 ) => {
   router.post(
     {

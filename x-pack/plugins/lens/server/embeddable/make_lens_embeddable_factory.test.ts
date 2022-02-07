@@ -9,7 +9,7 @@ import semverGte from 'semver/functions/gte';
 import { makeLensEmbeddableFactory } from './make_lens_embeddable_factory';
 import { getAllMigrations } from '../migrations/saved_object_migrations';
 import { Filter } from '@kbn/es-query';
-import { GetMigrationFunctionObjectFn } from 'src/plugins/kibana_utils/common/persistable_state/types';
+import { GetMigrationFunctionObjectFn } from 'src/plugins/kibana_utils/common';
 
 describe('embeddable migrations', () => {
   test('should have all saved object migrations versions (>7.13.0)', () => {
@@ -17,7 +17,7 @@ describe('embeddable migrations', () => {
       return semverGte(version, '7.13.1');
     });
     const embeddableMigrationVersions = (
-      makeLensEmbeddableFactory({}, {})()?.migrations as GetMigrationFunctionObjectFn
+      makeLensEmbeddableFactory(() => ({}), {})()?.migrations as GetMigrationFunctionObjectFn
     )();
     if (embeddableMigrationVersions) {
       expect(savedObjectMigrationVersions.sort()).toEqual(
@@ -46,22 +46,20 @@ describe('embeddable migrations', () => {
       },
     };
 
-    const embeddableMigrationVersions = makeLensEmbeddableFactory(
-      {
-        [migrationVersion]: (filters: Filter[]) => {
-          return filters.map((filterState) => ({
-            ...filterState,
-            migrated: true,
-          }));
-        },
-      },
-      {}
-    )()?.migrations;
+    const migrations = (
+      makeLensEmbeddableFactory(
+        () => ({
+          [migrationVersion]: (filters: Filter[]) => {
+            return filters.map((filterState) => ({
+              ...filterState,
+              migrated: true,
+            }));
+          },
+        }),
+        {}
+      )()?.migrations as GetMigrationFunctionObjectFn
+    )();
 
-    const migrations =
-      typeof embeddableMigrationVersions === 'function'
-        ? embeddableMigrationVersions()
-        : embeddableMigrationVersions || {};
     const migratedLensDoc = migrations[migrationVersion](lensVisualizationDoc);
 
     expect(migratedLensDoc).toEqual({
@@ -99,14 +97,11 @@ describe('embeddable migrations', () => {
     }));
 
     const embeddableMigrationVersions = (
-      makeLensEmbeddableFactory(
-        {},
-        {
-          abc: () => ({
-            [migrationVersion]: migrationFn,
-          }),
-        }
-      )()?.migrations as GetMigrationFunctionObjectFn
+      makeLensEmbeddableFactory(() => ({}), {
+        abc: () => ({
+          [migrationVersion]: migrationFn,
+        }),
+      })()?.migrations as GetMigrationFunctionObjectFn
     )();
 
     const migratedLensDoc = embeddableMigrationVersions?.[migrationVersion](lensVisualizationDoc);

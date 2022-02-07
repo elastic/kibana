@@ -17,12 +17,12 @@ import {
   excess,
   CaseResponseRt,
   CaseResponse,
-  CasesClientPostRequestRt,
   CasePostRequest,
-  CaseType,
   ActionTypes,
+  CasePostRequestRt,
 } from '../../../common/api';
-import { ENABLE_CASE_CONNECTOR, MAX_TITLE_LENGTH } from '../../../common/constants';
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
+import { isInvalidTag } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -47,20 +47,9 @@ export const create = async (
     authorization: auth,
   } = clientArgs;
 
-  // default to an individual case if the type is not defined.
-  const { type = CaseType.individual, ...nonTypeCaseFields } = data;
-
-  if (!ENABLE_CASE_CONNECTOR && type === CaseType.collection) {
-    throw Boom.badRequest(
-      'Case type cannot be collection when the case connector feature is disabled'
-    );
-  }
-
   const query = pipe(
-    // decode with the defaulted type field
-    excess(CasesClientPostRequestRt).decode({
-      type,
-      ...nonTypeCaseFields,
+    excess(CasePostRequestRt).decode({
+      ...data,
     }),
     fold(throwErrors(Boom.badRequest), identity)
   );
@@ -69,6 +58,10 @@ export const create = async (
     throw Boom.badRequest(
       `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
     );
+  }
+
+  if (query.tags.some(isInvalidTag)) {
+    throw Boom.badRequest('A tag must contain at least one non-space character');
   }
 
   try {
@@ -80,7 +73,6 @@ export const create = async (
     });
 
     const newCase = await caseService.postNewCase({
-      unsecuredSavedObjectsClient,
       attributes: transformNewCase({
         user,
         newCase: query,

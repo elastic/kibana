@@ -82,7 +82,6 @@ export default function ({ getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(populationJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(populationJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();

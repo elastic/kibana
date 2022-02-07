@@ -226,7 +226,7 @@ export const CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP = i18n.translate(
 export const CONFIGURED_SOURCES_CONNECT_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectButton',
   {
-    defaultMessage: 'Connect',
+    defaultMessage: 'Connect another',
   }
 );
 

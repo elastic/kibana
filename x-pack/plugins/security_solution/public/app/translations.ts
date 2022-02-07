@@ -28,7 +28,7 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Exceptions',
+  defaultMessage: 'Exception lists',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
@@ -85,6 +85,10 @@ export const INVESTIGATE = i18n.translate('xpack.securitySolution.navigation.inv
 });
 export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage', {
   defaultMessage: 'Manage',
+});
+
+export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {
+  defaultMessage: 'Blocklist',
 });
 
 export const GO_TO_DOCUMENTATION = i18n.translate(

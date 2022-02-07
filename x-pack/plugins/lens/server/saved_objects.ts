@@ -13,7 +13,7 @@ import { CustomVisualizationMigrations } from './migrations/types';
 
 export function setupSavedObjects(
   core: CoreSetup,
-  filterMigrations: MigrateFunctionsObject,
+  getFilterMigrations: () => MigrateFunctionsObject,
   customVisualizationMigrations: CustomVisualizationMigrations
 ) {
   core.savedObjects.registerType({
@@ -31,7 +31,7 @@ export function setupSavedObjects(
         uiCapabilitiesPath: 'visualize.show',
       }),
     },
-    migrations: () => getAllMigrations(filterMigrations, customVisualizationMigrations),
+    migrations: () => getAllMigrations(getFilterMigrations(), customVisualizationMigrations),
     mappings: {
       properties: {
         title: {
