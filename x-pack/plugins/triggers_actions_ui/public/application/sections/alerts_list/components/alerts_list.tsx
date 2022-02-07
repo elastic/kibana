@@ -246,7 +246,7 @@ export const AlertsList: React.FunctionComponent = () => {
           typesFilter,
           actionTypesFilter,
           alertStatusesFilter,
-          sort,
+          sort: { field: sort[0].id, direction: sort[0].direction },
         });
         await loadAlertAggs();
         setAlertsState({
@@ -338,7 +338,7 @@ export const AlertsList: React.FunctionComponent = () => {
     );
 
     return (
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" data-test-subj="alertsTableCell-status">
         <EuiFlexItem>{healthWithTooltip}</EuiFlexItem>
         {isLicenseError && (
           <EuiFlexItem grow={false}>
@@ -372,7 +372,6 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       initialWidth: 80,
       isSortable: true,
-      'data-test-subj': 'alertsTableCell-enabled',
       isExpandable: false,
     },
     {
@@ -384,7 +383,6 @@ export const AlertsList: React.FunctionComponent = () => {
       isSortable: true,
       isExpandable: false,
       initialWidth: width * 0.3,
-      'data-test-subj': 'alertsTableCell-name',
     },
     {
       id: 'executionStatus.lastExecutionDate',
@@ -407,7 +405,6 @@ export const AlertsList: React.FunctionComponent = () => {
       initialWidth: width * 0.15,
       isSortable: true,
       isExpandable: false,
-      'data-test-subj': 'alertsTableCell-lastExecutionDate',
     },
     {
       id: 'schedule.interval',
@@ -418,7 +415,6 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       isSortable: false,
       isExpandable: false,
-      'data-test-subj': 'alertsTableCell-interval',
     },
     {
       id: 'executionStatus.lastDuration',
@@ -441,7 +437,6 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       isSortable: true,
       isExpandable: false,
-      'data-test-subj': 'alertsTableCell-duration',
     },
     {
       id: 'monitoring.execution.calculated_metrics.success_ratio',
@@ -475,13 +470,12 @@ export const AlertsList: React.FunctionComponent = () => {
       isSortable: true,
       initialWidth: 120,
       isExpandable: false,
-      'data-test-subj': 'alertsTableCell-status',
     },
   ];
 
   const alertDataGridCellValueRenderers = {
     enabled: (row) => (
-      <EuiFlexItem style={{ alignItems: 'center' }}>
+      <EuiFlexItem style={{ alignItems: 'center' }} data-test-subj="alertsTableCell-enabled">
         <RuleEnabledSwitch
           disableAlert={async () => await disableAlert({ http, id: row.id })}
           enableAlert={async () => await enableAlert({ http, id: row.id })}
@@ -495,7 +489,7 @@ export const AlertsList: React.FunctionComponent = () => {
       const checkEnabledResult = checkAlertTypeEnabled(ruleType);
       const link = (
         <>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="alertsTableCell-name">
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiLink
@@ -587,22 +581,24 @@ export const AlertsList: React.FunctionComponent = () => {
       const date = executionStatus.lastExecutionDate;
       if (date) {
         return (
-          <>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem grow={false}>{moment(date).format('MMM D, YYYY HH:mm:ssa')}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs">
-                  {moment(date).fromNow()}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            data-test-subj="alertsTableCell-lastExecutionDate"
+          >
+            <EuiFlexItem grow={false}>{moment(date).format('MMM D, YYYY HH:mm:ssa')}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs">
+                {moment(date).fromNow()}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         );
       } else return null;
     },
     'schedule.interval': ({ schedule }) => {
       const { interval } = schedule;
-      return formatDuration(interval);
+      return <span data-test-subj="alertsTableCell-interval">{formatDuration(interval)}</span>;
     },
     'executionStatus.lastDuration': ({ alertTypeId, executionStatus }) => {
       const { lastDuration } = executionStatus;
@@ -612,7 +608,7 @@ export const AlertsList: React.FunctionComponent = () => {
       );
 
       return (
-        <>
+        <span data-test-subj="alertsTableCell-duration">
           {`${formatMillisForDisplay(lastDuration)}`}
           {showDurationWarning && (
             <EuiIconTip
@@ -629,7 +625,7 @@ export const AlertsList: React.FunctionComponent = () => {
               position="right"
             />
           )}
-        </>
+        </span>
       );
     },
     'monitoring.execution.calculated_metrics.success_ratio': ({ monitoring }) => {
@@ -1048,7 +1044,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   return alertDataGridCellValueRenderers[columnId](row);
                 }}
                 sorting={{
-                  onSort: (sortedCols) => setSort(sortedCols),
+                  onSort: (sortedCols) => setSort(sortedCols.slice(-1)),
                   columns: sort,
                 }}
               />
