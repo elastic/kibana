@@ -27,7 +27,7 @@ import { NoDataEmptyState } from './components/no_data_empty_state';
 import { ArtifactFlyoutProps, MaybeArtifactFlyout } from './components/artifact_flyout';
 import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
-import { useFetchArtifactData } from './hooks/use_fetch_artifact_data';
+import { useWithArtifactListData } from './hooks/use_fetch_artifact_data';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -60,11 +60,18 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
 
-    const { isLoading, data: apiDataResponse } = useFetchArtifactData(apiClient);
+    const {
+      isPageInitializing,
+      isLoading,
+      data: listDataResponse,
+      uiPagination,
+      doesDataExist,
+      error,
+    } = useWithArtifactListData(apiClient);
 
     const items = useMemo(() => {
-      return apiDataResponse?.data ?? [];
-    }, [apiDataResponse?.data]);
+      return listDataResponse?.data ?? [];
+    }, [listDataResponse?.data]);
 
     const labels = useMemo<typeof artifactListPageLabels>(() => {
       return {
@@ -84,9 +91,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setUrlParams({ show: 'create' });
     }, [setUrlParams]);
 
-    const doesDataExist = true; // FIXME: implement
-
-    if (isLoading && !doesDataExist) {
+    if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
     }
 
@@ -160,15 +165,10 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               items={items}
               ItemComponent={ArtifactEntryCard}
               itemComponentProps={handleCardProps}
-              onChange={() => {}}
-              error={undefined}
-              loading={false}
-              pagination={{
-                totalItemCount: 0,
-                pageSize: MANAGEMENT_DEFAULT_PAGE_SIZE,
-                pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-                pageIndex: 0,
-              }}
+              onChange={() => {}} // FIXME:PT implement change handler
+              error={error}
+              loading={isLoading}
+              pagination={uiPagination}
               contentClassName="card-container"
               data-test-subj={getTestId('cardContent')}
               noItemsMessage={<>{'no items'}</>} // FIXME: implement no results message
