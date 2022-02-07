@@ -11,7 +11,6 @@ import { IEsSearchResponse } from '../../../data/common';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
 import { getRemoteRoutePaths } from '../../common';
-import { getBase64Encoding } from './index';
 
 export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   const paths = getRemoteRoutePaths();
@@ -143,8 +142,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
         const tracesDocIDs: string[] = [];
         resFlamegraphTraces.rawResponse.aggregations.sample.group_by.buckets.forEach(
           (stackTraceItem: any) => {
-            const docID = getBase64Encoding(stackTraceItem.key);
-            tracesDocIDs.push(docID);
+            tracesDocIDs.push(stackTraceItem.key);
           }
         );
 
@@ -161,8 +159,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           // profiling-events to profiling-stack-traces
           if (trace._source) {
             for (let i = 0; i < trace._source.Offset.length; i++) {
-              const docID = getBase64Encoding(trace._source.FileIDHash[i]);
-              stackFrameDocIDs.push(docID);
+              stackFrameDocIDs.push(trace._source.FrameID[i]);
             }
           }
         });
