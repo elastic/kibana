@@ -623,6 +623,8 @@ export interface AppLeaveActionFactory {
    * @param text The text to display in the confirmation message
    * @param title (optional) title to display in the confirmation message
    * @param callback (optional) to know that the user want to stay on the page
+   * @param confirmButtonText (optional) text for the confirmation button
+   * @param buttonColor (optional) color for the confirmation button
    * so we can show to the user the right UX for him to saved his/her/their changes
    */
   confirm(
