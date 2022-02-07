@@ -22,10 +22,9 @@ import {
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
 import * as i18n from '../translations';
-import {
-  useRulesFeatureTourContextOptional,
-  OptionalEuiTourStep,
-} from './rules_feature_tour_context';
+import { useRulesFeatureTourContextOptional } from './rules_feature_tour_context';
+
+import { OptionalEuiTourStep } from './optional_eui_tour_step';
 
 interface AllRulesUtilityBarProps {
   canBulkEdit: boolean;

@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiButton,
   EuiTourStepProps,
-  EuiTourStep,
 } from '@elastic/eui';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -41,6 +40,7 @@ const featuresTourSteps: EuiStatelessTourStep[] = [
     stepsTotal: 2,
     children: <></>,
     onFinish: noop,
+    maxWidth: TOUR_POPOVER_WIDTH,
   },
   {
     step: 2,
@@ -50,6 +50,7 @@ const featuresTourSteps: EuiStatelessTourStep[] = [
     children: <></>,
     onFinish: noop,
     anchorPosition: 'rightUp',
+    maxWidth: TOUR_POPOVER_WIDTH,
   },
 ];
 
@@ -73,13 +74,12 @@ export const RulesFeatureTourContextProvider: FC = ({ children }) => {
 
   const [stepProps, actions, reducerState] = useEuiTour(featuresTourSteps, initialStore);
 
-  const finishTour = useCallback(() => actions.finishTour(), [actions]);
-  const goToNextStep = useCallback(() => actions.incrementStep(), [actions]);
+  const finishTour = actions.finishTour;
+  const goToNextStep = actions.incrementStep;
 
   const inMemoryTableStepProps = useMemo(
     () => ({
       ...stepProps[0],
-      maxWidth: TOUR_POPOVER_WIDTH,
       content: (
         <>
           <p>{i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP}</p>
@@ -92,10 +92,6 @@ export const RulesFeatureTourContextProvider: FC = ({ children }) => {
     }),
     [stepProps, goToNextStep]
   );
-  const bulkActionsStepProps = useMemo(
-    () => ({ ...stepProps[1], maxWidth: TOUR_POPOVER_WIDTH }),
-    [stepProps]
-  );
 
   useEffect(() => {
     storage.set(STORAGE_KEY, reducerState);
@@ -105,12 +101,12 @@ export const RulesFeatureTourContextProvider: FC = ({ children }) => {
     () => ({
       steps: {
         inMemoryTableStepProps,
-        bulkActionsStepProps,
+        bulkActionsStepProps: stepProps[1],
       },
       finishTour,
       goToNextStep,
     }),
-    [finishTour, goToNextStep, bulkActionsStepProps, inMemoryTableStepProps]
+    [finishTour, goToNextStep, inMemoryTableStepProps, stepProps]
   );
 
   return (
@@ -134,23 +130,4 @@ export const useRulesFeatureTourContextOptional = (): RulesFeatureTourContextTyp
   const rulesFeatureTourContext = useContext(RulesFeatureTourContext);
 
   return rulesFeatureTourContext;
-};
-
-/**
- * This component can be used for tour steps, for the components outside of RulesFeatureTourContext
- * if stepProps are not supplied, step will not be rendered, only children component will be
- */
-export const OptionalEuiTourStep: FC<{ stepProps: EuiTourStepProps | undefined }> = ({
-  children,
-  stepProps,
-}) => {
-  if (!stepProps) {
-    return <>{children}</>;
-  }
-
-  return (
-    <EuiTourStep {...stepProps}>
-      <>{children}</>
-    </EuiTourStep>
-  );
 };
