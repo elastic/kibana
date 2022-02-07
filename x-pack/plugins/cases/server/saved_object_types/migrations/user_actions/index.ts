@@ -14,6 +14,7 @@ import {
 } from '../../../../../../../src/core/server';
 
 import { ConnectorTypes } from '../../../../common/api';
+import { removeRuleInformation } from './alerts';
 import { userActionsConnectorIdMigration } from './connector_id';
 import { payloadMigration } from './payload';
 import { UserActions } from './types';
@@ -63,5 +64,6 @@ export const userActionsMigrations = {
     return addOwnerToSO(doc);
   },
   '7.16.0': userActionsConnectorIdMigration,
+  '8.0.0': removeRuleInformation,
   '8.1.0': payloadMigration,
 };

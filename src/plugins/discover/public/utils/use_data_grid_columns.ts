@@ -7,7 +7,7 @@
  */
 
 import { useMemo } from 'react';
-import type { DataView, DataViewsContract } from 'src/plugins/data/common';
+import type { DataView, DataViewsContract } from 'src/plugins/data_views/public';
 
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import {

@@ -119,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
             'siem',
             'securitySolutionCases',
             'fleet',
+            'fleetv2',
           ].sort()
         );
       });

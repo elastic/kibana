@@ -9,7 +9,7 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { Capabilities } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
@@ -139,9 +139,9 @@ function getProps({
   const rolesAPIClient = rolesAPIClientMock.create();
   rolesAPIClient.getRole.mockResolvedValue(role);
 
-  const indexPatterns = dataPluginMock.createStartContract().indexPatterns;
+  const dataViews = dataPluginMock.createStartContract().dataViews;
   // `undefined` titles can technically happen via import/export or other manual manipulation
-  indexPatterns.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
+  dataViews.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
 
   const indicesAPIClient = indicesAPIClientMock.create();
 
@@ -171,7 +171,7 @@ function getProps({
     roleName: role?.name,
     license,
     http,
-    indexPatterns,
+    dataViews,
     indicesAPIClient,
     privilegesAPIClient,
     rolesAPIClient,
@@ -352,11 +352,11 @@ describe('<EditRolePage />', () => {
   });
 
   it('can render if index patterns are not available', async () => {
-    const indexPatterns = dataPluginMock.createStartContract().indexPatterns;
-    indexPatterns.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
+    const dataViews = dataPluginMock.createStartContract().dataViews;
+    dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
 
     const wrapper = mountWithIntl(
-      <EditRolePage {...{ ...getProps({ action: 'edit' }), indexPatterns }} />
+      <EditRolePage {...{ ...getProps({ action: 'edit' }), dataViews }} />
     );
 
     await waitForRender(wrapper);

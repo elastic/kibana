@@ -853,12 +853,14 @@ export class LensAttributes {
     ];
   }
 
-  getJSON(refresh?: number): TypedLensByValueInput['attributes'] {
+  getJSON(): TypedLensByValueInput['attributes'] {
+    const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
+
     const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
 
     return {
       title: 'Prefilled from exploratory view app',
-      description: String(refresh),
+      description: '',
       visualizationType: 'lnsXY',
       references: this.getReferences(),
       state: {

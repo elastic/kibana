@@ -42,6 +42,7 @@ import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { isPopulatedObject } from '../../../../../common/util/object_utils';
 import { RuntimeMappings } from '../../../../../common/types/fields';
+import { addExcludeFrozenToQuery } from '../../../../../common/util/query_utils';
 import { MlPageHeader } from '../../../components/page_header';
 
 export interface ModuleJobUI extends ModuleJob {
@@ -136,7 +137,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       const { start, end } = await ml.getTimeFieldRange({
         index: dataView.title,
         timeFieldName: dataView.timeFieldName,
-        query: combinedQuery,
+        // By default we want to use full non-frozen time range
+        query: addExcludeFrozenToQuery(combinedQuery),
         ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
       });
       return {

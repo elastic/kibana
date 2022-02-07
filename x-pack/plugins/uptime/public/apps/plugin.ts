@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   CoreSetup,
   CoreStart,
@@ -14,6 +15,7 @@ import {
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { SharePluginSetup, SharePluginStart } from '../../../../../src/plugins/share/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
 
 import {
@@ -29,6 +31,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
+
 import { alertTypeInitializers, legacyAlertTypeInitializers } from '../lib/alert_types';
 import { FleetStart } from '../../../fleet/public';
 import {
@@ -45,21 +48,25 @@ import {
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
 import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspector/public';
 import { UptimeUiConfig } from '../../common/config';
+import { CasesUiStart } from '../../../cases/public';
 
 export interface ClientPluginsSetup {
-  data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
+  data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
-  embeddable: EmbeddableStart;
-  data: DataPublicPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fleet?: FleetStart;
-  observability: ObservabilityPublicStart;
+  data: DataPublicPluginStart;
   inspector: InspectorPluginStart;
+  embeddable: EmbeddableStart;
+  observability: ObservabilityPublicStart;
+  share: SharePluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  cases: CasesUiStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {

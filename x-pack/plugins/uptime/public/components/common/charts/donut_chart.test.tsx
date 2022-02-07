@@ -6,7 +6,7 @@
  */
 
 import { DonutChart } from './donut_chart';
-import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 describe('DonutChart component', () => {

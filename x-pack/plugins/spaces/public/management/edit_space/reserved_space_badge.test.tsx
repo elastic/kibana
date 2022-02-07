@@ -8,7 +8,7 @@
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { ReservedSpaceBadge } from './reserved_space_badge';
 

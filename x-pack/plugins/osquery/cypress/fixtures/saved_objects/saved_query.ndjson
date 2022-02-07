@@ -9,12 +9,6 @@
         "value": {
           "field": "hours"
         }
-      },
-      {
-        "key": "message",
-        "value": {
-          "field": "seconds"
-        }
       }
     ],
     "id": "Saved-Query-Id",

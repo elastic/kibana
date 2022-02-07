@@ -12,7 +12,7 @@ import Url from 'url';
 import { RunWithCommands, createFlagError, Flags } from '@kbn/dev-utils';
 import { KbnClient } from './kbn_client';
 
-import { readConfigFile } from './functional_test_runner';
+import { readConfigFile, EsVersion } from './functional_test_runner';
 
 function getSinglePositionalArg(flags: Flags) {
   const positional = flags._;
@@ -57,7 +57,7 @@ export function runKbnArchiverCli() {
           throw createFlagError('expected --config to be a string');
         }
 
-        config = await readConfigFile(log, Path.resolve(flags.config));
+        config = await readConfigFile(log, EsVersion.getDefault(), Path.resolve(flags.config));
         statsMeta.set('ftrConfigPath', flags.config);
       }
 

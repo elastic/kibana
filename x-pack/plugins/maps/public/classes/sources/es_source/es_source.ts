@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter } from '@kbn/es-query';
-import { IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { DataViewField, DataView, ISearchSource } from 'src/plugins/data/common';
 import type { Query } from 'src/plugins/data/common';
+import type { KibanaExecutionContext } from 'kibana/public';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
@@ -38,6 +39,7 @@ import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { makePublicExecutionContext } from '../../../util';
 
 export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
@@ -46,7 +48,7 @@ export function isSearchSourceAbortError(error: Error) {
 export interface IESSource extends IVectorSource {
   isESSource(): true;
   getId(): string;
-  getIndexPattern(): Promise<IndexPattern>;
+  getIndexPattern(): Promise<DataView>;
   getIndexPatternId(): string;
   getGeoFieldName(): string;
   loadStylePropsMeta({
@@ -69,7 +71,7 @@ export interface IESSource extends IVectorSource {
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
 
   readonly _descriptor: AbstractESSourceDescriptor;
 
@@ -160,6 +162,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     requestName,
     searchSessionId,
     searchSource,
+    executionContext,
   }: {
     registerCancelCallback: (callback: () => void) => void;
     requestDescription: string;
@@ -167,6 +170,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     requestName: string;
     searchSessionId?: string;
     searchSource: ISearchSource;
+    executionContext: KibanaExecutionContext;
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
@@ -183,6 +187,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             title: requestName,
             description: requestDescription,
           },
+          executionContext,
         })
         .toPromise();
       return resp;
@@ -277,6 +282,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       const esResp = await searchSource.fetch({
         abortSignal: abortController.signal,
         legacyHitsTotal: false,
+        executionContext: makePublicExecutionContext('es_source:bounds'),
       });
 
       if (!esResp.aggregations) {
@@ -340,7 +346,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return this._descriptor.geoField;
   }
 
-  async getIndexPattern(): Promise<IndexPattern> {
+  async getIndexPattern(): Promise<DataView> {
     // Do we need this cache? Doesn't the IndexPatternService take care of this?
     if (this.indexPattern) {
       return this.indexPattern;
@@ -363,7 +369,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     }
   }
 
-  async _getGeoField(): Promise<IndexPatternField> {
+  async _getGeoField(): Promise<DataViewField> {
     const indexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this.getGeoFieldName());
     if (!geoField) {
@@ -469,6 +475,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         }
       ),
       searchSessionId,
+      executionContext: makePublicExecutionContext('es_source:style_meta'),
     });
 
     return resp.aggregations;

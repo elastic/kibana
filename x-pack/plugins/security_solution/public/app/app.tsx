@@ -12,6 +12,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { AppLeaveHandler, AppMountParameters } from '../../../../../src/core/public';
 
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -33,6 +34,7 @@ interface StartAppComponent {
   onAppLeave: (handler: AppLeaveHandler) => void;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
+  theme$: AppMountParameters['theme$'];
 }
 
 const queryClient = new QueryClient();
@@ -43,6 +45,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
   setHeaderActionMenu,
   onAppLeave,
   store,
+  theme$,
 }) => {
   const {
     i18n,
@@ -55,23 +58,25 @@ const StartAppComponent: FC<StartAppComponent> = ({
       <i18n.Context>
         <ManageGlobalToaster>
           <ReduxStoreProvider store={store}>
-            <EuiThemeProvider darkMode={darkMode}>
-              <MlCapabilitiesProvider>
-                <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                  <ManageUserInfo>
-                    <QueryClientProvider client={queryClient}>
-                      <PageRouter
-                        history={history}
-                        onAppLeave={onAppLeave}
-                        setHeaderActionMenu={setHeaderActionMenu}
-                      >
-                        {children}
-                      </PageRouter>
-                    </QueryClientProvider>
-                  </ManageUserInfo>
-                </UserPrivilegesProvider>
-              </MlCapabilitiesProvider>
-            </EuiThemeProvider>
+            <KibanaThemeProvider theme$={theme$}>
+              <EuiThemeProvider darkMode={darkMode}>
+                <MlCapabilitiesProvider>
+                  <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                    <ManageUserInfo>
+                      <QueryClientProvider client={queryClient}>
+                        <PageRouter
+                          history={history}
+                          onAppLeave={onAppLeave}
+                          setHeaderActionMenu={setHeaderActionMenu}
+                        >
+                          {children}
+                        </PageRouter>
+                      </QueryClientProvider>
+                    </ManageUserInfo>
+                  </UserPrivilegesProvider>
+                </MlCapabilitiesProvider>
+              </EuiThemeProvider>
+            </KibanaThemeProvider>
             <ErrorToastDispatcher />
             <GlobalToaster />
           </ReduxStoreProvider>
@@ -90,6 +95,7 @@ interface SecurityAppComponentProps {
   services: StartServices;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
+  theme$: AppMountParameters['theme$'];
 }
 
 const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
@@ -99,6 +105,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   services,
   setHeaderActionMenu,
   store,
+  theme$,
 }) => (
   <KibanaContextProvider
     services={{
@@ -111,6 +118,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       onAppLeave={onAppLeave}
       setHeaderActionMenu={setHeaderActionMenu}
       store={store}
+      theme$={theme$}
     >
       {children}
     </StartApp>

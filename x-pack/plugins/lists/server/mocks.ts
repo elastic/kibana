@@ -7,7 +7,10 @@
 
 import { ListPluginSetup } from './types';
 import { getListClientMock } from './services/lists/list_client.mock';
-import { getExceptionListClientMock } from './services/exception_lists/exception_list_client.mock';
+import {
+  getCreateExceptionListItemOptionsMock,
+  getExceptionListClientMock,
+} from './services/exception_lists/exception_list_client.mock';
 
 const createSetupMock = (): jest.Mocked<ListPluginSetup> => {
   const mock: jest.Mocked<ListPluginSetup> = {
@@ -20,6 +23,7 @@ const createSetupMock = (): jest.Mocked<ListPluginSetup> => {
 
 export const listMock = {
   createSetup: createSetupMock,
+  getCreateExceptionListItemOptionsMock,
   getExceptionListClient: getExceptionListClientMock,
   getListClient: getListClientMock,
 };

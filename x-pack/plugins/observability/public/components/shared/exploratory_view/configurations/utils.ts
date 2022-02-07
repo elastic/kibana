@@ -49,6 +49,20 @@ export function convertToShortUrl(series: SeriesUrl) {
   };
 }
 
+export function createExploratoryViewRoutePath({
+  reportType,
+  allSeries,
+}: {
+  reportType: ReportViewType;
+  allSeries: AllSeries;
+}) {
+  const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
+
+  return `/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
+    allShortSeries as unknown as RisonValue
+  )}`;
+}
+
 export function createExploratoryViewUrl(
   { reportType, allSeries }: { reportType: ReportViewType; allSeries: AllSeries },
   baseHref = '',

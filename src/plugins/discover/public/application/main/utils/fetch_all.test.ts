@@ -16,6 +16,7 @@ import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll } from './fetch_all';
 import {
+  DataAvailableFieldsMsg,
   DataChartsMessage,
   DataDocumentsMsg,
   DataMainMsg,
@@ -64,6 +65,9 @@ describe('test fetchAll', () => {
       documents$: new BehaviorSubject<DataDocumentsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       charts$: new BehaviorSubject<DataChartsMessage>({ fetchStatus: FetchStatus.UNINITIALIZED }),
+      availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>({
+        fetchStatus: FetchStatus.UNINITIALIZED,
+      }),
     };
     deps = {
       appStateContainer: {

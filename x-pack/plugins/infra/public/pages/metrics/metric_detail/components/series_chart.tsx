@@ -16,6 +16,7 @@ import {
 } from '@elastic/charts';
 import { NodeDetailsDataSeries } from '../../../../../common/http_api/node_details_api';
 import { InventoryVisType } from '../../../../../common/inventory_models/types';
+import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 
 interface Props {
   id: string;
@@ -34,6 +35,7 @@ export const SeriesChart = (props: Props) => {
 };
 
 export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
+  const timezone = useKibanaTimeZoneSetting();
   const style: RecursivePartial<AreaSeriesStyle> = {
     area: {
       opacity: 1,
@@ -56,11 +58,13 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       areaSeriesStyle={style}
       color={color ? color : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
+      timeZone={timezone}
     />
   );
 };
 
 export const BarChart = ({ id, color, series, name, stack }: Props) => {
+  const timezone = useKibanaTimeZoneSetting();
   const style: RecursivePartial<BarSeriesStyle> = {
     rectBorder: {
       stroke: color || void 0,
@@ -83,6 +87,7 @@ export const BarChart = ({ id, color, series, name, stack }: Props) => {
       barSeriesStyle={style}
       color={color ? color : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
+      timeZone={timezone}
     />
   );
 };

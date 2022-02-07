@@ -6,12 +6,14 @@
  */
 
 import { merge } from 'lodash';
-import { checkParam, MissingRequiredError } from '../error_missing_required';
+import { MissingRequiredError } from '../error_missing_required';
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const legacyStats = resp.hits?.hits[0]?._source?.logstash_stats;
@@ -33,18 +35,25 @@ export function handleResponse(resp: ElasticsearchResponse) {
 
 export function getNodeInfo(
   req: LegacyRequest,
-  lsIndexPattern: string,
   { clusterUuid, logstashUuid }: { clusterUuid: string; logstashUuid: string }
 ) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in getNodeInfo');
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
   const clusterFilter = isStandaloneCluster
     ? standaloneClusterFilter
     : { term: { cluster_uuid: clusterUuid } };
 
+  const dataset = 'node_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
+
   const params = {
-    index: lsIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     filter_path: [

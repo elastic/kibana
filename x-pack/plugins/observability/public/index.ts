@@ -23,7 +23,12 @@ export type {
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart,
 };
-export { enableInspectEsQueries } from '../common/ui_settings_keys';
+export {
+  enableInspectEsQueries,
+  enableComparisonByDefault,
+  enableInfrastructureView,
+} from '../common/ui_settings_keys';
+export { uptimeOverviewLocatorID } from '../common';
 
 export interface ConfigSchema {
   unsafe: {
@@ -52,6 +57,7 @@ export {
   FilterValueLabel,
   SelectableUrlList,
   ExploratoryView,
+  DatePicker,
 } from './components/shared/';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
@@ -93,7 +99,6 @@ export type { AddInspectorRequest } from './context/inspector/inspector_context'
 export { InspectorContextProvider } from './context/inspector/inspector_context';
 export { useInspectorContext } from './context/inspector/use_inspector_context';
 
-export { enableComparisonByDefault } from '../common/ui_settings_keys';
 export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
 export {
   ReportTypes,
@@ -106,3 +111,4 @@ export {
   RECORDS_PERCENTAGE_FIELD,
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
+export { fromQuery, toQuery } from './utils/url';

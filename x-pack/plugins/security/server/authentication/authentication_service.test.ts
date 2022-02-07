@@ -10,18 +10,22 @@ jest.mock('./unauthenticated_page');
 
 import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
-import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   AuthenticationHandler,
   AuthToolkit,
+  ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
   KibanaRequest,
   Logger,
   LoggerFactory,
   OnPreResponseToolkit,
+  UnauthorizedError,
+  UnauthorizedErrorHandler,
+  UnauthorizedErrorHandlerToolkit,
 } from 'src/core/server';
 import {
   coreMock,
@@ -31,16 +35,16 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
-import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
-import type { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import type { AuditServiceSetup } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditServiceMock } from '../audit/mocks';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
+import { securityMock } from '../mocks';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
@@ -52,6 +56,7 @@ describe('AuthenticationService', () => {
   let logger: jest.Mocked<Logger>;
   let mockSetupAuthenticationParams: {
     http: jest.Mocked<HttpServiceSetup>;
+    elasticsearch: jest.Mocked<ElasticsearchServiceSetup>;
     config: ConfigType;
     license: jest.Mocked<SecurityLicense>;
     buildNumber: number;
@@ -68,13 +73,15 @@ describe('AuthenticationService', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
 
-    const httpMock = coreMock.createSetup().http;
+    const coreSetupMock = coreMock.createSetup();
+    const httpMock = coreSetupMock.http;
     (httpMock.basePath.prepend as jest.Mock).mockImplementation(
       (path) => `${httpMock.basePath.serverBasePath}${path}`
     );
     (httpMock.basePath.get as jest.Mock).mockImplementation(() => httpMock.basePath.serverBasePath);
     mockSetupAuthenticationParams = {
       http: httpMock,
+      elasticsearch: coreSetupMock.elasticsearch,
       config: createConfig(ConfigSchema.validate({}), loggingSystemMock.create().get(), {
         isTLSEnabled: false,
       }),
@@ -118,6 +125,17 @@ describe('AuthenticationService', () => {
       expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
         expect.any(Function)
       );
+    });
+
+    it('properly registers unauthorized error handler', () => {
+      service.setup(mockSetupAuthenticationParams);
+
+      expect(
+        mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler
+      ).toHaveBeenCalledWith(expect.any(Function));
     });
 
     it('properly registers onPreResponse handler', () => {
@@ -278,7 +296,9 @@ describe('AuthenticationService', () => {
 
       it('rejects with original `badRequest` error when `authenticate` fails to authenticate user', async () => {
         const mockResponse = httpServerMock.createLifecycleResponseFactory();
-        const esError = Boom.badRequest('some message');
+        const esError = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 400, body: 'some message' })
+        );
         authenticate.mockResolvedValue(AuthenticationResult.failed(esError));
 
         await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
@@ -293,12 +313,19 @@ describe('AuthenticationService', () => {
 
       it('includes `WWW-Authenticate` header if `authenticate` fails to authenticate user and provides challenges', async () => {
         const mockResponse = httpServerMock.createLifecycleResponseFactory();
-        const originalError = Boom.unauthorized('some message');
-        (originalError.output.headers as { [key: string]: string })['WWW-Authenticate'] = [
-          'Basic realm="Access to prod", charset="UTF-8"',
-          'Basic',
-          'Negotiate',
-        ] as any;
+        const originalError = new errors.ResponseError(
+          securityMock.createApiResponse({
+            statusCode: 403,
+            body: 'some message',
+            headers: {
+              'WWW-Authenticate': [
+                'Basic realm="Access to prod", charset="UTF-8"',
+                'Basic',
+                'Negotiate',
+              ],
+            },
+          })
+        );
         authenticate.mockResolvedValue(
           AuthenticationResult.failed(originalError, {
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
@@ -326,6 +353,221 @@ describe('AuthenticationService', () => {
 
         expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('unauthorized error handler', () => {
+      let unauthorizedErrorHandler: UnauthorizedErrorHandler;
+      let reauthenticate: jest.SpyInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
+      let mockUnauthorizedErrorToolkit: jest.Mocked<UnauthorizedErrorHandlerToolkit>;
+      beforeEach(() => {
+        mockUnauthorizedErrorToolkit = { notHandled: jest.fn(), retry: jest.fn() };
+
+        service.start(mockStartAuthenticationParams);
+
+        unauthorizedErrorHandler =
+          mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler.mock.calls[0][0];
+        reauthenticate =
+          jest.requireMock('./authenticator').Authenticator.mock.instances[0].reauthenticate;
+      });
+
+      it('does not handle error if license is not available.', async () => {
+        mockSetupAuthenticationParams.license.isLicenseAvailable.mockReturnValue(false);
+
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 401, body: {} })
+        ) as UnauthorizedError;
+
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: httpServerMock.createKibanaRequest() },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+        expect(reauthenticate).not.toHaveBeenCalled();
+      });
+
+      it('does not handle error when security is disabled in elasticsearch.', async () => {
+        mockSetupAuthenticationParams.license.isEnabled.mockReturnValue(false);
+
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 401, body: {} })
+        ) as UnauthorizedError;
+
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: httpServerMock.createKibanaRequest() },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+        expect(reauthenticate).not.toHaveBeenCalled();
+      });
+
+      it('does not handle non-401 errors.', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 403, body: {} })
+        ) as UnauthorizedError;
+
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: httpServerMock.createKibanaRequest() },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+        expect(reauthenticate).not.toHaveBeenCalled();
+      });
+
+      it('does not handle error unless provider successfully returns new headers.', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 401, body: {} })
+        ) as UnauthorizedError;
+
+        const nonHandleableResults = [
+          AuthenticationResult.notHandled(),
+          AuthenticationResult.failed(
+            new errors.ResponseError(securityMock.createApiResponse({ statusCode: 404, body: {} }))
+          ),
+          AuthenticationResult.redirectTo('some-url'),
+          AuthenticationResult.succeeded(mockAuthenticatedUser(), {
+            authResponseHeaders: { header: 'value' },
+          }),
+        ];
+
+        const mockRequest = httpServerMock.createKibanaRequest();
+        for (const result of nonHandleableResults) {
+          reauthenticate.mockResolvedValue(result);
+
+          await unauthorizedErrorHandler(
+            { error: failureReason, request: mockRequest },
+            mockUnauthorizedErrorToolkit
+          );
+
+          expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+          expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+
+          expect(reauthenticate).toHaveBeenCalledTimes(1);
+          expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
+
+          mockUnauthorizedErrorToolkit.notHandled.mockClear();
+          reauthenticate.mockClear();
+        }
+      });
+
+      it('handles error if authentication succeeds and authentication headers are available.', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 401, body: {} })
+        ) as UnauthorizedError;
+
+        reauthenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(mockAuthenticatedUser(), {
+            authHeaders: { header: 'value' },
+          })
+        );
+
+        const mockRequest = httpServerMock.createKibanaRequest();
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: mockRequest },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledTimes(1);
+        expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
+          authHeaders: { header: 'value' },
+        });
+        expect(mockUnauthorizedErrorToolkit.notHandled).not.toHaveBeenCalled();
+
+        expect(reauthenticate).toHaveBeenCalledTimes(1);
+        expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
+      });
+
+      it('filters out and recovers `Authorization` header when provider cannot handle error.', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 401, body: {} })
+        ) as UnauthorizedError;
+
+        const mockRequest = httpServerMock.createKibanaRequest({
+          headers: { Authorization: 'Basic xxx', Random: 'random' },
+        });
+
+        let modifiedHeaders;
+        reauthenticate.mockImplementation((request) => {
+          modifiedHeaders = request.headers;
+          return Promise.resolve(AuthenticationResult.notHandled());
+        });
+
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: mockRequest },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(reauthenticate).toHaveBeenCalledTimes(1);
+        expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
+        expect(modifiedHeaders).toEqual({ Random: 'random' });
+
+        expect(mockRequest.headers).toEqual({ Authorization: 'Basic xxx', Random: 'random' });
+      });
+
+      it('filters out and recovers `Authorization` header when provider can handle error.', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 401, body: {} })
+        ) as UnauthorizedError;
+
+        const mockRequest = httpServerMock.createKibanaRequest({
+          headers: { Authorization: 'Basic xxx', Random: 'random' },
+        });
+
+        let modifiedHeaders;
+        reauthenticate.mockImplementation((request) => {
+          modifiedHeaders = request.headers;
+          return Promise.resolve(
+            AuthenticationResult.succeeded(mockAuthenticatedUser(), {
+              authHeaders: { header: 'value' },
+            })
+          );
+        });
+
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: mockRequest },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(reauthenticate).toHaveBeenCalledTimes(1);
+        expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
+        expect(modifiedHeaders).toEqual({ Random: 'random' });
+
+        expect(mockRequest.headers).toEqual({ Authorization: 'Basic xxx', Random: 'random' });
+      });
+
+      it('filters out and recovers `Authorization` header when provider fails with unexpected error.', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 401, body: {} })
+        ) as UnauthorizedError;
+
+        const mockRequest = httpServerMock.createKibanaRequest({
+          headers: { Authorization: 'Basic xxx', Random: 'random' },
+        });
+
+        let modifiedHeaders;
+        reauthenticate.mockImplementation((request) => {
+          modifiedHeaders = request.headers;
+          return Promise.reject(new Error('Uh oh.'));
+        });
+
+        await expect(
+          unauthorizedErrorHandler(
+            { error: failureReason, request: mockRequest },
+            mockUnauthorizedErrorToolkit
+          )
+        ).rejects.toThrow(new Error('Uh oh.'));
+
+        expect(reauthenticate).toHaveBeenCalledTimes(1);
+        expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
+        expect(modifiedHeaders).toEqual({ Random: 'random' });
+
+        expect(mockRequest.headers).toEqual({ Authorization: 'Basic xxx', Random: 'random' });
       });
     });
 
