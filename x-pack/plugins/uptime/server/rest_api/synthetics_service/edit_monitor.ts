@@ -48,17 +48,26 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         syntheticsMonitorType,
         monitorId
       );
+      const monitorWithRevision = {
+        ...monitor,
+        revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
+      };
 
       const editMonitor: SavedObjectsUpdateResponse<MonitorFields> =
-        await savedObjectsClient.update(syntheticsMonitorType, monitorId, {
-          ...monitor,
-          revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
-        });
+        await savedObjectsClient.update<MonitorFields>(
+          syntheticsMonitorType,
+          monitorId,
+          monitor.type === 'browser' ? { ...monitorWithRevision, urls: '' } : monitorWithRevision
+        );
 
       const errors = await syntheticsService.pushConfigs(request, [
         {
           ...(editMonitor.attributes as SyntheticsMonitor),
           id: editMonitor.id,
+          fields: {
+            config_id: editMonitor.id,
+          },
+          fields_under_root: true,
         },
       ]);
 

@@ -42,6 +42,7 @@ export class AlertService {
 
       const res = await this.scopedClusterClient.search({
         index: indices,
+        ignore_unavailable: true,
         query: { ids: { values: ids } },
         size: 0,
         aggregations: builtAggs,

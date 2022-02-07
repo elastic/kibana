@@ -212,6 +212,7 @@ export function ColorRangeItem({
               index: index + 1,
             },
           })}
+          step="any"
         />
       </EuiFlexItem>
       {ActionButton ? (

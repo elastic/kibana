@@ -55,6 +55,7 @@ export interface UptimeServerSetup {
   kibanaVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
+  uptimeEsClient: UptimeESClient;
 }
 
 export interface UptimeCorePluginsSetup {
