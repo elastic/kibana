@@ -4,21 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger } from 'src/core/server';
 import { AggregationsFiltersAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from 'src/core/server';
-import { AGENT_LOGS_INDEX } from '../../../common/constants';
+import { AGENT_LOGS_INDEX_PATTERN } from '../../../common/constants';
 
 const getAgentLogsEsQuery = (): SearchRequest => ({
-  index: AGENT_LOGS_INDEX,
+  index: AGENT_LOGS_INDEX_PATTERN,
   size: 0,
-  //   query: {
-  //     bool: {
-  //       filter: [
-  //         { term: { 'event_status.keyword': 'end' } }, // TODO: comment out when updating agent to send logs
-  //       ],
-  //     },
-  //   },
+  query: {
+    bool: {
+      filter: [{ term: { 'status.keyword': 'end' } }],
+    },
+  },
   aggs: {
     group: {
       terms: { field: 'agent.id.keyword' },
@@ -39,7 +37,8 @@ const getAgentLogsEsQuery = (): SearchRequest => ({
 const getCycleId = (v: any): string => v.group_docs.hits.hits?.[0]?.fields['run_id.keyword'][0];
 
 export const getLatestCycleIds = async (
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  logger: Logger
 ): Promise<string[] | undefined> => {
   try {
     const agentLogs = await esClient.search(getAgentLogsEsQuery());
@@ -53,7 +52,7 @@ export const getLatestCycleIds = async (
     }
     return buckets.map(getCycleId);
   } catch (err) {
-    // TODO: return meaningful error message
+    logger.error('Failed to fetch cycle_ids');
     return;
   }
 };

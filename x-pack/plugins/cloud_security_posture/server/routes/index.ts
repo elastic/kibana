@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '../../../../../src/core/server';
+import type { IRouter } from '../../../../../src/core/server';
 import { defineGetStatsRoute } from './stats/stats';
+import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineFindingsIndexRoute as defineGetFindingsIndexRoute } from './findings/findings';
+import { CspAppContext } from '../plugin';
 import { defineSaveDataYamlRoute } from './configuration/save_data_yaml';
 
-export function defineRoutes(router: IRouter, logger: Logger) {
-  defineGetStatsRoute(router, logger);
-  defineGetFindingsIndexRoute(router, logger);
-  defineSaveDataYamlRoute(router, logger);
+// export function defineRoutes(router: IRouter, logger: Logger) {
+//   defineGetStatsRoute(router, logger);
+//   defineGetFindingsIndexRoute(router, logger);
+
+export function defineRoutes(router: IRouter, cspContext: CspAppContext) {
+  defineGetStatsRoute(router, cspContext);
+  defineGetFindingsIndexRoute(router, cspContext);
+  defineGetBenchmarksRoute(router, cspContext);
+  defineSaveDataYamlRoute(router, cspContext);
 }

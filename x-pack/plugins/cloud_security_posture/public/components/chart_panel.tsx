@@ -7,17 +7,21 @@
 
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiPanel, EuiText, EuiTitle, EuiLoadingChart, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  EuiLoadingChart,
+  EuiFlexGroup,
+  EuiSpacer,
+} from '@elastic/eui';
 import { CHART_PANEL_TEST_SUBJECTS } from './constants';
 
-interface ChartPanelProps<TData = unknown> {
+interface ChartPanelProps {
   title?: string;
-  description?: string;
   hasBorder?: boolean;
   isLoading: boolean;
   isError: boolean;
-  data: TData;
-  chart: React.FC<{ data: TData }>;
 }
 
 const Loading = () => (
@@ -42,49 +46,28 @@ const Error = () => (
   </EuiFlexGroup>
 );
 
-const Empty = () => (
-  <EuiFlexGroup
-    justifyContent="center"
-    alignItems="center"
-    data-test-subj={CHART_PANEL_TEST_SUBJECTS.EMPTY}
-  >
-    <EuiText size="xs" color="subdued">
-      {'No data to display'}
-    </EuiText>
-  </EuiFlexGroup>
-);
-
-export const ChartPanel = <TData extends unknown>({
+export const ChartPanel: React.FC<ChartPanelProps> = ({
   title,
-  description,
   hasBorder = true,
-  chart: Chart,
   isLoading,
   isError,
-  data,
-}: ChartPanelProps<TData>) => {
+  children,
+}) => {
   const renderChart = useCallback(() => {
     if (isLoading) return <Loading />;
     if (isError) return <Error />;
-    if (!data) return <Empty />;
-    return <Chart data={data} />;
-  }, [isLoading, isError, data, Chart]);
+    return children;
+  }, [isLoading, isError, children]);
 
   return (
     <EuiPanel hasBorder={hasBorder} hasShadow={false} data-test-subj="chart-panel">
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        {title && (
-          <EuiTitle size="s" css={euiTitleStyle}>
-            <h3>{title}</h3>
-          </EuiTitle>
-        )}
-        {description && (
-          <EuiText size="xs" color="subdued">
-            {description}
-          </EuiText>
-        )}
-        {renderChart()}
-      </EuiFlexGroup>
+      {title && (
+        <EuiTitle size="s" css={euiTitleStyle}>
+          <h3>{title}</h3>
+        </EuiTitle>
+      )}
+      <EuiSpacer />
+      {renderChart()}
     </EuiPanel>
   );
 };

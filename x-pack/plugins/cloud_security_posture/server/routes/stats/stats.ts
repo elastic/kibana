@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IRouter, Logger } from 'src/core/server';
+import type { ElasticsearchClient, IRouter } from 'src/core/server';
 import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import { number, UnknownRecord } from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { CspAppContext } from '../../plugin';
 
 import type {
   CloudPostureStats,
@@ -22,8 +23,8 @@ import {
   getBenchmarksQuery,
   getLatestFindingQuery,
 } from './stats_queries';
-import { STATS_ROUTE_PATH } from '../../../common/constants';
 import { RULE_PASSED, RULE_FAILED } from '../../constants';
+import { STATS_ROUTE_PATH } from '../../../common/constants';
 
 // TODO: use a schema decoder
 function assertBenchmarkStats(v: unknown): asserts v is BenchmarkStats {
@@ -39,7 +40,7 @@ function assertBenchmarkStats(v: unknown): asserts v is BenchmarkStats {
 }
 
 interface LastCycle {
-  run_id: string;
+  cycle_id: string;
 }
 
 interface GroupFilename {
@@ -65,10 +66,11 @@ const calculatePostureScore = (total: number, passed: number, failed: number): S
 const getLatestCycleId = async (esClient: ElasticsearchClient) => {
   const latestFinding = await esClient.search<LastCycle>(getLatestFindingQuery());
   const lastCycle = latestFinding.body.hits.hits[0];
-  if (lastCycle?._source?.run_id === undefined) {
+
+  if (lastCycle?._source?.cycle_id === undefined) {
     throw new Error('cycle id is missing');
   }
-  return lastCycle?._source?.run_id;
+  return lastCycle?._source?.cycle_id;
 };
 
 export const getBenchmarks = async (esClient: ElasticsearchClient) => {
@@ -77,6 +79,7 @@ export const getBenchmarks = async (esClient: ElasticsearchClient) => {
     { benchmarks: AggregationsMultiBucketAggregateBase<Pick<GroupFilename, 'key'>> }
   >(getBenchmarksQuery());
   const benchmarksBuckets = queryResult.body.aggregations?.benchmarks;
+
   if (!benchmarksBuckets || !Array.isArray(benchmarksBuckets?.buckets)) {
     throw new Error('missing buckets');
   }
@@ -191,7 +194,7 @@ export const getResourcesEvaluation = async (
   return [...passedEvaluationPerResources, ...failedEvaluationPerResource];
 };
 
-export const defineGetStatsRoute = (router: IRouter, logger: Logger): void =>
+export const defineGetStatsRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: STATS_ROUTE_PATH,

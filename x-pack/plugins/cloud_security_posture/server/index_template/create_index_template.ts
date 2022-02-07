@@ -6,7 +6,7 @@
  */
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from 'src/core/server';
-import { CSP_KUBEBEAT_INDEX_NAME, CSP_FINDINGS_INDEX_NAME } from '../../common/constants';
+import { CSP_KUBEBEAT_INDEX_PATTERN, CSP_FINDINGS_INDEX_NAME } from '../../common/constants';
 import { mapping as findingsIndexMapping } from './findings_mapping';
 
 export type Status = boolean;
@@ -61,7 +61,7 @@ export const createFindingsIndexTemplate = async (
     return await createIndexTemplate(
       esClient,
       CSP_FINDINGS_INDEX_NAME,
-      CSP_KUBEBEAT_INDEX_NAME,
+      CSP_KUBEBEAT_INDEX_PATTERN,
       findingsIndexMapping,
       logger
     );

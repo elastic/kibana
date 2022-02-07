@@ -10,14 +10,14 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { CSP_KUBEBEAT_INDEX_NAME } from '../../../common/constants';
+import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 
 export const getFindingsEsQuery = (
   cycleId: string,
   evaluationResult?: string,
   benchmark?: string
 ): CountRequest => {
-  const filter: QueryDslQueryContainer[] = [{ term: { 'run_id.keyword': cycleId } }];
+  const filter: QueryDslQueryContainer[] = [{ term: { 'cycle_id.keyword': cycleId } }];
 
   if (benchmark) {
     filter.push({ term: { 'rule.benchmark.keyword': benchmark } });
@@ -28,7 +28,7 @@ export const getFindingsEsQuery = (
   }
 
   return {
-    index: CSP_KUBEBEAT_INDEX_NAME,
+    index: CSP_KUBEBEAT_INDEX_PATTERN,
     query: {
       bool: { filter },
     },
@@ -44,7 +44,7 @@ export const getResourcesEvaluationEsQuery = (
   const query: QueryDslQueryContainer = {
     bool: {
       filter: [
-        { term: { 'run_id.keyword': cycleId } },
+        { term: { 'cycle_id.keyword': cycleId } },
         { term: { 'result.evaluation.keyword': result } },
       ],
     },
@@ -53,7 +53,7 @@ export const getResourcesEvaluationEsQuery = (
     query.bool!.must = { terms: { 'resource.filename.keyword': resources } };
   }
   return {
-    index: CSP_KUBEBEAT_INDEX_NAME,
+    index: CSP_KUBEBEAT_INDEX_PATTERN,
     size,
     query,
     aggs: {
@@ -66,7 +66,7 @@ export const getResourcesEvaluationEsQuery = (
 };
 
 export const getBenchmarksQuery = (): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_NAME,
+  index: CSP_KUBEBEAT_INDEX_PATTERN,
   size: 0,
   aggs: {
     benchmarks: {
@@ -76,7 +76,7 @@ export const getBenchmarksQuery = (): SearchRequest => ({
 });
 
 export const getLatestFindingQuery = (): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_NAME,
+  index: CSP_KUBEBEAT_INDEX_PATTERN,
   size: 1,
   /* @ts-expect-error TS2322 - missing SearchSortContainer */
   sort: { '@timestamp': 'desc' },

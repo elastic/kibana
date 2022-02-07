@@ -8,14 +8,15 @@
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import type {
   IRouter,
-  Logger,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from 'src/core/server';
+
 import { transformError } from '@kbn/securitysolution-es-utils';
 import yaml from 'js-yaml';
 
 import { CspConfigSchema } from 'x-pack/plugins/cloud_security_posture/common/schemas/csp_configuration';
+import { CspAppContext } from '../../plugin';
 import { SAVE_DATA_YAML_ROUTE_PATH } from '../../../common/constants';
 import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
 export const DEFAULT_FINDINGS_PER_PAGE = 20;
@@ -51,7 +52,7 @@ const convertConfigToYaml = (config: CspConfigSchema): string => {
   return dataYaml;
 };
 
-export const defineSaveDataYamlRoute = (router: IRouter, logger: Logger): void =>
+export const defineSaveDataYamlRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: SAVE_DATA_YAML_ROUTE_PATH,
