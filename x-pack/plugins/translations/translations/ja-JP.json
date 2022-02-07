@@ -25992,7 +25992,6 @@
     "xpack.transform.transformList.editFlyoutFormNumberRange10To10000NotValidErrorMessage": "値は10～10000の範囲の整数でなければなりません。",
     "xpack.transform.transformList.editFlyoutFormRequiredErrorMessage": "必須フィールド。",
     "xpack.transform.transformList.editFlyoutFormRetentionMaxAgeFieldLabel": "最大年齢",
-    "xpack.transform.transformList.editFlyoutFormRetentionPolicyButtonContent": "保持ポリシー",
     "xpack.transform.transformList.editFlyoutFormRetentionPolicyDateFieldHelpText": "デスティネーションインデックスで古いドキュメントを特定するために使用できる日付フィールドを選択します。",
     "xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel": "フィールド",
     "xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldSelectAriaLabel": "保持ポリシーを設定する日付フィールド",
