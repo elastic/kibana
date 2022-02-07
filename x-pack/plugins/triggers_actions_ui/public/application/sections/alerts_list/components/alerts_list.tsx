@@ -108,6 +108,11 @@ interface AlertState {
   totalItemCount: number;
 }
 
+const defaultSort = {
+  id: 'name',
+  direction: 'asc',
+} as EuiDataGridSorting['columns'][0];
+
 export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
@@ -137,12 +142,23 @@ export const AlertsList: React.FunctionComponent = () => {
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<AlertTableItem | null>(null);
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
 
-  const [sort, setSort] = useState<EuiDataGridSorting['columns']>([
-    {
-      id: 'name',
-      direction: 'asc',
-    },
+  const [sort, setSort] = useState<EuiDataGridSorting['columns']>([defaultSort]);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([
+    'enabled',
+    'name',
+    'executionStatus.lastExecutionDate',
+    'schedule.interval',
+    'executionStatus.lastDuration',
+    'monitoring.execution.calculated_metrics.success_ratio',
+    'executionStatus.status',
   ]);
+  const displayedSort = useMemo(() => {
+    if (sort.length && visibleColumns.includes(sort[0].id)) {
+      return sort;
+    }
+    return [];
+  }, [sort, visibleColumns]);
+
   const [manageLicenseModalOpts, setManageLicenseModalOpts] = useState<{
     licenseType: string;
     alertTypeId: string;
@@ -236,6 +252,9 @@ export const AlertsList: React.FunctionComponent = () => {
   async function loadAlertsData() {
     const hasAnyAuthorizedAlertType =
       alertTypesState.isInitialized && alertTypesState.data.size > 0;
+    const alertSort = sort.length
+      ? { field: sort[0].id, direction: sort[0].direction }
+      : { field: defaultSort.id, direction: defaultSort.direction };
     if (hasAnyAuthorizedAlertType) {
       setAlertsState({ ...alertsState, isLoading: true });
       try {
@@ -246,7 +265,7 @@ export const AlertsList: React.FunctionComponent = () => {
           typesFilter,
           actionTypesFilter,
           alertStatusesFilter,
-          sort: { field: sort[0].id, direction: sort[0].direction },
+          sort: alertSort,
         });
         await loadAlertAggs();
         setAlertsState({
@@ -1020,21 +1039,16 @@ export const AlertsList: React.FunctionComponent = () => {
           return (
             <div ref={(el) => measureRef(el)}>
               <EuiDataGrid
+                gridStyle={{
+                  border: 'horizontal',
+                }}
                 rowCount={tableItems.length}
                 columns={columns}
                 trailingControlColumns={trailingControlColumns(width, totalColumnWidths)}
                 leadingControlColumns={leadingControlColumns}
                 columnVisibility={{
-                  visibleColumns: [
-                    'enabled',
-                    'name',
-                    'executionStatus.lastExecutionDate',
-                    'schedule.interval',
-                    'executionStatus.lastDuration',
-                    'monitoring.execution.calculated_metrics.success_ratio',
-                    'executionStatus.status',
-                  ],
-                  setVisibleColumns: () => {},
+                  visibleColumns,
+                  setVisibleColumns,
                 }}
                 rowHeightsOptions={{
                   defaultHeight: 'auto',
@@ -1045,7 +1059,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 }}
                 sorting={{
                   onSort: (sortedCols) => setSort(sortedCols.slice(-1)),
-                  columns: sort,
+                  columns: displayedSort,
                 }}
               />
             </div>
