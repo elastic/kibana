@@ -13,7 +13,7 @@ import {
   TestBed,
   AsyncTestBedConfig,
   delay,
-} from '@kbn/test/jest';
+} from '@kbn/test-jest-helpers';
 import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
 import { BASE_PATH } from '../../../public/application/constants';
 import { WithAppDependencies } from './setup_environment';
