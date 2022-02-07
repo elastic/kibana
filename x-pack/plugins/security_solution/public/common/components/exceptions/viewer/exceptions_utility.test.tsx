@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsViewerUtility } from './exceptions_utility';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';

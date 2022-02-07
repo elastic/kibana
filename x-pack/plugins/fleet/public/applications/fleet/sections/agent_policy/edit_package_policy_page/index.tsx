@@ -64,10 +64,9 @@ import type {
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
-
 import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
 
-import { hasUpgradeAvailable } from './utils';
+import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -231,6 +230,10 @@ export const EditPackagePolicyForm = memo<{
                   ...vars,
                   ...basePolicyInputVars,
                 };
+              }
+              // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
+              if (basePackage.name === 'apm') {
+                newVars = fixApmDurationVars(newVars);
               }
               return {
                 ...restOfInput,

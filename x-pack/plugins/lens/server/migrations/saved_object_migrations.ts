@@ -27,6 +27,7 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  CustomVisualizationMigrations,
   LensDocShape810,
 } from './types';
 import {
@@ -36,6 +37,7 @@ import {
   commonMakeReversePaletteAsCustom,
   commonRenameFilterReferences,
   getLensFilterMigrations,
+  getLensCustomVisualizationMigrations,
   commonRenameRecordsField,
   fixLensTopValuesCustomFormatting,
 } from './common_migrations';
@@ -479,9 +481,13 @@ const lensMigrations: SavedObjectMigrationMap = {
 };
 
 export const getAllMigrations = (
-  filterMigrations: MigrateFunctionsObject
+  filterMigrations: MigrateFunctionsObject,
+  customVisualizationMigrations: CustomVisualizationMigrations
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
-    lensMigrations,
-    getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+    mergeSavedObjectMigrationMaps(
+      lensMigrations,
+      getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+    ),
+    getLensCustomVisualizationMigrations(customVisualizationMigrations)
   );
