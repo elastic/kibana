@@ -253,7 +253,7 @@ describe('PartitionVisComponent', function () {
     const newProps = { ...wrapperProps, visData: newVisData };
     const component = mount(<PartitionVisComponent {...newProps} />);
     expect(findTestSubject(component, 'partitionVisNegativeValues').text()).toEqual(
-      "pie charts can't render with negative values."
+      "Pie chart can't render with negative values."
     );
   });
 });
