@@ -24,8 +24,7 @@ export const DownloadCloudDependencies: Task = {
       const url = `https://${subdomain}-no-kpi.elastic.co/${buildIdUrl}downloads/beats/${beat}/${beat}-${version}-linux-${architecture}.tar.gz`;
       const checksum = await downloadToString({ log, url: url + '.sha512', expectStatus: 200 });
       const destination = config.resolveFromRepo('.beats', Path.basename(url));
-
-      return await downloadToDisk({
+      return downloadToDisk({
         log,
         url,
         destination,
