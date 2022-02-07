@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { RouteComponentProps, Router } from 'react-router-dom';
 import { createMemoryHistory, createLocation } from 'history';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import TriggersActionsUIHome, { MatchParams } from './home';
 import { useKibana } from '../common/lib/kibana';
 jest.mock('../common/lib/kibana');
