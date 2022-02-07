@@ -412,6 +412,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 ]}
                 baseTheme={chartBaseTheme}
                 onRenderChange={onRenderChange}
+                ariaLabel={props.visParams.ariaLabel}
+                ariaUseDefaultSummary={!props.visParams.ariaLabel}
               />
               <Partition
                 id={visType}

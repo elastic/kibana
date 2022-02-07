@@ -429,8 +429,9 @@ To keep signal values set `restoreSignalValuesOnRefresh: true` in the Vega confi
 /**
   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
   * @param {string} [index] as defined in Kibana, or default if missing
+  * @param {string} Custom label of the filter shown in the filter bar
   */
-kibanaAddFilter(query, index)
+kibanaAddFilter(query, index, alias)
 
 /**
   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
