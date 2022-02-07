@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '../logger';
+import { Logger } from '@kbn/logging';
 
 export type MockedLogger = jest.Mocked<Logger> & { context: string[] };
 

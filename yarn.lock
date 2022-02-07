@@ -3826,6 +3826,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/logging-mocks@link:bazel-bin/packages/kbn-logging-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging@link:bazel-bin/packages/kbn-logging":
   version "0.0.0"
   uid ""
@@ -6795,6 +6799,14 @@
   uid ""
 
 "@types/kbn__io-ts-utils@link:bazel-bin/packages/kbn-io-ts-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__logging-mocks@link:bazel-bin/packages/kbn-logging-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__logging@link:bazel-bin/packages/kbn-logging/npm_module_types":
   version "0.0.0"
   uid ""
 
