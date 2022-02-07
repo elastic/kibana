@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { OptedInNoticeBanner } from './opted_in_notice_banner';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { httpServiceMock } from '../../../../core/public/http/http_service.mock';
