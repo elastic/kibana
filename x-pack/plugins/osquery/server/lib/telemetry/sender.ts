@@ -220,9 +220,8 @@ export class TelemetryEventsSender {
         clusterInfo?.version?.number,
         licenseInfo?.uid
       );
-    } catch (err) {
-      this.logger.warn(`Error sending telemetry events data: ${err}`);
-    }
+      // eslint-disable-next-line no-empty
+    } catch (err) {}
   }
 
   private async fetchTelemetryUrl(channel: string): Promise<string> {
