@@ -38,7 +38,6 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
@@ -80,11 +79,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import {
-  APP_UI_ID,
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
-} from '../../../../../../common/constants';
+import { APP_UI_ID, DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 

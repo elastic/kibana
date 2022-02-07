@@ -119,6 +119,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
+  : T extends HostsQueries.hostsRiskScore
+  ? HostsRiskScoreStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
   : T extends HostsQueries.authentications

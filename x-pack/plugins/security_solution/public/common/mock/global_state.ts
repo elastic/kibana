@@ -13,9 +13,6 @@ import {
   NetworkTopTablesFields,
   NetworkTlsFields,
   NetworkUsersFields,
-  RiskScoreFields,
-  HostRulesFields,
-  HostTacticsFields,
   HostRiskScoreFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
@@ -206,7 +203,7 @@ export const mockGlobalState: State = {
         [usersModel.UsersTableType.allUsers]: {
           activePage: 0,
           limit: 10,
-          // sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          // TODO sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
         },
       },
     },
@@ -215,7 +212,7 @@ export const mockGlobalState: State = {
         [usersModel.UsersTableType.allUsers]: {
           activePage: 0,
           limit: 10,
-          // sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
+          // TODO sort: { field: HostRulesFields.riskScore, direction: Direction.desc },
         },
       },
     },

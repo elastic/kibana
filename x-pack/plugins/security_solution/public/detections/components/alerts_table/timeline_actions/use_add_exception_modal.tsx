@@ -8,11 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
-import {
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
-} from '../../../../../common/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { inputsModel } from '../../../../common/store';
 

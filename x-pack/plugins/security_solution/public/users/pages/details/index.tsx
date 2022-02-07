@@ -11,11 +11,9 @@ import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
-import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
-import { LastEventTime } from '../../../common/components/last_event_time';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -36,7 +34,6 @@ import { type } from './utils';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
-// import { Display } from '../display';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -100,13 +97,10 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            {/* <Display show={!globalFullScreen}> */}
             <HeaderPage border subtitle={'TODO <LastEventTime />'} title={detailName} />
             <SecuritySolutionTabNavigation navTabs={navTabsUsersDetails(detailName)} />
 
             <EuiSpacer />
-            {/* </Display> */}
-
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}

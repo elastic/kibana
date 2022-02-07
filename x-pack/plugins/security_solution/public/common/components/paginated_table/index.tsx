@@ -77,8 +77,6 @@ declare type HostsTableColumnsTest = [
 
 declare type BasicTableColumns =
   | AuthTableColumns
-  | HostRulesColumns
-  | HostTacticsColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns
@@ -88,7 +86,6 @@ declare type BasicTableColumns =
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsNetworkDetails
   | HostRiskScoreColumns
-  | RiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;
