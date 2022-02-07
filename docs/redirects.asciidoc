@@ -391,7 +391,7 @@ This content has moved. Refer to <<kibana-role-management>>.
 
 This content has moved. Refer to <<logging-config-changes>>.
 
-[role="exclude" id="upgrade-migrations"]
+[role="exclude",id="upgrade-migrations"]
 == Upgrade migrations
 
 This content has moved. Refer to <<saved-object-migrations>>.
