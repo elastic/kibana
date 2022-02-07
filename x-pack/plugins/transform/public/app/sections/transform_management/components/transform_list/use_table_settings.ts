@@ -89,6 +89,5 @@ export function useTableSettings<TypeOfItem>(
       direction: sortDirection,
     },
   };
-
   return { onTableChange, pagination, sorting };
 }
