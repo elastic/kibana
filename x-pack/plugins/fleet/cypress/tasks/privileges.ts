@@ -132,6 +132,33 @@ export const FleetAllIntegrNoneUser: User = {
   password: 'password',
   roles: [FleetAllIntegrNoneRole.name],
 };
+export const FleetNoneIntegrAllRole: Role = {
+  name: 'fleet_none_int_all_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          fleetv2: ['none'],
+          fleet: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+export const FleetNoneIntegrAllUser: User = {
+  username: 'fleet_none_int_all_user',
+  password: 'password',
+  roles: [FleetNoneIntegrAllRole.name],
+};
 
 const getUserInfo = (user: User): UserInfo => ({
   username: user.username,

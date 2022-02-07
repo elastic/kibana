@@ -6,6 +6,7 @@
  */
 
 export const ADD_AGENT_BUTTON = 'addAgentButton';
+export const ADD_AGENT_BUTTON_TOP = 'addAgentBtnTop';
 
 export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';

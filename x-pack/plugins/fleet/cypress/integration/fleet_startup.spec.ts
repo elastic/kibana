@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { AGENTS_TAB, AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
+import {
+  AGENTS_TAB,
+  AGENT_POLICIES_TAB,
+  ENROLLMENT_TOKENS_TAB,
+  ADD_AGENT_BUTTON_TOP,
+} from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
@@ -77,7 +82,7 @@ describe('Fleet startup', () => {
     });
 
     it('should create agent policy', () => {
-      cy.getBySel('addAgentBtnTop').click();
+      cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
       cy.getBySel('standaloneTab').click();
 
       cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');

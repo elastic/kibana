@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FLEET } from '../tasks/navigation';
+import { FLEET, INTEGRATIONS } from '../tasks/navigation';
 import {
   createUsersAndRoles,
   FleetAllIntegrReadRole,
@@ -17,8 +17,10 @@ import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import {
   FLEET_SERVER_MISSING_PRIVILEGES_TITLE,
   FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE,
-  FLEET_AGENT_POLICIES_TAB,
+  ADD_AGENT_BUTTON_TOP,
 } from '../screens/fleet';
+import { ADD_POLICY_BTN } from '../screens/integrations';
+
 const rolesToCreate = [FleetAllIntegrReadRole];
 const usersToCreate = [FleetAllIntegrReadUser];
 
@@ -29,6 +31,8 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
 
   after(() => {
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
+  });
+  afterEach(() => {
     logout();
   });
 
@@ -39,6 +43,12 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
       'contain',
       'Fleet Server needs to be set up.'
     );
-    // cy.getBySel(FLEET_AGENT_POLICIES_TAB).click();
+    cy.getBySel(ADD_AGENT_BUTTON_TOP).should('not.be.disabled');
+  });
+
+  it('Integrations are visible but cannot be added', () => {
+    loginWithUserAndWaitForPage(INTEGRATIONS, FleetAllIntegrReadUser);
+    cy.getBySel('integration-card:epr:apache').click();
+    cy.getBySel(ADD_POLICY_BTN).should('be.disabled');
   });
 });
