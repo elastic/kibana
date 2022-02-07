@@ -11,6 +11,6 @@
   "ui": true,
   "extraPublicDirs": ["common/lib"],
   "requiredPlugins": ["kibanaReact", "embeddable", "expressions", "dataViews"],
-  "requiredBundles": ["savedObjects"],
+  "requiredBundles": [],
   "optionalPlugins": []
 }

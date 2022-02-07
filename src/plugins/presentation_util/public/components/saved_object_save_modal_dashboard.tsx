@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { OnSaveProps, SavedObjectSaveModal } from '../../../../plugins/saved_objects/public';
+import { OnSaveProps, SavedObjectSaveModal } from './save_modal';
 
 import { pluginServices } from '../services';
 import { SaveModalDashboardProps } from './types';
