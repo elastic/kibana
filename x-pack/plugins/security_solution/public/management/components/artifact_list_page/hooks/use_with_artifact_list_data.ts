@@ -67,8 +67,7 @@ export const useWithArtifactListData = (
   });
 
   // Convert to useMemo()? that uses data from API request?
-  const [uiPagination] = useState<Pagination>({
-    // FIXME:PT calculate this on every data fetch
+  const [uiPagination, setUiPagination] = useState<Pagination>({
     totalItemCount: 0,
     pageSize: perPage,
     pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
@@ -76,15 +75,6 @@ export const useWithArtifactListData = (
   });
 
   const [isPageInitializing, setIsPageInitializing] = useState(true);
-
-  // Once we know if data exists, update the page initializing state
-  useEffect(() => {
-    if (isMounted) {
-      if (isPageInitializing === true && !isLoadingDataExists) {
-        setIsPageInitializing(false);
-      }
-    }
-  }, [isLoadingDataExists, isMounted, isPageInitializing]);
 
   const listDataRequest = useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['list', apiClient, page, perPage, sortField, sortField, filter],
@@ -94,8 +84,39 @@ export const useWithArtifactListData = (
       keepPreviousData: true,
     }
   );
-  const { data: listData, isLoading: isLoadingListData, error: listDataError } = listDataRequest;
 
+  const {
+    data: listData,
+    isLoading: isLoadingListData,
+    error: listDataError,
+    isSuccess: isSuccessListData,
+  } = listDataRequest;
+
+  // Once we know if data exists, update the page initializing state.
+  // This should only ever happen at most once;
+  useEffect(() => {
+    if (isMounted) {
+      if (isPageInitializing === true && !isLoadingDataExists) {
+        setIsPageInitializing(false);
+      }
+    }
+  }, [isLoadingDataExists, isMounted, isPageInitializing]);
+
+  // Update the uiPagination once the query succeeds
+  useEffect(() => {
+    if (isMounted && listData && !isLoadingListData && isSuccessListData) {
+      setUiPagination((prevState) => {
+        return {
+          ...prevState,
+          pageIndex: listData.page - 1,
+          pageSize: listData.per_page,
+          totalItemCount: listData.total,
+        };
+      });
+    }
+  }, [isLoadingListData, isMounted, isSuccessListData, listData]);
+
+  // Keep the `doesDataExist` updated if we detect that list data result total is zero.
   // Anytime:
   //    1. the list data total is 0
   //    2. and page is 1
@@ -104,6 +125,7 @@ export const useWithArtifactListData = (
   // check if data exists again
   useEffect(() => {
     if (
+      isMounted &&
       !isLoadingListData &&
       !listDataError &&
       listData &&
@@ -114,7 +136,16 @@ export const useWithArtifactListData = (
     ) {
       checkIfDataExists();
     }
-  }, [checkIfDataExists, doesDataExist, filter, isLoadingListData, listData, listDataError, page]);
+  }, [
+    checkIfDataExists,
+    doesDataExist,
+    filter,
+    isLoadingListData,
+    isMounted,
+    listData,
+    listDataError,
+    page,
+  ]);
 
   return {
     isPageInitializing,

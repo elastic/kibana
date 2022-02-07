@@ -154,9 +154,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             <EuiSpacer size="m" />
 
             <EuiText color="subdued" size="xs" data-test-subj={getTestId('showCount')}>
-              {
-                labels.getShowingCountLabel(0) // FIXME:PT provide total count
-              }
+              {labels.getShowingCountLabel(uiPagination.totalItemCount)}
             </EuiText>
 
             <EuiSpacer size="s" />
