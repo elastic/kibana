@@ -22,6 +22,80 @@ describe('alert user actions', () => {
       context = migrationMocks.createContext();
     });
 
+    describe('JSON.stringify throws an error', () => {
+      let jsonStringifySpy: jest.SpyInstance;
+      beforeEach(() => {
+        jsonStringifySpy = jest.spyOn(JSON, 'stringify').mockImplementation(() => {
+          throw new Error('failed to stringify');
+        });
+      });
+
+      afterEach(() => {
+        jsonStringifySpy.mockRestore();
+      });
+
+      it('logs an error when an error is thrown outside of the JSON.parse function', () => {
+        const doc = {
+          id: '123',
+          attributes: {
+            action: 'create',
+            action_field: ['comment'],
+            new_value:
+              '{"type":"generated_alert","alertId":"4eb4cd05b85bc65c7b9f22b776e0136f970f7538eb0d1b2e6e8c7d35b2e875cb","index":".internal.alerts-security.alerts-default-000001","rule":{"id":"43104810-7875-11ec-abc6-6f72e72f6004","name":"A rule"},"owner":"securitySolution"}',
+          },
+          type: 'abc',
+          references: [],
+        };
+
+        expect(removeRuleInformation(doc, context)).toEqual(doc);
+
+        const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+        expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "Failed to migrate user action alerts with doc id: 123 version: 8.0.0 error: failed to stringify",
+            Object {
+              "migrations": Object {
+                "userAction": Object {
+                  "id": "123",
+                },
+              },
+            },
+          ]
+        `);
+      });
+    });
+
+    describe('JSON.parse spy', () => {
+      let jsonParseSpy: jest.SpyInstance;
+      beforeEach(() => {
+        jsonParseSpy = jest.spyOn(JSON, 'parse');
+      });
+
+      afterEach(() => {
+        jsonParseSpy.mockRestore();
+      });
+
+      it('does not modify the document and does not call JSON.prase when it is not a create comment user action', () => {
+        const doc = {
+          id: '123',
+          attributes: {
+            action: 'update',
+            action_field: ['status'],
+            new_value: 'open',
+          },
+          type: 'abc',
+          references: [],
+        };
+
+        expect(removeRuleInformation(doc, context)).toEqual(doc);
+
+        expect(jsonParseSpy).not.toBeCalled();
+
+        const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+        expect(log.error.mock.calls[0]).toBeUndefined();
+      });
+    });
+
     it('does not modify non-alert user action', () => {
       const doc = {
         id: '123',
@@ -51,18 +125,7 @@ describe('alert user actions', () => {
       expect(removeRuleInformation(doc, context)).toEqual(doc);
 
       const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
-      expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "Failed to migrate user action alerts with doc id: 123 version: 8.0.0 error: Unexpected end of JSON input",
-            Object {
-              "migrations": Object {
-                "userAction": Object {
-                  "id": "123",
-                },
-              },
-            },
-          ]
-        `);
+      expect(log.error.mock.calls[0]).toBeUndefined();
     });
 
     it('does not modify the document when new_value is null', () => {
