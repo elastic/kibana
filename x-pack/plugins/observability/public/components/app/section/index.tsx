@@ -38,7 +38,6 @@ export function SectionContainer({ title, appLink, children, hasError }: Props) 
         extraAction={
           appLink?.href && (
             <EuiButtonEmpty
-              iconSide="left"
               iconType={'sortRight'}
               size="xs"
               color="text"
