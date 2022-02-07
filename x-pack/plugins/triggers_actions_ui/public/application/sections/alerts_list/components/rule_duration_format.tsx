@@ -5,23 +5,35 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
 
 interface Props {
   duration: number;
+  allowZero?: boolean;
 }
 
 export const RuleDurationFormat = memo((props: Props) => {
-  const { duration } = props;
+  const { duration, allowZero = true } = props;
+
+  const formattedDuration = useMemo(() => {
+    if (allowZero || typeof duration === 'number') {
+      return getFormattedDuration(duration);
+    }
+    return 'N/A';
+  }, [duration, allowZero]);
+
+  const formattedTooltip = useMemo(() => {
+    if (allowZero || typeof duration === 'number') {
+      return getFormattedMilliseconds(duration);
+    }
+    return 'N/A';
+  }, [duration, allowZero]);
 
   return (
-    <EuiToolTip
-      data-test-subj="rule-duration-format-tooltip"
-      content={getFormattedMilliseconds(duration)}
-    >
-      <span data-test-subj="rule-duration-format-value">{getFormattedDuration(duration)}</span>
+    <EuiToolTip data-test-subj="rule-duration-format-tooltip" content={formattedTooltip}>
+      <span data-test-subj="rule-duration-format-value">{formattedDuration}</span>
     </EuiToolTip>
   );
 });

@@ -415,7 +415,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const renderPercentileCellValue = (value: number) => {
     return (
       <span data-test-subj={`${selectedPercentile}Percentile`}>
-        <RuleDurationFormat duration={value} />
+        <RuleDurationFormat allowZero={false} duration={value} />
       </span>
     );
   };

@@ -460,7 +460,7 @@ describe('alerts_list component with items', () => {
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(
-      'The length of time it took for the rule to run.'
+      'The length of time it took for the rule to run (mm:ss).'
     );
 
     // Status column
@@ -529,7 +529,7 @@ describe('alerts_list component with items', () => {
             .props().content
         ).toEqual(getFormattedMilliseconds(rule.monitoring.execution.calculated_metrics.p50));
       } else {
-        expect(percentiles.at(index).text()).toEqual('00:00');
+        expect(percentiles.at(index).text()).toEqual('N/A');
       }
     });
 
@@ -602,7 +602,7 @@ describe('alerts_list component with items', () => {
           getFormattedDuration(rule.monitoring.execution.calculated_metrics.p95)
         );
       } else {
-        expect(percentiles.at(index).text()).toEqual('00:00');
+        expect(percentiles.at(index).text()).toEqual('N/A');
       }
     });
 
