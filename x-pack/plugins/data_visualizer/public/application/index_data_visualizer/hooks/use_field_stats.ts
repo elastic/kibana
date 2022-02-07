@@ -64,7 +64,7 @@ const createBatchedRequests = (fields: Field[], maxBatchSize = 10) => {
 export function useFieldStatsSearchStrategy(
   searchStrategyParams: OverallStatsSearchStrategyParams | undefined,
   fieldStatsParams: FieldStatsParams | undefined,
-  initialDataVisualizerListState: DataVisualizerIndexBasedAppState
+  dataVisualizerListState: DataVisualizerIndexBasedAppState
 ): FieldStatsSearchStrategyReturnBase {
   const {
     services: {
@@ -109,7 +109,7 @@ export function useFieldStatsSearchStrategy(
       return;
     }
 
-    const { sortField, sortDirection } = initialDataVisualizerListState;
+    const { sortField, sortDirection } = dataVisualizerListState;
     /**
      * Sort the list of fields by the initial sort field and sort direction
      * Then divide into chunks by the initial page size
@@ -125,7 +125,7 @@ export function useFieldStatsSearchStrategy(
       ...fieldStatsParams.nonMetricConfigs,
     ].sort(itemsSorter);
 
-    const { pageIndex, pageSize } = initialDataVisualizerListState;
+    const { pageIndex, pageSize } = dataVisualizerListState;
     const sortedConfigs = preslicedSortedConfigs.slice(
       pageIndex * pageSize,
       (pageIndex + 1) * pageSize
@@ -235,7 +235,7 @@ export function useFieldStatsSearchStrategy(
         complete: onComplete,
       });
 
-    // // If any of batches failed, retry each of the failed field at least one time individually
+    // If any of batches failed, retry each of the failed field at least one time individually
     retries$.current = combineLatest([
       statsMap$,
       fieldsToRetry$.pipe(
@@ -275,10 +275,10 @@ export function useFieldStatsSearchStrategy(
     data.search,
     toasts,
     fieldStatsParams,
-    initialDataVisualizerListState.pageSize,
-    initialDataVisualizerListState.pageIndex,
-    initialDataVisualizerListState.sortDirection,
-    initialDataVisualizerListState.sortField,
+    dataVisualizerListState.pageSize,
+    dataVisualizerListState.pageIndex,
+    dataVisualizerListState.sortDirection,
+    dataVisualizerListState.sortField,
   ]);
 
   const cancelFetch = useCallback(() => {

@@ -209,15 +209,12 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           )
         : of(undefined);
 
-    const observables = [
-      documentCountStats$,
-      ...aggregatableOverallStatsObs,
-      ...nonAggregatableFieldsObs,
-    ];
-
     const sub = rateLimitingForkJoin<
       AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
-    >(observables, MAX_CONCURRENT_REQUESTS);
+    >(
+      [documentCountStats$, ...aggregatableOverallStatsObs, ...nonAggregatableFieldsObs],
+      MAX_CONCURRENT_REQUESTS
+    );
 
     searchSubscription$.current = sub.subscribe({
       next: (value) => {

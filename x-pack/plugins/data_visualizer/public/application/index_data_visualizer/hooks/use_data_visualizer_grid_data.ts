@@ -438,43 +438,47 @@ export const useDataVisualizerGridData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallStats, showEmptyFields]);
 
-  const configs = useMemo(() => {
-    const fieldStats = strategyResponse.fieldStats;
-    let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
-    if (visibleFieldTypes && visibleFieldTypes.length > 0) {
-      combinedConfigs = combinedConfigs.filter(
-        (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
-      );
-    }
-    if (visibleFieldNames && visibleFieldNames.length > 0) {
-      combinedConfigs = combinedConfigs.filter(
-        (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
-      );
-    }
+  const configs = useMemo(
+    () => {
+      const fieldStats = strategyResponse.fieldStats;
+      let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
+      if (visibleFieldTypes && visibleFieldTypes.length > 0) {
+        combinedConfigs = combinedConfigs.filter(
+          (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
+        );
+      }
+      if (visibleFieldNames && visibleFieldNames.length > 0) {
+        combinedConfigs = combinedConfigs.filter(
+          (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
+        );
+      }
 
-    if (fieldStats) {
-      combinedConfigs = combinedConfigs.map((c) => {
-        const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
-        return loadedFullStats
-          ? {
-              ...c,
-              loading: false,
-              stats: { ...c.stats, ...loadedFullStats },
-            }
-          : c;
-      });
-    }
+      if (fieldStats) {
+        combinedConfigs = combinedConfigs.map((c) => {
+          const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
+          return loadedFullStats
+            ? {
+                ...c,
+                loading: false,
+                stats: { ...c.stats, ...loadedFullStats },
+              }
+            : c;
+        });
+      }
 
-    return combinedConfigs;
-  }, [
-    nonMetricConfigs,
-    metricConfigs,
-    visibleFieldTypes,
-    visibleFieldNames,
-    strategyResponse.progress.loaded,
-    dataVisualizerListState.pageIndex,
-    dataVisualizerListState.pageSize,
-  ]);
+      return combinedConfigs;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      nonMetricConfigs,
+      metricConfigs,
+      visibleFieldTypes,
+      visibleFieldNames,
+      strategyResponse.progress.loaded,
+      dataVisualizerListState.pageIndex,
+      dataVisualizerListState.pageSize,
+    ]
+  );
 
   // Some actions open up fly-out or popup
   // This variable is used to keep track of them and clean up when unmounting

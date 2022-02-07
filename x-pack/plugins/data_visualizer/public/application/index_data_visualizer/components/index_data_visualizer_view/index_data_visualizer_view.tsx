@@ -90,8 +90,7 @@ export const getDefaultDataVisualizerListState = (
   overrides?: Partial<DataVisualizerIndexBasedAppState>
 ): Required<DataVisualizerIndexBasedAppState> => ({
   pageIndex: 0,
-  // @todo: change back to 25
-  pageSize: 10,
+  pageSize: 25,
   sortField: 'fieldName',
   sortDirection: 'asc',
   visibleFieldTypes: [],
