@@ -28,7 +28,9 @@ function createMockRoleMapping(mapping: Partial<estypes.SecurityRoleMapping> = {
 
 describe('Kibana user deprecation routes', () => {
   let router: jest.Mocked<SecurityRouter>;
-  let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext>;
+  let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext> & {
+    core: ReturnType<typeof coreMock.createRequestHandlerContext>;
+  };
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
