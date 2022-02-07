@@ -193,7 +193,7 @@ export const bucketTransform = {
     };
     if (bucket.gap_policy) body.serial_diff.gap_policy = bucket.gap_policy;
     if (bucket.lag && /^([\d]+)$/.test(bucket.lag)) {
-      body.serial_diff.lag = bucket.lang;
+      body.serial_diff.lag = bucket.lag;
     }
     return body;
   },
