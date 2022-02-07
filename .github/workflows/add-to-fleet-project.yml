@@ -7,7 +7,11 @@ jobs:
   add_to_project:
     runs-on: ubuntu-latest
     if: |
-      contains(github.event.issue.labels.*.name, 'Team:Fleet') && contains(github.event.issue.labels.*.name, 'technical debt')
+      contains(github.event.issue.labels.*.name, 'Team:Fleet') && (
+        contains(github.event.issue.labels.*.name, 'technical debt') ||
+        contains(github.event.issue.labels.*.name, 'bug') ||
+        contains(github.event.issue.labels.*.name, 'performance')
+      )
     steps:
       - uses: octokit/graphql-action@v2.x
         id: add_to_project
