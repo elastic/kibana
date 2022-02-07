@@ -18,6 +18,8 @@ import {
   EuiI18n,
   EuiFocusTrap,
   EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -424,8 +426,14 @@ export const CodeEditor: React.FC<Props> = ({
 
       <FullScreenDisplay>
         <div className="kibanaCodeEditor__controls">
-          <FullScreenButton />
-          <CopyButton />
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem>
+              <CopyButton />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FullScreenButton />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
         <MonacoEditor
           theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
@@ -437,7 +445,7 @@ export const CodeEditor: React.FC<Props> = ({
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}
           options={{
-            padding: isFullScreen ? { top: 24 } : {},
+            padding: allowFullScreen || isCopyable ? { top: 24 } : {},
             renderLineHighlight: 'none',
             scrollBeyondLastLine: false,
             minimap: {
@@ -504,6 +512,7 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
             iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
             color="text"
             aria-label={isFullScreen ? fullscreenCollapse : fullscreenExpand}
+            size="xs"
           />
         )}
       </EuiI18n>
@@ -552,6 +561,7 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
                   iconType="copyClipboard"
                   color="text"
                   aria-label={copyButton}
+                  size="xs"
                 />
               )}
             </EuiCopy>
