@@ -13,7 +13,7 @@ import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { AdministrationListPage as _AdministrationListPage } from '../administration_list_page';
 
-import { PaginatedContent } from '../paginated_content';
+import { PaginatedContent, PaginatedContentProps } from '../paginated_content';
 
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
@@ -30,6 +30,11 @@ import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
+
+type ArtifactListPagePaginatedContentComponent = PaginatedContentProps<
+  ExceptionListItemSchema,
+  ArtifactEntryCardType
+>;
 
 const AdministrationListPage = styled(_AdministrationListPage)`
   // TODO:PT Ask David - why do we have this here? because the Card already has similar code:
@@ -90,6 +95,18 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const handleOpenCreateFlyoutClick = useCallback(() => {
       setUrlParams({ show: 'create' });
     }, [setUrlParams]);
+
+    const handlePaginationChange: ArtifactListPagePaginatedContentComponent['onChange'] =
+      useCallback(
+        ({ pageIndex, pageSize }) => {
+          setUrlParams({
+            // ensure page is reset if user changes page size
+            page: pageSize !== uiPagination.pageSize ? 1 : pageIndex + 1,
+            perPage: pageSize,
+          });
+        },
+        [setUrlParams, uiPagination.pageSize]
+      );
 
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
@@ -163,7 +180,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               items={items}
               ItemComponent={ArtifactEntryCard}
               itemComponentProps={handleCardProps}
-              onChange={() => {}} // FIXME:PT implement change handler
+              onChange={handlePaginationChange}
               error={error}
               loading={isLoading}
               pagination={uiPagination}
