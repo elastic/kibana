@@ -16,6 +16,7 @@ import type {
 
 import moment from 'moment';
 import { merge } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
@@ -56,7 +57,6 @@ import type { MlJobsStatsResponse } from '../../../common/types/job_service';
 import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import type { JobSavedObjectService } from '../../saved_objects';
 import { isDefined } from '../../../common/types/guards';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';

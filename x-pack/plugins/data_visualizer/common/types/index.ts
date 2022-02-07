@@ -6,7 +6,7 @@
  */
 
 import type { SimpleSavedObject } from 'kibana/public';
-import { isPopulatedObject } from '../utils/object_utils';
+import { isPopulatedObject } from '@kbn/ml-utils';
 export type { JobFieldType } from './job_field_type';
 export type {
   FieldRequestConfig,

@@ -8,7 +8,6 @@
 export type { ChartData } from '../../ml/common';
 export {
   composeValidators,
-  isPopulatedObject,
   isRuntimeMappings,
   patternValidator,
   isRuntimeField,

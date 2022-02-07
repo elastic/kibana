@@ -10,6 +10,7 @@ import { find, get } from 'lodash';
 import { catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import {
   MAX_PERCENT,
   PERCENTILE_SPACING,
@@ -20,7 +21,6 @@ import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type { Aggs, FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type {
   Field,

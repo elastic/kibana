@@ -8,8 +8,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { combineLatest, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type {
   Field,
   FieldExamples,

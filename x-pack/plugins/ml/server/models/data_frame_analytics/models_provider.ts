@@ -11,6 +11,7 @@ import {
   MlTrainedModelStats,
   NodesInfoNodeInfo,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import type {
   NodeDeploymentStatsResponse,
   PipelineDefinition,
@@ -26,7 +27,6 @@ import {
   TrainedModelModelSizeStats,
 } from '../../../common/types/trained_models';
 import { isDefined } from '../../../common/types/guards';
-import { isPopulatedObject } from '../../../common';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 

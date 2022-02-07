@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
-import { isPopulatedObject } from '../../common/utils';
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 

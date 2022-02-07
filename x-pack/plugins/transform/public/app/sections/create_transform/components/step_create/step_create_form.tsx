@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 import { DISCOVER_APP_LOCATOR } from '../../../../../../../../../src/plugins/discover/public';
@@ -49,7 +50,6 @@ import {
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
 import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common';
-import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { isContinuousTransform, isLatestTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 

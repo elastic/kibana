@@ -6,6 +6,7 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import {
   TimefilterContract,
   TimeRange,
@@ -27,7 +28,6 @@ import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants
 import { MlResultsService } from './results_service';
 import { EntityField } from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
-import { isPopulatedObject } from '../../../common';
 
 /**
  * Service for retrieving anomaly swim lanes data.

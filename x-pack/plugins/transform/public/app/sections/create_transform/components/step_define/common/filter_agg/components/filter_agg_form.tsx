@@ -8,6 +8,7 @@
 import React, { useContext, useMemo } from 'react';
 import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
@@ -16,7 +17,6 @@ import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
 import type { RuntimeMappings } from '../../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
-import { isPopulatedObject } from '../../../../../../../../../common/shared_imports';
 
 /**
  * Resolves supported filters for provided field.

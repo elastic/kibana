@@ -8,11 +8,11 @@ import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type {
   Field,
   BooleanFieldStats,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-utils';
+
 import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
@@ -24,7 +26,7 @@ import {
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 
-import { isPopulatedObject, RUNTIME_FIELD_TYPES } from '../../../../../../../common/shared_imports';
+import { RUNTIME_FIELD_TYPES } from '../../../../../../../common/shared_imports';
 
 export interface ErrorMessage {
   query: string;

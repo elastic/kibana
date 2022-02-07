@@ -9,6 +9,7 @@ import { each, find, get, map, reduce, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Observable, of } from 'rxjs';
 import { catchError, map as mapObservable } from 'rxjs/operators';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import { RecordForInfluencer } from './results_service/results_service';
 import {
   isMappableJob,
@@ -34,7 +35,6 @@ import {
   ResultResponse,
   ScheduledEventsByBucket,
 } from './results_service/result_service_rx';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import {
   ExplorerChartsData,

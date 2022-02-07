@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { get, each, last, find } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
@@ -19,7 +20,6 @@ import {
 import { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;

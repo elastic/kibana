@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IndexPattern } from '../../../../../src/plugins/data/common';
+import { isPopulatedObject } from '@kbn/ml-utils';
 
-import { isPopulatedObject } from '../shared_imports';
+import type { IndexPattern } from '../../../../../src/plugins/data/common';
 
 // Custom minimal type guard for IndexPattern to check against the attributes used in transforms code.
 export function isIndexPattern(arg: any): arg is IndexPattern {

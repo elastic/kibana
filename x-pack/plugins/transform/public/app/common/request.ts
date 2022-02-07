@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-utils';
 
 import { HttpFetchError } from '../../../../../../src/core/public';
 import type { IndexPattern } from '../../../../../../src/plugins/data/public';
@@ -17,7 +18,6 @@ import type {
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
-import { isPopulatedObject } from '../../../common/shared_imports';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 import { isIndexPattern } from '../../../common/types/index_pattern';
 

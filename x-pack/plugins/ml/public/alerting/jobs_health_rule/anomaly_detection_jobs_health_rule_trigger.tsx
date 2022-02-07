@@ -10,6 +10,7 @@ import { EuiComboBoxOptionOption, EuiForm, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import { RuleTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
@@ -17,7 +18,6 @@ import { jobsApiProvider } from '../../application/services/ml_api_service/jobs'
 import { HttpService } from '../../application/services/http_service';
 import { useMlKibana } from '../../application/contexts/kibana';
 import { TestsSelectionControl } from './tests_selection_control';
-import { isPopulatedObject } from '../../../common';
 import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
 import { BetaBadge } from '../beta_badge';
 import { isDefined } from '../../../common/types/guards';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '../util/object_utils';
+import { isPopulatedObject } from '@kbn/ml-utils';
 
 export type FeatureImportanceClassName = string | number | boolean;
 

@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Query } from '@kbn/es-query';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
@@ -15,7 +16,6 @@ import {
   getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { IKibanaSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
 import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';

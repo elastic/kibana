@@ -21,10 +21,10 @@ import {
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import type { ModelItemFull } from './models_list';
 import { timeFormatter } from '../../../../common/util/date_utils';
 import { isDefined } from '../../../../common/types/guards';
-import { isPopulatedObject } from '../../../../common';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../nodes_overview/allocated_models';
 import type { AllocatedModel } from '../../../../common/types/trained_models';

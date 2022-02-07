@@ -7,6 +7,7 @@
 
 import type { CoreStart } from 'kibana/public';
 import type { Filter, Query } from '@kbn/es-query';
+import { isPopulatedObject } from '@kbn/ml-utils';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common';
@@ -21,7 +22,6 @@ import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
 import { EntityField } from '../../common/util/anomaly_utils';
-import { isPopulatedObject } from '../../common/util/object_utils';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,

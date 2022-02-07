@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-utils';
 import { AggName } from '../../../common/types/aggregations';
 import { Dictionary } from '../../../common/types/common';
 import { EsFieldName } from '../../../common/types/fields';
 import { GenericAgg } from '../../../common/types/pivot_group_by';
-import { isPopulatedObject } from '../../../common/shared_imports';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 import { PivotAggsConfigWithUiSupport } from './pivot_aggs';
 
