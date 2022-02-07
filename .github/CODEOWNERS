@@ -40,7 +40,7 @@
 /src/plugins/chart_expressions/expression_metric/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_heatmap/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_gauge/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_pie/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_partition_vis/ @elastic/kibana-vis-editors
 /src/plugins/url_forwarding/ @elastic/kibana-vis-editors
 /packages/kbn-tinymath/ @elastic/kibana-vis-editors
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
@@ -268,6 +268,7 @@
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
+/packages/kbn-logging-mocks/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-core
