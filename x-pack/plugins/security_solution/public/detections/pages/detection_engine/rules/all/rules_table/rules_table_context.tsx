@@ -6,10 +6,15 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
-import { invariant } from '../../../../../../common/utils/invariant';
-import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { FilterOptions, PaginationOptions, Rule, SortingOptions } from '../types';
+import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../../common/constants';
+import { invariant } from '../../../../../../../common/utils/invariant';
+import { useKibana, useUiSetting$ } from '../../../../../../common/lib/kibana';
+import {
+  FilterOptions,
+  PaginationOptions,
+  Rule,
+  SortingOptions,
+} from '../../../../../containers/detection_engine/rules/types';
 import { useFindRules } from './use_find_rules';
 import { getRulesComparator, getRulesPredicate } from './utils';
 
@@ -102,7 +107,7 @@ export type LoadingRuleAction =
   | 'edit'
   | null;
 
-interface LoadingRules {
+export interface LoadingRules {
   ids: string[];
   action: LoadingRuleAction;
 }

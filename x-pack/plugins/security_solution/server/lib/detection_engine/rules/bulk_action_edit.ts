@@ -20,7 +20,7 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
   return arr.filter((item) => !itemsSet.has(item));
 };
 
-export const appplyBulkActionEditToRule = (
+export const applyBulkActionEditToRule = (
   existingRule: RuleAlertType,
   action: BulkActionEditPayload
 ): RuleAlertType => {

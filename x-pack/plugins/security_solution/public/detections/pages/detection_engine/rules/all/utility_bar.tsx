@@ -55,7 +55,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isBulkActionInProgress,
     hasDisabledActions,
   }) => {
-    const handleGetBuIktemsPopoverContent = useCallback(
+    const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
         if (onGetBulkItemsPopoverContent != null) {
           return (
@@ -141,7 +141,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                     iconSide="right"
                     iconType="arrowDown"
                     popoverPanelPaddingSize="none"
-                    popoverContent={handleGetBuIktemsPopoverContent}
+                    popoverContent={handleGetBulkItemsPopoverContent}
                   >
                     {i18n.BATCH_ACTIONS}
                   </UtilityBarAction>

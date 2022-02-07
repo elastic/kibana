@@ -13,7 +13,7 @@ import { CreateRulesSchema } from '../../../../../common/detection_engine/schema
 import { createRule } from './api';
 import * as i18n from './translations';
 import { transformOutput } from './transforms';
-import { useInvalidateRules } from './rules_table/use_find_rules';
+import { useInvalidateRules } from './use_find_rules_query';
 
 interface CreateRuleReturn {
   isLoading: boolean;

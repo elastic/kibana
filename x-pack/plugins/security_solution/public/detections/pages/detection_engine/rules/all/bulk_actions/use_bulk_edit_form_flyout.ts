@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useState, useCallback, useRef } from 'react';
-import { useAsyncConfirmation } from '../../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
+import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 
 import {
   BulkActionEditType,

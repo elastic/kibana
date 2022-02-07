@@ -8,7 +8,7 @@
 import { EuiSwitch, EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
 
 const ToolbarLayout = styled.div`
@@ -16,7 +16,7 @@ const ToolbarLayout = styled.div`
   grid-template-columns: 1fr auto;
   align-items: center;
   grid-gap: 16px;
-  box-shadow: inset 0 -1px 0 #d3dae6;
+  box-shadow: inset 0 -1px 0 ${({ theme }) => theme.eui.euiBorderColor};
 `;
 
 interface RulesTableToolbarProps {
