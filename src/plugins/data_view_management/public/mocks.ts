@@ -54,7 +54,7 @@ const docLinks = {
 const createIndexPatternManagmentContext = (): {
   [key in keyof IndexPatternManagmentContext]: any;
 } => {
-  const { chrome, application, uiSettings, notifications, overlays } = coreMock.createStart();
+  const { chrome, uiSettings, notifications, overlays } = coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
   const dataViewFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
@@ -62,7 +62,6 @@ const createIndexPatternManagmentContext = (): {
 
   return {
     chrome,
-    application,
     uiSettings,
     notifications,
     overlays,

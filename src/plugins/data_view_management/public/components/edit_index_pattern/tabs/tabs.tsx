@@ -80,7 +80,7 @@ export function Tabs({
   location,
   refreshFields,
 }: TabsProps) {
-  const { application, uiSettings, docLinks, dataViewFieldEditor, overlays, theme } =
+  const { uiSettings, docLinks, dataViewFieldEditor, overlays, theme, dataViews } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -154,7 +154,7 @@ export function Tabs({
     [uiSettings]
   );
 
-  const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+  const userEditPermission = dataViews.getCanSaveSync();
   const getFilterSection = useCallback(
     (type: string) => {
       return (

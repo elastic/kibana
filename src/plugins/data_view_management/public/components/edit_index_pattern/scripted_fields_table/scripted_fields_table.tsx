@@ -43,8 +43,8 @@ interface ScriptedFieldsTableState {
 
 const withHooks = (Comp: typeof Component) => {
   return (props: any) => {
-    const { application } = useKibana<IndexPatternManagmentContext>().services;
-    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+    const { dataViews } = useKibana<IndexPatternManagmentContext>().services;
+    const userEditPermission = dataViews.getCanSaveSync();
 
     return <Comp userEditPermission={userEditPermission} {...props} />;
   };
