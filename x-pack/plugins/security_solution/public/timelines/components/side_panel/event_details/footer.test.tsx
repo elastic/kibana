@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { EventDetailsFooter } from './footer';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
@@ -103,11 +103,8 @@ const defaultProps = {
 };
 
 describe('event details footer component', () => {
-  let coreHttp: ReturnType<typeof coreMock.createStart>['http'];
-
   beforeEach(() => {
     const coreStartMock = coreMock.createStart();
-    coreHttp = coreStartMock.http;
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
     (useKibana as jest.Mock).mockReturnValue({
       services: {

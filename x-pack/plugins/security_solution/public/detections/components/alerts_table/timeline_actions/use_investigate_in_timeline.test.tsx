@@ -37,12 +37,10 @@ const props = {
 };
 
 describe('use investigate in timeline hook', () => {
-  let coreHttp: ReturnType<typeof coreMock.createStart>['http'];
   let mockSendAlertToTimeline: jest.SpyInstance<Promise<void>, [SendAlertToTimelineActionProps]>;
 
   beforeEach(() => {
     const coreStartMock = coreMock.createStart();
-    coreHttp = coreStartMock.http;
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
     mockSendAlertToTimeline = jest.spyOn(actions, 'sendAlertToTimelineAction');
     (useKibana as jest.Mock).mockReturnValue({
