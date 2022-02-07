@@ -20,7 +20,7 @@ import type {
   CspServerPluginStartDeps,
 } from './types';
 import { defineRoutes } from './routes';
-import { initUiSettings } from './uiSettings';
+import { initUiSettings } from './ui_settings';
 
 export class CspPlugin
   implements
