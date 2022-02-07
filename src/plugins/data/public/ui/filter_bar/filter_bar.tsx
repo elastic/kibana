@@ -300,7 +300,9 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   return (
     <EuiFlexGroup
-      className="globalFilterGroup"
+      className={classNames('globalFilterGroup', {
+        'globalFilterGroup--hasFilters': props.filters.length > 0 || props.multipleFilters.length > 0,
+      })}
       gutterSize="none"
       alignItems="flexStart"
       responsive={false}
@@ -318,7 +320,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           {renderMultipleFilters()}
           {renderSelectedSavedQueries()}
           {props.multipleFilters.length === 0 && renderItems()}
-          {renderEditFilter()}
+          {/* {renderEditFilter()} */}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

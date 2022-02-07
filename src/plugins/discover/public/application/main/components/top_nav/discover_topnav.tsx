@@ -115,7 +115,7 @@ export const DiscoverTopNav = ({
   }, []);
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false} className="dscSidebar__indexPatternSwitcher">
         <DiscoverIndexPattern
           selectedIndexPattern={indexPattern}
