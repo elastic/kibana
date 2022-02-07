@@ -197,9 +197,6 @@ describe('find()', () => {
           "index": ".alerts-observability.apm.alerts",
           "seq_no_primary_term": true,
         },
-        Object {
-          "meta": true,
-        },
       ]
     `);
   });
@@ -296,7 +293,7 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find
+            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
             Error: Error: Unauthorized for fake.rule and apm"
           `);
 
@@ -326,7 +323,7 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find
+            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
             Error: Error: something went wrong"
           `);
   });

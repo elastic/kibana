@@ -86,6 +86,8 @@ function mockEsClient() {
     cluster_name: 'test',
     version: { number: '8.0.0' } as estypes.ElasticsearchVersionInfo,
   } as estypes.InfoResponse);
+  // @ts-expect-error empty response
+  esClient.cluster.stats.mockResponse({});
 
   return esClient;
 }
