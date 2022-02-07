@@ -34,6 +34,7 @@ export type {
   ExpressionRendererComponent,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
+  useExpressionRenderer,
 } from './react_expression_renderer';
 export type {
   AnyExpressionFunctionDefinition,

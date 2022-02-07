@@ -46,6 +46,7 @@ export const heatmapRenderer: (
 
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');
+    const { isInteractive } = handlers;
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <div className="heatmap-container" data-test-subj="heatmapChart">
@@ -58,6 +59,7 @@ export const heatmapRenderer: (
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
             uiState={handlers.uiState as PersistedState}
+            interactive={isInteractive()}
           />
         </div>
       </KibanaThemeProvider>,
