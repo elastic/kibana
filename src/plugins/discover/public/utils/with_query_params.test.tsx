@@ -9,7 +9,7 @@
 import React, { ReactElement } from 'react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { withQueryParams } from './with_query_params';
 
 const mountComponent = (children: ReactElement, query = '') => {

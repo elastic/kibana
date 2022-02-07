@@ -250,7 +250,7 @@ export async function getAll(
   { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const { caseService, logger, authorization } = clientArgs;
 
   try {
     const { filter, ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(
@@ -258,7 +258,6 @@ export async function getAll(
     );
 
     const comments = await caseService.getAllCaseComments({
-      unsecuredSavedObjectsClient,
       id: caseID,
       options: {
         filter,
