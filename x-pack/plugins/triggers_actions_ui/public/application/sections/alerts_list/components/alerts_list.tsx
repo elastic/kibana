@@ -391,7 +391,7 @@ export const AlertsList: React.FunctionComponent = () => {
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.ruleExecutionPercentileTooltip',
             {
-              defaultMessage: `{percentileOrdinal} percentile of this rule's past {sampleLimit} execution durations`,
+              defaultMessage: `{percentileOrdinal} percentile of this rule's past {sampleLimit} execution durations (mm:ss).`,
               values: {
                 percentileOrdinal: percentileOrdinals[selectedPercentile!],
                 sampleLimit: MONITORING_HISTORY_LIMIT,
@@ -625,7 +625,7 @@ export const AlertsList: React.FunctionComponent = () => {
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.durationTitle',
               {
-                defaultMessage: 'The length of time it took for the rule to run.',
+                defaultMessage: 'The length of time it took for the rule to run (mm:ss).',
               }
             )}
           >
@@ -676,7 +676,7 @@ export const AlertsList: React.FunctionComponent = () => {
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.successRatioTitle',
               {
-                defaultMessage: 'How often this rule executes successfully',
+                defaultMessage: 'How often this rule executes successfully.',
               }
             )}
           >
