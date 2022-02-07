@@ -68,7 +68,7 @@ export function AlertsSection() {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
+          <EuiLoadingSpinner size="l" />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -99,7 +99,12 @@ export function AlertsSection() {
 
   return (
     <div>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+        gutterSize="s"
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h4>
@@ -112,23 +117,23 @@ export function AlertsSection() {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="sortRight" color="text" size="xs" href={manageLink}>
             {i18n.translate('xpack.observability.overview.alert.appLink', {
-              defaultMessage: 'Manage rules and alerts',
+              defaultMessage: 'Show all alerts',
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <>
         <EuiFlexItem grow={false}>
-          <EuiSpacer />
+          <EuiSpacer size="s" />
           <EuiSelect
             compressed
-            fullWidth={true}
             id="filterAlerts"
             options={[allTypes, ...filterOptions]}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
+            prepend="Show"
           />
-          <EuiSpacer />
+          <EuiSpacer size="s" />
         </EuiFlexItem>
         {alerts
           .filter((alert) => filter === ALL_TYPES || alert.consumer === filter)

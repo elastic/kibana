@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../..';
@@ -100,14 +100,8 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={4}>
-              {/* Data sections */}
-              {hasAnyData && <DataSections bucketSize={bucketSize} />}
-              <EmptySections />
-            </EuiFlexItem>
-            <EuiSpacer size="l" />
-            <EuiFlexItem grow={2}>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
               <EuiFlexGroup direction="column" gutterSize="s">
                 {hasDataMap?.alert?.hasData && (
                   <EuiFlexItem>
@@ -118,21 +112,25 @@ export function OverviewPage({ routeParams }: Props) {
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
+            <EuiFlexItem>
+              {/* Data sections */}
+              {hasAnyData && <DataSections bucketSize={bucketSize} />}
+              <EmptySections />
+            </EuiFlexItem>
+            <EuiSpacer size="s" />
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
+          <EuiHorizontalRule />
           <EuiFlexGroup>
             <EuiFlexItem>
               {/* Resources / What's New sections */}
-              <EuiPanel color="subdued">
-                <EuiFlexGroup direction="row">
-                  <EuiFlexItem grow={4}>
-                    {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={2}>
-                    <Resources />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem grow={4}>
+                  {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
+                </EuiFlexItem>
+                <EuiFlexItem grow={2}>
+                  <Resources />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
