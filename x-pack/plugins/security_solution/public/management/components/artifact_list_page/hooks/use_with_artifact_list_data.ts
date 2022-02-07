@@ -18,14 +18,9 @@ import {
 } from '../../../common/constants';
 import { useUrlParams } from './use_url_params';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
-
-interface ListPagingUrlParams {
-  page?: number;
-  perPage?: number;
-  sortField?: string;
-  sortOrder?: string;
-  filter?: string;
-}
+import { ArtifactListPageUrlParams } from '../types';
+import { MaybeImmutable } from '../../../../../common/endpoint/types';
+import { useKueryFromExceptionsSearchFilter } from './use_kuery_from_exceptions_search_filter';
 
 type WithArtifactListDataInterface = QueryObserverResult<
   FoundExceptionListItemSchema,
@@ -49,13 +44,23 @@ type WithArtifactListDataInterface = QueryObserverResult<
 };
 
 export const useWithArtifactListData = (
-  apiClient: ExceptionsListApiClient
+  apiClient: ExceptionsListApiClient,
+  searchableFields: MaybeImmutable<string[]>
 ): WithArtifactListDataInterface => {
   const isMounted = useIsMounted();
 
   const {
-    urlParams: { page = 1, perPage = MANAGEMENT_DEFAULT_PAGE_SIZE, sortOrder, sortField, filter },
-  } = useUrlParams<ListPagingUrlParams>();
+    urlParams: {
+      page = 1,
+      perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
+      sortOrder,
+      sortField,
+      filter,
+      includedPolicies,
+    },
+  } = useUrlParams<ArtifactListPageUrlParams>();
+
+  const kuery = useKueryFromExceptionsSearchFilter(filter, searchableFields, includedPolicies);
 
   const {
     data: doesDataExist,
@@ -76,9 +81,10 @@ export const useWithArtifactListData = (
 
   const [isPageInitializing, setIsPageInitializing] = useState(true);
 
+  // FIXME: need to convert `filter` to `kuery` (example in middleware for event filters)
   const listDataRequest = useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['list', apiClient, page, perPage, sortField, sortField, filter],
-    async () => apiClient.find({ page, perPage, filter, sortField, sortOrder }),
+    ['list', apiClient, page, perPage, sortField, sortField, kuery],
+    async () => apiClient.find({ page, perPage, filter: kuery, sortField, sortOrder }),
     {
       enabled: true,
       keepPreviousData: true,

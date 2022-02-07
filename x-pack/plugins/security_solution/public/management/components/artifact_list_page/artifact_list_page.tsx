@@ -28,6 +28,10 @@ import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import { ArtifactListPageUrlParams } from './types';
+import { useUrlParams } from './hooks/use_url_params';
+import { MaybeImmutable } from '../../../../common/endpoint/types';
+import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -53,6 +57,8 @@ export interface ArtifactListPageProps {
   apiClient: ExceptionsListApiClient;
   /** The artifact Component that will be displayed in the Flyout for Create and Edit flows */
   ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
+  /** A list of fields that will be used by the search functionality when a user enters a value in the searchbar */
+  searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;
   /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
   labels?: Partial<ArtifactListPageLabels>;
@@ -60,10 +66,19 @@ export interface ArtifactListPageProps {
 }
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
-  ({ apiClient, ArtifactFormComponent, labels: _labels = {}, 'data-test-subj': dataTestSubj }) => {
+  ({
+    apiClient,
+    ArtifactFormComponent,
+    searchableFields = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
+    labels: _labels = {},
+    'data-test-subj': dataTestSubj,
+  }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
+    const {
+      urlParams: { filter },
+    } = useUrlParams<ArtifactListPageUrlParams>();
 
     const {
       isPageInitializing,
@@ -72,7 +87,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       uiPagination,
       doesDataExist,
       error,
-    } = useWithArtifactListData(apiClient);
+    } = useWithArtifactListData(apiClient, searchableFields);
 
     const items = useMemo(() => {
       return listDataResponse?.data ?? [];
@@ -107,6 +122,16 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         },
         [setUrlParams, uiPagination.pageSize]
       );
+
+    const handleOnSearch = useCallback(
+      (filterValue: string, includedPolicies: string) => {
+        setUrlParams({
+          filter: filterValue,
+          included_policies: includedPolicies,
+        });
+      },
+      [setUrlParams]
+    );
 
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
@@ -160,8 +185,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         {doesDataExist && (
           <>
             <SearchExceptions
-              defaultValue={''} // FIXME:PT get from url
-              onSearch={() => {}} // FIXME:PT handle search
+              defaultValue={filter}
+              onSearch={handleOnSearch}
               placeholder={labels.searchPlaceholderInfo}
               hasPolicyFilter
               policyList={[]} // FIXME:PT provide list of policies

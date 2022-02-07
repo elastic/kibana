@@ -7,10 +7,11 @@
 
 import { useMemo } from 'react';
 import { useUrlParams } from './use_url_params';
+import { ArtifactListPageUrlParams } from '../types';
 
 const SHOW_VALUES: readonly string[] = ['create', 'edit'];
 
 export const useIsFlyoutOpened = (): boolean => {
-  const showUrlParamValue = useUrlParams<{ show?: string }>().urlParams.show ?? '';
+  const showUrlParamValue = useUrlParams<ArtifactListPageUrlParams>().urlParams.show ?? '';
   return useMemo(() => SHOW_VALUES.includes(showUrlParamValue), [showUrlParamValue]);
 };
