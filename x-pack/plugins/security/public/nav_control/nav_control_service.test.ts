@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 
 import type { ILicense } from '../../../licensing/public';
