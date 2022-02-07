@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Route, useLocation } from 'react-router-dom';
+import { Route, useLocation, useHistory } from 'react-router-dom';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
@@ -14,7 +14,13 @@ import { createFleetTestRendererMock } from '../../../../../mock';
 import { FLEET_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../constants';
 import type { CreatePackagePolicyRouteState } from '../../../types';
 
-import { sendCreatePackagePolicy, sendCreateAgentPolicy, useIntraAppState } from '../../../hooks';
+import {
+  sendCreatePackagePolicy,
+  sendCreateAgentPolicy,
+  sendGetAgentStatus,
+  useIntraAppState,
+  useStartServices,
+} from '../../../hooks';
 
 import { CreatePackagePolicyPage } from './index';
 
@@ -106,16 +112,45 @@ jest.mock('../../../hooks', () => {
       data: { item: { id: 'agent-policy-2', name: 'Agent policy 2', namespace: 'default' } },
     }),
     useIntraAppState: jest.fn().mockReturnValue({}),
+    useStartServices: jest.fn().mockReturnValue({
+      application: { navigateToApp: jest.fn() },
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+          addSuccess: jest.fn(),
+        },
+      },
+      docLinks: {
+        links: {
+          fleet: {},
+        },
+      },
+      http: {
+        basePath: {
+          get: () => 'http://localhost:5620',
+          prepend: (url: string) => 'http://localhost:5620' + url,
+        },
+      },
+      chrome: {
+        docTitle: {
+          change: jest.fn(),
+        },
+        setBreadcrumbs: jest.fn(),
+      },
+    }),
   };
 });
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn().mockReturnValue({ search: '' }),
+  useHistory: jest.fn().mockReturnValue({
+    push: jest.fn(),
+  }),
 }));
 
 describe('when on the package policy create page', () => {
-  const createPageUrlPath = pagePathGetters.add_integration_to_policy({ pkgkey: 'nginx-0.3.7' })[1];
+  const createPageUrlPath = pagePathGetters.add_integration_to_policy({ pkgkey: 'nginx-1.3.0' })[1];
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
@@ -167,7 +202,7 @@ describe('when on the package policy create page', () => {
         });
       });
 
-      it('should use custom "cancel" URL', () => {
+      test('should use custom "cancel" URL', () => {
         expect(cancelLink.href).toBe(expectedRouteState.onCancelUrl);
         expect(cancelButton.href).toBe(expectedRouteState.onCancelUrl);
       });
@@ -241,6 +276,75 @@ describe('when on the package policy create page', () => {
       });
     });
 
+    describe('on save navigate', () => {
+      async function setupSaveNavigate(routeState: any) {
+        (useIntraAppState as jest.MockedFunction<any>).mockReturnValue(routeState);
+        render();
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText('Existing hosts')!);
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        await act(async () => {
+          fireEvent.click(
+            renderResult.getByText(/Add Elastic Agent to your hosts/).closest('button')!
+          );
+        });
+      }
+
+      test('should navigate to save navigate path if set', async () => {
+        const routeState = {
+          onSaveNavigateTo: [PLUGIN_ID, { path: '/save/url/here' }],
+        };
+
+        await setupSaveNavigate(routeState);
+
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+          path: '/save/url/here',
+        });
+      });
+
+      test('should navigate to save navigate path with query param if set', async () => {
+        const mockUseLocation = useLocation as jest.MockedFunction<any>;
+        mockUseLocation.mockReturnValue({
+          search: 'policyId=agent-policy-1',
+        });
+
+        const routeState = {
+          onSaveNavigateTo: [PLUGIN_ID, { path: '/save/url/here' }],
+        };
+
+        await setupSaveNavigate(routeState);
+
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+          path: '/policies/agent-policy-1',
+        });
+
+        mockUseLocation.mockReturnValue({
+          search: '',
+        });
+      });
+
+      test('should navigate to save navigate app if set', async () => {
+        const routeState = {
+          onSaveNavigateTo: [PLUGIN_ID],
+        };
+        await setupSaveNavigate(routeState);
+
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
+      });
+
+      test('should set history if no routeState', async () => {
+        await setupSaveNavigate({});
+
+        expect(useHistory().push).toHaveBeenCalledWith('/policies/agent-policy-1');
+      });
+    });
+
     describe('without query param', () => {
       beforeEach(() => {
         render();
@@ -290,7 +394,33 @@ describe('when on the package policy create page', () => {
         expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
       });
 
-      describe('create package policy with exinsting agent policy', () => {
+      test('should not show modal if agent policy has agents', async () => {
+        (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
+          data: { results: { total: 1 } },
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText('Existing hosts')!);
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByText('This action will update 1 agent')).toBeInTheDocument();
+        });
+
+        await act(async () => {
+          fireEvent.click(
+            renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!
+          );
+        });
+
+        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
+      });
+
+      describe('create package policy with existing agent policy', () => {
         beforeEach(async () => {
           await act(async () => {
             fireEvent.click(renderResult.getByText('Existing hosts')!);
