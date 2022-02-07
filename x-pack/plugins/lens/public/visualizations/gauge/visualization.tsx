@@ -108,7 +108,7 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  attributes?: Partial<Omit<GaugeArguments, keyof GaugeVisualizationState>>
+  attributes?: Partial<Omit<GaugeArguments, keyof GaugeVisualizationState | 'ariaLabel'>>
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
 

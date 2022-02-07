@@ -521,6 +521,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                     : NaN,
               }}
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
+              ariaLabel={args.ariaLabel}
+              ariaUseDefaultSummary={!args.ariaLabel}
             />
             <Heatmap
               id="heatmap"

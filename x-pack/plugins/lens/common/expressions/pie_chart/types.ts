@@ -42,6 +42,7 @@ export type PieExpressionArgs = SharedPieLayerState & {
   shape: PieChartTypes;
   hideLabels: boolean;
   palette: PaletteOutput;
+  ariaLabel?: string;
 };
 
 export interface PieExpressionProps {

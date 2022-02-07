@@ -64,6 +64,7 @@ export const getTimelionVisRenderer: (
           <KibanaContextProvider services={{ ...deps }}>
             <VisComponent
               interval={visParams.interval}
+              ariaLabel={visParams.ariaLabel}
               seriesList={seriesList}
               renderComplete={handlers.done}
               onBrushEvent={onBrushEvent}
