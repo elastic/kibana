@@ -385,3 +385,13 @@ This content has moved. Refer to <<managing-data-views>>.
 == Kibana role management.
 
 This content has moved. Refer to <<kibana-role-management>>.
+
+[role="exclude",id="logging-configuration-changes"]
+== Logging configuration changes
+
+This content has moved. Refer to <<logging-config-changes>>.
+
+[role="exclude",id="upgrade-migrations"]
+== Upgrade migrations
+
+This content has moved. Refer to <<saved-object-migrations>>.
