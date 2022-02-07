@@ -17,7 +17,7 @@ import { pageObjects } from './page_objects';
 // - Click "Publish Docker image" step
 // - Copy the digest: sha256:xxxx value from the logs of the last docker push step
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:76b83394ccdd4359fbe101bdfbfd3c99c31cc5ffe150e0e4fa7ec4a12644c939';
+  'docker.elastic.co/package-registry/distribution@sha256:76b83394ccdd4359fbe101bdfbfd3c99c31cc5ffe150e0e4fa7ec4a12644c939';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
