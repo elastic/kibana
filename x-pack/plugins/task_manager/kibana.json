@@ -1,7 +1,7 @@
 {
   "id": "taskManager",
   "server": true,
-  "version": "8.1.0",
+  "version": "8.2.0",
   "owner": {
     "name": "Kibana Alerting",
     "githubTeam": "kibana-alerting-services"

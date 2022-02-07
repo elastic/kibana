@@ -30,7 +30,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     authorization,
   } = clientArgs;
   try {
-    const cases = await caseService.getCases({ unsecuredSavedObjectsClient, caseIds: ids });
+    const cases = await caseService.getCases({ caseIds: ids });
     const entities = new Map<string, OwnerEntity>();
 
     for (const theCase of cases.saved_objects) {
@@ -52,7 +52,6 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
 
     const deleteCasesMapper = async (id: string) =>
       caseService.deleteCase({
-        unsecuredSavedObjectsClient,
         id,
       });
 
@@ -63,7 +62,6 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
 
     const getCommentsMapper = async (id: string) =>
       caseService.getAllCaseComments({
-        unsecuredSavedObjectsClient,
         id,
       });
 
