@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { PingListExpandedRowComponent } from './expanded_row';
 import { Ping } from '../../../../common/runtime_types';

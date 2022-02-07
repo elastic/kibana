@@ -19,7 +19,7 @@ import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '../../licensing/server/mocks';
 import { httpServerMock, loggingSystemMock } from '../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../security/server/audit/index.mock';
+import { auditLoggerMock } from '../../security/server/audit/mocks';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
 import {
@@ -72,7 +72,7 @@ const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
 const ephemeralExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
-const auditLogger = auditServiceMock.create().asScoped(request);
+const auditLogger = auditLoggerMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -1888,6 +1888,7 @@ describe('enqueueExecution()', () => {
         id: uuid.v4(),
         params: {},
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
@@ -1906,6 +1907,7 @@ describe('enqueueExecution()', () => {
           id: uuid.v4(),
           params: {},
           spaceId: 'default',
+          executionId: '123abc',
           apiKey: null,
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
@@ -1922,6 +1924,7 @@ describe('enqueueExecution()', () => {
         id: uuid.v4(),
         params: {},
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       });
 
@@ -1937,6 +1940,7 @@ describe('enqueueExecution()', () => {
       id: uuid.v4(),
       params: { baz: false },
       spaceId: 'default',
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     };
     await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);

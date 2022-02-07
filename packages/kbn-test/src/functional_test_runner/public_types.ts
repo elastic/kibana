@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/dev-utils';
 
-import { Config, Lifecycle, FailureMetadata, DockerServersService } from './lib';
-import { Test, Suite } from './fake_mocha_types';
+import type { Config, Lifecycle, TestMetadata, DockerServersService, EsVersion } from './lib';
+import type { Test, Suite } from './fake_mocha_types';
 
-export { Lifecycle, Config, FailureMetadata };
+export { Lifecycle, Config, TestMetadata };
 
 export interface AsyncInstance<T> {
   /**
@@ -57,7 +57,7 @@ export interface GenericFtrProviderContext<
    * @param serviceName
    */
   hasService(
-    serviceName: 'config' | 'log' | 'lifecycle' | 'failureMetadata' | 'dockerServers'
+    serviceName: 'config' | 'log' | 'lifecycle' | 'testMetadata' | 'dockerServers' | 'esVersion'
   ): true;
   hasService<K extends keyof ServiceMap>(serviceName: K): serviceName is K;
   hasService(serviceName: string): serviceName is Extract<keyof ServiceMap, string>;
@@ -71,7 +71,8 @@ export interface GenericFtrProviderContext<
   getService(serviceName: 'log'): ToolingLog;
   getService(serviceName: 'lifecycle'): Lifecycle;
   getService(serviceName: 'dockerServers'): DockerServersService;
-  getService(serviceName: 'failureMetadata'): FailureMetadata;
+  getService(serviceName: 'testMetadata'): TestMetadata;
+  getService(serviceName: 'esVersion'): EsVersion;
   getService<T extends keyof ServiceMap>(serviceName: T): ServiceMap[T];
 
   /**
@@ -100,6 +101,7 @@ export class GenericFtrService<ProviderContext extends GenericFtrProviderContext
 
 export interface FtrConfigProviderContext {
   log: ToolingLog;
+  esVersion: EsVersion;
   readConfigFile(path: string): Promise<Config>;
 }
 

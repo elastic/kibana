@@ -56,7 +56,8 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     )
   );
   const [selectedEntities, setSelectedEntities] = useState<EntityField[] | undefined>();
-  const [{ uiSettings }, { data: dataServices, share, uiActions }] = services;
+  const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
+    services;
   const { timefilter } = dataServices.query.timefilter;
 
   const mlLocator = useMemo(
@@ -183,6 +184,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
+              chartsService={chartsService}
             />
           )}
         </div>

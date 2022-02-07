@@ -16,7 +16,7 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/empty_message';
 import { ImpactBar } from '../../shared/impact_bar';
@@ -169,7 +169,6 @@ export function TraceList({ items = [], isLoading, isFailure }: Props) {
       initialSortField="impact"
       initialSortDirection="desc"
       noItemsMessage={noItemsMessage}
-      initialPageSize={25}
     />
   );
 }

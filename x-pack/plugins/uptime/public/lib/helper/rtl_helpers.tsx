@@ -37,6 +37,7 @@ import { ClientPluginsStart } from '../../apps/plugin';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
+import { kibanaService } from '../../state/kibana_service';
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -100,8 +101,8 @@ const mockAppUrls: Record<string, string> = {
 };
 
 /* default mock core */
-const defaultCore = coreMock.createStart();
-const mockCore: () => Partial<CoreStart> = () => {
+export const defaultCore = coreMock.createStart();
+export const mockCore: () => Partial<CoreStart> = () => {
   const core: Partial<CoreStart & ClientPluginsStart & { storage: IStorageWrapper }> = {
     ...defaultCore,
     application: {
@@ -115,6 +116,9 @@ const mockCore: () => Partial<CoreStart> = () => {
           configureSettings: true,
           save: true,
           show: true,
+        },
+        actions: {
+          save: true,
         },
       },
     },
@@ -148,6 +152,8 @@ export function MockKibanaProvider<ExtraCore>({
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
   const coreOptions = merge({}, mockCore(), core);
+
+  kibanaService.core = coreOptions as any;
 
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
@@ -208,6 +214,27 @@ export const MockRedux = ({
   );
 };
 
+export function WrappedHelper<ExtraCore>({
+  children,
+  core,
+  kibanaProps,
+  state,
+  url,
+  useRealStore,
+  path,
+  history = createMemoryHistory(),
+}: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
+  const testState: AppState = merge({}, mockState, state);
+
+  return (
+    <MountWithReduxProvider state={testState} useRealStore={useRealStore}>
+      <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
+        {children}
+      </MockRouter>
+    </MountWithReduxProvider>
+  );
+}
+
 /* Custom react testing library render */
 export function render<ExtraCore>(
   ui: ReactElement,
@@ -222,19 +249,23 @@ export function render<ExtraCore>(
     useRealStore,
   }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
 ) {
-  const testState: AppState = merge({}, mockState, state);
-
   if (url) {
     history = getHistoryFromUrl(url);
   }
 
   return {
     ...reactTestLibRender(
-      <MountWithReduxProvider state={testState} useRealStore={useRealStore}>
-        <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
-          {ui}
-        </MockRouter>
-      </MountWithReduxProvider>,
+      <WrappedHelper
+        history={history}
+        kibanaProps={kibanaProps}
+        core={core}
+        url={url}
+        state={state}
+        path={path}
+        useRealStore={useRealStore}
+      >
+        {ui}
+      </WrappedHelper>,
       renderOptions
     ),
     history,

@@ -11,24 +11,21 @@ import { Action } from '@kbn/securitysolution-io-ts-alerting-types';
 import { SavedObjectsClientContract } from 'kibana/server';
 import pMap from 'p-map';
 
+import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
 import { ActionsClient } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import {
-  RuleAlertType,
-  isAlertType,
-  isRuleStatusSavedObjectAttributes,
-  IRuleStatusSOAttributes,
-} from '../../rules/types';
+import { RuleAlertType, isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert } from '../../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -99,23 +96,23 @@ export const transformTags = (tags: string[]): string[] => {
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
 export const transformAlertToRule = (
-  alert: SanitizedAlert<RuleParams>,
-  ruleStatus?: IRuleStatusSOAttributes,
+  rule: SanitizedAlert<RuleParams>,
+  ruleExecutionSummary?: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(alert, ruleStatus, legacyRuleActions);
+  return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
 };
 
 export const transformAlertsToRules = (
-  alerts: RuleAlertType[],
+  rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
 ): Array<Partial<RulesSchema>> => {
-  return alerts.map((alert) => transformAlertToRule(alert, undefined, legacyRuleActions[alert.id]));
+  return rules.map((rule) => transformAlertToRule(rule, null, legacyRuleActions[rule.id]));
 };
 
 export const transformFindAlerts = (
-  findResults: FindResult<RuleParams>,
-  currentStatusesByRuleId: { [key: string]: IRuleStatusSOAttributes | undefined },
+  ruleFindResults: FindResult<RuleParams>,
+  ruleExecutionSummariesByRuleId: RuleExecutionSummariesByRuleId,
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
 ): {
   page: number;
@@ -124,28 +121,24 @@ export const transformFindAlerts = (
   data: Array<Partial<RulesSchema>>;
 } | null => {
   return {
-    page: findResults.page,
-    perPage: findResults.perPage,
-    total: findResults.total,
-    data: findResults.data.map((alert) => {
-      const status = currentStatusesByRuleId[alert.id];
-      return internalRuleToAPIResponse(alert, status, legacyRuleActions[alert.id]);
+    page: ruleFindResults.page,
+    perPage: ruleFindResults.perPage,
+    total: ruleFindResults.total,
+    data: ruleFindResults.data.map((rule) => {
+      const executionSummary = ruleExecutionSummariesByRuleId[rule.id];
+      return internalRuleToAPIResponse(rule, executionSummary, legacyRuleActions[rule.id]);
     }),
   };
 };
 
 export const transform = (
-  alert: PartialAlert<RuleParams>,
-  ruleStatus?: IRuleStatusSOAttributes,
+  rule: PartialAlert<RuleParams>,
+  ruleExecutionSummary?: RuleExecutionSummary | null,
   isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
-  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
-    return transformAlertToRule(
-      alert,
-      isRuleStatusSavedObjectAttributes(ruleStatus) ? ruleStatus : undefined,
-      legacyRuleActions
-    );
+  if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
+    return transformAlertToRule(rule, ruleExecutionSummary, legacyRuleActions);
   }
 
   return null;

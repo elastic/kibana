@@ -12,7 +12,7 @@ import { Suite, Test } from './fake_mocha_types';
 import {
   Lifecycle,
   LifecyclePhase,
-  FailureMetadata,
+  TestMetadata,
   readConfigFile,
   ProviderCollection,
   readProviderSpec,
@@ -21,17 +21,21 @@ import {
   DockerServersService,
   Config,
   SuiteTracker,
+  EsVersion,
 } from './lib';
+import { createEsClientForFtrConfig } from '../es';
 
 export class FunctionalTestRunner {
   public readonly lifecycle = new Lifecycle();
-  public readonly failureMetadata = new FailureMetadata(this.lifecycle);
+  public readonly testMetadata = new TestMetadata(this.lifecycle);
   private closed = false;
 
+  private readonly esVersion: EsVersion;
   constructor(
     private readonly log: ToolingLog,
     private readonly configFile: string,
-    private readonly configOverrides: any
+    private readonly configOverrides: any,
+    esVersion?: string | EsVersion
   ) {
     for (const [key, value] of Object.entries(this.lifecycle)) {
       if (value instanceof LifecyclePhase) {
@@ -39,6 +43,12 @@ export class FunctionalTestRunner {
         value.after$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
       }
     }
+    this.esVersion =
+      esVersion === undefined
+        ? EsVersion.getDefault()
+        : esVersion instanceof EsVersion
+        ? esVersion
+        : new EsVersion(esVersion);
   }
 
   async run() {
@@ -51,6 +61,9 @@ export class FunctionalTestRunner {
         ...readProviderSpec('PageObject', config.get('pageObjects')),
       ]);
 
+      if (providers.hasService('es')) {
+        await this.validateEsVersion(config);
+      }
       await providers.loadAll();
 
       const customTestRunner = config.get('testRunner');
@@ -61,12 +74,39 @@ export class FunctionalTestRunner {
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);
     });
+  }
+
+  private async validateEsVersion(config: Config) {
+    const es = createEsClientForFtrConfig(config);
+
+    let esInfo;
+    try {
+      esInfo = await es.info();
+    } catch (error) {
+      throw new Error(
+        `attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ${error.stack}`
+      );
+    } finally {
+      try {
+        await es.close();
+      } catch {
+        // noop
+      }
+    }
+
+    if (!this.esVersion.eql(esInfo.version.number)) {
+      throw new Error(
+        `ES reports a version number "${
+          esInfo.version.number
+        }" which doesn't match supplied es version "${this.esVersion.toString()}"`
+      );
+    }
   }
 
   async getTestStats() {
@@ -107,14 +147,14 @@ export class FunctionalTestRunner {
         ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
       ]);
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
 
       const countTests = (suite: Suite): number =>
         suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
 
       return {
         testCount: countTests(mocha.suite),
-        excludedTests: mocha.excludedTests.map((t: Test) => t.fullTitle()),
+        testsExcludedByTag: mocha.testsExcludedByTag.map((t: Test) => t.fullTitle()),
       };
     });
   }
@@ -125,7 +165,12 @@ export class FunctionalTestRunner {
     let runErrorOccurred = false;
 
     try {
-      const config = await readConfigFile(this.log, this.configFile, this.configOverrides);
+      const config = await readConfigFile(
+        this.log,
+        this.esVersion,
+        this.configFile,
+        this.configOverrides
+      );
       this.log.info('Config loaded');
 
       if (
@@ -145,9 +190,10 @@ export class FunctionalTestRunner {
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => this.lifecycle,
         log: () => this.log,
-        failureMetadata: () => this.failureMetadata,
+        testMetadata: () => this.testMetadata,
         config: () => config,
         dockerServers: () => dockerServers,
+        esVersion: () => this.esVersion,
       });
 
       return await handler(config, coreProviders);

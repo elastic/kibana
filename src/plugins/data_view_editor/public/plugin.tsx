@@ -60,9 +60,7 @@ export class DataViewEditorPlugin
        * @returns boolean
        */
       userPermissions: {
-        editDataView: () => {
-          return application.capabilities.management.kibana.indexPatterns;
-        },
+        editDataView: () => dataViews.getCanSaveSync(),
       },
     };
   }

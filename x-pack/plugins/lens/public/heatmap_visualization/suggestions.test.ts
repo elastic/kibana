@@ -79,6 +79,52 @@ describe('heatmap suggestions', () => {
       ).toEqual([]);
     });
 
+    test('when there is more than 1 metric', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'metric-column-1',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric 1',
+                },
+              },
+              {
+                columnId: 'metric-column-2',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric 2',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([]);
+    });
+
     test('when there are 3 or more buckets', () => {
       expect(
         getSuggestions({
@@ -182,6 +228,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -189,7 +237,7 @@ describe('heatmap suggestions', () => {
               type: LEGEND_FUNCTION,
             },
           },
-          title: 'Heatmap',
+          title: 'Heat map',
           hide: true,
           previewIcon: 'empty',
           score: 0,
@@ -233,6 +281,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -240,7 +290,7 @@ describe('heatmap suggestions', () => {
               type: LEGEND_FUNCTION,
             },
           },
-          title: 'Heatmap',
+          title: 'Heat map',
           hide: true,
           previewIcon: 'empty',
           score: 0.3,
@@ -297,6 +347,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -304,7 +356,7 @@ describe('heatmap suggestions', () => {
               type: LEGEND_FUNCTION,
             },
           },
-          title: 'Heatmap',
+          title: 'Heat map',
           // Temp hide all suggestions while heatmap is in beta
           hide: true,
           previewIcon: 'empty',
@@ -370,6 +422,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -377,7 +431,7 @@ describe('heatmap suggestions', () => {
               type: LEGEND_FUNCTION,
             },
           },
-          title: 'Heatmap',
+          title: 'Heat map',
           // Temp hide all suggestions while heatmap is in beta
           hide: true,
           previewIcon: 'empty',

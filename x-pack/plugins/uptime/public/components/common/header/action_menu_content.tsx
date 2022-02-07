@@ -16,7 +16,11 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { useGetUrlParams } from '../../../hooks';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
-import { MONITOR_MANAGEMENT, MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
+import {
+  MONITOR_MANAGEMENT_ROUTE,
+  MONITOR_ROUTE,
+  SETTINGS_ROUTE,
+} from '../../../../common/constants';
 import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
@@ -81,7 +85,7 @@ export function ActionMenuContent({ config }: { config: UptimeConfig }): React.R
           color="text"
           data-test-subj="management-page-link"
           href={history.createHref({
-            pathname: MONITOR_MANAGEMENT,
+            pathname: MONITOR_MANAGEMENT_ROUTE,
           })}
         >
           <FormattedMessage

@@ -60,7 +60,7 @@ export async function setupRemoteCache(repoRootPath: string) {
   try {
     const { stdout } = await spawn(
       'vault',
-      ['read', '-field=readonly-key', 'secret/kibana-issues/dev/bazel-remote-cache'],
+      ['read', '-field=readonly-key', 'secret/ui-team/kibana-bazel-remote-cache'],
       {
         stdio: 'pipe',
       }

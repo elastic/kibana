@@ -6,6 +6,7 @@
  */
 
 import { Page } from '@elastic/synthetics';
+import { DataStream } from '../../common/runtime_types/monitor_management';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
 
@@ -16,11 +17,21 @@ export function monitorManagementPageProvider({
   page: Page;
   kibanaUrl: string;
 }) {
-  const monitorManagement = `${kibanaUrl}/app/uptime/manage-monitors`;
-  const addMonitor = `${kibanaUrl}/app/uptime/add-monitor`;
-
+  const remoteKibanaUrl = process.env.SYNTHETICS_REMOTE_KIBANA_URL;
+  const remoteUsername = process.env.SYNTHETICS_REMOTE_KIBANA_USERNAME;
+  const remotePassword = process.env.SYNTHETICS_REMOTE_KIBANA_PASSWORD;
+  const isRemote = Boolean(process.env.SYNTHETICS_REMOTE_ENABLED);
+  const basePath = isRemote ? remoteKibanaUrl : kibanaUrl;
+  const monitorManagement = `${basePath}/app/uptime/manage-monitors`;
+  const addMonitor = `${basePath}/app/uptime/add-monitor`;
+  const overview = `${basePath}/app/uptime`;
   return {
-    ...loginPageProvider({ page, kibanaUrl }),
+    ...loginPageProvider({
+      page,
+      isRemote,
+      username: isRemote ? remoteUsername : 'elastic',
+      password: isRemote ? remotePassword : 'changeme',
+    }),
     ...utilsPageProvider({ page }),
 
     async navigateToMonitorManagement() {
@@ -35,6 +46,12 @@ export function monitorManagementPageProvider({
       });
     },
 
+    async navigateToOverviewPage() {
+      await page.goto(overview, {
+        waitUntil: 'networkidle',
+      });
+    },
+
     async clickAddMonitor() {
       await page.click('text=Add monitor');
     },
@@ -42,6 +59,10 @@ export function monitorManagementPageProvider({
     async deleteMonitor() {
       await this.clickByTestSubj('monitorManagementDeleteMonitor');
       return await this.findByTestSubj('uptimeDeleteMonitorSuccess');
+    },
+
+    async editMonitor() {
+      await this.clickByTestSubj('monitorManagementEditMonitor');
     },
 
     async findMonitorConfiguration(monitorConfig: Record<string, string>) {
@@ -178,6 +199,35 @@ export function monitorManagementPageProvider({
       await this.fillByTestSubj('syntheticsBrowserZipUrlUsername', username || '');
       await this.fillByTestSubj('syntheticsBrowserZipUrlPassword', password || '');
       await this.fillCodeEditor(params || '');
+    },
+
+    async createMonitor({
+      monitorConfig,
+      monitorType,
+    }: {
+      monitorConfig: Record<string, string | string[]>;
+      monitorType: DataStream;
+    }) {
+      switch (monitorType) {
+        case DataStream.HTTP:
+          // @ts-ignore
+          await this.createBasicHTTPMonitorDetails(monitorConfig);
+          break;
+        case DataStream.TCP:
+          // @ts-ignore
+          await this.createBasicTCPMonitorDetails(monitorConfig);
+          break;
+        case DataStream.ICMP:
+          // @ts-ignore
+          await this.createBasicICMPMonitorDetails(monitorConfig);
+          break;
+        case DataStream.BROWSER:
+          // @ts-ignore
+          await this.createBasicBrowserMonitorDetails(monitorConfig, true);
+          break;
+        default:
+          break;
+      }
     },
   };
 }
