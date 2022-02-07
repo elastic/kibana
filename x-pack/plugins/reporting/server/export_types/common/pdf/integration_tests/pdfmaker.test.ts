@@ -27,9 +27,8 @@ describe('PdfMaker', () => {
       pdf.setTitle('the best PDF in the world');
       pdf.addImage(imageBase64, { title: 'first viz', description: '☃️' });
       pdf.addImage(imageBase64, { title: 'second viz', description: '❄️' });
-      pdf.generate();
 
-      await expect(pdf.getBuffer()).resolves.toBeInstanceOf(Buffer);
+      await expect(pdf.generate()).resolves.toBeInstanceOf(Buffer);
     });
   });
 });
