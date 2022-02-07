@@ -33,7 +33,7 @@ const WarningCheckbox: React.FunctionComponent<{
   warningId: string;
   label: React.ReactNode;
   description: React.ReactNode;
-  documentationUrl: string;
+  documentationUrl?: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }> = ({ isChecked, warningId, label, onChange, description, documentationUrl }) => (
   <>
@@ -47,20 +47,22 @@ const WarningCheckbox: React.FunctionComponent<{
             onChange={onChange}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink href={documentationUrl} target="_blank" external={false}>
-            <EuiIconTip
-              content={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel"
-                  defaultMessage="Documentation"
-                />
-              }
-              position="right"
-              type="help"
-            />
-          </EuiLink>
-        </EuiFlexItem>
+        {documentationUrl !== undefined && (
+          <EuiFlexItem grow={false}>
+            <EuiLink href={documentationUrl} target="_blank" external={false}>
+              <EuiIconTip
+                content={
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel"
+                    defaultMessage="Documentation"
+                  />
+                }
+                position="right"
+                type="help"
+              />
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="xs" />
@@ -155,6 +157,38 @@ export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCh
         </>
       }
       documentationUrl={docLinks.elasticsearch.indexModules}
+    />
+  );
+};
+
+export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
+  WarningCheckboxProps
+> = ({ isChecked, onChange, docLinks, id, meta }) => {
+  return (
+    <WarningCheckbox
+      isChecked={isChecked}
+      onChange={onChange}
+      warningId={id}
+      label={
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.replaceIndexWithAliasWarningTitle"
+          defaultMessage="Replace {indexName} index with {reindexName} index and create {indexName} index alias"
+          values={{
+            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
+            reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
+          }}
+        />
+      }
+      description={
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.replaceIndexWithAliasWarningDetail"
+          defaultMessage="You can search {indexName} as before. To delete the data you'll have to delete {reindexName}"
+          values={{
+            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
+            reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
+          }}
+        />
+      }
     />
   );
 };

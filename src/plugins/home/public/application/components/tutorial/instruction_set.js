@@ -27,7 +27,7 @@ import {
 import * as StatusCheckStates from './status_check_states';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 class InstructionSetUi extends React.Component {
   constructor(props) {

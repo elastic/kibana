@@ -33,6 +33,7 @@ import { verticalProgressBar } from './vertical_progress_bar';
 import { verticalProgressPill } from './vertical_progress_pill';
 import { tagCloud } from './tag_cloud';
 import { metricVis } from './metric_vis';
+import { heatmap } from './heatmap';
 
 import { SetupInitializer } from '../plugin';
 import { ElementFactory } from '../../types';
@@ -63,6 +64,7 @@ const elementSpecs = [
   verticalProgressBar,
   verticalProgressPill,
   tagCloud,
+  heatmap,
 ];
 
 const initializeElementFactories = [metricElementInitializer];

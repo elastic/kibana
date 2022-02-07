@@ -53,6 +53,7 @@ export const mockGlobalState: TimelineState = {
       queryFields: [],
       selectAll: false,
       title: 'Events',
+      timelineType: 'default',
     },
   },
 };

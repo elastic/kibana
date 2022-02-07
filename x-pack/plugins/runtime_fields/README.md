@@ -72,7 +72,7 @@ interface RuntimeField {
   type: RuntimeType; // 'long' | 'boolean' ...
   script: {
     source: string;
-  }
+  };
 }
 ```
 
@@ -103,8 +103,8 @@ interface Context {
 
 The runtime field editor is also exported as static React component that you can import into your components. The editor is exported in 2 flavours:
 
-* As the content of a `<EuiFlyout />` (it contains a flyout header and footer)
-* As a standalone component that you can inline anywhere
+- As the content of a `<EuiFlyout />` (it contains a flyout header and footer)
+- As a standalone component that you can inline anywhere
 
 **Note:** The runtime field editor uses the `<CodeEditor />` that has a dependency on the `Provider` from the `"kibana_react"` plugin. If your app is not already wrapped by this provider you will need to add it at least around the runtime field editor. You can see an example in the ["Using the core.overlays.openFlyout()"](#using-the-coreoverlaysopenflyout) example below.
 
@@ -118,7 +118,7 @@ import { RuntimeFieldEditorFlyoutContent, RuntimeField } from '../runtime_fields
 const MyComponent = () => {
   const { docLinksStart } = useCoreContext(); // access the core start service
   const [isFlyoutVisilbe, setIsFlyoutVisible] = useState(false);
- 
+
   const saveRuntimeField = useCallback((field: RuntimeField) => {
     // Do something with the field
   }, []);
@@ -139,7 +139,7 @@ const MyComponent = () => {
         </EuiFlyout>
       )}
     </>
-  ) 
+  )
 }
 ```
 
@@ -157,11 +157,11 @@ import { RuntimeFieldEditorFlyoutContent, RuntimeField } from '../runtime_fields
 
 const MyComponent = () => {
   // Access the core start service
-  const { docLinksStart, overlays, uiSettings } = useCoreContext();
+  const { docLinksStart, theme, overlays, uiSettings } = useCoreContext();
   const flyoutEditor = useRef<OverlayRef | null>(null);
 
   const { openFlyout } = overlays;
- 
+
   const saveRuntimeField = useCallback((field: RuntimeField) => {
     // Do something with the field
   }, []);
@@ -179,7 +179,8 @@ const MyComponent = () => {
             defaultValue={defaultRuntimeField}
             ctx={/*optional context object -- see section above*/}
           />
-        </KibanaReactContextProvider>
+        </KibanaReactContextProvider>,
+        { theme$: theme.theme$ }
       )
     );
   }, [openFlyout, saveRuntimeField, uiSettings]);
@@ -188,7 +189,7 @@ const MyComponent = () => {
     <>
       <EuiButton onClick={openRuntimeFieldEditor}>Create field</EuiButton>
     </>
-  ) 
+  )
 }
 ```
 
@@ -208,7 +209,7 @@ const MyComponent = () => {
   });
 
   const { submit, isValid: isFormValid, isSubmitted } = runtimeFieldFormState;
- 
+
   const saveRuntimeField = useCallback(async () => {
     const { isValid, data } = await submit();
     if (isValid) {
@@ -233,6 +234,6 @@ const MyComponent = () => {
         Save field
       </EuiButton>
     </>
-  ) 
+  )
 }
 ```

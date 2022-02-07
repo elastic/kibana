@@ -122,7 +122,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
   }
 
   if (group) {
-    const instance = services.alertInstanceFactory('1').replaceState({ instanceStateValue: true });
+    const instance = services.alertFactory.create('1').replaceState({ instanceStateValue: true });
 
     if (subgroup) {
       instance.scheduleActionsWithSubGroup(group, subgroup, {
@@ -177,8 +177,8 @@ function getCumulativeFiringAlertType() {
       const runCount = (state.runCount || 0) + 1;
 
       times(runCount, (index) => {
-        services
-          .alertInstanceFactory(`instance-${index}`)
+        services.alertFactory
+          .create(`instance-${index}`)
           .replaceState({ instanceStateValue: true })
           .scheduleActions(group);
       });
@@ -446,15 +446,54 @@ function getPatternFiringAlertType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          services.alertInstanceFactory(instanceId).scheduleActions('default', {
+          services.alertFactory.create(instanceId).scheduleActions('default', {
             ...EscapableStrings,
             deep: DeepContextVariables,
           });
         } else if (typeof scheduleByPattern === 'string') {
-          services
-            .alertInstanceFactory(instanceId)
+          services.alertFactory
+            .create(instanceId)
             .scheduleActionsWithSubGroup('default', scheduleByPattern);
         }
+      }
+
+      return {
+        patternIndex: patternIndex + 1,
+      };
+    },
+  };
+  return result;
+}
+
+function getPatternSuccessOrFailureAlertType() {
+  const paramsSchema = schema.object({
+    pattern: schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()])),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends AlertTypeState {
+    patternIndex?: number;
+  }
+  const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
+    id: 'test.patternSuccessOrFailure',
+    name: 'Test: Succeeding or failing on a Pattern',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor(alertExecutorOptions) {
+      const { state, params } = alertExecutorOptions;
+      const pattern = params.pattern;
+      if (!Array.isArray(pattern)) throw new Error('pattern is not an array');
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex >= pattern.length) {
+        return { patternIndex };
+      }
+
+      if (!pattern[patternIndex]) {
+        throw new Error('Failed to execute alert type');
       }
 
       return {
@@ -499,7 +538,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         return {};
       }
 
-      services.alertInstanceFactory('alert').scheduleActions('default', {});
+      services.alertFactory.create('alert').scheduleActions('default', {});
 
       // run long if pattern says to
       if (pattern[globalPatternIndex++] === true) {
@@ -685,4 +724,5 @@ export function defineAlertTypes(
   alerting.registerType(getLongRunningPatternRuleType());
   alerting.registerType(getLongRunningPatternRuleType(false));
   alerting.registerType(getCancellableRuleType());
+  alerting.registerType(getPatternSuccessOrFailureAlertType());
 }

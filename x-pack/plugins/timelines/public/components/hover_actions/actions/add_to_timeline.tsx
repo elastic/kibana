@@ -9,10 +9,12 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { DraggableId } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
-
 import { isEmpty } from 'lodash';
+
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { DataProvider, TimelineId } from '../../../../common/types';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import { tGridSelectors } from '../../../types';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
@@ -67,6 +69,12 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     const dispatch = useDispatch();
     const { addSuccess } = useAppToasts();
     const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
+    const getTGrid = tGridSelectors.getTGridByIdSelector();
+
+    const { timelineType } = useDeepEqualSelector((state) => {
+      return getTGrid(state, TimelineId.active);
+    });
+
     const handleStartDragToTimeline = useCallback(() => {
       if (draggableId != null) {
         startDragToTimeline();
@@ -80,7 +88,9 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
                 dataProvider: provider,
               })
             );
-            addSuccess(i18n.ADDED_TO_TIMELINE_MESSAGE(provider.name));
+            addSuccess(
+              i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(provider.name, timelineType === 'default')
+            );
           }
         });
       }
@@ -88,7 +98,15 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       if (onClick != null) {
         onClick();
       }
-    }, [addSuccess, onClick, dataProvider, dispatch, draggableId, startDragToTimeline]);
+    }, [
+      addSuccess,
+      dataProvider,
+      dispatch,
+      draggableId,
+      onClick,
+      startDragToTimeline,
+      timelineType,
+    ]);
 
     useEffect(() => {
       if (!ownFocus) {

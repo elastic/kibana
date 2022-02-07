@@ -119,7 +119,7 @@ export const SearchOrFilter = React.memo<Props>(
                   itemClassName={timelineSelectModeItemsClassName}
                   onChange={handleChange}
                   options={options}
-                  popoverClassName={searchOrFilterPopoverClassName}
+                  popoverProps={{ className: searchOrFilterPopoverClassName }}
                   valueOfSelected={kqlMode}
                 />
               </EuiToolTip>

@@ -10,27 +10,25 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { DatatableColumn, ExpressionAstExpression } from 'src/plugins/expressions';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
+import { ResolvedArgProps, ResolvedColumns } from '../../../public/expression_types/arg';
 
 const { VisDimension: strings } = ArgumentStrings;
 
-interface VisDimensionArgInputProps {
+type VisDimensionArgInputProps = {
   onValueChange: (value: ExpressionAstExpression) => void;
   argValue: ExpressionAstExpression;
-  argId?: string;
-  columns: DatatableColumn[];
   typeInstance: {
     options?: {
       confirm?: string;
     };
   };
-}
+} & ResolvedArgProps<ResolvedColumns>;
 
 const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   argValue,
   typeInstance,
   onValueChange,
-  argId,
-  columns,
+  resolved: { columns },
 }) => {
   const [value, setValue] = useState(argValue);
   const confirm = typeInstance?.options?.confirm;
@@ -75,7 +73,7 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
       <EuiFlexItem>
-        <EuiSelect options={options} value={column} onChange={onChange} />
+        <EuiSelect compressed options={options} value={column} onChange={onChange} />
       </EuiFlexItem>
       {confirm && (
         <EuiFlexItem grow={false}>

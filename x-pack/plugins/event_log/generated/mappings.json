@@ -239,6 +239,9 @@
                 },
                 "task": {
                     "properties": {
+                        "id": {
+                            "type": "keyword"
+                        },
                         "scheduled": {
                             "type": "date"
                         },
@@ -286,6 +289,9 @@
                                         },
                                         "metrics": {
                                             "properties": {
+                                                "number_of_triggered_actions": {
+                                                    "type": "long"
+                                                },
                                                 "total_indexing_duration_ms": {
                                                     "type": "long"
                                                 },
@@ -300,6 +306,19 @@
                                     }
                                 }
                             }
+                        }
+                    }
+                },
+                "reporting": {
+                    "properties": {
+                        "id": {
+                            "type": "keyword"
+                        },
+                        "jobType": {
+                            "type": "keyword"
+                        },
+                        "byteSize": {
+                            "type": "long"
                         }
                     }
                 },

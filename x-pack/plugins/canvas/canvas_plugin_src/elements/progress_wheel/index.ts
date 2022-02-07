@@ -15,7 +15,8 @@ export const progressWheel: ElementFactory = () => ({
   help: 'Displays progress as a portion of a wheel',
   width: 200,
   height: 200,
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | math "mean(percent_uptime)"
 | progress shape="wheel" label={formatnumber 0%} font={font size=24 family="${openSans.value}" color="#000000" align=center}

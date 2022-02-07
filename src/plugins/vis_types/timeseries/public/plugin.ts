@@ -9,7 +9,6 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { VisualizationsSetup } from '../../../visualizations/public';
-import { VisualizePluginSetup } from '../../../visualize/public';
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
 
 import { createMetricsFn } from './metrics_fn';
@@ -30,7 +29,6 @@ import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 export interface MetricsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  visualize: VisualizePluginSetup;
 }
 
 /** @internal */
@@ -47,11 +45,8 @@ export class MetricsPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(
-    core: CoreSetup,
-    { expressions, visualizations, visualize }: MetricsPluginSetupDependencies
-  ) {
-    visualize.visEditorsRegistry.register(TSVB_EDITOR_NAME, EditorController);
+  public setup(core: CoreSetup, { expressions, visualizations }: MetricsPluginSetupDependencies) {
+    visualizations.visEditorsRegistry.register(TSVB_EDITOR_NAME, EditorController);
     expressions.registerFunction(createMetricsFn);
     expressions.registerRenderer(
       getTimeseriesVisRenderer({

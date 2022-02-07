@@ -43,8 +43,10 @@ export interface NavTab {
 export type SecurityNavKey =
   | SecurityPageName.administration
   | SecurityPageName.alerts
+  | SecurityPageName.blocklist
   | SecurityPageName.case
   | SecurityPageName.endpoints
+  | SecurityPageName.policies
   | SecurityPageName.eventFilters
   | SecurityPageName.exceptions
   | SecurityPageName.hostIsolationExceptions

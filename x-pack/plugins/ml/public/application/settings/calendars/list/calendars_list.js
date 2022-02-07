@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
 
-import {
-  EuiConfirmModal,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EUI_MODAL_CONFIRM_BUTTON,
-} from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
-import { NavigationMenu } from '../../../components/navigation_menu';
 import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table';
 import { ml } from '../../../services/ml_api_service';
@@ -143,35 +136,26 @@ export class CalendarsListUI extends Component {
     }
 
     return (
-      <Fragment>
-        <NavigationMenu tabId="settings" />
-        <EuiPage className="mlCalendarList" data-test-subj="mlPageCalendarManagement">
-          <EuiPageBody>
-            <EuiPageContent
-              className="mlCalendarList__content"
-              verticalPosition="center"
-              horizontalPosition="center"
-            >
-              <CalendarsListHeader
-                totalCount={calendars.length}
-                refreshCalendars={this.loadCalendars}
-              />
-              <CalendarsListTable
-                loading={loading}
-                calendarsList={this.addRequiredFieldsToList(calendars)}
-                onDeleteClick={this.showDestroyModal}
-                canCreateCalendar={canCreateCalendar}
-                canDeleteCalendar={canDeleteCalendar}
-                mlNodesAvailable={nodesAvailable}
-                setSelectedCalendarList={this.setSelectedCalendarList}
-                itemsSelected={selectedForDeletion.length > 0}
-              />
-            </EuiPageContent>
-            {destroyModal}
-          </EuiPageBody>
-        </EuiPage>
+      <>
+        <div data-test-subj="mlPageCalendarManagement">
+          <CalendarsListHeader
+            totalCount={calendars.length}
+            refreshCalendars={this.loadCalendars}
+          />
+          <CalendarsListTable
+            loading={loading}
+            calendarsList={this.addRequiredFieldsToList(calendars)}
+            onDeleteClick={this.showDestroyModal}
+            canCreateCalendar={canCreateCalendar}
+            canDeleteCalendar={canDeleteCalendar}
+            mlNodesAvailable={nodesAvailable}
+            setSelectedCalendarList={this.setSelectedCalendarList}
+            itemsSelected={selectedForDeletion.length > 0}
+          />
+          {destroyModal}
+        </div>
         <HelpMenu docLink={helpLink} />
-      </Fragment>
+      </>
     );
   }
 }

@@ -40,7 +40,7 @@ export const defaultDoc = {
   visualizationType: 'testVis',
   state: {
     query: 'kuery',
-    filters: [{ query: { match_phrase: { src: 'test' } } }],
+    filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
     datasourceStates: {
       testDatasource: 'datasource',
     },

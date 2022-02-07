@@ -9,7 +9,12 @@ import { flatten, reverse, uniqBy } from 'lodash/fp';
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { createFilter } from '../common/helpers';
+import {
+  createFilter,
+  getInspectResponse,
+  InspectResponse,
+  generateTablePaginationOptions,
+} from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
   ResultEdges,
@@ -22,7 +27,6 @@ import {
 import { ESTermQuery } from '../../common/typed_json';
 import { queryClient } from '../query_client';
 
-import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ResultsArgs {

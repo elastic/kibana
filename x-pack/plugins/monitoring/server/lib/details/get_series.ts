@@ -16,30 +16,15 @@ import { formatTimestampToDuration } from '../../../common';
 import {
   NORMALIZED_DERIVATIVE_UNIT,
   CALCULATE_DURATION_UNTIL,
+  INDEX_PATTERN_TYPES,
   STANDALONE_CLUSTER_CLUSTER_UUID,
 } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
+import type { Metric } from '../metrics/metrics';
 
 type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } };
-
-interface Metric {
-  app: string;
-  derivative: boolean;
-  mbField?: string;
-  aggs: any;
-  getDateHistogramSubAggs?: Function;
-  dateHistogramSubAggs?: any;
-  metricAgg: string;
-  field: string;
-  timestampField: string;
-  calculation: (
-    b: SeriesBucket,
-    key: string,
-    metric: Metric,
-    defaultSizeInSeconds: number
-  ) => number | null;
-  serialize: () => string;
-}
 
 /**
  * Derivative metrics for the first two agg buckets are unusable. For the first bucket, there
@@ -69,7 +54,12 @@ function getUuid(req: LegacyRequest, metric: Metric) {
   }
 }
 
-function defaultCalculation(bucket: SeriesBucket, key: string) {
+function defaultCalculation(
+  bucket: SeriesBucket,
+  key: string,
+  metric?: Metric,
+  defaultSizeInSeconds?: number
+) {
   const legacyValue: number = get(bucket, key, null);
   const mbValue = bucket.metric_mb_deriv?.normalized_value ?? null;
   let value;
@@ -117,7 +107,7 @@ function createMetricAggs(metric: Metric) {
 
 async function fetchSeries(
   req: LegacyRequest,
-  indexPattern: string,
+  moduleType: INDEX_PATTERN_TYPES,
   metric: Metric,
   metricOptions: any,
   groupBy: string | Record<string, any> | null,
@@ -139,7 +129,7 @@ async function fetchSeries(
   } else {
     dateHistogramSubAggs = {
       metric: {
-        [metric.metricAgg]: {
+        [metric.metricAgg!]: {
           field: metric.field,
         },
       },
@@ -147,7 +137,7 @@ async function fetchSeries(
     };
     if (metric.mbField) {
       Reflect.set(dateHistogramSubAggs, 'metric_mb', {
-        [metric.metricAgg]: {
+        [metric.metricAgg!]: {
           field: metric.mbField,
         },
       });
@@ -175,8 +165,14 @@ async function fetchSeries(
     };
   }
 
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    ccs: req.payload.ccs,
+  });
+
   const params = {
-    index: indexPattern,
+    index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
     body: {
@@ -327,14 +323,15 @@ function handleSeries(
  * TODO: This should be expanded to accept multiple metrics in a single request to allow a single date histogram to be used.
  *
  * @param {Object} req The incoming user's request.
- * @param {String} indexPattern The relevant index pattern (not just for Elasticsearch!).
+ * @param {String} moduleType The relevant module eg: elasticsearch, kibana, logstash.
  * @param {String} metricName The name of the metric being plotted.
  * @param {Array} filters Any filters that should be applied to the query.
  * @return {Promise} The object response containing the {@code timeRange}, {@code metric}, and {@code data}.
  */
+
 export async function getSeries(
   req: LegacyRequest,
-  indexPattern: string,
+  moduleType: INDEX_PATTERN_TYPES,
   metricName: string,
   metricOptions: Record<string, any>,
   filters: Array<Record<string, any>>,
@@ -346,7 +343,7 @@ export async function getSeries(
     timezone,
   }: { min: string | number; max: string | number; bucketSize: number; timezone: string }
 ) {
-  checkParam(indexPattern, 'indexPattern in details/getSeries');
+  checkParam(moduleType, 'moduleType in details/getSeries');
 
   const metric = metrics[metricName];
   if (!metric) {
@@ -354,7 +351,7 @@ export async function getSeries(
   }
   const response = await fetchSeries(
     req,
-    indexPattern,
+    moduleType,
     metric,
     metricOptions,
     groupBy,

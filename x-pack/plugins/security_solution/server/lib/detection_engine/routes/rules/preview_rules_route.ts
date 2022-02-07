@@ -11,7 +11,7 @@ import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { createWarningsAndErrors } from '../../signals/preview/preview_rule_execution_log_client';
+import { createPreviewRuleExecutionLogger } from '../../signals/preview/preview_rule_execution_logger';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
@@ -24,7 +24,7 @@ import {
   previewRulesSchema,
   RulePreviewLogs,
 } from '../../../../../common/detection_engine/schemas/request';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
 import {
   AlertInstanceContext,
@@ -34,7 +34,7 @@ import {
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
-import { AlertInstance } from '../../../../../../alerting/server';
+import { Alert } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
@@ -75,10 +75,7 @@ export const previewRulesRoute = async (
       }
       try {
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution?.getAppClient();
-        if (!siemClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const siemClient = context.securitySolution.getAppClient();
 
         let invocationCount = request.body.invocationCount;
         if (
@@ -115,14 +112,14 @@ export const previewRulesRoute = async (
         const spaceId = siemClient.getSpaceId();
         const previewId = uuid.v4();
         const username = security?.authc.getCurrentUser(request)?.username;
-        const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
+        const previewRuleExecutionLogger = createPreviewRuleExecutionLogger();
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
           ruleDataClient: previewRuleDataClient,
-          ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
+          ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
         });
 
         const runExecutors = async <
@@ -143,12 +140,14 @@ export const previewRulesRoute = async (
           ruleTypeName: string,
           params: TParams,
           shouldWriteAlerts: () => boolean,
-          alertInstanceFactory: (
-            id: string
-          ) => Pick<
-            AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>,
-            'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
-          >
+          alertFactory: {
+            create: (
+              id: string
+            ) => Pick<
+              Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
+              'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+            >;
+          }
         ) => {
           let statePreview = runState as TState;
 
@@ -173,6 +172,7 @@ export const previewRulesRoute = async (
             statePreview = (await executor({
               alertId: previewId,
               createdBy: rule.createdBy,
+              executionId: uuid.v4(),
               name: rule.name,
               params,
               previousStartedAt,
@@ -180,7 +180,7 @@ export const previewRulesRoute = async (
               services: {
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
-                alertInstanceFactory,
+                alertFactory,
                 // Just use es client always for preview
                 search: context.core.elasticsearch.client,
                 savedObjectsClient: context.core.savedObjects.client,
@@ -194,21 +194,21 @@ export const previewRulesRoute = async (
             })) as TState;
 
             // Save and reset error and warning logs
-            const currentLogs = {
-              errors: warningsAndErrorsStore
-                .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-                .map((item) => item.message ?? 'Unkown Error'),
-              warnings: warningsAndErrorsStore
-                .filter(
-                  (item) =>
-                    item.newStatus === RuleExecutionStatus['partial failure'] ||
-                    item.newStatus === RuleExecutionStatus.warning
-                )
-                .map((item) => item.message ?? 'Unknown Warning'),
+            const errors = previewRuleExecutionLogger.logged.statusChanges
+              .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+              .map((item) => item.message ?? 'Unkown Error');
+
+            const warnings = previewRuleExecutionLogger.logged.statusChanges
+              .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
+              .map((item) => item.message ?? 'Unknown Warning');
+
+            logs.push({
+              errors,
+              warnings,
               startedAt: startedAt.toDate().toISOString(),
-            };
-            logs.push(currentLogs);
-            previewRuleExecutionLogClient.clearWarningsAndErrorsStore();
+            });
+
+            previewRuleExecutionLogger.clearLogs();
 
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
@@ -225,7 +225,7 @@ export const previewRulesRoute = async (
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
           case 'threshold':
@@ -238,7 +238,7 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
           case 'threat_match':
@@ -251,7 +251,7 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
           case 'eql':
@@ -262,7 +262,7 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
           case 'machine_learning':
@@ -273,7 +273,7 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
         }

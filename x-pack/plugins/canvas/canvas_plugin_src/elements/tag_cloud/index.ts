@@ -12,10 +12,11 @@ export const tagCloud: ElementFactory = () => ({
   type: 'chart',
   help: 'Tagcloud visualization',
   icon: 'visTagCloud',
-  expression: `filters
-  | demodata
-  | ply by="country" fn={math "count(country)" | as "Count"}
-  | filterrows fn={getCell "Count" | gte 10}
-  | tagcloud metric={visdimension "Count"} bucket={visdimension "country"}
-  | render`,
+  expression: `kibana
+| selectFilter
+| demodata
+| ply by="country" fn={math "count(country)" | as "Count"}
+| filterrows fn={getCell "Count" | gte 10}
+| tagcloud metric={visdimension "Count"} bucket={visdimension "country"}
+| render`,
 });

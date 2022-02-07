@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
-import { euiLightVars as euiVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
 import type { Agent } from '../../../types';
 
