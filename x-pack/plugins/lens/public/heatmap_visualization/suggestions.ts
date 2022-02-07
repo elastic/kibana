@@ -48,6 +48,10 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     return [];
   }
 
+  if (metrics.length > 1) {
+    return [];
+  }
+
   const isSingleBucketDimension = groups.length === 1 && metrics.length === 0;
 
   /**
@@ -72,6 +76,8 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
       isCellLabelVisible: false,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: state?.gridConfig?.isYAxisTitleVisible ?? false,
+      isXAxisTitleVisible: state?.gridConfig?.isXAxisTitleVisible ?? false,
     },
   };
 
@@ -98,7 +104,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     {
       state: newState,
       title: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
-        defaultMessage: 'Heatmap',
+        defaultMessage: 'Heat map',
       }),
       // Temp hide all suggestions while heatmap is in beta
       hide: true || hide,
