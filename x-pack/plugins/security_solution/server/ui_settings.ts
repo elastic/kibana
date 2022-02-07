@@ -229,7 +229,7 @@ export const initUiSettings = (
       }),
       type: 'boolean',
       category: [APP_ID],
-      requiresPageReload: true,
+      requiresPageReload: false,
       schema: schema.boolean(),
     },
     // TODO: Remove this check once the experimental flag is removed
