@@ -10,7 +10,7 @@ import { ValidationFunc } from '../../hook_form_lib';
 import { containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
-import { indexPatterns } from '../../../../../data/public';
+import { validateDataView } from '../../../../../data_views/public';
 
 export const indexPatternField =
   (i18n: any) =>
@@ -35,7 +35,7 @@ export const indexPatternField =
     }
 
     // Validate illegal characters
-    const errors = indexPatterns.validate(value);
+    const errors = validateDataView(value);
 
     if (errors.ILLEGAL_CHARACTERS) {
       return {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { indexPatterns } from '../../../../data/public';
+import { ILLEGAL_CHARACTERS_VISIBLE } from '../../../../data_views/public';
 
-export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, '*'];
+export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...ILLEGAL_CHARACTERS_VISIBLE, '*'];
 
 // Insert the comma into the middle, so it doesn't look as if it has grammatical meaning when
 // these characters are rendered in the UI.
-const insertionIndex = Math.floor(indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.length / 2);
+const insertionIndex = Math.floor(ILLEGAL_CHARACTERS_VISIBLE.length / 2);
 INDEX_ILLEGAL_CHARACTERS_VISIBLE.splice(insertionIndex, 0, ',');
