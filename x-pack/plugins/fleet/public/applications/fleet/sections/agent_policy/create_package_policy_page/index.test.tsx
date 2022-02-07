@@ -38,7 +38,65 @@ jest.mock('../../../hooks', () => {
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     }),
     useGetPackageInfoByKey: jest.fn().mockReturnValue({
-      data: { item: { name: 'nginx', version: '0.3.7', title: 'Nginx' } },
+      data: {
+        item: {
+          name: 'nginx',
+          title: 'Nginx',
+          version: '1.3.0',
+          release: 'ga',
+          description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
+          policy_templates: [
+            {
+              name: 'nginx',
+              title: 'Nginx logs and metrics',
+              description: 'Collect logs and metrics from Nginx instances',
+              inputs: [
+                {
+                  type: 'logfile',
+                  title: 'Collect logs from Nginx instances',
+                  description: 'Collecting Nginx access and error logs',
+                },
+              ],
+              multiple: true,
+            },
+          ],
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'nginx.access',
+              title: 'Nginx access logs',
+              release: 'experimental',
+              ingest_pipeline: 'default',
+              streams: [
+                {
+                  input: 'logfile',
+                  vars: [
+                    {
+                      name: 'paths',
+                      type: 'text',
+                      title: 'Paths',
+                      multi: true,
+                      required: true,
+                      show_user: true,
+                      default: ['/var/log/nginx/access.log*'],
+                    },
+                  ],
+                  template_path: 'stream.yml.hbs',
+                  title: 'Nginx access logs',
+                  description: 'Collect Nginx access logs',
+                  enabled: true,
+                },
+              ],
+              package: 'nginx',
+              path: 'access',
+            },
+          ],
+          latestVersion: '1.3.0',
+          removable: true,
+          keepPoliciesUpToDate: false,
+          status: 'not_installed',
+        },
+      },
       isLoading: false,
     }),
     sendCreatePackagePolicy: jest
@@ -120,15 +178,37 @@ describe('when on the package policy create page', () => {
     const newPackagePolicy = {
       description: '',
       enabled: true,
-      inputs: [],
+      inputs: [
+        {
+          enabled: true,
+          policy_template: 'nginx',
+          streams: [
+            {
+              data_stream: {
+                dataset: 'nginx.access',
+                type: 'logs',
+              },
+              enabled: true,
+              vars: {
+                paths: {
+                  type: 'text',
+                  value: ['/var/log/nginx/access.log*'],
+                },
+              },
+            },
+          ],
+          type: 'logfile',
+        },
+      ],
       name: 'nginx-1',
       namespace: 'default',
       output_id: '',
       package: {
         name: 'nginx',
         title: 'Nginx',
-        version: '0.3.7',
+        version: '1.3.0',
       },
+      policy_id: 'agent-policy-1',
       vars: undefined,
     };
 
@@ -197,39 +277,6 @@ describe('when on the package policy create page', () => {
         });
       });
 
-      test('should creating package policy with existing host', async () => {
-        await act(async () => {
-          fireEvent.click(renderResult.getByText('Existing hosts')!);
-        });
-
-        await act(async () => {
-          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
-        });
-
-        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
-        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
-          ...newPackagePolicy,
-          policy_id: 'agent-policy-1',
-        });
-
-        await waitFor(() => {
-          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
-        });
-      });
-
-      test('should disable submit button on invalid form with empty name', async () => {
-        await act(async () => {
-          fireEvent.change(renderResult.getByLabelText('Integration name'), {
-            target: { value: '' },
-          });
-        });
-
-        renderResult.getByText(
-          'Your integration policy has errors. Please fix them before saving.'
-        );
-        expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
-      });
-
       test('should disable submit button on invalid form with empty agent policy name', async () => {
         await act(async () => {
           fireEvent.change(renderResult.getByLabelText('New agent policy name'), {
@@ -241,6 +288,96 @@ describe('when on the package policy create page', () => {
           'Your integration policy has errors. Please fix them before saving.'
         );
         expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
+      });
+
+      describe('create package policy with exinsting agent policy', () => {
+        beforeEach(async () => {
+          await act(async () => {
+            fireEvent.click(renderResult.getByText('Existing hosts')!);
+          });
+        });
+
+        test('should creating package policy with existing host', async () => {
+          await act(async () => {
+            fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+          });
+
+          expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
+          expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
+            ...newPackagePolicy,
+            policy_id: 'agent-policy-1',
+          });
+
+          await waitFor(() => {
+            expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+          });
+        });
+
+        test('should disable submit button on invalid form with empty name', async () => {
+          await act(async () => {
+            fireEvent.change(renderResult.getByLabelText('Integration name'), {
+              target: { value: '' },
+            });
+          });
+
+          renderResult.getByText(
+            'Your integration policy has errors. Please fix them before saving.'
+          );
+          expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
+        });
+
+        test('should disable submit button on invalid form with empty package var', async () => {
+          await act(async () => {
+            fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+          });
+
+          await act(async () => {
+            fireEvent.change(renderResult.getByDisplayValue('/var/log/nginx/access.log*'), {
+              target: { value: '' },
+            });
+          });
+
+          renderResult.getByText(
+            'Your integration policy has errors. Please fix them before saving.'
+          );
+          expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
+        });
+
+        test('should submit form with changed package var', async () => {
+          await act(async () => {
+            fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+          });
+
+          await act(async () => {
+            fireEvent.change(renderResult.getByDisplayValue('/var/log/nginx/access.log*'), {
+              target: { value: '/path/to/log' },
+            });
+          });
+
+          await act(async () => {
+            fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+          });
+
+          expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
+            ...newPackagePolicy,
+            inputs: [
+              {
+                ...newPackagePolicy.inputs[0],
+                streams: [
+                  {
+                    ...newPackagePolicy.inputs[0].streams[0],
+                    vars: {
+                      paths: {
+                        type: 'text',
+                        value: ['/path/to/log'],
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          });
+        });
       });
     });
   });
