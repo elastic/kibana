@@ -194,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('should display elements on ML Overview page correctly', async () => {
             await ml.testExecution.logTestStep('should load the Overview page');
+            await ml.navigation.navigateToMl();
             await ml.navigation.navigateToOverview();
 
             await ml.testExecution.logTestStep('should display ML Nodes panel');
