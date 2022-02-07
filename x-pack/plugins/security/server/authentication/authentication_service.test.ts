@@ -39,7 +39,7 @@ import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import type { AuditServiceSetup } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditServiceMock } from '../audit/mocks';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
