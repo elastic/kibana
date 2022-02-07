@@ -177,9 +177,6 @@ describe('get()', () => {
           "index": ".alerts-observability.apm.alerts",
           "seq_no_primary_term": true,
         },
-        Object {
-          "meta": true,
-        },
       ]
     `);
   });
