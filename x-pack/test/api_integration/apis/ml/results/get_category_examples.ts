@@ -54,37 +54,38 @@ export default ({ getService }: FtrProviderContext) => {
     query: { bool: { must: [{ match_all: {} }] } },
   };
 
-  const expectedCategoryDefinition = {
-    categoryId: '1',
-    terms: 'GET HTTP/1.1 Mozilla/5.0 X11 Linux x86_64 rv Gecko/20110421 Firefox/6.0a1',
-    regex:
-      '.*?GET.+?HTTP/1\\.1.+?Mozilla/5\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\.0a1.*',
-    examples: [
+  const expectedCategoryExamples1 = {
+    '1': [
+      '130.246.123.197 - - [2018-07-22T03:26:21.326Z] "GET /beats/metricbeat HTTP/1.1" 200 6850 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
+    ],
+  };
+  const expectedCategoryExamples3 = {
+    '1': [
       '130.246.123.197 - - [2018-07-22T03:26:21.326Z] "GET /beats/metricbeat HTTP/1.1" 200 6850 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
       '130.246.123.197 - - [2018-07-22T03:26:21.326Z] "GET /beats/metricbeat_1 HTTP/1.1" 200 6850 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
       '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-      '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
     ],
   };
 
-  async function getCategoryDefinition(
+  async function getCategoryExamples(
     jobId: string,
-    categoryId: string,
+    categoryIds: string[],
+    maxExamples: number,
     user: USER,
     expectedStatusCode: number,
     space?: string
   ) {
     const { body } = await supertest
-      .post(`${space ? `/s/${space}` : ''}/api/ml/results/category_definition`)
+      .post(`${space ? `/s/${space}` : ''}/api/ml/results/category_examples`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ jobId, categoryId })
+      .send({ jobId, categoryIds, maxExamples })
       .expect(expectedStatusCode);
 
     return body;
   }
 
-  describe('get category_definition', function () {
+  describe('get category_examples', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -106,65 +107,94 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
-    it('should produce the correct category for the job', async () => {
-      const resp = await getCategoryDefinition(
+    it('should produce the correct 1 example for the job', async () => {
+      const resp = await getCategoryExamples(
         jobIdSpace1,
-        expectedCategoryDefinition.categoryId,
+        Object.keys(expectedCategoryExamples1),
+        1,
         USER.ML_POWERUSER,
         200,
         idSpace1
       );
 
       expect(resp).to.eql(
-        expectedCategoryDefinition,
-        `response should be ${JSON.stringify(expectedCategoryDefinition)} (got ${JSON.stringify(
+        expectedCategoryExamples1,
+        `response should be ${JSON.stringify(expectedCategoryExamples1)} (got ${JSON.stringify(
           resp
         )})`
       );
     });
 
-    it('should not produce the correct category for the job', async () => {
-      const resp = await getCategoryDefinition(jobIdSpace1, '2', USER.ML_POWERUSER, 200, idSpace1);
+    it('should produce the correct 3 examples for the job', async () => {
+      const resp = await getCategoryExamples(
+        jobIdSpace1,
+        Object.keys(expectedCategoryExamples3),
+        3,
+        USER.ML_POWERUSER,
+        200,
+        idSpace1
+      );
+
+      expect(resp).to.eql(
+        expectedCategoryExamples3,
+        `response should be ${JSON.stringify(expectedCategoryExamples3)} (got ${JSON.stringify(
+          resp
+        )})`
+      );
+    });
+
+    it('should not produce the correct example for the job', async () => {
+      const resp = await getCategoryExamples(
+        jobIdSpace1,
+        ['2'],
+        3,
+        USER.ML_POWERUSER,
+        200,
+        idSpace1
+      );
 
       expect(resp).to.not.eql(
-        expectedCategoryDefinition,
-        `response should not be ${JSON.stringify(expectedCategoryDefinition)} (got ${JSON.stringify(
+        expectedCategoryExamples3,
+        `response should not be ${JSON.stringify(expectedCategoryExamples3)} (got ${JSON.stringify(
           resp
         )})`
       );
     });
 
-    it('should not produce the correct category for the job in the wrong space', async () => {
-      await getCategoryDefinition(
+    it('should not produce the correct examples for the job in the wrong space', async () => {
+      await getCategoryExamples(
         jobIdSpace1,
-        expectedCategoryDefinition.categoryId,
+        Object.keys(expectedCategoryExamples1),
+        3,
         USER.ML_POWERUSER,
         404,
         idSpace2
       );
     });
 
-    it('should produce the correct category for ml viewer user', async () => {
-      const resp = await getCategoryDefinition(
+    it('should produce the correct example for the job for the ml viewer user', async () => {
+      const resp = await getCategoryExamples(
         jobIdSpace1,
-        expectedCategoryDefinition.categoryId,
+        Object.keys(expectedCategoryExamples3),
+        3,
         USER.ML_VIEWER,
         200,
         idSpace1
       );
 
       expect(resp).to.eql(
-        expectedCategoryDefinition,
-        `response should be ${JSON.stringify(expectedCategoryDefinition)} (got ${JSON.stringify(
+        expectedCategoryExamples3,
+        `response should be ${JSON.stringify(expectedCategoryExamples3)} (got ${JSON.stringify(
           resp
         )})`
       );
     });
 
-    it('should not produce the correct category for ml unauthorized user', async () => {
-      await getCategoryDefinition(
+    it('should not produce the correct example for the job for the ml unauthorized user', async () => {
+      await getCategoryExamples(
         jobIdSpace1,
-        expectedCategoryDefinition.categoryId,
+        Object.keys(expectedCategoryExamples3),
+        3,
         USER.ML_UNAUTHORIZED,
         403,
         idSpace1
