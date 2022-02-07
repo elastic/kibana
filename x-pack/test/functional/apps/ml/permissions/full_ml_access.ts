@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.overviewPage.assertDFACreateJobButtonEnabled(true);
 
             await ml.testExecution.logTestStep(
-              'should persist the getting callout state after refresh'
+              'should persist the getting started callout state after refresh'
             );
             await browser.refresh();
             await ml.overviewPage.assertGettingStartedCalloutVisible(false);
