@@ -58,21 +58,21 @@ interface LinksMenuProps {
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
-  const [discoverUrlError, setDiscoverUrlError] = useState<sting | undefined>();
+  const [discoverUrlError, setDiscoverUrlError] = useState<string | undefined>();
 
   const isCategorizationAnomalyRecord = isCategorizationAnomaly(props.anomaly);
 
   const closePopover = props.onItemClick;
 
   const kibana = useMlKibana();
+  const {
+    services: { share, application },
+  } = kibana;
 
   useEffect(() => {
     let unmounted = false;
 
     const generateDiscoverUrl = async () => {
-      const {
-        services: { share },
-      } = kibana;
       const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
       if (!discoverLocator) {
@@ -523,7 +523,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       });
     }
 
-    if (!isCategorizationAnomalyRecord) {
+    if (application.capabilities.discover?.show && !isCategorizationAnomalyRecord) {
       // Add item from the start, but disable it during the URL generation.
       const isLoading = discoverUrlError === undefined && openInDiscoverUrl === undefined;
 
