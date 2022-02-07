@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
 import {
