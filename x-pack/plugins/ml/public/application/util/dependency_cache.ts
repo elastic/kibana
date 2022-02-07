@@ -45,7 +45,7 @@ export interface DependencyCache {
   http: HttpStart | null;
   security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
-  dashboardLocator: DashboardStart['locator'] | null;
+  dashboard: DashboardStart | null;
   maps: MapsStartApi | null;
   dataVisualizer: DataVisualizerPluginStart | null;
   dataViews: DataViewsContract | null;
@@ -68,7 +68,7 @@ const cache: DependencyCache = {
   http: null,
   security: null,
   i18n: null,
-  dashboardLocator: null,
+  dashboard: null,
   maps: null,
   dataVisualizer: null,
   dataViews: null,
@@ -91,7 +91,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.http = deps.http || null;
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
-  cache.dashboardLocator = deps.dashboardLocator || null;
+  cache.dashboard = deps.dashboard || null;
   cache.dataVisualizer = deps.dataVisualizer || null;
   cache.dataViews = deps.dataViews || null;
 }
@@ -214,11 +214,11 @@ export function getI18n() {
   return cache.i18n;
 }
 
-export function getDashboardLocator() {
-  if (cache.dashboardLocator === null) {
-    throw new Error("dashboardLocator hasn't been initialized");
+export function getDashboard() {
+  if (cache.dashboard === null) {
+    throw new Error("dashboard hasn't been initialized");
   }
-  return cache.dashboardLocator;
+  return cache.dashboard;
 }
 
 export function getDataViews() {

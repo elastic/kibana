@@ -22,7 +22,6 @@ interface InvestigateInTimelineActionProps {
   alertIds?: string[];
   buttonType?: 'text' | 'icon';
   onInvestigateInTimelineAlertClick?: () => void;
-  timelineId?: string;
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
@@ -31,13 +30,11 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   ecsRowData,
   buttonType,
   onInvestigateInTimelineAlertClick,
-  timelineId,
 }) => {
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
     ecsRowData,
     alertIds,
     onInvestigateInTimelineAlertClick,
-    timelineId,
   });
 
   return (

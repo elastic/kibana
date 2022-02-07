@@ -15,7 +15,7 @@ import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
 import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
-import { getSavedObjectsClient, getDashboardLocator } from '../../../util/dependency_cache';
+import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
 export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
   // Returns the settings object in the format used by the custom URL editor
@@ -150,11 +150,9 @@ function buildDashboardUrlFromSettings(settings) {
           query = queryFromEntityFieldNames;
         }
 
-        const dashboardLocator = getDashboardLocator();
-        if (!dashboardLocator) {
-          throw new Error('Dashboard locator missing');
-        }
-        return dashboardLocator
+        const dashboard = getDashboard();
+
+        dashboard.locator
           .getUrl({
             dashboardId,
             timeRange: {

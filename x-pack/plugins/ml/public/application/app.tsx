@@ -135,7 +135,7 @@ export const renderApp = (
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
-    dashboardLocator: deps.dashboard.locator,
+    dashboard: deps.dashboard,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,
