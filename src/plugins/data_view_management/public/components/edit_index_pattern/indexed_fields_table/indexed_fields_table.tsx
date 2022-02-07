@@ -37,7 +37,7 @@ interface IndexedFieldsTableState {
 
 const withHooks = (Comp: typeof Component) => {
   return (props: any) => {
-    const { application, dataViews } = useKibana<IndexPatternManagmentContext>().services;
+    const { dataViews } = useKibana<IndexPatternManagmentContext>().services;
     const userEditPermission = dataViews.getCanSaveSync();
 
     return <Comp userEditPermission={userEditPermission} {...props} />;
