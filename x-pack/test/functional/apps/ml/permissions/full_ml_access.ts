@@ -14,6 +14,7 @@ import { USER } from '../../../services/ml/security_common';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const browser = getService('browser');
 
   const testUsers = [
     { user: USER.ML_POWERUSER, discoverAvailable: true },
@@ -83,6 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToOverview();
 
             await ml.testExecution.logTestStep('should display a welcome callout');
+            await ml.overviewPage.assertGettingStartedCalloutVisible(true);
+            await ml.overviewPage.dismissGettingStartedCallout();
 
             await ml.testExecution.logTestStep('should display ML Nodes panel');
             await ml.mlNodesPanel.assertNodeOverviewPanel();
@@ -96,6 +99,12 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.overviewPage.assertDFAEmptyStateExists();
             await ml.overviewPage.assertDFACreateJobButtonExists();
             await ml.overviewPage.assertDFACreateJobButtonEnabled(true);
+
+            await ml.testExecution.logTestStep(
+              'should persist the getting callout state after refresh'
+            );
+            await browser.refresh();
+            await ml.overviewPage.assertGettingStartedCalloutVisible(false);
           });
         });
       }
