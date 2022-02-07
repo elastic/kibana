@@ -197,6 +197,4 @@ include::{kib-repo-dir}/spaces/index.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
 
-include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
-
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
