@@ -17,7 +17,6 @@ import {
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
 import { spyOnUseFetcher } from '../../../lib/helper/spy_use_fetcher';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import * as kibana from '../../../state/kibana_service';
 import { ActionBar } from './action_bar';
 import { mockLocationsState } from '../mocks';
