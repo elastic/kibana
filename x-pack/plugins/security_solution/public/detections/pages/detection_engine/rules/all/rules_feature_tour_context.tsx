@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, FC } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, FC } from 'react';
 
 import { noop } from 'lodash';
 import {
