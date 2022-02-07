@@ -9,7 +9,7 @@
 import { openModal } from './shard_failure_open_modal_button.test.mocks';
 import React from 'react';
 import { themeServiceMock } from 'src/core/public/mocks';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import ShardFailureOpenModalButton from './shard_failure_open_modal_button';
 import { shardFailureRequest } from './__mocks__/shard_failure_request';
 import { shardFailureResponse } from './__mocks__/shard_failure_response';
