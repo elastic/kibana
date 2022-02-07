@@ -12,8 +12,12 @@ export function MlNodesPanelProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertNodesOverviewPanelExists() {
-      await testSubjects.existOrFail('mlNodesOverviewPanel');
+    async assertNodesOverviewPanelExists(expectPanelExits: boolean = true) {
+      if (expectPanelExits) {
+        await testSubjects.existOrFail('mlNodesOverviewPanel');
+      } else {
+        await testSubjects.missingOrFail('mlNodesOverviewPanel');
+      }
     },
 
     async assertNodesListLoaded() {
