@@ -9,6 +9,7 @@ import * as yaml from 'js-yaml';
 import Url, { UrlObject } from 'url';
 
 import { ROLES } from '../../common/test';
+import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 import { hostDetailsUrl, LOGOUT_URL } from '../urls/navigation';
 
@@ -293,7 +294,10 @@ const disableRulesFeatureTour = (window: Window) => {
   const tourConfig = {
     isTourActive: false,
   };
-  window.localStorage.setItem('securitySolution.rulesFeatureTour', JSON.stringify(tourConfig));
+  window.localStorage.setItem(
+    RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY,
+    JSON.stringify(tourConfig)
+  );
 };
 
 /**

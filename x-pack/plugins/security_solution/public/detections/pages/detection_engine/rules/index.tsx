@@ -37,13 +37,9 @@ import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_c
 import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RulesTableContextProvider } from './all/rules_table/rules_table_context';
 import { HeaderPage } from '../../../../common/components/header_page';
-
+import { RulesTableContextProvider } from './all/rules_table/rules_table_context';
 import { RulesFeatureTourContextProvider } from './all/rules_feature_tour_context';
-
-type Func = () => Promise<void>;
-
 import { useInvalidateRules } from '../../../containers/detection_engine/rules/use_find_rules_query';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 
@@ -200,21 +196,11 @@ const RulesPageComponent: React.FC = () => {
                       data-test-subj="open-value-lists-modal-button"
                       iconType="importAction"
                       isDisabled={!canWriteListsIndex || loading}
-                      onClick={() => setShowValueListsModal(true)}
+                      onClick={showValueListModal}
                     >
                       {i18n.UPLOAD_VALUE_LISTS}
                     </EuiButton>
                   </EuiToolTip>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="rules-import-modal-button"
-                    iconType="importAction"
-                    isDisabled={!canWriteListsIndex || loading}
-                    onClick={showValueListModal}
-                  >
-                    {i18n.IMPORT_RULE}
-                  </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton

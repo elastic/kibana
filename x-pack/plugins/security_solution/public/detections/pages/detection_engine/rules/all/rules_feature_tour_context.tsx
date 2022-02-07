@@ -16,6 +16,7 @@ import {
   EuiTourStepProps,
 } from '@elastic/eui';
 import { invariant } from '../../../../../../common/utils/invariant';
+import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 
 import * as i18n from '../translations';
@@ -29,7 +30,6 @@ export interface RulesFeatureTourContextType {
   finishTour: () => void;
 }
 
-const STORAGE_KEY = 'securitySolution.rulesFeatureTour';
 const TOUR_POPOVER_WIDTH = 360;
 
 const featuresTourSteps: EuiStatelessTourStep[] = [
@@ -70,7 +70,10 @@ const RulesFeatureTourContext = createContext<RulesFeatureTourContextType | null
  */
 export const RulesFeatureTourContextProvider: FC = ({ children }) => {
   const { storage } = useKibana().services;
-  const initialStore = useMemo(() => storage.get(STORAGE_KEY) ?? tourConfig, [storage]);
+  const initialStore = useMemo(
+    () => storage.get(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY) ?? tourConfig,
+    [storage]
+  );
 
   const [stepProps, actions, reducerState] = useEuiTour(featuresTourSteps, initialStore);
 
@@ -94,7 +97,7 @@ export const RulesFeatureTourContextProvider: FC = ({ children }) => {
   );
 
   useEffect(() => {
-    storage.set(STORAGE_KEY, reducerState);
+    storage.set(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY, reducerState);
   }, [reducerState, storage]);
 
   const providerValue = useMemo(
