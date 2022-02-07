@@ -56,7 +56,6 @@ describe('TelemetryEventsSender', () => {
             created: 0,
             path: 'X',
             test: 'me',
-            another: 'nope',
             Ext: {
               code_signature: {
                 key1: 'X',
@@ -71,19 +70,15 @@ describe('TelemetryEventsSender', () => {
               header_bytes: 'data in here',
               quarantine_result: true,
               quarantine_message: 'this file is bad',
-              something_else: 'nope',
             },
           },
           host: {
             os: {
               name: 'windows',
             },
-            something_else: 'nope',
           },
           process: {
             name: 'foo.exe',
-            nope: 'nope',
-            executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
           },
@@ -91,14 +86,10 @@ describe('TelemetryEventsSender', () => {
           Target: {
             process: {
               name: 'bar.exe',
-              nope: 'nope',
               thread: {
                 id: 1234,
               },
             },
-          },
-          threat: {
-            ignored_object: true, // this field is not allowlisted
           },
         },
       ];
