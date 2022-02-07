@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fieldValidators } from '../shared_imports';
+import { fieldValidators, ValidationFunc } from '../shared_imports';
 import { INDEX_PATTERN_TYPE } from '../types';
 
 export const schema = {
@@ -27,6 +27,30 @@ export const schema = {
             defaultMessage: 'A name is required.',
           })
         ),
+      },
+      {
+        validator: (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
+          const [{ value, path }] = args;
+
+          const message = i18n.translate('indexPatternEditor.validations.noSingleAstriskPattern', {
+            defaultMessage: "A single '*' is not an allowed index pattern",
+          });
+
+          return value === '*' ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+        },
+
+        /*
+          if (Array.isArray(value)) {
+            return isEmptyArray(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+          }
+        },
+        /*
+        fieldValidators.emptyField(
+          i18n.translate('indexPatternEditor.validations.noSingleAstriskPattern', {
+            defaultMessage: "a single '*' is not an allowed index pattern",
+          })
+        ),
+        */
       },
     ],
   },
