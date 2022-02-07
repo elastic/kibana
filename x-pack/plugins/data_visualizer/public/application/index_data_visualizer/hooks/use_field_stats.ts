@@ -9,7 +9,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { combineLatest, from, Observable, Subject, Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { last, cloneDeep } from 'lodash';
-import { mergeMap, switchMap, tap } from 'rxjs/operators';
+import { mergeMap, switchMap } from 'rxjs/operators';
 import { Comparators } from '@elastic/eui';
 import type {
   DataStatsFetchProgress,
@@ -30,6 +30,7 @@ import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_EXAMPLES_DEFAULT } from '../search_strategy/requests/constants';
 import type { ISearchOptions } from '../../../../../../../src/plugins/data/common';
 import { getFieldsStats } from '../search_strategy/requests/get_fields_stats';
+import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
 
 interface FieldStatsParams {
   metricConfigs: FieldRequestConfig[];
@@ -196,17 +197,14 @@ export function useFieldStatsSearchStrategy(
 
     // First, attempt to fetch field stats in batches of 10
     searchSubscription$.current = from(fieldStatsToFetch)
-      .pipe(
-        mergeMap((observable) => observable, 20),
-        tap(() => {
+      .pipe(mergeMap((observable) => observable, MAX_CONCURRENT_REQUESTS))
+      .subscribe({
+        next: (batchResponse) => {
           setFetchState({
             ...getInitialProgress(),
             error: undefined,
           });
-        })
-      )
-      .subscribe({
-        next: (batchResponse) => {
+
           if (batchResponse) {
             const failedFields: Field[] = [];
             if (Array.isArray(batchResponse)) {
@@ -221,12 +219,12 @@ export function useFieldStatsSearchStrategy(
               failedFields.push(...(batchResponse.fields ?? []));
             }
 
+            setFieldStats(statsMapTmp);
             setFetchState({
               loaded: (statsMapTmp.size / sortedConfigs.length) * 100,
               isRunning: true,
             });
 
-            setFieldStats(statsMapTmp);
             if (failedFields.length > 0) {
               statsMap$.next(statsMapTmp);
               fieldsToRetry$.next(failedFields);
@@ -237,7 +235,7 @@ export function useFieldStatsSearchStrategy(
         complete: onComplete,
       });
 
-    // If any of batches failed, retry each of the failed field at least one time individually
+    // // If any of batches failed, retry each of the failed field at least one time individually
     retries$.current = combineLatest([
       statsMap$,
       fieldsToRetry$.pipe(

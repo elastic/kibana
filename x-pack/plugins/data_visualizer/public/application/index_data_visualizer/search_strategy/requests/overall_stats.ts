@@ -90,6 +90,13 @@ export const checkAggregatableFieldsExistRequest = (
 export interface AggregatableFieldOverallStats extends IKibanaSearchResponse {
   aggregatableFields: string[];
 }
+
+export function isAggregatableFieldOverallStats(
+  arg: unknown
+): arg is AggregatableFieldOverallStats {
+  return isPopulatedObject(arg, ['aggregatableFields']);
+}
+
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: string[],
