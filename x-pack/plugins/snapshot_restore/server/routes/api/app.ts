@@ -49,14 +49,13 @@ export function registerAppRoutes({
 
       try {
         // Get cluster privileges
-        const {
-          body: { has_all_requested: hasAllPrivileges, cluster },
-        } = await clusterClient.asCurrentUser.security.hasPrivileges({
-          body: {
-            // @ts-expect-error @elastic/elasticsearch doesn't declare all possible values in SecurityClusterPrivilege
-            cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
-          },
-        });
+        const { has_all_requested: hasAllPrivileges, cluster } =
+          await clusterClient.asCurrentUser.security.hasPrivileges({
+            body: {
+              // @ts-expect-error @elastic/elasticsearch doesn't declare all possible values in SecurityClusterPrivilege
+              cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
+            },
+          });
 
         // Find missing cluster privileges and set overall app privileges
         privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
