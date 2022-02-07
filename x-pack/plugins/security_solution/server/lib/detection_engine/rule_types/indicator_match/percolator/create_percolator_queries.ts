@@ -54,6 +54,7 @@ export const createPercolatorQueries = async ({
         ruleVersion,
         threatList: indicatorPage.hits.hits,
         threatMapping,
+        threatIndicatorPath,
       })
     );
 

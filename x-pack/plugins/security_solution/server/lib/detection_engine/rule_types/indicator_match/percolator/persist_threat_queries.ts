@@ -30,10 +30,10 @@ export const persistThreatQueries = async ({
   const writeRequests = chunkedThreatQueries.map((queries) =>
     percolatorRuleDataClient.getWriter({ namespace: spaceId }).bulk({
       body: queries.flatMap((query) => {
-        const id = query._name;
-        const indicator = query.indicator;
-        delete query._name;
-        delete query.indicator;
+        const id = query.id;
+        delete query.id;
+        const enrichments = query.enrichments;
+        delete query.enrichments;
         return [
           {
             create: {
@@ -41,7 +41,7 @@ export const persistThreatQueries = async ({
               _id: id,
             },
           },
-          { query, ...indicator?._source, rule_id: ruleId, rule_version: ruleVersion },
+          { query, threat: { enrichments }, rule_id: ruleId, rule_version: ruleVersion },
         ];
       }),
     })

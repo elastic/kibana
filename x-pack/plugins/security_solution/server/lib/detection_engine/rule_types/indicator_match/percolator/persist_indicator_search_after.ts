@@ -30,7 +30,7 @@ export const persistIndicatorSearchAfter = async ({
       {
         create: {
           _index: percolatorRuleDataClient.indexNameWithNamespace(spaceId),
-          _id: searchAfter[0],
+          _id: searchAfter.join('_'),
         },
       },
       {

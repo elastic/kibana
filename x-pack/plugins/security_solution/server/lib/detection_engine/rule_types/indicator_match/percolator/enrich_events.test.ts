@@ -79,39 +79,6 @@ describe('enrichEvents', () => {
     });
   });
 
-  it('createEnrichmentFromPercolatorHit creates the expected enrichment from legacy hit', () => {
-    const actualEnrichment = createEnrichmentFromPercolatorHit(
-      sampleLegacyPercolatorHit,
-      'threatintel.indicator'
-    );
-
-    expect(actualEnrichment).toEqual({
-      matched: {
-        atomic: '61.54.61.255',
-        field: 'destination.ip',
-        id: '123',
-        index: 'threat_index',
-        type: 'indicator_match_rule',
-      },
-      indicator: {
-        reference: 'https://urlhaus.abuse.ch/url/1996847/',
-        first_seen: '2022-01-22T00:45:06.000Z',
-        provider: 'geenensp',
-        ip: '61.54.61.255',
-        type: 'url',
-        url: {
-          path: '/bin.sh',
-          extension: 'sh',
-          original: 'http://61.54.61.255:42050/bin.sh',
-          scheme: 'http',
-          port: 42050,
-          domain: '61.54.61.255',
-          full: 'http://61.54.61.255:42050/bin.sh',
-        },
-      },
-    });
-  });
-
   describe('enrichEvent', () => {
     it('enriches event with no threats', () => {
       const actual = enrichEvent({ ...sampleEventHit }, sampleEnrichment);
@@ -172,27 +139,6 @@ describe('enrichEvents', () => {
         )
       ).toEqual(true);
     });
-  });
-
-  it('mergeDuplicates merges duplicate events enrichments', () => {
-    expect(sampleEventHitWithEnrichment._source.threat.enrichments[0]).toEqual(sampleEnrichment);
-    expect(duplicateEventHitWithEnrichment._source.threat.enrichments[0]).toEqual(
-      sampleEnrichment2
-    );
-    expect(uniqueEventHitWithEnrichment._source.threat.enrichments[0]).toEqual(sampleEnrichment);
-
-    const result = mergeDuplicates([
-      sampleEventHitWithEnrichment,
-      duplicateEventHitWithEnrichment,
-      uniqueEventHitWithEnrichment,
-    ]);
-
-    expect(result.length).toEqual(2);
-    expect(result[0]._source.threat.enrichments.length).toEqual(2);
-    expect(result[1]._source.threat.enrichments.length).toEqual(1);
-    expect(result[0]._source.threat.enrichments[0]).toEqual(sampleEnrichment);
-    expect(result[0]._source.threat.enrichments[1]).toEqual(sampleEnrichment2);
-    expect(result[1]._source.threat.enrichments).toEqual([sampleEnrichment]);
   });
 
   it('enriches events', () => {

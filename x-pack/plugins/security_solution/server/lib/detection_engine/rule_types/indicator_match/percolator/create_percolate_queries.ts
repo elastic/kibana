@@ -10,66 +10,78 @@ import {
   CreatePercolateQueriesOptions,
   PercolatorQuery,
 } from '../../../signals/threat_mapping/types';
-import { encodeThreatMatchNamedQuery } from '../../../signals/threat_mapping/utils';
+import { ENRICHMENT_TYPES } from '../../../../../../common/cti/constants';
 
 export const createPercolateQueries = ({
   ruleId,
   ruleVersion,
   threatMapping: orItemsWithAndSubItems,
   threatList,
+  threatIndicatorPath,
 }: CreatePercolateQueriesOptions): PercolatorQuery[] => {
   const must = [{ match: { rule_id: ruleId } }, { match: { rule_version: ruleVersion } }];
 
-  return threatList.reduce<PercolatorQuery[]>((allQueries, indicator) => {
-    const { fields, ...indicatorWithoutFields } = indicator;
+  console.log(threatList.length);
 
+  return threatList.reduce<PercolatorQuery[]>((allQueries, indicator) => {
     const queriesFromOneIndicator = orItemsWithAndSubItems.reduce<PercolatorQuery[]>(
       (orQueries, orItem) => {
         const andItems = orItem.entries;
 
         const isIndicatorMatchingAndItems = andItems.every((andItem) => {
-          const val = get(andItem.value, fields);
+          const val = get(andItem.value, indicator.fields);
           return val != null && val.length === 1;
         });
 
         if (isIndicatorMatchingAndItems) {
-          const andQuery = andItems.reduce<PercolatorQuery>(
-            (percolatorQuery, andItem) => ({
-              bool: {
-                ...percolatorQuery.bool,
-                should: [
-                  ...percolatorQuery.bool.should,
-                  {
-                    match: {
-                      [andItem.field]: {
-                        query: get(andItem.value, fields)[0],
+          const orQuery = andItems.reduce<PercolatorQuery>(
+            (percolatorQuery, andItem) => {
+              const atomic = get(andItem.value, indicator.fields)[0];
+              return {
+                bool: {
+                  ...percolatorQuery.bool,
+                  should: [
+                    ...percolatorQuery.bool.should,
+                    {
+                      match: {
+                        [andItem.field]: {
+                          query: atomic,
+                        },
                       },
                     },
-                    _name: encodeThreatMatchNamedQuery({
+                  ],
+                  minimum_should_match: percolatorQuery.bool.minimum_should_match + 1,
+                },
+                enrichments: [
+                  ...(percolatorQuery.enrichments ?? []),
+                  {
+                    matched: {
                       id: indicator._id,
                       index: indicator._index,
+                      atomic,
                       field: andItem.field,
-                      value: andItem.value,
-                    }),
+                      type: ENRICHMENT_TYPES.IndicatorMatchRule,
+                    },
+                    indicator: get(threatIndicatorPath, indicator._source),
+                    feed: {
+                      name: indicator._source?.threat?.feed?.name ?? '',
+                    },
                   },
                 ],
-                minimum_should_match: percolatorQuery.bool.minimum_should_match + 1,
-              },
-            }),
+                id: `${percolatorQuery.id}_${andItem.field}_${atomic}`,
+              };
+            },
             {
               bool: {
                 must,
                 should: [],
                 minimum_should_match: 0,
               },
+              enrichments: [],
+              id: `${indicator._id}_${indicator._index}`,
             }
           );
-          orQueries.push({
-            ...andQuery,
-            indicator: {
-              ...indicatorWithoutFields,
-            },
-          });
+          orQueries.push(orQuery);
         }
         return orQueries;
       },

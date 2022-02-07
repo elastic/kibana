@@ -174,8 +174,9 @@ export interface BuildEntriesMappingFilterOptions {
 export interface CreatePercolateQueriesOptions {
   ruleId: string;
   ruleVersion: number;
-  threatList: Array<estypes.SearchHit<EventDoc>>;
+  threatList: Array<estypes.SearchHit<ThreatListDoc>>;
   threatMapping: ThreatMapping;
+  threatIndicatorPath: string;
 }
 
 export interface SplitShouldClausesOptions {
@@ -194,7 +195,8 @@ interface ThreatListConfig {
 
 export interface PercolatorQuery {
   bool: { must: unknown[]; should: unknown[]; minimum_should_match: number };
-  indicator?: IndicatorHit;
+  enrichments?: ThreatEnrichment[];
+  id?: string;
 }
 
 export interface GetNextPageOptions {
@@ -248,7 +250,15 @@ export interface EventDoc {
   fields?: Record<string, string[]>;
 }
 
-export type ThreatListDoc = EventDoc;
+export interface ThreatListDoc extends EventDoc {
+  threat?: {
+    feed?: {
+      name?: string;
+    };
+    [key: string]: unknown;
+  };
+}
+
 export type SourceEventDoc = EventDoc;
 
 /**
@@ -260,7 +270,7 @@ export type IndicatorHit = estypes.SearchHit<ThreatListDoc>;
 
 export interface ThreatEnrichment {
   feed: Record<string, unknown>;
-  indicator: Record<string, unknown>;
+  indicator: unknown;
   matched: { id: string; index: string; field: string; atomic?: string; type: string };
 }
 

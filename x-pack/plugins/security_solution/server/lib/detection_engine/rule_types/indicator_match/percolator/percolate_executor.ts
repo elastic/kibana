@@ -158,14 +158,14 @@ export const percolateExecutor = ({
 
       results.searchAfterTimes = [(end - start).toString()];
 
-      console.log(JSON.stringify(enrichedHits[0]));
+      // console.log(JSON.stringify(enrichedHits[0]));
 
       const alertCandidates = wrapHits(
         enrichedHits.slice(0, tuple.maxSignals),
         buildReasonMessageForThreatMatchAlert
       );
 
-      console.log(JSON.stringify(alertCandidates[0]));
+      // console.log(JSON.stringify(alertCandidates[0]));
 
       const {
         bulkCreateDuration: bulkDuration,
