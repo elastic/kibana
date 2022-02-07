@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed, findTestSubject } from '@kbn/test/jest';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 import { AutoFollowPatternList } from '../../../app/sections/home/auto_follow_pattern_list';
 import { ccrStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
