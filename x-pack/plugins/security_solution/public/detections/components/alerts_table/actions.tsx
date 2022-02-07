@@ -403,7 +403,7 @@ const createThresholdTimeline = async (
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
       method: 'POST',
-      body: JSON.stringify(buildAlertsQuery([ecsData._id] ?? [])),
+      body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });
     const formattedAlertData =
       alertResponse?.hits.hits.reduce<Ecs[]>((acc, { _id, _index, _source = {} }) => {
