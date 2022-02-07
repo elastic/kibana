@@ -106,13 +106,14 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       const message = `queued report ${this.report._id}`;
       const event = deepMerge(
         {
+          message,
           kibana: { reporting: { actionType: ActionType.SCHEDULE_TASK } },
         } as Partial<ScheduledTask>,
         this.eventObj
       );
 
       genericLogger.logEvent(message, event);
-      return { ...event, message };
+      return event;
     }
 
     logExecutionStart(): StartedExecution {
@@ -120,13 +121,14 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       this.completionLogger.startTiming();
       const event = deepMerge(
         {
+          message,
           kibana: { reporting: { actionType: ActionType.EXECUTE_START } },
         } as Partial<StartedExecution>,
         this.eventObj
       );
 
       genericLogger.logEvent(message, event);
-      return { ...event, message };
+      return event;
     }
 
     logExecutionComplete({ byteSize }: ExecutionCompleteMetrics): CompletedExecution {
@@ -134,17 +136,19 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       this.completionLogger.stopTiming();
       const event = deepMerge(
         {
+          message,
           kibana: { reporting: { actionType: ActionType.EXECUTE_COMPLETE, byteSize } },
         } as Partial<CompletedExecution>,
         this.eventObj
       );
       this.completionLogger.logEvent(message, event);
-      return { ...event, message };
+      return event;
     }
 
     logError(error: ErrorAction): ExecuteError {
       const message = `an error occurred`;
       const logErrorMessage = {
+        message,
         kibana: { reporting: { actionType: ActionType.EXECUTE_ERROR } },
         error: {
           message: error.message,
@@ -155,59 +159,63 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       } as Partial<ExecuteError>;
       const event = deepMerge(logErrorMessage, this.eventObj);
       genericLogger.logEvent(message, event);
-      return { ...event, message };
+      return event;
     }
 
     logClaimTask(): ClaimedTask {
       const message = `claimed report ${this.report._id}`;
       const event = deepMerge(
         {
+          message,
           kibana: { reporting: { actionType: ActionType.CLAIM_TASK } },
         } as Partial<ClaimedTask>,
         this.eventObj
       );
 
       genericLogger.logEvent(message, event);
-      return { ...event, message };
+      return event;
     }
 
     logReportFailure(): FailedReport {
       const message = `report ${this.report._id} has failed`;
       const event = deepMerge(
         {
+          message,
           kibana: { reporting: { actionType: ActionType.FAIL_REPORT } },
         } as Partial<FailedReport>,
         this.eventObj
       );
 
       genericLogger.logEvent(message, event);
-      return { ...event, message };
+      return event;
     }
 
     logReportSaved(): SavedReport {
       const message = `saved report ${this.report._id}`;
       const event = deepMerge(
         {
+          message,
           kibana: { reporting: { actionType: ActionType.SAVE_REPORT } },
         } as Partial<SavedReport>,
         this.eventObj
       );
 
       genericLogger.logEvent(message, event);
-      return { ...event, message };
+      return event;
     }
 
     logRetry(): ScheduledRetry {
       const message = `scheduled retry for report ${this.report._id}`;
       const event = deepMerge(
         {
+          message,
           kibana: { reporting: { actionType: ActionType.RETRY } },
         } as Partial<ScheduledRetry>,
         this.eventObj
       );
 
       genericLogger.logEvent(message, event);
-      return { ...event, message };
+      return event;
     }
   };
 }
