@@ -7,7 +7,7 @@
 
 import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicAlertInstance } from './alert_instance';
+import { PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -74,9 +74,9 @@ export interface AlertServices<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > extends Services {
-  alertInstanceFactory: (
-    id: string
-  ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+  alertFactory: {
+    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+  };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   search: IAbortableClusterClient;
