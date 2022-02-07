@@ -106,11 +106,19 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         subGroupId: selectedFilters[idx].subGroupId,
       };
     });
-    props.toggleEditFilterModal?.(false);
-    props?.onMultipleFiltersUpdated?.(mergedFilters);
+
+    const multipleFilters = [...props.multipleFilters];
+
+    const newMultipleFilters = multipleFilters.filter((filter) => filter.groupId !== Number(groupId));
+
+    const filtersNew = newMultipleFilters.concat(mergedFilters);
 
     const filters = [...props.filters, ...buildFilters];
     props?.onFiltersUpdated?.(filters);
+
+    props?.onMultipleFiltersUpdated?.(filtersNew);
+
+    props.toggleEditFilterModal?.(false);
   }
 
   function renderItems() {
@@ -187,7 +195,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           onEditFilterClick={onEditFilterClick}
-          filtersGroupsCount={1}
+          filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
           customLabel={label}
           savedQueryService={props.savedQueryService}
           onFilterSave={props.onFilterSave}
@@ -213,12 +221,12 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
             applySavedQueries={() => props.toggleEditFilterModal?.(false)}
             onCancel={() => props.toggleEditFilterModal?.(false)}
-            filter={props.multipleFilters[0]}
-            multipleFilters={currentEditFilters}
+            filter={currentEditFilters[0]}
+            currentEditFilters={currentEditFilters}
+            multipleFilters={props.multipleFilters}
             indexPatterns={props.indexPatterns!}
             onRemoveFilterGroup={onDeleteFilterGroup}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-            savedQueryManagement={undefined}
             initialAddFilterMode={undefined}
             saveFilters={props.onFilterSave}
           />

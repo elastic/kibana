@@ -393,15 +393,15 @@ export const QueryBarTopRow = React.memo(
     function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
       const lastFilter: any = props.multipleFilters[props.multipleFilters.length - 1];
       const mappedFilters = mapAndFlattenFilters(buildFilters);
-      if (lastFilter !== undefined) lastFilter.relationship = 'AND';
+      // if (lastFilter !== undefined) lastFilter.relationship = 'AND';
       const mergedFilters = mappedFilters.map((filter, idx) => {
         let groupId = selectedFilters[idx].groupId;
         let id = selectedFilters[idx].id;
         // groupId starts from 1; id starts from 0
 
         if (lastFilter !== undefined) {
-          groupId += lastFilter.groupId;
-          id += lastFilter.id + 1;
+        //   groupId += lastFilter.groupId;
+        //   id += lastFilter.id + 1;
         }
 
         return {
@@ -453,6 +453,7 @@ export const QueryBarTopRow = React.memo(
               indexPatterns={props.indexPatterns!}
               onSubmit={onAddMultipleFilters}
               onMultipleFiltersSubmit={onAddMultipleFiltersANDOR}
+              multipleFilters={props.multipleFilters}
               applySavedQueries={applySavedQueries}
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               savedQueryManagement={props.savedQueryManagement}

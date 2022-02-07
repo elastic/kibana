@@ -90,9 +90,9 @@ export function EditFilterModal({
   applySavedQueries,
   filter,
   multipleFilters,
+  currentEditFilters,
   indexPatterns,
   timeRangeForSuggestionsOverride,
-  savedQueryManagement,
   initialAddFilterMode,
   onRemoveFilterGroup,
   saveFilters,
@@ -103,9 +103,9 @@ export function EditFilterModal({
   onCancel: () => void;
   filter: Filter;
   multipleFilters?: Filter[];
+  currentEditFilters?: Filter[];
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
-  savedQueryManagement?: JSX.Element;
   initialAddFilterMode?: string;
   onRemoveFilterGroup: (groupId: string) => void;
   saveFilters: (savedQueryMeta: SavedQueryMeta) => void;
@@ -117,7 +117,7 @@ export function EditFilterModal({
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
-    convertFilterToFilterGroup(multipleFilters)
+    convertFilterToFilterGroup(currentEditFilters)
   );
   const [groupsCount, setGroupsCount] = useState<number>(1);
 
@@ -168,9 +168,7 @@ export function EditFilterModal({
     const index = localFilters.findIndex((f) => f.id === localFilterIndex);
     // Only reset params when the operator type changes
     const params =
-      localFilters[localFilterIndex].operator?.type === operator.type
-        ? localFilters[localFilterIndex].value
-        : undefined;
+      localFilters[index]?.operator?.type === operator.type ? localFilters[index].value : undefined;
     const updatedLocalFilter = { ...localFilters[index], operator, value: params };
     localFilters[index] = updatedLocalFilter;
     setLocalFilters([...localFilters]);
@@ -268,11 +266,11 @@ export function EditFilterModal({
           placeholder={
             selectedField
               ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                  defaultMessage: 'Operator',
-                })
+                defaultMessage: 'Operator',
+              })
               : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                  defaultMessage: 'Waiting',
-                })
+                defaultMessage: 'Waiting',
+              })
           }
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
@@ -438,7 +436,7 @@ export function EditFilterModal({
   };
 
   const onDeliteFilter = () => {
-    onRemoveFilterGroup(multipleFilters[0]?.groupId);
+    onRemoveFilterGroup(filter?.groupId);
   };
 
   const renderGroupedFilters = () => {
@@ -463,8 +461,8 @@ export function EditFilterModal({
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                ? 'kbnQueryBar__filterModalGroups'
-                : '';
+                  ? 'kbnQueryBar__filterModalGroups'
+                  : '';
             return (
               <>
                 <div className={classNames(classes)}>
@@ -485,25 +483,24 @@ export function EditFilterModal({
                               </EuiFlexItem>
                             </EuiFlexGroup>
                           </EuiFlexItem>
-
                           <EuiFlexItem grow={false}>
+
                             <EuiFlexGroup responsive={false} justifyContent="center">
                               {subGroup.length < 2 && (
                                 <EuiFlexItem grow={false}>
                                   <EuiButtonIcon
                                     onClick={() => {
-                                      const updatedLocalFilter = {
-                                        ...localfilter,
-                                        relationship: 'OR',
-                                      };
+                                      const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
                                       const idx = localFilters.findIndex(
-                                        (f) =>
-                                          f.id === localfilter.id && f.groupId === Number(groupId)
+                                        (f) => f.id === localfilter.id && f.groupId === Number(groupId)
                                       );
                                       const subGroupId = (localfilter?.subGroupId ?? 0) + 1;
                                       if (subGroup.length < 2) {
                                         localFilters[idx] = updatedLocalFilter;
                                       }
+                                      const countOfFilterBeforeFilterEdit = multipleFilters.filter(
+                                        (f) => f.groupId === Number(groupId)
+                                      );
                                       setLocalFilters([
                                         ...localFilters,
                                         {
@@ -512,7 +509,7 @@ export function EditFilterModal({
                                           value: undefined,
                                           relationship: undefined,
                                           groupId: localfilter.groupId,
-                                          id: localFilters.length,
+                                          id: Number(multipleFilters.length) - countOfFilterBeforeFilterEdit.length + localFilters.length,
                                           subGroupId,
                                         },
                                       ]);
@@ -533,17 +530,19 @@ export function EditFilterModal({
                                     const subGroupId =
                                       filtersOnGroup.length > 2
                                         ? localfilter?.subGroupId ?? 0
-                                        : (localfilter?.subGroupId ?? 0) + 1;
+                                        : localfilter?.subGroupId ?? 0;
                                     const updatedLocalFilter = {
                                       ...localfilter,
                                       relationship: 'AND',
                                       subGroupId: filtersOnGroup.length > 1 ? subGroupId : 1,
                                     };
                                     const idx = localFilters.findIndex(
-                                      (f) =>
-                                        f.id === localfilter.id && f.groupId === Number(groupId)
+                                      (f) => f.id === localfilter.id && f.groupId === Number(groupId)
                                     );
                                     localFilters[idx] = updatedLocalFilter;
+                                    const countOfFilterBeforeFilterEdit = multipleFilters.filter(
+                                      (f) => f.groupId === Number(groupId)
+                                    );
                                     setLocalFilters([
                                       ...localFilters,
                                       {
@@ -551,14 +550,13 @@ export function EditFilterModal({
                                         operator: undefined,
                                         value: undefined,
                                         relationship: undefined,
-                                        groupId:
-                                          filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
+                                        groupId: filtersOnGroup.length > 1 ? groupsCount : (Number(multipleFilters?.length) - countOfFilterBeforeFilterEdit.length + localFilters.length + 1),
                                         subGroupId,
-                                        id: localFilters.length,
+                                        id: Number(multipleFilters.length) - countOfFilterBeforeFilterEdit.length + localFilters.length,
                                       },
                                     ]);
                                     if (filtersOnGroup.length <= 1) {
-                                      setGroupsCount(groupsCount + 1);
+                                      setGroupsCount((groupsCount) => groupsCount + 1);
                                     }
                                   }}
                                   iconType="plus"
@@ -578,7 +576,7 @@ export function EditFilterModal({
                                         localFilters[currentIdx - 1].relationship = 'AND';
                                       }
                                       const updatedFilters = localFilters.filter(
-                                        (_, idx) => idx !== localfilter.id
+                                        (_, idx) => idx !== currentIdx
                                       );
                                       const filtersOnGroup = updatedFilters.filter(
                                         (f) => f.groupId === Number(groupId)
@@ -688,7 +686,6 @@ export function EditFilterModal({
         <EuiForm className="kbnQueryBar__filterModalForm">
           {addFilterMode === 'quick_form' && renderGroupedFilters()}
           {addFilterMode === 'query_builder' && renderCustomEditor()}
-          {addFilterMode === 'saved_filters' && savedQueryManagement}
         </EuiForm>
       </EuiModalBody>
       <EuiHorizontalRule margin="none" />
