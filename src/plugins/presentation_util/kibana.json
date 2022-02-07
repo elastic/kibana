@@ -10,6 +10,6 @@
   "server": true,
   "ui": true,
   "extraPublicDirs": ["common/lib"],
-  "requiredPlugins": ["savedObjects", "kibanaReact", "embeddable", "expressions", "dataViews"],
+  "requiredPlugins": ["kibanaReact", "embeddable", "expressions", "dataViews"],
   "optionalPlugins": []
 }

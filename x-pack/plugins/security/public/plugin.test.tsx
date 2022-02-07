@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 
 import type { CoreSetup } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import { managementPluginMock } from 'src/plugins/management/public/mocks';
 
 import type { FeaturesPluginStart } from '../../features/public';
@@ -92,7 +92,7 @@ describe('Security Plugin', () => {
 
       expect(
         plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
-          data: {} as DataPublicPluginStart,
+          dataViews: {} as DataViewsPublicPluginStart,
           features: {} as FeaturesPluginStart,
         })
       ).toEqual({
@@ -133,7 +133,7 @@ describe('Security Plugin', () => {
 
       const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
       plugin.start(coreStart, {
-        data: {} as DataPublicPluginStart,
+        dataViews: {} as DataViewsPublicPluginStart,
         features: {} as FeaturesPluginStart,
         management: managementStartMock,
       });
@@ -162,7 +162,7 @@ describe('Security Plugin', () => {
       );
 
       plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
-        data: {} as DataPublicPluginStart,
+        dataViews: {} as DataViewsPublicPluginStart,
         features: {} as FeaturesPluginStart,
       });
 

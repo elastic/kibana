@@ -41,7 +41,7 @@ async function mountApp(basePath: string, pathname: string) {
         fatalErrors,
         getStartServices: jest
           .fn()
-          .mockResolvedValue([coreStart, { data: {}, features: featuresStart }]),
+          .mockResolvedValue([coreStart, { dataViews: {}, features: featuresStart }]),
       })
       .mount({
         basePath,
