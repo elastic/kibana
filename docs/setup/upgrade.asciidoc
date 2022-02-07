@@ -23,7 +23,7 @@ ifeval::[ "{version}" != "{minor-version}.0" ]
 |Upgrade to {version}
 endif::[]
 
-|7.0–7.13
+|7.0–7.16
 |Upgrade to {version}
 
 |6.8
@@ -49,12 +49,9 @@ a|
 . Upgrade to {version}
 |====
 
-[WARNING]
-====
-Upgrading from 6.8 to 7.0 is *not* supported.
-You must upgrade directly to 7.1 or later.
-We recommend upgrading the latest 7.n release. 
-====
+// tag::7.0-upgrade-warning[]
+WARNING: Upgrading from 6.8 to 7.0 is *not* supported. Upgrade directly to {version} instead.
+// end::7.0-upgrade-warning[]
 
 [float]
 [[upgrade-before-you-begin]]
@@ -77,7 +74,7 @@ Before you upgrade {kib}:
 
 To identify the changes you need to make to upgrade, and to enable you to
 perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to
-6.8 before you upgrade to 7.1 or later.
+6.8 before you upgrade to {version}.
 
 For a comprehensive overview of the upgrade process, refer to
 *{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack]*.
@@ -85,10 +82,9 @@ For a comprehensive overview of the upgrade process, refer to
 
 [float]
 [[upgrade-5x-earlier]]
-=== Upgrade from 5.x or earlier
-{es} can read indices created in the previous major version. Before you upgrade
-to 7.x, you must reindex or delete any indices created in 5.x or earlier.
-For more information, refer to
+=== Upgrade from 5.6 or earlier
+{es} {version} can't read indices created in 5.6 or earlier versions. Before you
+upgrade to {version}, you must reindex or delete these indices. For more information, refer to
 {stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack].
 
 When your reindex is complete, follow the <<upgrade-standard, Standard upgrade>>
@@ -96,31 +92,28 @@ instructions.
 
 [float]
 [[upgrade-6x]]
-=== Upgrade from 6.x
+=== Upgrade from 6.7 or earlier
 
-The recommended path is to upgrade to 6.8 before upgrading to 7.n. This makes it
-easier to identify the required changes, and enables you to use the Upgrade
-Assistant to prepare for your upgrade.
+The recommended path is to upgrade to 6.8 before upgrading to {version}. This
+makes it easier to identify the required changes and enables you to use the
+Upgrade Assistant to prepare for your upgrade.
 
-IMPORTANT: Upgrading from 6.8 to 7.0 is not supported. 
-You must upgrade directly to 7.1 or later. 
-We recommend upgrading to the latest 7.n release.
+include::upgrade.asciidoc[tag=7.0-upgrade-warning]
 
 You can import {kib} 6.x saved searches, visualizations, and
-dashboards in 7.x.
+dashboards in {version}.
 
 [float]
 [[upgrade-67]]
 === Upgrade from 6.8
-To help you prepare for your upgrade to 7.n, 6.8 includes an https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html[Upgrade Assistant]
-To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
+To help you prepare for your upgrade to {version}, 6.8 includes an
+https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html[Upgrade
+Assistant]. To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
 
-IMPORTANT: Upgrading from 6.8 to 7.0 is not supported. 
-You must upgrade directly to 7.1 or later. 
-We recommend upgrading to the latest 7.n release.
+include::upgrade.asciidoc[tag=7.0-upgrade-warning]
 
 After you have addressed any issues that were identified by the Upgrade
-Assistant, <<upgrade-standard,upgrade to 7.n>>.
+Assistant, <<upgrade-standard,upgrade to {version}>>.
 
 [float]
 === Known issues
