@@ -38,7 +38,7 @@ import { installTransform } from './install';
 import { getAsset } from './common';
 
 describe('test transform install', () => {
-  let esClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
@@ -104,18 +104,16 @@ describe('test transform install', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
       {
@@ -394,18 +392,16 @@ describe('test transform install', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
       {
