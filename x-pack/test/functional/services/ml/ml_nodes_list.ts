@@ -24,11 +24,11 @@ export function MlNodesPanelProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('mlNodesTable loaded', { timeout: 5000 });
     },
 
-    async assertMlNodesCount(expectedCount: number = 1) {
+    async assertMlNodesCount(minCount: number = 1) {
       const actualCount = parseInt(await testSubjects.getVisibleText('mlTotalNodesCount'), 10);
       expect(actualCount).to.not.be.lessThan(
-        expectedCount,
-        `Total ML nodes count should be at least '${expectedCount}' (got '${actualCount}')`
+        minCount,
+        `Total ML nodes count should be at least '${minCount}' (got '${actualCount}')`
       );
     },
 
