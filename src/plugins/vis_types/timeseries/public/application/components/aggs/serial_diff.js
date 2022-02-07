@@ -28,6 +28,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
+const SERIAL_DIFF_DEFAULT_VALUE = 1;
+
 export const SerialDiffAgg = (props) => {
   const { siblings, fields, indexPattern, model } = props;
 
@@ -110,7 +112,7 @@ export const SerialDiffAgg = (props) => {
           >
             <EuiFieldNumber
               className="tvbAgg__input"
-              placeholder="1"
+              placeholder={SERIAL_DIFF_DEFAULT_VALUE}
               onChange={handleNumberChange('lag', { isOptional: true })}
               value={model.lag}
               min={1}
