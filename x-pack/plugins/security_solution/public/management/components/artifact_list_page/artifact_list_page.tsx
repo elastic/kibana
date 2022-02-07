@@ -17,7 +17,6 @@ import { PaginatedContent } from '../paginated_content';
 
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
-import { MANAGEMENT_DEFAULT_PAGE_SIZE, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { ArtifactListPageLabels, artifactListPageLabels } from './translations';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
@@ -27,7 +26,8 @@ import { NoDataEmptyState } from './components/no_data_empty_state';
 import { ArtifactFlyoutProps, MaybeArtifactFlyout } from './components/artifact_flyout';
 import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
-import { useWithArtifactListData } from './hooks/use_fetch_artifact_data';
+import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
+import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -45,7 +45,7 @@ const AdministrationListPage = styled(_AdministrationListPage)`
 `;
 
 export interface ArtifactListPageProps {
-  apiClient: unknown; // ExceptionsListApiClient;
+  apiClient: ExceptionsListApiClient;
   /** The artifact Component that will be displayed in the Flyout for Create and Edit flows */
   ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
   flyoutSize?: EuiFlyoutSize;

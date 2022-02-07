@@ -7,9 +7,9 @@
 
 import type { QueryObserverResult } from 'react-query';
 import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pagination } from '@elastic/eui';
-import { useFetchHostIsolationExceptionsList } from '../../../pages/host_isolation_exceptions/view/hooks';
+import { useQuery } from 'react-query';
 import type { ServerApiError } from '../../../../common/types';
 import { useIsMounted } from '../../hooks/use_is_mounted';
 import {
@@ -17,6 +17,7 @@ import {
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../common/constants';
 import { useUrlParams } from './use_url_params';
+import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 interface ListPagingUrlParams {
   page?: number;
@@ -48,7 +49,7 @@ type WithArtifactListDataInterface = QueryObserverResult<
 };
 
 export const useWithArtifactListData = (
-  apiClient: unknown /* FIXME:PT type should be: ExceptionsListApiClient */
+  apiClient: ExceptionsListApiClient
 ): WithArtifactListDataInterface => {
   const isMounted = useIsMounted();
 
@@ -56,20 +57,69 @@ export const useWithArtifactListData = (
     urlParams: { page = 1, perPage = MANAGEMENT_DEFAULT_PAGE_SIZE, sortOrder, sortField, filter },
   } = useUrlParams<ListPagingUrlParams>();
 
+  const {
+    data: doesDataExist,
+    isLoading: isLoadingDataExists,
+    refetch: checkIfDataExists,
+  } = useQuery<boolean, ServerApiError>([apiClient], async () => apiClient.hasData(), {
+    enabled: true,
+    keepPreviousData: true,
+  });
+
+  // Convert to useMemo()? that uses data from API request?
   const [uiPagination] = useState<Pagination>({
+    // FIXME:PT calculate this on every data fetch
     totalItemCount: 0,
     pageSize: perPage,
     pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
     pageIndex: page - 1,
   });
 
-  const [isPageInitializing] = useState(false /* true */); // FIXME:PT set to `true` once we have code for it
-  const [doesDataExist] = useState(true /* false */); // FIXME:PT set to `false` once we have code for it
+  const [isPageInitializing, setIsPageInitializing] = useState(true);
+
+  // Once we know if data exists, update the page initializing state
+  useEffect(() => {
+    if (isMounted) {
+      if (isPageInitializing === true && !isLoadingDataExists) {
+        setIsPageInitializing(false);
+      }
+    }
+  }, [isLoadingDataExists, isMounted, isPageInitializing]);
+
+  const listDataRequest = useQuery<FoundExceptionListItemSchema, ServerApiError>(
+    ['list', apiClient, page, perPage, sortField, sortField, filter],
+    async () => apiClient.find({ page, perPage, filter, sortField, sortOrder }),
+    {
+      enabled: true,
+      keepPreviousData: true,
+    }
+  );
+  const { data: listData, isLoading: isLoadingListData, error: listDataError } = listDataRequest;
+
+  // Anytime:
+  //    1. the list data total is 0
+  //    2. and page is 1
+  //    3. and filter is empty
+  //    4. and doesDataExists is currently set to true
+  // check if data exists again
+  useEffect(() => {
+    if (
+      !isLoadingListData &&
+      !listDataError &&
+      listData &&
+      listData.total === 0 &&
+      page === 1 &&
+      !filter &&
+      doesDataExist
+    ) {
+      checkIfDataExists();
+    }
+  }, [checkIfDataExists, doesDataExist, filter, isLoadingListData, listData, listDataError, page]);
 
   return {
     isPageInitializing,
-    doesDataExist,
+    doesDataExist: doesDataExist ?? false,
     uiPagination,
-    ...useFetchHostIsolationExceptionsList({ page, perPage, sortOrder, sortField, filter }),
+    ...listDataRequest,
   };
 };
