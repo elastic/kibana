@@ -265,9 +265,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const viewSeries = async () => {
-    const {
-      services: { share },
-    } = kibana;
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
     const record = props.anomaly.source;
