@@ -1,7 +1,7 @@
 import { ValidConfigOptions } from '../../../options/options';
 import { apiRequestV4 } from './apiRequestV4';
 
-export interface PullRequestResponse {
+interface PullRequestResponse {
   repository: {
     pullRequest: { id: string };
   };

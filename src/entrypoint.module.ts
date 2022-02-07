@@ -47,7 +47,7 @@ export async function getCommits(options: {
   dateUntil?: string;
   dateSince?: string;
 }) {
-  initLogger({ ci: true });
+  initLogger({ ci: true, accessToken: options.accessToken });
 
   const optionsFromGithub = await getOptionsFromGithub(options);
 

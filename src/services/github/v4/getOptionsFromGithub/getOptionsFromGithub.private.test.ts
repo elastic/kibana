@@ -18,6 +18,7 @@ describe('getOptionsFromGithub', () => {
           accessToken: 'foo',
           repoOwner: 'backport-org',
           repoName: 'backport-e2e',
+          cwd: process.cwd(),
         };
 
         await expect(
@@ -35,6 +36,7 @@ describe('getOptionsFromGithub', () => {
           accessToken: devAccessToken,
           repoOwner: 'backport-org',
           repoName: 'backport-e2e',
+          cwd: process.cwd(),
         };
 
         expect(await getOptionsFromGithub(combinedOptions)).toEqual({
@@ -83,6 +85,7 @@ describe('getOptionsFromGithub', () => {
         accessToken: devAccessToken,
         repoOwner: 'sqren',
         repoName: 'backport-e2e',
+        cwd: process.cwd(),
       };
 
       const options = await getOptionsFromGithub(combinedOptions);
@@ -99,6 +102,7 @@ describe('getOptionsFromGithub', () => {
           accessToken: devAccessToken,
           repoOwner: 'backport-org',
           repoName: 'repo-with-non-standard-main-branch',
+          cwd: process.cwd(),
         };
 
         const options = await getOptionsFromGithub(combinedOptions);
@@ -116,6 +120,7 @@ describe('getOptionsFromGithub', () => {
           accessToken: devAccessToken,
           repoOwner: 'backport-org',
           repoName: 'repo-with-branch-named-backport',
+          cwd: process.cwd(),
         };
 
         await expect(async () => {
@@ -134,6 +139,7 @@ describe('getOptionsFromGithub', () => {
         accessToken: devAccessToken,
         repoOwner: 'backport-org',
         repoName: 'repo-with-backportrc-removed',
+        cwd: process.cwd(),
       };
 
       const options = await getOptionsFromGithub(combinedOptions);

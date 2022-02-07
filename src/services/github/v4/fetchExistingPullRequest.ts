@@ -83,7 +83,7 @@ interface ExistingPullRequestResponse {
   };
 }
 
-export function splitHead(prPayload: PullRequestPayload) {
+function splitHead(prPayload: PullRequestPayload) {
   const [repoForkOwner, head] = prPayload.head.split(':');
   return { repoForkOwner, head };
 }

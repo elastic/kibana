@@ -15,7 +15,7 @@ import {
   getLocalConfigFileCommitDate,
   isLocalConfigFileUntracked,
   isLocalConfigFileModified,
-  getRepoOwnerAndNameFromGitRemote,
+  getRepoInfoFromGitRemotes,
 } from './git';
 import { Commit } from './sourceCommit/parseSourceCommit';
 
@@ -67,13 +67,17 @@ describe('getLocalConfigFileCommitDate', () => {
       stderr: '',
     };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await getLocalConfigFileCommitDate()).toEqual(1608142239000);
+    expect(await getLocalConfigFileCommitDate({ cwd: 'foo/bar' })).toEqual(
+      1608142239000
+    );
   });
 
   it('returns empty when file does not exists', async () => {
     const res = { stdout: '', stderr: '' };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await getLocalConfigFileCommitDate()).toEqual(undefined);
+    expect(await getLocalConfigFileCommitDate({ cwd: 'foo/bar' })).toEqual(
+      undefined
+    );
   });
 
   it('handles errors', async () => {
@@ -86,7 +90,9 @@ describe('getLocalConfigFileCommitDate', () => {
       stderr: 'any error',
     };
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
-    expect(await getLocalConfigFileCommitDate()).toEqual(undefined);
+    expect(await getLocalConfigFileCommitDate({ cwd: 'foo/bar' })).toEqual(
+      undefined
+    );
   });
 });
 
@@ -94,13 +100,13 @@ describe('isLocalConfigFileUntracked', () => {
   it('returns "false" if file does not exist', async () => {
     const res = { stdout: '', stderr: '' };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await isLocalConfigFileUntracked()).toEqual(false);
+    expect(await isLocalConfigFileUntracked({ cwd: 'foo/bar' })).toEqual(false);
   });
 
   it('returns "true" if file is untracked', async () => {
     const res = { stdout: '.backportrc.json\n', stderr: '' };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await isLocalConfigFileUntracked()).toEqual(true);
+    expect(await isLocalConfigFileUntracked({ cwd: 'foo/bar' })).toEqual(true);
   });
 
   it('handles errors', async () => {
@@ -113,7 +119,9 @@ describe('isLocalConfigFileUntracked', () => {
       stderr: 'any error',
     };
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
-    expect(await isLocalConfigFileUntracked()).toEqual(undefined);
+    expect(await isLocalConfigFileUntracked({ cwd: 'foo/bar' })).toEqual(
+      undefined
+    );
   });
 });
 
@@ -121,19 +129,19 @@ describe('isLocalConfigFileModified', () => {
   it('returns "false" if file does not exist', async () => {
     const res = { stdout: '', stderr: '' };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await isLocalConfigFileModified()).toEqual(false);
+    expect(await isLocalConfigFileModified({ cwd: 'foo/bar' })).toEqual(false);
   });
 
   it('returns "false" if file is untracked', async () => {
     const res = { stdout: '', stderr: '' };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await isLocalConfigFileModified()).toEqual(false);
+    expect(await isLocalConfigFileModified({ cwd: 'foo/bar' })).toEqual(false);
   });
 
   it('returns "true" if file is staged', async () => {
     const res = { stdout: '.backportrc.json\n', stderr: '' };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await isLocalConfigFileModified()).toEqual(true);
+    expect(await isLocalConfigFileModified({ cwd: 'foo/bar' })).toEqual(true);
   });
 
   it('handles errors', async () => {
@@ -146,28 +154,39 @@ describe('isLocalConfigFileModified', () => {
       stderr: 'any error',
     };
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
-    expect(await isLocalConfigFileModified()).toEqual(undefined);
+    expect(await isLocalConfigFileModified({ cwd: 'foo/bar' })).toEqual(
+      undefined
+    );
   });
 });
 
-describe('getRepoOwnerAndNameFromGitRemote', () => {
-  it('returns first matching pattern', async () => {
+describe('getRepoInfoFromGitRemotes', () => {
+  it('returns repoName and repoOwner for every remote', async () => {
     const res = {
       stdout:
-        'origin\tgit@github.com:elastic/kibana.git (fetch)\norigin\tgit@github.com:elastic/kibana.git (push)\nsqren\tgit@github.com:sqren/kibana.git (fetch)\nsqren\tgit@github.com:sqren/kibana.git (push)\n',
+        'john.doe\tgit@github.com:john.doe/kibana (fetch)\n' +
+        'john.doe\tgit@github.com:john.doe/kibana (push)\n' +
+        'elastic\tgit@github.com:elastic/kibana.git (fetch)\n' +
+        'elastic\tgit@github.com:elastic/kibana.git (push)\n' +
+        'peter\tgit@github.com:peter/kibana (fetch)\n' +
+        'peter\tgit@github.com:peter/kibana (push)\n' +
+        'sqren\tgit@github.com:sqren/kibana.git (fetch)\n' +
+        'sqren\tgit@github.com:sqren/kibana.git (push)\n',
       stderr: '',
     };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await getRepoOwnerAndNameFromGitRemote()).toEqual({
-      repoOwner: 'elastic',
-      repoName: 'kibana',
-    });
+    expect(await getRepoInfoFromGitRemotes({ cwd: 'foo/bar' })).toEqual([
+      { repoName: 'kibana', repoOwner: 'john.doe' },
+      { repoName: 'kibana', repoOwner: 'elastic' },
+      { repoName: 'kibana', repoOwner: 'peter' },
+      { repoName: 'kibana', repoOwner: 'sqren' },
+    ]);
   });
 
   it('returns undefined when no remotes exist', async () => {
     const res = { stdout: '', stderr: '' };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await getRepoOwnerAndNameFromGitRemote()).toEqual(undefined);
+    expect(await getRepoInfoFromGitRemotes({ cwd: 'foo/bar' })).toEqual([]);
   });
 
   it('handles errors', async () => {
@@ -181,7 +200,7 @@ describe('getRepoOwnerAndNameFromGitRemote', () => {
         'fatal: not a git repository (or any of the parent directories): .git\n',
     };
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
-    expect(await getRepoOwnerAndNameFromGitRemote()).toEqual(undefined);
+    expect(await getRepoInfoFromGitRemotes({ cwd: 'foo/bar' })).toEqual([]);
   });
 });
 

@@ -19,7 +19,6 @@ export type Result =
       // only set for failure
       status: 'failure';
       targetBranch: string;
-      errorMessage: string;
       error: HandledError;
     };
 
@@ -56,7 +55,6 @@ export async function runSequentially({
       results.push({
         targetBranch,
         status: 'failure',
-        errorMessage: e.message,
         error: e,
       });
       consoleLog(e.message);

@@ -2,7 +2,6 @@ import dedent from 'dedent';
 import { isString } from 'lodash';
 import safeJsonStringify from 'safe-json-stringify';
 import winston, { format } from 'winston';
-import { ConfigFileOptions } from '../options/ConfigOptions';
 import { redact } from '../utils/redact';
 import { getLogfilePath } from './env';
 
@@ -37,19 +36,26 @@ export const logger = {
   },
 };
 
-let accessToken: string | undefined;
+let _accessToken: string | undefined;
 
-export function updateLogger(options: ConfigFileOptions) {
-  accessToken = options.accessToken;
+export function updateLogger({
+  accessToken,
+  verbose,
+}: {
+  accessToken: string;
+  verbose?: boolean;
+}) {
+  // set access token
+  _accessToken = accessToken;
 
   // set log level
-  winstonInstance.level = options.verbose ? 'debug' : 'info';
+  winstonInstance.level = verbose ? 'debug' : 'info';
 }
 
 function redactAccessToken(str: string) {
   // `redactAccessToken` might be called before access token is set
-  if (accessToken) {
-    return redact(accessToken, str);
+  if (_accessToken) {
+    return redact(_accessToken, str);
   }
 
   return str;
@@ -57,12 +63,18 @@ function redactAccessToken(str: string) {
 
 export function initLogger({
   ci,
+  accessToken,
   logFilePath,
 }: {
   ci?: boolean;
+  accessToken?: string;
   logFilePath?: string;
 }) {
   const fileTransport = getFileTransport({ logFilePath });
+
+  if (accessToken) {
+    _accessToken = accessToken;
+  }
 
   winstonInstance = winston.createLogger({
     transports: ci

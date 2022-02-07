@@ -1,6 +1,5 @@
 import { ConfigFileOptions } from '../ConfigOptions';
 import { OptionsFromCliArgs } from '../cliArgs';
-import { getOptionsFromGit } from './getOptionsFromGit';
 import { getGlobalConfig } from './globalConfig';
 import { getProjectConfig } from './projectConfig';
 
@@ -22,18 +21,14 @@ export async function getOptionsFromConfigFiles({
 
   // ci: cli and module only flag
   const configFile =
-    optionsFromCliArgs.configFile ??
-    optionsFromModule.configFile ??
-    defaultConfigOptions.configFile;
+    optionsFromCliArgs.configFile ?? optionsFromModule.configFile;
 
-  const [gitConfig, projectConfig, globalConfig] = await Promise.all([
-    getOptionsFromGit(),
+  const [projectConfig, globalConfig] = await Promise.all([
     getProjectConfig({ configFile }),
     ci ? undefined : getGlobalConfig(),
   ]);
 
   return {
-    ...gitConfig,
     ...globalConfig,
     ...projectConfig,
     ...optionsFromModule,

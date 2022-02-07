@@ -65,6 +65,10 @@ type Options = Partial<{
 
 export type ConfigFileOptions = Options &
   Partial<{
+    // yargs options
+    help: boolean;
+    version: boolean;
+
     // only allowed in project config. Not allowed in CI and denoted in plural (historicalBranchLabelMappings) in options from Github
     branchLabelMapping: Record<string, string>;
 

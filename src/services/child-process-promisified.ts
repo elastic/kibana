@@ -2,7 +2,10 @@ import child_process from 'child_process';
 import { promisify } from 'util';
 import { logger } from './logger';
 
-export async function exec(cmd: string, options: child_process.ExecOptions) {
+export async function exec(
+  cmd: string,
+  options: child_process.ExecOptions & { cwd: string }
+) {
   const execPromisified = promisify(child_process.exec);
   try {
     const res = await execPromisified(cmd, {

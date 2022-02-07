@@ -1,7 +1,9 @@
 import { Octokit } from '@octokit/rest';
 import { BackportResponse } from '../../../backportRun';
 import { ValidConfigOptions } from '../../../options/options';
+import { PACKAGE_VERSION } from '../../../utils/packageVersion';
 import { redact } from '../../../utils/redact';
+import { HandledError } from '../../HandledError';
 import { logger } from '../../logger';
 import { getFirstLine } from '../commitFormatters';
 
@@ -90,15 +92,25 @@ export function getCommentBody({
     }
   }
 
-  const backportPRCommand = `\n### How to fix\nRe-run the backport manually:\n\`\`\`\n${options.backportBinary} --pr ${pullNumber}\n\`\`\``;
-  const supportSection =
+  const packageVersionSection = `\n<!--- Backport version: ${PACKAGE_VERSION} -->`;
+  const manualBackportCommand = `\n### Manual backport\nTo create the backport manually run:\n\`\`\`\n${options.backportBinary} --pr ${pullNumber}\n\`\`\``;
+  const questionsAndLinkToBackport =
     '\n\n### Questions ?\nPlease refer to the [Backport tool documentation](https://github.com/sqren/backport)';
 
   if (backportResponse.status === 'failure') {
+    if (
+      backportResponse.error instanceof HandledError &&
+      backportResponse.error.errorContext?.code === 'no-branches-exception'
+    ) {
+      return `## ⚪ Backport skipped
+      The pull request was not backported as there were no branches to backport to. If this is a mistake, please apply the desired version labels or run the backport tool manually.
+      ${manualBackportCommand}${questionsAndLinkToBackport}${packageVersionSection}`;
+    }
+
     return `## 💔 Backport failed
 The pull request could not be backported due to the following error:
-\`${backportResponse.errorMessage}\`
-${backportPRCommand}${supportSection}`;
+\`${backportResponse.error.message}\`
+${manualBackportCommand}${questionsAndLinkToBackport}${packageVersionSection}`;
   }
 
   const tableBody = backportResponse.results
@@ -115,30 +127,29 @@ ${backportPRCommand}${supportSection}`;
         ];
       }
 
-      if (
-        result.error.meta?.type === 'merge-conflict-due-to-missing-backports'
-      ) {
-        const conflictingPullRequests =
-          result.error.meta.commitsWithoutBackports.map((c) => {
+      if (result.error.errorContext?.code === 'merge-conflict-exception') {
+        const unmergedBackports =
+          result.error.errorContext.commitsWithoutBackports.map((c) => {
             return ` - [${getFirstLine(c.commit.originalMessage)}](${
               c.commit.pullUrl
             })`;
           });
 
-        const conflictSection = `<br><br>You might need to backport the following PRs to ${
-          result.targetBranch
-        }:<br>${conflictingPullRequests.join('<br>')}`;
+        const unmergedBackportsSection =
+          unmergedBackports.length > 0
+            ? `<br><br>You might need to backport the following PRs to ${
+                result.targetBranch
+              }:<br>${unmergedBackports.join('<br>')}`
+            : '';
 
         return [
           '❌',
           result.targetBranch,
-          `**Backport failed because of merge conflicts**${
-            conflictingPullRequests.length > 0 ? conflictSection : ''
-          }`,
+          `**Backport failed because of merge conflicts**${unmergedBackportsSection}`,
         ];
       }
 
-      return ['❌', result.targetBranch, result.errorMessage];
+      return ['❌', result.targetBranch, result.error.message];
     })
     .map((line) => line.join('|'))
     .join('|\n|');
@@ -170,9 +181,9 @@ ${backportPRCommand}${supportSection}`;
       : '';
 
   const backportPRCommandMessage = !didAllBackportsSucceed
-    ? `${backportPRCommand}`
+    ? `${manualBackportCommand}`
     : '';
 
   return `${header}\n\n${table}
-${backportPRCommandMessage}${autoMergeMessage}${supportSection}`;
+${backportPRCommandMessage}${autoMergeMessage}${questionsAndLinkToBackport}${packageVersionSection}`;
 }

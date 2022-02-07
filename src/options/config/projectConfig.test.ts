@@ -1,5 +1,5 @@
+import fs from 'fs/promises';
 import findUp from 'find-up';
-import * as fs from '../../services/fs-promisified';
 import { SpyHelper } from '../../types/SpyHelper';
 import { getProjectConfig } from './projectConfig';
 

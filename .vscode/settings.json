@@ -4,6 +4,14 @@
     "yarn.lock": true,
     "coverage": true
   },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "CODE_OF_CONDUCT.md": true,
+    "github-schema.graphql": true,
+    "LICENSE.txt": true
+  },
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true

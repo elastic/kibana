@@ -44,14 +44,14 @@ describe('apiRequestV4', () => {
     beforeEach(() => {
       mockGqlRequest({
         name: 'MyQuery',
-        statusCode: 500,
+        statusCode: 200,
         body: {
           errors: [{ message: 'some error' }, { message: 'some other error' }],
         },
       });
     });
 
-    it('should return parsed github error', async () => {
+    it('should return error containing the error messages', async () => {
       return expect(
         apiRequestV4({
           accessToken: 'myAccessToken',
@@ -62,9 +62,7 @@ describe('apiRequestV4', () => {
           },
         })
       ).rejects.toThrowError(
-        new HandledError(
-          `some error, some other error (Unhandled Github v4 error)`
-        )
+        new HandledError(`some error,some other error (Github API v4)`)
       );
     });
   });
@@ -88,7 +86,7 @@ describe('apiRequestV4', () => {
             foo: 'bar',
           },
         })
-      ).rejects.toThrowErrorMatchingSnapshot();
+      ).rejects.toThrowError('Request failed with status code 500');
     });
   });
 });

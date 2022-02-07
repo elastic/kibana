@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { fetchPullRequestId } from './FetchPullRequestId';
 import { apiRequestV4 } from './apiRequestV4';
 
-export interface PullRequestAutoMergeResponse {
+interface Response {
   enablePullRequestAutoMerge: { pullRequest?: { number: number } };
 }
 
@@ -42,7 +42,7 @@ export async function enablePullRequestAutoMerge(
   `;
 
   try {
-    const res = await apiRequestV4<PullRequestAutoMergeResponse>({
+    const res = await apiRequestV4<Response>({
       githubApiBaseUrlV4,
       accessToken,
       query,

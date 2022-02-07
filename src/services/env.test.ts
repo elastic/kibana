@@ -7,11 +7,11 @@ describe('env', () => {
     jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
   });
 
-  test('getGlobalConfigPath', () => {
+  it('getGlobalConfigPath', () => {
     expect(getGlobalConfigPath()).toBe('/myHomeDir/.backport/config.json');
   });
 
-  test('getRepoPath', () => {
+  it('getRepoPath', () => {
     expect(
       getRepoPath({
         repoOwner: 'elastic',

@@ -1,5 +1,5 @@
 // Docs: https://developer.github.com/v3/#client-errors
-export type GithubV3Error = {
+type GithubV3Error = {
   name: string;
   status: number;
   documentation_url: string;

@@ -2,6 +2,7 @@ import { isEmpty } from 'lodash';
 import { HandledError } from '../services/HandledError';
 import { getGlobalConfigPath } from '../services/env';
 import { getOptionsFromGithub } from '../services/github/v4/getOptionsFromGithub/getOptionsFromGithub';
+import { getRepoOwnerAndNameFromGitRemotes } from '../services/github/v4/getRepoOwnerAndNameFromGitRemotes';
 import { updateLogger } from './../services/logger';
 import { ConfigFileOptions, TargetBranchChoiceOrString } from './ConfigOptions';
 import { getOptionsFromCliArgs, OptionsFromCliArgs } from './cliArgs';
@@ -20,7 +21,7 @@ export type ValidConfigOptions = Readonly<
   Awaited<ReturnType<typeof getOptions>>
 >;
 
-export const defaultConfigOptions = {
+const defaultConfigOptions = {
   assignees: [] as Array<string>,
   autoAssign: false,
   autoMerge: false,
@@ -29,10 +30,12 @@ export const defaultConfigOptions = {
   cherrypickRef: true,
   ci: false,
   commitPaths: [] as Array<string>,
+  cwd: process.cwd(),
   dateSince: null,
   dateUntil: null,
   details: false,
   fork: true,
+  gitHostname: 'github.com',
   maxNumber: 10,
   multipleBranches: true,
   multipleCommits: false,
@@ -64,18 +67,17 @@ export async function getOptions(
     optionsFromCliArgs,
   });
 
-  // update logger
-  updateLogger(combined);
+  const { accessToken, repoName, repoOwner } = await getRequiredOptions(
+    combined
+  );
 
-  // required
-  const accessToken = requireAccessToken(combined);
-  const repoName = requireRepoName(combined);
-  const repoOwner = requireRepoOwner(combined);
+  // update logger
+  updateLogger({ accessToken, verbose: combined.verbose });
 
   const optionsFromGithub = await getOptionsFromGithub({
     ...combined,
 
-    // required props
+    // required options
     accessToken,
     repoName,
     repoOwner,
@@ -108,6 +110,47 @@ export async function getOptions(
   return res;
 }
 
+async function getRequiredOptions(combined: CombinedOptions) {
+  const { accessToken, repoName, repoOwner } = combined;
+
+  if (accessToken && repoName && repoOwner) {
+    return { accessToken, repoName, repoOwner };
+  }
+
+  // require access token
+  if (!accessToken) {
+    const globalConfigPath = getGlobalConfigPath();
+    throw new HandledError(
+      `Please update your config file: "${globalConfigPath}".\nIt must contain a valid "accessToken".\n\nRead more: ${GLOBAL_CONFIG_DOCS_LINK}`
+    );
+  }
+
+  // attempt to retrieve repo-owner and repo-name from git remote
+  const gitRemote = await getRepoOwnerAndNameFromGitRemotes({
+    cwd: combined.cwd,
+    githubApiBaseUrlV4: combined.githubApiBaseUrlV4,
+    accessToken,
+  });
+
+  if (!gitRemote.repoName) {
+    throw new HandledError(
+      `Please specify a repo name: "--repo-name kibana".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
+    );
+  }
+
+  if (!gitRemote.repoOwner) {
+    throw new HandledError(
+      `Please specify a repo owner: "--repo-owner elastic".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
+    );
+  }
+
+  return {
+    accessToken,
+    repoName: gitRemote.repoName,
+    repoOwner: gitRemote.repoOwner,
+  };
+}
+
 type CombinedOptions = ReturnType<typeof getCombinedOptions>;
 function getCombinedOptions({
   optionsFromConfigFiles,
@@ -121,35 +164,6 @@ function getCombinedOptions({
     ...optionsFromConfigFiles,
     ...optionsFromCliArgs,
   };
-}
-
-function requireAccessToken(combinedOptions: CombinedOptions): string {
-  // accessToken must be supplied in config or via cli args
-  if (!combinedOptions.accessToken) {
-    const globalConfigPath = getGlobalConfigPath();
-    throw new HandledError(
-      `Please update your config file: "${globalConfigPath}".\nIt must contain a valid "accessToken".\n\nRead more: ${GLOBAL_CONFIG_DOCS_LINK}`
-    );
-  }
-  return combinedOptions.accessToken;
-}
-
-function requireRepoName(combinedOptions: CombinedOptions): string {
-  if (!combinedOptions.repoName) {
-    throw new HandledError(
-      `Please specify a repo name: "--repo-name kibana".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
-    );
-  }
-  return combinedOptions.repoName;
-}
-
-function requireRepoOwner(combinedOptions: CombinedOptions): string {
-  if (!combinedOptions.repoOwner) {
-    throw new HandledError(
-      `Please specify a repo owner: "--repo-owner elastic".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
-    );
-  }
-  return combinedOptions.repoOwner;
 }
 
 function requireTargetBranch(config: {

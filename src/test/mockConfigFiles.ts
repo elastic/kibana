@@ -1,5 +1,5 @@
+import fs from 'fs/promises';
 import { ConfigFileOptions } from '../options/ConfigOptions';
-import * as fs from '../services/fs-promisified';
 
 export function mockConfigFiles({
   projectConfig,

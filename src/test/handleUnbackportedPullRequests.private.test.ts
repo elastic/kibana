@@ -1,6 +1,7 @@
-import { resolve } from 'path';
 import { getCommits, backportRun } from '../entrypoint.module';
+import { exec } from '../services/child-process-promisified';
 import { getDevAccessToken } from './private/getDevAccessToken';
+import { getSandboxPath, resetSandbox } from './sandbox';
 
 jest.unmock('find-up');
 jest.setTimeout(15000);
@@ -28,22 +29,25 @@ describe('Handle unbackported pull requests', () => {
 
   it('shows that backport failed because PR number 8 was not backported', async () => {
     const accessToken = await getDevAccessToken();
+    const sandboxPath = getSandboxPath({ filename: __filename });
+    await resetSandbox(sandboxPath);
+    await exec('git init', { cwd: sandboxPath });
+
     const result = await backportRun({
       accessToken: accessToken,
       repoOwner: 'backport-org',
       repoName: 'repo-with-conflicts',
       pullNumber: 12,
       targetBranches: ['7.x'],
-      dir: resolve(
-        './src/test/tmp-mock-environments/handleUnbackportedPullRequests'
-      ),
+      dir: sandboxPath,
       ci: true,
       publishStatusComment: false,
     });
 
     expect(
       //@ts-expect-error
-      result.results[0].error.meta?.commitsWithoutBackports[0].commit.pullNumber
+      result.results[0].error.errorContext?.commitsWithoutBackports[0].commit
+        .pullNumber
     ).toBe(8);
   });
 });

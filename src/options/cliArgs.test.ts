@@ -35,17 +35,6 @@ describe('getOptionsFromCliArgs', () => {
     });
   });
 
-  // blocked by: https://github.com/yargs/yargs/issues/1853
-  describe('help', () => {
-    // eslint-disable-next-line jest/no-commented-out-tests
-    //   it('should output help', () => {
-    //     const argv = ['--help'];
-    //     expect(() =>
-    //       getOptionsFromCliArgs(argv, { exitOnError: false, returnHelp: true })
-    //     ).toThrow('asa');
-    //   });
-  });
-
   describe('sourcePRLabels', () => {
     it('should handle all variations', () => {
       const argv = [

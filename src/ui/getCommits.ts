@@ -53,19 +53,14 @@ export async function getCommits(options: ValidConfigOptions) {
       );
     }
 
-    if (options.prFilter) {
-      spinner.text = 'Loading pull requests...';
-      const commitChoices = await fetchPullRequestBySearchQuery(options);
-      spinner.stop();
-      return promptForCommits({
-        commitChoices,
-        isMultipleChoice: options.multipleCommits,
-        showDetails: options.details,
-      });
-    }
+    spinner.text = options.prFilter
+      ? 'Loading pull requests...'
+      : `Loading commits from branch "${options.sourceBranch}"...`;
 
-    spinner.text = `Loading commits from branch "${options.sourceBranch}"...`;
-    const commitChoices = await fetchCommitsByAuthor(options);
+    const commitChoices = options.prFilter
+      ? await fetchPullRequestBySearchQuery(options)
+      : await fetchCommitsByAuthor(options);
+
     spinner.stop();
     return promptForCommits({
       commitChoices,

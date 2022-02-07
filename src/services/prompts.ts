@@ -109,12 +109,12 @@ export function getChoicesForCommitPrompt(
     if (showDetails) {
       const message = stripPullNumber(c.originalMessage);
       const prLink = c.pullUrl ? ` ` + getPrLink(c.pullNumber, c.pullUrl) : '';
-      const detailsList = getDetailedPullStatus(c);
-      name = `${position}${message}${prLink}${detailsList}`;
+      const pullStatus = getDetailedPullStatus(c);
+      name = `${position}${message}${prLink}${pullStatus}`;
     } else {
       const message = getFirstLine(c.originalMessage);
-      const pullStates = getSimplePullStatus(c);
-      name = `${position}${message} ${pullStates}`;
+      const pullStatus = getSimplePullStatus(c);
+      name = `${position}${message} ${pullStatus}`;
     }
 
     const short = c.pullNumber

@@ -162,7 +162,7 @@ async function backportViaFilesystem({
  * For a single commit: `backport/7.x/commit-abcdef`
  * For multiple: `backport/7.x/pr-1234_commit-abcdef`
  */
-export function getBackportBranchName(targetBranch: string, commits: Commit[]) {
+function getBackportBranchName(targetBranch: string, commits: Commit[]) {
   const refValues = commits
     .map((commit) =>
       commit.pullNumber
@@ -243,13 +243,10 @@ async function waitForCherrypick(
   });
 
   if (options.ci) {
-    throw new HandledError(
-      `Commit could not be cherrypicked due to conflicts`,
-      {
-        type: 'merge-conflict-due-to-missing-backports',
-        commitsWithoutBackports,
-      }
-    );
+    throw new HandledError({
+      code: 'merge-conflict-exception',
+      commitsWithoutBackports,
+    });
   }
 
   consoleLog(
@@ -274,7 +271,7 @@ async function waitForCherrypick(
 
   if (options.editor) {
     const repoPath = getRepoPath(options);
-    await exec(`${options.editor} ${repoPath}`, {});
+    await exec(`${options.editor} ${repoPath}`, { cwd: options.cwd });
   }
 
   // list files with conflict markers + unstaged files and require user to resolve them
@@ -345,7 +342,7 @@ ${unstagedSection}
 Press ENTER when the conflicts are resolved and files are staged`);
 
   if (!res) {
-    throw new HandledError('Aborted');
+    throw new HandledError({ code: 'abort-exception' });
   }
 
   const MAX_RETRIES = 100;

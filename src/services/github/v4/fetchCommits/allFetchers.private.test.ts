@@ -1,5 +1,6 @@
 import { ValidConfigOptions } from '../../../../options/options';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
+import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import { fetchCommitByPullNumber } from './fetchCommitByPullNumber';
 import { fetchCommitBySha } from './fetchCommitBySha';
 import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
@@ -7,12 +8,11 @@ import { fetchPullRequestBySearchQuery } from './fetchPullRequestBySearchQuery';
 
 describe('allFetchers', () => {
   let devAccessToken: string;
+  let commitByAuthor: Commit;
 
   beforeEach(async () => {
     devAccessToken = await getDevAccessToken();
-  });
 
-  it('all fetchers return the same commit', async () => {
     const commitsByAuthor = await fetchCommitsByAuthor({
       accessToken: devAccessToken,
       author: 'sqren',
@@ -26,10 +26,12 @@ describe('allFetchers', () => {
       commitPaths: [] as Array<string>,
     });
 
-    const commitByAuthor = commitsByAuthor[0];
+    commitByAuthor = commitsByAuthor[0];
+  });
 
+  it('matches commitByAuthor with commitByPullNumber', async () => {
     if (!commitByAuthor.pullNumber) {
-      throw new Error('Missing pullnumber!');
+      throw new Error('Missing pull number!');
     }
 
     const commitByPullNumber = await fetchCommitByPullNumber({
@@ -41,6 +43,10 @@ describe('allFetchers', () => {
       historicalBranchLabelMappings: [],
     });
 
+    expect(commitByAuthor).toEqual(commitByPullNumber);
+  });
+
+  it('matches commitByAuthor with commitBySha', async () => {
     const commitBySha = await fetchCommitBySha({
       repoOwner: 'elastic',
       repoName: 'kibana',
@@ -50,18 +56,26 @@ describe('allFetchers', () => {
       historicalBranchLabelMappings: [],
     });
 
+    expect(commitByAuthor).toEqual(commitBySha);
+  });
+
+  it('matches commitByAuthor with commitBySearchQuery', async () => {
     const commitsBySearchQuery = await fetchPullRequestBySearchQuery({
       repoOwner: 'elastic',
       repoName: 'kibana',
       accessToken: devAccessToken,
       maxNumber: 1,
-      prFilter: `[APM] Add note about synthtrace to APM docs`,
+      prFilter: `created:2021-12-20..2021-12-20`,
       sourceBranch: 'main',
+      author: 'sqren',
     } as ValidConfigOptions);
 
-    expect(commitByAuthor).toEqual(commitByPullNumber);
-    expect(commitByAuthor).toEqual(commitBySha);
-    expect(commitByAuthor).toEqual(commitsBySearchQuery[0]);
+    const commitBySearchQuery = commitsBySearchQuery[0];
+
+    expect(commitByAuthor).toEqual(commitBySearchQuery);
+  });
+
+  it('returns correct response for commitByAuthor', async () => {
     expect(commitByAuthor).toEqual({
       committedDate: '2021-12-20T14:20:16Z',
       expectedTargetPullRequests: [

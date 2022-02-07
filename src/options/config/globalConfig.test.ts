@@ -1,6 +1,6 @@
+import fs from 'fs/promises';
 import os from 'os';
 import makeDir from 'make-dir';
-import * as fs from '../../services/fs-promisified';
 import { getGlobalConfig, createGlobalConfigIfNotExist } from './globalConfig';
 
 describe('config', () => {

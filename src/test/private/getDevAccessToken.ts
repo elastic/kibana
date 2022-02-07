@@ -1,4 +1,5 @@
-import { promises as fs } from 'fs';
+import { readFile } from 'fs/promises';
+import { resolve } from 'path';
 
 // get global config: either from .backport/config.json or via env variables
 export async function getDevAccessToken(): Promise<string> {
@@ -10,14 +11,16 @@ export async function getDevAccessToken(): Promise<string> {
   }
 
   // get credentials from config file
-  const accessTokenFile = './src/test/private/accessToken.txt';
+  const accessTokenFile = resolve('./src/test/private/accessToken.txt');
   try {
-    const accessToken = await fs.readFile(accessTokenFile, {
+    const accessToken = await readFile(accessTokenFile, {
       encoding: 'utf-8',
     });
 
     return accessToken.trim();
   } catch (e) {
-    throw new Error(`Missing accessToken in "${accessTokenFile}"`);
+    throw new Error(
+      `Missing accessToken in "${accessTokenFile}":\n${e.message}`
+    );
   }
 }

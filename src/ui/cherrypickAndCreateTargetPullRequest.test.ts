@@ -108,6 +108,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
          - #1000
          - #2000
 
+        <!--- Backport version: 1.2.3 -->
+
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
             "head": "sqren_authenticated:backport/6.x/pr-1000_pr-2000",
@@ -205,6 +207,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         This is an automatic backport to \`6.x\` of:
          - My original commit message (mySha)
 
+        <!--- Backport version: 1.2.3 -->
+
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
             "head": "sqren_authenticated:backport/6.x/commit-mySha",
@@ -286,6 +290,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 
         This is an automatic backport to \`6.x\` of:
          - My original commit message (mySha)
+
+        <!--- Backport version: 1.2.3 -->
 
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",

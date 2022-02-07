@@ -28,7 +28,7 @@ export function getTargetBranches(
   // automatically backport to specified target branches
   if (options.ci) {
     if (isEmpty(missingTargetBranches)) {
-      throw new HandledError(`There are no branches to backport to. Aborting.`);
+      throw new HandledError({ code: 'no-branches-exception' });
     }
 
     return missingTargetBranches;

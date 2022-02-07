@@ -67,6 +67,7 @@ export function getOptionsFromCliArgs(
     })
 
     .option('configFile', {
+      alias: 'config',
       description: 'Path to project config',
       type: 'string',
     })

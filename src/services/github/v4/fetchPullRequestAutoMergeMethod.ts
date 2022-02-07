@@ -1,7 +1,7 @@
 import { ValidConfigOptions } from '../../../options/options';
 import { apiRequestV4 } from './apiRequestV4';
 
-export interface PullRequestAutoMergeResponse {
+interface Response {
   repository: { pullRequest?: { autoMergeRequest?: { mergeMethod: string } } };
 }
 
@@ -28,7 +28,7 @@ export async function fetchPullRequestAutoMergeMethod(
     }
   `;
 
-  const res = await apiRequestV4<PullRequestAutoMergeResponse>({
+  const res = await apiRequestV4<Response>({
     githubApiBaseUrlV4,
     accessToken,
     query,

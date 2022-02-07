@@ -23,6 +23,8 @@ describe('getPullRequestBody', () => {
       This is an automatic backport to \`7.x\` of:
        - #55
 
+      <!--- Backport version: 1.2.3 -->
+
       ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
     `);
@@ -46,6 +48,8 @@ describe('getPullRequestBody', () => {
 
       This is an automatic backport to \`7.x\` of:
        - My commit message (abcdefgh)
+
+      <!--- Backport version: 1.2.3 -->
 
       ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
@@ -76,6 +80,8 @@ describe('getPullRequestBody', () => {
       This is an automatic backport to \`7.x\` of:
        - #55
        - Another commit message (qwertyui)
+
+      <!--- Backport version: 1.2.3 -->
 
       ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
@@ -136,6 +142,8 @@ describe('getPullRequestBody', () => {
       This is an automatic backport to \`7.x\` of:
        - #55
        - Another commit message (qwertyui)
+
+      <!--- Backport version: 1.2.3 -->
 
       ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)

@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { ConfigFileOptions } from '../../../../options/ConfigOptions';
 import { withConfigMigrations } from '../../../../options/config/readConfigFile';
 import { filterNil } from '../../../../utils/filterEmpty';
@@ -9,11 +8,7 @@ import {
   isLocalConfigFileModified,
 } from '../../../git';
 import { logger } from '../../../logger';
-import {
-  apiRequestV4,
-  handleGithubV4Error,
-  GithubV4Response,
-} from '../apiRequestV4';
+import { apiRequestV4, GithubV4Exception } from '../apiRequestV4';
 import { throwOnInvalidAccessToken } from '../throwOnInvalidAccessToken';
 import { GithubConfigOptionsResponse, query, RemoteConfig } from './query';
 
@@ -22,15 +17,13 @@ import { GithubConfigOptionsResponse, query, RemoteConfig } from './query';
 // - verify the access token
 // - ensure no branch named "backport" exists
 
-export type OptionsFromGithub = Awaited<
-  ReturnType<typeof getOptionsFromGithub>
->;
 export async function getOptionsFromGithub(options: {
   accessToken: string;
   githubApiBaseUrlV4?: string;
   repoName: string;
   repoOwner: string;
   skipRemoteConfig?: boolean;
+  cwd?: string;
 }) {
   const { accessToken, githubApiBaseUrlV4, repoName, repoOwner } = options;
 
@@ -42,20 +35,15 @@ export async function getOptionsFromGithub(options: {
       accessToken,
       query,
       variables: { repoOwner, repoName },
-      handleError: false,
     });
   } catch (e) {
-    const error = e as AxiosError<
-      GithubV4Response<GithubConfigOptionsResponse | null>
-    >;
+    if (!(e instanceof GithubV4Exception)) {
+      throw e;
+    }
 
-    throwOnInvalidAccessToken({
-      error,
-      repoName,
-      repoOwner,
-    });
-
-    res = handleMissingConfigFile(error);
+    const error = e as GithubV4Exception<GithubConfigOptionsResponse>;
+    throwOnInvalidAccessToken({ error, repoName, repoOwner });
+    res = swallowErrorIfConfigFileIsMissing(error);
   }
 
   // get the original repo (not the fork)
@@ -71,6 +59,7 @@ export async function getOptionsFromGithub(options: {
   const historicalRemoteConfigs = repo.defaultBranchRef.target.history.edges;
   const latestRemoteConfig = historicalRemoteConfigs[0]?.remoteConfig;
   const skipRemoteConfig = await getSkipRemoteConfigFile(
+    options.cwd,
     options.skipRemoteConfig,
     latestRemoteConfig
   );
@@ -86,6 +75,7 @@ export async function getOptionsFromGithub(options: {
 }
 
 async function getSkipRemoteConfigFile(
+  cwd?: string,
   skipRemoteConfig?: boolean,
   remoteConfig?: RemoteConfig
 ) {
@@ -101,33 +91,35 @@ async function getSkipRemoteConfigFile(
     return true;
   }
 
-  const [isLocalConfigModified, isLocalConfigUntracked, localCommitDate] =
-    await Promise.all([
-      isLocalConfigFileModified(),
-      isLocalConfigFileUntracked(),
-      getLocalConfigFileCommitDate(),
-    ]);
+  if (cwd) {
+    const [isLocalConfigModified, isLocalConfigUntracked, localCommitDate] =
+      await Promise.all([
+        isLocalConfigFileModified({ cwd }),
+        isLocalConfigFileUntracked({ cwd }),
+        getLocalConfigFileCommitDate({ cwd }),
+      ]);
 
-  if (isLocalConfigUntracked) {
-    logger.info('Skipping remote config: local config is new');
-    return true;
-  }
+    if (isLocalConfigUntracked) {
+      logger.info('Skipping remote config: local config is new');
+      return true;
+    }
 
-  if (isLocalConfigModified) {
-    logger.info('Skipping remote config: local config is modified');
-    return true;
-  }
+    if (isLocalConfigModified) {
+      logger.info('Skipping remote config: local config is modified');
+      return true;
+    }
 
-  if (
-    localCommitDate &&
-    localCommitDate > Date.parse(remoteConfig.committedDate)
-  ) {
-    logger.info(
-      `Skipping remote config: local config is newer: ${new Date(
-        localCommitDate
-      ).toISOString()} > ${remoteConfig.committedDate}`
-    );
-    return true;
+    if (
+      localCommitDate &&
+      localCommitDate > Date.parse(remoteConfig.committedDate)
+    ) {
+      logger.info(
+        `Skipping remote config: local config is newer: ${new Date(
+          localCommitDate
+        ).toISOString()} > ${remoteConfig.committedDate}`
+      );
+      return true;
+    }
   }
 
   return false;
@@ -174,20 +166,21 @@ function getHistoricalBranchLabelMappings(
     })
     .filter(filterNil);
 }
-function handleMissingConfigFile(
-  error: AxiosError<GithubV4Response<GithubConfigOptionsResponse | null>>
-) {
-  const wasMissingConfigError = error.response?.data.errors?.some(
+function swallowErrorIfConfigFileIsMissing<T>(error: GithubV4Exception<T>) {
+  const { data, errors } = error.axiosResponse.data;
+
+  const wasMissingConfigError = errors?.some(
     (error) =>
       error.type === 'NOT_FOUND' &&
       error.path.join('.') ===
         'repository.defaultBranchRef.target.history.edges.0.remoteConfig.file'
   );
 
-  // Throw unexpected error
-  if (!wasMissingConfigError || !error.response?.data.data) {
-    throw handleGithubV4Error(error);
+  // swallow error if it's just the config file that's missing
+  if (wasMissingConfigError && data != null) {
+    return data;
   }
 
-  return error.response.data.data;
+  // Throw unexpected error
+  throw error;
 }

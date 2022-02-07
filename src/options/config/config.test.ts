@@ -1,4 +1,4 @@
-import * as fs from '../../services/fs-promisified';
+import fs from 'fs/promises';
 import { mockConfigFiles } from '../../test/mockConfigFiles';
 import { getOptionsFromConfigFiles } from './config';
 

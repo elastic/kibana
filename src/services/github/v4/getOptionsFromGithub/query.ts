@@ -3,7 +3,7 @@ export type RemoteConfig = {
   file: { object: { text: string } };
 };
 
-export type Repository = {
+type Repository = {
   ref: { name: string } | null;
   defaultBranchRef: {
     name: string;

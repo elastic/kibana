@@ -1,6 +1,7 @@
 import { Octokit } from '@octokit/rest';
 import ora from 'ora';
 import { ValidConfigOptions } from '../../../options/options';
+import { PACKAGE_VERSION } from '../../../utils/packageVersion';
 import { HandledError } from '../../HandledError';
 import { logger } from '../../logger';
 import { Commit } from '../../sourceCommit/parseSourceCommit';
@@ -103,6 +104,8 @@ export function getPullRequestBody({
 
 This is an automatic backport to \`${targetBranch}\` of:
 ${commitMessages}
+
+<!--- Backport version: ${PACKAGE_VERSION} -->
 
 ### Questions ?
 Please refer to the [Backport tool documentation](https://github.com/sqren/backport)`;

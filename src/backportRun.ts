@@ -1,12 +1,13 @@
 import chalk from 'chalk';
 import ora from 'ora';
-import yargs from 'yargs';
+import yargsParser from 'yargs-parser';
 import { ConfigFileOptions } from './options/ConfigOptions';
 import { getOptions, ValidConfigOptions } from './options/options';
 import { runSequentially, Result } from './runSequentially';
 import { HandledError } from './services/HandledError';
 import { getLogfilePath } from './services/env';
 import { createStatusComment } from './services/github/v3/createStatusComment';
+import { GithubV4Exception } from './services/github/v4/apiRequestV4';
 import { consoleLog, initLogger, logger } from './services/logger';
 import { Commit } from './services/sourceCommit/parseSourceCommit';
 import { getCommits } from './ui/getCommits';
@@ -21,21 +22,25 @@ export type BackportResponse =
   | {
       status: 'failure';
       commits: Commit[];
-      errorMessage: string;
-      error: Error;
+      error: Error | HandledError;
     };
 
 export async function backportRun(
   processArgs: string[],
   optionsFromModule: ConfigFileOptions = {}
 ): Promise<BackportResponse> {
-  const argv = yargs(processArgs).argv as any as ConfigFileOptions;
+  const argv = yargsParser(processArgs) as ConfigFileOptions;
   const ci = argv.ci ?? optionsFromModule.ci;
   const logFilePath = argv.logFilePath ?? optionsFromModule.logFilePath;
 
   initLogger({ ci, logFilePath });
 
-  const spinner = ora().start('Initializing...');
+  // don't show spinner for yargs commands that exit the process without stopping the spinner first
+  const spinner = ora();
+
+  if (!argv.help && !argv.version) {
+    spinner.start('Initializing...');
+  }
 
   let options: ValidConfigOptions | null = null;
   let commits: Commit[] = [];
@@ -63,7 +68,6 @@ export async function backportRun(
     const backportResponse: BackportResponse = {
       status: 'failure',
       commits,
-      errorMessage: e.message,
       error: e,
     };
 
@@ -74,7 +78,7 @@ export async function backportRun(
       });
     }
 
-    if (e instanceof HandledError) {
+    if (e instanceof HandledError || e instanceof GithubV4Exception) {
       consoleLog(e.message);
     } else if (e instanceof Error) {
       // output
@@ -94,7 +98,7 @@ export async function backportRun(
         )
       );
 
-      // log file
+      // write to log
       logger.info('Unknown error:', e);
     }
 

@@ -1,7 +1,7 @@
+import { chmod, writeFile } from 'fs/promises';
 import makeDir from 'make-dir';
 import { HandledError } from '../../services/HandledError';
 import { getBackportDirPath, getGlobalConfigPath } from '../../services/env';
-import { chmod, writeFile } from '../../services/fs-promisified';
 import { ConfigFileOptions } from '../ConfigOptions';
 import { readConfigFile } from './readConfigFile';
 

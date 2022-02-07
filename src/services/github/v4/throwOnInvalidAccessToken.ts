@@ -1,20 +1,18 @@
-import { AxiosError } from 'axios';
 import { isEmpty, difference } from 'lodash';
+import { maybe } from '../../../utils/maybe';
 import { HandledError } from '../../HandledError';
 import { getGlobalConfigPath } from '../../env';
-import { GithubV4Response } from './apiRequestV4';
+import { GithubV4Exception } from './apiRequestV4';
 
 export function throwOnInvalidAccessToken({
+  error,
   repoOwner,
   repoName,
-  error,
 }: {
+  error: GithubV4Exception<unknown>;
   repoOwner: string;
   repoName: string;
-  error: AxiosError<GithubV4Response<unknown>>;
 }) {
-  type MaybeString = string | undefined;
-
   function getSSOAuthUrl(ssoHeader?: string) {
     const matches = ssoHeader?.match(/url=(.*)/);
     if (matches) {
@@ -22,19 +20,19 @@ export function throwOnInvalidAccessToken({
     }
   }
 
-  const statusCode = error.response?.status;
+  const statusCode = error.axiosResponse.status;
 
   switch (statusCode) {
     case 200: {
-      const repoNotFound = error.response?.data.errors?.some(
+      const repoNotFound = error.axiosResponse.data.errors?.some(
         (error) =>
           error.type === 'NOT_FOUND' && error.path.join('.') === 'repository'
       );
 
-      const grantedScopes = error.response?.headers['x-oauth-scopes'] || '';
+      const grantedScopes = error.axiosResponse.headers['x-oauth-scopes'] || '';
       const requiredScopes =
-        error.response?.headers['x-accepted-oauth-scopes'] || '';
-      const ssoHeader: MaybeString = error.response?.headers['x-github-sso'];
+        error.axiosResponse.headers['x-accepted-oauth-scopes'] || '';
+      const ssoHeader = maybe(error.axiosResponse.headers['x-github-sso']);
 
       if (repoNotFound) {
         const hasRequiredScopes = isEmpty(
@@ -54,7 +52,7 @@ export function throwOnInvalidAccessToken({
         );
       }
 
-      const repoAccessForbidden = error.response?.data.errors?.some(
+      const repoAccessForbidden = error.axiosResponse.data.errors?.some(
         (error) => error.type === 'FORBIDDEN'
       );
 
@@ -73,5 +71,8 @@ export function throwOnInvalidAccessToken({
       throw new HandledError(
         `Please check your access token and make sure it is valid.\nConfig: ${getGlobalConfigPath()}`
       );
+
+    default:
+      return undefined;
   }
 }

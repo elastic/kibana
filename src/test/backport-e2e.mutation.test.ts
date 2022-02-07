@@ -1,8 +1,6 @@
 /* eslint-disable jest/no-commented-out-tests */
 import os from 'os';
-import { resolve } from 'path';
 import { Octokit } from '@octokit/rest';
-import del = require('del');
 import nock from 'nock';
 import { getOptions } from '../options/options';
 import { runSequentially } from '../runSequentially';
@@ -10,17 +8,11 @@ import { getCommits } from '../ui/getCommits';
 import { mockConfigFiles } from './mockConfigFiles';
 import { listenForCallsToNockScope } from './nockHelpers';
 import { getDevAccessToken } from './private/getDevAccessToken';
+import { getSandboxPath, resetSandbox } from './sandbox';
 
-jest.unmock('make-dir');
-jest.unmock('del');
 jest.setTimeout(10000);
 
-const E2E_TEST_DATA_PATH = resolve(
-  './src/test/tmp-mock-environments/backport-e2e'
-);
-const HOMEDIR_PATH = resolve(
-  './src/test/tmp-mock-environments/backport-e2e/homedir'
-);
+const sandboxPath = getSandboxPath({ filename: __filename });
 const REPO_OWNER = 'backport-org';
 const REPO_NAME = 'integration-test';
 const BRANCH_WITH_ONE_COMMIT = 'backport/7.x/commit-5bf29b7d';
@@ -28,13 +20,15 @@ const BRANCH_WITH_TWO_COMMITS = 'backport/7.x/commit-5bf29b7d_pr-2';
 const AUTHOR = 'sqren';
 
 describe('backport e2e', () => {
+  let accessToken: string;
   afterAll(() => {
     nock.cleanAll();
   });
 
-  beforeAll(() => {
+  beforeAll(async () => {
     // set alternative homedir
-    jest.spyOn(os, 'homedir').mockReturnValue(HOMEDIR_PATH);
+    jest.spyOn(os, 'homedir').mockReturnValue(`${sandboxPath}/homedir`);
+    accessToken = await getDevAccessToken();
 
     mockConfigFiles({
       globalConfig: {},
@@ -44,11 +38,10 @@ describe('backport e2e', () => {
 
   describe('when a single commit is backported', () => {
     let res: Awaited<ReturnType<typeof runSequentially>>;
-    let accessToken: string;
+
     let createPullRequestsMockCalls: unknown[];
 
     beforeAll(async () => {
-      accessToken = await getDevAccessToken();
       await resetState(accessToken);
 
       createPullRequestsMockCalls = mockCreatePullRequest({
@@ -93,6 +86,8 @@ describe('backport e2e', () => {
         This is an automatic backport to \`7.x\` of:
          - Add ❤️ emoji (5bf29b7d)
 
+        <!--- Backport version: 1.2.3 -->
+
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
             "head": "sqren:backport/7.x/commit-5bf29b7d",
@@ -128,10 +123,8 @@ describe('backport e2e', () => {
   describe('when two commits are backported', () => {
     let createPullRequestsMockCalls: unknown[];
     let res: Awaited<ReturnType<typeof runSequentially>>;
-    let accessToken: string;
 
     beforeAll(async () => {
-      accessToken = await getDevAccessToken();
       await resetState(accessToken);
 
       createPullRequestsMockCalls = mockCreatePullRequest({
@@ -172,6 +165,8 @@ describe('backport e2e', () => {
         This is an automatic backport to \`7.x\` of:
          - Add ❤️ emoji (5bf29b7d)
          - #2
+
+        <!--- Backport version: 1.2.3 -->
 
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
@@ -219,11 +214,9 @@ describe('backport e2e', () => {
 
   describe('when disabling fork mode', () => {
     let res: Awaited<ReturnType<typeof runSequentially>>;
-    let accessToken: string;
     let createPullRequestsMockCalls: unknown[];
 
     beforeAll(async () => {
-      accessToken = await getDevAccessToken();
       await resetState(accessToken);
 
       createPullRequestsMockCalls = mockCreatePullRequest({
@@ -256,6 +249,8 @@ describe('backport e2e', () => {
 
         This is an automatic backport to \`7.x\` of:
          - Add ❤️ emoji (5bf29b7d)
+
+        <!--- Backport version: 1.2.3 -->
 
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
@@ -394,5 +389,5 @@ async function resetState(accessToken: string) {
     branchName: BRANCH_WITH_TWO_COMMITS,
   });
 
-  await del(E2E_TEST_DATA_PATH);
+  await resetSandbox(sandboxPath);
 }
