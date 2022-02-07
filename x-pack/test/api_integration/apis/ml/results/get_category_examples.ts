@@ -117,11 +117,9 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      expect(resp).to.eql(
-        expectedCategoryExamples1,
-        `response should be ${JSON.stringify(expectedCategoryExamples1)} (got ${JSON.stringify(
-          resp
-        )})`
+      expect(resp['1'].length).to.eql(
+        expectedCategoryExamples1['1'].length,
+        `response examples length should be ${expectedCategoryExamples1['1'].length} (got ${resp['1'].length})`
       );
     });
 
@@ -135,11 +133,9 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      expect(resp).to.eql(
-        expectedCategoryExamples3,
-        `response should be ${JSON.stringify(expectedCategoryExamples3)} (got ${JSON.stringify(
-          resp
-        )})`
+      expect(resp['1'].length).to.eql(
+        expectedCategoryExamples3['1'].length,
+        `response examples length should be ${expectedCategoryExamples3['1'].length} (got ${resp['1'].length})`
       );
     });
 
@@ -153,11 +149,11 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      expect(resp).to.not.eql(
-        expectedCategoryExamples3,
-        `response should not be ${JSON.stringify(expectedCategoryExamples3)} (got ${JSON.stringify(
-          resp
-        )})`
+      expect(Object.keys(resp)).to.not.eql(
+        Object.keys(expectedCategoryExamples3),
+        `response examples keys should be ${Object.keys(
+          expectedCategoryExamples3
+        )} (got ${Object.keys(resp)})`
       );
     });
 
@@ -182,11 +178,9 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      expect(resp).to.eql(
-        expectedCategoryExamples3,
-        `response should be ${JSON.stringify(expectedCategoryExamples3)} (got ${JSON.stringify(
-          resp
-        )})`
+      expect(resp['1'].length).to.eql(
+        expectedCategoryExamples3['1'].length,
+        `response examples length should be ${expectedCategoryExamples3['1'].length} (got ${resp['1'].length})`
       );
     });
 

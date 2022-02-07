@@ -115,22 +115,26 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      expect(resp).to.eql(
-        expectedCategoryDefinition,
-        `response should be ${JSON.stringify(expectedCategoryDefinition)} (got ${JSON.stringify(
-          resp
-        )})`
+      expect(resp.categoryId).to.eql(
+        expectedCategoryDefinition.categoryId,
+        `categoryId should be ${expectedCategoryDefinition.categoryId} (got ${resp.categoryId})`
+      );
+      expect(resp.examples.length).to.eql(
+        expectedCategoryDefinition.examples.length,
+        `examples list length should be ${expectedCategoryDefinition.examples.length} (got ${resp.examples.length})`
+      );
+      expect(resp.terms.length).to.be.greaterThan(
+        0,
+        `terms string length should be greater than 0 (got ${resp.terms.length})`
       );
     });
 
     it('should not produce the correct category for the job', async () => {
       const resp = await getCategoryDefinition(jobIdSpace1, '2', USER.ML_POWERUSER, 200, idSpace1);
 
-      expect(resp).to.not.eql(
-        expectedCategoryDefinition,
-        `response should not be ${JSON.stringify(expectedCategoryDefinition)} (got ${JSON.stringify(
-          resp
-        )})`
+      expect(resp.categoryId).to.not.eql(
+        expectedCategoryDefinition.categoryId,
+        `categoryId should not be ${expectedCategoryDefinition.categoryId} (got ${resp.categoryId})`
       );
     });
 
@@ -153,11 +157,17 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      expect(resp).to.eql(
-        expectedCategoryDefinition,
-        `response should be ${JSON.stringify(expectedCategoryDefinition)} (got ${JSON.stringify(
-          resp
-        )})`
+      expect(resp.categoryId).to.eql(
+        expectedCategoryDefinition.categoryId,
+        `categoryId should be ${expectedCategoryDefinition.categoryId} (got ${resp.categoryId})`
+      );
+      expect(resp.examples.length).to.eql(
+        expectedCategoryDefinition.examples.length,
+        `examples list length should be ${expectedCategoryDefinition.examples.length} (got ${resp.examples.length})`
+      );
+      expect(resp.terms.length).to.be.greaterThan(
+        0,
+        `terms string length should be greater than 0 (got ${resp.terms.length})`
       );
     });
 
