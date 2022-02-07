@@ -10,7 +10,18 @@
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
  * This way plugins can do targeted imports to reduce the final code bundle
  */
-import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS, TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
+  ALERT_STATUS,
+  ALERT_UUID,
+  TIMESTAMP,
+  ALERT_START,
+} from '@kbn/rule-data-utils';
 
 import {
   EuiButtonIcon,
@@ -391,7 +402,18 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           sortDirection,
         },
       ],
-      additionalFieldsToFetch: ['*'],
+      queryFields: [
+        ALERT_DURATION,
+        ALERT_EVALUATION_THRESHOLD,
+        ALERT_EVALUATION_VALUE,
+        ALERT_REASON,
+        ALERT_RULE_CATEGORY,
+        ALERT_RULE_NAME,
+        ALERT_STATUS,
+        ALERT_UUID,
+        ALERT_START,
+        TIMESTAMP,
+      ],
       leadingControlColumns,
       trailingControlColumns,
       unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),
