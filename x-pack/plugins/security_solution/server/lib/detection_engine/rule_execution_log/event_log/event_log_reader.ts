@@ -123,7 +123,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
           metricsFields.forEach((field) => {
             set(aggregatedResults[uuid], field, get(event, field));
           });
-        } else if (eventAction === 'status-change' && status !== 'going to run') {
+        } else if (eventAction === 'status-change' && status !== 'running') {
           if (status != null) {
             set(aggregatedResults[uuid], 'kibana.alert.rule.execution.status', status);
           }
