@@ -63,9 +63,7 @@ export function markdown(): ExpressionFunctionDefinition<
     fn: async (input, args) => {
       // @ts-expect-error untyped local
       const { Handlebars } = await import('../../../common/lib/handlebars');
-      const compileFunctions = args.content.map((str) =>
-        Handlebars.compile(String(str), { knownHelpersOnly: true })
-      );
+      const compileFunctions = args.content.map((str) => Handlebars.compileAst(String(str)));
       const ctx = {
         columns: [],
         rows: [],

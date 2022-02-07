@@ -7,25 +7,20 @@
  */
 
 import { encode, RisonValue } from 'rison-node';
-import {
-  create as createHandlebars,
-  compile as compileHandlebars,
-  HelperDelegate,
-  HelperOptions,
-} from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { i18n } from '@kbn/i18n';
 import { emptyLabel } from '../../../../common/empty_label';
 
-type CompileOptions = Parameters<typeof compileHandlebars>[1];
+type CompileOptions = Parameters<typeof Handlebars.compile>[1];
 
-const handlebars = createHandlebars();
+const handlebars = Handlebars.create();
 
 function createSerializationHelper(
   fnName: string,
   serializeFn: (value: unknown) => string
-): HelperDelegate {
+): Handlebars.HelperDelegate {
   return (...args) => {
-    const { hash } = args.slice(-1)[0] as HelperOptions;
+    const { hash } = args.slice(-1)[0] as Handlebars.HelperOptions;
     const hasHash = Object.keys(hash).length > 0;
     const hasValues = args.length > 1;
     if (hasHash && hasValues) {
@@ -65,15 +60,7 @@ export function replaceVars(
   try {
     /** we need add '[]' for emptyLabel because this value contains special characters.
      * @see (https://handlebarsjs.com/guide/expressions.html#literal-segments) **/
-    const template = handlebars.compile(str.split(emptyLabel).join(`[${emptyLabel}]`), {
-      strict: true,
-      knownHelpersOnly: true,
-      knownHelpers: {
-        rison: true,
-        encodeURIComponent: true,
-      },
-      ...compileOptions,
-    });
+    const template = handlebars.compileAst(str.split(emptyLabel).join(`[${emptyLabel}]`));
     const string = template({
       ...vars,
       args,

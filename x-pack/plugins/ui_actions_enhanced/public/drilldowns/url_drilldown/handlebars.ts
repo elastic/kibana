@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { create as createHandlebars, HelperDelegate, HelperOptions } from 'handlebars';
+import { create as createHandlebars, HelperDelegate, HelperOptions } from '@kbn/handlebars';
 import { encode, RisonValue } from 'rison-node';
 import dateMath from '@kbn/datemath';
 import moment, { Moment } from 'moment';
