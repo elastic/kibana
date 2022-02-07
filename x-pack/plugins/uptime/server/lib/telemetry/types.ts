@@ -15,7 +15,7 @@ export interface MonitorUpdateEvent {
   monitorNameLength: number;
   monitorInterval: number;
   locations: string[];
-  countOfLocations: number;
+  locationsCount: number;
   scriptType?: 'inline' | 'recorder' | 'zip';
   revision: number;
   error?: Array<{ locationId: string; error: Error }>;

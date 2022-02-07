@@ -33,7 +33,7 @@ describe('TelemetryEventsSender', () => {
     stackVersion: '8.1.0',
     type: 'http',
     locations: ['us_central'],
-    countOfLocations: 1,
+    locationsCount: 1,
     monitorNameLength: 8,
     monitorInterval: 180000,
     revision: 1,

@@ -60,7 +60,7 @@ export function formatTelemetryEvent({
     locations: attributes[ConfigKey.LOCATIONS].map((location) =>
       location.isServiceManaged ? location.id : 'other'
     ), // mark self-managed locations as other
-    countOfLocations: attributes[ConfigKey.LOCATIONS].length,
+    locationsCount: attributes[ConfigKey.LOCATIONS].length,
     monitorNameLength: attributes[ConfigKey.NAME].length,
     monitorInterval: parseInt(attributes[ConfigKey.SCHEDULE].number, 10) * 60 * 1000,
     stackVersion: kibanaVersion,
