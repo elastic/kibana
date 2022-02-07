@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { getScreenshotContext, setScreenshotContext } from './context';
 export {
   getScreenshotMode,
   setScreenshotModeEnabled,

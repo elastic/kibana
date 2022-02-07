@@ -20,6 +20,13 @@ export interface ScreenshotModePluginStart {
 
 export interface ScreenshotModePluginSetup extends ScreenshotModePluginStart {
   /**
+   * Stores a value in the screenshotting context.
+   * @param key Context key to set.
+   * @param value Value to set.
+   */
+  setScreenshotContext<T = unknown>(key: string, value: T): void;
+
+  /**
    * Set the current environment to screenshot mode. Intended to run in a browser-environment, before any other scripts
    * on the page have run to ensure that screenshot mode is detected as early as possible.
    */
