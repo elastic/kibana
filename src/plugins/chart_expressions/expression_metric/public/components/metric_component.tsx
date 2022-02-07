@@ -17,6 +17,7 @@ import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { formatValue, shouldApplyColor } from '../utils';
 import { getColumnByAccessor } from '../utils/accessor';
 import { needsLightText } from '../utils/palette';
+import { AutoScale } from './auto_scale';
 
 import './metric.scss';
 
@@ -108,16 +109,28 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   };
 
   private renderMetric = (metric: MetricOptions, index: number) => {
+    const getMetricValueComponent = () => {
+      return (
+        <MetricVisValue
+          key={index}
+          metric={metric}
+          style={this.props.visParams.metric.style}
+          onFilter={
+            this.props.visParams.dimensions.bucket ? () => this.filterBucket(index) : undefined
+          }
+          showLabel={this.props.visParams.metric.labels.show}
+        />
+      );
+    };
+
     return (
-      <MetricVisValue
-        key={index}
-        metric={metric}
-        style={this.props.visParams.metric.style}
-        onFilter={
-          this.props.visParams.dimensions.bucket ? () => this.filterBucket(index) : undefined
-        }
-        showLabel={this.props.visParams.metric.labels.show}
-      />
+      <>
+        {this.props.visParams.metric.autoScale ? (
+          <AutoScale key={metric.value}>{getMetricValueComponent()}</AutoScale>
+        ) : (
+          getMetricValueComponent()
+        )}
+      </>
     );
   };
 
