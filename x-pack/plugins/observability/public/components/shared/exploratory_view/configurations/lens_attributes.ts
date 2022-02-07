@@ -856,8 +856,6 @@ export class LensAttributes {
   getJSON(): TypedLensByValueInput['attributes'] {
     const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
 
-    const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
-
     return {
       title: 'Prefilled from exploratory view app',
       description: '',
