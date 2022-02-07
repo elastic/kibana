@@ -7,8 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { skipBodyValidation } from '../../lib/route_config_helpers';
-
 import { RouteDependencies } from '../../plugin';
 
 export function registerCrawlerRoutes({

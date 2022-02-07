@@ -90,7 +90,6 @@ describe('CrawlSelectDomainsModal', () => {
     it('starts a crawl and hides the modal', () => {
       wrapper.find(EuiModalFooter).find(EuiButton).simulate('click');
 
-      expect(MOCK_ACTIONS.hideModal).toHaveBeenCalled();
       expect(MOCK_ACTIONS.startCrawl).toHaveBeenCalledWith({
         domain_allowlist: MOCK_VALUES.selectedDomainUrls,
       });
