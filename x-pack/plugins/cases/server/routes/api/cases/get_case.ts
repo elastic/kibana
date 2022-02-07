@@ -11,7 +11,7 @@ import { RouteDeps } from '../types';
 import { getWarningHeader, wrapError } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
 
-export function initGetCaseApi({ router, logger }: RouteDeps) {
+export function initGetCaseApi({ router, logger, kibanaVersion }: RouteDeps) {
   router.get(
     {
       path: CASE_DETAILS_URL,
@@ -34,10 +34,7 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
 
         return response.ok({
           headers: {
-            ...getWarningHeader(
-              casesClient.kibanaVersion,
-              'Deprecated query parameter includeComments'
-            ),
+            ...getWarningHeader(kibanaVersion, 'Deprecated query parameter includeComments'),
           },
           body: await casesClient.cases.get({
             id,

@@ -1133,9 +1133,9 @@ export const getServiceNowSimulationServer = async (): Promise<{
 };
 
 /**
+ * Extracts the warning value a warning header that is formatted according to RFC 7234.
+ * For example for the string 299 Kibana-8.1.0 "Deprecation endpoint", the return value is Deprecation endpoint.
  *
- * @param warningHeader
- * @returns
  */
 export const extractWarningValueFromWarningHeader = (warningHeader: string) => {
   const firstQuote = warningHeader.indexOf('"');

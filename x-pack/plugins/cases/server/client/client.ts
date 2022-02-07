@@ -17,7 +17,6 @@ import { createMetricsSubClient, MetricsSubClient } from './metrics/client';
  * Client wrapper that contains accessor methods for individual entities within the cases system.
  */
 export class CasesClient {
-  private readonly _kibanaVersion: CasesClientArgs['kibanaVersion'];
   private readonly _casesClientInternal: CasesClientInternal;
   private readonly _cases: CasesSubClient;
   private readonly _attachments: AttachmentsSubClient;
@@ -26,20 +25,12 @@ export class CasesClient {
   private readonly _metrics: MetricsSubClient;
 
   constructor(args: CasesClientArgs) {
-    this._kibanaVersion = args.kibanaVersion;
     this._casesClientInternal = createCasesClientInternal(args);
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
     this._attachments = createAttachmentsSubClient(args, this, this._casesClientInternal);
     this._userActions = createUserActionsSubClient(args);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
     this._metrics = createMetricsSubClient(args, this);
-  }
-
-  /**
-   * Retrieves the current kibana version
-   */
-  public get kibanaVersion() {
-    return this._kibanaVersion;
   }
 
   /**

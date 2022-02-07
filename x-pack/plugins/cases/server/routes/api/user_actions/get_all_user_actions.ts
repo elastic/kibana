@@ -14,7 +14,7 @@ import { CASE_USER_ACTIONS_URL } from '../../../../common/constants';
 /**
  * @deprecated since version 8.1.0
  */
-export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
+export function initGetAllCaseUserActionsApi({ router, logger, kibanaVersion }: RouteDeps) {
   router.get(
     {
       path: CASE_USER_ACTIONS_URL,
@@ -35,7 +35,7 @@ export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
 
         return response.ok({
           headers: {
-            ...getWarningHeader(casesClient.kibanaVersion),
+            ...getWarningHeader(kibanaVersion),
           },
           body: await casesClient.userActions.getAll({ caseId }),
         });

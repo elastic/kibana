@@ -14,7 +14,7 @@ import { CASE_COMMENTS_URL } from '../../../../common/constants';
 /**
  * @deprecated since version 8.1.0
  */
-export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
+export function initGetAllCommentsApi({ router, logger, kibanaVersion }: RouteDeps) {
   router.get(
     {
       path: CASE_COMMENTS_URL,
@@ -30,7 +30,7 @@ export function initGetAllCommentsApi({ router, logger }: RouteDeps) {
 
         return response.ok({
           headers: {
-            ...getWarningHeader(client.kibanaVersion),
+            ...getWarningHeader(kibanaVersion),
           },
           body: await client.attachments.getAll({
             caseID: request.params.case_id,

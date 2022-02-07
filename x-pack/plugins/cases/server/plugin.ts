@@ -103,6 +103,7 @@ export class CasePlugin {
     initCaseApi({
       logger: this.log,
       router,
+      kibanaVersion: this.kibanaVersion,
     });
   }
 
@@ -123,7 +124,6 @@ export class CasePlugin {
        */
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
-      kibanaVersion: this.kibanaVersion,
     });
 
     const client = core.elasticsearch.client;
