@@ -27,6 +27,8 @@ import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
 import { ChartTimeRange, LastUpdated } from './header/last_updated';
+import { useExpViewTimeRange } from './hooks/use_time_range';
+import { ExpViewActionMenu } from './components/action_menu';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
 
@@ -55,6 +57,7 @@ export function ExploratoryView({
   const { firstSeries, allSeries, lastRefresh, reportType, setLastRefresh } = useSeriesStorage();
 
   const lensAttributesT = useLensAttributes();
+  const timeRange = useExpViewTimeRange();
 
   const setHeightOffset = () => {
     if (seriesBuilderRef?.current && wrapperRef.current) {
@@ -101,6 +104,7 @@ export function ExploratoryView({
 
   return lens ? (
     <>
+      <ExpViewActionMenu timeRange={timeRange} lensAttributes={lensAttributes} />
       <LensWrapper ref={wrapperRef} height={height}>
         <ResizableContainer direction="vertical" onToggleCollapsed={onCollapse}>
           {(EuiResizablePanel, _EuiResizableButton, { togglePanel }) => {
