@@ -10,7 +10,6 @@ import { IEsSearchRequest } from '../../../data/server';
 import { IEsSearchResponse } from '../../../data/common';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
-import { getBase64Encoding } from './index';
 
 export function queryTopNCommon(
   router: IRouter<DataRequestHandlerContext>,
@@ -100,9 +99,7 @@ export function queryTopNCommon(
           const docIDs: string[] = [];
           resTopNStackTraces.rawResponse.aggregations.histogram.buckets.forEach((timeInterval) => {
             timeInterval.group_by.buckets.forEach((stackTraceItem: any) => {
-              const docID = getBase64Encoding(stackTraceItem.key);
-
-              docIDs.push(docID);
+              docIDs.push(stackTraceItem.key);
             });
           });
 
@@ -130,7 +127,7 @@ export function queryTopNCommon(
         return response.customError({
           statusCode: e.statusCode ?? 500,
           body: {
-            message: e.message,
+            message: 'Profiling TopN request failed: ' + e.message + '; full error ' + e.toString(),
           },
         });
       }
