@@ -12,6 +12,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import type {
   Visualization,
   OperationMetadata,
@@ -101,6 +102,8 @@ export const getPieVisualization = ({
     ...state,
     shape: visualizationTypeId as PieVisualizationState['shape'],
   }),
+
+  triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state, mainPalette) {
     return (
