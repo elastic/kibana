@@ -30,6 +30,9 @@ async function fetchIndicesCall(
       '*.settings.index.hidden',
       '*.data_stream',
     ],
+    // for better performance only compute aliases and settings of indices but not mappings
+    // @ts-expect-error new param https://github.com/elastic/elasticsearch-specification/issues/1382
+    features: ['aliases', 'settings'],
   });
 
   if (!Object.keys(indices).length) {

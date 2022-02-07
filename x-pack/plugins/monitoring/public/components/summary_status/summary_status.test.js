@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test/jest';
+import { renderWithIntl } from '@kbn/test-jest-helpers';
 import { SummaryStatus } from './summary_status';
 
 describe('Summary Status Component', () => {
