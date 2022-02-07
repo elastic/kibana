@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useSelector } from 'react-redux';
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
@@ -30,6 +30,8 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { TestRun } from '../test_now_mode/test_now_mode';
 
 import { monitorManagementListSelector } from '../../../state/selectors';
+
+import { kibanaService } from '../../../state/kibana_service';
 
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
@@ -47,8 +49,6 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSuccessful, setIsSuccessful] = useState(false);
-
-  const { notifications } = useKibana();
 
   const { data, status } = useFetcher(() => {
     if (!isSaving || !isValid) {
@@ -83,32 +83,24 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       setIsSaving(false);
     }
     if (status === FETCH_STATUS.FAILURE) {
-      notifications.toasts.danger({
-        title: <p data-test-subj="uptimeAddMonitorFailure">{MONITOR_FAILURE_LABEL}</p>,
+      kibanaService.toasts.addDanger({
+        title: MONITOR_FAILURE_LABEL,
         toastLifeTimeMs: 3000,
       });
     } else if (status === FETCH_STATUS.SUCCESS && !hasErrors && !loading) {
-      notifications.toasts.success({
-        title: (
-          <p data-test-subj="uptimeAddMonitorSuccess">
-            {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL}
-          </p>
-        ),
+      kibanaService.toasts.addSuccess({
+        title: monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
       });
       setIsSuccessful(true);
     } else if (hasErrors && !loading) {
       Object.values(data).forEach((location) => {
         const { status: responseStatus, reason } = location.error || {};
-        notifications.toasts.warning({
-          title: (
-            <p data-test-subj="uptimeAddMonitorFailure">
-              {i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
-                defaultMessage: `Unable to sync monitor config`,
-              })}
-            </p>
-          ),
-          body: (
+        kibanaService.toasts.addWarning({
+          title: i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
+            defaultMessage: `Unable to sync monitor config`,
+          }),
+          text: toMountPoint(
             <>
               <p>
                 {i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
@@ -134,22 +126,12 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
               </p>
             </>
           ),
-          toastLifeTimeMs: 3000,
+          toastLifeTimeMs: 30000,
         });
       });
       setIsSuccessful(true);
     }
-  }, [
-    data,
-    status,
-    notifications.toasts,
-    isSaving,
-    isValid,
-    monitorId,
-    hasErrors,
-    locations,
-    loading,
-  ]);
+  }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);
 
   return isSuccessful ? (
     <Redirect to={MONITOR_MANAGEMENT_ROUTE} />

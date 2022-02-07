@@ -17,13 +17,18 @@ import {
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
 import { spyOnUseFetcher } from '../../../lib/helper/spy_use_fetcher';
-import * as kibana from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import * as kibana from '../../../state/kibana_service';
 import { ActionBar } from './action_bar';
 import { mockLocationsState } from '../mocks';
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
-  ...jest.requireActual('../../../../../../../src/plugins/kibana_react/public'),
-  useKibana: jest.fn(),
+jest.mock('../../../state/kibana_service', () => ({
+  ...jest.requireActual('../../../state/kibana_service'),
+  kibanaService: {
+    toasts: {
+      addWarning: jest.fn(),
+    },
+  },
 }));
 
 const monitor: SyntheticsMonitor = {
@@ -46,13 +51,7 @@ describe('<ActionBar /> Service Errors', () => {
   });
 
   it('Handles service errors', async () => {
-    jest.spyOn(kibana, 'useKibana').mockReturnValue({
-      notifications: {
-        toasts: {
-          warning: toast,
-        },
-      },
-    } as unknown as ReturnType<typeof kibana.useKibana>);
+    jest.spyOn(kibana.kibanaService.toasts, 'addWarning').mockImplementation(toast);
     useFetcher.mockReturnValue({
       data: [
         { locationId: 'us_central', error: { reason: 'Invalid config', status: 400 } },
@@ -66,40 +65,12 @@ describe('<ActionBar /> Service Errors', () => {
 
     await waitFor(() => {
       expect(toast).toBeCalledTimes(2);
-      expect(toast).toBeCalledWith({
-        body: (
-          <>
-            <p>
-              {
-                'Your monitor was saved, but there was a problem syncing the configuration for US Central. We will automatically try again later. If this problem continues, your monitors will stop running in US Central. Please contact Support for assistance.'
-              }
-            </p>
-            <p>
-              {'Status: 400. '}
-              {'Reason: Invalid config.'}
-            </p>
-          </>
-        ),
-        title: <p data-test-subj="uptimeAddMonitorFailure">Unable to sync monitor config</p>,
-        toastLifeTimeMs: 3000,
-      });
-      expect(toast).toBeCalledWith({
-        body: (
-          <>
-            <p>
-              {
-                'Your monitor was saved, but there was a problem syncing the configuration for US Central. We will automatically try again later. If this problem continues, your monitors will stop running in US Central. Please contact Support for assistance.'
-              }
-            </p>
-            <p>
-              {'Status: 500. '}
-              {'Reason: Cannot schedule.'}
-            </p>
-          </>
-        ),
-        title: <p data-test-subj="uptimeAddMonitorFailure">Unable to sync monitor config</p>,
-        toastLifeTimeMs: 3000,
-      });
+      expect(toast).toBeCalledWith(
+        expect.objectContaining({
+          title: 'Unable to sync monitor config',
+          toastLifeTimeMs: 30000,
+        })
+      );
     });
   });
 });
