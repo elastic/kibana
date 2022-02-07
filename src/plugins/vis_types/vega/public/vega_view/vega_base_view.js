@@ -340,10 +340,11 @@ export class VegaBaseView {
   /**
    * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
    * @param {string} [index] as defined in Kibana, or default if missing
+   * @param {string} Elastic Query DSL's Custom label for kibanaAddFilter, as used in '+ Add Filter'
    */
-  async addFilterHandler(query, index) {
+  async addFilterHandler(query, index, alias) {
     const indexId = await this.findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const filter = esFilters.buildQueryFilter(query, indexId, alias);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }
