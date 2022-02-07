@@ -333,6 +333,8 @@ export function PieComponent(
           legendAction={props.interactive ? getLegendAction(firstTable, onClickValue) : undefined}
           theme={[themeOverrides, chartTheme]}
           baseTheme={chartBaseTheme}
+          ariaLabel={props.args.ariaLabel}
+          ariaUseDefaultSummary={!props.args.ariaLabel}
         />
         <Partition
           id={shape}
