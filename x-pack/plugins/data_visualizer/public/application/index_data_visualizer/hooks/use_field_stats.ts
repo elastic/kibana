@@ -30,6 +30,7 @@ import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_EXAMPLES_DEFAULT } from '../search_strategy/requests/constants';
 import type { ISearchOptions } from '../../../../../../../src/plugins/data/common';
 import { getFieldsStats } from '../search_strategy/requests/get_fields_stats';
+
 interface FieldStatsParams {
   metricConfigs: FieldRequestConfig[];
   nonMetricConfigs: FieldRequestConfig[];
@@ -100,6 +101,7 @@ export function useFieldStatsSearchStrategy(
         fieldStatsParams.nonMetricConfigs.length === 0)
     ) {
       setFetchState({
+        loaded: 100,
         isRunning: false,
       });
 
@@ -127,7 +129,6 @@ export function useFieldStatsSearchStrategy(
         ? initialDataVisualizerListState.pageIndex - 1
         : 0;
     const endingPage = initialDataVisualizerListState.pageIndex + 1;
-
     sortedConfigs = sortedConfigs.slice(
       initialDataVisualizerListState.pageSize * startingPage,
       initialDataVisualizerListState.pageSize * endingPage
@@ -203,8 +204,8 @@ export function useFieldStatsSearchStrategy(
         mergeMap((observable) => observable, 20),
         tap(() => {
           setFetchState({
-            loaded: 0,
-            isRunning: true,
+            ...getInitialProgress(),
+            error: undefined,
           });
         })
       )
