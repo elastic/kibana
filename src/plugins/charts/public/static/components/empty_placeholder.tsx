@@ -14,12 +14,20 @@ import './empty_placeholder.scss';
 export const EmptyPlaceholder = ({
   icon,
   message = <FormattedMessage id="charts.noDataLabel" defaultMessage="No results found" />,
+  dataTestSubj = 'emptyPlaceholder',
 }: {
   icon: IconType;
   message?: JSX.Element;
+  dataTestSubj?: string;
 }) => (
   <>
-    <EuiText className="chart__empty-placeholder" textAlign="center" color="subdued" size="xs">
+    <EuiText
+      data-test-subj={dataTestSubj}
+      className="chart__empty-placeholder"
+      textAlign="center"
+      color="subdued"
+      size="xs"
+    >
       <EuiIcon type={icon} color="subdued" size="l" />
       <EuiSpacer size="s" />
       <p>{message}</p>

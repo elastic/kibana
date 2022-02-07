@@ -8,40 +8,29 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ClassNames } from '@emotion/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { Datatable, ExpressionRenderDefinition } from '../../../../expressions/public';
-import { VisualizationContainer } from '../../../../visualizations/public';
+import { ExpressionRenderDefinition } from '../../../../expressions/public';
 import type { PersistedState } from '../../../../visualizations/public';
+import { VisTypePieDependencies } from '../plugin';
+import { withSuspense } from '../../../../presentation_util/public';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
-
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { ChartTypes, RenderValue } from '../../common/types';
 
-import { VisTypePieDependencies } from '../plugin';
-
 export const strings = {
   getDisplayName: () =>
-    i18n.translate('expressionPartitionVis.renderer.pieVis.displayName', {
-      defaultMessage: 'Pie visualization',
+    i18n.translate('expressionPartitionVis.renderer.partitionVis.pie.displayName', {
+      defaultMessage: 'Partition visualization',
     }),
   getHelpDescription: () =>
-    i18n.translate('expressionPartitionVis.renderer.pieVis.helpDescription', {
-      defaultMessage: 'Render a pie',
+    i18n.translate('expressionPartitionVis.renderer.partitionVis.pie.helpDescription', {
+      defaultMessage: 'Render pie/donut/treemap/mosaic/waffle charts',
     }),
 };
 
-const PartitionVisComponent = lazy(() => import('../components/partition_vis_component'));
-
-function shouldShowNoResultsMessage(visData: Datatable | undefined): boolean {
-  const rows: object[] | undefined = visData?.rows;
-  const isZeroHits = !rows || !rows.length;
-
-  return Boolean(isZeroHits);
-}
-
-const partitionVisClass = { height: '100%' };
+const LazyPartitionVisComponent = lazy(() => import('../components/partition_vis_component'));
+const PartitionVisComponent = withSuspense(LazyPartitionVisComponent);
 
 export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
@@ -51,8 +40,6 @@ export const getPartitionVisRenderer: (
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (domNode, { visConfig, visData, visType, syncColors }, handlers) => {
-    const showNoResult = shouldShowNoResultsMessage(visData);
-
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -63,28 +50,20 @@ export const getPartitionVisRenderer: (
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={services.kibanaTheme.theme$}>
-          <ClassNames>
-            {({ css, cx }) => (
-              <VisualizationContainer
-                handlers={handlers}
-                showNoResult={showNoResult}
-                className={cx('partitionVisContainer', css(partitionVisClass))}
-              >
-                <PartitionVisComponent
-                  chartsThemeService={theme}
-                  palettesRegistry={palettesRegistry}
-                  visParams={visConfig}
-                  visData={visData}
-                  visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-                  renderComplete={handlers.done}
-                  fireEvent={handlers.event}
-                  uiState={handlers.uiState as PersistedState}
-                  services={{ data: services.data, fieldFormats: services.fieldFormats }}
-                  syncColors={syncColors}
-                />
-              </VisualizationContainer>
-            )}
-          </ClassNames>
+          <div css={{ height: '100%' }}>
+            <PartitionVisComponent
+              chartsThemeService={theme}
+              palettesRegistry={palettesRegistry}
+              visParams={visConfig}
+              visData={visData}
+              visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
+              renderComplete={handlers.done}
+              fireEvent={handlers.event}
+              uiState={handlers.uiState as PersistedState}
+              services={{ data: services.data, fieldFormats: services.fieldFormats }}
+              syncColors={syncColors}
+            />
+          </div>
         </KibanaThemeProvider>
       </I18nProvider>,
       domNode,
