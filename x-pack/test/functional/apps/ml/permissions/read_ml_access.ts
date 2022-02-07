@@ -83,6 +83,8 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToMl();
             await ml.navigation.navigateToOverview();
 
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
             await ml.testExecution.logTestStep('should display a welcome callout');
             await ml.overviewPage.assertGettingStartedCalloutVisible(true);
             await ml.overviewPage.dismissGettingStartedCallout();
