@@ -428,6 +428,80 @@ describe('heatmap suggestions', () => {
       ]);
     });
 
+    test('when there is a date histogram and a second bucket dimension', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'number-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'number',
+                  scale: 'interval',
+                  label: 'AvgTicketPrice',
+                },
+              },
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'metric-column',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([
+        {
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            shape: 'heatmap',
+            yAccessor: 'date-column',
+            xAccessor: 'number-column',
+            valueAccessor: 'metric-column',
+            gridConfig: {
+              type: HEATMAP_GRID_FUNCTION,
+              isCellLabelVisible: false,
+              isYAxisLabelVisible: true,
+              isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
+            },
+            legend: {
+              isVisible: true,
+              position: Position.Right,
+              type: LEGEND_FUNCTION,
+            },
+          },
+          title: 'Heat map',
+          hide: false,
+          previewIcon: 'empty',
+          score: 0.9,
+        },
+      ]);
+    });
+
     test('when complete configuration has been resolved', () => {
       expect(
         getSuggestions({

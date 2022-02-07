@@ -60,13 +60,15 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
    * - tables with just a single bucket dimension
    * - tables with a date histogram
    */
-  const hasDateHistogram =
-    groups.some((group) => group.operation.dataType === 'date') && metrics.length === 1;
+  const hasOnlyOneDatehistogramBucket =
+    groups.some((group) => group.operation.dataType === 'date') &&
+    metrics.length === 1 &&
+    groups.length === 1;
   const hide =
     table.changeType === 'reduced' ||
     table.changeType === 'reorder' ||
     isSingleBucketDimension ||
-    hasDateHistogram;
+    hasOnlyOneDatehistogramBucket;
 
   const newState: HeatmapVisualizationState = {
     shape: CHART_SHAPES.HEATMAP,
