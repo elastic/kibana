@@ -81,7 +81,6 @@ export const useWithArtifactListData = (
 
   const [isPageInitializing, setIsPageInitializing] = useState(true);
 
-  // FIXME: need to convert `filter` to `kuery` (example in middleware for event filters)
   const listDataRequest = useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['list', apiClient, page, perPage, sortField, sortField, kuery],
     async () => apiClient.find({ page, perPage, filter: kuery, sortField, sortOrder }),

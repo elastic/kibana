@@ -32,6 +32,7 @@ import { ArtifactListPageUrlParams } from './types';
 import { useUrlParams } from './hooks/use_url_params';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
+import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -79,6 +80,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const {
       urlParams: { filter },
     } = useUrlParams<ArtifactListPageUrlParams>();
+
+    const itemToDelete = false;
 
     const {
       isPageInitializing,
@@ -162,14 +165,22 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         {/* Flyout component is driven by URL params and may or may not be displayed based on those */}
         <MaybeArtifactFlyout
           apiClient={apiClient}
-          onCancel={() => {}}
-          onSuccess={() => {}}
+          onCancel={() => {}} // FIXME:pt handle cancel
+          onSuccess={() => {}} // FIXME:pt handle success
           FormComponent={ArtifactFormComponent}
           labels={labels}
           data-test-subj={getTestId('flyout')}
         />
 
-        {/* {showDelete && <EventFilterDeleteModal />}*/}
+        {itemToDelete && (
+          <ArtifactDeleteModal
+            item={itemToDelete}
+            labels={labels}
+            data-test-subj={getTestId('deleteModal')}
+            onSuccess={() => {}} // FIXME:PT handle delete
+            onCancel={() => {}} // FIXME:PT handle cancel
+          />
+        )}
 
         {!doesDataExist && (
           <NoDataEmptyState

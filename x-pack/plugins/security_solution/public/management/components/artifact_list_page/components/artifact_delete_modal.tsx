@@ -1,0 +1,141 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo } from 'react';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { AutoFocusButton } from '../../../../common/components/autofocus_button/autofocus_button';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import {
+  getPolicyIdsFromArtifact,
+  isArtifactByPolicy,
+} from '../../../../../common/endpoint/service/artifacts';
+
+export const ARTIFACT_DELETE_LABELS = Object.freeze({
+  deleteModalTitle: (itemName: string): string =>
+    i18n.translate('xpack.securitySolution.artifactListPage.deleteModalTitle', {
+      // FIXME:PT adjust all `id` in this set of labels
+      defaultMessage: 'Delete "itemName"',
+      values: { itemName },
+    }),
+
+  deleteModalImpactTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.deleteModalImpactTitle',
+    {
+      defaultMessage: 'Warning',
+    }
+  ),
+
+  deleteModalImpactInfo: (item: ExceptionListItemSchema): string => {
+    return i18n.translate('xpack.securitySolution.artifactListPage.deleteModalImpactInfo', {
+      defaultMessage:
+        'Deleting this entry will remove it from {count} associated {count, plural, one {policy} other {policies}}.',
+      values: {
+        count: isArtifactByPolicy(item) ? 'all' : getPolicyIdsFromArtifact(item).length,
+      },
+    });
+  },
+
+  deleteModalConfirmInfo: i18n.translate(
+    'xpack.securitySolution.artifactListPage.deleteModalConfirmInfo',
+    {
+      defaultMessage: 'This action cannot be undone. Are you sure you wish to continue?',
+    }
+  ),
+
+  deleteModalSubmitButtonTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.deleteModalSubmitButtonTitle',
+    { defaultMessage: 'Delete' }
+  ),
+
+  deleteModalCancelButtonTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.deleteModalCancelButtonTitle',
+    { defaultMessage: 'Cancel' }
+  ),
+});
+
+export interface DeleteArtifactModalProps {
+  item: ExceptionListItemSchema;
+  onCancel: () => void;
+  onSuccess: () => void;
+  'data-test-subj'?: string;
+  labels: typeof ARTIFACT_DELETE_LABELS;
+}
+
+export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
+  ({
+    item,
+    onCancel,
+    onSuccess,
+    'data-test-subj': dataTestSubj,
+    labels = ARTIFACT_DELETE_LABELS,
+  }) => {
+    // FIXME:PT ensure onCancel/onSuccess can not be called when deletion is underway
+
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const isDeleting = false;
+    const onConfirm = () => {};
+
+    return (
+      <EuiModal onClose={onCancel}>
+        <EuiModalHeader data-test-subj={getTestId('header')}>
+          <EuiModalHeaderTitle>{labels.deleteModalTitle(item.name)}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody data-test-subj={getTestId('body')}>
+          <EuiText>
+            <EuiCallOut
+              data-test-subj={getTestId('impactCallout')}
+              title={labels.deleteModalImpactTitle}
+              color="danger"
+              iconType="alert"
+            >
+              <p data-test-subj={getTestId('impactCalloutInfo')}>
+                {labels.deleteModalImpactInfo(item)}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+            <p>{labels.deleteModalConfirmInfo}</p>
+          </EuiText>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty
+            onClick={onCancel}
+            isDisabled={isDeleting}
+            data-test-subj={getTestId('cancelButton')}
+          >
+            {labels.deleteModalCancelButtonTitle}
+          </EuiButtonEmpty>
+
+          <AutoFocusButton
+            fill
+            color="danger"
+            onClick={onConfirm}
+            isLoading={isDeleting}
+            data-test-subj={getTestId('submitButton')}
+          >
+            {labels.deleteModalSubmitButtonTitle}
+          </AutoFocusButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+  }
+);
+ArtifactDeleteModal.displayName = 'ArtifactDeleteModal';

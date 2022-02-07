@@ -64,7 +64,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
 });
 
 interface ArtifactFormComponentProps {
-  item: object;
+  item: object; // FIXME:PT should be a type? and optional?
   mode: 'edit' | 'create';
   /** signals that the form should be made disabled (ex. during update) */
   disabled: boolean;

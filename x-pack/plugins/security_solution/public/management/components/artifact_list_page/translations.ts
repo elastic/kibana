@@ -7,9 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { ARTIFACT_FLYOUT_LABELS } from './components/artifact_flyout';
+import { ARTIFACT_DELETE_LABELS } from './components/artifact_delete_modal';
 
 export const artifactListPageLabels = Object.freeze({
+  // ------------------------------
   // PAGE labels
+  // ------------------------------
   pageTitle: i18n.translate('xpack.securitySolution.artifactListPage.pageTitle', {
     defaultMessage: 'Artifact',
   }),
@@ -20,7 +23,9 @@ export const artifactListPageLabels = Object.freeze({
     defaultMessage: 'Add artifact',
   }),
 
+  // ------------------------------
   // EMPTY state labels
+  // ------------------------------
   emptyStateTitle: i18n.translate('xpack.securitySolution.artifactListPage.emptyStateTitle', {
     defaultMessage: 'Add your first artifact',
   }),
@@ -32,7 +37,9 @@ export const artifactListPageLabels = Object.freeze({
     { defaultMessage: 'Add' }
   ),
 
+  // ------------------------------
   // SEARCH BAR labels
+  // ------------------------------
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.artifactListPage.searchPlaceholderInfo',
     {
@@ -46,7 +53,9 @@ export const artifactListPageLabels = Object.freeze({
     });
   },
 
+  // ------------------------------
   // CARD ACTIONS labels
+  // ------------------------------
   cardActionEditLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.cardActionEditLabel',
     {
@@ -60,8 +69,15 @@ export const artifactListPageLabels = Object.freeze({
     }
   ),
 
+  // ------------------------------
   // ARTIFACT FLYOUT
+  // ------------------------------
   ...ARTIFACT_FLYOUT_LABELS,
+
+  // ------------------------------
+  // ARTIFACT DELETE MODAL
+  // ------------------------------
+  ...ARTIFACT_DELETE_LABELS,
 });
 
 export type ArtifactListPageLabels = typeof artifactListPageLabels;
