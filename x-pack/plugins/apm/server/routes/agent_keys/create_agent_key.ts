@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { ApmPluginRequestHandlerContext } from '../typings';
-import { CreateApiKeyResponse } from '../../../common/agent_key_types';
 
 const resource = '*';
 
@@ -80,7 +79,7 @@ export async function createAgentKey({
     },
   };
 
-  const agentKey: CreateApiKeyResponse =
+  const agentKey =
     await context.core.elasticsearch.client.asCurrentUser.security.createApiKey(
       {
         body,

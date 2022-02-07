@@ -260,27 +260,24 @@ export class AlertsClient {
         };
       }
 
-      const result = await this.esClient.search<ParsedTechnicalFields>(
-        {
-          index: index ?? '.alerts-*',
-          ignore_unavailable: true,
-          // @ts-expect-error
-          body: queryBody,
-          seq_no_primary_term: true,
-        },
-        { meta: true }
-      );
+      const result = await this.esClient.search<ParsedTechnicalFields>({
+        index: index ?? '.alerts-*',
+        ignore_unavailable: true,
+        // @ts-expect-error
+        body: queryBody,
+        seq_no_primary_term: true,
+      });
 
-      if (!result?.body.hits.hits.every((hit) => isValidAlert(hit))) {
+      if (!result?.hits.hits.every((hit) => isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
         this.logger.error(errorMessage);
         throw Boom.badData(errorMessage);
       }
 
-      if (result?.body?.hits?.hits != null && result?.body.hits.hits.length > 0) {
-        await this.ensureAllAuthorized(result.body.hits.hits, operation);
+      if (result?.hits?.hits != null && result?.hits.hits.length > 0) {
+        await this.ensureAllAuthorized(result.hits.hits, operation);
 
-        result?.body.hits.hits.map((item) =>
+        result?.hits.hits.map((item) =>
           this.auditLogger?.log(
             alertAuditEvent({
               action: operationAlertAuditActionMap[operation],
@@ -291,7 +288,7 @@ export class AlertsClient {
         );
       }
 
-      return result.body;
+      return result;
     } catch (error) {
       const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${query}" and operation ${operation} \nError: ${error}`;
       this.logger.error(errorMessage);
