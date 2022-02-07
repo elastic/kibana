@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
-import {getLocalRoutePaths, timeRangeFromRequest} from '../../common';
+import { getLocalRoutePaths, timeRangeFromRequest } from '../../common';
 
 export function registerTraceEventsTopNHostsRoute(router: IRouter<DataRequestHandlerContext>) {
   const paths = getLocalRoutePaths();

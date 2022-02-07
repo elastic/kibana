@@ -25,7 +25,7 @@ export function registerFlameChartElasticRoute(router: IRouter<DataRequestHandle
         }),
       },
     },
-   async (ctx, request, response) => {
+    async (ctx, request, response) => {
       const [timeFrom, timeTo] = timeRangeFromRequest(request);
       const src = await import(`../fixtures/flamechart_${timeTo - timeFrom}`);
       delete src.default;
