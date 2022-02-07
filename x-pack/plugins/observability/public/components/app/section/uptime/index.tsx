@@ -79,12 +79,12 @@ export function UptimeSection({ bucketSize }: Props) {
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.uptime.title', {
-        defaultMessage: 'Uptime',
+        defaultMessage: 'Monitors',
       })}
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.uptime.appLink', {
-          defaultMessage: 'Open in app',
+          defaultMessage: 'Show monitors',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}

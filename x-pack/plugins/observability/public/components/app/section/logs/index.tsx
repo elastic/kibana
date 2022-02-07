@@ -92,12 +92,12 @@ export function LogsSection({ bucketSize }: Props) {
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.logs.title', {
-        defaultMessage: 'Logs',
+        defaultMessage: 'Log Events',
       })}
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.logs.appLink', {
-          defaultMessage: 'Open in app',
+          defaultMessage: 'Show log stream',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}
