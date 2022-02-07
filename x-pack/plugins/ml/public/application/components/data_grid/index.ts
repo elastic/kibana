@@ -12,6 +12,7 @@ export {
   getFieldsFromKibanaIndexPattern,
   getCombinedRuntimeMappings,
   multiColumnSortFactory,
+  getNestedOrEscapedVal,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
   getProcessedFields,
