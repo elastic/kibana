@@ -42,11 +42,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.ELASTIC_APM_ACTIVE,
-        ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
+        ELASTIC_APM_CENTRAL_CONFIG: false,
+        ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '0.1',
+        ELASTIC_APM_BREAKDOWN_METRICS: false,
+        ELASTIC_APM_CAPTURE_SPAN_STACK_TRACES: false,
+        ELASTIC_APM_METRICS_INTERVAL: '120s',
+        // ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
+        ELASTIC_SANITIZE_FIELD_NAMES:
+          'password,passwd,pwd,secret,*key,*token*,*session*,*credit*,*card*,*auth*,set-cookie,pw,pass,connect.sid',
         ELASTIC_APM_ENVIRONMENT: process.env.CI ? 'ci' : 'development',
-        ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '1.0',
-        ELASTIC_APM_SERVER_URL: 'https://apm-testing.apm.us-central1.gcp.foundit.no',
-        ELASTIC_APM_SECRET_TOKEN: 'bwF17RD4rmj6JcdvKR',
+        ELASTIC_APM_SERVER_URL: 'https://apm-testing.apm.us-central1.gcp.cloud.es.io',
+        ELASTIC_APM_SECRET_TOKEN: 'zjGna3Spgu30H5jX2L',
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
           simulation: process.env.GATLING_SIMULATIONS
             ? process.env.GATLING_SIMULATIONS
@@ -56,7 +62,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
       },
       // delay shutdown by 15 seconds to ensure that APM can report the data it collects during test execution
-      delayShutdown: 60_000,
+      delayShutdown: 120_000,
     },
   };
 }
