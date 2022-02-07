@@ -58,7 +58,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
    * Hide for:
    * - reduced and reorder tables
    * - tables with just a single bucket dimension
-   * - tables with a date histogram
+   * - tables with only date histogram
    */
   const hasOnlyDatehistogramBuckets =
     metrics.length === 1 &&
@@ -82,8 +82,8 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     gridConfig: {
       type: HEATMAP_GRID_FUNCTION,
       isCellLabelVisible: false,
-      isYAxisLabelVisible: true,
-      isXAxisLabelVisible: true,
+      isYAxisLabelVisible: state?.gridConfig?.isYAxisLabelVisible ?? true,
+      isXAxisLabelVisible: state?.gridConfig?.isXAxisLabelVisible ?? true,
       isYAxisTitleVisible: state?.gridConfig?.isYAxisTitleVisible ?? false,
       isXAxisTitleVisible: state?.gridConfig?.isXAxisTitleVisible ?? false,
     },
@@ -101,11 +101,15 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   newState.xAccessor = histogram[0]?.columnId || ordinal[0]?.columnId;
   newState.yAccessor = groups.find((g) => g.columnId !== newState.xAccessor)?.columnId;
 
-  if (newState.xAccessor) {
-    score += 0.3;
-  }
-  if (newState.yAccessor) {
-    score += 0.3;
+  const hasDatehistogram = groups.some((group) => group.operation.dataType === 'date');
+
+  if (!hasDatehistogram) {
+    if (newState.xAccessor) {
+      score += 0.3;
+    }
+    if (newState.yAccessor) {
+      score += 0.3;
+    }
   }
 
   return [

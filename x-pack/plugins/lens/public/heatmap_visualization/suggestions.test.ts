@@ -293,7 +293,7 @@ describe('heatmap suggestions', () => {
           title: 'Heat map',
           hide: true,
           previewIcon: 'empty',
-          score: 0.3,
+          score: 0,
         },
       ]);
     });
@@ -357,7 +357,7 @@ describe('heatmap suggestions', () => {
           title: 'Heat map',
           hide: true,
           previewIcon: 'empty',
-          score: 0.6,
+          score: 0.3,
         },
       ]);
     });
@@ -497,7 +497,7 @@ describe('heatmap suggestions', () => {
           title: 'Heat map',
           hide: false,
           previewIcon: 'empty',
-          score: 0.9,
+          score: 0.3,
         },
       ]);
     });
