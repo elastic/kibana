@@ -280,7 +280,6 @@ function createClientMock() {
     { items: [] }
   );
 
-  // @ts-expect-error
   esClientMock.mget.mockResponseImplementation((params) => {
     // @ts-expect-error
     const docs = params?.body.docs.map(({ _id }) => {
