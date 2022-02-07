@@ -212,8 +212,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       };
     },
     [enableAutoApply.type]: (state) => {
-      state.visualization = cloneDeep(state.appliedState!.visualization);
-      state.datasourceStates = cloneDeep(state.appliedState!.datasourceStates);
       delete state.appliedState;
     },
     [disableAutoApply.type]: (state) => {
