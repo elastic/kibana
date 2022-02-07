@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from '../../../core/server';
-import {
+import type { Plugin, CoreSetup } from 'src/core/server';
+import type {
   ScreenshotModeRequestHandlerContext,
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,

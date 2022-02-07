@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-
-import { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
-
+import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { getScreenshotMode, getScreenshotLayout } from '../common';
+import type { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
 
 export class ScreenshotModePlugin implements Plugin<ScreenshotModePluginSetup> {
   private publicContract = Object.freeze({

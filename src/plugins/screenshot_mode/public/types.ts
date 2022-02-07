@@ -13,10 +13,10 @@ export interface IScreenshotModeService {
    * Returns a boolean indicating whether the current user agent (browser) would like to view UI optimized for
    * screenshots or printing.
    */
-  isScreenshotMode: () => boolean;
+  isScreenshotMode(): boolean;
 
   /** @deprecated */
-  getScreenshotLayout: () => undefined | Layout;
+  getScreenshotLayout(): undefined | Layout;
 }
 
 export type ScreenshotModePluginSetup = IScreenshotModeService;

@@ -12,6 +12,13 @@
 
 export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KEY__';
 
+declare global {
+  interface Window {
+    [KBN_SCREENSHOT_MODE_ENABLED_KEY]?: boolean;
+    [KBN_SCREENSHOT_MODE_LAYOUT_KEY]?: Layout;
+  }
+}
+
 /**
  * This function is responsible for detecting whether we are currently in screenshot mode.
  *
@@ -21,7 +28,7 @@ export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KE
  */
 export const getScreenshotMode = (): boolean => {
   return (
-    (window as unknown as Record<string, unknown>)[KBN_SCREENSHOT_MODE_ENABLED_KEY] === true ||
+    window[KBN_SCREENSHOT_MODE_ENABLED_KEY] === true ||
     window.localStorage.getItem(KBN_SCREENSHOT_MODE_ENABLED_KEY) === 'true'
   );
 };
@@ -85,7 +92,7 @@ export const setScreenshotLayout = (value: Layout) => {
 /** @deprecated */
 export const getScreenshotLayout = (): undefined | Layout => {
   return (
-    (window as unknown as Record<string, Layout>)[KBN_SCREENSHOT_MODE_LAYOUT_KEY] ||
+    window[KBN_SCREENSHOT_MODE_LAYOUT_KEY] ??
     (window.localStorage.getItem(KBN_SCREENSHOT_MODE_LAYOUT_KEY) as Layout)
   );
 };

@@ -9,28 +9,24 @@
 import type { RequestHandlerContext, KibanaRequest } from 'src/core/server';
 import type { Layout } from '../common';
 
-/**
- * Any context that requires access to the screenshot mode flag but does not have access
- * to request context {@link ScreenshotModeRequestHandlerContext}, for instance if they are pre-context,
- * can use this function to check whether the request originates from a client that is in screenshot mode.
- */
-type IsScreenshotMode = (request: KibanaRequest) => boolean;
+export interface ScreenshotModePluginStart {
+  /**
+   * Any context that requires access to the screenshot mode flag but does not have access
+   * to request context {@link ScreenshotModeRequestHandlerContext}, for instance if they are pre-context,
+   * can use this function to check whether the request originates from a client that is in screenshot mode.
+   */
+  isScreenshotMode(request: KibanaRequest): boolean;
+}
 
-export interface ScreenshotModePluginSetup {
-  isScreenshotMode: IsScreenshotMode;
-
+export interface ScreenshotModePluginSetup extends ScreenshotModePluginStart {
   /**
    * Set the current environment to screenshot mode. Intended to run in a browser-environment, before any other scripts
    * on the page have run to ensure that screenshot mode is detected as early as possible.
    */
-  setScreenshotModeEnabled: () => void;
+  setScreenshotModeEnabled(): void;
 
   /** @deprecated */
-  setScreenshotLayout: (value: Layout) => void;
-}
-
-export interface ScreenshotModePluginStart {
-  isScreenshotMode: IsScreenshotMode;
+  setScreenshotLayout(value: Layout): void;
 }
 
 export interface ScreenshotModeRequestHandlerContext extends RequestHandlerContext {
