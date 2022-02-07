@@ -55,7 +55,6 @@ describe('TelemetryEventsSender', () => {
             size: 3,
             created: 0,
             path: 'X',
-            test: 'me',
             Ext: {
               code_signature: {
                 key1: 'X',
