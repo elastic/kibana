@@ -23,7 +23,7 @@ ifeval::[ "{version}" != "{minor-version}.0" ]
 |Upgrade to {version}
 endif::[]
 
-|7.0–7.16
+|7.0–7.9
 |Upgrade to {version}
 
 |6.8
