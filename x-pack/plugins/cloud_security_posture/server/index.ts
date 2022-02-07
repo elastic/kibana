@@ -7,7 +7,7 @@
 import type { PluginInitializerContext } from '../../../../src/core/server';
 import { CspPlugin } from './plugin';
 
-export { CspServerPluginSetup, CspServerPluginStart } from './types';
+export type { CspServerPluginSetup, CspServerPluginStart } from './types';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CspPlugin(initializerContext);
