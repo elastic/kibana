@@ -11,7 +11,7 @@ import { workerData, parentPort, isMainThread } from 'worker_threads';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import path from 'path';
-import PdfMake from 'pdfmake';
+import Printer from 'pdfmake';
 // @ts-ignore: no module definition
 import concat from 'concat-stream';
 
@@ -55,7 +55,7 @@ async function execute() {
     },
   };
 
-  const printer = new PdfMake(fonts);
+  const printer = new Printer(fonts);
 
   const { layout, logo, title, content } = workerData as PdfWorkerData;
 
