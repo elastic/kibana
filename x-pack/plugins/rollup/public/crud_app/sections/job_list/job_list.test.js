@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
