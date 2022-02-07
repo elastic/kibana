@@ -13,7 +13,7 @@ import { packageRegistryPort } from './ftr_config';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution@sha256:de952debe048d903fc73e8a4472bb48bb95028d440cba852f21b863d47020c61';
+  'docker.elastic.co/package-registry/distribution@sha256:76b83394ccdd4359fbe101bdfbfd3c99c31cc5ffe150e0e4fa7ec4a12644c939';
 
 async function ftrConfigRun({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(require.resolve('./ftr_config.ts'));

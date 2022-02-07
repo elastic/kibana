@@ -11,11 +11,13 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { defineDockerServersConfig } from '@kbn/test';
 
 // Docker image to use for Fleet API integration tests.
-// This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
-// example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
-// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
+// This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, to update:
+// - Go to: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/activity?branch=snapshot
+// - Choose the most recent successful build
+// - Click "Publish Docker image" step
+// - Copy the digest: sha256:xxxx value from the logs of the last docker push step
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution@sha256:de952debe048d903fc73e8a4472bb48bb95028d440cba852f21b863d47020c61';
+  'docker.elastic.co/package-registry/distribution@sha256:76b83394ccdd4359fbe101bdfbfd3c99c31cc5ffe150e0e4fa7ec4a12644c939';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
