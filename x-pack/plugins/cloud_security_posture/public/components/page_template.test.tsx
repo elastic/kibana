@@ -7,7 +7,7 @@
 import React, { ComponentProps } from 'react';
 import { render, screen } from '@testing-library/react';
 import Chance from 'chance';
-import { createNavigationItemFixture } from '../test/fixtures/navigationItem';
+import { createNavigationItemFixture } from '../test/fixtures/navigation_item';
 import { TestProvider } from '../test/test_provider';
 import { CspPageTemplate, getSideNavItems } from './page_template';
 
