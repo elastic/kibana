@@ -111,20 +111,28 @@ export function OverviewPage({ routeParams }: Props) {
               <EuiFlexGroup direction="column" gutterSize="s">
                 {hasDataMap?.alert?.hasData && (
                   <EuiFlexItem>
-                    <EuiPanel hasBorder={true}>
+                    <EuiPanel color="subdued">
                       <AlertsSection />
                     </EuiPanel>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem>
-                  {/* Resources / What's New sections */}
-                  <EuiPanel hasBorder={true}>
-                    <Resources />
-                    <EuiSpacer size="l" />
-                    {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 5)} />}
-                  </EuiPanel>
-                </EuiFlexItem>
               </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {/* Resources / What's New sections */}
+              <EuiPanel color="subdued">
+                <EuiFlexGroup direction="row">
+                  <EuiFlexItem grow={4}>
+                    {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={2}>
+                    <Resources />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
