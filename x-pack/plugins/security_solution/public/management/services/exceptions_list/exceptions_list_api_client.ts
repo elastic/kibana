@@ -24,7 +24,8 @@ import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../com
  * Please, use the getInstance method instead of creating a new instance when using this implementation.
  */
 export class ExceptionsListApiClient {
-  private static instance: Map<ListId, ExceptionsListApiClient>;
+  private static instance: Map<ListId, ExceptionsListApiClient> = new Map();
+  private static wasListCreated: Map<ListId, Promise<void>> = new Map();
   private ensureListExists: Promise<void>;
 
   constructor(
@@ -40,16 +41,34 @@ export class ExceptionsListApiClient {
    * This method is being used when initializing an instance only once.
    */
   private async createExceptionList(): Promise<void> {
-    try {
-      await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-        body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
-      });
-    } catch (err) {
-      // Ignore 409 errors. List already created
-      if (err.response?.status !== 409) {
-        throw err;
-      }
+    if (ExceptionsListApiClient.wasListCreated.has(this.listId)) {
+      return ExceptionsListApiClient.wasListCreated.get(this.listId);
     }
+    ExceptionsListApiClient.wasListCreated.set(
+      this.listId,
+      new Promise<void>(async (resolve, reject) => {
+        try {
+          await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+            body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
+          });
+
+          resolve();
+        } catch (err) {
+          // Ignore 409 errors. List already created
+          if (err.response?.status !== 409) {
+            reject(err);
+          }
+
+          resolve();
+        }
+      })
+    );
+
+    ExceptionsListApiClient.wasListCreated.get(this.listId)?.catch(() => {
+      ExceptionsListApiClient.wasListCreated.delete(this.listId);
+    });
+
+    return ExceptionsListApiClient.wasListCreated.get(this.listId);
   }
 
   /**
@@ -73,8 +92,6 @@ export class ExceptionsListApiClient {
     listId: string,
     listDefinition: CreateExceptionListSchema
   ): ExceptionsListApiClient {
-    if (!ExceptionsListApiClient.instance) ExceptionsListApiClient.instance = new Map();
-
     if (!ExceptionsListApiClient.instance.has(listId)) {
       ExceptionsListApiClient.instance.set(
         listId,

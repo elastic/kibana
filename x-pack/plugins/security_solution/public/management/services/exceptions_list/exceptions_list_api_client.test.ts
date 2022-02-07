@@ -74,6 +74,30 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.post).toHaveBeenCalledTimes(0);
       expect(exceptionsListApiClientInstance).toBeDefined();
     });
+
+    it('Creating three instances from the same listId only creates the list one time', () => {
+      const newFakeListId = 'fakeListIdV2';
+      const exceptionsListApiClientInstanceV1 = new ExceptionsListApiClient(
+        fakeHttpServices,
+        newFakeListId,
+        getFakeListDefinition()
+      );
+      const exceptionsListApiClientInstanceV2 = new ExceptionsListApiClient(
+        fakeHttpServices,
+        newFakeListId,
+        getFakeListDefinition()
+      );
+      const exceptionsListApiClientInstanceV3 = new ExceptionsListApiClient(
+        fakeHttpServices,
+        newFakeListId,
+        getFakeListDefinition()
+      );
+
+      expect(fakeHttpServices.post).toHaveBeenCalledTimes(1);
+      expect(exceptionsListApiClientInstanceV1).toBeDefined();
+      expect(exceptionsListApiClientInstanceV2).toBeDefined();
+      expect(exceptionsListApiClientInstanceV3).toBeDefined();
+    });
   });
 
   describe('Wen using public methods', () => {
