@@ -133,7 +133,7 @@ export const checkVersionIsSame = (version: string, kibanaVersion: string) => {
 const checkSourceUriAllowed = (sourceUri?: string) => {
   if (sourceUri && !appContextService.getConfig()?.developer?.allowAgentUpgradeSourceUri) {
     throw new Error(
-      `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`
+      `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
     );
   }
 };
