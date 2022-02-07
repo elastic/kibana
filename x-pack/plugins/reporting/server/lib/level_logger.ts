@@ -46,7 +46,8 @@ export class LevelLogger implements GenericLevelLogger {
     this.getLogger(tags).warn(msg);
   }
 
-  public debug<T extends LogMeta>(msg: string, tags: string[] = [], meta: T) {
+  // only "debug" logging supports the LogMeta for now...
+  public debug<T extends LogMeta>(msg: string, tags: string[] = [], meta?: T) {
     this.getLogger(tags).debug<T>(msg, meta);
   }
 

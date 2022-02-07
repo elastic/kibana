@@ -29,7 +29,7 @@ export interface ExecutionCompleteMetrics {
   byteSize: number;
 }
 
-interface IReportingEventLogger {
+export interface IReportingEventLogger {
   logEvent(message: string, properties: LogMeta): void;
   startTiming(): void;
   stopTiming(): void;
