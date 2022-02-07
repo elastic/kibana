@@ -82,6 +82,11 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       help: strings.getLabelsArgHelp(),
       default: `{${PARTITION_LABELS_FUNCTION}}`,
     },
+    ariaLabel: {
+      types: ['string'],
+      help: strings.getAriaLabelHelp(),
+      required: false,
+    },
   },
   fn(context, args, handlers) {
     const maxSupportedBuckets = 2;
@@ -95,6 +100,10 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
 
     const visConfig: PartitionVisParams = {
       ...args,
+      ariaLabel:
+        args.ariaLabel ??
+        (handlers.variables?.embeddableTitle as string) ??
+        handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
         metric: args.metric,
