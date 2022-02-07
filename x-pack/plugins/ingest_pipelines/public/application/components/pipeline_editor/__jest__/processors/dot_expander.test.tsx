@@ -81,7 +81,7 @@ describe('Processor: Dot Expander', () => {
     ]);
   });
 
-  test('allow form submission if field for the dot notation equal to *', async () => {
+  test('allows form submission if the field for the dot notation is equal to *', async () => {
     const {
       actions: { saveNewProcessor },
       form,
