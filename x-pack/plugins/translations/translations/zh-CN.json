@@ -2764,8 +2764,6 @@
     "expressionPartitionVis.legend.filterForValueButtonAriaLabel": "筛留值",
     "expressionPartitionVis.legend.filterOptionsLegend": "{legendDataLabel}, 筛选选项",
     "expressionPartitionVis.legend.filterOutValueButtonAriaLabel": "筛除值",
-    "expressionPartitionVis.negativeValuesFound": "饼图/圆环图无法使用负值进行呈现。",
-    "expressionPartitionVis.noResultsFoundTitle": "找不到结果",
     "fieldFormats.advancedSettings.format.bytesFormat.numeralFormatLinkText": "数值格式",
     "fieldFormats.advancedSettings.format.bytesFormatText": "“字节”格式的默认{numeralFormatLink}",
     "fieldFormats.advancedSettings.format.bytesFormatTitle": "字节格式",

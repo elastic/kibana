@@ -2980,8 +2980,6 @@
     "expressionPartitionVis.legend.filterForValueButtonAriaLabel": "値でフィルター",
     "expressionPartitionVis.legend.filterOptionsLegend": "{legendDataLabel}、フィルターオプション",
     "expressionPartitionVis.legend.filterOutValueButtonAriaLabel": "値を除外",
-    "expressionPartitionVis.negativeValuesFound": "円/ドーナツグラフは負の値では表示できません。",
-    "expressionPartitionVis.noResultsFoundTitle": "結果が見つかりませんでした",
     "fieldFormats.advancedSettings.format.bytesFormat.numeralFormatLinkText": "数字フォーマット",
     "fieldFormats.advancedSettings.format.bytesFormatText": "「バイト」フォーマットのデフォルト{numeralFormatLink}です",
     "fieldFormats.advancedSettings.format.bytesFormatTitle": "バイトフォーマット",
