@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export const useToastNotificationService = jest.fn();
+export const useToastNotificationService = jest.fn(() => {
+  return {};
+});
