@@ -88,8 +88,6 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
       loginWithUserAndWaitForPage(INTEGRATIONS, FleetAllIntegrReadUser);
       cy.getBySel('integration-card:epr:apache').click();
       cy.getBySel(ADD_POLICY_BTN).should('be.disabled');
-      cy.getBySel(POLICIES_TAB).should('not.exist');
-      cy.getBySel(ADVANCED_TAB).should('not.exist');
     });
   });
 });
