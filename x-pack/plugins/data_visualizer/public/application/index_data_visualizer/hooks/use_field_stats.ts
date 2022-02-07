@@ -119,19 +119,15 @@ export function useFieldStatsSearchStrategy(
       Comparators.default(sortDirection as 'asc' | 'desc' | undefined)
     );
 
-    let sortedConfigs = [
+    const preslicedSortedConfigs = [
       ...fieldStatsParams.metricConfigs,
       ...fieldStatsParams.nonMetricConfigs,
     ].sort(itemsSorter);
 
-    const startingPage =
-      initialDataVisualizerListState.pageIndex > 1
-        ? initialDataVisualizerListState.pageIndex - 1
-        : 0;
-    const endingPage = initialDataVisualizerListState.pageIndex + 1;
-    sortedConfigs = sortedConfigs.slice(
-      initialDataVisualizerListState.pageSize * startingPage,
-      initialDataVisualizerListState.pageSize * endingPage
+    const { pageIndex, pageSize } = initialDataVisualizerListState;
+    const sortedConfigs = preslicedSortedConfigs.slice(
+      pageIndex * pageSize,
+      (pageIndex + 1) * pageSize
     );
 
     const filterCriteria = buildBaseFilterCriteria(
