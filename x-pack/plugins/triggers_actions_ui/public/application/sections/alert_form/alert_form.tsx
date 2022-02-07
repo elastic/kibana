@@ -556,7 +556,9 @@ export const AlertForm = ({
               actionGroup.id === selectedAlertType.recoveryActionGroup.id
                 ? {
                     ...actionGroup,
-                    omitOptionalMessageVariables: true,
+                    omitMessageVariables: selectedAlertType.doesSetRecoveryContext
+                      ? 'keepContext'
+                      : 'all',
                     defaultActionMessage: recoveredActionGroupMessage,
                   }
                 : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }

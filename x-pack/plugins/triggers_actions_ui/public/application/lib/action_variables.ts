@@ -7,16 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
-import { ActionVariables, REQUIRED_ACTION_VARIABLES } from '../../types';
+import { ActionVariables, REQUIRED_ACTION_VARIABLES, CONTEXT_ACTION_VARIABLES } from '../../types';
 import { ActionVariable } from '../../../../alerting/common';
+
+export type OmitMessageVariablesType = 'all' | 'keepContext';
 
 // return a "flattened" list of action variables for an alertType
 export function transformActionVariables(
   actionVariables: ActionVariables,
-  omitOptionalMessageVariables?: boolean
+  omitMessageVariables?: OmitMessageVariablesType
 ): ActionVariable[] {
-  const filteredActionVariables: ActionVariables = omitOptionalMessageVariables
-    ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
+  const filteredActionVariables: ActionVariables = omitMessageVariables
+    ? omitMessageVariables === 'all'
+      ? pick(actionVariables, REQUIRED_ACTION_VARIABLES)
+      : pick(actionVariables, [...REQUIRED_ACTION_VARIABLES, ...CONTEXT_ACTION_VARIABLES])
     : actionVariables;
 
   const alwaysProvidedVars = getAlwaysProvidedActionVariables();
