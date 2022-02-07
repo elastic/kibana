@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
-import { IEsSearchRequest } from '../../../data/server';
-import { IEsSearchResponse } from '../../../data/common';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
 import { getRemoteRoutePaths } from '../../common';
@@ -30,123 +28,108 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
       const { index, projectID, timeFrom, timeTo } = request.query;
 
       try {
-        const resFlamegraphTraces = await context
-          .search!.search(
-            {
-              params: {
-                index,
-                body: {
-                  query: {
-                    function_score: {
-                      query: {
-                        bool: {
-                          must: [
-                            {
-                              term: {
-                                ProjectID: {
-                                  value: projectID,
-                                  boost: 1.0,
-                                },
-                              },
-                            },
-                            {
-                              range: {
-                                '@timestamp': {
-                                  gte: timeFrom,
-                                  lt: timeTo,
-                                  format: 'epoch_second',
-                                  boost: 1.0,
-                                },
-                              },
-                            },
-                          ],
-                        },
-                      },
-                      random_score: {},
-                    },
-                  },
-                  aggs: {
-                    sample: {
-                      sampler: {
-                        shard_size: 20000,
-                      },
-                      aggs: {
-                        group_by: {
-                          terms: {
-                            field: 'StackTraceID',
-                            size: 20000,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            } as IEsSearchRequest,
-            {}
-          )
-          .toPromise();
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-        const resTotalTraces = await context
-          .search!.search(
-            {
-              params: {
-                index,
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            ProjectID: {
-                              value: projectID,
-                              boost: 1.0,
-                            },
+        const resFlamegraphTraces = await esClient.search({
+          index,
+          body: {
+            query: {
+              function_score: {
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          ProjectID: {
+                            value: projectID,
+                            boost: 1.0,
                           },
                         },
-                        {
-                          range: {
-                            '@timestamp': {
-                              gte: timeFrom,
-                              lt: timeTo,
-                              format: 'epoch_second',
-                              boost: 1.0,
-                            },
+                      },
+                      {
+                        range: {
+                          '@timestamp': {
+                            gte: timeFrom,
+                            lt: timeTo,
+                            format: 'epoch_second',
+                            boost: 1.0,
                           },
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
-                  aggs: {
-                    histogram: {
-                      auto_date_histogram: {
-                        field: '@timestamp',
-                        buckets: 100,
-                      },
-                      aggs: {
-                        Count: {
-                          sum: {
-                            field: 'Count',
-                          },
-                        },
-                      },
+                },
+              },
+            },
+            aggs: {
+              sample: {
+                sampler: {
+                  shard_size: 20000,
+                },
+                aggs: {
+                  group_by: {
+                    terms: {
+                      field: 'StackTraceID',
+                      size: 20000,
                     },
                   },
                 },
               },
-            } as IEsSearchRequest,
-            {}
-          )
-          .toPromise();
+            },
+          },
+        });
+
+        const resTotalTraces = await esClient.search({
+          index,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      ProjectID: {
+                        value: projectID,
+                        boost: 1.0,
+                      },
+                    },
+                  },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: timeFrom,
+                        lt: timeTo,
+                        format: 'epoch_second',
+                        boost: 1.0,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            aggs: {
+              histogram: {
+                auto_date_histogram: {
+                  field: '@timestamp',
+                  buckets: 100,
+                },
+                aggs: {
+                  Count: {
+                    sum: {
+                      field: 'Count',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
 
         const tracesDocIDs: string[] = [];
-        resFlamegraphTraces.rawResponse.aggregations.sample.group_by.buckets.forEach(
+        resFlamegraphTraces.body.aggregations.sample.group_by.buckets.forEach(
           (stackTraceItem: any) => {
             tracesDocIDs.push(stackTraceItem.key);
           }
         );
-
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
 
         const resStackTraces = await esClient.mget<any>({
           index: 'profiling-stacktraces',
@@ -171,8 +154,8 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
 
         return response.ok({
           body: {
-            flameChart: (resFlamegraphTraces as IEsSearchResponse).rawResponse,
-            totalTraces: (resTotalTraces as IEsSearchResponse).rawResponse.aggregations,
+            flameChart: resFlamegraphTraces.body,
+            totalTraces: resTotalTraces.body.aggregations,
             stackTraces: resStackTraces.body.docs,
             stackFrames: resStackFrames.body.docs,
           },
