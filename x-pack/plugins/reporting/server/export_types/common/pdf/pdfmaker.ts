@@ -26,12 +26,15 @@ import { PdfWorkerOutOfMemoryError } from './pdf_generate_errors';
 import type { PdfWorkerData } from './worker';
 
 export class PdfMaker {
-  private _layout: Layout;
+  _layout: Layout;
   private _logo: string | undefined;
   private _title: string;
   private _content: Content[];
 
   private worker?: Worker;
+
+  protected workerModulePath = path.resolve(__dirname, './worker.js');
+  protected workerMaxHeapSizeMb = 128; // We should consider making this number dynamic?
 
   constructor(layout: Layout, logo: string | undefined) {
     this._layout = layout;
@@ -138,9 +141,10 @@ export class PdfMaker {
 
     return await new Promise<Buffer>((resolve, reject) => {
       let buffer: undefined | Buffer;
-      this.worker = new Worker(path.resolve(__dirname, './worker.js'), {
+      this.worker = new Worker(this.workerModulePath, {
         resourceLimits: {
-          maxOldGenerationSizeMb: 128, // We should consider making this number dynamic?
+          maxYoungGenerationSizeMb: this.workerMaxHeapSizeMb,
+          maxOldGenerationSizeMb: this.workerMaxHeapSizeMb,
         },
         workerData: this.getWorkerData(),
       });

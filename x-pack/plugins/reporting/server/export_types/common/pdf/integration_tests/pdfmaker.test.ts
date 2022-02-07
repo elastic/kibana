@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { isUint8Array } from 'util/types';
 import { createMockLayout } from '../../../../../../screenshotting/server/layouts/mock';
 import { PdfMaker } from '../';
+import { PdfWorkerOutOfMemoryError } from '../pdf_generate_errors';
+import { MemoryLeakPdfMaker } from './memory_leak_pdfmaker';
 
 const imageBase64 = Buffer.from(
   `iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAGFBMVEXy8vJpaWn7+/vY2Nj39/cAAACcnJzx8fFvt0oZAAAAi0lEQVR4nO3SSQoDIBBFwR7U3P/GQXKEIIJULXr9H3TMrHhX5Yysvj3jjM8+XRnVa9wec8QuHKv3h74Z+PNyGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/xu3Bxy026rXu4ljdUVW395xUFfGzLo946DK+QW+bgCTFcecSAAAAABJRU5ErkJggg==`,
@@ -22,13 +25,20 @@ describe('PdfMaker', () => {
     pdf = new PdfMaker(layout, undefined);
   });
 
-  describe('getBuffer', () => {
-    it('should generate PDF buffer', async () => {
+  describe('generate', () => {
+    it('should generate PDF array buffer', async () => {
       pdf.setTitle('the best PDF in the world');
       pdf.addImage(imageBase64, { title: 'first viz', description: '☃️' });
       pdf.addImage(imageBase64, { title: 'second viz', description: '❄️' });
 
-      await expect(pdf.generate()).resolves.toBeInstanceOf(Buffer);
+      expect(isUint8Array(await pdf.generate())).toBe(true);
+    });
+  });
+
+  describe('worker', () => {
+    it('should report when the PDF worker runs out of memory instead of crashing the main thread', async () => {
+      const leakyMaker = new MemoryLeakPdfMaker(layout, undefined);
+      await expect(leakyMaker.generate()).rejects.toBeInstanceOf(PdfWorkerOutOfMemoryError);
     });
   });
 });
