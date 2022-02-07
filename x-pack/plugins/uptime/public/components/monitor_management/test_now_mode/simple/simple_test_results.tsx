@@ -15,7 +15,7 @@ interface Props {
 }
 export function SimpleTestResults({ monitorId }: Props) {
   const [summaryDocs, setSummaryDocs] = useState<Ping[]>([]);
-  const { summaryDoc, loading } = useSimpleRunOnceMonitors({ monitorId });
+  const { summaryDoc, loading } = useSimpleRunOnceMonitors({ configId: monitorId });
 
   useEffect(() => {
     if (summaryDoc) {

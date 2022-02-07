@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { EuiFilePicker, EuiConfirmModal } from '@elastic/eui';
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 jest.mock('../../../utils', () => ({
   readUploadedFileAsBase64: jest.fn(({ img }) => img),
