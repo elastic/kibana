@@ -9,15 +9,15 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIconTip,
+  EuiHealth,
   EuiLink,
   EuiText,
   EuiSpacer,
   EuiTitle,
-  EuiButton,
+  EuiButtonEmpty,
   EuiLoadingSpinner,
   EuiCallOut,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -110,11 +110,11 @@ export function AlertsSection() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" href={manageLink}>
+          <EuiButtonEmpty iconType="sortRight" color="text" size="xs" href={manageLink}>
             {i18n.translate('xpack.observability.overview.alert.appLink', {
-              defaultMessage: 'Manage alerts',
+              defaultMessage: 'Manage rules and alerts',
             })}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <>
@@ -133,50 +133,59 @@ export function AlertsSection() {
         {alerts
           .filter((alert) => filter === ALL_TYPES || alert.consumer === filter)
           .map((alert, index) => {
-            const isLastElement = index === alerts.length - 1;
             return (
-              <EuiFlexGroup direction="column" gutterSize="s" key={alert.id}>
-                <EuiFlexItem grow={false}>
-                  <EuiLink
-                    href={core.http.basePath.prepend(paths.management.alertDetails(alert.id))}
-                  >
-                    <EuiText size="s">{alert.name}</EuiText>
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">{alert.alertTypeId}</EuiBadge>
-                    </EuiFlexItem>
-                    {alert.tags.map((tag, idx) => {
-                      return (
-                        <EuiFlexItem key={idx} grow={false}>
-                          <EuiBadge color="default">{tag}</EuiBadge>
-                        </EuiFlexItem>
-                      );
-                    })}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiText color="subdued" size="xs">
-                        Updated {moment.duration(moment().diff(alert.updatedAt)).humanize()} ago
-                      </EuiText>
-                    </EuiFlexItem>
-                    {alert.muteAll && (
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiPanel>
+                    <EuiFlexGroup direction="column" gutterSize="s" key={alert.id}>
                       <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          type="minusInCircle"
-                          content={i18n.translate('xpack.observability.overview.alerts.muted', {
-                            defaultMessage: 'Muted',
-                          })}
-                        />
+                        <EuiLink
+                          href={core.http.basePath.prepend(paths.management.alertDetails(alert.id))}
+                        >
+                          <EuiText size="s">{alert.name}</EuiText>
+                        </EuiLink>
                       </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup gutterSize="xs">
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge color="hollow">{alert.alertTypeId}</EuiBadge>
+                          </EuiFlexItem>
+                          {alert.tags.map((tag, idx) => {
+                            return (
+                              <EuiFlexItem key={idx} grow={false}>
+                                <EuiBadge color="default">{tag}</EuiBadge>
+                              </EuiFlexItem>
+                            );
+                          })}
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup gutterSize="s" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiHealth color="primary" textSize="xs">
+                              Active
+                            </EuiHealth>
+                          </EuiFlexItem>
+                          {alert.muteAll && (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="hollow">
+                                {i18n.translate('xpack.observability.overview.alerts.muted', {
+                                  defaultMessage: 'Muted',
+                                })}
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          )}
+                          <EuiFlexItem grow={false}>
+                            <EuiText color="subdued" size="xs">
+                              Last updated{' '}
+                              {moment.duration(moment().diff(alert.updatedAt)).humanize()} ago
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
                 </EuiFlexItem>
-                {!isLastElement && <EuiHorizontalRule margin="xs" />}
               </EuiFlexGroup>
             );
           })}
