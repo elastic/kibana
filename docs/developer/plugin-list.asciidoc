@@ -388,6 +388,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_security_posture/README.md[csp]
+|Cloud Posture automates the identification and remediation of risks across cloud infrastructures
+
+
 |<<dashboard-enhanced-plugin>>
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
