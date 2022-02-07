@@ -16,18 +16,13 @@ import { getFont } from './get_font';
 import { PdfWorkerOutOfMemoryError } from './pdf_generate_errors';
 
 import { PdfWorkerData } from './worker';
-
-const pageMarginTop = 40;
-const pageMarginBottom = 80;
-const pageMarginWidth = 40;
-const headingFontSize = 14;
-const headingMarginTop = 10;
-const headingMarginBottom = 5;
-const headingHeight = headingFontSize * 1.5 + headingMarginTop + headingMarginBottom;
-const subheadingFontSize = 12;
-const subheadingMarginTop = 0;
-const subheadingMarginBottom = 5;
-const subheadingHeight = subheadingFontSize * 1.5 + subheadingMarginTop + subheadingMarginBottom;
+import {
+  pageMarginTop,
+  pageMarginBottom,
+  pageMarginWidth,
+  headingHeight,
+  subheadingHeight,
+} from './constants';
 
 const tableBorderWidth = 1;
 
