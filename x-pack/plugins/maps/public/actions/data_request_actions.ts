@@ -24,6 +24,7 @@ import {
   getDataRequestDescriptor,
   getLayerById,
   getLayerList,
+  getEditState,
 } from '../selectors/map_selectors';
 import {
   cancelRequest,
@@ -67,6 +68,7 @@ export type DataRequestContext = {
   dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
   isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
+  isEditingFeatures: boolean;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -119,7 +121,8 @@ function getDataRequestContext(
   getState: () => MapStoreState,
   layerId: string,
   forceRefreshDueToDrawing: boolean,
-  isForceRefresh: boolean
+  isForceRefresh: boolean,
+  isEditingFeatures?: boolean
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),
@@ -145,6 +148,7 @@ function getDataRequestContext(
       dispatch(registerCancelCallback(requestToken, callback)),
     forceRefreshDueToDrawing,
     isForceRefresh,
+    isEditingFeatures: getEditState(getState())?.layerId === layerId,
   };
 }
 
@@ -183,7 +187,8 @@ export function syncDataForLayerDueToDrawing(layer: ILayer) {
       getState,
       layer.getId(),
       true,
-      false
+      false,
+      getEditState(getState())?.layerId === layer.getId()
     );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
@@ -199,7 +204,8 @@ export function syncDataForLayer(layer: ILayer, isForceRefresh: boolean) {
       getState,
       layer.getId(),
       false,
-      isForceRefresh
+      isForceRefresh,
+      getEditState(getState())?.layerId === layer.getId()
     );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
@@ -393,7 +399,14 @@ export function fitToLayerExtent(layerId: string) {
     if (targetLayer) {
       try {
         const bounds = await targetLayer.getBounds(
-          getDataRequestContext(dispatch, getState, layerId, false, false)
+          getDataRequestContext(
+            dispatch,
+            getState,
+            layerId,
+            false,
+            false,
+            getEditState(getState())?.layerId === layerId
+          )
         );
         if (bounds) {
           await dispatch(setGotoWithBounds(scaleBounds(bounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
@@ -426,7 +439,14 @@ export function fitToDataBounds(onNoBounds?: () => void) {
         return null;
       }
       return layer.getBounds(
-        getDataRequestContext(dispatch, getState, layer.getId(), false, false)
+        getDataRequestContext(
+          dispatch,
+          getState,
+          layer.getId(),
+          false,
+          false,
+          getEditState(getState())?.layerId === layer.getId()
+        )
       );
     });
 

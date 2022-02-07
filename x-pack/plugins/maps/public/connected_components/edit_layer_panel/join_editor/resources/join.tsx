@@ -210,6 +210,7 @@ export class Join extends Component<Props, State> {
           label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
             defaultMessage: `Apply global search to join`,
           })}
+          isEditingFeatures={false}
         />
       );
       if (this.state.indexPattern && this.state.indexPattern.timeFieldName) {
@@ -222,6 +223,7 @@ export class Join extends Component<Props, State> {
             label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalTimeCheckboxLabel', {
               defaultMessage: `Apply global time to join`,
             })}
+            isEditingFeatures={false}
           />
         );
       }

@@ -38,6 +38,7 @@ export interface Props {
   toggleVisible: (layerId: string) => void;
   editModeActiveForLayer: boolean;
   numLayers: number;
+  updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
 }
 
 interface State {
@@ -196,7 +197,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
                 defaultMessage:
                   'Edit features only supported for document layers without clustering, term joins, time filtering, or global search.',
               }),
-          disabled: !this.state.isFeatureEditingEnabled || this.props.editModeActiveForLayer,
+          disabled: false,
           onClick: async () => {
             this._closePopover();
             const supportedShapeTypes = await (
@@ -210,6 +211,9 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
             } else {
               this.props.enablePointEditing(this.props.layer.getId());
             }
+
+            this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', false);
+            this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', false);
           },
         });
       }

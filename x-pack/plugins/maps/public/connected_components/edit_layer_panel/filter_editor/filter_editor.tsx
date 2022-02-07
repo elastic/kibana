@@ -35,6 +35,7 @@ export interface Props {
   layer: ILayer;
   setLayerQuery: (id: string, query: Query) => void;
   updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
+  editModeActiveForLayer: boolean;
 }
 
 interface State {
@@ -213,6 +214,7 @@ export class FilterEditor extends Component<Props, State> {
         })}
         applyGlobalTime={this.props.layer.getSource().getApplyGlobalTime()}
         setApplyGlobalTime={this._onApplyGlobalTimeChange}
+        isEditingFeatures={this.props.editModeActiveForLayer}
       />
     ) : null;
 
@@ -244,6 +246,7 @@ export class FilterEditor extends Component<Props, State> {
           })}
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+          isEditingFeatures={this.props.editModeActiveForLayer}
         />
 
         {globalTimeCheckbox}
