@@ -137,14 +137,19 @@ describe('successful migrations', () => {
         schedule: undefined,
       });
 
-      expect(migration820(taskInstance, migrationContext)).toEqual({
-        ...taskInstance,
-        attributes: {
-          ...taskInstance.attributes,
-          attempts: 3,
-          status: 'idle',
-        },
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('does not update the tasks that are not "failed" and has a schedule', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'idle',
+        attempts: 3,
+        schedule: { interval: '1000' },
       });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
     });
   });
 });
