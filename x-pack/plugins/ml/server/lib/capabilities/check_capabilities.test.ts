@@ -26,17 +26,13 @@ const mlIsNotEnabled = async () => false;
 
 const mlClientNonUpgrade = {
   info: async () => ({
-    body: {
-      upgrade_mode: false,
-    },
+    upgrade_mode: false,
   }),
 } as unknown as MlClient;
 
 const mlClientUpgrade = {
   info: async () => ({
-    body: {
-      upgrade_mode: true,
-    },
+    upgrade_mode: true,
   }),
 } as unknown as MlClient;
 

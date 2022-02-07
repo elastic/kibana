@@ -266,7 +266,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await mlClient.putDataFrameAnalytics(
+        const body = await mlClient.putDataFrameAnalytics(
           {
             id: analyticsId,
             // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
@@ -304,7 +304,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await mlClient.evaluateDataFrame(
+        const body = await mlClient.evaluateDataFrame(
           {
             // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,

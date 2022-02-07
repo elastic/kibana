@@ -156,10 +156,8 @@ export function jobsProvider(
     const results: ResetJobsResponse = {};
     for (const jobId of jobIds) {
       try {
-        const {
-          // @ts-expect-error @elastic-elasticsearch resetJob response incorrect, missing task
-          body: { task },
-        } = await mlClient.resetJob({
+        // @ts-expect-error @elastic-elasticsearch resetJob response incorrect, missing task
+        const { task } = await mlClient.resetJob({
           job_id: jobId,
           wait_for_completion: false,
         });
