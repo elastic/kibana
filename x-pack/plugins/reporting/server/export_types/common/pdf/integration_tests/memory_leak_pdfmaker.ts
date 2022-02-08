@@ -9,6 +9,7 @@ import path from 'path';
 import { PdfMaker } from '../pdfmaker';
 
 export class MemoryLeakPdfMaker extends PdfMaker {
-  protected workerMaxHeapSizeMb = 2;
+  protected workerMaxOldHeapSizeMb = 2;
+  protected workerMaxYoungHeapSizeMb = 2;
   protected workerModulePath = path.resolve(__dirname, './memory_leak_worker.js');
 }

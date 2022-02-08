@@ -36,8 +36,7 @@ export class PdfMaker {
   protected workerModulePath = path.resolve(__dirname, './worker.js');
 
   /**
-   * The maximum heap size for the worker thread. Used for both young and
-   * old heap generation regions.
+   * The maximum heap size for old memory region of the worker thread.
    *
    * @note We need to choose a sane number given that we need to load a Kibana
    * node environment, all the library code and the subsequent buffers that
@@ -54,7 +53,16 @@ export class PdfMaker {
    * TODO: Should we consider making this number dynamic? It is difficult to
    * know how we'd describe this to users in the most helpful way.
    */
-  protected workerMaxHeapSizeMb = 128;
+  protected workerMaxOldHeapSizeMb = 128;
+
+  /**
+   * The maximum heap size for young memory region of the worker thread.
+   *
+   * @note leave 'undefined' to use the Node.js default value.
+   * @note we set this to a low value to trigger an OOM event sooner for the worker
+   * in test scenarios.
+   */
+  protected workerMaxYoungHeapSizeMb: number | undefined = undefined;
 
   constructor(layout: Layout, logo: string | undefined) {
     this._layout = layout;
@@ -163,8 +171,8 @@ export class PdfMaker {
       let buffer: undefined | Uint8Array;
       this.worker = new Worker(this.workerModulePath, {
         resourceLimits: {
-          maxYoungGenerationSizeMb: this.workerMaxHeapSizeMb,
-          maxOldGenerationSizeMb: this.workerMaxHeapSizeMb,
+          maxYoungGenerationSizeMb: this.workerMaxYoungHeapSizeMb,
+          maxOldGenerationSizeMb: this.workerMaxOldHeapSizeMb,
         },
         workerData: this.getWorkerData(),
       });
