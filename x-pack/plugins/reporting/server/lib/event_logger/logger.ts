@@ -11,6 +11,7 @@ import { LevelLogger } from '../';
 import { PLUGIN_ID } from '../../../common/constants';
 import { IReport } from '../store';
 import { ActionType } from './';
+import { EcsLogAdapter } from './adapter';
 import {
   ClaimedTask,
   CompletedExecution,
@@ -35,37 +36,13 @@ export interface IReportingEventLogger {
   stopTiming(): void;
 }
 
-const getEventLog = (logger: LevelLogger) => ({
-  getLogger(lProperties: Partial<LogMeta>): IReportingEventLogger {
-    let start: Date | undefined;
-    let end: Date | undefined;
-    let duration: number | undefined;
-
-    return {
-      logEvent(message: string, properties: LogMeta) {
-        if (start && !end) {
-          end = start ? new Date() : undefined;
-        }
-        duration = end && start ? end.valueOf() - start.valueOf() : undefined;
-        const logMeta: Partial<LogMeta> = {
-          event: { duration, start: start?.toISOString(), end: end?.toISOString() },
-        };
-        const mProperties: LogMeta = deepMerge(lProperties, logMeta);
-        logger.debug(message, ['events'], deepMerge(mProperties, properties));
-      },
-      startTiming() {
-        start = new Date();
-      },
-      stopTiming() {
-        end = new Date();
-      },
-    };
-  },
-});
+const getEventLog = (logger: LevelLogger, lProperties: Partial<LogMeta>) => {
+  return new EcsLogAdapter(logger, lProperties);
+};
 
 /** @internal */
 export function reportingEventLoggerFactory(logger: LevelLogger) {
-  const genericLogger = getEventLog(logger).getLogger({ event: { provider: PLUGIN_ID } });
+  const genericLogger = getEventLog(logger, { event: { provider: PLUGIN_ID } });
 
   return class ReportingEventLogger {
     readonly eventObj: {
@@ -97,7 +74,7 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       };
 
       // create a "complete" logger that will use EventLog helpers to calculate timings
-      this.completionLogger = getEventLog(logger).getLogger({ event: { provider: PLUGIN_ID } });
+      this.completionLogger = getEventLog(logger, { event: { provider: PLUGIN_ID } });
     }
 
     logScheduleTask(): ScheduledTask {
