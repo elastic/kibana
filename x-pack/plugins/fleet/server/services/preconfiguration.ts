@@ -339,7 +339,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       const packagePoliciesToAdd = installedPackagePolicies.filter((installablePackagePolicy) => {
         return !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
           (packagePolicy) =>
-            packagePolicy.id === installablePackagePolicy.id ||
+            (packagePolicy.id !== undefined && packagePolicy.id === installablePackagePolicy.id) ||
             packagePolicy.name === installablePackagePolicy.name
         );
       });
