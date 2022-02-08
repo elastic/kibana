@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
 import { I18nStart, NotificationsStart } from 'src/core/public';
-import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../../saved_objects/public';
+import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../components/save_modal';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,

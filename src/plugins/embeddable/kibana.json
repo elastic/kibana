@@ -10,5 +10,5 @@
   "description": "Adds embeddables service to Kibana",
   "requiredPlugins": ["inspector", "uiActions"],
   "extraPublicDirs": ["common"],
-  "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils"]
 }

@@ -10,16 +10,17 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
-import { Start as InspectorStart } from '../../inspector/public';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   PublicAppInfo,
-} from '../../../core/public';
+} from 'src/core/public';
+import { showSaveModal } from './components/save_modal';
+import { getSavedObjectFinder } from './components/finder';
+import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+import { Start as InspectorStart } from '../../inspector/public';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,

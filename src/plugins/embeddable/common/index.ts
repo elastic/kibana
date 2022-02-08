@@ -16,3 +16,5 @@ export type {
 export { ViewMode } from './types';
 export type { SavedObjectEmbeddableInput } from './lib';
 export { isSavedObjectEmbeddableInput } from './lib';
+
+export const LISTING_LIMIT_SETTING = 'savedObjects:listingLimit';
