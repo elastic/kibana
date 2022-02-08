@@ -999,8 +999,8 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
-          executorServices.alertInstanceFactory('2').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
+          executorServices.alertFactory.create('2').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -1066,8 +1066,8 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
-          executorServices.alertInstanceFactory('2').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
+          executorServices.alertFactory.create('2').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
