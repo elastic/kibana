@@ -18,14 +18,24 @@ import {
 
 export const errors = {
   invalidShapeError: () =>
-    i18n.translate('expressionGauge.functions.gauge.errors.shapeIsNotSupported', {
+    i18n.translate('expressionGauge.functions.gauge.errors.invalidShapeError', {
       defaultMessage: `Invalid shape is specified. Supported shapes: {shapes}`,
       values: { shapes: Object.values(GaugeShapes).join(', ') },
     }),
   invalidColorModeError: () =>
-    i18n.translate('expressionGauge.functions.gauge.errors.shapeIsNotSupported', {
+    i18n.translate('expressionGauge.functions.gauge.errors.invalidColorModeError', {
       defaultMessage: `Invalid color mode is specified. Supported color modes: {colorModes}`,
       values: { colorModes: Object.values(GaugeColorModes).join(', ') },
+    }),
+  invalidTicksPositionError: () =>
+    i18n.translate('expressionGauge.functions.gauge.errors.invalidTicksPositionError', {
+      defaultMessage: `Invalid ticks position is specified. Supported ticks positions: {ticksPositions}`,
+      values: { ticksPositions: Object.values(GaugeTicksPositions).join(', ') },
+    }),
+  invalidLabelMajorModeError: () =>
+    i18n.translate('expressionGauge.functions.gauge.errors.invalidLabelMajorModeError', {
+      defaultMessage: `Invalid label major mode is specified. Supported label major modes: {labelMajorModes}`,
+      values: { labelMajorModes: Object.values(GaugeLabelMajorModes).join(', ') },
     }),
 };
 
@@ -44,7 +54,6 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Type of gauge chart',
       }),
       required: true,
-      default: GaugeShapes.HORIZONTAL_BULLET,
     },
     metricAccessor: {
       types: ['string'],
@@ -86,18 +95,17 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     },
     ticksPosition: {
       types: ['string'],
+      default: GaugeTicksPositions.AUTO,
       options: [GaugeTicksPositions.AUTO, GaugeTicksPositions.BANDS],
       help: i18n.translate('expressionGauge.functions.gauge.args.ticksPosition.help', {
         defaultMessage: 'Specifies the placement of ticks',
       }),
-      required: true,
     },
     labelMajor: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gauge.args.labelMajor.help', {
         defaultMessage: 'Specifies the labelMajor of the gauge chart displayed inside the chart.',
       }),
-      required: false,
     },
     labelMajorMode: {
       types: ['string'],
@@ -105,21 +113,19 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.labelMajorMode.help', {
         defaultMessage: 'Specifies the mode of labelMajor',
       }),
-      required: true,
+      default: GaugeLabelMajorModes.AUTO,
     },
     labelMinor: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gauge.args.labelMinor.help', {
         defaultMessage: 'Specifies the labelMinor of the gauge chart',
       }),
-      required: false,
     },
     ariaLabel: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gaugeChart.config.ariaLabel.help', {
         defaultMessage: 'Specifies the aria label of the gauge chart',
       }),
-      required: false,
     },
   },
 
@@ -130,6 +136,14 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
 
     if (!Object.values(GaugeColorModes).includes(args.colorMode)) {
       throw new Error(errors.invalidColorModeError());
+    }
+
+    if (!Object.values(GaugeTicksPositions).includes(args.ticksPosition)) {
+      throw new Error(errors.invalidTicksPositionError());
+    }
+
+    if (!Object.values(GaugeLabelMajorModes).includes(args.labelMajorMode)) {
+      throw new Error(errors.invalidLabelMajorModeError());
     }
 
     return {
