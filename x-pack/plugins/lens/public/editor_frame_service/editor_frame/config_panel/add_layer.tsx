@@ -13,6 +13,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiIcon,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -84,6 +85,7 @@ export function AddLayerButton({
     <EuiPopover
       display="block"
       data-test-subj="lnsConfigPanel__addLayerPopover"
+      panelClassName="lnsChangeIndexPatternPopover"
       button={
         <EuiButton
           className="lnsConfigPanel__addLayerBtn"
@@ -104,8 +106,13 @@ export function AddLayerButton({
       }
       isOpen={showLayersChoice}
       closePopover={() => toggleLayersChoice(false)}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
+      <EuiPopoverTitle>
+        {i18n.translate('xpack.lens.configPanel.selectLayerType', {
+          defaultMessage: 'Select layer type',
+        })}
+      </EuiPopoverTitle>
       <EuiContextMenuPanel
         size="s"
         items={supportedLayers.map(({ type, label, icon, disabled, tooltipContent }) => {
