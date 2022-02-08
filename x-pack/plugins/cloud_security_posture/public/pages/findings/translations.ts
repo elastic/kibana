@@ -30,7 +30,7 @@ export const FINDINGS = i18n.translate('xpack.csp.findings', {
   defaultMessage: 'Findings',
 });
 
-export const MISSING_KUBEBEAT = i18n.translate('xpack.csp.findings', {
+export const MISSING_KUBEBEAT = i18n.translate('xpack.csp.kubebeatDataViewIsMissing', {
   defaultMessage: 'Kubebeat DataView is missing',
 });
 
@@ -146,6 +146,6 @@ export const PLATFORM = i18n.translate('xpack.csp.platform', {
   defaultMessage: 'Platform',
 });
 
-export const NO_FINDINGS = i18n.translate('xpack.csp.platform', {
+export const NO_FINDINGS = i18n.translate('xpack.csp.thereAreNoFindings', {
   defaultMessage: 'There are no Findings',
 });

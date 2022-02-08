@@ -14,16 +14,13 @@ import { ENABLE_CSP } from '../common/constants';
 export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
   uiSettings.register({
     [ENABLE_CSP]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableCloudSecurityPosture', {
+      name: i18n.translate('xpack.csp.uiSettings.enableCloudSecurityPosture', {
         defaultMessage: 'Cloud Security',
       }),
       value: false,
-      description: `${i18n.translate(
-        'xpack.securitySolution.uiSettings.enableCloudSecurityPostureDescription',
-        {
-          defaultMessage: '<p>Enables the Cloud Security Posture feature (experimental)</p>',
-        }
-      )}`,
+      description: `${i18n.translate('xpack.csp.uiSettings.enableCloudSecurityPostureDescription', {
+        defaultMessage: '<p>Enables the Cloud Security Posture feature (experimental)</p>',
+      })}`,
       type: 'boolean',
       category: [SECURITY_SOLUTION_APP_ID],
       requiresPageReload: true,
