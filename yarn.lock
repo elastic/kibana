@@ -6929,6 +6929,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__typed-react-router-config@link:bazel-bin/packages/kbn-typed-react-router-config/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__ui-shared-deps-npm@link:bazel-bin/packages/kbn-ui-shared-deps-npm/npm_module_types":
   version "0.0.0"
   uid ""
