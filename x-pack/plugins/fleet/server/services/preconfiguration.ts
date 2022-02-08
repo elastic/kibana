@@ -338,7 +338,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       const packagePoliciesToAdd = installedPackagePolicies.filter((installablePackagePolicy) => {
         return !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
-          (packagePolicy) => packagePolicy.name === installablePackagePolicy.name
+          (packagePolicy) =>
+            packagePolicy.id === installablePackagePolicy.id ||
+            packagePolicy.name === installablePackagePolicy.name
         );
       });
 
