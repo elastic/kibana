@@ -62,7 +62,7 @@ The following example is the expected response:
       id: 'pf-collection-agent: runtime.releaseSudog() in runtime2.go#282',
       value: 1,
       depth: 19,
-      layers: {
+      pathFromRoot: {
         '0': 'root',
         '1': 'pf-collection-agent: runtime.goexit() in asm_amd64.s#1581',
         '2': 'pf-collection-agent: github.com/optimyze/prodfiler/pf-storage-backend/storagebackend/storagebackendv1.(*ScyllaExecutor).Start.func1 in scyllaexecutor.go#102',
@@ -96,7 +96,7 @@ Here is a basic description of the response format:
 * `id` represents the name of the flamegraph node
 * `value` represents the number of samples for that node
 * `depth` represents the depth of the node in the flamegraph, starting from zero
-* `layers` represents the full path from the flamegraph root to the given node
+* `pathFromRoot` represents the full path from the flamegraph root to the given node
 
 ### /api/prodfiler/*/flamechart/pixi
 
