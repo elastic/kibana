@@ -8,7 +8,10 @@
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-handlebars/src",
-    "types": ["node"]
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
     "src/**/*.ts"
