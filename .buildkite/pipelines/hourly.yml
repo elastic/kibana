@@ -119,9 +119,9 @@ steps:
 
   - command: .buildkite/scripts/steps/test/jest.sh
     label: 'Jest Tests'
-    parallelism: 8
+    parallelism: 10
     agents:
-      queue: n2-4
+      queue: n2d-4
     timeout_in_minutes: 90
     key: jest
 
