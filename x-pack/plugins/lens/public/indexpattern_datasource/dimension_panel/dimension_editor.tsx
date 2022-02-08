@@ -684,12 +684,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       !selectedColumn.timeScale
                   ),
                   inlineElement: (
+                    selectedOperationDefinition.timeScalingMode ?
                     <TimeScaling
                       selectedColumn={selectedColumn}
                       columnId={columnId}
                       layer={state.layers[layerId]}
                       updateLayer={setStateWrapper}
-                    />
+                    /> : null
                   ),
                 },
                 {

@@ -22,6 +22,10 @@
   }
 }
 
+.lnsIndexPatternDimensionEditor__section:empty {
+  display: none;
+}
+
 .lnsIndexPatternDimensionEditor__section--padded {
   padding: $euiSize;
 }
