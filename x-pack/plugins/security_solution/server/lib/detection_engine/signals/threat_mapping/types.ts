@@ -190,7 +190,7 @@ export interface BooleanFilter {
 interface ThreatListConfig {
   _source: string[] | boolean;
   fields: string[] | undefined;
-  sort?: Array<{ [key: string]: string }>;
+  sort?: estypes.Sort;
 }
 
 export interface PercolatorQuery {
