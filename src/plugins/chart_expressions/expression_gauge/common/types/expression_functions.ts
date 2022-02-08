@@ -46,6 +46,7 @@ export type GaugeArguments = GaugeState & {
   shape: GaugeShape;
   colorMode: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteState>;
+  ariaLabel?: string;
 };
 
 export type GaugeInput = Datatable;
