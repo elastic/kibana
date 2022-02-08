@@ -15,10 +15,8 @@ import type { Client } from '@elastic/elasticsearch';
  */
 export type ElasticsearchClient = Omit<
   Client,
-  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'
-> & {
-  transport: Client['transport']; // can't use Pick<Client['transport'], 'request'>; because the Client API definition expects a full transport
-};
+  'connectionPool' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'
+>;
 
 /**
  * All response typings are maintained until elasticsearch-js provides them out of the box
