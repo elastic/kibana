@@ -49,7 +49,7 @@ const HostNameComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const hostName = `${value}`;
-  const isInTimeline = timelineId === TimelineId.active;
+  const isInTimeline = timelineId !== undefined;
   const openHostDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();

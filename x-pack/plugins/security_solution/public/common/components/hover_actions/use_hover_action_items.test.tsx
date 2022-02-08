@@ -9,7 +9,10 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useHoverActionItems, UseHoverActionItemsProps } from './use_hover_action_items';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { DataProvider } from '../../../../common/types/timeline';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 
+const mockFilterManager = new FilterManager(coreMock.createStart().uiSettings);
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_selector');
 jest.mock('../../containers/sourcerer', () => ({
@@ -22,6 +25,7 @@ describe('useHoverActionItems', () => {
     defaultFocusedButtonRef: null,
     field: 'kibana.alert.rule.name',
     handleHoverActionClicked: jest.fn(),
+    filterManager: mockFilterManager,
     hideTopN: false,
     isCaseView: false,
     isObjectArray: false,

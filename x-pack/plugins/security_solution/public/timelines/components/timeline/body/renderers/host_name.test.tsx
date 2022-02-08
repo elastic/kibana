@@ -5,9 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
-
+import { render, fireEvent, act, cleanup } from '@testing-library/react';
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
@@ -57,17 +55,18 @@ describe('HostName', () => {
     isDraggable: false,
     value: 'Mock Host',
   };
-
-  test('should render host name', () => {
-    const wrapper = mount(
+  afterEach(() => {
+    cleanup();
+    jest.clearAllMocks();
+  });
+  test('should render host name', async () => {
+    const wrapper = render(
       <TestProviders>
         <HostName {...props} />
       </TestProviders>
     );
-
-    expect(wrapper.find('[data-test-subj="host-details-button"]').last().text()).toEqual(
-      props.value
-    );
+    const component = wrapper.getByText(props.value);
+    expect(component.textContent).toEqual(props.value);
   });
 
   test('should render DefaultDraggable if isDraggable is true', () => {
@@ -75,73 +74,76 @@ describe('HostName', () => {
       ...props,
       isDraggable: true,
     };
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <HostName {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="DefaultDraggable"]').exists()).toEqual(true);
+    expect(wrapper.getByTestId('DefaultDraggable')).toBeTruthy();
   });
 
   test('if not enableHostDetailsFlyout, should go to hostdetails page', async () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <HostName {...props} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
-    await waitFor(() => {
-      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
+    const button = wrapper.getByTestId('host-details-button');
+    act(() => {
+      fireEvent.click(button);
     });
+    expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
   });
 
   test('if enableHostDetailsFlyout, should open HostDetailsSidePanel', async () => {
     const newProps = {
-      timelineID: TimelineId.active,
+      timelineId: TimelineId.active,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <HostName {...props} {...newProps} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
-    await waitFor(() => {
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
-        panelView: 'hostDetail',
-        params: {
-          hostName: props.value,
-        },
-        tabType: TimelineTabs.query,
-        timelineId: TimelineId.active,
-      });
+    const button = wrapper.getByTestId('host-details-button');
+    act(() => {
+      fireEvent.click(button);
+    });
+    expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+      panelView: 'hostDetail',
+      params: {
+        hostName: props.value,
+      },
+      tabType: TimelineTabs.query,
+      timelineId: TimelineId.active,
     });
   });
 
-  test('if enableHostDetailsFlyout but timelineId not equals to `TimelineId.active`, should call toggleDetailPanel anyway', async () => {
+  test('if timelineId not equals to `TimelineId.active`, should call toggleDetailPanel anyway', async () => {
     const newProps = {
-      timelineID: 'detection',
+      timelineId: 'detection',
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <HostName {...props} {...newProps} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
-    await waitFor(() => {
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
-        panelView: 'hostDetail',
-        params: {
-          hostName: props.value,
-        },
-        tabType: TimelineTabs.query,
-        timelineId: 'detection',
-      });
+    const button = wrapper.getByTestId('host-details-button');
+    act(() => {
+      fireEvent.click(button);
+    });
+    expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+      panelView: 'hostDetail',
+      params: {
+        hostName: props.value,
+      },
+      tabType: TimelineTabs.query,
+      timelineId: 'detection',
     });
   });
 });

@@ -88,7 +88,7 @@ describe('StatefulCell', () => {
         isDetails: false,
         linkValues,
         rowIndex: ariaRowindex - 1,
-        timelineId: `${timelineId}-${tabType}`,
+        timelineId: `${timelineId}`,
       })
     );
   });
