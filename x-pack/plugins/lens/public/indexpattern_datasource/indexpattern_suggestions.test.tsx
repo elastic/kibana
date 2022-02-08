@@ -1569,7 +1569,7 @@ describe('IndexPattern Data Source suggestions', () => {
                       format: {
                         id: 'bytes',
                         params: {
-                          decimals: 2,
+                          decimals: 0,
                         },
                       },
                     }),
