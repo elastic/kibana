@@ -8,7 +8,7 @@
 import { mount, shallow, ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
 import { useUiSetting$ } from '../../lib/kibana';

@@ -20,7 +20,7 @@ jest.mock('./common', () => {
 
 import { errors } from '@elastic/elasticsearch';
 import type { SavedObject, SavedObjectsClientContract } from 'kibana/server';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { Installation, RegistryPackage } from '../../../../types';

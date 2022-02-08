@@ -35,7 +35,7 @@ describe('Error count alert', () => {
     });
 
     await executor({ params });
-    expect(services.alertInstanceFactory).not.toBeCalled();
+    expect(services.alertFactory.create).not.toBeCalled();
   });
 
   it('sends alerts with service name and environment for those that exceeded the threshold', async () => {
@@ -132,7 +132,7 @@ describe('Error count alert', () => {
       'apm.error_rate_foo_env-foo-2',
       'apm.error_rate_bar_env-bar',
     ].forEach((instanceName) =>
-      expect(services.alertInstanceFactory).toHaveBeenCalledWith(instanceName)
+      expect(services.alertFactory.create).toHaveBeenCalledWith(instanceName)
     );
 
     expect(scheduleActions).toHaveBeenCalledTimes(3);

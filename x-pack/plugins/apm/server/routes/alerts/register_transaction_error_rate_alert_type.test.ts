@@ -42,7 +42,7 @@ describe('Transaction error rate alert', () => {
     });
 
     await executor({ params });
-    expect(services.alertInstanceFactory).not.toBeCalled();
+    expect(services.alertFactory.create).not.toBeCalled();
   });
 
   it('sends alerts for services that exceeded the threshold', async () => {
@@ -111,12 +111,12 @@ describe('Transaction error rate alert', () => {
 
     await executor({ params });
 
-    expect(services.alertInstanceFactory).toHaveBeenCalledTimes(1);
+    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
-    expect(services.alertInstanceFactory).toHaveBeenCalledWith(
+    expect(services.alertFactory.create).toHaveBeenCalledWith(
       'apm.transaction_error_rate_foo_type-foo_env-foo'
     );
-    expect(services.alertInstanceFactory).not.toHaveBeenCalledWith(
+    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
       'apm.transaction_error_rate_bar_type-bar_env-bar'
     );
 

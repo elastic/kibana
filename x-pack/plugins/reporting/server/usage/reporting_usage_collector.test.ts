@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClientMock } from '../../../../../src/core/server/mocks';
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import {
