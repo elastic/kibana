@@ -27,12 +27,12 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
   });
 
   const layers = useMemo(() => {
-    if (!ctx || !ctx.facts || !ctx.facts.length) {
+    if (!ctx || !ctx.leaves || !ctx.leaves.length) {
       return [];
     }
 
-    const { facts } = ctx;
-    const maxDepth = Math.max(...facts.map((node) => node.depth));
+    const { leaves } = ctx;
+    const maxDepth = Math.max(...leaves.map((node) => node.depth));
 
     const result = [...new Array(maxDepth)].map((_, depth) => {
       return {
@@ -55,7 +55,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
         <Settings />
         <Partition
           id={id}
-          data={ctx.facts}
+          data={ctx.leaves}
           layers={layers}
           valueAccessor={(d: any) => d.value as number}
           valueFormatter={() => ''}
