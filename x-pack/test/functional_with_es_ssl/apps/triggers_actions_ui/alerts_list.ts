@@ -361,7 +361,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
     });
 
-    it.only('should render percentile column and cells correctly', async () => {
+    it('should render percentile column and cells correctly', async () => {
       await createAlert({ supertest, objectRemover });
       await refreshAlertsList();
 
