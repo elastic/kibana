@@ -39,9 +39,9 @@ export class PdfMaker {
    * The maximum heap size for the worker thread. Used for both young and
    * old heap generation regions.
    *
-   * @note We need to choose a sane number given that we need to load a the Kibana
+   * @note We need to choose a sane number given that we need to load a Kibana
    * node environment, all the library code and the subsequent buffers that
-   * could result from generating PDFs.
+   * could result from generating a PDF.
    *
    * Local testing indicates that to trigger an OOM event for the worker we need
    * to exhaust not only heap but also any compression optimization and fallback
