@@ -72,6 +72,8 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
             </EuiTab>
           ))}
         </EuiTabs>
+        {/* delaying render of tour due to EuiPopover can't react to layout changes
+        https://github.com/elastic/kibana/pull/124343#issuecomment-1032467614 */}
         <OptionalEuiTourStep stepProps={loading ? undefined : inMemoryTableStepProps}>
           <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
             <EuiSwitch
