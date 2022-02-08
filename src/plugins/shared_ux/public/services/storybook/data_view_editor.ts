@@ -7,14 +7,12 @@
  */
 import { action } from '@storybook/addon-actions';
 import { FakeDataViewEditor } from './fake_data_view_editor';
-import { DataViewEditorStart } from '../../../../data_view_editor/public';
+import { DataViewEditorProps, DataViewEditorStart } from '../../../../data_view_editor/public';
 
 const createStartContract = (): DataViewEditorStart => {
   return {
     IndexPatternEditorComponent: FakeDataViewEditor,
-    openEditor: (options) => () => {
-      action('openEditor');
-    },
+    openEditor: action('openEditor') as any as (options: DataViewEditorProps) => () => void,
     userPermissions: {
       editDataView: () => {
         return true;
@@ -23,10 +21,10 @@ const createStartContract = (): DataViewEditorStart => {
   };
 };
 
-export const indexPatternEditorPluginMock = {
+export const dataViewEditorPluginMock = {
   createStartContract,
 };
 
 export const dataViewEditorFactory = () => {
-  return indexPatternEditorPluginMock.createStartContract();
+  return dataViewEditorPluginMock;
 };

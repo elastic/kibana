@@ -26,3 +26,7 @@ ConnectedComponent.argTypes = {
 export const PureComponent = () => {
   return <NoDataViewsComponent canCreateNewDataView={true} onClick={action('onClick')} />;
 };
+
+export const PureComponentCannotCreateDataViews = () => {
+  return <NoDataViewsComponent canCreateNewDataView={false} />;
+};
