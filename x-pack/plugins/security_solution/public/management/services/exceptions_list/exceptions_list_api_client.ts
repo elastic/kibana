@@ -46,27 +46,27 @@ export class ExceptionsListApiClient {
     }
     ExceptionsListApiClient.wasListCreated.set(
       this.listId,
-      new Promise<void>(async (resolve, reject) => {
-        try {
-          await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-            body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
-          });
+      new Promise<void>((resolve, reject) => {
+        const asyncFunction = async () => {
+          try {
+            await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+              body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
+            });
 
-          resolve();
-        } catch (err) {
-          // Ignore 409 errors. List already created
-          if (err.response?.status !== 409) {
-            reject(err);
+            resolve();
+          } catch (err) {
+            // Ignore 409 errors. List already created
+            if (err.response?.status !== 409) {
+              ExceptionsListApiClient.wasListCreated.delete(this.listId);
+              reject(err);
+            }
+
+            resolve();
           }
-
-          resolve();
-        }
+        };
+        asyncFunction();
       })
     );
-
-    ExceptionsListApiClient.wasListCreated.get(this.listId)?.catch(() => {
-      ExceptionsListApiClient.wasListCreated.delete(this.listId);
-    });
 
     return ExceptionsListApiClient.wasListCreated.get(this.listId);
   }
