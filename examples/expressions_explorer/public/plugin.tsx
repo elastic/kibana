@@ -73,7 +73,7 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/expressions/README.md',
+          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/expressions/README.asciidoc',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
