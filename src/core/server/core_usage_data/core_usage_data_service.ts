@@ -160,7 +160,7 @@ export class CoreUsageDataService
           .count({
             index,
           })
-          .then(({ body }) => {
+          .then((body) => {
             return {
               savedObjectsDocsCount: body.count ? body.count : 0,
             };
