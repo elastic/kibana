@@ -329,7 +329,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
                 if (completeRule.ruleConfig.throttle != null) {
                   await scheduleThrottledNotificationActions({
-                    alertInstance: services.alertInstanceFactory(alertId),
+                    alertInstance: services.alertFactory.create(alertId),
                     throttle: completeRule.ruleConfig.throttle ?? '',
                     startedAt,
                     id: alertId,
@@ -343,7 +343,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     logger,
                   });
                 } else if (createdSignalsCount) {
-                  const alertInstance = services.alertInstanceFactory(alertId);
+                  const alertInstance = services.alertFactory.create(alertId);
                   scheduleNotificationActions({
                     alertInstance,
                     signalsCount: createdSignalsCount,
@@ -385,7 +385,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
               if (completeRule.ruleConfig.throttle != null) {
                 await scheduleThrottledNotificationActions({
-                  alertInstance: services.alertInstanceFactory(alertId),
+                  alertInstance: services.alertFactory.create(alertId),
                   throttle: completeRule.ruleConfig.throttle ?? '',
                   startedAt,
                   id: completeRule.alertId,
@@ -417,7 +417,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
             if (completeRule.ruleConfig.throttle != null) {
               await scheduleThrottledNotificationActions({
-                alertInstance: services.alertInstanceFactory(alertId),
+                alertInstance: services.alertFactory.create(alertId),
                 throttle: completeRule.ruleConfig.throttle ?? '',
                 startedAt,
                 id: completeRule.alertId,

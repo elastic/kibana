@@ -44,7 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // In Cloud default users are defined in file realm, such users aren't exposed through the Users API.
       if (isCloudEnvironment()) {
-        expect(Object.keys(users)).to.eql(['test_user']);
+        expect(users).to.not.have.property('elastic');
+        expect(users).to.not.have.property('kibana_system');
+        expect(users).to.not.have.property('kibana');
       } else {
         expect(users.elastic.roles).to.eql(['superuser']);
         expect(users.elastic.reserved).to.be(true);

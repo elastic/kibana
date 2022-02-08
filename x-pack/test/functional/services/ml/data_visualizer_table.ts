@@ -565,6 +565,17 @@ export function MachineLearningDataVisualizerTableProvider(
       }
     }
 
+    public async assertLensActionShowChart(fieldName: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton')
+        );
+        await testSubjects.existOrFail('lnsVisualizationContainer', {
+          timeout: 15 * 1000,
+        });
+      });
+    }
+
     public async ensureNumRowsPerPage(n: 10 | 25 | 50) {
       const paginationButton = 'dataVisualizerTable > tablePaginationPopoverButton';
       await retry.tryForTime(10000, async () => {

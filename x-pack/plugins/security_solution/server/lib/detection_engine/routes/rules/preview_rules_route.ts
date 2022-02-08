@@ -34,7 +34,7 @@ import {
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
-import { AlertInstance } from '../../../../../../alerting/server';
+import { Alert } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
@@ -141,12 +141,14 @@ export const previewRulesRoute = async (
           ruleTypeName: string,
           params: TParams,
           shouldWriteAlerts: () => boolean,
-          alertInstanceFactory: (
-            id: string
-          ) => Pick<
-            AlertInstance<TInstanceState, TInstanceContext, TActionGroupIds>,
-            'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
-          >
+          alertFactory: {
+            create: (
+              id: string
+            ) => Pick<
+              Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
+              'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+            >;
+          }
         ) => {
           let statePreview = runState as TState;
 
@@ -179,7 +181,7 @@ export const previewRulesRoute = async (
               services: {
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
-                alertInstanceFactory,
+                alertFactory,
                 // Just use es client always for preview
                 search: context.core.elasticsearch.client,
                 savedObjectsClient: context.core.savedObjects.client,
@@ -224,7 +226,7 @@ export const previewRulesRoute = async (
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
           case 'threshold':
@@ -237,7 +239,7 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
           case 'threat_match':
@@ -250,7 +252,7 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
           case 'eql':
@@ -261,7 +263,7 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
           case 'machine_learning':
@@ -272,7 +274,7 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              alertInstanceFactoryStub
+              { create: alertInstanceFactoryStub }
             );
             break;
         }

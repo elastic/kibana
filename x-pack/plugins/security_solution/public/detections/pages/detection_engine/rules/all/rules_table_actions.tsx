@@ -16,7 +16,7 @@ import { NavigateToAppOptions } from '../../../../../../../../../src/core/public
 import { ActionToaster } from '../../../../../common/components/toasters';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { Rule } from '../../../../containers/detection_engine/rules';
-import { RulesTableActions } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { RulesTableActions } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
 import {
   deleteRulesAction,
