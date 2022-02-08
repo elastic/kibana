@@ -185,81 +185,16 @@ describe('When using EPM `get` services', () => {
       const mockContract = createAppContextStartContractMock();
       appContextService.start(mockContract);
       MockRegistry.fetchFindLatestPackage.mockResolvedValue({
-        name: 'my_package',
+        name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
-      MockRegistry.fetchInfo.mockResolvedValue({
-        name: 'my_package',
-        description: 'test',
-        format_version: '1.0.0',
-        title: 'package',
-        release: 'ga',
-        owner: { github: 'someone' },
-        version: '1.0.0',
-        assets: [
-          '/package/my_package/1.0.0/kibana/dashboard/test-bae11b00-9bfc-11ea-87e4-dfg31ec44891.json',
-          '/package/my_package/1.0.0/kibana/dashboard/test-cv012312-9bfc-654s-765d-ixje3c091232.json',
-        ],
-        download: '/packages/my_package/1.0.0/test.zip',
-        path: '/packages/my_package/1.0.0',
-      } as RegistryPackage);
-      const RealPackageRegistry = jest.requireActual('../registry');
-      MockRegistry.groupPathsByService.mockImplementation(RealPackageRegistry.groupPathsByService);
-    });
-
-    it('should fetch the info from the registry if we do not have the version installed', async () => {
-      const soClient = savedObjectsClientMock.create();
-      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
-
-      expect(
-        await getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: 'my_package',
-          pkgVersion: '1.0.0',
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "assets": Object {
-            "elasticsearch": undefined,
-            "kibana": Object {
-              "dashboard": Array [
-                Object {
-                  "dataset": undefined,
-                  "file": "test-bae11b00-9bfc-11ea-87e4-dfg31ec44891.json",
-                  "path": "my_package-1.0.0/kibana/dashboard/test-bae11b00-9bfc-11ea-87e4-dfg31ec44891.json",
-                  "pkgkey": "my_package-1.0.0",
-                  "service": "kibana",
-                  "type": "dashboard",
-                },
-                Object {
-                  "dataset": undefined,
-                  "file": "test-cv012312-9bfc-654s-765d-ixje3c091232.json",
-                  "path": "my_package-1.0.0/kibana/dashboard/test-cv012312-9bfc-654s-765d-ixje3c091232.json",
-                  "pkgkey": "my_package-1.0.0",
-                  "service": "kibana",
-                  "type": "dashboard",
-                },
-              ],
-            },
-          },
-          "description": "test",
-          "download": "/packages/my_package/1.0.0/test.zip",
-          "format_version": "1.0.0",
-          "keepPoliciesUpToDate": false,
-          "latestVersion": "1.0.0",
-          "name": "my_package",
-          "notice": undefined,
-          "owner": Object {
-            "github": "someone",
-          },
-          "path": "/packages/my_package/1.0.0",
-          "release": "ga",
-          "removable": true,
-          "status": "not_installed",
-          "title": "package",
-          "version": "1.0.0",
-        }
-      `);
+      MockRegistry.getRegistryPackage.mockResolvedValue({
+        paths: [],
+        packageInfo: {
+          name: 'my-package',
+          version: '1.0.0',
+        } as RegistryPackage,
+      });
     });
 
     describe('installation status', () => {
@@ -270,7 +205,7 @@ describe('When using EPM `get` services', () => {
         expect(
           await getPackageInfo({
             savedObjectsClient: soClient,
-            pkgName: 'my_package',
+            pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
         ).toMatchObject({
@@ -281,7 +216,7 @@ describe('When using EPM `get` services', () => {
       it('should be installing when package SO install_status is installing', async () => {
         const soClient = savedObjectsClientMock.create();
         soClient.get.mockResolvedValue({
-          id: 'my_package',
+          id: 'my-package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
           references: [],
           attributes: {
@@ -292,7 +227,7 @@ describe('When using EPM `get` services', () => {
         expect(
           await getPackageInfo({
             savedObjectsClient: soClient,
-            pkgName: 'my_package',
+            pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
         ).toMatchObject({
@@ -303,7 +238,7 @@ describe('When using EPM `get` services', () => {
       it('should be installed when package SO install_status is installed', async () => {
         const soClient = savedObjectsClientMock.create();
         soClient.get.mockResolvedValue({
-          id: 'my_package',
+          id: 'my-package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
           references: [],
           attributes: {
@@ -314,7 +249,7 @@ describe('When using EPM `get` services', () => {
         expect(
           await getPackageInfo({
             savedObjectsClient: soClient,
-            pkgName: 'my_package',
+            pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
         ).toMatchObject({
@@ -325,7 +260,7 @@ describe('When using EPM `get` services', () => {
       it('should be install_failed when package SO install_status is install_failed', async () => {
         const soClient = savedObjectsClientMock.create();
         soClient.get.mockResolvedValue({
-          id: 'my_package',
+          id: 'my-package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
           references: [],
           attributes: {
@@ -336,7 +271,7 @@ describe('When using EPM `get` services', () => {
         expect(
           await getPackageInfo({
             savedObjectsClient: soClient,
-            pkgName: 'my_package',
+            pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
         ).toMatchObject({
