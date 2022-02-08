@@ -2134,11 +2134,12 @@ describe('state_helpers', () => {
                 isBucketed: false,
                 scale: 'ratio',
                 params: {
-                  isFormulaBroken: false, formula: 'average(bytes)',
+                  isFormulaBroken: false,
+                  formula: 'average(bytes)',
                   format: {
-                    id: "number",
-                    params: { decimals: 2 }
-                  }
+                    id: 'number',
+                    params: { decimals: 2 },
+                  },
                 },
                 references: [],
               } as FormulaIndexPatternColumn,
@@ -2150,18 +2151,19 @@ describe('state_helpers', () => {
           field: indexPattern.fields[2], // bytes field
           visualizationGroups: [],
           shouldResetLabel: undefined,
-        })
+        });
 
-        expect(actual.columns.col1).toEqual(expect.objectContaining({
-          params: {
-            format: {
-              id: "number",
-              params: { decimals: 2 }
-            }
-          }
-        }));
+        expect(actual.columns.col1).toEqual(
+          expect.objectContaining({
+            params: {
+              format: {
+                id: 'number',
+                params: { decimals: 2 },
+              },
+            },
+          })
+        );
       });
-
     });
 
     it('should allow making a replacement on an operation that is being referenced, even if it ends up invalid', () => {

@@ -422,7 +422,7 @@ export function replaceColumn({
         op,
         field,
         visualizationGroups,
-        incompleteParams: previousColumn
+        incompleteParams: previousColumn,
       });
 
       // if the formula label is not the default one, propagate it to the new operation
@@ -538,8 +538,8 @@ export function replaceColumn({
       try {
         newLayer = newColumn.params.formula
           ? insertOrReplaceFormulaColumn(columnId, newColumn, basicLayer, {
-            indexPattern,
-          }).layer
+              indexPattern,
+            }).layer
           : basicLayer;
       } catch (e) {
         newLayer = basicLayer;
@@ -1142,10 +1142,10 @@ function adjustColumnReferencesForChangedColumn(layer: IndexPatternLayer, change
       const operationDefinition = operationDefinitionMap[currentColumn.operationType];
       newColumns[currentColumnId] = operationDefinition.onOtherColumnChanged
         ? operationDefinition.onOtherColumnChanged(
-          { ...layer, columns: newColumns },
-          currentColumnId,
-          changedColumnId
-        )
+            { ...layer, columns: newColumns },
+            currentColumnId,
+            changedColumnId
+          )
         : currentColumn;
     }
   });
@@ -1297,12 +1297,12 @@ export function getErrorMessages(
   core: CoreStart
 ):
   | Array<
-    | string
-    | {
-      message: string;
-      fixAction?: DatasourceFixAction<IndexPatternPrivateState>;
-    }
-  >
+      | string
+      | {
+          message: string;
+          fixAction?: DatasourceFixAction<IndexPatternPrivateState>;
+        }
+    >
   | undefined {
   const columns = Object.entries(layer.columns);
   const visibleManagedReferences = columns.filter(
@@ -1331,26 +1331,26 @@ export function getErrorMessages(
         ...errorMessage,
         fixAction: errorMessage.fixAction
           ? {
-            ...errorMessage.fixAction,
-            newState: async (frame: FrameDatasourceAPI) => ({
-              ...state,
-              layers: {
-                ...state.layers,
-                [layerId]: await errorMessage.fixAction!.newState(core, frame, layerId),
-              },
-            }),
-          }
+              ...errorMessage.fixAction,
+              newState: async (frame: FrameDatasourceAPI) => ({
+                ...state,
+                layers: {
+                  ...state.layers,
+                  [layerId]: await errorMessage.fixAction!.newState(core, frame, layerId),
+                },
+              }),
+            }
           : undefined,
       };
     })
     // remove the undefined values
     .filter((v) => v != null) as Array<
-      | string
-      | {
+    | string
+    | {
         message: string;
         fixAction?: DatasourceFixAction<IndexPatternPrivateState>;
       }
-    >;
+  >;
 
   return errors.length ? errors : undefined;
 }
