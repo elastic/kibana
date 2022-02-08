@@ -87,7 +87,7 @@ const parametrizedComponentFactories = {
   node: function (name, parent) {
     return new ListComponent(name, [], parent, false);
   },
-  name: function (name, parent) {
+  index_template: function (name, parent) {
     return new IndexTemplateAutocompleteComponent(name, parent);
   },
 };

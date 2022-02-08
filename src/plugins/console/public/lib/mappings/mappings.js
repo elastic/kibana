@@ -192,7 +192,7 @@ function loadTemplates(templatesObject = {}) {
 }
 
 function loadIndexTemplates(data) {
-  indexTemplates = _.map(data.index_templates, 'name');
+  indexTemplates = (data.index_templates ?? []).map(({ name }) => name);
 }
 
 export function loadMappings(mappings) {
@@ -311,34 +311,40 @@ export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   $.when(mappingPromise, aliasesPromise, templatesPromise, indexTemplatesPromise).done(
     (mappings, aliases, templates, indexTemplates) => {
       let mappingsResponse;
-      if (mappings) {
-        const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
-        if (maxMappingSize) {
-          console.warn(
-            `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
-          );
-          mappingsResponse = '[{}]';
-        } else {
-          mappingsResponse = mappings[0];
+      try {
+        if (mappings && mappings.length) {
+          const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
+          if (maxMappingSize) {
+            console.warn(
+              `Mapping size is larger than 10MB (${
+                mappings[0].length / 1024 / 1024
+              } MB). Ignoring...`
+            );
+            mappingsResponse = '[{}]';
+          } else {
+            mappingsResponse = mappings[0];
+          }
+          loadMappings(JSON.parse(mappingsResponse));
         }
-        loadMappings(JSON.parse(mappingsResponse));
-      }
 
-      if (aliases) {
-        loadAliases(JSON.parse(aliases[0]));
-      }
+        if (aliases) {
+          loadAliases(JSON.parse(aliases[0]));
+        }
 
-      if (templates) {
-        loadTemplates(JSON.parse(templates[0]));
-      }
+        if (templates) {
+          loadTemplates(JSON.parse(templates[0]));
+        }
 
-      if (indexTemplates) {
-        loadIndexTemplates(JSON.parse(indexTemplates[0]));
-      }
+        if (indexTemplates) {
+          loadIndexTemplates(JSON.parse(indexTemplates[0]));
+        }
 
-      if (mappings && aliases) {
-        // Trigger an update event with the mappings, aliases
-        $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
+        if (mappings && aliases) {
+          // Trigger an update event with the mappings, aliases
+          $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
+        }
+      } catch (error) {
+        console.error(error);
       }
 
       // Schedule next request.

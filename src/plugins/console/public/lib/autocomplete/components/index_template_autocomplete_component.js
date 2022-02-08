@@ -14,10 +14,6 @@ export class IndexTemplateAutocompleteComponent extends ListComponent {
     super(name, getIndexTemplates, parent, true, true);
   }
 
-  getDefaultTermMeta() {
-    return 'name';
-  }
-
   getContextKey() {
     return 'index_template';
   }
