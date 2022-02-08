@@ -30,7 +30,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-        const resFlamegraphTraces = await esClient.search({
+        const resEvents = await esClient.search({
           index,
           body: {
             query: {
@@ -79,7 +79,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           },
         });
 
-        const resTotalTraces = await esClient.search({
+        const resTotalEvents = await esClient.search({
           index,
           body: {
             query: {
@@ -125,7 +125,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
         });
 
         const tracesDocIDs: string[] = [];
-        resFlamegraphTraces.body.aggregations.sample.group_by.buckets.forEach(
+        resEvents.body.aggregations.sample.group_by.buckets.forEach(
           (stackTraceItem: any) => {
             tracesDocIDs.push(stackTraceItem.key);
           }
@@ -154,8 +154,8 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
 
         return response.ok({
           body: {
-            flameChart: resFlamegraphTraces.body,
-            totalTraces: resTotalTraces.body.aggregations,
+            events: resEvents.body,
+            totalEvents: resTotalEvents.body,
             stackTraces: resStackTraces.body.docs,
             stackFrames: resStackFrames.body.docs,
           },
