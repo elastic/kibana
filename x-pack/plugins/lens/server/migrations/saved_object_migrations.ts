@@ -28,10 +28,7 @@ import {
   VisStatePre715,
   VisState716,
   CustomVisualizationMigrations,
-<<<<<<< HEAD
-=======
   LensDocShape810,
->>>>>>> upstream/main
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -41,10 +38,7 @@ import {
   commonRenameFilterReferences,
   getLensFilterMigrations,
   getLensCustomVisualizationMigrations,
-<<<<<<< HEAD
-=======
   commonRenameRecordsField,
->>>>>>> upstream/main
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {

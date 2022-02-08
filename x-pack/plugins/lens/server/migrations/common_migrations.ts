@@ -7,7 +7,6 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { Filter } from '@kbn/es-query';
 import { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
@@ -209,51 +208,6 @@ const getApplyCustomVisualizationMigrationToLens = (id: string, migration: Migra
       },
     };
   };
-};
-
-const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
-  return (savedObject: { attributes: LensDocShape }) => {
-    if (savedObject.attributes.visualizationType !== id) return savedObject;
-    return {
-      ...savedObject,
-      attributes: {
-        ...savedObject.attributes,
-        state: {
-          ...savedObject.attributes.state,
-          visualization: migration(
-            savedObject.attributes.state.visualization as SerializableRecord
-          ),
-        },
-      },
-    };
-  };
-};
-
-/**
- * This creates a migration map that applies custom visualization migrations
- */
-export const getLensCustomVisualizationMigrations = (
-  customVisualizationMigrations: CustomVisualizationMigrations
-) => {
-  return Object.entries(customVisualizationMigrations)
-    .map(([id, migrationGetter]) => {
-      const migrationMap: MigrateFunctionsObject = {};
-      const currentMigrations = migrationGetter();
-      for (const version in currentMigrations) {
-        if (currentMigrations.hasOwnProperty(version)) {
-          migrationMap[version] = getApplyCustomVisualizationMigrationToLens(
-            id,
-            currentMigrations[version]
-          );
-        }
-      }
-      return migrationMap;
-    })
-    .reduce(
-      (fullMigrationMap, currentVisualizationTypeMigrationMap) =>
-        mergeMigrationFunctionMaps(fullMigrationMap, currentVisualizationTypeMigrationMap),
-      {}
-    );
 };
 
 /**
