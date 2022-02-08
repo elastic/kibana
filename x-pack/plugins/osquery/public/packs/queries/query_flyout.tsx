@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, map } from 'lodash';
+import { isEmpty } from 'lodash';
 import {
   EuiFlyout,
   EuiTitle,
@@ -78,9 +78,28 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     (savedQuery) => {
       reset();
       if (savedQuery) {
-        map(savedQuery, (value, field) => {
-          setFieldValue(field, value);
-        });
+        setFieldValue('id', savedQuery.id);
+        setFieldValue('query', savedQuery.query);
+
+        if (savedQuery.description) {
+          setFieldValue('description', savedQuery.description);
+        }
+
+        if (savedQuery.interval) {
+          setFieldValue('interval', savedQuery.interval);
+        }
+
+        if (savedQuery.platform) {
+          setFieldValue('platform', savedQuery.platform);
+        }
+
+        if (savedQuery.version) {
+          setFieldValue('version', [savedQuery.version]);
+        }
+
+        if (savedQuery.ecs_mapping) {
+          setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
+        }
       }
     },
     [setFieldValue, reset]
