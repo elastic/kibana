@@ -57,7 +57,7 @@ The following example is the expected response:
 
 ```json
 {
-  facts: [
+  leaves: [
     {
       id: 'pf-collection-agent: runtime.releaseSudog() in runtime2.go#282',
       value: 1,
@@ -92,7 +92,7 @@ The following example is the expected response:
 
 Here is a basic description of the response format:
 
-* Each object in the `facts` list represents a node in the flamegraph
+* Each object in the `leaves` list represents a leaf node in the flamegraph
 * `id` represents the name of the flamegraph node
 * `value` represents the number of samples for that node
 * `depth` represents the depth of the node in the flamegraph, starting from zero

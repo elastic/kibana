@@ -120,6 +120,6 @@ export function mapFlamechart(src) {
   }));
 
   return {
-    facts: newRoot,
+    leaves: newRoot,
   };
 }
