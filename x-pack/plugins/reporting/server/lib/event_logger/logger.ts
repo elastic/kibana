@@ -36,13 +36,9 @@ export interface IReportingEventLogger {
   stopTiming(): void;
 }
 
-const getEventLog = (logger: LevelLogger, lProperties: Partial<LogMeta>) => {
-  return new EcsLogAdapter(logger, lProperties);
-};
-
 /** @internal */
 export function reportingEventLoggerFactory(logger: LevelLogger) {
-  const genericLogger = getEventLog(logger, { event: { provider: PLUGIN_ID } });
+  const genericLogger = new EcsLogAdapter(logger, { event: { provider: PLUGIN_ID } });
 
   return class ReportingEventLogger {
     readonly eventObj: {
@@ -74,7 +70,7 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       };
 
       // create a "complete" logger that will use EventLog helpers to calculate timings
-      this.completionLogger = getEventLog(logger, { event: { provider: PLUGIN_ID } });
+      this.completionLogger = new EcsLogAdapter(logger, { event: { provider: PLUGIN_ID } });
     }
 
     logScheduleTask(): ScheduledTask {
