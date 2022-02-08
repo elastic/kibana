@@ -28,7 +28,7 @@ import {
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
 import { displayWarningToast, useStateToaster } from '../../../../../../common/components/toasters';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
-import { useRulesTableContext } from '../../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useRulesTableContext } from '../rules_table/rules_table_context';
 import * as detectionI18n from '../../../translations';
 import * as i18n from '../../translations';
 import {
@@ -48,7 +48,7 @@ import { convertRulesFilterToKQL } from '../../../../../containers/detection_eng
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 import type { BulkActionPartialErrorResponse } from '../../../../../../../common/detection_engine/schemas/response/perform_bulk_action_schema';
 import type { HTTPError } from '../../../../../../../common/detection_engine/types';
-import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/rules_table/use_find_rules';
+import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
