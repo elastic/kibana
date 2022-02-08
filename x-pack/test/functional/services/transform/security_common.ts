@@ -45,7 +45,7 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
     {
       name: 'transform_ui_extras',
       elasticsearch: {
-        cluster: ['monitor'],
+        cluster: ['monitor', 'read_pipeline'],
       },
       kibana: [],
     },

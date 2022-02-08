@@ -58,7 +58,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
 
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
@@ -90,7 +89,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('should display created annotation in job list');
         await ml.navigation.navigateToJobManagement();
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationExists({
@@ -125,7 +123,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
 
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationContentById(
@@ -179,7 +176,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('should display edited annotation in job list');
         await ml.navigation.navigateToJobManagement();
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
@@ -200,7 +196,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
 
@@ -221,7 +216,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
 
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
@@ -257,7 +251,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('does not show the deleted annotation in job list');
         await ml.navigation.navigateToJobManagement();
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);
