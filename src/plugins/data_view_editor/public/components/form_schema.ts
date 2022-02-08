@@ -38,19 +38,6 @@ export const schema = {
 
           return value === '*' ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
         },
-
-        /*
-          if (Array.isArray(value)) {
-            return isEmptyArray(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
-          }
-        },
-        /*
-        fieldValidators.emptyField(
-          i18n.translate('indexPatternEditor.validations.noSingleAstriskPattern', {
-            defaultMessage: "a single '*' is not an allowed index pattern",
-          })
-        ),
-        */
       },
     ],
   },
