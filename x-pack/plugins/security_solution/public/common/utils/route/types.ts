@@ -22,7 +22,6 @@ export type SiemRouteType =
   | NetworkRouteType
   | TimelineType
   | AdministrationType
-  | UsersTableType
   | UsersTableType;
 export interface RouteSpyState {
   pageName: string;
