@@ -16,6 +16,14 @@ import {
   GaugeTicksPositions,
 } from '../constants';
 
+export const errors = {
+  invalidShapeError: () =>
+    i18n.translate('expressionGauge.functions.gauge.errors.shapeIsNotSupported', {
+      defaultMessage: `Invalid shape is specified. Supported shapes: {shapes}`,
+      values: { shapes: Object.values(GaugeShapes).join(', ') },
+    }),
+};
+
 export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
   name: EXPRESSION_GAUGE_NAME,
   type: 'render',
@@ -30,6 +38,8 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.shape.help', {
         defaultMessage: 'Type of gauge chart',
       }),
+      required: true,
+      default: GaugeShapes.HORIZONTAL_BULLET,
     },
     metricAccessor: {
       types: ['string'],
@@ -101,6 +111,10 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     },
   },
   fn(data, args) {
+    if (!Object.values(GaugeShapes).includes(args.shape)) {
+      throw new Error(strings.invalidShapeError());
+    }
+
     return {
       type: 'render',
       as: EXPRESSION_GAUGE_NAME,
