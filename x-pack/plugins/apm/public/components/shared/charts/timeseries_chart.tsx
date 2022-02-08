@@ -392,14 +392,7 @@ export function TimeseriesChart({
         status={fetchStatus}
         id={id}
       >
-        <Chart
-          ref={chartRef}
-          id={id}
-          onInternalMainProjectionAreaDimensionsChange={(d) => {
-            setMlBrushMarginLeft(d.left);
-            setMlBrushWidth(d.width);
-          }}
-        >
+        <Chart ref={chartRef} id={id}>
           <Settings
             debugState={true}
             tooltip={{ stickTo: 'top', showNullValues: true }}
@@ -410,6 +403,10 @@ export function TimeseriesChart({
                   }
                 : undefined
             }
+            onProjectionAreaChange={({ projection }) => {
+              setMlBrushMarginLeft(projection.left);
+              setMlBrushWidth(projection.width);
+            }}
             theme={[
               customTheme,
               {
