@@ -123,39 +123,3 @@ export function mapFlamechart(src) {
     facts: newRoot,
   };
 }
-
-export function mapKibanaFlameChart(src) {
-  src.ExeFileName = 'root';
-
-  return {
-    facts: [
-      {
-        id: 'pf-collection-agent: runtime.releaseSudog() in runtime2.go#282',
-        value: 1,
-        depth: 19,
-        layers: {
-          '0': 'root',
-          '1': 'pf-collection-agent: runtime.goexit() in asm_amd64.s#1581',
-          '2': 'pf-collection-agent: github.com/optimyze/prodfiler/pf-storage-backend/storagebackend/storagebackendv1.(*ScyllaExecutor).Start.func1 in scyllaexecutor.go#102',
-          '3': 'pf-collection-agent: github.com/optimyze/prodfiler/pf-storage-backend/storagebackend/storagebackendv1.(*ScyllaExecutor).executeQueryAndReadResults in scyllaexecutor.go#158',
-          '4': 'pf-collection-agent: github.com/gocql/gocql.(*Query).Iter in session.go#1246',
-          '5': 'pf-collection-agent: github.com/gocql/gocql.(*Session).executeQuery in session.go#463',
-          '6': 'pf-collection-agent: github.com/gocql/gocql.(*queryExecutor).executeQuery in query_executor.go#66',
-          '7': 'pf-collection-agent: github.com/gocql/gocql.(*queryExecutor).do in query_executor.go#127',
-          '8': 'pf-collection-agent: github.com/gocql/gocql.(*queryExecutor).attemptQuery in query_executor.go#32',
-          '9': 'pf-collection-agent: github.com/gocql/gocql.(*Query).execute in session.go#1044',
-          '10': 'pf-collection-agent: github.com/gocql/gocql.(*Conn).executeQuery in conn.go#1129',
-          '11': 'pf-collection-agent: github.com/gocql/gocql.(*Conn).exec in conn.go#916',
-          '12': 'pf-collection-agent: github.com/gocql/gocql.(*writeExecuteFrame).writeFrame in frame.go#1618',
-          '13': 'pf-collection-agent: github.com/gocql/gocql.(*framer).writeExecuteFrame in frame.go#1643',
-          '14': 'pf-collection-agent: github.com/gocql/gocql.(*framer).finishWrite in frame.go#788',
-          '15': 'pf-collection-agent: github.com/gocql/gocql.(*Conn).Write in conn.go#319',
-          '16': 'pf-collection-agent: github.com/gocql/gocql.(*writeCoalescer).Write in conn.go#829',
-          '17': 'pf-collection-agent: sync.(*Cond).Wait in cond.go#83',
-          '18': 'pf-collection-agent: sync.runtime_notifyListWait() in sema.go#498',
-          '19': 'pf-collection-agent: runtime.releaseSudog() in runtime2.go#282',
-        },
-      },
-    ],
-  };
-}
