@@ -26,6 +26,7 @@ export interface TimelionRenderValue {
 export interface TimelionVisParams {
   expression: string;
   interval: string;
+  ariaLabel?: string;
 }
 
 export type TimelionExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -56,12 +57,26 @@ export const getTimelionVisualizationConfig = (
       default: 'auto',
       help: '',
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('timelion.function.args.ariaLabelHelpText', {
+        defaultMessage: 'Specifies the aria label of the timelion',
+      }),
+      required: false,
+    },
   },
-  async fn(input, args, { getSearchSessionId, getExecutionContext }) {
+  async fn(input, args, { getSearchSessionId, getExecutionContext, variables }) {
     const { getTimelionRequestHandler } = await import('./async_services');
     const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
-    const visParams = { expression: args.expression, interval: args.interval };
+    const visParams = {
+      expression: args.expression,
+      interval: args.interval,
+      ariaLabel:
+        args.ariaLabel ??
+        (variables?.embeddableTitle as string) ??
+        getExecutionContext?.()?.description,
+    };
 
     const response = await timelionRequestHandler({
       timeRange: get(input, 'timeRange') as TimeRange,

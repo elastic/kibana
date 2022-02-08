@@ -14,7 +14,7 @@ import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data/common';
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
@@ -25,7 +25,7 @@ export interface IESAggSource extends IESSource {
   getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string;
   getMetricFields(): IESAggField[];
   getMetricFieldForName(fieldName: string): IESAggField | null;
-  getValueAggsDsl(indexPattern: IndexPattern): { [key: string]: unknown };
+  getValueAggsDsl(indexPattern: DataView): { [key: string]: unknown };
 }
 
 export abstract class AbstractESAggSource extends AbstractESSource implements IESAggSource {
@@ -107,7 +107,7 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     return this.getMetricFields();
   }
 
-  getValueAggsDsl(indexPattern: IndexPattern, metricsFilter?: (metric: IESAggField) => boolean) {
+  getValueAggsDsl(indexPattern: DataView, metricsFilter?: (metric: IESAggField) => boolean) {
     const valueAggsDsl: { [key: string]: unknown } = {};
     this.getMetricFields()
       .filter((esAggMetric) => {

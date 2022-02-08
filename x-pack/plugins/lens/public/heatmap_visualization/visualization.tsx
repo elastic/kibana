@@ -108,7 +108,7 @@ export const getHeatmapVisualization = ({
       id: 'heatmap',
       icon: HeatmapIcon,
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
-        defaultMessage: 'Heatmap',
+        defaultMessage: 'Heat map',
       }),
       groupLabel: groupLabelForHeatmap,
       showExperimentalBadge: false,
