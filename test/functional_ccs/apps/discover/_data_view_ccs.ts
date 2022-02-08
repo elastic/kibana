@@ -24,11 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     persistent: {
       cluster: {
         remote: {
-          local: {
-            mode: 'proxy',
-            proxy_address: '127.0.0.1:9302',
+          remote: {
             skip_unavailable: 'true',
-            // seeds: ['localhost:9320'],
+            seeds: ['localhost:9300'],
           },
         },
       },
