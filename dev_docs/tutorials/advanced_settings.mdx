@@ -12,10 +12,10 @@ _Note: Advanced settings, uiSettings, settings and config are often used to desc
 UI settings are configurable from the Advanced Settings page in Management and control the behavior of Kibana. When settings are changed from their default, the new value is persisted as a key/value pair in the `config` saved object registered by `core`.
 
 There are several ways to configure an advanced setting:
- - Through the Advanced Settings UI
- - Locked via `kibana.yml`'s `uiSettings.overrides`
- - Through the client-side `uiSettings` service
- - Through the server-side `uiSettings` service
+ - <DocLink id="kibDevTutorialAdvancedSettings" section="configuration-with-advanced-settings-ui" text="Through the Advanced Settings UI"/>
+ - <DocLink id="kibDevTutorialAdvancedSettings" section="configuration-with-ui-settings-overrides" text="Locked via `kibana.yml`'s `uiSettings.overrides`"/>
+ - <DocLink id="kibDevTutorialAdvancedSettings" section="client-side-usage" text="Through the client-side `uiSettings` service"/>
+ - <DocLink id="kibDevTutorialAdvancedSettings" section="server-side-usage" text="Through the server-side `uiSettings` service"/>
 
 `uiSettings` are registered synchronously during `core`'s setup lifecycle phase. This means that once you add a new advanced setting, you cannot change or remove it without <DocLink id="kibDevTutorialAdvancedSettings" section="registering-migrations" text="registering a migration in core"/>.
 
@@ -46,7 +46,10 @@ uiSettings.overrides:
 
 On the client, the `uiSettings` service is accessible directly from `core` and the client provides plugins access to the `config` entries stored in Elasticsearch.
 
-**Add link to public API docs**
+<DocCallOut>
+  See [the client-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-public.iuisettingsclient.md)
+</DocCallOut>
+
 Here is a basic example for using the `uiSettings` service:
 
 **src/plugins/charts/public/plugin.ts**
@@ -119,6 +122,10 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
 
 On the server side, `uiSettings` are accessible directly from `core`. The following example shows how to register a new setting with the minimum required schema parameter against which validations are performed on read and write.
 The example also shows how plugins can leverage the optional deprecation parameter on registration for handling deprecation notices and renames. The deprecation warnings are rendered in the Advanced Settings UI and should also be added to the Configure Kibana guide.
+
+<DocCallOut>
+  See [the server-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)
+</DocCallOut>
 
 **src/plugins/charts/server/plugin.ts**
 
