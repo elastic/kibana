@@ -7,7 +7,21 @@
 
 import type { RequestHandlerContext } from 'src/core/server';
 import type { SearchRequestHandlerContext } from '../../../../src/plugins/data/server';
-import { MlPluginSetup } from '../../ml/server';
+import type { MlPluginSetup } from '../../ml/server';
+import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
+import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
+
+export interface InfraPluginSetup {
+  defineInternalSourceConfiguration: (
+    sourceId: string,
+    sourceProperties: InfraStaticSourceConfiguration
+  ) => void;
+  logViews: LogViewsServiceSetup;
+}
+
+export interface InfraPluginStart {
+  logViews: LogViewsServiceStart;
+}
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 export type MlAnomalyDetectors = ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;
