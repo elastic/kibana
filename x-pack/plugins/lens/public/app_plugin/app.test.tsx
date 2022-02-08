@@ -678,13 +678,14 @@ describe('Lens App', () => {
             filters: [pinned, unpinned],
           },
         });
+
+        const { state: expectedFilters } = services.data.query.filterManager.extract([unpinned]);
+
         expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
           expect.objectContaining({
             savedObjectId: defaultSavedObjectId,
             title: 'hello there2',
-            state: expect.objectContaining({
-              filters: services.data.query.filterManager.inject([unpinned], []),
-            }),
+            state: expect.objectContaining({ filters: expectedFilters }),
           }),
           true,
           { id: '5678', savedObjectId: defaultSavedObjectId }

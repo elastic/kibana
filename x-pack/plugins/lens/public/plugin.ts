@@ -239,7 +239,7 @@ export class LensPlugin {
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
-        injectFilterReferences: data.query.filterManager.inject,
+        injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
         indexPatternService: plugins.data.indexPatterns,
         uiActions: plugins.uiActions,
