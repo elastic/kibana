@@ -27,10 +27,12 @@ export interface ExploratoryEmbeddableProps {
   appendTitle?: JSX.Element;
   appendHeader?: JSX.Element;
   appId?: 'security' | 'observability';
-  attributes: AllSeries;
+  attributes?: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   compressed?: boolean;
   customHeight?: string | number;
+  customLensAttrs?: any;
+
   disableBorder?: boolean;
   disableShadow?: boolean;
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
@@ -42,7 +44,7 @@ export interface ExploratoryEmbeddableProps {
     timeFieldName?: string | undefined;
   }) => void;
   reportConfigMap?: ReportConfigMap;
-  withActions?: boolean | Array<'explore' | 'save' | 'addToCase'>;
+  withActions?: boolean | Array<'explore' | 'save' | 'addToCase' | 'openInLens'>;
   reportType: ReportViewType | string;
   showCalculationMethod?: boolean;
   showExploreButton?: boolean;
@@ -63,10 +65,11 @@ export default function Embeddable({
   appendTitle,
   appendHeader,
   appId,
-  attributes,
+  attributes = [],
   axisTitlesVisibility,
   compressed = false,
   customHeight,
+  customLensAttrs,
   disableBorder = false,
   disableShadow = false,
   indexPatterns,
@@ -97,14 +100,6 @@ export default function Embeddable({
 
   const [operationType, setOperationType] = useState(series?.operationType);
   const theme = useTheme();
-  const actions = useActions({
-    withActions,
-    attributes,
-    reportType,
-    appId,
-    setIsSaveOpen,
-    setAddToCaseOpen,
-  });
 
   const layerConfigs: LayerConfig[] = getLayerConfigs(
     attributes,
@@ -114,29 +109,48 @@ export default function Embeddable({
     { ...reportConfigMap, ...obsvReportConfigMap }
   );
 
-  if (layerConfigs.length < 1) {
-    return null;
+  let lensAttributes;
+
+  try {
+    lensAttributes = new LensAttributes(layerConfigs, reportType);
+  } catch (error) {}
+
+  const attributesJSON = customLensAttrs ?? lensAttributes?.getJSON();
+
+  if (typeof axisTitlesVisibility !== 'undefined') {
+    (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
+      axisTitlesVisibility;
   }
-  const lensAttributes = new LensAttributes(layerConfigs, reportType);
-
-  if (!LensComponent) {
-    return <EuiText>No lens component</EuiText>;
-  }
-
-  const attributesJSON = lensAttributes.getJSON();
-
-  (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
-    axisTitlesVisibility;
 
   if (typeof legendIsVisible !== 'undefined') {
     (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
   }
+
+  const actions = useActions({
+    withActions,
+    attributes,
+    reportType,
+    appId,
+    setIsSaveOpen,
+    setAddToCaseOpen,
+    timeRange: series?.time,
+    lensAttributes: attributesJSON,
+  });
 
   const href = createExploratoryViewUrl(
     { reportType, allSeries: attributes },
     http?.basePath.get(),
     appId
   );
+
+  if (!attributesJSON && layerConfigs.length < 1) {
+    console.log(attributesJSON, layerConfigs.length);
+    return null;
+  }
+
+  if (!LensComponent) {
+    return <EuiText>No lens component</EuiText>;
+  }
 
   return (
     <Wrapper $customHeight={customHeight} $compressed={compressed}>

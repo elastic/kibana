@@ -27,11 +27,9 @@ import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../../types';
 import { STACK_BY } from '../../../common/components/matrix_histogram/translations';
-import {
-  indexPatternList,
-  reportConfigMap,
-} from '../../../app/exploratory_view/security_exploratory_view';
+import { reportConfigMap } from '../../../app/exploratory_view/security_exploratory_view';
 import { ReportTypes } from '../../../../../observability/public';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
@@ -45,6 +43,158 @@ const dnsStackByOptions: MatrixHistogramOption[] = [
 ];
 
 const DEFAULT_STACK_BY = 'dns.question.registered_domain';
+
+const topDomainsAttrs = {
+  title: 'Top domains by dns.question.registered_domain',
+  description: '',
+  visualizationType: 'lnsXY',
+  state: {
+    visualization: {
+      legend: {
+        isVisible: true,
+        position: 'right',
+      },
+      valueLabels: 'hide',
+      fittingFunction: 'None',
+      yLeftExtent: {
+        mode: 'full',
+      },
+      yRightExtent: {
+        mode: 'full',
+      },
+      axisTitlesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      tickLabelsVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      labelsOrientation: {
+        x: 0,
+        yLeft: 0,
+        yRight: 0,
+      },
+      gridlinesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          layerId: 'b1c3efc6-c886-4fba-978f-3b6bb5e7948a',
+          accessors: ['2a4d5e20-f570-48e4-b9ab-ff3068919377'],
+          position: 'top',
+          seriesType: 'bar',
+          showGridlines: false,
+          layerType: 'data',
+          xAccessor: 'd1452b87-0e9e-4fc0-a725-3727a18e0b37',
+          splitAccessor: 'e8842815-2a45-4c74-86de-c19a391e2424',
+        },
+      ],
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [
+      {
+        meta: {
+          alias: null,
+          negate: true,
+          disabled: false,
+          type: 'phrase',
+          key: 'dns.question.type',
+          params: {
+            query: 'PTR',
+          },
+          indexRefName: 'filter-index-pattern-0',
+        },
+        query: {
+          match_phrase: {
+            'dns.question.type': 'PTR',
+          },
+        },
+        $state: {
+          store: 'appState',
+        },
+      },
+    ],
+    datasourceStates: {
+      indexpattern: {
+        layers: {
+          'b1c3efc6-c886-4fba-978f-3b6bb5e7948a': {
+            columns: {
+              'd1452b87-0e9e-4fc0-a725-3727a18e0b37': {
+                label: '@timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: '@timestamp',
+                isBucketed: true,
+                scale: 'interval',
+                params: {
+                  interval: 'auto',
+                },
+              },
+              '2a4d5e20-f570-48e4-b9ab-ff3068919377': {
+                label: 'Unique count of dns.question.registered_domain',
+                dataType: 'number',
+                operationType: 'unique_count',
+                scale: 'ratio',
+                sourceField: 'dns.question.registered_domain',
+                isBucketed: false,
+              },
+              'e8842815-2a45-4c74-86de-c19a391e2424': {
+                label: 'Top values of dns.question.name',
+                dataType: 'string',
+                operationType: 'terms',
+                scale: 'ordinal',
+                sourceField: 'dns.question.name',
+                isBucketed: true,
+                params: {
+                  size: 6,
+                  orderBy: {
+                    type: 'column',
+                    columnId: '2a4d5e20-f570-48e4-b9ab-ff3068919377',
+                  },
+                  orderDirection: 'desc',
+                  otherBucket: true,
+                  missingBucket: false,
+                },
+              },
+            },
+            columnOrder: [
+              'e8842815-2a45-4c74-86de-c19a391e2424',
+              'd1452b87-0e9e-4fc0-a725-3727a18e0b37',
+              '2a4d5e20-f570-48e4-b9ab-ff3068919377',
+            ],
+            incompleteColumns: {},
+          },
+        },
+      },
+    },
+  },
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'filebeat-*',
+      name: 'indexpattern-datasource-current-indexpattern',
+    },
+    {
+      type: 'index-pattern',
+      id: 'logs-*',
+      name: 'indexpattern-datasource-layer-b1c3efc6-c886-4fba-978f-3b6bb5e7948a',
+    },
+    {
+      name: 'filter-index-pattern-0',
+      type: 'index-pattern',
+      id: 'logs-*',
+    },
+  ],
+};
 
 export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   defaultStackByOption:
@@ -85,6 +235,15 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
       );
     },
     []
+  );
+  const { patternList, dataViewId } = useSourcererDataView();
+
+  const customLensAttrs = useMemo(
+    () => ({
+      ...topDomainsAttrs,
+      references: topDomainsAttrs.references.map((ref) => ({ ...ref, id: dataViewId })),
+    }),
+    [dataViewId]
   );
 
   useEffect(() => {
@@ -159,33 +318,36 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
           appendHeader={appendTitle}
           title={title}
           reportConfigMap={reportConfigMap}
-          dataTypesIndexPatterns={indexPatternList}
+          dataTypesIndexPatterns={patternList?.join(',')}
           reportType={ReportTypes.KPI}
           attributes={[
             {
-              reportDefinitions: {
-                [selectedStackByOption.value]: ['ALL_VALUES'],
-              },
-              name: selectedStackByOption.value,
+              //     reportDefinitions: {
+              //       [selectedStackByOption.value]: ['ALL_VALUES'],
+              //     },
+              //     name: selectedStackByOption.value,
               dataType: 'security',
-              selectedMetricField: 'TOP_DNS_DOMAINS',
-              breakdown: selectedStackByOption.value,
-              time: { from: startDate, to: endDate },
-              seriesType: 'bar_stacked',
+              //     selectedMetricField: 'TOP_DNS_DOMAINS',
+              //     breakdown: selectedStackByOption.value,
+              //     time: { from: startDate, to: endDate },
+              //     seriesType: 'bar_stacked',
             },
           ]}
-          legendIsVisible={true}
-          axisTitlesVisibility={{
-            x: false,
-            yLeft: false,
-            yRight: false,
-          }}
+          // legendIsVisible={true}
+          // axisTitlesVisibility={{
+          //   x: false,
+          //   yLeft: false,
+          //   yRight: false,
+          // }}
           disableBorder
           disableShadow
           compressed
           customHeight="100%"
+          customLensAttrs={customLensAttrs}
+          withActions={['save', 'addToCase', 'openInLens']}
         />
       </EuiPanel>
+
       <EuiSpacer />
       <NetworkDnsTableManage
         data={networkDns}

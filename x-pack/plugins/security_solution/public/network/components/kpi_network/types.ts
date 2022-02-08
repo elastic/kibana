@@ -22,7 +22,6 @@ export interface NetworkKpiProps {
 export interface NetworkKpiEmbessablesProps {
   filterQuery?: string;
   from: string;
-  indexNames: string[];
   to: string;
   inputsModelId?: InputsModelId;
 }

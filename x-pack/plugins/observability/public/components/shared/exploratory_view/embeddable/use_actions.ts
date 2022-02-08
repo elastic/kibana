@@ -15,6 +15,7 @@ import {
   Action,
   ActionExecutionContext,
 } from '../../../../../../../../src/plugins/ui_actions/public';
+import { ObservabilityAppServices } from '../../../../application/types';
 
 export function useActions({
   withActions,
@@ -23,15 +24,25 @@ export function useActions({
   setIsSaveOpen,
   setAddToCaseOpen,
   appId = 'observability',
+  timeRange,
+  lensAttributes,
 }: {
-  withActions?: boolean | Array<'explore' | 'save'>;
+  withActions?: boolean | Array<'explore' | 'save' | 'addToCase' | 'openInLens'>;
   reportType: ReportViewType;
   attributes: AllSeries;
   appId: 'security' | 'observability';
   setIsSaveOpen: (val: boolean) => void;
   setAddToCaseOpen: (val: boolean) => void;
 }) {
-  const [defaultActions, setDefaultActions] = useState(['explore', 'save', 'addToCase']);
+  const kServices = useKibana<ObservabilityAppServices>().services;
+
+  const { lens } = kServices;
+  const [defaultActions, setDefaultActions] = useState([
+    'explore',
+    'save',
+    'addToCase',
+    'openInLens',
+  ]);
 
   useEffect(() => {
     if (withActions === false) {
@@ -69,6 +80,21 @@ export function useActions({
     setAddToCaseOpen(true);
   }, [setAddToCaseOpen]);
 
+  const openInLensCallback = useCallback(() => {
+    if (lensAttributes) {
+      lens.navigateToPrefilledEditor(
+        {
+          id: '',
+          timeRange,
+          attributes: lensAttributes,
+        },
+        {
+          openInNewTab: true,
+        }
+      );
+    }
+  }, [lens, lensAttributes, timeRange]);
+
   return defaultActions.map<Action>((action) => {
     if (action === 'save') {
       return getSaveAction({ callback: saveCallback });
@@ -76,9 +102,35 @@ export function useActions({
     if (action === 'addToCase') {
       return getAddToCaseAction({ callback: addToCaseCallback });
     }
+
+    if (action === 'openInLens') {
+      return getOpenInLensAction({ callback: openInLensCallback });
+    }
     return getExploreAction({ href, callback: exploreCallback });
   });
 }
+
+const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {
+  return {
+    id: 'expViewOpenInLens',
+    getDisplayName(context: ActionExecutionContext<object>): string {
+      return i18n.translate('xpack.observability.expView.openInLens', {
+        defaultMessage: 'Open in Lens',
+      });
+    },
+    getIconType(context: ActionExecutionContext<object>): string | undefined {
+      return 'visArea';
+    },
+    type: 'link',
+    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+      return true;
+    },
+    async execute(context: ActionExecutionContext<object>): Promise<void> {
+      callback();
+      return;
+    },
+  };
+};
 
 const getExploreAction = ({ href, callback }: { href: string; callback: () => void }): Action => {
   return {
