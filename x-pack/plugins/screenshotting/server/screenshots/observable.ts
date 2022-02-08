@@ -176,15 +176,14 @@ export class ScreenshotObservableHandler {
     const waitTimeout = this.options.timeouts.waitForElements;
 
     return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
-      mergeMap((itemsCount) => {
+      mergeMap(async (itemsCount) => {
         // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
         const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
 
-        return driver
-          .setViewport(viewport, this.logger)
-          .then(() =>
-            waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout)
-          );
+        // Set the viewport allowing time for the browser to handle reflow and redraw
+        // before checking for readiness of visualizations.
+        await driver.setViewport(viewport, this.logger);
+        await waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout);
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
