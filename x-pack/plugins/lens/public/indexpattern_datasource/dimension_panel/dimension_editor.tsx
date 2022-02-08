@@ -683,15 +683,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       ) &&
                       !selectedColumn.timeScale
                   ),
-                  inlineElement: (
-                    selectedOperationDefinition.timeScalingMode ?
+                  inlineElement: selectedOperationDefinition.timeScalingMode ? (
                     <TimeScaling
                       selectedColumn={selectedColumn}
                       columnId={columnId}
                       layer={state.layers[layerId]}
                       updateLayer={setStateWrapper}
-                    /> : null
-                  ),
+                    />
+                  ) : null,
                 },
                 {
                   title: i18n.translate('xpack.lens.indexPattern.filterBy.label', {

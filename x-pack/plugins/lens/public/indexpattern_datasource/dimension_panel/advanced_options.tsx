@@ -18,7 +18,7 @@ interface AdvancedOption {
   helpPopup?: string | null;
 }
 
-export function AdvancedOptions(props: {options: AdvancedOption[]}) {
+export function AdvancedOptions(props: { options: AdvancedOption[] }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const popoverOptions = props.options.filter((option) => option.showInPopover);
   const inlineOptions = props.options.filter((option) => option.inlineElement);
