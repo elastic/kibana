@@ -24,17 +24,6 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
     },
     async (context, request, response) => {
       try {
-        // Check to ensure the space is listed in monitoring.cluster_alerts.allowedSpaces
-        const config = server.config();
-        const allowedSpaces =
-          config.get('monitoring.cluster_alerts.allowedSpaces') || ([] as string[]);
-        if (!allowedSpaces.includes(context.infra.spaceId)) {
-          server.log.info(
-            `Skipping alert creation for "${context.infra.spaceId}" space; add space ID to 'monitoring.cluster_alerts.allowedSpaces' in your kibana.yml`
-          );
-          return response.ok({ body: undefined });
-        }
-
         const alerts = AlertsFactory.getAll();
         if (alerts.length) {
           const { isSufficientlySecure, hasPermanentEncryptionKey } = npRoute.alerting

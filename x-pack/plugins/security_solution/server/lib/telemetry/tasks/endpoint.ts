@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'src/core/server';
-import { TelemetryEventsSender } from '../sender';
+import { ITelemetryEventsSender } from '../sender';
 import type {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
@@ -14,10 +14,11 @@ import type {
   ESClusterInfo,
   ESLicense,
 } from '../types';
-import { TelemetryReceiver } from '../receiver';
+import { ITelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 import {
   batchTelemetryRecords,
+  extractEndpointPolicyConfig,
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
 } from '../helpers';
@@ -46,8 +47,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: TelemetryReceiver,
-      sender: TelemetryEventsSender,
+      receiver: ITelemetryReceiver,
+      sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       if (!taskExecutionPeriod.last) {
@@ -145,11 +146,11 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             packagePolicies
               .map((pPolicy) => pPolicy as PolicyData)
               .forEach((pPolicy) => {
-                if (pPolicy.inputs[0].config !== undefined) {
+                if (pPolicy.inputs[0]?.config !== undefined && pPolicy.inputs[0]?.config !== null) {
                   pPolicy.inputs.forEach((input) => {
                     if (
                       input.type === FLEET_ENDPOINT_PACKAGE &&
-                      input.config !== undefined &&
+                      input?.config !== undefined &&
                       policyInfo !== undefined
                     ) {
                       endpointPolicyCache.set(policyInfo, pPolicy);
@@ -212,6 +213,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           }
 
           const { cpu, memory, uptime } = endpoint.endpoint_metrics.Endpoint.metrics;
+          const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
 
           return {
             '@timestamp': taskExecutionPeriod.current,
@@ -229,7 +231,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             endpoint_meta: {
               os: endpoint.endpoint_metrics.host.os,
             },
-            policy_config: policyConfig !== null ? policyConfig?.inputs[0].config.policy : {},
+            policy_config: endpointPolicyDetail !== null ? endpointPolicyDetail : {},
             policy_response:
               failedPolicy !== null && failedPolicy !== undefined
                 ? {
@@ -253,9 +255,10 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          *
          * Send the documents in a batches of maxTelemetryBatch
          */
-        batchTelemetryRecords(telemetryPayloads, maxTelemetryBatch).forEach((telemetryBatch) =>
-          sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, telemetryBatch)
-        );
+        const batches = batchTelemetryRecords(telemetryPayloads, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, batch);
+        }
         return telemetryPayloads.length;
       } catch (err) {
         logger.warn('could not complete endpoint alert telemetry task');
@@ -266,7 +269,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 }
 
 async function fetchEndpointData(
-  receiver: TelemetryReceiver,
+  receiver: ITelemetryReceiver,
   executeFrom: string,
   executeTo: string
 ) {

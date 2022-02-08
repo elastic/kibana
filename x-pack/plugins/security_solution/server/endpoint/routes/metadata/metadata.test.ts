@@ -24,7 +24,6 @@ import { registerEndpointRoutes } from './index';
 import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
-  createMockPackageService,
   createRouteHandlerContext,
 } from '../../mocks';
 import {
@@ -38,7 +37,7 @@ import {
   legacyMetadataSearchResponseMock,
   unitedMetadataSearchResponseMock,
 } from './support/test_support';
-import { AgentClient, PackageService } from '../../../../../fleet/server/services';
+import type { AgentClient, PackageService, PackageClient } from '../../../../../fleet/server';
 import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
@@ -57,7 +56,7 @@ import {
 } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
-import { createMockAgentClient } from '../../../../../fleet/server/mocks';
+import { createMockAgentClient, createMockPackageService } from '../../../../../fleet/server/mocks';
 import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz';
 
@@ -76,7 +75,7 @@ describe('test endpoint routes', () => {
   let mockClusterClient: ClusterClientMock;
   let mockScopedClient: ScopedClusterClientMock;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockPackageService: jest.Mocked<PackageService>;
+  let mockPackageService: PackageService;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeHandler: RequestHandler<any, any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -121,30 +120,29 @@ describe('test endpoint routes', () => {
 
     endpointAppContextService = new EndpointAppContextService();
     mockPackageService = createMockPackageService();
-    mockPackageService.getInstallation.mockReturnValue(
-      Promise.resolve({
-        installed_kibana: [],
-        package_assets: [],
-        es_index_patterns: {},
-        name: '',
-        version: '',
-        install_status: 'installed',
-        install_version: '',
-        install_started_at: '',
-        install_source: 'registry',
-        installed_es: [
-          {
-            id: 'logs-endpoint.events.security',
-            type: ElasticsearchAssetType.indexTemplate,
-          },
-          {
-            id: `${metadataTransformPrefix}-0.16.0-dev.0`,
-            type: ElasticsearchAssetType.transform,
-          },
-        ],
-        keep_policies_up_to_date: false,
-      })
-    );
+    const mockPackageClient = mockPackageService.asInternalUser as jest.Mocked<PackageClient>;
+    mockPackageClient.getInstallation.mockResolvedValue({
+      installed_kibana: [],
+      package_assets: [],
+      es_index_patterns: {},
+      name: '',
+      version: '',
+      install_status: 'installed',
+      install_version: '',
+      install_started_at: '',
+      install_source: 'registry',
+      installed_es: [
+        {
+          id: 'logs-endpoint.events.security',
+          type: ElasticsearchAssetType.indexTemplate,
+        },
+        {
+          id: `${metadataTransformPrefix}-0.16.0-dev.0`,
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+      keep_policies_up_to_date: false,
+    });
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
     endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     mockAgentService = startContract.agentService!;

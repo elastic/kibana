@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
 import { DataStream, MonitorFields } from '../../../../common/runtime_types';
 
 interface DataStreamConfig {
@@ -31,9 +32,9 @@ export function convertToDataStreamFormat(monitor: Record<string, any>): DataStr
     id: monitor.id,
     // Schedule is needed by service at root level as well
     schedule: monitor.schedule,
-    enabled: monitor.enabled,
+    enabled: monitor.enabled ?? true,
     data_stream: {
-      namespace: monitor.namespace ?? 'default',
+      namespace: monitor.namespace ?? DEFAULT_NAMESPACE_STRING,
     },
     streams: [
       {

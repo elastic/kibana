@@ -11,9 +11,12 @@ import { Logger } from 'src/core/server';
 
 import { RuleAlertType as Rule } from '../../rules/types';
 
+import type { RulesClient } from '../../../../../../alerting/server';
+
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
+  RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
@@ -27,10 +30,10 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
-import { enableRule } from '../../rules/enable_rule';
 import { findRules } from '../../rules/find_rules';
+import { readRules } from '../../rules/read_rules';
 import { patchRules } from '../../rules/patch_rules';
-import { appplyBulkActionEditToRule } from '../../rules/bulk_action_edit';
+import { applyBulkActionEditToRule } from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 
@@ -129,6 +132,87 @@ const executeBulkAction = async (rules: Rule[], action: RuleActionFn, abortSigna
     abortSignal,
   });
 
+const getRulesByIds = async ({
+  ids,
+  rulesClient,
+  isRuleRegistryEnabled,
+  abortSignal,
+}: {
+  ids: string[];
+  rulesClient: RulesClient;
+  isRuleRegistryEnabled: boolean;
+  abortSignal: AbortSignal;
+}) => {
+  const readRulesExecutor = async (id: string) => {
+    try {
+      const rule = await readRules({ id, rulesClient, isRuleRegistryEnabled, ruleId: undefined });
+      if (rule == null) {
+        throw Error('Can`t fetch a rule');
+      }
+      return { rule };
+    } catch (err) {
+      const { message, statusCode } = transformError(err);
+      return {
+        error: { message, statusCode },
+        rule: { id },
+      };
+    }
+  };
+
+  const { results } = await initPromisePool({
+    concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+    items: ids,
+    executor: readRulesExecutor,
+    abortSignal,
+  });
+
+  return {
+    total: ids.length,
+    rules: results.filter((rule) => rule.error === undefined).map(({ rule }) => rule) as Rule[],
+    fetchErrors: results.filter((rule): rule is RuleActionError => rule.error !== undefined),
+  };
+};
+
+const fetchRules = async ({
+  query,
+  ids,
+  rulesClient,
+  isRuleRegistryEnabled,
+  abortSignal,
+}: {
+  query: string | undefined;
+  ids: string[] | undefined;
+  rulesClient: RulesClient;
+  isRuleRegistryEnabled: boolean;
+  abortSignal: AbortSignal;
+}) => {
+  if (ids) {
+    return getRulesByIds({
+      ids,
+      rulesClient,
+      isRuleRegistryEnabled,
+      abortSignal,
+    });
+  }
+
+  const { data, total } = await findRules({
+    isRuleRegistryEnabled,
+    rulesClient,
+    perPage: MAX_RULES_TO_PROCESS_TOTAL,
+    filter: query !== '' ? query : undefined,
+    page: undefined,
+    sortField: undefined,
+    sortOrder: undefined,
+    fields: undefined,
+  });
+
+  return {
+    rules: data,
+    total,
+    fetchErrors: [] as RuleActionError[],
+  };
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
@@ -151,6 +235,21 @@ export const performBulkActionRoute = (
     async (context, request, response) => {
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
+
+      if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
+        return siemResponse.error({
+          body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
+          statusCode: 400,
+        });
+      }
+
+      if (body?.ids && body.query !== undefined) {
+        return siemResponse.error({
+          body: `Both query and ids are sent. Define either ids or query in request payload.`,
+          statusCode: 400,
+        });
+      }
+
       const abortController = new AbortController();
 
       // subscribing to completed$, because it handles both cases when request was completed and aborted.
@@ -158,10 +257,10 @@ export const performBulkActionRoute = (
       request.events.completed$.subscribe(() => abortController.abort());
 
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const exceptionsClient = context.lists?.getExceptionListClient();
         const savedObjectsClient = context.core.savedObjects.client;
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -170,22 +269,15 @@ export const performBulkActionRoute = (
           savedObjectsClient,
         });
 
-        if (!rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-
-        const rules = await findRules({
+        const { rules, total, fetchErrors } = await fetchRules({
           isRuleRegistryEnabled,
           rulesClient,
-          perPage: MAX_RULES_TO_PROCESS_TOTAL,
-          filter: body.query !== '' ? body.query : undefined,
-          page: undefined,
-          sortField: undefined,
-          sortOrder: undefined,
-          fields: undefined,
+          query: body.query,
+          ids: body.ids,
+          abortSignal: abortController.signal,
         });
 
-        if (rules.total > MAX_RULES_TO_PROCESS_TOTAL) {
+        if (total > MAX_RULES_TO_PROCESS_TOTAL) {
           return siemResponse.error({
             body: `More than ${MAX_RULES_TO_PROCESS_TOTAL} rules matched the filter query. Try to narrow it down.`,
             statusCode: 400,
@@ -200,14 +292,11 @@ export const performBulkActionRoute = (
         switch (body.action) {
           case BulkAction.enable:
             processingResponse = await executeBulkAction(
-              rules.data,
+              rules,
               async (rule) => {
                 if (!rule.enabled) {
                   throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                  await enableRule({
-                    rule,
-                    rulesClient,
-                  });
+                  await rulesClient.enable({ id: rule.id });
                 }
               },
               abortController.signal
@@ -215,7 +304,7 @@ export const performBulkActionRoute = (
             break;
           case BulkAction.disable:
             processingResponse = await executeBulkAction(
-              rules.data,
+              rules,
               async (rule) => {
                 if (rule.enabled) {
                   throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
@@ -227,12 +316,12 @@ export const performBulkActionRoute = (
             break;
           case BulkAction.delete:
             processingResponse = await executeBulkAction(
-              rules.data,
+              rules,
               async (rule) => {
                 await deleteRules({
                   ruleId: rule.id,
                   rulesClient,
-                  ruleStatusClient,
+                  ruleExecutionLog,
                 });
               },
               abortController.signal
@@ -240,7 +329,7 @@ export const performBulkActionRoute = (
             break;
           case BulkAction.duplicate:
             processingResponse = await executeBulkAction(
-              rules.data,
+              rules,
               async (rule) => {
                 throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
@@ -256,7 +345,7 @@ export const performBulkActionRoute = (
               rulesClient,
               exceptionsClient,
               savedObjectsClient,
-              rules.data.map(({ params }) => ({ rule_id: params.ruleId })),
+              rules.map(({ params }) => ({ rule_id: params.ruleId })),
               logger,
               isRuleRegistryEnabled
             );
@@ -272,7 +361,7 @@ export const performBulkActionRoute = (
             });
           case BulkAction.edit:
             processingResponse = await executeBulkAction(
-              rules.data,
+              rules,
               async (rule) => {
                 throwHttpError({
                   valid: !isElasticRule(rule.tags),
@@ -282,7 +371,7 @@ export const performBulkActionRoute = (
                 throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
                 const editedRule = body[BulkAction.edit].reduce(
-                  (acc, action) => appplyBulkActionEditToRule(acc, action),
+                  (acc, action) => applyBulkActionEditToRule(acc, action),
                   rule
                 );
 
@@ -306,13 +395,15 @@ export const performBulkActionRoute = (
           throw Error('Bulk action was aborted');
         }
 
-        const errors = processingResponse.results.filter(
-          (resp): resp is RuleActionError => resp?.error !== undefined
-        );
-        const rulesCount = rules.data.length;
+        const errors = [
+          ...fetchErrors,
+          ...processingResponse.results.filter(
+            (resp): resp is RuleActionError => resp?.error !== undefined
+          ),
+        ];
 
         if (errors.length > 0) {
-          const responseBody = getErrorResponseBody(errors, rulesCount);
+          const responseBody = getErrorResponseBody(errors, total);
 
           return response.custom({
             headers: {
@@ -326,7 +417,7 @@ export const performBulkActionRoute = (
         return response.ok({
           body: {
             success: true,
-            rules_count: rulesCount,
+            rules_count: total,
           },
         });
       } catch (err) {

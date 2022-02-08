@@ -31,7 +31,7 @@ export interface DeprecatedConfigDetails {
    * - warning: will not break deployment upon upgrade
    * - critical: needs to be addressed before upgrade.
    */
-  level?: 'warning' | 'critical';
+  level: 'warning' | 'critical';
   /** (optional) set to `true` to prevent the config service from logging the deprecation message. */
   silent?: boolean;
   /** (optional) link to the documentation for more details on the deprecation. */
@@ -107,9 +107,9 @@ export interface ConfigDeprecationCommand {
  * @example
  * ```typescript
  * const provider: ConfigDeprecationProvider = ({ deprecate, rename, unused }) => [
- *   deprecate('deprecatedKey', '8.0.0'),
- *   rename('oldKey', 'newKey'),
- *   unused('deprecatedKey'),
+ *   deprecate('deprecatedKey', '8.0.0', { level: 'warning' }),
+ *   rename('oldKey', 'newKey', { level: 'warning' }),
+ *   unused('deprecatedKey', { level: 'warning' }),
  *   (config, path) => ({ unset: [{ key: 'path.to.key' }] })
  * ]
  * ```
@@ -117,6 +117,10 @@ export interface ConfigDeprecationCommand {
  * @public
  */
 export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => ConfigDeprecation[];
+
+/** @public */
+export type FactoryConfigDeprecationDetails = Pick<DeprecatedConfigDetails, 'level'> &
+  Partial<Omit<DeprecatedConfigDetails, 'level'>>;
 
 /**
  * Provides helpers to generates the most commonly used {@link ConfigDeprecation}
@@ -127,8 +131,8 @@ export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => C
  * @example
  * ```typescript
  * const provider: ConfigDeprecationProvider = ({ rename, unused }) => [
- *   rename('oldKey', 'newKey'),
- *   unused('deprecatedKey'),
+ *   rename('oldKey', 'newKey', { level: 'critical' }),
+ *   unused('deprecatedKey', { level: 'warning' }),
  * ]
  * ```
  *
@@ -144,14 +148,14 @@ export interface ConfigDeprecationFactory {
    * Log a deprecation warning indicating 'myplugin.deprecatedKey' should be removed by `8.0.0`
    * ```typescript
    * const provider: ConfigDeprecationProvider = ({ deprecate }) => [
-   *   deprecate('deprecatedKey', '8.0.0'),
+   *   deprecate('deprecatedKey', '8.0.0', { level: 'critical' }),
    * ]
    * ```
    */
   deprecate(
     deprecatedKey: string,
     removeBy: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**
@@ -165,14 +169,14 @@ export interface ConfigDeprecationFactory {
    * Log a deprecation warning indicating 'myplugin.deprecatedKey' should be removed by `8.0.0`
    * ```typescript
    * const provider: ConfigDeprecationProvider = ({ deprecateFromRoot }) => [
-   *   deprecateFromRoot('deprecatedKey', '8.0.0'),
+   *   deprecateFromRoot('deprecatedKey', '8.0.0', { level: 'critical' }),
    * ]
    * ```
    */
   deprecateFromRoot(
     deprecatedKey: string,
     removeBy: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**
@@ -183,7 +187,7 @@ export interface ConfigDeprecationFactory {
    * Rename 'myplugin.oldKey' to 'myplugin.newKey'
    * ```typescript
    * const provider: ConfigDeprecationProvider = ({ rename }) => [
-   *   rename('oldKey', 'newKey'),
+   *   rename('oldKey', 'newKey', { level: 'warning' }),
    * ]
    * ```
    *
@@ -209,7 +213,7 @@ export interface ConfigDeprecationFactory {
   rename(
     oldKey: string,
     newKey: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**
@@ -223,7 +227,7 @@ export interface ConfigDeprecationFactory {
    * Rename 'oldplugin.key' to 'newplugin.key'
    * ```typescript
    * const provider: ConfigDeprecationProvider = ({ renameFromRoot }) => [
-   *   renameFromRoot('oldplugin.key', 'newplugin.key'),
+   *   renameFromRoot('oldplugin.key', 'newplugin.key', { level: 'critical' }),
    * ]
    * ```
    *
@@ -249,7 +253,7 @@ export interface ConfigDeprecationFactory {
   renameFromRoot(
     oldKey: string,
     newKey: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**
@@ -260,7 +264,7 @@ export interface ConfigDeprecationFactory {
    * Flags 'myplugin.deprecatedKey' as unused
    * ```typescript
    * const provider: ConfigDeprecationProvider = ({ unused }) => [
-   *   unused('deprecatedKey'),
+   *   unused('deprecatedKey', { level: 'warning' }),
    * ]
    * ```
    *
@@ -283,7 +287,7 @@ export interface ConfigDeprecationFactory {
    * }
    * ```
    */
-  unused(unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation;
+  unused(unusedKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation;
 
   /**
    * Remove a configuration property from the root configuration.
@@ -296,7 +300,7 @@ export interface ConfigDeprecationFactory {
    * Flags 'somepath.deprecatedProperty' as unused
    * ```typescript
    * const provider: ConfigDeprecationProvider = ({ unusedFromRoot }) => [
-   *   unusedFromRoot('somepath.deprecatedProperty'),
+   *   unusedFromRoot('somepath.deprecatedProperty', { level: 'warning' }),
    * ]
    * ```
    *
@@ -319,7 +323,7 @@ export interface ConfigDeprecationFactory {
    * }
    * ```
    */
-  unusedFromRoot(unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation;
+  unusedFromRoot(unusedKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation;
 }
 
 /** @internal */

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { AddFilterButton } from './add_filter_btn';
 import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 
@@ -24,6 +24,7 @@ describe('AddFilterButton component', () => {
             disabled={false}
             flush="left"
             iconType="plusInCircleFilled"
+            isLoading={false}
             onClick={[Function]}
             size="s"
           >
@@ -90,6 +91,7 @@ describe('AddFilterButton component', () => {
             disabled={false}
             flush="left"
             iconType="plusInCircleFilled"
+            isLoading={false}
             onClick={[Function]}
             size="s"
           >
@@ -143,6 +145,7 @@ describe('AddFilterButton component', () => {
             disabled={true}
             flush="left"
             iconType="plusInCircleFilled"
+            isLoading={false}
             onClick={[Function]}
             size="s"
           >

@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
     });
 
     const jobId = `bm_1_${Date.now()}`;

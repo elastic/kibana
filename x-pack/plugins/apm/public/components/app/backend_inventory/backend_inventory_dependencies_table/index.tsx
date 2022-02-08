@@ -44,8 +44,7 @@ export function BackendInventoryDependenciesTable() {
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/backends/top_backends',
+      return callApmApi('GET /internal/apm/backends/top_backends', {
         params: {
           query: { start, end, environment, numBuckets: 20, offset, kuery },
         },

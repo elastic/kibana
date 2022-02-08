@@ -23,17 +23,19 @@ describe('Super User - Live Query', () => {
   });
 
   it('should run query and enable ecs mapping', () => {
+    const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
     cy.contains('New live query').click();
     selectAllAgents();
-    inputQuery('select * from uptime;');
-    submitQuery();
-
+    inputQuery('select * from uptime; ');
+    cy.wait(500);
+    // checking submit by clicking cmd+enter
+    inputQuery(cmd);
     checkResults();
     cy.react('EuiDataGridHeaderCellWrapper', {
-      props: { id: 'osquery.days', index: 1 },
+      props: { id: 'osquery.days.number', index: 1 },
     });
     cy.react('EuiDataGridHeaderCellWrapper', {
-      props: { id: 'osquery.hours', index: 2 },
+      props: { id: 'osquery.hours.number', index: 2 },
     });
 
     cy.react('EuiAccordion', { props: { buttonContent: 'Advanced' } }).click();
@@ -46,7 +48,7 @@ describe('Super User - Live Query', () => {
       props: { id: 'message', index: 1 },
     });
     cy.react('EuiDataGridHeaderCellWrapper', {
-      props: { id: 'osquery.days', index: 2 },
+      props: { id: 'osquery.days.number', index: 2 },
     }).react('EuiIconIndexMapping');
   });
 });

@@ -24,15 +24,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import {
-  getAnalysisType,
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-  useRefreshAnalyticsList,
-} from '../../data_frame_analytics/common';
+import { getAnalysisType } from '../../data_frame_analytics/common';
 import { ModelsTableToConfigMapping } from './index';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator, useNavigateToPath, useTimefilter } from '../../contexts/kibana';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import {
   ModelPipelines,
@@ -86,6 +81,8 @@ export const ModelsList: FC = () => {
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
+
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
@@ -180,14 +177,7 @@ export const ModelsList: FC = () => {
       );
     }
     setIsLoading(false);
-    refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
   }, [itemIdToExpandedRowMap]);
-
-  // Subscribe to the refresh observable to trigger reloading the model list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: fetchModelsData,
-  });
 
   useEffect(
     function updateOnTimerRefresh() {

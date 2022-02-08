@@ -42,7 +42,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-io-ts-utils",
+  "//packages/kbn-io-ts-utils:npm_module_types",
   "@npm//fp-ts",
   "@npm//query-string",
   "@npm//utility-types",

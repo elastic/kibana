@@ -482,7 +482,9 @@ export function copyToSpaceTestSuiteFactory(
       const type = 'sharedtype';
       const noConflictId = `${spaceId}_only`;
       const exactMatchId = 'each_space';
-      const inexactMatchId = `conflict_1_${spaceId}`;
+      const inexactMatchIdA = `conflict_1a_${spaceId}`;
+      const inexactMatchIdB = `conflict_1b_${spaceId}`;
+      const inexactMatchIdC = `conflict_1c_default_and_space_1`;
       const ambiguousConflictId = `conflict_2_${spaceId}`;
 
       const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
@@ -560,22 +562,24 @@ export function copyToSpaceTestSuiteFactory(
           },
         },
         {
-          testTitle: 'copying with an inexact match conflict',
-          objects: [{ type, id: inexactMatchId }],
+          testTitle:
+            'copying with an inexact match conflict (a) - originId matches existing originId',
+          objects: [{ type, id: inexactMatchIdA }],
           statusCode,
           response: async (response: TestResponse) => {
             if (outcome === 'authorized') {
               const { success, successCount, successResults, errors } = getResult(response);
-              const title = 'A shared saved-object in one space';
+              const title =
+                'This is used to test an inexact match conflict for an originId -> originId match';
               const meta = { title, icon: 'beaker' };
-              const destinationId = 'conflict_1_space_2';
+              const destinationId = 'conflict_1a_space_2';
               if (createNewCopies) {
-                expectNewCopyResponse(response, inexactMatchId, title);
+                expectNewCopyResponse(response, inexactMatchIdA, title);
               } else if (overwrite) {
                 expect(success).to.eql(true);
                 expect(successCount).to.eql(1);
                 expect(successResults).to.eql([
-                  { type, id: inexactMatchId, meta, overwrite: true, destinationId },
+                  { type, id: inexactMatchIdA, meta, overwrite: true, destinationId },
                 ]);
                 expect(errors).to.be(undefined);
               } else {
@@ -586,7 +590,91 @@ export function copyToSpaceTestSuiteFactory(
                   {
                     error: { type: 'conflict', destinationId },
                     type,
-                    id: inexactMatchId,
+                    id: inexactMatchIdA,
+                    title,
+                    meta,
+                  },
+                ]);
+              }
+            } else if (outcome === 'noAccess') {
+              expectRouteForbiddenResponse(response);
+            } else {
+              // unauthorized read/write
+              expectSavedObjectForbiddenResponse(response);
+            }
+          },
+        },
+        {
+          testTitle: 'copying with an inexact match conflict (b) - originId matches existing id',
+          objects: [{ type, id: inexactMatchIdB }],
+          statusCode,
+          response: async (response: TestResponse) => {
+            if (outcome === 'authorized') {
+              const { success, successCount, successResults, errors } = getResult(response);
+              const title =
+                'This is used to test an inexact match conflict for an originId -> id match';
+              const meta = { title, icon: 'beaker' };
+              const destinationId = 'conflict_1b_space_2';
+              if (createNewCopies) {
+                expectNewCopyResponse(response, inexactMatchIdB, title);
+              } else if (overwrite) {
+                expect(success).to.eql(true);
+                expect(successCount).to.eql(1);
+                expect(successResults).to.eql([
+                  { type, id: inexactMatchIdB, meta, overwrite: true, destinationId },
+                ]);
+                expect(errors).to.be(undefined);
+              } else {
+                expect(success).to.eql(false);
+                expect(successCount).to.eql(0);
+                expect(successResults).to.be(undefined);
+                expect(errors).to.eql([
+                  {
+                    error: { type: 'conflict', destinationId },
+                    type,
+                    id: inexactMatchIdB,
+                    title,
+                    meta,
+                  },
+                ]);
+              }
+            } else if (outcome === 'noAccess') {
+              expectRouteForbiddenResponse(response);
+            } else {
+              // unauthorized read/write
+              expectSavedObjectForbiddenResponse(response);
+            }
+          },
+        },
+        {
+          testTitle: 'copying with an inexact match conflict (c) - id matches existing originId',
+          objects: [{ type, id: inexactMatchIdC }],
+          statusCode,
+          response: async (response: TestResponse) => {
+            if (outcome === 'authorized') {
+              const { success, successCount, successResults, errors } = getResult(response);
+              const title =
+                'This is used to test an inexact match conflict for an id -> originId match';
+              const meta = { title, icon: 'beaker' };
+              const destinationId = 'conflict_1c_space_2';
+              if (createNewCopies) {
+                expectNewCopyResponse(response, inexactMatchIdC, title);
+              } else if (overwrite) {
+                expect(success).to.eql(true);
+                expect(successCount).to.eql(1);
+                expect(successResults).to.eql([
+                  { type, id: inexactMatchIdC, meta, overwrite: true, destinationId },
+                ]);
+                expect(errors).to.be(undefined);
+              } else {
+                expect(success).to.eql(false);
+                expect(successCount).to.eql(0);
+                expect(successResults).to.be(undefined);
+                expect(errors).to.eql([
+                  {
+                    error: { type: 'conflict', destinationId },
+                    type,
+                    id: inexactMatchIdC,
                     title,
                     meta,
                   },

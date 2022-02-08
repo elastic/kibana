@@ -6,19 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import {
-  isEmpty,
-  set,
-  unset,
-  has,
-  difference,
-  filter,
-  find,
-  map,
-  mapKeys,
-  pickBy,
-  uniq,
-} from 'lodash';
+import { set, unset, has, difference, filter, find, map, mapKeys, uniq } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import {
@@ -126,16 +114,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         request.params.id,
         {
           enabled,
-          ...pickBy(
-            {
-              name,
-              description,
-              queries: queries && convertPackQueriesToSO(queries),
-              updated_at: moment().toISOString(),
-              updated_by: currentUser,
-            },
-            (value) => !isEmpty(value)
-          ),
+          name,
+          description: description || '',
+          queries: queries && convertPackQueriesToSO(queries),
+          updated_at: moment().toISOString(),
+          updated_by: currentUser,
         },
         policy_ids
           ? {

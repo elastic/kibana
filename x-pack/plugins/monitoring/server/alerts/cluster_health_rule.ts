@@ -18,18 +18,11 @@ import {
   AlertClusterHealth,
   AlertInstanceState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
-import {
-  RULE_CLUSTER_HEALTH,
-  LEGACY_RULE_DETAILS,
-  INDEX_PATTERN_ELASTICSEARCH,
-} from '../../common/constants';
+import { Alert } from '../../../alerting/server';
+import { RULE_CLUSTER_HEALTH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerting/common';
-import { Globals } from '../static_globals';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
 
 const RED_STATUS_MESSAGE = i18n.translate('xpack.monitoring.alerts.clusterHealth.redMessage', {
@@ -66,19 +59,9 @@ export class ClusterHealthRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
-    const healths = await fetchClusterHealth(
-      esClient,
-      clusters,
-      esIndexPattern,
-      params.filterQuery
-    );
+    const healths = await fetchClusterHealth(esClient, clusters, params.filterQuery);
     return healths.map((clusterHealth) => {
       const shouldFire = clusterHealth.health !== AlertClusterHealthType.Green;
       const severity =
@@ -128,7 +111,7 @@ export class ClusterHealthRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

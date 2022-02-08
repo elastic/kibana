@@ -11,7 +11,7 @@ import constate from 'constate';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { useKibana } from './use_kibana';
 import { VerificationCodeForm } from './verification_code_form';

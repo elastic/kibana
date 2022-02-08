@@ -7,18 +7,19 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { jsonRt } from '@kbn/io-ts-utils';
 import {
   createApmArtifact,
   deleteApmArtifact,
   listArtifacts,
   updateSourceMapsOnFleetPolicies,
   getCleanedBundleFilePath,
+  ArtifactSourceMap,
 } from '../fleet/source_maps';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
+import { Artifact } from '../../../../fleet/server';
 
 export const sourceMapRt = t.intersection([
   t.type({
@@ -39,7 +40,9 @@ export type SourceMap = t.TypeOf<typeof sourceMapRt>;
 const listSourceMapRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/sourcemaps',
   options: { tags: ['access:apm'] },
-  handler: async ({ plugins }) => {
+  async handler({
+    plugins,
+  }): Promise<{ artifacts: ArtifactSourceMap[] } | undefined> {
     try {
       const fleetPluginStart = await plugins.fleet?.start();
       if (fleetPluginStart) {
@@ -72,7 +75,7 @@ const uploadSourceMapRoute = createApmServerRoute({
         .pipe(sourceMapRt),
     }),
   }),
-  handler: async ({ params, plugins, core }) => {
+  handler: async ({ params, plugins, core }): Promise<Artifact | undefined> => {
     const {
       service_name: serviceName,
       service_version: serviceVersion,
@@ -122,7 +125,7 @@ const deleteSourceMapRoute = createApmServerRoute({
       id: t.string,
     }),
   }),
-  handler: async ({ params, plugins, core }) => {
+  handler: async ({ params, plugins, core }): Promise<void> => {
     const fleetPluginStart = await plugins.fleet?.start();
     const { id } = params.path;
     const coreStart = await core.start();
@@ -148,7 +151,8 @@ const deleteSourceMapRoute = createApmServerRoute({
   },
 });
 
-export const sourceMapsRouteRepository = createApmServerRouteRepository()
-  .add(listSourceMapRoute)
-  .add(uploadSourceMapRoute)
-  .add(deleteSourceMapRoute);
+export const sourceMapsRouteRepository = {
+  ...listSourceMapRoute,
+  ...uploadSourceMapRoute,
+  ...deleteSourceMapRoute,
+};

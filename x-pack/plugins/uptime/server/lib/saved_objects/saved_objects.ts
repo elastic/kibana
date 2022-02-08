@@ -26,7 +26,7 @@ export const registerUptimeSavedObjects = (
 ) => {
   savedObjectsService.registerType(umDynamicSettings);
 
-  if (config?.unsafe?.service.enabled) {
+  if (config?.service?.enabled) {
     savedObjectsService.registerType(syntheticsMonitor);
     savedObjectsService.registerType(syntheticsServiceApiKey);
 
@@ -38,7 +38,7 @@ export const registerUptimeSavedObjects = (
 };
 
 export interface UMSavedObjectsAdapter {
-  config: UptimeConfig;
+  config: UptimeConfig | null;
   getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;
   setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
 }

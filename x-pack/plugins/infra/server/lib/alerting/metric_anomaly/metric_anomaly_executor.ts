@@ -6,27 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KibanaRequest } from 'kibana/server';
 import { first } from 'lodash';
 import moment from 'moment';
-import { KibanaRequest } from 'kibana/server';
-import { stateToAlertMessage } from '../common/messages';
-import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { MappedAnomalyHit } from '../../infra_ml';
-import { AlertStates } from '../common/types';
 import {
   ActionGroup,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '../../../../../alerting/common';
 import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../alerting/server';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
-import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_rule_type';
 import { MlPluginSetup } from '../../../../../ml/server';
+import { AlertStates, MetricAnomalyParams } from '../../../../common/alerting/metrics';
+import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { MappedAnomalyHit } from '../../infra_ml';
 import { InfraBackendLibs } from '../../infra_types';
+import { stateToAlertMessage } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
+import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_rule_type';
 
 export const createMetricAnomalyExecutor =
-  (libs: InfraBackendLibs, ml?: MlPluginSetup) =>
+  (_libs: InfraBackendLibs, ml?: MlPluginSetup) =>
   async ({
     services,
     params,
@@ -84,7 +83,7 @@ export const createMetricAnomalyExecutor =
         typical,
         influencers,
       } = first(data as MappedAnomalyHit[])!;
-      const alert = services.alertInstanceFactory(`${nodeType}-${metric}`);
+      const alert = services.alertFactory.create(`${nodeType}-${metric}`);
 
       alert.scheduleActions(FIRED_ACTIONS_ID, {
         alertState: stateToAlertMessage[AlertStates.ALERT],

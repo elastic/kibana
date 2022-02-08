@@ -8,41 +8,21 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SearchSourceFields } from 'src/plugins/data/common';
-import { ExportPanelShareOpts } from '.';
-import type { ShareContext } from '../../../../../src/plugins/share/public';
+import { ShareContext, ShareMenuProvider } from 'src/plugins/share/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
+import { ExportPanelShareOpts } from './';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
-export const ReportingCsvShareProvider = ({
+export const reportingCsvShareProvider = ({
   apiClient,
   toasts,
   uiSettings,
-  license$,
-  startServices$,
+  application,
+  license,
   usesUiCapabilities,
-}: ExportPanelShareOpts) => {
-  let licenseToolTipContent = '';
-  let licenseHasCsvReporting = false;
-  let licenseDisabled = true;
-  let capabilityHasCsvReporting = false;
-
-  license$.subscribe((license) => {
-    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
-    licenseToolTipContent = licenseCheck.message;
-    licenseHasCsvReporting = licenseCheck.showLinks;
-    licenseDisabled = !licenseCheck.enableLinks;
-  });
-
-  if (usesUiCapabilities) {
-    startServices$.subscribe(([{ application }]) => {
-      // TODO: add abstractions in ExportTypeRegistry to use here?
-      capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
-    });
-  } else {
-    capabilityHasCsvReporting = true; // deprecated
-  }
-
+  theme,
+}: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
@@ -67,6 +47,19 @@ export const ReportingCsvShareProvider = ({
     };
 
     const shareActions = [];
+
+    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
+    const licenseToolTipContent = licenseCheck.message;
+    const licenseHasCsvReporting = licenseCheck.showLinks;
+    const licenseDisabled = !licenseCheck.enableLinks;
+
+    // TODO: add abstractions in ExportTypeRegistry to use here?
+    let capabilityHasCsvReporting = false;
+    if (usesUiCapabilities) {
+      capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
+    } else {
+      capabilityHasCsvReporting = true; // deprecated
+    }
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
@@ -96,6 +89,7 @@ export const ReportingCsvShareProvider = ({
               objectId={objectId}
               getJobParams={getJobParams}
               onClose={onClose}
+              theme={theme}
             />
           ),
         },

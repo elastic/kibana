@@ -30,6 +30,8 @@ import {
   processResults,
 } from '../../../common/components/utils';
 
+import { Chat } from '../../../../../../cloud/public';
+
 import { MODE } from './constants';
 
 export class FileDataVisualizerView extends Component {
@@ -383,6 +385,7 @@ export class FileDataVisualizerView extends Component {
             )}
           </>
         )}
+        <Chat />
       </div>
     );
   }

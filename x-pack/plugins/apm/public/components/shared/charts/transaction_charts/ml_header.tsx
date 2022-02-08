@@ -12,7 +12,7 @@ import React from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { MLSingleMetricLink } from '../../Links/MachineLearningLinks/MLSingleMetricLink';
+import { MLSingleMetricLink } from '../../links/machine_learning_links/mlsingle_metric_link';
 
 interface Props {
   hasValidMlLicense?: boolean;

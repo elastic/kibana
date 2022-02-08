@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import type { CoreStart } from 'kibana/public';
-import type { UiActionsStart } from 'src/plugins/ui_actions/public';
+import type { CoreStart, ThemeServiceStart } from 'kibana/public';
+import type { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
@@ -25,6 +25,8 @@ import type { IndexPatternPersistedState } from '../indexpattern_datasource/type
 import type { XYState } from '../xy_visualization/types';
 import type { PieVisualizationState, MetricState } from '../../common/expressions';
 import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
+import type { HeatmapVisualizationState } from '../heatmap_visualization/types';
+import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,
@@ -48,11 +50,15 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
     | LensAttributes<'lnsXY', XYState>
     | LensAttributes<'lnsPie', PieVisualizationState>
     | LensAttributes<'lnsDatatable', DatatableVisualizationState>
-    | LensAttributes<'lnsMetric', MetricState>;
+    | LensAttributes<'lnsMetric', MetricState>
+    | LensAttributes<'lnsHeatmap', HeatmapVisualizationState>
+    | LensAttributes<'lnsGauge', GaugeVisualizationState>
+    | LensAttributes<string, unknown>;
 };
 
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {
-  withActions?: boolean;
+  withDefaultActions?: boolean;
+  extraActions?: Action[];
 };
 
 interface PluginsStartDependencies {
@@ -67,7 +73,10 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
     const factory = embeddableStart.getEmbeddableFactory('lens')!;
     const input = { ...props };
     const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
-    const hasActions = props.withActions === true;
+    const hasActions =
+      Boolean(props.withDefaultActions) || (props.extraActions && props.extraActions?.length > 0);
+
+    const theme = core.theme;
 
     if (loading) {
       return <EuiLoadingChart />;
@@ -81,6 +90,9 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
           inspector={inspector}
           actionPredicate={() => hasActions}
           input={input}
+          theme={theme}
+          extraActions={props.extraActions}
+          withDefaultActions={props.withDefaultActions}
         />
       );
     }
@@ -95,6 +107,9 @@ interface EmbeddablePanelWrapperProps {
   inspector: PluginsStartDependencies['inspector'];
   actionPredicate: (id: string) => boolean;
   input: EmbeddableComponentProps;
+  theme: ThemeServiceStart;
+  extraActions?: Action[];
+  withDefaultActions?: boolean;
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
@@ -103,6 +118,9 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   actionPredicate,
   inspector,
   input,
+  theme,
+  extraActions,
+  withDefaultActions,
 }) => {
   useEffect(() => {
     embeddable.updateInput(input);
@@ -112,12 +130,19 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
     <EmbeddablePanel
       hideHeader={false}
       embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
-      getActions={uiActions.getTriggerCompatibleActions}
+      getActions={async (triggerId, context) => {
+        const actions = withDefaultActions
+          ? await uiActions.getTriggerCompatibleActions(triggerId, context)
+          : [];
+
+        return [...(extraActions ?? []), ...actions];
+      }}
       inspector={inspector}
       actionPredicate={actionPredicate}
       showShadow={false}
       showBadges={false}
       showNotifications={false}
+      theme={theme}
     />
   );
 };
