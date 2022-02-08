@@ -56,15 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const expectedCategoryDefinition = {
     categoryId: '1',
-    terms: 'GET HTTP/1.1 Mozilla/5.0 X11 Linux x86_64 rv Gecko/20110421 Firefox/6.0a1',
-    regex:
-      '.*?GET.+?HTTP/1\\.1.+?Mozilla/5\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\.0a1.*',
-    examples: [
-      '130.246.123.197 - - [2018-07-22T03:26:21.326Z] "GET /beats/metricbeat HTTP/1.1" 200 6850 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-      '130.246.123.197 - - [2018-07-22T03:26:21.326Z] "GET /beats/metricbeat_1 HTTP/1.1" 200 6850 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-      '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-      '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-    ],
+    examplesLength: 4,
   };
 
   async function getCategoryDefinition(
@@ -102,7 +94,6 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await spacesService.delete(idSpace1);
       await spacesService.delete(idSpace2);
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
       await ml.api.cleanMlIndices();
     });
 
@@ -120,17 +111,28 @@ export default ({ getService }: FtrProviderContext) => {
         `categoryId should be ${expectedCategoryDefinition.categoryId} (got ${resp.categoryId})`
       );
       expect(resp.examples.length).to.eql(
-        expectedCategoryDefinition.examples.length,
-        `examples list length should be ${expectedCategoryDefinition.examples.length} (got ${resp.examples.length})`
+        expectedCategoryDefinition.examplesLength,
+        `examples list length should be ${expectedCategoryDefinition.examplesLength} (got ${resp.examples.length})`
       );
       expect(resp.terms.length).to.be.greaterThan(
         0,
         `terms string length should be greater than 0 (got ${resp.terms.length})`
       );
+      expect(resp.regex.length).to.be.greaterThan(
+        0,
+        `regex string length should be greater than 0 (got ${resp.terms.length})`
+      );
     });
 
-    it('should not produce the correct category for the job', async () => {
-      const resp = await getCategoryDefinition(jobIdSpace1, '2', USER.ML_POWERUSER, 200, idSpace1);
+    it('should produce the correct category for the job', async () => {
+      const categoryId = '2';
+      const resp = await getCategoryDefinition(
+        jobIdSpace1,
+        categoryId,
+        USER.ML_POWERUSER,
+        200,
+        idSpace1
+      );
 
       expect(resp.categoryId).to.not.eql(
         expectedCategoryDefinition.categoryId,
@@ -162,12 +164,16 @@ export default ({ getService }: FtrProviderContext) => {
         `categoryId should be ${expectedCategoryDefinition.categoryId} (got ${resp.categoryId})`
       );
       expect(resp.examples.length).to.eql(
-        expectedCategoryDefinition.examples.length,
-        `examples list length should be ${expectedCategoryDefinition.examples.length} (got ${resp.examples.length})`
+        expectedCategoryDefinition.examplesLength,
+        `examples list length should be ${expectedCategoryDefinition.examplesLength} (got ${resp.examples.length})`
       );
       expect(resp.terms.length).to.be.greaterThan(
         0,
         `terms string length should be greater than 0 (got ${resp.terms.length})`
+      );
+      expect(resp.regex.length).to.be.greaterThan(
+        0,
+        `regex string length should be greater than 0 (got ${resp.terms.length})`
       );
     });
 

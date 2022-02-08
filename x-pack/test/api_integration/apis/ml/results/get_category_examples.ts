@@ -54,22 +54,14 @@ export default ({ getService }: FtrProviderContext) => {
     query: { bool: { must: [{ match_all: {} }] } },
   };
 
-  const expectedCategoryExamples1 = {
-    '1': [
-      '130.246.123.197 - - [2018-07-22T03:26:21.326Z] "GET /beats/metricbeat HTTP/1.1" 200 6850 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-    ],
-  };
-  const expectedCategoryExamples3 = {
-    '1': [
-      '130.246.123.197 - - [2018-07-22T03:26:21.326Z] "GET /beats/metricbeat HTTP/1.1" 200 6850 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-      '130.246.123.197 - - [2018-07-22T03:26:21.326Z] "GET /beats/metricbeat_1 HTTP/1.1" 200 6850 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-      '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-    ],
+  const expectedCategoryExamples = {
+    categoryId: '1',
+    examplesLength: 3,
   };
 
   async function getCategoryExamples(
     jobId: string,
-    categoryIds: string[],
+    categoryId: string[],
     maxExamples: number,
     user: USER,
     expectedStatusCode: number,
@@ -79,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
       .post(`${space ? `/s/${space}` : ''}/api/ml/results/category_examples`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ jobId, categoryIds, maxExamples })
+      .send({ jobId, categoryId, maxExamples })
       .expect(expectedStatusCode);
 
     return body;
@@ -103,65 +95,51 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await spacesService.delete(idSpace1);
       await spacesService.delete(idSpace2);
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
       await ml.api.cleanMlIndices();
     });
 
     it('should produce the correct 1 example for the job', async () => {
+      const maxExamples = 1;
       const resp = await getCategoryExamples(
         jobIdSpace1,
-        Object.keys(expectedCategoryExamples1),
-        1,
+        [expectedCategoryExamples.categoryId],
+        maxExamples,
         USER.ML_POWERUSER,
         200,
         idSpace1
       );
 
-      expect(resp['1'].length).to.eql(
-        expectedCategoryExamples1['1'].length,
-        `response examples length should be ${expectedCategoryExamples1['1'].length} (got ${resp['1'].length})`
+      expect(resp[expectedCategoryExamples.categoryId].length).to.eql(
+        maxExamples,
+        `response examples length should be ${maxExamples} (got ${
+          resp[expectedCategoryExamples.categoryId].length
+        })`
       );
     });
 
     it('should produce the correct 3 examples for the job', async () => {
       const resp = await getCategoryExamples(
         jobIdSpace1,
-        Object.keys(expectedCategoryExamples3),
-        3,
+        [expectedCategoryExamples.categoryId],
+        expectedCategoryExamples.examplesLength,
         USER.ML_POWERUSER,
         200,
         idSpace1
       );
 
-      expect(resp['1'].length).to.eql(
-        expectedCategoryExamples3['1'].length,
-        `response examples length should be ${expectedCategoryExamples3['1'].length} (got ${resp['1'].length})`
-      );
-    });
-
-    it('should not produce the correct example for the job', async () => {
-      const resp = await getCategoryExamples(
-        jobIdSpace1,
-        ['2'],
-        3,
-        USER.ML_POWERUSER,
-        200,
-        idSpace1
-      );
-
-      expect(Object.keys(resp)).to.not.eql(
-        Object.keys(expectedCategoryExamples3),
-        `response examples keys should be ${Object.keys(
-          expectedCategoryExamples3
-        )} (got ${Object.keys(resp)})`
+      expect(resp[expectedCategoryExamples.categoryId].length).to.eql(
+        expectedCategoryExamples.examplesLength,
+        `response examples length should be ${expectedCategoryExamples.examplesLength} (got ${
+          resp[expectedCategoryExamples.categoryId].length
+        })`
       );
     });
 
     it('should not produce the correct examples for the job in the wrong space', async () => {
       await getCategoryExamples(
         jobIdSpace1,
-        Object.keys(expectedCategoryExamples1),
-        3,
+        [expectedCategoryExamples.categoryId],
+        expectedCategoryExamples.examplesLength,
         USER.ML_POWERUSER,
         404,
         idSpace2
@@ -171,24 +149,26 @@ export default ({ getService }: FtrProviderContext) => {
     it('should produce the correct example for the job for the ml viewer user', async () => {
       const resp = await getCategoryExamples(
         jobIdSpace1,
-        Object.keys(expectedCategoryExamples3),
-        3,
+        [expectedCategoryExamples.categoryId],
+        expectedCategoryExamples.examplesLength,
         USER.ML_VIEWER,
         200,
         idSpace1
       );
 
-      expect(resp['1'].length).to.eql(
-        expectedCategoryExamples3['1'].length,
-        `response examples length should be ${expectedCategoryExamples3['1'].length} (got ${resp['1'].length})`
+      expect(resp[expectedCategoryExamples.categoryId].length).to.eql(
+        expectedCategoryExamples.examplesLength,
+        `response examples length should be ${expectedCategoryExamples.examplesLength} (got ${
+          resp[expectedCategoryExamples.categoryId].length
+        })`
       );
     });
 
     it('should not produce the correct example for the job for the ml unauthorized user', async () => {
       await getCategoryExamples(
         jobIdSpace1,
-        Object.keys(expectedCategoryExamples3),
-        3,
+        [expectedCategoryExamples.categoryId],
+        expectedCategoryExamples.examplesLength,
         USER.ML_UNAUTHORIZED,
         403,
         idSpace1
