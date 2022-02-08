@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
@@ -44,15 +44,6 @@ export const IndexPatternConfigurationPanel: React.FC<{
 
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.infra.logSourceConfiguration.dataViewSectionTitle"
-            defaultMessage="Data view"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
       <DataViewsInlineHelpMessage />
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
