@@ -307,7 +307,7 @@ export class SearchInterceptor {
             executionContext: {
               ...executionContext,
               ...this.deps.executionContext.getAll(),
-            } as any
+            }
           }),
         },
         abortSignal

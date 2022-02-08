@@ -130,7 +130,7 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
-        ...(!isEmpty(context)  ? new ExecutionContextContainer(context as any).toHeader() : {}),
+        ...(!isEmpty(context)  ? new ExecutionContextContainer(context).toHeader() : {}),
       }),
     };
 
