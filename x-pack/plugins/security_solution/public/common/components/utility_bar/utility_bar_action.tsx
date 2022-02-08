@@ -35,10 +35,16 @@ const Popover = React.memo<UtilityBarActionProps>(
     ownFocus,
     dataTestSubj,
     popoverPanelPaddingSize,
+    onClick,
   }) => {
     const [popoverState, setPopoverState] = useState(false);
 
     const closePopover = useCallback(() => setPopoverState(false), [setPopoverState]);
+
+    const handleLinkIconClick = useCallback(() => {
+      onClick?.();
+      setPopoverState(!popoverState);
+    }, [popoverState, onClick]);
 
     return (
       <EuiPopover
@@ -51,13 +57,13 @@ const Popover = React.memo<UtilityBarActionProps>(
             iconSide={iconSide}
             iconSize={iconSize}
             iconType={iconType}
-            onClick={() => setPopoverState(!popoverState)}
+            onClick={handleLinkIconClick}
             disabled={disabled}
           >
             {children}
           </LinkIcon>
         }
-        closePopover={() => setPopoverState(false)}
+        closePopover={closePopover}
         isOpen={popoverState}
         repositionOnScroll
       >
@@ -107,6 +113,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       <BarAction data-test-subj={dataTestSubj}>
         {popoverContent ? (
           <Popover
+            onClick={onClick}
             dataTestSubj={`${dataTestSubj}-popover`}
             disabled={disabled}
             color={color}

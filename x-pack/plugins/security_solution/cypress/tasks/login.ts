@@ -9,6 +9,7 @@ import * as yaml from 'js-yaml';
 import Url, { UrlObject } from 'url';
 
 import { ROLES } from '../../common/test';
+import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 import { hostDetailsUrl, LOGOUT_URL } from '../urls/navigation';
 
@@ -285,6 +286,21 @@ export const getEnvAuth = (): User => {
 };
 
 /**
+ * Saves in localStorage rules feature tour config with deactivated option
+ * It prevents tour to appear during tests and cover UI elements
+ * @param window - browser's window object
+ */
+const disableRulesFeatureTour = (window: Window) => {
+  const tourConfig = {
+    isTourActive: false,
+  };
+  window.localStorage.setItem(
+    RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY,
+    JSON.stringify(tourConfig)
+  );
+};
+
+/**
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
@@ -301,6 +317,7 @@ export const loginAndWaitForPage = (
         if (onBeforeLoadCallback) {
           onBeforeLoadCallback(win);
         }
+        disableRulesFeatureTour(win);
       },
     }
   );
@@ -315,13 +332,17 @@ export const waitForPage = (url: string) => {
 
 export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);
-  cy.visit(role ? getUrlWithRoute(role, url) : url);
+  cy.visit(role ? getUrlWithRoute(role, url) : url, {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
 export const loginWithUserAndWaitForPageWithoutDateRange = (url: string, user: User) => {
   loginWithUser(user);
-  cy.visit(constructUrlWithUser(user, url));
+  cy.visit(constructUrlWithUser(user, url), {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
@@ -329,7 +350,9 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
 
   login(role);
-  cy.visit(role ? getUrlWithRoute(role, route) : route);
+  cy.visit(role ? getUrlWithRoute(role, route) : route, {
+    onBeforeLoad: disableRulesFeatureTour,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
