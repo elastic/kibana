@@ -206,7 +206,12 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     updatedAgentPolicy: NewAgentPolicy
   ) => {
     if (selectedTab === SelectedPolicyTab.NEW) {
-      if (!updatedAgentPolicy.name || !updatedAgentPolicy.namespace) {
+      if (
+        !updatedAgentPolicy.name ||
+        updatedAgentPolicy.name.trim() === '' ||
+        !updatedAgentPolicy.namespace ||
+        updatedAgentPolicy.namespace.trim() === ''
+      ) {
         setHasAgentPolicyError(true);
       } else {
         setHasAgentPolicyError(false);
