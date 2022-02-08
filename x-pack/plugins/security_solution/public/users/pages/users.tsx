@@ -19,6 +19,7 @@ import { SecuritySolutionTabNavigation } from '../../common/components/navigatio
 
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { LastEventTime } from '../../common/components/last_event_time';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useKibana } from '../../common/lib/kibana';
@@ -42,6 +43,7 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
 import { UpdateDateRange } from '../../common/components/charts/common';
+import { LastEventIndexKey } from '../../../common/search_strategy';
 
 const ID = 'UsersQueryId';
 
@@ -146,7 +148,17 @@ const UsersComponent = () => {
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <HeaderPage subtitle={'TODO <LastEventTime />'} title={i18n.PAGE_TITLE} />
+            <HeaderPage
+              subtitle={
+                <LastEventTime
+                  docValueFields={docValueFields}
+                  indexKey={LastEventIndexKey.users}
+                  indexNames={selectedPatterns}
+                />
+              }
+              border
+              title={i18n.PAGE_TITLE}
+            />
 
             <UsersKpiComponent
               filterQuery={filterQuery}
@@ -157,6 +169,8 @@ const UsersComponent = () => {
               skip={isInitializing || !filterQuery}
               narrowDateRange={narrowDateRange}
             />
+
+            <EuiSpacer />
 
             <SecuritySolutionTabNavigation navTabs={navTabsUsers} />
 

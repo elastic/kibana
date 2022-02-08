@@ -40,7 +40,8 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { LastEventTime } from '../../../common/components/last_event_time';
+import { LastEventIndexKey } from '../../../../common/search_strategy';
 const ID = 'UsersDetailsQueryId';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
@@ -95,7 +96,20 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <HeaderPage border subtitle={'TODO <LastEventTime />'} title={detailName} />
+            <HeaderPage
+              border
+              subtitle={
+                <LastEventTime
+                  docValueFields={docValueFields}
+                  indexKey={LastEventIndexKey.userDetails}
+                  indexNames={selectedPatterns}
+                  userName={detailName}
+                />
+              }
+              title={detailName}
+            />
+            <EuiSpacer />
+
             <SecuritySolutionTabNavigation navTabs={navTabsUsersDetails(detailName)} />
 
             <EuiSpacer />

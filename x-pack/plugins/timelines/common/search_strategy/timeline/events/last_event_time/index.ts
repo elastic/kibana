@@ -12,12 +12,15 @@ import { TimelineRequestBasicOptions } from '../..';
 export enum LastEventIndexKey {
   hostDetails = 'hostDetails',
   hosts = 'hosts',
+  users = 'users',
+  userDetails = 'userDetails',
   ipDetails = 'ipDetails',
   network = 'network',
 }
 
 export interface LastTimeDetails {
   hostName?: Maybe<string>;
+  userName?: Maybe<string>;
   ip?: Maybe<string>;
 }
 
