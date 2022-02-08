@@ -6,5 +6,7 @@
  */
 
 export const useToastNotificationService = jest.fn(() => {
-  return {};
+  return {
+    displayWarningToast: jest.fn(() => {}),
+  };
 });
