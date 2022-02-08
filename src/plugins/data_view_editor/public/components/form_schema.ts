@@ -10,6 +10,18 @@ import { i18n } from '@kbn/i18n';
 import { fieldValidators, ValidationFunc } from '../shared_imports';
 import { INDEX_PATTERN_TYPE } from '../types';
 
+export const singleAstriskValidator = (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value, path }] = args;
+
+  const message = i18n.translate('indexPatternEditor.validations.noSingleAstriskPattern', {
+    defaultMessage: "A single '*' is not an allowed index pattern",
+  });
+
+  return value === '*' ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+};
+
 export const schema = {
   title: {
     label: i18n.translate('indexPatternEditor.editor.form.titleLabel', {
@@ -29,15 +41,7 @@ export const schema = {
         ),
       },
       {
-        validator: (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
-          const [{ value, path }] = args;
-
-          const message = i18n.translate('indexPatternEditor.validations.noSingleAstriskPattern', {
-            defaultMessage: "A single '*' is not an allowed index pattern",
-          });
-
-          return value === '*' ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
-        },
+        validator: singleAstriskValidator,
       },
     ],
   },
