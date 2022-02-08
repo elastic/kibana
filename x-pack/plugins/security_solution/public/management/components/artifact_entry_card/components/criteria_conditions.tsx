@@ -121,12 +121,10 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
                     <EuiExpression description={''} value={nestedField} color="subdued" />
                   </EuiFlexItemNested>
                   <EuiFlexItemNested grow={false}>
-                    <div className="eui-xScroll">
-                      <EuiExpression
-                        description={getEntryOperator(nestedType, nestedOperator)}
-                        value={getEntryValue(nestedType, nestedValue)}
-                      />
-                    </div>
+                    <EuiExpression
+                      description={getEntryOperator(nestedType, nestedOperator)}
+                      value={getEntryValue(nestedType, nestedValue)}
+                    />
                   </EuiFlexItemNested>
                 </EuiFlexGroupNested>
               );
@@ -148,12 +146,12 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
         {entries.map(({ field, type, value, operator, entries: nestedEntries = [] }) => {
           return (
             <div data-test-subj={getTestId('condition')} key={field + type + value}>
-              <EuiExpression
-                description={<StyledCondition>{CONDITION_AND}</StyledCondition>}
-                value={field}
-                color="subdued"
-              />
               <div className="eui-xScroll">
+                <EuiExpression
+                  description={<StyledCondition>{CONDITION_AND}</StyledCondition>}
+                  value={field}
+                  color="subdued"
+                />
                 <EuiExpression
                   description={getEntryOperator(type, operator)}
                   value={getEntryValue(type, value)}
