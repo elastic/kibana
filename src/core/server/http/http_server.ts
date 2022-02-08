@@ -46,6 +46,7 @@ import { AuthHeadersStorage, IAuthHeadersStorage } from './auth_headers_storage'
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
+import apm from 'elastic-apm-node';
 
 /** @internal */
 export interface HttpServerSetup {
@@ -338,7 +339,18 @@ export class HttpServer {
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
-      if (parentContext) executionContext?.set(parentContext);
+
+      if (parentContext) {
+        const apmContext = {
+          appId: parentContext.name,
+          page: parentContext.page,
+          id: parentContext.id,
+        };
+
+        apm.addLabels(apmContext);
+        executionContext?.set(parentContext);
+      }
+      
 
       executionContext?.setRequestId(requestId);
 
