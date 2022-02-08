@@ -105,7 +105,7 @@ experimental[] {kib} offers a preconfigured index connector to facilitate indexi
 
 [WARNING]
 ==================================================
-This functionality is experimental and may be changed or removed completely in a future release.
+This functionality is in technical preview and may be changed or removed completely in a future release.
 ==================================================
 
 To use this connector, set the <<action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> configuration to `true`.
