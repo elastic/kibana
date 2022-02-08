@@ -111,12 +111,10 @@ export async function getPackageInfo(options: {
 
   // If no package version is provided, use the installed version in the response
   let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
-
   // If no installed version of the given package exists, default to the latest version of the package
   if (!responsePkgVersion) {
     responsePkgVersion = latestPackage.version;
   }
-
   let packageInfo: RegistryPackage | undefined;
   // Look for the package locally
   if (
@@ -141,7 +139,7 @@ export async function getPackageInfo(options: {
   }
 
   if (!packageInfo) {
-    packageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
+    packageInfo = await Registry.fetchInfo(pkgName, responsePkgVersion);
   }
 
   // Fix the paths
