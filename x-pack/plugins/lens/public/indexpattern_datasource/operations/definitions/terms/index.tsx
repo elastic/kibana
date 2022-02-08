@@ -81,6 +81,11 @@ function isScriptedField(fieldName: string | IndexPatternField, indexPattern?: I
   return fieldName.scripted;
 }
 
+// It is not always possible to know if there's a numeric field, so just ignore it for now
+function getParentFormatter(params: Partial<TermsIndexPatternColumn['params']>) {
+  return { id: params.secondaryFields?.length ? 'multi_terms' : 'terms' };
+}
+
 const idPrefix = htmlIdGenerator()();
 const DEFAULT_SIZE = 3;
 // Elasticsearch limit
@@ -124,9 +129,18 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if (field && !isScriptedField(field)) {
       secondaryFields.add(field.name);
     }
-    return {
-      secondaryFields: [...secondaryFields].filter((f) => targetColumn.sourceField !== f),
+    // remove the sourceField
+    secondaryFields.delete(targetColumn.sourceField);
+
+    const secondaryFieldsList: string[] = [...secondaryFields];
+    const ret: Partial<TermsIndexPatternColumn['params']> = {
+      secondaryFields: secondaryFieldsList,
+      parentFormat: getParentFormatter({
+        ...targetColumn.params,
+        secondaryFields: secondaryFieldsList,
+      }),
     };
+    return ret;
   },
   canAddNewField: ({ targetColumn, sourceColumn, field, indexPattern }) => {
     // first step: collect the fields from the targetColumn
@@ -222,6 +236,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
         missingBucket: false,
+        parentFormat: { id: 'terms' },
       },
     };
   },
@@ -289,6 +304,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
     }
+    newParams.parentFormat = getParentFormatter(newParams);
     return {
       ...oldColumn,
       dataType: field.type as DataType,
@@ -348,8 +364,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       updateLayer,
     } = props;
     const onFieldSelectChange = useCallback(
-      (fields) => {
+      (fields: string[]) => {
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
+        const secondaryFields = fields.length > 1 ? fields.slice(1) : undefined;
         updateLayer({
           ...layer,
           columns: {
@@ -364,7 +381,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               ),
               params: {
                 ...column.params,
-                secondaryFields: fields.length > 1 ? fields.slice(1) : undefined,
+                secondaryFields,
+                parentFormat: getParentFormatter({
+                  ...column.params,
+                  secondaryFields,
+                }),
               },
             },
           } as Record<string, TermsIndexPatternColumn>,
