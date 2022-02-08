@@ -78,7 +78,6 @@ export async function getErrorGroupMainStatistics({
             },
             aggs: {
               sample: {
-                // change to top_metrics
                 top_hits: {
                   size: 1,
                   _source: [

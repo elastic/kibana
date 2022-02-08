@@ -86,7 +86,6 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
       comparisonRangeRt,
       t.type({
         numBuckets: toNumberRt,
-        transactionType: t.string,
         groupIds: jsonRt.pipe(t.array(t.string)),
       }),
     ]),
@@ -116,7 +115,6 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
         environment,
         kuery,
         numBuckets,
-        transactionType,
         groupIds,
         comparisonStart,
         comparisonEnd,
@@ -131,7 +129,6 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
       serviceName,
       setup,
       numBuckets,
-      transactionType,
       groupIds,
       comparisonStart,
       comparisonEnd,

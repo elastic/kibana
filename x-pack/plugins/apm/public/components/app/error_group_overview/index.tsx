@@ -46,7 +46,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 };
 
 export function ErrorGroupOverview() {
-  const { serviceName, transactionType } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
 
   const {
     query: {
@@ -118,13 +118,7 @@ export function ErrorGroupOverview() {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
   } = useFetcher(
     (callApmApi) => {
-      if (
-        requestId &&
-        errorGroupMainStatistics.length &&
-        start &&
-        end &&
-        transactionType
-      ) {
+      if (requestId && errorGroupMainStatistics.length && start && end) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
@@ -136,7 +130,6 @@ export function ErrorGroupOverview() {
                 start,
                 end,
                 numBuckets: 20,
-                transactionType,
                 groupIds: JSON.stringify(
                   errorGroupMainStatistics.map(({ groupId }) => groupId).sort()
                 ),
