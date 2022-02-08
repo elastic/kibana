@@ -197,9 +197,38 @@ export interface LensDocShape715<VisualizationState = unknown> {
 
 export type LensDocShape810<VisualizationState = unknown> = Omit<
   LensDocShape715<VisualizationState>,
-  'filters'
+  'filters' | 'state'
 > & {
   filters: Filter[];
+  state: Omit<LensDocShape715['state'], 'datasourceStates'> & {
+    datasourceStates: {
+      indexpattern: Omit<LensDocShape715['state']['datasourceStates']['indexpattern'], 'layers'> & {
+        layers: Record<
+          string,
+          Omit<
+            LensDocShape715['state']['datasourceStates']['indexpattern']['layers'][string],
+            'columns'
+          > & {
+            columns: Record<
+              string,
+              | {
+                  operationType: 'terms';
+                  params: {
+                    secondaryFields?: string[];
+                  };
+                  [key: string]: unknown;
+                }
+              | {
+                  operationType: OperationTypePost712;
+                  params: Record<string, unknown>;
+                  [key: string]: unknown;
+                }
+            >;
+          }
+        >;
+      };
+    };
+  };
 };
 
 export type VisState716 =
