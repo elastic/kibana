@@ -11,6 +11,101 @@ import type { IRouter } from '../../../../core/server';
 import { getRemoteRoutePaths } from '../../common';
 import { FlameGraph } from './flamegraph';
 
+interface FilterObject {
+  bool: {
+    must: Array<
+      | {
+          term: {
+            ProjectID: {
+              value: string;
+              boost: number;
+            };
+          };
+        }
+      | {
+          range: {
+            '@timestamp': {
+              gte: string;
+              lt: string;
+              format: string;
+              boost: number;
+            };
+          };
+        }
+    >;
+  };
+}
+
+function createFilterObject(projectID: string, timeFrom: string, timeTo: string): FilterObject {
+  return {
+    bool: {
+      must: [
+        {
+          term: {
+            ProjectID: {
+              value: projectID,
+              boost: 1.0,
+            },
+          },
+        },
+        {
+          range: {
+            '@timestamp': {
+              gte: timeFrom,
+              lt: timeTo,
+              format: 'epoch_second',
+              boost: 1.0,
+            },
+          },
+        },
+      ],
+    },
+  } as FilterObject;
+}
+
+function getSampledTraceEventsIndex(
+  sampleSize: number,
+  sampleCountFromSmallestTable: number
+): [string, number, number] {
+  if (sampleCountFromSmallestTable === 0) {
+    // If this happens the returned estimatedSampleCount may be very wrong.
+    // Hardcode sampleCountFromSmallestTable to 1 else an estimatedSampleCount
+    // of zero is returned.
+    sampleCountFromSmallestTable = 1;
+  }
+
+  const sampleRates: number[] = [1000, 125, 25, 5, 1];
+
+  let tableName: string;
+  let sampleRate = 0;
+  let estimatedSampleCount = 0;
+
+  for (let i = 0; i < sampleRates.length; i++) {
+    sampleRate = sampleRates[i];
+
+    // Fractional floats have an inherent inaccuracy,
+    // see https://docs.python.org/3/tutorial/floatingpoint.htm) for details.
+    // Examples:
+    //   0.01 as float32: 0.009999999776482582092285156250 (< 0.01)
+    //   0.01 as float64: 0.010000000000000000208166817117 (> 0.01)
+    // But if "N / f >= 1", which is the case below as N is >= 1 and f is <= 1,
+    // we end up with the correct result (tested with a small Go program).
+    estimatedSampleCount = sampleCountFromSmallestTable * (sampleRates[0] / sampleRate);
+
+    if (estimatedSampleCount >= sampleSize) {
+      break;
+    }
+  }
+
+  if (sampleRate === 1) {
+    tableName = 'profiling-events';
+  } else {
+    tableName = 'profiling-events-' + sampleRate.toString();
+  }
+
+  return [tableName, 1 / sampleRate, estimatedSampleCount];
+}
+
 export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   const paths = getRemoteRoutePaths();
   router.get(
@@ -27,51 +122,49 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
     },
     async (context, request, response) => {
       const { index, projectID, timeFrom, timeTo } = request.query;
+      const sampleSize = 20000;
 
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const filter = createFilterObject(projectID!, timeFrom!, timeTo!);
+
+        // const resp = await getCountResponse(context, filter);
+        const resp = await esClient.search({
+          index: 'profiling-events-1000',
+          body: {
+            query: filter,
+            size: 0,
+            track_total_hits: true,
+          },
+        });
+
+        const sampleCountFromSmallestTable = resp.body.hits.total.value as number;
+
+        const [eventsIndex, sampleRate, estimatedSampleCount] = getSampledTraceEventsIndex(
+          sampleSize,
+          sampleCountFromSmallestTable
+        );
+
+        console.log('Index', eventsIndex, sampleRate, estimatedSampleCount);
 
         const resEvents = await esClient.search({
-          index,
+          index: eventsIndex,
           body: {
             query: {
               function_score: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          ProjectID: {
-                            value: projectID,
-                            boost: 1.0,
-                          },
-                        },
-                      },
-                      {
-                        range: {
-                          '@timestamp': {
-                            gte: timeFrom,
-                            lt: timeTo,
-                            format: 'epoch_second',
-                            boost: 1.0,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
+                query: filter,
               },
             },
             aggs: {
               sample: {
                 sampler: {
-                  shard_size: 20000,
+                  shard_size: sampleSize,
                 },
                 aggs: {
                   group_by: {
                     terms: {
                       field: 'StackTraceID',
-                      size: 20000,
+                      size: sampleSize,
                     },
                   },
                 },
@@ -83,30 +176,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
         const resTotalEvents = await esClient.search({
           index,
           body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      ProjectID: {
-                        value: projectID,
-                        boost: 1.0,
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: timeFrom,
-                        lt: timeTo,
-                        format: 'epoch_second',
-                        boost: 1.0,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
+            query: filter,
             aggs: {
               histogram: {
                 auto_date_histogram: {
@@ -177,6 +247,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           body: flamegraph.toElastic(),
         });
       } catch (e) {
+        console.log('Caught', e);
         return response.customError({
           statusCode: e.statusCode ?? 500,
           body: {
