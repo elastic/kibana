@@ -22,9 +22,7 @@ import {
   getPolicyTrustedAppsListPagination,
   getTrustedAppsAllPoliciesById,
   isPolicyTrustedAppListLoading,
-  policyIdFromParams,
   getCurrentPolicyArtifactsFilter,
-  policyDetails,
 } from '../../../store/policy_details/selectors';
 import {
   getPolicyDetailPath,

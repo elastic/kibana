@@ -39,6 +39,7 @@ describe('Policy details event filter delete modal', () => {
         renderResult = mockedContext.render(
           <PolicyEventFiltersDeleteModal
             policyId={policyId}
+            policyName="fakeName"
             onCancel={onCancel}
             exception={exception}
           />
