@@ -22,6 +22,11 @@ export const errors = {
       defaultMessage: `Invalid shape is specified. Supported shapes: {shapes}`,
       values: { shapes: Object.values(GaugeShapes).join(', ') },
     }),
+  invalidColorModeError: () =>
+    i18n.translate('expressionGauge.functions.gauge.errors.shapeIsNotSupported', {
+      defaultMessage: `Invalid color mode is specified. Supported color modes: {colorModes}`,
+      values: { colorModes: Object.values(GaugeColorModes).join(', ') },
+    }),
 };
 
 export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
@@ -67,7 +72,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     },
     colorMode: {
       types: ['string'],
-      default: 'none',
+      default: GaugeColorModes.NONE,
       options: [GaugeColorModes.NONE, GaugeColorModes.PALETTE],
       help: i18n.translate('expressionGauge.functions.gauge.args.colorMode.help', {
         defaultMessage: 'If set to palette, the palette colors will be applied to the bands',
@@ -120,7 +125,11 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
 
   fn(data, args, handlers) {
     if (!Object.values(GaugeShapes).includes(args.shape)) {
-      throw new Error(strings.invalidShapeError());
+      throw new Error(errors.invalidShapeError());
+    }
+
+    if (!Object.values(GaugeColorModes).includes(args.colorMode)) {
+      throw new Error(errors.invalidColorModeError());
     }
 
     return {
