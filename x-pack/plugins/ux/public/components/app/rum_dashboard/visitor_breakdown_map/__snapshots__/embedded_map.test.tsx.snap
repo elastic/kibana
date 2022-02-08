@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Embedded Map it renders 1`] = `
+.c0 {
+  z-index: auto;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.c0 .embPanel__content {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex: 1 1 100%;
+  -ms-flex: 1 1 100%;
+  flex: 1 1 100%;
+  z-index: 1;
+  min-height: 0;
+}
+
+.c0.c0.c0 .mapboxgl-canvas {
+  -webkit-animation: none !important;
+  animation: none !important;
+}
+
+<div
+  class="c0"
+>
+  <div
+    class="embPanel__content"
+    data-test-subj="xpack.ux.regionMap.embeddedPanel"
+  />
+</div>
+`;

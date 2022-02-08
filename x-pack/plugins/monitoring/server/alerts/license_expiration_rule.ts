@@ -20,7 +20,7 @@ import {
   AlertLicense,
   AlertLicenseState,
 } from '../../common/types/alerts';
-import { AlertExecutorOptions, AlertInstance } from '../../../alerting/server';
+import { AlertExecutorOptions, Alert } from '../../../alerting/server';
 import { RULE_LICENSE_EXPIRATION, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
@@ -143,7 +143,7 @@ export class LicenseExpirationRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

@@ -245,7 +245,7 @@ function getSearchParams(queryParams: EsQueryAlertParams) {
 
 async function esQueryExpressionExecutor(logger: Logger, options: ExecutorOptions) {
   const { alertId, name, services, params, state } = options;
-  const { alertInstanceFactory, search } = services;
+  const { alertFactory, search } = services;
   const previousTimestamp = state.latestTimestamp;
 
   const abortableEsClient = search.asCurrentUser;
@@ -340,7 +340,7 @@ async function esQueryExpressionExecutor(logger: Logger, options: ExecutorOption
     };
 
     const actionContext = addMessages(options, baseContext, params);
-    const alertInstance = alertInstanceFactory(ConditionMetAlertInstanceId);
+    const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
     alertInstance
       // store the params we would need to recreate the query that led to this alert instance
       .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })
@@ -430,7 +430,7 @@ async function indexThresholdExpressionExecutor(
       conditions,
       link,
     };
-    const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
+    const alertInstance = options.services.alertFactory.create(ConditionMetAlertInstanceId);
     alertInstance.scheduleActions(ActionGroupId, baseContext);
   }
 

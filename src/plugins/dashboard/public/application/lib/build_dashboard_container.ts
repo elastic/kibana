@@ -31,7 +31,7 @@ import {
 } from '../../services/embeddable';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
-  data: DashboardAppServices['data']; // the whole data service is required here because it is required by getUrlGeneratorState
+  data: DashboardAppServices['data']; // the whole data service is required here because it is required by getLocatorParams
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
