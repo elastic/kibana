@@ -28,7 +28,7 @@ import { TooltipWrapper, useDebouncedValue } from '../../shared_components';
 
 const icons = [
   {
-    value: 'none',
+    value: 'empty',
     label: i18n.translate('xpack.lens.xyChart.referenceLine.noIconLabel', {
       defaultMessage: 'None',
     }),
