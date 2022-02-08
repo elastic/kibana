@@ -9,6 +9,7 @@
 import React, { FC, createContext, useContext } from 'react';
 import { SharedUXPlatformService } from './platform';
 import { servicesFactory } from './stub';
+import { DataViewEditorStart } from '../../../data_view_editor/public';
 
 /**
  * A collection of services utilized by SharedUX.  This serves as a thin
@@ -20,6 +21,7 @@ import { servicesFactory } from './stub';
  */
 export interface SharedUXServices {
   platform: SharedUXPlatformService;
+  dataViewEditor: DataViewEditorStart;
 }
 
 // The React Context used to provide the services to the SharedUX components.

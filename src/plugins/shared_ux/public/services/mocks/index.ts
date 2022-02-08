@@ -7,15 +7,17 @@
  */
 
 export type { MockPlatformServiceFactory } from './platform.mock';
-export { platformServiceFactory } from './platform.mock';
 
 import type { SharedUXServices } from '../.';
 import { PluginServiceFactory } from '../types';
 import { platformServiceFactory } from './platform.mock';
+
+import { indexPatternEditorPluginMock } from '../../../../data_view_editor/public';
 
 /**
  * A factory function for creating a Jest-based implementation of `SharedUXServices`.
  */
 export const servicesFactory: PluginServiceFactory<SharedUXServices> = () => ({
   platform: platformServiceFactory(),
+  dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
 });

@@ -9,10 +9,12 @@
 import type { SharedUXServices } from '../.';
 import { PluginServiceFactory } from '../types';
 import { platformServiceFactory } from './platform';
+import { dataViewEditorFactory } from './data_view_editor';
 
 /**
  * A factory function for creating a Storybook-based implementation of `SharedUXServices`.
  */
 export const servicesFactory: PluginServiceFactory<SharedUXServices, {}> = (params) => ({
   platform: platformServiceFactory(params),
+  dataViewEditor: dataViewEditorFactory(),
 });

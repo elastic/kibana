@@ -19,4 +19,5 @@ export const servicesFactory: KibanaPluginServiceFactory<
   SharedUXPluginStartDeps
 > = (params) => ({
   platform: platformServiceFactory(params),
+  dataViewEditor: params.startPlugins.dataViewEditor,
 });
