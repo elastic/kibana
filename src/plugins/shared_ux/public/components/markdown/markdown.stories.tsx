@@ -8,7 +8,6 @@
 
 import React from 'react';
 
-import { useArgTypes } from '@storybook/api';
 import { Markdown as MarkdownComponent } from './markdown.component';
 import { Markdown } from './markdown';
 import mdx from './markdown.mdx';

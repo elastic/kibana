@@ -8,7 +8,6 @@
 
 import React from 'react';
 
-import { action } from '@storybook/addon-actions';
 import { MarkdownSimple as MarkdownSimpleComponent } from './markdown_simple.component';
 import mdx from './markdown.mdx';
 
@@ -23,7 +22,7 @@ export default {
 };
 
 export const ConnectedComponent = () => {
-  return <MarkdownSimpleComponent onChange={action('onChange')} children={} />;
+  return <MarkdownSimpleComponent children={'testfordays'} />;
 };
 
 ConnectedComponent.argTypes = {
