@@ -15,6 +15,12 @@ import type { DataPublicPluginStart } from '../../../../src/plugins/data/public'
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import {
+  ManagementSetup,
+  ManagementAppMountParams,
+} from '../../../../src/plugins/management/public';
+import { FeaturesPluginStart } from '../..//features/public';
 
 import type {
   GetCasesProps,
@@ -24,16 +30,19 @@ import type {
   CasesOwners,
 } from './methods';
 
-export interface SetupPlugins {
+export interface CasesPluginSetup {
   security: SecurityPluginSetup;
+  management: ManagementSetup;
+  home?: HomePublicPluginSetup;
 }
 
-export interface StartPlugins {
+export interface CasesPluginStart {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   lens: LensPublicStart;
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
+  features: FeaturesPluginStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -44,9 +53,17 @@ export interface StartPlugins {
  */
 
 export type StartServices = CoreStart &
-  StartPlugins & {
+  CasesPluginStart & {
     security: SecurityPluginSetup;
   };
+
+export interface RenderAppProps {
+  mountParams: ManagementAppMountParams;
+  coreStart: CoreStart;
+  pluginsStart: CasesPluginStart;
+  storage: Storage;
+  kibanaVersion: string;
+}
 
 export interface CasesUiStart {
   /**

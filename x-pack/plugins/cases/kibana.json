@@ -10,8 +10,10 @@
   "id":"cases",
   "kibanaVersion":"kibana",
   "optionalPlugins":[
+    "home",
      "security",
-     "spaces"
+     "spaces",
+     "features"
   ],
   "owner":{
      "githubTeam":"response-ops",
@@ -24,9 +26,11 @@
      "features",
      "kibanaReact",
      "kibanaUtils",
-     "triggersActionsUi"
+     "triggersActionsUi",
+     "management"
   ],
   "requiredBundles": [
+    "home",
     "savedObjects"
   ],
   "server":true,

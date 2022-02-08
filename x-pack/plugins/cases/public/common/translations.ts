@@ -254,3 +254,11 @@ export const MAX_LENGTH_ERROR = (field: string, length: number) =>
 export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {
   defaultMessage: 'appropriate license',
 });
+
+export const APP_TITLE = i18n.translate('xpack.cases.common.appTitle', {
+  defaultMessage: 'Cases',
+});
+
+export const APP_DESC = i18n.translate('xpack.cases.common.appDescription', {
+  defaultMessage: 'Cases',
+});
