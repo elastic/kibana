@@ -69,6 +69,7 @@ export const useWithArtifactListData = (
   } = useQuery<boolean, ServerApiError>([apiClient], async () => apiClient.hasData(), {
     enabled: true,
     keepPreviousData: true,
+    refetchOnWindowFocus: false,
   });
 
   // Convert to useMemo()? that uses data from API request?
@@ -87,6 +88,7 @@ export const useWithArtifactListData = (
     {
       enabled: true,
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
     }
   );
 

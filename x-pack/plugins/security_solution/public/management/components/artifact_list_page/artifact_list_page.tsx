@@ -81,7 +81,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
     const {
-      urlParams: { filter },
+      urlParams: { filter, includedPolicies },
     } = useUrlParams<ArtifactListPageUrlParams>();
 
     const {
@@ -91,6 +91,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       uiPagination,
       doesDataExist,
       error,
+      refetch: refetchListData,
     } = useWithArtifactListData(apiClient, searchableFields);
 
     const items = useMemo(() => {
@@ -149,15 +150,22 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       );
 
     const handleOnSearch = useCallback(
-      (filterValue: string, includedPolicies: string) => {
+      (filterValue: string, selectedPolicies: string) => {
+        // FIXME:PT talk to David about possibly having the ExceptionsSearch also return a boolean that indicates if a refresh of existing data should be done
+
         setUrlParams({
           // `undefined` will drop the param from the url
           filter: filterValue.trim() === '' ? undefined : filterValue,
-          included_policies: includedPolicies.trim() === '' ? undefined : includedPolicies,
+          included_policies: selectedPolicies.trim() === '' ? undefined : selectedPolicies,
         });
       },
       [setUrlParams]
     );
+
+    const handleArtifactDeleteModalOnSuccess = useCallback(() => {
+      setSelectedItemForDelete(undefined);
+      refetchListData();
+    }, [refetchListData]);
 
     const handleArtifactDeleteModalOnCancel = useCallback(() => {
       setSelectedItemForDelete(undefined);
@@ -201,10 +209,11 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
         {selectedItemForDelete && (
           <ArtifactDeleteModal
+            apiClient={apiClient}
             item={selectedItemForDelete}
             labels={labels}
             data-test-subj={getTestId('deleteModal')}
-            onSuccess={() => {}} // FIXME:PT handle delete
+            onSuccess={handleArtifactDeleteModalOnSuccess}
             onCancel={handleArtifactDeleteModalOnCancel}
           />
         )}
@@ -228,7 +237,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               placeholder={labels.searchPlaceholderInfo}
               hasPolicyFilter
               policyList={[]} // FIXME:PT provide list of policies
-              defaultIncludedPolicies={''} // FIXME:PT provide list of included policies
+              defaultIncludedPolicies={includedPolicies}
             />
 
             <EuiSpacer size="m" />

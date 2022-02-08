@@ -16,7 +16,6 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../common/translations';
 import { useToasts } from '../../../../common/lib/kibana';
-import { useSetUrlParams } from './use_set_url_params';
 
 type CardActionType = 'edit' | 'delete';
 
@@ -45,7 +44,6 @@ export const useArtifactCardPropsProvider = ({
 }: UseArtifactCardPropsProviderProps): ArtifactCardPropsProvider => {
   const getTestId = useTestIdGenerator(dataTestSubj);
   const toasts = useToasts();
-  const setUrlParams = useSetUrlParams();
 
   const { data: policyData } = useGetEndpointSpecificPolicies({
     onError: (error) => {

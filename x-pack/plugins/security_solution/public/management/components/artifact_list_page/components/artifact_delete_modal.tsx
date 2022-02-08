@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,6 +25,11 @@ import {
   getPolicyIdsFromArtifact,
   isArtifactGlobal,
 } from '../../../../../common/endpoint/service/artifacts';
+import {
+  ARTIFACT_DELETE_ACTION_LABELS,
+  useArtifactDeleteItem,
+} from '../hooks/use_artifact_delete_item';
+import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 export const ARTIFACT_DELETE_LABELS = Object.freeze({
   deleteModalTitle: (itemName: string): string =>
@@ -73,30 +78,32 @@ export const ARTIFACT_DELETE_LABELS = Object.freeze({
 });
 
 export interface DeleteArtifactModalProps {
+  apiClient: ExceptionsListApiClient;
   item: ExceptionListItemSchema;
   onCancel: () => void;
   onSuccess: () => void;
+  labels: typeof ARTIFACT_DELETE_LABELS & typeof ARTIFACT_DELETE_ACTION_LABELS;
   'data-test-subj'?: string;
-  labels: typeof ARTIFACT_DELETE_LABELS;
 }
 
 export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
-  ({
-    item,
-    onCancel,
-    onSuccess,
-    'data-test-subj': dataTestSubj,
-    labels = ARTIFACT_DELETE_LABELS,
-  }) => {
-    // FIXME:PT ensure onCancel/onSuccess can not be called when deletion is underway
-
+  ({ apiClient, item, onCancel, onSuccess, 'data-test-subj': dataTestSubj, labels }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const isDeleting = false;
-    const onConfirm = () => {};
+    const { deleteArtifactItem, isLoading: isDeleting } = useArtifactDeleteItem(apiClient, labels);
+
+    const onConfirm = useCallback(() => {
+      deleteArtifactItem(item).then(() => onSuccess());
+    }, [deleteArtifactItem, item, onSuccess]);
+
+    const handleOnCancel = useCallback(() => {
+      if (!isDeleting) {
+        onCancel();
+      }
+    }, [isDeleting, onCancel]);
 
     return (
-      <EuiModal onClose={onCancel}>
+      <EuiModal onClose={handleOnCancel}>
         <EuiModalHeader data-test-subj={getTestId('header')}>
           <EuiModalHeaderTitle>{labels.deleteModalTitle(item.name)}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -120,7 +127,7 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
 
         <EuiModalFooter>
           <EuiButtonEmpty
-            onClick={onCancel}
+            onClick={handleOnCancel}
             isDisabled={isDeleting}
             data-test-subj={getTestId('cancelButton')}
           >
