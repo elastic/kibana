@@ -11,18 +11,21 @@ import type { RouteDefinitionParams } from '../';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineGetProfileRoute({ router, getProfileService }: RouteDefinitionParams) {
+export function defineGetProfileRoute({ router, getUserProfileService }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/profile/{uid}',
+      options: {
+        tags: ['access:accessUserProfile', 'access:updateUserProfle'],
+      },
       validate: {
         params: schema.object({ uid: schema.string() }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const profileService = getProfileService();
+      const userProfileService = getUserProfileService();
       try {
-        const profile = await profileService.get(request.params.uid, '*');
+        const profile = await userProfileService.get(request.params.uid, '*');
         return response.ok({ body: profile });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

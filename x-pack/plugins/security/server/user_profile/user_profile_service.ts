@@ -7,19 +7,17 @@
 
 import type { ElasticsearchClient, Logger } from 'src/core/server';
 
+import type { User } from '../../common';
+
 const KIBANA_DATA_ROOT = 'kibana';
 
-export interface Profile<T extends UserData> {
+export interface UserProfile<T extends UserData> {
   uid: string;
-  user: User;
+  user: UserInfo;
   data: T;
 }
 
-export interface User {
-  username: string;
-  roles: string[];
-  realm_name: string;
-  full_name: string;
+export interface UserInfo extends User {
   display_name?: string;
   avatar?: {
     initials?: string;
@@ -31,18 +29,13 @@ export interface User {
 
 export type UserData = Record<string, unknown>;
 
-export interface ProfileServiceStart {
-  /**
-   * Creates or updates an existing user profile.
-   */
-  // activate(params: { username: string; password: string }): Promise<void>;
-
+export interface UserProfileServiceStart {
   /**
    * Retrieves a single user profile by identifier.
    * @param uid User ID
    * @param dataPath By default `get()` returns user information, but does not return any user data. The optional "dataPath" parameter can be used to return personal data for this user.
    */
-  get<T extends UserData>(uid: string, dataPath?: string): Promise<Profile<T>>;
+  get<T extends UserData>(uid: string, dataPath?: string): Promise<UserProfile<T>>;
 
   /**
    * Updates user preferences by identifier.
@@ -56,7 +49,7 @@ type GetProfileResponse<T extends UserData> = Record<
   string,
   {
     uid: string;
-    user: User;
+    user: UserInfo;
     data: {
       [KIBANA_DATA_ROOT]: T;
     };
@@ -66,36 +59,43 @@ type GetProfileResponse<T extends UserData> = Record<
   }
 >;
 
-export class ProfileService {
+export class UserProfileService {
   constructor(private readonly logger: Logger) {}
 
-  start(elasticsearchClient: ElasticsearchClient): ProfileServiceStart {
+  start(elasticsearchClient: ElasticsearchClient): UserProfileServiceStart {
     const { logger } = this;
-    logger.info('ProfileService: start');
 
     async function get<T extends UserData>(uid: string, dataPath?: string) {
-      const { body } = await elasticsearchClient.transport.request<GetProfileResponse<T>>({
-        method: 'GET',
-        path: `_security/profile/${uid}${dataPath ? `?data=${KIBANA_DATA_ROOT}.${dataPath}` : ''}`,
-      });
-      logger.info('ProfileService: get', body);
-
-      const { user, data } = body[uid];
-
-      return { uid, user, data: data[KIBANA_DATA_ROOT] };
+      try {
+        const { body } = await elasticsearchClient.transport.request<GetProfileResponse<T>>({
+          method: 'GET',
+          path: `_security/profile/${uid}${
+            dataPath ? `?data=${KIBANA_DATA_ROOT}.${dataPath}` : ''
+          }`,
+        });
+        const { user, data } = body[uid];
+        return { uid, user, data: data[KIBANA_DATA_ROOT] };
+      } catch (error) {
+        logger.error(`Failed to retrieve user profile [uid=${uid}]: ${error.message}`);
+        throw error;
+      }
     }
 
     async function update<T extends UserData>(uid: string, data: T) {
-      logger.info('ProfileService: update', data);
-      await elasticsearchClient.transport.request({
-        method: 'POST',
-        path: `_security/profile/_data/${uid}`,
-        body: {
-          data: {
-            [KIBANA_DATA_ROOT]: data,
+      try {
+        await elasticsearchClient.transport.request({
+          method: 'POST',
+          path: `_security/profile/_data/${uid}`,
+          body: {
+            data: {
+              [KIBANA_DATA_ROOT]: data,
+            },
           },
-        },
-      });
+        });
+      } catch (error) {
+        logger.error(`Failed to update user profile [uid=${uid}]: ${error.message}`);
+        throw error;
+      }
     }
 
     return { get, update };

@@ -17,9 +17,9 @@ import type { InternalAuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { ProfileServiceStart } from '../profile/profile_service';
 import type { Session } from '../session_management';
 import type { SecurityRouter } from '../types';
+import type { UserProfileServiceStart } from '../user_profile/user_profile_service';
 import { defineAnonymousAccessRoutes } from './anonymous_access';
 import { defineApiKeysRoutes } from './api_keys';
 import { defineAuthenticationRoutes } from './authentication';
@@ -49,7 +49,7 @@ export interface RouteDefinitionParams {
   getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getAuthenticationService: () => InternalAuthenticationServiceStart;
-  getProfileService: () => ProfileServiceStart;
+  getUserProfileService: () => UserProfileServiceStart;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
 }
 

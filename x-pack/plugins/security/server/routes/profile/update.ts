@@ -11,19 +11,25 @@ import type { RouteDefinitionParams } from '../';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineUpdateProfileDataRoute({ router, getProfileService }: RouteDefinitionParams) {
+export function defineUpdateProfileDataRoute({
+  router,
+  getUserProfileService,
+}: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/profile/_data/{uid}',
+      options: {
+        tags: ['access:accessUserProfile', 'access:updateUserProfle'],
+      },
       validate: {
         params: schema.object({ uid: schema.string() }),
         body: schema.recordOf(schema.string(), schema.any()),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const profileService = getProfileService();
+      const userProfileService = getUserProfileService();
       try {
-        await profileService.update(request.params.uid, request.body);
+        await userProfileService.update(request.params.uid, request.body);
         return response.ok();
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
