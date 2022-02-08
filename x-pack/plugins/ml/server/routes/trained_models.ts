@@ -41,7 +41,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       try {
         const { modelId } = request.params;
         const { with_pipelines: withPipelines, ...query } = request.query;
-        const { body } = await mlClient.getTrainedModels({
+        const body = await mlClient.getTrainedModels({
           // @ts-expect-error @elastic-elasticsearch not sure why this is an error, size is a number
           size: 1000,
           ...query,

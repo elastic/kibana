@@ -180,7 +180,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const { body } = await mlClient.putJob({
+        const body = await mlClient.putJob({
           job_id: jobId,
           // @ts-expect-error job type custom_rules is incorrect
           body: request.body,
@@ -219,7 +219,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const { body } = await mlClient.updateJob({
+        const body = await mlClient.updateJob({
           job_id: jobId,
           // @ts-expect-error MlDetector is not compatible
           body: request.body,
