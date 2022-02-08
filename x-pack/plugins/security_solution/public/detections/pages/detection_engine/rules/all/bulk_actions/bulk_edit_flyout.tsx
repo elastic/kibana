@@ -17,7 +17,7 @@ import { TagsForm } from './forms/tags_form';
 
 interface BulkEditFlyoutProps {
   onClose: () => void;
-  onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
+  onConfirm: (bulkActionEditPayload: BulkActionEditPayload) => void;
   editAction: BulkActionEditType;
   rulesCount: number;
   tags: string[];
