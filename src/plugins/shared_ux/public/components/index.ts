@@ -22,3 +22,4 @@ export const LazyToolbarButton = React.lazy(() => import('./toolbar_button'));
  * a predefined fallback and error boundary.
  */
 export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
+export const ToolbarButton = withSuspense(LazyToolbarButton);
