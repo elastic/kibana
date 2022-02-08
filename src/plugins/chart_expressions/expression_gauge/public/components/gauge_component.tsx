@@ -15,6 +15,7 @@ import {
   GaugeLabelMajorMode,
   GaugeTicksPosition,
   GaugeLabelMajorModes,
+  GaugeColorModes,
 } from '../../common';
 import { GaugeShapes, GaugeTicksPositions } from '../../common';
 import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
@@ -103,9 +104,9 @@ function getTitle(
   labelMajor?: string,
   fallbackTitle?: string
 ) {
-  if (labelMajorMode === GaugeLabelMajorModes.none) {
+  if (labelMajorMode === GaugeLabelMajorModes.NONE) {
     return '';
-  } else if (labelMajorMode === GaugeLabelMajorModes.auto) {
+  } else if (labelMajorMode === GaugeLabelMajorModes.AUTO) {
     return `${fallbackTitle || ''}   `; // added extra space for nice rendering
   }
   return `${labelMajor || fallbackTitle || ''}   `; // added extra space for nice rendering
@@ -131,7 +132,7 @@ function getTicks(
   range: [number, number],
   colorBands?: number[]
 ) {
-  if (ticksPosition === GaugeTicksPositions.bands && colorBands) {
+  if (ticksPosition === GaugeTicksPositions.BANDS && colorBands) {
     return colorBands && getTicksLabels(colorBands);
   }
   const TICKS_NO = 3;
@@ -175,7 +176,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     const metricValue = getValueFromAccessor('metricAccessor', row, args);
 
-    const icon = subtype === GaugeShapes.horizontalBullet ? GaugeIconHorizontal : GaugeIconVertical;
+    const icon =
+      subtype === GaugeShapes.HORIZONTAL_BULLET ? GaugeIconHorizontal : GaugeIconVertical;
 
     if (typeof metricValue !== 'number') {
       return <EmptyPlaceholder icon={icon} />;
@@ -242,7 +244,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           bands={bands}
           ticks={getTicks(ticksPosition, [min, max], bands)}
           bandFillColor={
-            colorMode === 'palette' && colors
+            colorMode === GaugeColorModes.PALETTE && colors
               ? (val) => {
                   const index = bands && bands.indexOf(val.value) - 1;
                   return colors && index >= 0 && colors[index]

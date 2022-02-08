@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { $Values } from '@kbn/utility-types';
 import {
   Datatable,
   ExpressionFunctionDefinition,
@@ -22,11 +23,10 @@ import {
 } from '../constants';
 import { CustomPaletteParams } from '.';
 
-export type GaugeType = 'gauge';
-export type GaugeColorMode = keyof typeof GaugeColorModes;
-export type GaugeShape = keyof typeof GaugeShapes;
-export type GaugeLabelMajorMode = keyof typeof GaugeLabelMajorModes;
-export type GaugeTicksPosition = keyof typeof GaugeTicksPositions;
+export type GaugeColorMode = $Values<typeof GaugeColorModes>;
+export type GaugeShape = $Values<typeof GaugeShapes>;
+export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
+export type GaugeTicksPosition = $Values<typeof GaugeTicksPositions>;
 
 export interface GaugeState {
   metricAccessor?: string;

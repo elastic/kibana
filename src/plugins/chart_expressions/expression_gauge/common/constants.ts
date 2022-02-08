@@ -10,22 +10,22 @@ export const EXPRESSION_GAUGE_NAME = 'gauge';
 export const GAUGE_FUNCTION_RENDERER_NAME = 'gauge_renderer';
 
 export const GaugeShapes = {
-  horizontalBullet: 'horizontalBullet',
-  verticalBullet: 'verticalBullet',
+  HORIZONTAL_BULLET: 'horizontalBullet',
+  VERTICAL_BULLET: 'verticalBullet',
 } as const;
 
 export const GaugeTicksPositions = {
-  auto: 'auto',
-  bands: 'bands',
+  AUTO: 'auto',
+  BANDS: 'bands',
 } as const;
 
 export const GaugeLabelMajorModes = {
-  auto: 'auto',
-  custom: 'custom',
-  none: 'none',
+  AUTO: 'auto',
+  CUSTOM: 'custom',
+  NONE: 'none',
 } as const;
 
 export const GaugeColorModes = {
-  palette: 'palette',
-  none: 'none',
+  PALETTE: 'palette',
+  NONE: 'none',
 } as const;
