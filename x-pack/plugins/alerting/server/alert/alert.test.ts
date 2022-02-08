@@ -450,6 +450,49 @@ describe('updateLastScheduledActions()', () => {
   });
 });
 
+describe('hasContext()', () => {
+  test('returns true when context has been set via scheduleActions()', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>({
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alert.scheduleActions('default', { field: true });
+    expect(alert.hasContext()).toEqual(true);
+  });
+
+  test('returns true when context has been set via setContext()', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>({
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alert.setContext({ field: true });
+    expect(alert.hasContext()).toEqual(true);
+  });
+
+  test('returns false when context has not been set', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>({
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    expect(alert.hasContext()).toEqual(false);
+  });
+});
+
 describe('toJSON', () => {
   test('only serializes state and meta', () => {
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(

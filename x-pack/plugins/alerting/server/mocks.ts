@@ -64,6 +64,7 @@ const createAlertFactoryMock = {
 
     return mock as unknown as AlertInstanceMock<InstanceState, InstanceContext>;
   },
+  done: () => {},
 };
 
 const createAbortableSearchClientMock = () => {
@@ -89,6 +90,7 @@ const createAlertServicesMock = <
   return {
     alertFactory: {
       create: jest.fn().mockReturnValue(alertFactoryMockCreate),
+      done: jest.fn().mockReturnValue({}),
     },
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),

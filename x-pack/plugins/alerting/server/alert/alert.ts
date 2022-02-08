@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -44,9 +45,11 @@ export class Alert<
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
   private meta: AlertInstanceMeta;
   private state: State;
+  private context: Context;
 
   constructor({ state, meta = {} }: RawAlertInstance = {}) {
     this.state = (state || {}) as State;
+    this.context = {} as Context;
     this.meta = meta;
   }
 
@@ -134,8 +137,17 @@ export class Alert<
     return this.state;
   }
 
+  getContext() {
+    return this.context;
+  }
+
+  hasContext() {
+    return !isEmpty(this.context);
+  }
+
   scheduleActions(actionGroup: ActionGroupIds, context: Context = {} as Context) {
     this.ensureHasNoScheduledActions();
+    this.setContext(context);
     this.scheduledExecutionOptions = {
       actionGroup,
       context,
@@ -150,12 +162,18 @@ export class Alert<
     context: Context = {} as Context
   ) {
     this.ensureHasNoScheduledActions();
+    this.setContext(context);
     this.scheduledExecutionOptions = {
       actionGroup,
       subgroup,
       context,
       state: this.state,
     };
+    return this;
+  }
+
+  setContext(context: Context) {
+    this.context = context;
     return this;
   }
 

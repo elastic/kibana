@@ -15,7 +15,7 @@ import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
-import { Alert as CreatedAlert, createAlertFactory } from '../alert';
+import { Alert as CreatedAlert, createAlertFactory, AlertsMap } from '../alert';
 import {
   validateRuleTypeParams,
   executionStatusFromState,
@@ -364,6 +364,8 @@ export class TaskRunner<
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >({
               alerts,
+              setsRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+              getRecoveredAlerts: getRecoveredAlertsFn(alerts, originalAlertIds),
             }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
@@ -424,23 +426,38 @@ export class TaskRunner<
       alerts,
       (alert: CreatedAlert<InstanceState, InstanceContext>) => alert.hasScheduledActions()
     );
-    const recoveredAlerts = pickBy(
-      alerts,
-      (alert: CreatedAlert<InstanceState, InstanceContext>, id) =>
-        !alert.hasScheduledActions() && originalAlertIds.has(id)
-    );
+
+    const recoveredAlerts = getRecoveredAlerts(alerts, originalAlertIds);
+
+    if (ruleType.doesSetRecoveryContext) {
+      for (const recoveredAlertId of Object.keys(recoveredAlerts)) {
+        this.logger.info(`task runner recovered alert ${JSON.stringify(alerts[recoveredAlertId])}`);
+        this.logger.info(
+          `task runner recovered alert hasContext ${alerts[recoveredAlertId].hasContext()}`
+        );
+        if (!alerts[recoveredAlertId].hasContext()) {
+          this.logger.info(`No recovery context specified for recovered alert ${recoveredAlertId}`);
+        } else if (alerts[recoveredAlertId].hasScheduledActions()) {
+          this.logger.info(
+            `Alert ${recoveredAlertId} but has scheduled actions. Something is wrong!`
+          );
+        }
+      }
+    }
 
     logActiveAndRecoveredAlerts({
       logger: this.logger,
       activeAlerts: alertsWithScheduledActions,
-      recoveredAlerts,
+      recoveredAlerts: recoveredAlerts as Dictionary<
+        CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>
+      >,
       ruleLabel,
     });
 
     trackAlertDurations({
       originalAlerts,
       currentAlerts: alertsWithScheduledActions,
-      recoveredAlerts,
+      recoveredAlerts: recoveredAlerts as Dictionary<CreatedAlert<InstanceState, InstanceContext>>,
     });
 
     if (this.shouldLogAndScheduleActionsForAlerts()) {
@@ -1157,7 +1174,7 @@ async function scheduleActionsForRecoveredAlerts<
       alert.unscheduleActions();
       const triggeredActionsForRecoveredAlert = await executionHandler({
         actionGroup: recoveryActionGroup.id,
-        context: {},
+        context: alert.getContext(),
         state: {},
         alertId: id,
       });
@@ -1221,6 +1238,33 @@ function logActiveAndRecoveredAlerts<
       )}`
     );
   }
+}
+
+function getRecoveredAlertsFn<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  RecoveryActionGroupId extends string
+>(
+  alerts: AlertsMap<InstanceState, InstanceContext, RecoveryActionGroupId>,
+  originalAlertIds: Set<string>
+) {
+  return () => getRecoveredAlerts(alerts, originalAlertIds);
+}
+
+function getRecoveredAlerts<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  RecoveryActionGroupId extends string
+>(
+  alerts: AlertsMap<InstanceState, InstanceContext, RecoveryActionGroupId>,
+  originalAlertIds: Set<string>
+) {
+  const recoveredAlerts = pickBy(
+    alerts,
+    (alert: CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>, id) =>
+      !alert.hasScheduledActions() && originalAlertIds.has(id)
+  );
+  return recoveredAlerts as AlertsMap<InstanceState, InstanceContext, RecoveryActionGroupId>;
 }
 
 /**

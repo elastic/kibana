@@ -7,7 +7,7 @@
 
 import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicAlert } from './alert';
+import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -76,6 +76,7 @@ export interface AlertServices<
 > extends Services {
   alertFactory: {
     create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+    done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext>;
   };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
