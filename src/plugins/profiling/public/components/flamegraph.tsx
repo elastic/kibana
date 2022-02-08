@@ -36,7 +36,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
 
     const result = [...new Array(maxDepth)].map((_, depth) => {
       return {
-        groupByRollup: (d: any) => d.layers[depth],
+        groupByRollup: (d: any) => d.pathFromRoot[depth],
         nodeLabel: (label: PrimitiveValue) => label,
         showAccessor: (n: PrimitiveValue) => !!n,
         shape: {

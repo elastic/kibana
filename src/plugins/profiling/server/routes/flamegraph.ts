@@ -24,7 +24,7 @@ export class FlameGraph {
           id: trace._source.FrameID[trace._source.FrameID.length - 1],
           value: 1,
           depth: trace._source.FrameID.length,
-          layers: Object.fromEntries(pairs),
+          pathFromRoot: Object.fromEntries(pairs),
         };
         leaves.push(fact);
       }
