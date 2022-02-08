@@ -1700,9 +1700,9 @@ export function getSplitByTermsLayer(
     for (const [param, value] of Object.entries(termsColumnParams)) {
       let paramValue = value;
       if (param === 'orderBy') {
-        const existingMetricColumn = Object.entries(termsLayer.columns)
-          .filter(([colId]) => isSortableByColumn(termsLayer, colId))
-          .map(([id]) => id)[0];
+        const [existingMetricColumn] = Object.keys(termsLayer.columns).filter((colId) =>
+          isSortableByColumn(termsLayer, colId)
+        );
 
         paramValue = (
           termsColumnParams.orderBy.type === 'column' && existingMetricColumn

@@ -220,6 +220,9 @@ describe('triggerTSVBtoLensConfiguration', () => {
       otherBucket: false,
       orderDirection: 'desc',
       orderBy: { type: 'alphabetical' },
+      parentFormat: {
+        id: 'terms',
+      },
     });
   });
 

@@ -26,8 +26,12 @@ const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
 export const triggerTSVBtoLensConfiguration = async (
   model: Panel
 ): Promise<NavigateToLensContext | null> => {
-  // Disables the option for not timeseries charts and for the string mode
-  if (model.type !== PANEL_TYPES.TIMESERIES || !model.use_kibana_indexes) {
+  // Disables the option for not timeseries charts, for the string mode and for series with annotations
+  if (
+    model.type !== PANEL_TYPES.TIMESERIES ||
+    !model.use_kibana_indexes ||
+    (model.annotations && model.annotations.length > 0)
+  ) {
     return null;
   }
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
@@ -89,7 +93,7 @@ export const triggerTSVBtoLensConfiguration = async (
       ...(splitFilters.length > 0 && { splitFilters }),
       // for non supported palettes, we will use the default palette
       palette:
-        palette.name === 'gradient' || palette.name === 'rainbow'
+        !palette || palette.name === 'gradient' || palette.name === 'rainbow'
           ? { name: 'default', type: 'palette' }
           : palette,
       ...(layer.split_mode === 'terms' && {
@@ -98,10 +102,11 @@ export const triggerTSVBtoLensConfiguration = async (
           otherBucket: false,
           orderDirection: layer.terms_direction,
           orderBy: layer.terms_order_by === '_key' ? { type: 'alphabetical' } : { type: 'column' },
+          parentFormat: { id: 'terms' },
         },
       }),
       metrics: [...metricsArray],
-      timeInterval: model.interval || 'auto',
+      timeInterval: model.interval && !model.interval?.includes('=') ? model.interval : 'auto',
       ...(SUPPORTED_FORMATTERS.includes(layer.formatter) && { format: layer.formatter }),
       ...(layer.label && { label: layer.label }),
     };

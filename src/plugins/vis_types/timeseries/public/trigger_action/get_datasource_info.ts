@@ -28,18 +28,15 @@ export const getDataSourceInfo = async (
       timeField = indexPattern.timeFieldName;
     }
   }
-  if (!timeField) {
-    if (indexPatternId) {
-      const indexPattern = await dataViews.get(indexPatternId);
-      timeField = indexPattern.timeFieldName;
-    } else {
-      const defaultIndex = await dataViews.getDefault();
-      timeField = defaultIndex?.timeFieldName;
-    }
-  }
+
   if (!indexPatternId) {
     const defaultIndex = await dataViews.getDefault();
     indexPatternId = defaultIndex?.id ?? '';
+    timeField = defaultIndex?.timeFieldName;
+  }
+  if (!timeField) {
+    const indexPattern = await dataViews.get(indexPatternId);
+    timeField = indexPattern.timeFieldName;
   }
 
   return {

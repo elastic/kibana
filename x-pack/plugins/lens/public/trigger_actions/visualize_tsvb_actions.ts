@@ -20,7 +20,7 @@ export const visualizeTSVBAction = (application: ApplicationStart) =>
       }),
     isCompatible: async () => !!application.capabilities.visualize.show,
     execute: async (context: { [key: string]: VisualizeEditorContext }) => {
-      const table = Object.entries(context.layers).map(([_, value]) => value);
+      const table = Object.values(context.layers);
       const payload = {
         ...context,
         layers: table,

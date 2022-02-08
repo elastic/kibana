@@ -145,7 +145,7 @@ export const getParentPipelineSeriesFormula = (
     }
     formula = `${aggMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
       additionalSubFunction.field ?? ''
-    }${additionalFunctionArgs ? `${additionalFunctionArgs}` : ''})))`;
+    }${additionalFunctionArgs ?? ''})))`;
   } else {
     let additionalFunctionArgs;
     if (pipelineAgg === 'percentile' && percentileValue) {
@@ -213,24 +213,20 @@ export const getFormulaEquivalent = (
   metaValue?: number
 ) => {
   const aggregation = SUPPORTED_METRICS[currentMetric.type]?.name;
-  let formula = null;
   switch (currentMetric.type) {
     case 'avg_bucket':
     case 'max_bucket':
     case 'min_bucket':
     case 'sum_bucket': {
-      formula = getSiblingPipelineSeriesFormula(currentMetric.type, currentMetric, metrics);
-      break;
+      return getSiblingPipelineSeriesFormula(currentMetric.type, currentMetric, metrics);
     }
     case 'count': {
-      formula = `${aggregation}()`;
-      break;
+      return `${aggregation}()`;
     }
     case 'percentile': {
-      formula = `${aggregation}(${currentMetric.field}${
+      return `${aggregation}(${currentMetric.field}${
         metaValue ? `, percentile=${metaValue}` : ''
       })`;
-      break;
     }
     case 'cumulative_sum':
     case 'derivative':
@@ -244,28 +240,22 @@ export const getFormulaEquivalent = (
       if (!pipelineAgg) {
         return null;
       }
-      formula = getParentPipelineSeriesFormula(
+      return getParentPipelineSeriesFormula(
         metrics,
         subFunctionMetric,
         pipelineAgg,
         currentMetric.type,
         metaValue
       );
-      break;
     }
     case 'positive_rate': {
-      formula = `${aggregation}(max(${currentMetric.field}))`;
-      break;
+      return `${aggregation}(max(${currentMetric.field}))`;
     }
     case 'filter_ratio': {
-      formula = getFilterRatioFormula(currentMetric);
-      break;
+      return getFilterRatioFormula(currentMetric);
     }
     default: {
-      formula = `${aggregation}(${currentMetric.field})`;
-      break;
+      return `${aggregation}(${currentMetric.field})`;
     }
   }
-
-  return formula;
 };

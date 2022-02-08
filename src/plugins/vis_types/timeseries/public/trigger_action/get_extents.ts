@@ -16,7 +16,7 @@ const lowerBoundShouldBeZero = (
   return (hasBarAreaChart && lowerBound && lowerBound > 0) || (upperBound && upperBound < 0);
 };
 
-const computebounds = (series: Series, lowerBound: number | null, upperBound: number | null) => {
+const computeBounds = (series: Series, lowerBound: number | null, upperBound: number | null) => {
   if (!lowerBound) {
     lowerBound = Number(series.axis_min);
   } else if (Number(series.axis_min) < lowerBound) {
@@ -30,6 +30,14 @@ const computebounds = (series: Series, lowerBound: number | null, upperBound: nu
   }
 
   return { lowerBound, upperBound };
+};
+
+const getLowerValue = (
+  minValue: number | null,
+  maxValue: number | null,
+  hasBarOrAreaRight: boolean
+) => {
+  return lowerBoundShouldBeZero(minValue, maxValue, hasBarOrAreaRight) ? 0 : minValue;
 };
 
 /*
@@ -54,7 +62,7 @@ export const getYExtents = (model: Panel) => {
       }
       if (s.separate_axis) {
         ignoreGlobalSettingsLeft = true;
-        const { lowerBound, upperBound } = computebounds(s, lowerBoundLeft, upperBoundLeft);
+        const { lowerBound, upperBound } = computeBounds(s, lowerBoundLeft, upperBoundLeft);
         lowerBoundLeft = lowerBound;
         upperBoundLeft = upperBound;
       }
@@ -65,7 +73,7 @@ export const getYExtents = (model: Panel) => {
       }
       if (s.separate_axis) {
         ignoreGlobalSettingsRight = true;
-        const { lowerBound, upperBound } = computebounds(s, lowerBoundRight, upperBoundRight);
+        const { lowerBound, upperBound } = computeBounds(s, lowerBoundRight, upperBoundRight);
         lowerBoundRight = lowerBound;
         upperBoundRight = upperBound;
       }
@@ -73,14 +81,11 @@ export const getYExtents = (model: Panel) => {
   });
 
   const finalLowerBoundLeft = ignoreGlobalSettingsLeft
-    ? lowerBoundShouldBeZero(lowerBoundLeft, upperBoundLeft, hasBarOrAreaLeft)
-      ? 0
-      : lowerBoundLeft
+    ? getLowerValue(lowerBoundLeft, upperBoundLeft, hasBarOrAreaLeft)
     : model.axis_position === 'left'
-    ? lowerBoundShouldBeZero(Number(model.axis_min), Number(model.axis_max), hasBarOrAreaLeft)
-      ? 0
-      : model.axis_min
+    ? getLowerValue(Number(model.axis_min), Number(model.axis_max), hasBarOrAreaLeft)
     : null;
+
   const finalUpperBoundLeft = ignoreGlobalSettingsLeft
     ? upperBoundLeft
     : model.axis_position === 'left'
@@ -88,18 +93,14 @@ export const getYExtents = (model: Panel) => {
     : null;
 
   const finalLowerBoundRight = ignoreGlobalSettingsRight
-    ? lowerBoundShouldBeZero(lowerBoundRight, upperBoundRight, hasBarOrAreaRight)
-      ? 0
-      : lowerBoundRight
+    ? getLowerValue(lowerBoundRight, upperBoundRight, hasBarOrAreaRight)
     : model.axis_position === 'right'
     ? model.axis_min
     : null;
   const finalUpperBoundRight = ignoreGlobalSettingsRight
     ? upperBoundRight
     : model.axis_position === 'right'
-    ? lowerBoundShouldBeZero(Number(model.axis_min), Number(model.axis_max), hasBarOrAreaRight)
-      ? 0
-      : model.axis_min
+    ? getLowerValue(Number(model.axis_min), Number(model.axis_max), hasBarOrAreaRight)
     : null;
   return {
     yLeftExtent: {

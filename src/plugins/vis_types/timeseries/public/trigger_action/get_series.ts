@@ -70,8 +70,8 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
           });
         } else {
           const script = getFormulaEquivalent(currentMetric, layerMetricsArray);
-          const variable = variables.find((v) => v.field === currentMetric.id);
           if (!script) return null;
+          const variable = variables.find((v) => v.field === currentMetric.id);
           finalScript = finalScript?.replace(`params.${variable?.name}`, script);
         }
       }
