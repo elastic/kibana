@@ -60,7 +60,6 @@ export const percolateExecutor = ({
       threatQuery,
       timestampOverride,
       version: ruleVersion,
-      indicatorTimestampOverride,
       threatIndicatorPath = DEFAULT_INDICATOR_SOURCE_PATH,
     } = completeRule.ruleParams;
     const abortableEsClient = services.search.asCurrentUser;
@@ -99,7 +98,6 @@ export const percolateExecutor = ({
             ruleId,
             ruleVersion,
             spaceId,
-            timestampOverride: indicatorTimestampOverride,
             threatFilters,
             threatIndex,
             threatIndicatorPath,
@@ -130,18 +128,17 @@ export const percolateExecutor = ({
         exceptionsList: exceptionItems,
         filters,
         index: inputIndex,
-        listClient,
-        services,
         language,
+        listClient,
         logger,
+        percolatorRuleDataClient,
         perPage,
         query,
-        threatIndicatorPath,
-        tuple,
-        percolatorRuleDataClient,
         ruleId,
         ruleVersion,
+        services,
         spaceId,
+        tuple,
       });
 
       if (!eventSuccess) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createThreatQueries } from './create_percolate_queries';
+import { createThreatQueries } from './create_threat_queries';
 import { mockRuleId, mockRuleVersion } from './mocks';
 
 describe('createThreatQueries', () => {
@@ -101,6 +101,7 @@ describe('createThreatQueries', () => {
     });
     expect(actual).toEqual([
       {
+        id: '7eeaf674454213946fb890252b0a03d176b0cf1731521c8d3ae28178e9c69dc3',
         bool: {
           must: [{ match: { rule_id: 'abcd-defg-hijk-lmno' } }, { match: { rule_version: 1337 } }],
           should: [{ match: { 'host.name': { query: 'computer1' } } }],
@@ -124,6 +125,7 @@ describe('createThreatQueries', () => {
         ],
       },
       {
+        id: 'a43055d69714d678ebe66ca5ff06997a6159423e646eb95cafe05a6ce1679e5b',
         bool: {
           must: [{ match: { rule_id: 'abcd-defg-hijk-lmno' } }, { match: { rule_version: 1337 } }],
           should: [{ match: { 'host.name': { query: 'computer2' } } }],
@@ -261,6 +263,7 @@ describe('createThreatQueries', () => {
 
     expect(actual).toEqual([
       {
+        id: '3be870e713c599408ffaca65f90907dbb8676577e406b840a1b18817918a42f8',
         bool: {
           must: [{ match: { rule_id: 'abcd-defg-hijk-lmno' } }, { match: { rule_version: 1337 } }],
           should: [
@@ -303,6 +306,7 @@ describe('createThreatQueries', () => {
         ],
       },
       {
+        id: '6efd29febfaa83725b057984d22c5504f3843a082f3552c37bc816ef30f9b99c',
         bool: {
           must: [{ match: { rule_id: 'abcd-defg-hijk-lmno' } }, { match: { rule_version: 1337 } }],
           should: [
@@ -441,6 +445,7 @@ describe('createThreatQueries', () => {
 
     expect(actual).toEqual([
       {
+        id: '6f3e936a35817c1a243a44b81214998591adbcf05f40ff143fd84b7fae09d735',
         bool: {
           must: [{ match: { rule_id: 'abcd-defg-hijk-lmno' } }, { match: { rule_version: 1337 } }],
           should: [{ match: { 'host.name': { query: 'computer1' } } }],
@@ -464,6 +469,7 @@ describe('createThreatQueries', () => {
         ],
       },
       {
+        id: '705fcedb37fab9e0e96ffb00cca8ce2999f6dd3f846f73ccf1ede41ebfcc2156',
         bool: {
           must: [{ match: { rule_id: 'abcd-defg-hijk-lmno' } }, { match: { rule_version: 1337 } }],
           should: [{ match: { confidence: { query: 'very confident' } } }],
@@ -487,6 +493,7 @@ describe('createThreatQueries', () => {
         ],
       },
       {
+        id: 'fbc36727733338df29b83805e7ee389fd976f20498183627b91f0e1e8d3b1099',
         bool: {
           must: [{ match: { rule_id: 'abcd-defg-hijk-lmno' } }, { match: { rule_version: 1337 } }],
           should: [{ match: { confidence: { query: 'there is confidence' } } }],
@@ -600,6 +607,7 @@ describe('createThreatQueries', () => {
     });
     expect(actual).toEqual([
       {
+        id: '6f3e936a35817c1a243a44b81214998591adbcf05f40ff143fd84b7fae09d735',
         bool: {
           must: [{ match: { rule_id: 'abcd-defg-hijk-lmno' } }, { match: { rule_version: 1337 } }],
           should: [
@@ -627,6 +635,7 @@ describe('createThreatQueries', () => {
         ],
       },
       {
+        id: 'b8aa5f79e905de0489b32717a8533ff035352706ffbf548b0337046a43ca7377',
         bool: {
           must: [{ match: { rule_id: 'abcd-defg-hijk-lmno' } }, { match: { rule_version: 1337 } }],
           should: [

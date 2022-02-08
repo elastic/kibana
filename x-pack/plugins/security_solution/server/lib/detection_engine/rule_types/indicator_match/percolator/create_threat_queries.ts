@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import get from 'lodash/fp/get';
 import {
   CreatePercolateQueriesOptions,
@@ -86,6 +87,11 @@ export const createThreatQueries = ({
       []
     );
     allQueries.push(...queriesFromOneIndicator);
-    return allQueries;
+    return allQueries.map((query) => ({
+      ...query,
+      id: createHash('sha256')
+        .update(query.id ?? '')
+        .digest('hex'),
+    }));
   }, []);
 };

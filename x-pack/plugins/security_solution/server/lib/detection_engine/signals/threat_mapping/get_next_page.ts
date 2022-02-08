@@ -41,7 +41,7 @@ export const getNextPage = async ({
     body: {
       query: getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems),
       search_after: searchAfter,
-      sort: [{ '@timestamp': 'asc' }],
+      sort: ['_doc', { '@timestamp': 'asc' }],
       ...threatListConfig,
     },
     track_total_hits: false,

@@ -8,11 +8,17 @@ import moment from 'moment';
 import { singleSearchAfter } from '../../../signals/single_search_after';
 import { getFilter } from '../../../signals/get_filter';
 import { filterEventsAgainstList } from '../../../signals/filters/filter_events_against_list';
-import { fetchSourceEvents } from './fetch_source_events';
+import { findPercolateEnrichEvents } from './find_percolate_enrich_events';
 import { getListClientMock } from '../../../../../../../lists/server/services/lists/list_client.mock';
 import { mockLogger } from '../../../signals/__mocks__/es_results';
 import { alertsMock } from '../../../../../../../alerting/server/mocks';
-import { emptySearchResult } from './mocks';
+import {
+  emptySearchResult,
+  mockPercolatorRuleDataClient,
+  mockRuleId,
+  mockRuleVersion,
+  mockSpaceId,
+} from './mocks';
 
 jest.mock('../../../signals/single_search_after');
 jest.mock('../../../signals/get_filter');
@@ -34,7 +40,7 @@ getFilterMock.mockResolvedValue({
 const filterEventsAgainstListMock = filterEventsAgainstList as jest.Mock;
 filterEventsAgainstListMock.mockResolvedValue(emptySearchResult.searchResult);
 
-describe('fetchSourceEvents', () => {
+describe('findPercolateEnrichEvents', () => {
   const buildRuleMessage = jest.fn();
   const listClient = getListClientMock();
   const logger = mockLogger;
@@ -45,7 +51,7 @@ describe('fetchSourceEvents', () => {
   });
 
   it('makes the expected getFilter request', async () => {
-    await fetchSourceEvents({
+    await findPercolateEnrichEvents({
       buildRuleMessage,
       exceptionsList: [],
       filters: [],
@@ -58,6 +64,10 @@ describe('fetchSourceEvents', () => {
       services,
       timestampOverride: 'event.ingested',
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
+      ruleId: mockRuleId,
+      ruleVersion: mockRuleVersion,
+      spaceId: mockSpaceId,
+      percolatorRuleDataClient: mockPercolatorRuleDataClient,
     });
 
     expect(getFilterMock.mock.calls[0][0]).toEqual({
@@ -73,7 +83,7 @@ describe('fetchSourceEvents', () => {
   });
 
   it('makes the expected singleSearchAfter request', async () => {
-    await fetchSourceEvents({
+    await findPercolateEnrichEvents({
       buildRuleMessage,
       exceptionsList: [],
       filters: [],
@@ -86,6 +96,10 @@ describe('fetchSourceEvents', () => {
       services,
       timestampOverride: 'event.ingested',
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
+      ruleId: mockRuleId,
+      ruleVersion: mockRuleVersion,
+      spaceId: mockSpaceId,
+      percolatorRuleDataClient: mockPercolatorRuleDataClient,
     });
 
     expect(singleSearchAfterMock.mock.calls[0][0]).toEqual({
@@ -132,7 +146,7 @@ describe('fetchSourceEvents', () => {
       searchErrors: ['THIS IS AN ERROR'],
     });
 
-    const { errors, success } = await fetchSourceEvents({
+    const { errors, success } = await findPercolateEnrichEvents({
       buildRuleMessage,
       exceptionsList: [],
       filters: [],
@@ -145,6 +159,10 @@ describe('fetchSourceEvents', () => {
       services,
       timestampOverride: 'event.ingested',
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
+      ruleId: mockRuleId,
+      ruleVersion: mockRuleVersion,
+      spaceId: mockSpaceId,
+      percolatorRuleDataClient: mockPercolatorRuleDataClient,
     });
 
     expect(errors[0]).toEqual('THIS IS AN ERROR');
@@ -188,7 +206,25 @@ describe('fetchSourceEvents', () => {
       },
     });
 
-    const { eventHits } = await fetchSourceEvents({
+    mockPercolatorRuleDataClient
+      .getReader({ namespace: mockSpaceId })
+      .search.mockResolvedValueOnce({
+        took: 0,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+          skipped: 0,
+        },
+        hits: {
+          max_score: 0,
+          // @ts-ignore
+          hits: [{ fields: { _percolator_document_slot: [0] }, threat: { enrichments: [] } }],
+        },
+      });
+
+    const { enrichedHits } = await findPercolateEnrichEvents({
       buildRuleMessage,
       exceptionsList: [],
       filters: [],
@@ -201,10 +237,16 @@ describe('fetchSourceEvents', () => {
       services,
       timestampOverride: 'event.ingested',
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
+      ruleId: mockRuleId,
+      ruleVersion: mockRuleVersion,
+      spaceId: mockSpaceId,
+      percolatorRuleDataClient: mockPercolatorRuleDataClient,
     });
 
     expect(singleSearchAfterMock).toHaveBeenCalledTimes(2);
     expect(singleSearchAfterMock.mock.calls[1][0].searchAfterSortIds).toEqual(['13371337']);
-    expect(eventHits).toEqual([{ sort: ['13371337'] }]);
+    expect(enrichedHits).toEqual([
+      { sort: ['13371337'], _source: { threat: { enrichments: [] } } },
+    ]);
   });
 });

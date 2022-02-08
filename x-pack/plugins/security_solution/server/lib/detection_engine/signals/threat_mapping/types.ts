@@ -58,7 +58,6 @@ export interface UpdatePercolatorIndexOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
-  timestampOverride?: string;
   withTimeout: WithTimeout;
 }
 
@@ -191,6 +190,7 @@ export interface BooleanFilter {
 interface ThreatListConfig {
   _source: string[] | boolean;
   fields: string[] | undefined;
+  sort?: Array<{ [key: string]: string }>;
 }
 
 export interface PercolatorQuery {
@@ -226,7 +226,6 @@ export interface CreatePercolatorQueriesOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
-  timestampOverride?: string;
 }
 
 export interface FetchItemsOptions<T> {

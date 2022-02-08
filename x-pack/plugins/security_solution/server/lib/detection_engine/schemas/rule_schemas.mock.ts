@@ -135,7 +135,6 @@ export const getThreatRuleParams = (): ThreatRuleParams => {
     concurrentSearches: undefined,
     itemsPerSearch: undefined,
     percolate: false,
-    indicatorTimestampOverride: undefined,
   };
 };
 

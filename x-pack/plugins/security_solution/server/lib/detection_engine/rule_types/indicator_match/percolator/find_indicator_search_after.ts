@@ -11,7 +11,6 @@ export interface FindIndicatorSearchAfterOptions {
   percolatorRuleDataClient: IRuleDataClient;
   ruleId: string;
   ruleVersion: number;
-  timestampOverride?: string;
   spaceId: string;
 }
 
@@ -19,7 +18,6 @@ export const findIndicatorSearchAfter = async ({
   percolatorRuleDataClient,
   ruleId,
   ruleVersion,
-  timestampOverride,
   spaceId,
 }: FindIndicatorSearchAfterOptions) => {
   const searchAfterResponse = await percolatorRuleDataClient
@@ -39,7 +37,7 @@ export const findIndicatorSearchAfter = async ({
         size: 1,
         sort: [
           {
-            [timestampOverride ?? '@timestamp']: {
+            '@timestamp': {
               order: 'desc',
             },
           },

@@ -55,9 +55,6 @@ describe('createPercolatorQueries', () => {
     delete actualGetNextPageArgs.abortableEsClient;
     delete actualGetNextPageArgs.logDebugMessage;
 
-    // testing transformHits separately below due to `Received: serializes to the same string` error
-    delete actualGetNextPageArgs.transformHits;
-
     const expectedGetNextPageArgs = {
       exceptionItems: [],
       filters: [{ mockFilter: true }],
@@ -67,15 +64,16 @@ describe('createPercolatorQueries', () => {
       query: 'timestamp > now-30m',
       searchAfter: ['5555'],
       threatListConfig: {
-        _source: ['*'],
-        fields: undefined,
+        _source: ['threat.indicator.*', 'threat.feed.name'],
+        fields: ['mockValue'],
+        sort: [{ '@timestamp': 'asc' }],
       },
     };
 
     expect(isEqual(expectedGetNextPageArgs, actualGetNextPageArgs)).toBe(true);
   });
 
-  it('transforms hits as expected', async () => {
+  it('creates threat queries as expected', async () => {
     getNextPageMock.mockResolvedValueOnce(searchResultOneEvent.searchResult);
 
     await createPercolatorQueries({
@@ -97,6 +95,7 @@ describe('createPercolatorQueries', () => {
     });
 
     const createThreatQueriesArgs = createThreatQueriesMock.mock.calls[0][0];
+
     const expectedArgs = {
       ruleId: 'abcd-efgh-jkli-mnop',
       ruleVersion: 2,
@@ -111,8 +110,8 @@ describe('createPercolatorQueries', () => {
       threatMapping: [
         { entries: [{ field: 'mockThreatField', value: 'mockValue', type: 'mapping' }] },
       ],
+      threatIndicatorPath: 'threat.indicator',
     };
-
     expect(isEqual(createThreatQueriesArgs, expectedArgs)).toBe(true);
   });
 });

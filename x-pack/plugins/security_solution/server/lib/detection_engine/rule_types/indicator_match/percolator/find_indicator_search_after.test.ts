@@ -26,7 +26,6 @@ describe('findIndicatorSearchAfter', () => {
       spaceId: mockSpaceId,
       ruleId: mockRuleId,
       ruleVersion: mockRuleVersion,
-      timestampOverride: 'event.ingested',
     });
 
     expect(
@@ -45,7 +44,7 @@ describe('findIndicatorSearchAfter', () => {
               },
             },
             size: 1,
-            sort: [{ 'event.ingested': { order: 'desc' } }],
+            sort: [{ '@timestamp': { order: 'desc' } }],
           },
         }
       )
@@ -64,7 +63,6 @@ describe('findIndicatorSearchAfter', () => {
       spaceId: mockSpaceId,
       ruleId: mockRuleId,
       ruleVersion: mockRuleVersion,
-      timestampOverride: 'event.ingested',
     });
 
     expect(value).not.toBeDefined();

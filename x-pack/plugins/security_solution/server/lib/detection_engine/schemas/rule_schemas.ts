@@ -137,7 +137,6 @@ const threatSpecificRuleParams = t.type({
   concurrentSearches: concurrentSearchesOrUndefined,
   itemsPerSearch: itemsPerSearchOrUndefined,
   percolate: booleanOrUndefined,
-  indicatorTimestampOverride: timestampOverrideOrUndefined,
 });
 export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
 export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;

@@ -32,6 +32,7 @@ export const createPercolatorQueries = async ({
   const threatListConfig = {
     _source: [`${threatIndicatorPath}.*`, 'threat.feed.name'],
     fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
+    sort: [{ '@timestamp': 'asc' }],
   };
 
   let indicatorPage = await getNextPage({

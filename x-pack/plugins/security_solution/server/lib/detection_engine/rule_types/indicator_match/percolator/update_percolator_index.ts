@@ -36,7 +36,6 @@ export const updatePercolatorIndex = async ({
   ruleId,
   ruleVersion,
   spaceId,
-  timestampOverride,
   threatFilters,
   threatIndex,
   threatIndicatorPath,
@@ -53,7 +52,6 @@ export const updatePercolatorIndex = async ({
     ruleId,
     ruleVersion,
     spaceId,
-    timestampOverride,
   });
 
   if (indicatorSearchAfter) {
@@ -82,7 +80,6 @@ export const updatePercolatorIndex = async ({
     threatLanguage,
     threatMapping,
     threatQuery,
-    timestampOverride,
   });
 
   if (threatQueriesToPersist.length) {
