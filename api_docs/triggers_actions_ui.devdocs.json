@@ -2268,7 +2268,7 @@
         "label": "ActionVariables",
         "description": [],
         "signature": [
-          "AsActionVariables<\"params\" | \"state\"> & Partial<AsActionVariables<\"context\">>"
+          "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
