@@ -90,6 +90,12 @@ const fields = [
   { name: 'amount', displayName: 'amount', esTypes: ['long'], isUserEditable: true },
 ].map(mockFieldToIndexPatternField);
 
+const mockedServices = {
+  userEditPermission: false,
+  openModal: () => ({ onClose: new Promise<void>(() => {}), close: async () => {} }),
+  theme: {} as any,
+};
+
 describe('IndexedFieldsTable', () => {
   test('should render normally', async () => {
     const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
@@ -102,8 +108,9 @@ describe('IndexedFieldsTable', () => {
         }}
         indexedFieldTypeFilter=""
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
@@ -122,8 +129,9 @@ describe('IndexedFieldsTable', () => {
         }}
         indexedFieldTypeFilter=""
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ fieldFilter: 'Elast' });
@@ -143,8 +151,9 @@ describe('IndexedFieldsTable', () => {
         }}
         indexedFieldTypeFilter=""
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ indexedFieldTypeFilter: 'date' });
@@ -165,8 +174,9 @@ describe('IndexedFieldsTable', () => {
           }}
           indexedFieldTypeFilter=""
           fieldFilter=""
+          {...mockedServices}
         />
-      ).dive();
+      );
 
       await new Promise((resolve) => process.nextTick(resolve));
       component.update();

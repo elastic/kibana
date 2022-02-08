@@ -260,6 +260,7 @@ export function Tabs({
                 }}
                 onRemoveField={refreshFilters}
                 painlessDocLink={docLinks.links.scriptedFields.painless}
+                userEditPermission={dataViews.getCanSaveSync()}
               />
             </Fragment>
           );
@@ -297,6 +298,7 @@ export function Tabs({
       refreshFields,
       overlays,
       theme,
+      dataViews,
     ]
   );
 
