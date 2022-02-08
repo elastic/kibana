@@ -48,15 +48,11 @@ export const readRulesRoute = (
 
       const { id, rule_id: ruleId } = request.query;
 
-      const rulesClient = context.alerting?.getRulesClient();
-
       try {
-        if (!rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = context.core.savedObjects.client;
+
         const rule = await readRules({
           id,
           isRuleRegistryEnabled,
@@ -69,14 +65,12 @@ export const readRulesRoute = (
             ruleAlertId: rule.id,
             logger,
           });
-          const currentStatus = await ruleStatusClient.getCurrentStatus({
-            ruleId: rule.id,
-            spaceId: context.securitySolution.getSpaceId(),
-          });
+
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
 
           const transformed = transform(
             rule,
-            currentStatus,
+            ruleExecutionSummary,
             isRuleRegistryEnabled,
             legacyRuleActions
           );

@@ -1596,6 +1596,90 @@ Object {
 }
 `;
 
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_user_action_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases-user-actions",
+    },
+  },
+  "message": "Failed attempt to access cases-user-actions [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_user_action_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "Failed attempt to access a user actions as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_user_action_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases-user-actions",
+    },
+  },
+  "message": "User has accessed cases-user-actions [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_user_action_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "User has accessed a user actions as any owners",
+}
+`;
+
 exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActions" with an error and entity 1`] = `
 Object {
   "error": Object {

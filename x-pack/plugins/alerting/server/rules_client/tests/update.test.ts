@@ -20,8 +20,7 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { resolvable } from '../../test_utils';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
@@ -36,7 +35,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {

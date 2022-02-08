@@ -8,11 +8,12 @@
 import React from 'react';
 
 import {
+  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
+  EuiSplitPanel,
   EuiText,
   EuiTitle,
   EuiToken,
@@ -31,6 +32,7 @@ import {
   CONFIGURED_SOURCES_EMPTY_STATE,
   CONFIGURED_SOURCES_TITLE,
   CONFIGURED_SOURCES_EMPTY_BODY,
+  ADD_SOURCE_ORG_SOURCES_TITLE,
 } from './constants';
 
 interface ConfiguredSourcesProps {
@@ -65,50 +67,52 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   );
 
   const visibleSources = (
-    <EuiFlexGrid columns={2} gutterSize="s" responsive={false} className="source-grid-configured">
+    <EuiFlexGrid columns={3} gutterSize="m" className="source-grid-configured">
       {sources.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
         <React.Fragment key={i}>
-          <EuiFlexItem>
-            <EuiPanel paddingSize="s">
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="none"
-                responsive={false}
-                className="eui-fullHeight"
-              >
-                <EuiFlexItem>
-                  <EuiFlexGroup
-                    justifyContent="flexStart"
-                    alignItems="center"
-                    gutterSize="s"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <SourceIcon serviceType={serviceType} name={name} size="l" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <h4>
-                          {name}
-                          {!connected &&
-                            !accountContextOnly &&
-                            isOrganization &&
-                            unConnectedTooltip}
-                          {accountContextOnly && isOrganization && accountOnlyTooltip}
-                        </h4>
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {(!isOrganization || (isOrganization && !accountContextOnly)) && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmptyTo to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-                      {CONFIGURED_SOURCES_CONNECT_BUTTON}
-                    </EuiButtonEmptyTo>
+          <EuiFlexItem
+            grow
+            className="organizational-content-source-item"
+            data-test-subj="ConfiguredSourcesListItem"
+          >
+            <EuiSplitPanel.Outer color="plain" hasShadow={false} hasBorder>
+              <EuiSplitPanel.Inner>
+                <EuiFlexGroup
+                  justifyContent="center"
+                  alignItems="center"
+                  direction="column"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem>
+                    <SourceIcon serviceType={serviceType} name={name} size="xxl" />
                   </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      <h4>
+                        {name}
+                        {!connected && !accountContextOnly && isOrganization && unConnectedTooltip}
+                        {accountContextOnly && isOrganization && accountOnlyTooltip}
+                      </h4>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiSplitPanel.Inner>
+              <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+                {((!isOrganization || (isOrganization && !accountContextOnly)) && (
+                  <EuiButtonEmptyTo
+                    className="eui-fullWidth"
+                    to={`${getSourcesPath(addPath, isOrganization)}/connect`}
+                  >
+                    {CONFIGURED_SOURCES_CONNECT_BUTTON}
+                  </EuiButtonEmptyTo>
+                )) || (
+                  <EuiButtonEmpty className="eui-fullWidth" isDisabled>
+                    {ADD_SOURCE_ORG_SOURCES_TITLE}
+                  </EuiButtonEmpty>
                 )}
-              </EuiFlexGroup>
-            </EuiPanel>
+              </EuiSplitPanel.Inner>
+            </EuiSplitPanel.Outer>
           </EuiFlexItem>
         </React.Fragment>
       ))}

@@ -166,8 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
         });
 
-        // Tests in development
-        it.skip('should delete a single list referenced within an exception list item if ignoreReferences=true', async () => {
+        it('should delete a single list referenced within an exception list item if ignoreReferences=true', async () => {
           // create a list
           const { body: valueListBody } = await supertest
             .post(LIST_URL)
@@ -207,8 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(409);
         });
 
-        // Tests in development
-        it.skip('should delete a single list referenced within an exception list item and referenced exception list items if deleteReferences=true', async () => {
+        it('should delete a single list referenced within an exception list item and referenced exception list items if deleteReferences=true', async () => {
           // create a list
           const { body: valueListBody } = await supertest
             .post(LIST_URL)
@@ -241,6 +239,13 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
+          // sanity check
+          await supertest
+            .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ID}`)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(200);
+
           // delete that list by its auto-generated id and delete referenced list items
           const deleteListBody = await supertest
             .delete(`${LIST_URL}?id=${valueListBody.id}&ignoreReferences=true`)
@@ -253,7 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
             .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ID}`)
             .set('kbn-xsrf', 'true')
             .send()
-            .expect(200);
+            .expect(404);
         });
       });
     });

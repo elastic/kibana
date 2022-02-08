@@ -27,7 +27,9 @@ import {
   UEBA,
   HOST_ISOLATION_EXCEPTIONS,
   EVENT_FILTERS,
+  BLOCKLIST,
   TRUSTED_APPLICATIONS,
+  POLICIES,
   ENDPOINTS,
 } from '../translations';
 import {
@@ -40,9 +42,11 @@ import {
   TIMELINES_PATH,
   CASES_PATH,
   ENDPOINTS_PATH,
+  POLICIES_PATH,
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
   UEBA_PATH,
+  BLOCKLIST_PATH,
   CASES_FEATURE_ID,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   SERVER_APP_ID,
@@ -122,7 +126,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         navLinkStatus: AppNavLinkStatus.hidden,
         keywords: [
           i18n.translate('xpack.securitySolution.search.exceptions', {
-            defaultMessage: 'Exceptions',
+            defaultMessage: 'Exception lists',
           }),
         ],
         searchable: true,
@@ -328,6 +332,12 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         path: ENDPOINTS_PATH,
       },
       {
+        id: SecurityPageName.policies,
+        title: POLICIES,
+        path: POLICIES_PATH,
+        experimentalKey: 'policyListEnabled',
+      },
+      {
         id: SecurityPageName.trustedApps,
         title: TRUSTED_APPLICATIONS,
         path: TRUSTED_APPS_PATH,
@@ -341,6 +351,11 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.hostIsolationExceptions,
         title: HOST_ISOLATION_EXCEPTIONS,
         path: HOST_ISOLATION_EXCEPTIONS_PATH,
+      },
+      {
+        id: SecurityPageName.blocklist,
+        title: BLOCKLIST,
+        path: BLOCKLIST_PATH,
       },
     ],
   },

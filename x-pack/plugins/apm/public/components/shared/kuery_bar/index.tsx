@@ -19,10 +19,10 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useDynamicDataViewFetcher } from '../../../hooks/use_dynamic_data_view';
-import { fromQuery, toQuery } from '../Links/url_helpers';
+import { fromQuery, toQuery } from '../links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
-import { Typeahead } from './Typeahead';
+import { Typeahead } from './typeahead';
 import { useProcessorEvent } from './use_processor_event';
 
 interface State {

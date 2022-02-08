@@ -66,13 +66,9 @@ const buildHandlers = (
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Set<MetricsHandler> => {
-  const handlers: MetricsHandler[] = [
-    new Lifespan(params.caseId, casesClient),
-    new AlertsCount(params.caseId, casesClient, clientArgs),
-    new AlertDetails(params.caseId, casesClient, clientArgs),
-    new Actions(params.caseId, casesClient, clientArgs),
-    new Connectors(),
-  ];
+  const handlers: MetricsHandler[] = [AlertsCount, AlertDetails, Actions, Connectors, Lifespan].map(
+    (ClassName) => new ClassName({ caseId: params.caseId, casesClient, clientArgs })
+  );
 
   const uniqueFeatures = new Set(params.features);
   const handlerFeatures = new Set<string>();
@@ -109,10 +105,9 @@ const checkAndThrowIfInvalidFeatures = (
 };
 
 const checkAuthorization = async (params: CaseMetricsParams, clientArgs: CasesClientArgs) => {
-  const { caseService, unsecuredSavedObjectsClient, authorization } = clientArgs;
+  const { caseService, authorization } = clientArgs;
 
   const caseInfo = await caseService.getCase({
-    unsecuredSavedObjectsClient,
     id: params.caseId,
   });
 

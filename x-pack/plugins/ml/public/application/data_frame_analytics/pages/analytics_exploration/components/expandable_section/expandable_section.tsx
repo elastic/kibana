@@ -75,7 +75,12 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   }, [isExpanded, setPageUrlState, urlStateKey]);
 
   return (
-    <EuiPanel paddingSize="none" data-test-subj={`mlDFExpandableSection-${dataTestId}`}>
+    <EuiPanel
+      paddingSize="none"
+      data-test-subj={`mlDFExpandableSection-${dataTestId}`}
+      hasShadow={false}
+      hasBorder
+    >
       <div className="mlExpandableSection">
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>

@@ -375,6 +375,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     </ModalContainer>
   );
 };
+LensEditorComponent.displayName = 'LensEditor';
 
 export const LensEditor = React.memo(LensEditorComponent);
 

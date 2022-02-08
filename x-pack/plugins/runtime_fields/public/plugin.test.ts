@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from 'src/core/public/mocks';
 
 jest.mock('../../../../src/plugins/kibana_react/public', () => {
   const original = jest.requireActual('../../../../src/plugins/kibana_react/public');
@@ -52,6 +52,7 @@ describe('RuntimeFieldsPlugin', () => {
         openFlyout,
       },
       uiSettings: {},
+      theme: themeServiceMock.createStartContract(),
     };
     coreSetup.getStartServices = async () => [mockCore] as any;
     const setupApi = await plugin.setup(coreSetup, {});

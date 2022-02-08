@@ -32,12 +32,14 @@ import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoin
 import { PolicyEventFiltersDeleteModal } from '../delete_modal';
 import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
 import { getEventFiltersListPath } from '../../../../../common/routing';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 interface PolicyEventFiltersListProps {
   policy: ImmutableObject<PolicyData>;
 }
 export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({ policy }) => {
   const { getAppUrl } = useAppUrl();
+  const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const policiesRequest = useGetEndpointSpecificPolicies();
   const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -94,7 +96,8 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
     return i18n.translate(
       'xpack.securitySolution.endpoint.policy.eventFilters.list.totalItemCount',
       {
-        defaultMessage: 'Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}',
+        defaultMessage:
+          'Showing {totalItemsCount, plural, one {# event filter} other {# event filters}}',
         values: { totalItemsCount: eventFilters?.data.length || 0 },
       }
     );
@@ -142,7 +145,7 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
     };
     return {
       expanded: expandedItemsMap.get(item.id) || false,
-      actions: [fullDetailsAction, deleteAction],
+      actions: canCreateArtifactsByPolicy ? [fullDetailsAction, deleteAction] : [fullDetailsAction],
       policies: artifactCardPolicies,
     };
   };
@@ -164,7 +167,7 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.eventFilters.list.search.placeholder',
           {
-            defaultMessage: 'Search on the fields below: name, comments, value',
+            defaultMessage: 'Search on the fields below: name, description, comments, value',
           }
         )}
         defaultValue={urlParams.filter}

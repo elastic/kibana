@@ -144,10 +144,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await ml.api.cleanMlIndices();
         await ml.api.deleteIndices(`user-${dfaJobId}`);
         await ml.api.deleteCalendar(calendarId);
         await ml.api.deleteFilter(filterId);
+        await ml.api.cleanMlIndices();
+        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+        await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+        await ml.testResources.deleteIndexPatternByTitle(ecIndexPattern);
       });
 
       for (const testUser of testUsers) {
@@ -493,7 +496,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToStackManagementJobsListPage();
 
             await ml.testExecution.logTestStep('should display the AD job in the list');
-            await ml.jobTable.filterWithSearchString(adJobId, 1);
+            await ml.jobTable.filterWithSearchString(adJobId, 1, 'stackMgmtJobList');
 
             await ml.testExecution.logTestStep(
               'should load the analytics jobs list page in stack management'

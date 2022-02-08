@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
+
 import { Logger, KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import { ConfigType } from './config';
-import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
+import { ruleExecutionLogForRoutesFactory } from './lib/detection_engine/rule_execution_log';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -83,7 +85,8 @@ export class RequestContextFactory implements IRequestContextFactory {
           if (!startPlugins.fleet) {
             endpointAuthz = getEndpointAuthzInitialState();
           } else {
-            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz);
+            const userRoles = security?.authc.getCurrentUser(request)?.roles ?? [];
+            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
           }
         }
 
@@ -100,14 +103,13 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
-      getExecutionLogClient: () =>
-        new RuleExecutionLogClient({
-          underlyingClient: config.ruleExecutionLog.underlyingClient,
-          savedObjectsClient: context.core.savedObjects.client,
-          eventLogService: plugins.eventLog,
-          eventLogClient: startPlugins.eventLog.getClient(request),
-          logger,
-        }),
+      getRuleExecutionLog: memoize(() =>
+        ruleExecutionLogForRoutesFactory(
+          context.core.savedObjects.client,
+          startPlugins.eventLog.getClient(request),
+          logger
+        )
+      ),
 
       getExceptionListClient: () => {
         if (!lists) {

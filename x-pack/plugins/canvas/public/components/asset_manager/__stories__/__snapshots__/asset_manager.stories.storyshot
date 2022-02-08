@@ -38,7 +38,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          Manage workpad assets
+          <h1>
+            Manage workpad assets
+          </h1>
         </div>
         <div
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive canvasAssetManager__fileUploadWrapper"
@@ -235,7 +237,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          Manage workpad assets
+          <h1>
+            Manage workpad assets
+          </h1>
         </div>
         <div
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive canvasAssetManager__fileUploadWrapper"
