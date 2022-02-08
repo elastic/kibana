@@ -24,7 +24,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
-import { splitPkgKey } from '../../../../../../common';
+import { PLUGIN_ID, splitPkgKey } from '../../../../../../common';
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -317,7 +317,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             mappingOptions: routeState.onSaveQueryParams,
             paramsToApply,
           });
-          navigateToApp(appId, { ...options, path: pathWithQueryString });
+
+          // In the case of a new policy creation, we always navigate to the Fleet agent policy details page
+          // for the newly-created policy
+          if (wasNewAgentPolicyCreated) {
+            navigateToApp(PLUGIN_ID, { ...options, path: pathWithQueryString });
+          } else {
+            navigateToApp(appId, { ...options, path: pathWithQueryString });
+          }
         } else {
           navigateToApp(...routeState.onSaveNavigateTo);
         }
