@@ -16,7 +16,7 @@ import {
 } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 jest.mock('../../../common/lib/kibana');
 
 const mockedActionParamsFields = lazy(async () => ({

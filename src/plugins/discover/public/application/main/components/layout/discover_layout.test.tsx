@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
@@ -33,31 +33,27 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';
+import { LocalStorageMock } from 'src/plugins/discover/public/__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
-import { FieldFormatsStart } from '../../../../../../field_formats/public';
-import { IUiSettingsClient } from 'kibana/public';
+import { DiscoverServices } from '../../../../build_services';
 
 setHeaderActionMenuMounter(jest.fn());
 
 function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
   const searchSourceMock = createSearchSourceMock({});
-  const services = discoverServiceMock;
+  const services = {
+    ...discoverServiceMock,
+    fieldFormats: {
+      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    },
+    storage: new LocalStorageMock({
+      [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
+    }) as unknown as Storage,
+  } as unknown as DiscoverServices;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
-  services.storage.get = (key: string) => {
-    if (key === SIDEBAR_CLOSED_KEY) {
-      return prevSidebarClosed;
-    }
-  };
-  services.fieldFormats = {
-    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-  } as unknown as FieldFormatsStart;
-  services.uiSettings = {
-    ...services.uiSettings,
-    get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
-  } as unknown as IUiSettingsClient;
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
@@ -153,7 +149,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
 

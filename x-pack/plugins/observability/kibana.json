@@ -27,7 +27,8 @@
     "inspector",
     "ruleRegistry",
     "timelines",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "inspector"
   ],
   "ui": true,
   "server": true,
@@ -35,7 +36,8 @@
     "data",
     "dataViews",
     "kibanaReact",
-    "kibanaUtils"
+    "kibanaUtils",
+    "lens"
   ],
   "extraPublicDirs": [
     "common"

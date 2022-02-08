@@ -13,7 +13,7 @@ import {
   RULES_EMPTY_PROMPT,
   RULE_SWITCH,
   SHOWING_RULES_TEXT,
-  RULES_MONIROTING_TABLE,
+  RULES_MONITORING_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 
@@ -175,7 +175,7 @@ describe('Actions with prebuilt rules', () => {
 
   context('Rule monitoring table', () => {
     it('Allows to activate/deactivate all rules at once', () => {
-      cy.get(RULES_MONIROTING_TABLE).click();
+      cy.get(RULES_MONITORING_TABLE).click();
 
       cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
       activateSelectedRules();

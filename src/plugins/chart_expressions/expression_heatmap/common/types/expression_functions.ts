@@ -52,8 +52,12 @@ export interface HeatmapGridConfig {
   isCellLabelVisible: boolean;
   // Y-axis
   isYAxisLabelVisible: boolean;
+  isYAxisTitleVisible: boolean;
+  yTitle?: string;
   // X-axis
   isXAxisLabelVisible: boolean;
+  isXAxisTitleVisible: boolean;
+  xTitle?: string;
 }
 
 export type HeatmapGridConfigResult = HeatmapGridConfig & {
@@ -73,6 +77,7 @@ export interface HeatmapArguments {
   splitColumnAccessor?: string | ExpressionValueVisDimension;
   legend: HeatmapLegendConfigResult;
   gridConfig: HeatmapGridConfigResult;
+  ariaLabel?: string;
 }
 
 export type HeatmapInput = Datatable;
