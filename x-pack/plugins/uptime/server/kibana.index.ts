@@ -91,7 +91,7 @@ export const initServerWithKibana = (
         catalogue: ['uptime'],
         api: ['uptime-read', 'lists-read'],
         savedObject: {
-          all: ['alert'],
+          all: [],
           read: [umDynamicSettings.name, syntheticsMonitorType, syntheticsApiKeyObjectType],
         },
         alerting: {
