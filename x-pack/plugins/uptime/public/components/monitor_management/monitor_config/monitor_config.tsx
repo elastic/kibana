@@ -7,7 +7,8 @@
 
 import React, { useState } from 'react';
 
-import { EuiResizableContainer } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiFlyout, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/contexts';
 
@@ -37,39 +38,38 @@ export const MonitorConfig = () => {
   });
 
   const [testRun, setTestRun] = useState<TestRun>();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
 
   const onTestNow = () => {
     if (config) {
       setTestRun({ id: uuidv4(), monitor: config as MonitorFieldsType });
+      setIsFlyoutOpen(true);
     }
   };
 
+  const flyout = isFlyoutOpen && config && (
+    <EuiFlyout
+      type="push"
+      size="m"
+      paddingSize="l"
+      maxWidth="44%"
+      aria-labelledby={TEST_RESULT}
+      onClose={() => setIsFlyoutOpen(false)}
+    >
+      <EuiFlyoutHeader>
+        <EuiSpacer size="xl" />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <TestNowMode testRun={testRun} />
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+
   return (
     <>
-      <EuiResizableContainer>
-        {(EuiResizablePanel, EuiResizableButton) => (
-          <>
-            <EuiResizablePanel
-              initialSize={55}
-              minSize="30%"
-              mode={[
-                'collapsible',
-                {
-                  position: 'top',
-                },
-              ]}
-            >
-              <MonitorFields />
-            </EuiResizablePanel>
+      <MonitorFields />
 
-            <EuiResizableButton />
-
-            <EuiResizablePanel initialSize={45} minSize="200px" mode="main">
-              {config && <TestNowMode testRun={testRun} />}
-            </EuiResizablePanel>
-          </>
-        )}
-      </EuiResizableContainer>
+      {flyout}
 
       <ActionBarPortal
         monitor={policyConfig[monitorType]}
@@ -80,3 +80,7 @@ export const MonitorConfig = () => {
     </>
   );
 };
+
+const TEST_RESULT = i18n.translate('xpack.uptime.monitorManagement.testResult', {
+  defaultMessage: 'Test result',
+});
