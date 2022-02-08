@@ -7,7 +7,14 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Router } from 'react-router-dom';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiErrorBoundary } from '@elastic/eui';
 
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../src/plugins/kibana_react/public';
 import { RenderAppProps } from './types';
 
 export const renderApp = (deps: RenderAppProps) => {
@@ -21,8 +28,29 @@ export const renderApp = (deps: RenderAppProps) => {
   };
 };
 
-export const App: React.FC<{ deps: RenderAppProps }> = (deps) => {
-  return <>{'Test'}</>;
+export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
+  const { mountParams, coreStart, pluginsStart, storage, kibanaVersion } = deps;
+  const { history, theme$ } = mountParams;
+  return (
+    <EuiErrorBoundary>
+      <I18nProvider>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaContextProvider
+            services={{
+              kibanaVersion,
+              ...coreStart,
+              ...pluginsStart,
+              storage,
+            }}
+          >
+            <Router history={history}>
+              <>{'Test'}</>
+            </Router>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </I18nProvider>
+    </EuiErrorBoundary>
+  );
 };
 
 App.displayName = 'App';
