@@ -22,6 +22,7 @@ export interface FieldValueCellProps {
   isDraggable?: boolean;
   linkValue?: string | null | undefined;
   values: string[] | null | undefined;
+  timelineId: string;
 }
 
 export const FieldValueCell = React.memo(
@@ -34,6 +35,7 @@ export const FieldValueCell = React.memo(
     isDraggable = false,
     linkValue,
     values,
+    timelineId,
   }: FieldValueCellProps) => {
     return (
       <EuiFlexGroup
@@ -73,6 +75,7 @@ export const FieldValueCell = React.memo(
                     value={value}
                     linkValue={(getLinkValue && getLinkValue(data.field)) ?? linkValue}
                     truncate={false}
+                    timelineId={timelineId}
                   />
                 )}
               </EuiFlexItem>

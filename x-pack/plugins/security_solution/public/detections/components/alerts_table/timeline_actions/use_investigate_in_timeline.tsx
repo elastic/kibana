@@ -38,16 +38,6 @@ export const useInvestigateInTimeline = ({
   } = useKibana().services;
   const dispatch = useDispatch();
 
-  // const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
-  // const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  // const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
-  //   getManageTimeline(state, timelineId ?? '')
-  // );
-  // const filterManager = useMemo(
-  //   () => activeFilterManager ?? filterManagerBackup,
-  //   [activeFilterManager, filterManagerBackup]
-  // );
-
   const updateTimelineIsLoading = useCallback(
     (payload) => dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
@@ -63,7 +53,6 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
-          filterManager,
           indexNames: timeline.indexNames ?? [],
           show: true,
         },

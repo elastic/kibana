@@ -22,7 +22,8 @@ export const Duration = React.memo<{
   fieldName: string;
   isDraggable: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, isDraggable, value }) =>
+  timelineId?: string;
+}>(({ contextId, eventId, fieldName, isDraggable, value, timelineId }) =>
   isDraggable ? (
     <DefaultDraggable
       id={`duration-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
@@ -32,6 +33,7 @@ export const Duration = React.memo<{
       field={fieldName}
       tooltipContent={null}
       value={value}
+      timelineId={timelineId}
     >
       <FormattedDuration maybeDurationNanoseconds={value} tooltipTitle={fieldName} />
     </DefaultDraggable>

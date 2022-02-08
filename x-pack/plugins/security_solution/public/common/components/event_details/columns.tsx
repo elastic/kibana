@@ -141,6 +141,7 @@ export const getColumns = ({
           getLinkValue={getLinkValue}
           isDraggable={isDraggable}
           values={values}
+          timelineId={timelineId}
         />
       );
     },

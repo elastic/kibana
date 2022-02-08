@@ -12,6 +12,7 @@ import { BrowserField } from '../../../containers/source';
 import { FieldValueCell } from './field_value_cell';
 import { TestProviders } from '../../../mock';
 import { EventFieldsData } from '../types';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 const contextId = 'test';
 
@@ -47,6 +48,7 @@ describe('FieldValueCell', () => {
             data={hostIpData}
             eventId={eventId}
             values={hostIpValues}
+            timelineId={TimelineId.test}
           />
         </TestProviders>
       );
@@ -69,6 +71,7 @@ describe('FieldValueCell', () => {
             eventId={eventId}
             fieldFromBrowserField={undefined} // <-- no metadata
             values={hostIpValues}
+            timelineId={TimelineId.test}
           />
         </TestProviders>
       );
@@ -133,6 +136,7 @@ describe('FieldValueCell', () => {
             eventId={eventId}
             fieldFromBrowserField={messageFieldFromBrowserField}
             values={messageValues}
+            timelineId={TimelineId.test}
           />
         </TestProviders>
       );
@@ -173,6 +177,7 @@ describe('FieldValueCell', () => {
             eventId={eventId}
             fieldFromBrowserField={hostIpFieldFromBrowserField} // <-- metadata
             values={hostIpValues}
+            timelineId={TimelineId.test}
           />
         </TestProviders>
       );

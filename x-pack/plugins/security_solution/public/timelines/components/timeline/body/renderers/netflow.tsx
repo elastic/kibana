@@ -110,6 +110,7 @@ export const NetflowRenderer = React.memo<NetflowRendererProps>(
       )}
       transport={asArrayIfExists(get(NETWORK_TRANSPORT_FIELD_NAME, data))}
       userName={undefined}
+      timelineId={timelineId}
     />
   )
 );

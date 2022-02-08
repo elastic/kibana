@@ -20,12 +20,14 @@ export const AgentStatuses = React.memo(
     eventId,
     isDraggable,
     value,
+    timelineId,
   }: {
     fieldName: string;
     contextId: string;
     eventId: string;
     isDraggable: boolean;
     value: string;
+    timelineId?: string;
   }) => {
     const { isIsolated, agentStatus, pendingIsolation, pendingUnisolation } =
       useHostIsolationStatus({ agentId: value });
@@ -41,6 +43,7 @@ export const AgentStatuses = React.memo(
                 isDraggable={isDraggable}
                 tooltipContent={fieldName}
                 value={`${agentStatus}`}
+                timelineId={timelineId}
               >
                 <AgentStatus hostStatus={agentStatus} />
               </DefaultDraggable>

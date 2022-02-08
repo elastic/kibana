@@ -58,6 +58,7 @@ export const plainColumnRenderer: ColumnRenderer = {
             linkValue={head(linkValues)}
             truncate={truncate}
             value={parseValue(value)}
+            timelineId={timelineId}
           />
         ))
       : getEmptyTagValue(),

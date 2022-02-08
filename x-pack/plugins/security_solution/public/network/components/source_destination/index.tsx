@@ -52,6 +52,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
     sourcePackets,
     sourcePort,
     transport,
+    timelineId,
   }) => (
     <EuiFlexGroup alignItems="center" direction="column" justifyContent="center" gutterSize="none">
       <EuiFlexItem grow={false}>
@@ -91,6 +92,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
           sourceIp={sourceIp}
           sourcePackets={sourcePackets}
           sourcePort={sourcePort}
+          timelineId={timelineId}
         />
       </EuiFlexItemMarginTop>
     </EuiFlexGroup>

@@ -20,7 +20,8 @@ export const Port = React.memo<{
   isDraggable?: boolean;
   title?: string;
   value: string | undefined | null;
-}>(({ Component, contextId, eventId, fieldName, isDraggable, title, value }) =>
+  timelineId?: string;
+}>(({ Component, contextId, eventId, fieldName, isDraggable, title, value, timelineId }) =>
   isDraggable ? (
     <DefaultDraggable
       data-test-subj="port"
@@ -29,6 +30,7 @@ export const Port = React.memo<{
       isDraggable={isDraggable}
       tooltipContent={fieldName}
       value={value}
+      timelineId={timelineId}
     >
       <PortOrServiceNameLink
         portOrServiceName={value || getEmptyValue()}

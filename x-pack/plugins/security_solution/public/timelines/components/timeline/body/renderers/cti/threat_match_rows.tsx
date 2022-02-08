@@ -37,6 +37,7 @@ export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, t
                 data={indicator}
                 eventId={eventId}
                 isDraggable={isDraggable}
+                timelineId={timelineId}
               />
               {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
             </Fragment>

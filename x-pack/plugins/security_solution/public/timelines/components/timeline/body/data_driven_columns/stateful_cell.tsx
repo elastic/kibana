@@ -52,7 +52,7 @@ const StatefulCellComponent = ({
         linkValues,
         rowIndex: ariaRowindex - 1,
         setCellProps,
-        timelineId: tabType != null ? `${timelineId}-${tabType}` : timelineId,
+        timelineId,
       })}
     </div>
   );

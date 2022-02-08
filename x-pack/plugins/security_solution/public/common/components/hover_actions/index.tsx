@@ -6,16 +6,17 @@
  */
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo, useContext } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import type { FilterManager } from '../../../../../../../src/plugins/data/public';
+import { useKibana } from '../../lib/kibana';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
 import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
+import { TimelineFilterContext } from '../../../timelines/components/timeline';
 
 export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
   i18n.translate(
@@ -92,7 +93,6 @@ interface Props {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
-  filterManager?: FilterManager;
   hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
@@ -131,7 +131,6 @@ export const HoverActions: React.FC<Props> = React.memo(
     enableOverflowButton = false,
     applyWidthAndPadding = true,
     field,
-    filterManager,
     isObjectArray,
     hideTopN = false,
     onFilterAdded,
@@ -164,6 +163,12 @@ export const HoverActions: React.FC<Props> = React.memo(
     }, [closePopOver, closeTopN]);
 
     const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
+    const { query } = useKibana().services.data;
+
+    const { filterManager: timelineFilterManager } = useContext(TimelineFilterContext);
+    const filterManager = useMemo(() => {
+      return timelineId === TimelineId.active ? timelineFilterManager : query.filterManager;
+    }, [timelineId, query.filterManager, timelineFilterManager]);
 
     useEffect(() => {
       if (ownFocus) {

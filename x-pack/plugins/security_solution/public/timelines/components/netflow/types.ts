@@ -41,4 +41,5 @@ export interface NetflowProps {
   tlsServerCertificateFingerprintSha1?: string[] | null;
   transport?: string[] | null;
   userName?: string[] | null;
+  timelineId?: string;
 }

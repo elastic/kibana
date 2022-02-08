@@ -329,6 +329,7 @@ export const cellActions: TGridCellAction[] = [
             title={title}
             linkValue={linkValue}
             onClick={closePopover}
+            timelineId={timelineId}
           />
         ) : (
           // data grid expects each cell action always return an element, it crashes if returns null

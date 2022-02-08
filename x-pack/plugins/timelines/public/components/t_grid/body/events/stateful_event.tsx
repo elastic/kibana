@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
@@ -16,7 +16,6 @@ import { EventColumnView } from './event_column_view';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { getMappedNonEcsValue } from '../data_driven_columns';
-import { StatefulEventContext } from './stateful_event_context';
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import {
   SetEventsDeleted,
@@ -80,8 +79,6 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
-  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-  const [activeStatefulEventContext] = useState({ timelineID: timelineId, tabType });
   const getTGrid = useMemo(() => tGridSelectors.getTGridByIdSelector(), []);
   const expandedDetail = useDeepEqualSelector(
     (state) => getTGrid(state, timelineId).expandedDetail ?? {}
@@ -182,45 +179,43 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 
   return (
-    <StatefulEventContext.Provider value={activeStatefulEventContext}>
-      <EventsTrGroup
-        $ariaRowindex={ariaRowindex}
-        className={STATEFUL_EVENT_CSS_CLASS_NAME}
-        data-test-subj="event"
-        eventType={getEventType(event.ecs)}
-        isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
-        isEvenEqlSequence={isEvenEqlSequence(event.ecs)}
-        isExpanded={isDetailPanelExpanded}
-        ref={trGroupRef}
-        showLeftBorder={!isEventViewer}
-      >
-        <EventColumnView
-          id={event._id}
-          actionsColumnWidth={actionsColumnWidth}
-          ariaRowindex={ariaRowindex}
-          columnHeaders={columnHeaders}
-          data={event.data}
-          ecsData={event.ecs}
-          hasRowRenderers={hasRowRenderers}
-          isEventViewer={isEventViewer}
-          loadingEventIds={loadingEventIds}
-          onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
-          onRowSelected={onRowSelected}
-          renderCellValue={renderCellValue}
-          onRuleChange={onRuleChange}
-          selectedEventIds={selectedEventIds}
-          showCheckboxes={showCheckboxes}
-          tabType={tabType}
-          timelineId={timelineId}
-          leadingControlColumns={leadingControlColumns}
-          trailingControlColumns={trailingControlColumns}
-          setEventsLoading={setEventsLoading}
-          setEventsDeleted={setEventsDeleted}
-        />
+    <EventsTrGroup
+      $ariaRowindex={ariaRowindex}
+      className={STATEFUL_EVENT_CSS_CLASS_NAME}
+      data-test-subj="event"
+      eventType={getEventType(event.ecs)}
+      isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
+      isEvenEqlSequence={isEvenEqlSequence(event.ecs)}
+      isExpanded={isDetailPanelExpanded}
+      ref={trGroupRef}
+      showLeftBorder={!isEventViewer}
+    >
+      <EventColumnView
+        id={event._id}
+        actionsColumnWidth={actionsColumnWidth}
+        ariaRowindex={ariaRowindex}
+        columnHeaders={columnHeaders}
+        data={event.data}
+        ecsData={event.ecs}
+        hasRowRenderers={hasRowRenderers}
+        isEventViewer={isEventViewer}
+        loadingEventIds={loadingEventIds}
+        onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
+        onRowSelected={onRowSelected}
+        renderCellValue={renderCellValue}
+        onRuleChange={onRuleChange}
+        selectedEventIds={selectedEventIds}
+        showCheckboxes={showCheckboxes}
+        tabType={tabType}
+        timelineId={timelineId}
+        leadingControlColumns={leadingControlColumns}
+        trailingControlColumns={trailingControlColumns}
+        setEventsLoading={setEventsLoading}
+        setEventsDeleted={setEventsDeleted}
+      />
 
-        <div>{RowRendererContent}</div>
-      </EventsTrGroup>
-    </StatefulEventContext.Provider>
+      <div>{RowRendererContent}</div>
+    </EventsTrGroup>
   );
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
@@ -20,7 +20,6 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
@@ -32,6 +31,8 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
+  timelineId?: string;
+  tabType?: TimelineTabs;
 }
 
 const HostNameComponent: React.FC<Props> = ({
@@ -44,12 +45,12 @@ const HostNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
+  timelineId,
+  tabType,
 }) => {
   const dispatch = useDispatch();
-  const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
-  const isInTimelineContext =
-    hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+  const isInTimeline = timelineId === TimelineId.active;
   const openHostDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
@@ -57,8 +58,7 @@ const HostNameComponent: React.FC<Props> = ({
       if (onClick) {
         onClick();
       }
-      if (eventContext && isInTimelineContext) {
-        const { timelineID, tabType } = eventContext;
+      if (isInTimeline) {
         const updatedExpandedDetail: TimelineExpandedDetailType = {
           panelView: 'hostDetail',
           params: {
@@ -69,17 +69,17 @@ const HostNameComponent: React.FC<Props> = ({
         dispatch(
           timelineActions.toggleDetailPanel({
             ...updatedExpandedDetail,
-            timelineId: timelineID,
+            timelineId,
             tabType,
           })
         );
 
-        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
+        if (isInTimeline && tabType === TimelineTabs.query) {
           activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
         }
       }
     },
-    [onClick, eventContext, isInTimelineContext, hostName, dispatch]
+    [onClick, hostName, dispatch, timelineId, tabType, isInTimeline]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -90,13 +90,13 @@ const HostNameComponent: React.FC<Props> = ({
         Component={Component}
         hostName={hostName}
         isButton={isButton}
-        onClick={isInTimelineContext ? openHostDetailsSidePanel : undefined}
+        onClick={isInTimeline ? openHostDetailsSidePanel : undefined}
         title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
       </HostDetailsLink>
     ),
-    [Component, hostName, isButton, isInTimelineContext, openHostDetailsSidePanel, title]
+    [Component, hostName, isButton, isInTimeline, openHostDetailsSidePanel, title]
   );
 
   return isString(value) && hostName.length > 0 ? (

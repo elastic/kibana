@@ -91,5 +91,3 @@ export { getPageRowIndex } from '../common/utils/pagination';
 export function plugin() {
   return new TimelinesPlugin();
 }
-
-export { StatefulEventContext } from './components/stateful_event_context';

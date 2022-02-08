@@ -59,9 +59,10 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
           isButton={true}
           onClick={togglePopover}
           onClickAriaLabel={CLICK_TO_CHANGE_ALERT_STATUS}
+          timelineId={timelineId}
         />
       ),
-      [contextId, eventId, enrichedFieldInfo, togglePopover]
+      [contextId, eventId, enrichedFieldInfo, togglePopover, timelineId]
     );
 
     return (

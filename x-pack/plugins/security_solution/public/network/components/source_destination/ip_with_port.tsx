@@ -62,7 +62,8 @@ export const IpWithPort = React.memo<{
   isDraggable?: boolean;
   port?: string | null;
   portFieldName: string;
-}>(({ contextId, eventId, ip, ipFieldName, isDraggable, port, portFieldName }) => (
+  timelineId?: string;
+}>(({ contextId, eventId, ip, ipFieldName, isDraggable, port, portFieldName, timelineId }) => (
   <EuiFlexGroup gutterSize="none">
     <EuiFlexItem grow={false}>
       <Ip
@@ -72,6 +73,7 @@ export const IpWithPort = React.memo<{
         fieldName={ipFieldName}
         isDraggable={isDraggable}
         value={ip}
+        timelineId={timelineId}
       />
     </EuiFlexItem>
     <EuiFlexItem>

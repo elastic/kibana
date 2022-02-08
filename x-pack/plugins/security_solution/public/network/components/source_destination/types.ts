@@ -53,6 +53,7 @@ export interface SourceDestinationProps {
   sourcePackets?: string[] | null;
   sourcePort?: string[] | null;
   transport?: string[] | null;
+  timelineId?: string;
 }
 
 export interface SourceDestinationIpProps {
@@ -74,6 +75,7 @@ export interface SourceDestinationIpProps {
   sourceIp?: string[] | null;
   sourcePort?: Array<number | string | null> | null;
   type: SourceDestinationType;
+  timelineId?: string;
 }
 
 export interface SourceDestinationWithArrowsProps {
@@ -98,4 +100,5 @@ export interface SourceDestinationWithArrowsProps {
   sourceIp?: string[] | null;
   sourcePackets?: string[] | null;
   sourcePort?: string[] | null;
+  timelineId?: string;
 }

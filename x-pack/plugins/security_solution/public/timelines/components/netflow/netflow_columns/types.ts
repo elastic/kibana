@@ -39,4 +39,5 @@ export interface NetflowColumnsProps {
   sourcePort?: string[] | null;
   transport?: string[] | null;
   userName?: string[] | null;
+  timelineId?: string;
 }

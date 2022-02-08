@@ -47,6 +47,7 @@ interface RenderRuleNameProps {
   truncate?: boolean;
   title?: string;
   value: string | number | null | undefined;
+  timelineId?: string;
 }
 
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
@@ -59,6 +60,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   truncate,
   title,
   value,
+  timelineId,
 }) => {
   const ruleName = `${value}`;
   const ruleId = linkValue;
@@ -115,6 +117,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         isDraggable={isDraggable}
         tooltipContent={value}
         value={value}
+        timelineId={timelineId}
       >
         {link}
       </DefaultDraggable>
@@ -129,6 +132,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         isDraggable={isDraggable}
         tooltipContent={value}
         value={`${value}`}
+        timelineId={timelineId}
       >
         {value}
       </DefaultDraggable>
@@ -155,6 +159,7 @@ export const renderEventModule = ({
   linkValue,
   truncate,
   value,
+  timelineId,
 }: {
   contextId: string;
   eventId: string;
@@ -163,6 +168,7 @@ export const renderEventModule = ({
   linkValue: string | null | undefined;
   truncate?: boolean;
   value: string | number | null | undefined;
+  timelineId?: string;
 }) => {
   const moduleName = `${value}`;
   const endpointRefUrl = linkValue;
@@ -185,6 +191,7 @@ export const renderEventModule = ({
             isDraggable={isDraggable}
             tooltipContent={value}
             value={value}
+            timelineId={timelineId}
           >
             {content}
           </DefaultDraggable>
@@ -253,6 +260,7 @@ export const renderUrl = ({
   truncate,
   title,
   value,
+  timelineId,
 }: {
   contextId: string;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
@@ -263,6 +271,7 @@ export const renderUrl = ({
   truncate?: boolean;
   title?: string;
   value: string | number | null | undefined;
+  timelineId?: string;
 }) => {
   const urlName = `${value}`;
   const isUrlValid = !isUrlInvalid(urlName);
@@ -288,6 +297,7 @@ export const renderUrl = ({
         isDraggable={isDraggable}
         tooltipContent={value}
         value={value}
+        timelineId={timelineId}
       >
         {content}
       </DefaultDraggable>

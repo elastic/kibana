@@ -166,6 +166,7 @@ export const Overview = React.memo<Props>(
             fieldFormat={ruleNameData.data.format}
             isDraggable={false}
             truncate={false}
+            timelineId={timelineId}
           />
         </OverviewCardWithActions>
       </EuiFlexItem>

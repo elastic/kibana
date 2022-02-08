@@ -70,6 +70,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
           )
         }
         truncate={truncate}
+        timelineId={timelineId}
       />
     ) : (
       <span>{getEmptyValue()}</span>

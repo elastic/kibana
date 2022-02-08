@@ -6,7 +6,7 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import React, { useCallback, useMemo, useContext } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
@@ -33,7 +33,6 @@ import {
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { timelineActions } from '../../store/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { StatefulEventContext } from '../../../../../timelines/public';
 
 const getUniqueId = ({
   contextId,
@@ -86,7 +85,8 @@ const NonDecoratedIpComponent: React.FC<{
   isDraggable: boolean;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({ contextId, eventId, fieldName, isDraggable, truncate, value }) => {
+  timelineId?: string;
+}> = ({ contextId, eventId, fieldName, isDraggable, truncate, value, timelineId }) => {
   const key = useMemo(
     () =>
       `non-decorated-ip-draggable-wrapper-${getUniqueId({
@@ -134,6 +134,7 @@ const NonDecoratedIpComponent: React.FC<{
       key={key}
       render={render}
       truncate={truncate}
+      timelineId={timelineId}
     />
   );
 };
@@ -142,6 +143,8 @@ const NonDecoratedIp = React.memo(NonDecoratedIpComponent);
 
 interface AddressLinksItemProps extends Omit<AddressLinksProps, 'addresses'> {
   address: string;
+  timelineId?: string;
+  tabType?: TimelineTabs;
 }
 
 const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
@@ -155,6 +158,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   onClick,
   truncate,
   title,
+  timelineId,
+  tabType,
 }) => {
   const key = `address-links-draggable-wrapper-${getUniqueId({
     contextId,
@@ -169,9 +174,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   );
 
   const dispatch = useDispatch();
-  const eventContext = useContext(StatefulEventContext);
-  const isInTimelineContext =
-    address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
+  const isInTimeline = timelineId === TimelineId.active;
 
   const openNetworkDetailsSidePanel = useCallback(
     (e) => {
@@ -180,8 +183,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         onClick();
       }
 
-      if (eventContext && isInTimelineContext) {
-        const { tabType, timelineID } = eventContext;
+      if (isInTimeline) {
         const updatedExpandedDetail: TimelineExpandedDetailType = {
           panelView: 'networkDetail',
           params: {
@@ -196,16 +198,16 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           timelineActions.toggleDetailPanel({
             ...updatedExpandedDetail,
             tabType,
-            timelineId: timelineID,
+            timelineId,
           })
         );
 
-        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
+        if (isInTimeline && tabType === TimelineTabs.query) {
           activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
         }
       }
     },
-    [onClick, eventContext, isInTimelineContext, address, fieldName, dispatch]
+    [onClick, isInTimeline, address, fieldName, dispatch, timelineId, tabType]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -217,7 +219,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           Component={Component}
           ip={address}
           isButton={isButton}
-          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
+          onClick={isInTimeline ? openNetworkDetailsSidePanel : undefined}
           title={title}
         />
       ) : (
@@ -226,20 +228,12 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
             Component={Component}
             ip={address}
             isButton={isButton}
-            onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
+            onClick={isInTimeline ? openNetworkDetailsSidePanel : undefined}
             title={title}
           />
         </Content>
       ),
-    [
-      Component,
-      address,
-      fieldName,
-      isButton,
-      isInTimelineContext,
-      openNetworkDetailsSidePanel,
-      title,
-    ]
+    [Component, address, fieldName, isButton, openNetworkDetailsSidePanel, title, isInTimeline]
   );
 
   const render = useCallback(
@@ -282,6 +276,8 @@ interface AddressLinksProps {
   onClick?: () => void;
   truncate?: boolean;
   title?: string;
+  timelineId?: string;
+  tabType?: TimelineTabs;
 }
 
 const AddressLinksComponent: React.FC<AddressLinksProps> = ({
@@ -295,6 +291,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
   onClick,
   truncate,
   title,
+  timelineId,
+  tabType,
 }) => {
   const uniqAddresses = useMemo(() => uniq(addresses), [addresses]);
 
@@ -313,6 +311,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
           onClick={onClick}
           truncate={truncate}
           title={title}
+          timelineId={timelineId}
+          tabType={tabType}
         />
       )),
     [
@@ -326,6 +326,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
       title,
       truncate,
       uniqAddresses,
+      timelineId,
+      tabType,
     ]
   );
 
@@ -354,6 +356,8 @@ const FormattedIpComponent: React.FC<{
   title?: string;
   truncate?: boolean;
   value: string | object | null | undefined;
+  timelineId?: string;
+  tabType?: TimelineTabs;
 }> = ({
   Component,
   contextId,
@@ -365,6 +369,8 @@ const FormattedIpComponent: React.FC<{
   title,
   truncate,
   value,
+  timelineId,
+  tabType,
 }) => {
   if (isString(value) && !isEmpty(value)) {
     try {
@@ -382,6 +388,8 @@ const FormattedIpComponent: React.FC<{
             onClick={onClick}
             title={title}
             truncate={truncate}
+            timelineId={timelineId}
+            tabType={tabType}
           />
         );
       }
@@ -402,6 +410,8 @@ const FormattedIpComponent: React.FC<{
         fieldName={fieldName}
         truncate={truncate}
         title={title}
+        timelineId={timelineId}
+        tabType={tabType}
       />
     );
   } else {

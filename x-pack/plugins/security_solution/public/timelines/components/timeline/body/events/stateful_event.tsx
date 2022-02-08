@@ -40,7 +40,6 @@ import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { useGetMappedNonEcsValue } from '../data_driven_columns';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   actionsColumnWidth: number;
@@ -102,13 +101,6 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
-  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-  const [activeStatefulEventContext] = useState({
-    timelineID: timelineId,
-    enableHostDetailsFlyout: true,
-    enableIpDetailsFlyout: true,
-    tabType,
-  });
 
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -262,67 +254,65 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 
   return (
-    <StatefulEventContext.Provider value={activeStatefulEventContext}>
-      <EventsTrGroup
-        $ariaRowindex={ariaRowindex}
-        className={STATEFUL_EVENT_CSS_CLASS_NAME}
-        data-test-subj="event"
-        eventType={getEventType(event.ecs)}
-        isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
-        isEvenEqlSequence={isEvenEqlSequence(event.ecs)}
-        isExpanded={isDetailPanelExpanded}
-        ref={trGroupRef}
-        showLeftBorder={!isEventViewer}
-      >
-        <EventColumnView
-          id={event._id}
-          actionsColumnWidth={actionsColumnWidth}
-          ariaRowindex={ariaRowindex}
-          columnHeaders={columnHeaders}
-          data={event.data}
-          ecsData={event.ecs}
-          eventIdToNoteIds={eventIdToNoteIds}
-          hasRowRenderers={hasRowRenderers}
-          isEventPinned={isEventPinned}
-          isEventViewer={isEventViewer}
-          loadingEventIds={loadingEventIds}
-          notesCount={notes.length}
-          onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
-          onRowSelected={onRowSelected}
-          refetch={refetch}
-          renderCellValue={renderCellValue}
-          onRuleChange={onRuleChange}
-          selectedEventIds={selectedEventIds}
-          showCheckboxes={showCheckboxes}
-          showNotes={!!showNotes[event._id]}
-          tabType={tabType}
-          timelineId={timelineId}
-          toggleShowNotes={onToggleShowNotes}
-          leadingControlColumns={leadingControlColumns}
-          trailingControlColumns={trailingControlColumns}
-          setEventsLoading={setEventsLoading}
-          setEventsDeleted={setEventsDeleted}
-        />
+    <EventsTrGroup
+      $ariaRowindex={ariaRowindex}
+      className={STATEFUL_EVENT_CSS_CLASS_NAME}
+      data-test-subj="event"
+      eventType={getEventType(event.ecs)}
+      isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
+      isEvenEqlSequence={isEvenEqlSequence(event.ecs)}
+      isExpanded={isDetailPanelExpanded}
+      ref={trGroupRef}
+      showLeftBorder={!isEventViewer}
+    >
+      <EventColumnView
+        id={event._id}
+        actionsColumnWidth={actionsColumnWidth}
+        ariaRowindex={ariaRowindex}
+        columnHeaders={columnHeaders}
+        data={event.data}
+        ecsData={event.ecs}
+        eventIdToNoteIds={eventIdToNoteIds}
+        hasRowRenderers={hasRowRenderers}
+        isEventPinned={isEventPinned}
+        isEventViewer={isEventViewer}
+        loadingEventIds={loadingEventIds}
+        notesCount={notes.length}
+        onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
+        onRowSelected={onRowSelected}
+        refetch={refetch}
+        renderCellValue={renderCellValue}
+        onRuleChange={onRuleChange}
+        selectedEventIds={selectedEventIds}
+        showCheckboxes={showCheckboxes}
+        showNotes={!!showNotes[event._id]}
+        tabType={tabType}
+        timelineId={timelineId}
+        toggleShowNotes={onToggleShowNotes}
+        leadingControlColumns={leadingControlColumns}
+        trailingControlColumns={trailingControlColumns}
+        setEventsLoading={setEventsLoading}
+        setEventsDeleted={setEventsDeleted}
+      />
 
-        <EventsTrSupplementContainerWrapper>
-          <EventsTrSupplement
-            className="siemEventsTable__trSupplement--notes"
-            data-test-subj="event-notes-flex-item"
-          >
-            <NoteCards
-              ariaRowindex={ariaRowindex}
-              associateNote={associateNote}
-              data-test-subj="note-cards"
-              notes={notes}
-              showAddNote={!!showNotes[event._id]}
-              toggleShowAddNote={onToggleShowNotes}
-            />
-          </EventsTrSupplement>
+      <EventsTrSupplementContainerWrapper>
+        <EventsTrSupplement
+          className="siemEventsTable__trSupplement--notes"
+          data-test-subj="event-notes-flex-item"
+        >
+          <NoteCards
+            ariaRowindex={ariaRowindex}
+            associateNote={associateNote}
+            data-test-subj="note-cards"
+            notes={notes}
+            showAddNote={!!showNotes[event._id]}
+            toggleShowAddNote={onToggleShowNotes}
+          />
+        </EventsTrSupplement>
 
-          {RowRendererContent}
-        </EventsTrSupplementContainerWrapper>
-      </EventsTrGroup>
-    </StatefulEventContext.Provider>
+        {RowRendererContent}
+      </EventsTrSupplementContainerWrapper>
+    </EventsTrGroup>
   );
 };
 

@@ -18,7 +18,7 @@ import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../../components/formatted_ip';
-
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { Port } from '../../../../../network/components/port';
 import { PORT_NAMES } from '../../../../../network/components/port/helpers';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -62,6 +62,8 @@ const FormattedFieldValueComponent: React.FC<{
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
+  timelineId?: string;
+  tabType?: TimelineTabs;
 }> = ({
   asPlainText,
   Component,
@@ -79,6 +81,8 @@ const FormattedFieldValueComponent: React.FC<{
   truncate = true,
   value,
   linkValue,
+  timelineId,
+  tabType,
 }) => {
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
@@ -95,6 +99,7 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         truncate={truncate}
+        timelineId={timelineId}
       />
     );
   } else if (fieldType === GEO_FIELD_TYPE) {
@@ -108,6 +113,7 @@ const FormattedFieldValueComponent: React.FC<{
         isDraggable={isDraggable}
         tooltipContent={null}
         value={`${value}`}
+        timelineId={timelineId}
       >
         <FormattedDate className={classNames} fieldName={fieldName} value={value} />
       </DefaultDraggable>
@@ -124,6 +130,7 @@ const FormattedFieldValueComponent: React.FC<{
         isDraggable={isDraggable}
         title={title}
         value={`${value}`}
+        timelineId={timelineId}
       />
     );
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
@@ -133,6 +140,7 @@ const FormattedFieldValueComponent: React.FC<{
         eventId={eventId}
         fieldName={fieldName}
         isDraggable={isDraggable}
+        timelineId={timelineId}
         value={`${value}`}
       />
     );
@@ -148,6 +156,8 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        timelineId={timelineId}
+        tabType={tabType}
       />
     );
   } else if (fieldFormat === BYTES_FORMAT) {
@@ -158,6 +168,7 @@ const FormattedFieldValueComponent: React.FC<{
         fieldName={fieldName}
         isDraggable={isDraggable}
         value={`${value}`}
+        timelineId={timelineId}
       />
     );
   } else if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
@@ -172,6 +183,7 @@ const FormattedFieldValueComponent: React.FC<{
         title={title}
         truncate={truncate}
         value={value}
+        timelineId={timelineId}
       />
     );
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
@@ -183,6 +195,7 @@ const FormattedFieldValueComponent: React.FC<{
       linkValue,
       truncate,
       value,
+      timelineId,
     });
   } else if (fieldName === SIGNAL_STATUS_FIELD_NAME) {
     return (
@@ -196,6 +209,7 @@ const FormattedFieldValueComponent: React.FC<{
         onClickAriaLabel={onClickAriaLabel}
         iconType={isButton ? 'arrowDown' : undefined}
         iconSide={isButton ? 'right' : undefined}
+        timelineId={timelineId}
       />
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
@@ -206,6 +220,7 @@ const FormattedFieldValueComponent: React.FC<{
         fieldName={fieldName}
         isDraggable={isDraggable}
         value={typeof value === 'string' ? value : ''}
+        timelineId={timelineId}
       />
     );
   } else if (
@@ -225,6 +240,7 @@ const FormattedFieldValueComponent: React.FC<{
       truncate,
       title,
       value,
+      timelineId,
     });
   } else if (columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
     return truncate && !isEmpty(value) ? (
@@ -262,6 +278,7 @@ const FormattedFieldValueComponent: React.FC<{
             ? null
             : fieldName
         }
+        timelineId={timelineId}
       >
         {content}
       </DefaultDraggable>

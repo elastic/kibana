@@ -37,6 +37,7 @@ const getDescription = ({
       linkValue={linkValue}
       isDraggable={isDraggable}
       values={values}
+      timelineId={timelineId}
     />
     {timelineId !== TimelineId.active && (
       <ActionCell

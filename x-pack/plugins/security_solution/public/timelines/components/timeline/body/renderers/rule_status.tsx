@@ -28,6 +28,7 @@ interface BaseProps {
   fieldName: string;
   isDraggable: boolean;
   value: string | number | undefined | null;
+  timelineId?: string;
 }
 
 type Props = BaseProps &
@@ -43,6 +44,7 @@ const RuleStatusComponent: React.FC<Props> = ({
   onClickAriaLabel,
   iconSide,
   iconType,
+  timelineId,
 }) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
   const badge = (
@@ -64,6 +66,7 @@ const RuleStatusComponent: React.FC<Props> = ({
       isDraggable={false}
       value={`${value}`}
       tooltipContent={fieldName}
+      timelineId={timelineId}
     >
       {badge}
     </DefaultDraggable>

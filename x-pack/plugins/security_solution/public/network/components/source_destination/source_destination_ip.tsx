@@ -93,6 +93,7 @@ const IpAdressesWithPorts = React.memo<{
   sourceIp?: string[] | null;
   sourcePort?: Array<number | string | null> | null;
   type: SourceDestinationType;
+  timelineId?: string;
 }>(
   ({
     contextId,
@@ -103,6 +104,7 @@ const IpAdressesWithPorts = React.memo<{
     sourceIp,
     sourcePort,
     type,
+    timelineId,
   }) => {
     const ip = type === 'source' ? sourceIp : destinationIp;
     const ipFieldName = type === 'source' ? SOURCE_IP_FIELD_NAME : DESTINATION_IP_FIELD_NAME;
@@ -142,6 +144,7 @@ const IpAdressesWithPorts = React.memo<{
                   isDraggable={isDraggable}
                   port={ipPortPair.port}
                   portFieldName={portFieldName}
+                  timelineId={timelineId}
                 />
               </EuiFlexItem>
             )
@@ -182,6 +185,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
     sourceIp,
     sourcePort,
     type,
+    timelineId,
   }) => {
     const label = type === 'source' ? i18n.SOURCE : i18n.DESTINATION;
 
@@ -208,6 +212,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
                 sourceIp={sourceIp}
                 sourcePort={sourcePort}
                 type={type}
+                timelineId={timelineId}
               />
             ) : (
               <EuiFlexGroup gutterSize="none">

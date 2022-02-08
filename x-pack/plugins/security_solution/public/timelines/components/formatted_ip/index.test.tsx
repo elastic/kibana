@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 import { FormattedIp } from './index';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
-import { StatefulEventContext } from '../../../../../timelines/public';
 import { timelineActions } from '../../store/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
 
@@ -112,17 +111,13 @@ describe('FormattedIp', () => {
   });
 
   test('if enableIpDetailsFlyout, should open NetworkDetailsSidePanel', async () => {
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
+    const newProps = {
       timelineID: TimelineId.active,
       tabType: TimelineTabs.query,
     };
     const wrapper = mount(
       <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <FormattedIp {...props} />
-        </StatefulEventContext.Provider>
+        <FormattedIp {...props} {...newProps} />
       </TestProviders>
     );
 
@@ -134,24 +129,20 @@ describe('FormattedIp', () => {
           flowTarget: 'source',
           ip: props.value,
         },
-        tabType: context.tabType,
-        timelineId: context.timelineID,
+        tabType: TimelineTabs.query,
+        timelineId: TimelineId.active,
       });
     });
   });
 
   test('if enableIpDetailsFlyout and timelineId equals to `timeline-1`, should call toggleExpandedDetail', async () => {
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
+    const newProps = {
       timelineID: TimelineId.active,
       tabType: TimelineTabs.query,
     };
     const wrapper = mount(
       <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <FormattedIp {...props} />
-        </StatefulEventContext.Provider>
+        <FormattedIp {...props} {...newProps} />
       </TestProviders>
     );
 
@@ -168,17 +159,13 @@ describe('FormattedIp', () => {
   });
 
   test('if enableIpDetailsFlyout but timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
+    const newProps = {
       timelineID: 'detection',
       tabType: TimelineTabs.query,
     };
     const wrapper = mount(
       <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <FormattedIp {...props} />
-        </StatefulEventContext.Provider>
+        <FormattedIp {...props} {...newProps} />
       </TestProviders>
     );
 
@@ -190,8 +177,8 @@ describe('FormattedIp', () => {
           flowTarget: 'source',
           ip: props.value,
         },
-        tabType: context.tabType,
-        timelineId: context.timelineID,
+        tabType: TimelineTabs.query,
+        timelineId: 'detection',
       });
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });

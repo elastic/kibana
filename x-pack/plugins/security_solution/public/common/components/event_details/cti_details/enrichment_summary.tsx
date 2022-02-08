@@ -82,6 +82,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
             isObjectArray={data.isObjectArray}
             value={value}
             truncate={false}
+            timelineId={timelineId}
           />
           {feedName && (
             <EnrichmentFieldFeedName>

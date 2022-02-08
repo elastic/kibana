@@ -25,6 +25,7 @@ interface IndicatorDetailsProps {
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
   isDraggable?: boolean;
+  timelineId?: string;
 }
 
 export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
@@ -34,6 +35,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
   indicatorReference,
   indicatorType,
   isDraggable,
+  timelineId,
 }) => (
   <EuiFlexGroup
     alignItems="flexStart"
@@ -90,6 +92,7 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             fieldName={INDICATOR_REFERENCE}
             isDraggable={isDraggable}
             value={indicatorReference}
+            timelineId={timelineId}
           />
         </EuiFlexItem>
       </>

@@ -66,6 +66,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
     sourcePort,
     transport,
     userName,
+    timelineId,
   }) => (
     <EuiFlexGroup
       data-test-subj="netflow-columns"
@@ -123,6 +124,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           sourcePackets={sourcePackets}
           sourcePort={sourcePort}
           transport={transport}
+          timelineId={timelineId}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
