@@ -93,36 +93,15 @@ export const ComparatorToi18nMap = {
 };
 
 export const ComparatorToi18nSymbolsMap = {
-  [Comparator.GT]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.gt', {
-    defaultMessage: '>',
-  }),
-  [Comparator.GT_OR_EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.gtOrEq', {
-    defaultMessage: '≥',
-  }),
-  [Comparator.LT]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.lt', {
-    defaultMessage: '<',
-  }),
-  [Comparator.LT_OR_EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.ltOrEq', {
-    defaultMessage: '≤',
-  }),
-  [Comparator.EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.eq', {
-    defaultMessage: '=',
-  }),
-  [Comparator.NOT_EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.notEq', {
-    defaultMessage: '≠',
-  }),
-  [`${Comparator.EQ}:number`]: i18n.translate(
-    'xpack.infra.logs.alerting.comparator.symbol.eqNumber',
-    {
-      defaultMessage: '=',
-    }
-  ),
-  [`${Comparator.NOT_EQ}:number`]: i18n.translate(
-    'xpack.infra.logs.alerting.comparator.symbol.notEqNumber',
-    {
-      defaultMessage: '≠',
-    }
-  ),
+  [Comparator.GT]: '>',
+  [Comparator.GT_OR_EQ]: '≥',
+  [Comparator.LT]: '<',
+  [Comparator.LT_OR_EQ]: '≤',
+  [Comparator.EQ]: '=',
+  [Comparator.NOT_EQ]: '≠',
+  [`${Comparator.EQ}:number`]: '=',
+  [`${Comparator.NOT_EQ}:number`]: '≠',
+
   // TODO: We could need to update the next messages to use symbols.
   [Comparator.MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.match', {
     defaultMessage: 'matches',
