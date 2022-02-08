@@ -10,7 +10,7 @@ import {
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
 } from 'kibana/server';
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep, omit, set } from 'lodash';
 import { migrationMocks } from 'src/core/server/mocks';
 import { removeRuleInformation } from './alerts';
 
@@ -75,25 +75,34 @@ describe('alert user actions', () => {
         jsonParseSpy.mockRestore();
       });
 
-      it('does not modify the document and does not call JSON.prase when it is not a create comment user action', () => {
-        const doc = {
-          id: '123',
-          attributes: {
-            action: 'update',
-            action_field: ['status'],
-            new_value: 'open',
-          },
-          type: 'abc',
-          references: [],
-        };
+      it.each([
+        ['update', ['status']],
+        ['update', ['comment']],
+        [undefined, ['comment']],
+        ['create', ['status']],
+        ['create', []],
+      ])(
+        'does not modify the document and does not call JSON.prase when action: %s and action_field: %s',
+        (action, actionField) => {
+          const doc = {
+            id: '123',
+            attributes: {
+              action,
+              action_field: actionField,
+              new_value: 'open',
+            },
+            type: 'abc',
+            references: [],
+          };
 
-        expect(removeRuleInformation(doc, context)).toEqual(doc);
+          expect(removeRuleInformation(doc, context)).toEqual(doc);
 
-        expect(jsonParseSpy).not.toBeCalled();
+          expect(jsonParseSpy).not.toBeCalled();
 
-        const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
-        expect(log.error.mock.calls[0]).toBeUndefined();
-      });
+          const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+          expect(log.error.mock.calls[0]).toBeUndefined();
+        }
+      );
     });
 
     it('does not modify non-alert user action', () => {
@@ -190,6 +199,27 @@ describe('alert user actions', () => {
       ensureRuleFieldsAreNull(newDoc);
 
       expect(docWithoutNewValue(newDoc)).toEqual(docWithoutNewValue(doc));
+      expectParsedDocsToEqual(newDoc, doc);
+    });
+
+    it('sets the rule fields to null when the alert has an extra field', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          action: 'create',
+          action_field: ['comment'],
+          new_value:
+            '{"anExtraField": "some value","type":"alert","alertId":"4eb4cd05b85bc65c7b9f22b776e0136f970f7538eb0d1b2e6e8c7d35b2e875cb","index":".internal.alerts-security.alerts-default-000001","rule":{"id":"43104810-7875-11ec-abc6-6f72e72f6004","name":"A rule"},"owner":"securitySolution"}',
+        },
+        type: 'abc',
+        references: [],
+      };
+
+      const newDoc = removeRuleInformation(doc, context) as SavedObject<{ new_value: string }>;
+      ensureRuleFieldsAreNull(newDoc);
+
+      expect(docWithoutNewValue(newDoc)).toEqual(docWithoutNewValue(doc));
+      expectParsedDocsToEqual(newDoc, doc);
     });
 
     it('sets the rule fields to null for a generated alert', () => {
@@ -209,6 +239,7 @@ describe('alert user actions', () => {
       ensureRuleFieldsAreNull(newDoc);
 
       expect(docWithoutNewValue(newDoc)).toEqual(docWithoutNewValue(doc));
+      expectParsedDocsToEqual(newDoc, doc);
     });
 
     it('preserves the references field', () => {
@@ -228,9 +259,37 @@ describe('alert user actions', () => {
       ensureRuleFieldsAreNull(newDoc);
 
       expect(docWithoutNewValue(newDoc)).toEqual(docWithoutNewValue(doc));
+      expectParsedDocsToEqual(newDoc, doc);
     });
   });
 });
+
+const expectParsedDocsToEqual = (
+  nulledRuleDoc: SavedObject<{ new_value: string }>,
+  originalDoc: SavedObject<{ new_value: string }>
+) => {
+  expect(parseDoc(nulledRuleDoc)).toEqual(injectNullRuleFields(parseDoc(originalDoc)));
+};
+
+const parseDoc = (doc: SavedObject<{ new_value: string }>): SavedObject<{ new_value: {} }> => {
+  const copyOfDoc = cloneDeep(doc);
+
+  const decodedNewValue = JSON.parse(doc.attributes.new_value);
+  set(copyOfDoc, 'attributes.new_value', decodedNewValue);
+
+  return copyOfDoc;
+};
+
+const injectNullRuleFields = (doc: SavedObject<{ new_value: {} }>) => {
+  const copyOfDoc = cloneDeep(doc);
+
+  set(copyOfDoc, 'attributes.new_value', {
+    ...doc.attributes.new_value,
+    rule: { id: null, name: null },
+  });
+
+  return copyOfDoc;
+};
 
 const docWithoutNewValue = (doc: {}) => {
   const copyOfDoc = cloneDeep(doc);

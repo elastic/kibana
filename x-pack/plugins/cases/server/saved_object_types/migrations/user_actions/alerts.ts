@@ -78,7 +78,13 @@ function decodeNewValue(data?: string | null): unknown | null {
 }
 
 function isAlertUserAction(newValue?: unknown | null): newValue is AlertCommentOptional {
-  return isAlertObject(newValue);
+  const unsafeAlertData = newValue as AlertCommentOptional;
+
+  return (
+    unsafeAlertData !== undefined &&
+    unsafeAlertData !== null &&
+    (unsafeAlertData.type === GENERATED_ALERT || unsafeAlertData.type === CommentType.alert)
+  );
 }
 
 function isCreateComment(action?: string, actionFields?: string[]): boolean {
@@ -93,13 +99,3 @@ function isCreateComment(action?: string, actionFields?: string[]): boolean {
 type AlertCommentOptional = Partial<Omit<CommentRequestAlertType, 'type'>> & {
   type: CommentType.alert | typeof GENERATED_ALERT;
 };
-
-function isAlertObject(data?: unknown | null): boolean {
-  const unsafeAlertData = data as AlertCommentOptional;
-
-  return (
-    unsafeAlertData !== undefined &&
-    unsafeAlertData !== null &&
-    (unsafeAlertData.type === GENERATED_ALERT || unsafeAlertData.type === CommentType.alert)
-  );
-}
