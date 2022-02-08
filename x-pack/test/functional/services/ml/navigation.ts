@@ -106,12 +106,36 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~anomalyDetection', expectedValue);
     },
 
+    async assertAnomalyExplorerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~anomalyExplorer', expectedValue);
+    },
+
+    async assertSingleMetricViewerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~singleMetricViewer', expectedValue);
+    },
+
     async assertDataFrameAnalyticsTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalytics', expectedValue);
     },
 
+    async assertTrainedModelsNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~trainedModels', expectedValue);
+    },
+
+    async assertNodesNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~nodesOverview', expectedValue);
+    },
+
     async assertDataVisualizerTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~dataVisualizer', expectedValue);
+    },
+
+    async assertFileDataVisualizerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~fileDataVisualizer', expectedValue);
+    },
+
+    async assertIndexDataVisualizerNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~indexDataVisualizer', expectedValue);
     },
 
     async assertSettingsTabEnabled(expectedValue: boolean) {
