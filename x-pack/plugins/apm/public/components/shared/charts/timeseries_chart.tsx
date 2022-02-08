@@ -61,7 +61,7 @@ import { getTimeZone } from './helper/timezone';
 import { CorrelationsTable } from '../../../components/app/correlations/correlations_table';
 import { getFailedTransactionsCorrelationImpactLabel } from '../../../components/app/correlations/utils/get_failed_transactions_correlation_impact_label';
 import { ImpactBar } from '../impact_bar';
-import { createHref, push } from '../Links/url_helpers';
+import { createHref, push } from '../links/url_helpers';
 
 import { MlBrush } from './brush';
 
