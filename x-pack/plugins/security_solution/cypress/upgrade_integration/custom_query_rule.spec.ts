@@ -49,7 +49,7 @@ const rule = {
   customQuery: '*:*',
   name: 'Custom query rule for upgrade',
   description: 'My description',
-  index: ['auditbeat-*'],
+  index: ['auditbeat-custom*'],
   severity: 'Low',
   riskScore: '7',
   timelineTemplate: 'none',
