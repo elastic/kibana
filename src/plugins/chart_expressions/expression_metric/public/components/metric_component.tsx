@@ -109,12 +109,12 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   };
 
   private renderMetric = (metric: MetricOptions, index: number) => {
-    const Component = this.props.visParams.metric.autoScale
+    const MetricComponent = this.props.visParams.metric.autoScale
       ? withAutoScale()(MetricVisValue)
       : MetricVisValue;
 
     return (
-      <Component
+      <MetricComponent
         key={index}
         metric={metric}
         style={this.props.visParams.metric.style}

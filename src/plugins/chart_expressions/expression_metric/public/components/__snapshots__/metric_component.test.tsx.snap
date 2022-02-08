@@ -2,7 +2,7 @@
 
 exports[`MetricVisComponent should render correct structure for multi-value metrics 1`] = `
 Array [
-  <Component
+  <MetricVisValue
     key="0"
     metric={
       Object {
@@ -25,7 +25,7 @@ Array [
       }
     }
   />,
-  <Component
+  <MetricVisValue
     key="1"
     metric={
       Object {
@@ -52,7 +52,7 @@ Array [
 `;
 
 exports[`MetricVisComponent should render correct structure for single metric 1`] = `
-<Component
+<MetricVisValue
   key="0"
   metric={
     Object {
