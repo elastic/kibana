@@ -77,27 +77,6 @@ export const DatePickerWrapper: FC = () => {
 
   const timeFilterRefreshInterval = useRefreshIntervalUpdates();
 
-  const refreshInterval = useMemo((): RefreshInterval => {
-    const resultInterval = globalState?.refreshInterval ?? timeFilterRefreshInterval;
-
-    let value = resultInterval.value;
-    if (resultInterval.value < DEFAULT_REFRESH_INTERVAL_MS) {
-      displayWarningToast(
-        i18n.translate('xpack.ml.datePicker.shortRefreshIntervalWarningMessage', {
-          defaultMessage: 'Configured refresh interval is too short.',
-        })
-      );
-      value = DEFAULT_REFRESH_INTERVAL_MS;
-    }
-
-    /**
-     * Enforce pause when it's set to false with 0 refresh interval.
-     */
-    const pause = resultInterval.pause || (!resultInterval.pause && resultInterval.value <= 0);
-
-    return { value, pause };
-  }, [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]);
-
   const setRefreshInterval = useCallback(
     debounce((refreshIntervalUpdate: RefreshInterval) => {
       setGlobalState('refreshInterval', refreshIntervalUpdate, true);
@@ -114,6 +93,34 @@ export const DatePickerWrapper: FC = () => {
   const [isTimeRangeSelectorEnabled, setIsTimeRangeSelectorEnabled] = useState(
     timefilter.isTimeRangeSelectorEnabled()
   );
+
+  const refreshInterval = useMemo((): RefreshInterval => {
+    const resultInterval = globalState?.refreshInterval ?? timeFilterRefreshInterval;
+
+    /**
+     * Enforce pause when it's set to false with 0 refresh interval.
+     */
+    const pause = resultInterval.pause || (!resultInterval.pause && resultInterval.value <= 0);
+
+    let value = resultInterval.value;
+    if (resultInterval.value < DEFAULT_REFRESH_INTERVAL_MS) {
+      value = DEFAULT_REFRESH_INTERVAL_MS;
+
+      if (!pause) {
+        displayWarningToast(
+          i18n.translate('xpack.ml.datePicker.shortRefreshIntervalWarningMessage', {
+            defaultMessage:
+              'Configured refresh interval is too short, a value of {defaultInterval} will be used instead.',
+            values: {
+              defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
+            },
+          })
+        );
+      }
+    }
+
+    return { value, pause };
+  }, [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]);
 
   const dateFormat = config.get('dateFormat');
   const timePickerQuickRanges = config.get<TimePickerQuickRange[]>(

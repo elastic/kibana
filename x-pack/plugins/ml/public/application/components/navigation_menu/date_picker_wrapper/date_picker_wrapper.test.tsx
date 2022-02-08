@@ -131,6 +131,19 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     // arrange
     (useUrlState as jest.Mock).mockReturnValue([{ refreshInterval: { pause: false, value: 0 } }]);
 
+    // act
+    render(<DatePickerWrapper />);
+
+    // assert
+    const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
+    expect(calledWith.isPaused).toBe(true);
+    expect(calledWith.refreshInterval).toBe(1000);
+  });
+
+  test('should fallback to default interval when configured interval is too short', () => {
+    // arrange
+    (useUrlState as jest.Mock).mockReturnValue([{ refreshInterval: { pause: false, value: 10 } }]);
+
     const displayWarningSpy = jest.fn(() => {});
 
     (useToastNotificationService as jest.Mock).mockReturnValueOnce({
@@ -143,7 +156,7 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     // assert
     expect(displayWarningSpy).toHaveBeenCalled();
     const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
-    expect(calledWith.isPaused).toBe(true);
+    expect(calledWith.isPaused).toBe(false);
     expect(calledWith.refreshInterval).toBe(1000);
   });
 });
