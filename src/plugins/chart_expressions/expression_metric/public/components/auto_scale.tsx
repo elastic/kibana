@@ -6,96 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useRef, useEffect, useState, ComponentType } from 'react';
 import { throttle } from 'lodash';
-import { EuiResizeObserver } from '@elastic/eui';
+import { useResizeObserver } from '@elastic/eui';
+import { autoScaleWrapperStyle } from './auto_scale.styles';
 
-interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode | React.ReactNode[];
+interface AutoScaleParams {
   minScale?: number;
 }
-
-interface State {
-  scale: number;
-}
-
-export class AutoScale extends React.Component<Props, State> {
-  private child: Element | null = null;
-  private parent: Element | null = null;
-  private scale: () => void;
-
-  constructor(props: Props) {
-    super(props);
-
-    this.scale = throttle(() => {
-      const scale = computeScale(this.parent, this.child, this.props.minScale);
-
-      // Prevent an infinite render loop
-      if (this.state.scale !== scale) {
-        this.setState({ scale });
-      }
-    });
-
-    // An initial scale of 0 means we always redraw
-    // at least once, which is sub-optimal, but it
-    // prevents an annoying flicker.
-    this.state = { scale: 0 };
-  }
-
-  setParent = (el: Element | null) => {
-    if (el && this.parent !== el) {
-      this.parent = el;
-      setTimeout(() => this.scale());
-    }
-  };
-
-  setChild = (el: Element | null) => {
-    if (el && this.child !== el) {
-      this.child = el;
-      setTimeout(() => this.scale());
-    }
-  };
-
-  render() {
-    const { children, minScale, ...rest } = this.props;
-    const { scale } = this.state;
-    const style = this.props.style || {};
-
-    return (
-      <EuiResizeObserver onResize={this.scale}>
-        {(resizeRef) => (
-          <div
-            {...rest}
-            ref={(el) => {
-              this.setParent(el);
-              resizeRef(el);
-            }}
-            style={{
-              ...style,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              maxWidth: '100%',
-              maxHeight: '100%',
-              overflow: 'auto',
-              lineHeight: 1.5,
-            }}
-          >
-            <div
-              ref={this.setChild}
-              style={{
-                transform: `scale(${scale})`,
-              }}
-            >
-              {children}
-            </div>
-          </div>
-        )}
-      </EuiResizeObserver>
-    );
-  }
-}
-
 interface ClientDimensionable {
   clientWidth: number;
   clientHeight: number;
@@ -122,3 +40,41 @@ export function computeScale(
 
   return Math.max(Math.min(MAX_SCALE, Math.min(scaleX, scaleY)), minScale);
 }
+
+export const withAutoScale =
+  (autoScaleParams?: AutoScaleParams) => (WrappedComponent: ComponentType<any>) => (props: any) => {
+    const [scale, setScale] = useState(0);
+    const parentRef = useRef<HTMLDivElement>(null);
+    const childrenRef = useRef<HTMLDivElement>(null);
+    const parentDimensions = useResizeObserver(parentRef.current);
+
+    const scaleFn = throttle(() => {
+      const newScale = computeScale(
+        { clientHeight: parentDimensions.height, clientWidth: parentDimensions.width },
+        childrenRef.current,
+        autoScaleParams?.minScale
+      );
+
+      // Prevent an infinite render loop
+      if (scale !== newScale) {
+        setScale(newScale);
+      }
+    });
+
+    useEffect(() => {
+      scaleFn();
+    }, [parentDimensions]);
+
+    return (
+      <div ref={parentRef} css={autoScaleWrapperStyle}>
+        <div
+          ref={childrenRef}
+          style={{
+            transform: `scale(${scale || 0})`,
+          }}
+        >
+          <WrappedComponent {...props} />
+        </div>
+      </div>
+    );
+  };

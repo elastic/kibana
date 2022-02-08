@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { computeScale, AutoScale } from './auto_scale';
-import { render } from 'enzyme';
+import { computeScale, withAutoScale } from './auto_scale';
+import { mount } from 'enzyme';
 
 const mockElement = (clientWidth = 100, clientHeight = 200) => ({
   clientHeight,
@@ -41,26 +41,38 @@ describe('AutoScale', () => {
     });
   });
 
-  describe('AutoScale', () => {
+  describe('withAutoScale', () => {
     it('renders', () => {
-      expect(
-        render(
-          <AutoScale>
-            <h1>Hoi!</h1>
-          </AutoScale>
-        )
-      ).toMatchInlineSnapshot(`
-        <div
-          style="display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5"
-        >
+      const Component = () => <h1>Hoi!</h1>;
+      const WrappedComponent = withAutoScale()(Component);
+      expect(mount(<WrappedComponent />)).toMatchInlineSnapshot(`
+        <Component>
           <div
-            style="transform:scale(0)"
+            css={
+              Object {
+                "map": undefined,
+                "name": "1l2vzaf",
+                "next": undefined,
+                "styles": "display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5;",
+                "toString": [Function],
+              }
+            }
           >
-            <h1>
-              Hoi!
-            </h1>
+            <div
+              style={
+                Object {
+                  "transform": "scale(0)",
+                }
+              }
+            >
+              <Component>
+                <h1>
+                  Hoi!
+                </h1>
+              </Component>
+            </div>
           </div>
-        </div>
+        </Component>
       `);
     });
   });
