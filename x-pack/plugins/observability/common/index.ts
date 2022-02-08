@@ -6,6 +6,7 @@
  */
 
 export type { AsDuration, AsPercent, TimeUnitChar } from './utils/formatters';
+export type { ObservabilityRuleTypeFormatter } from './typings';
 
 export { formatDurationFromTimeUnitChar } from './utils/formatters';
 

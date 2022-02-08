@@ -5,9 +5,11 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import { ParsedTechnicalFields } from '../../rule_registry/common/parse_technical_fields';
+import { AsDuration, AsPercent } from './utils/formatters';
 
 export type Maybe<T> = T | null | undefined;
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 
 export const alertWorkflowStatusRt = t.keyof({
   open: null,
@@ -35,3 +37,8 @@ export interface AlertStatusFilter {
   query: string;
   label: string;
 }
+
+export type ObservabilityRuleTypeFormatter = (options: {
+  fields: ParsedTechnicalFields & Record<string, any>;
+  formatters: { asDuration: AsDuration; asPercent: AsPercent };
+}) => { reason: string; link: string };
