@@ -10,6 +10,7 @@ import React, { createContext, useContext, useEffect, useMemo, FC } from 'react'
 import { noop } from 'lodash';
 import {
   useEuiTour,
+  EuiTourState,
   EuiStatelessTourStep,
   EuiSpacer,
   EuiButton,
@@ -54,7 +55,7 @@ const featuresTourSteps: EuiStatelessTourStep[] = [
   },
 ];
 
-const tourConfig = {
+const tourConfig: EuiTourState = {
   currentTourStep: 1,
   isTourActive: true,
   tourPopoverWidth: TOUR_POPOVER_WIDTH,
@@ -70,8 +71,11 @@ const RulesFeatureTourContext = createContext<RulesFeatureTourContextType | null
  */
 export const RulesFeatureTourContextProvider: FC = ({ children }) => {
   const { storage } = useKibana().services;
-  const initialStore = useMemo(
-    () => storage.get(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY) ?? tourConfig,
+  const initialStore = useMemo<EuiTourState>(
+    () => ({
+      ...tourConfig,
+      ...(storage.get(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY) ?? tourConfig),
+    }),
     [storage]
   );
 
@@ -97,7 +101,8 @@ export const RulesFeatureTourContextProvider: FC = ({ children }) => {
   );
 
   useEffect(() => {
-    storage.set(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY, reducerState);
+    const { isTourActive, currentTourStep } = reducerState;
+    storage.set(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
   }, [reducerState, storage]);
 
   const providerValue = useMemo(

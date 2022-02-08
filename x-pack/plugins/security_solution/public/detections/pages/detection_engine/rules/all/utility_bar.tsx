@@ -149,7 +149,11 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                       iconType="arrowDown"
                       popoverPanelPaddingSize="none"
                       popoverContent={handleGetBulkItemsPopoverContent}
-                      onClick={featureTour?.finishTour}
+                      onClick={() => {
+                        if (featureTour?.steps?.bulkActionsStepProps?.isStepOpen) {
+                          featureTour?.finishTour();
+                        }
+                      }}
                     >
                       {i18n.BATCH_ACTIONS}
                     </UtilityBarAction>

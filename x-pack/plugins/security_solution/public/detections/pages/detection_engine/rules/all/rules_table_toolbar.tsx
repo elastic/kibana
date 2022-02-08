@@ -76,7 +76,9 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
               label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
               checked={isInMemorySorting}
               onChange={(e) => {
-                goToNextStep();
+                if (inMemoryTableStepProps.isStepOpen) {
+                  goToNextStep();
+                }
                 setIsInMemorySorting(e.target.checked);
               }}
             />
