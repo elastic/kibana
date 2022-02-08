@@ -17,6 +17,7 @@ import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
 import { CrawlRulesTable } from './components/crawl_rules_table';
+import { CrawlSelectDomainsModal } from './components/crawl_select_domains_modal/crawl_select_domains_modal';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DeduplicationPanel } from './components/deduplication_panel';
@@ -78,6 +79,7 @@ export const CrawlerSingleDomain: React.FC = () => {
       <DeduplicationPanel />
       <EuiSpacer size="xl" />
       <DeleteDomainPanel />
+      <CrawlSelectDomainsModal />
     </AppSearchPageTemplate>
   );
 };
