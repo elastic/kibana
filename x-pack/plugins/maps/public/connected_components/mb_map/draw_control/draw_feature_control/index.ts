@@ -9,6 +9,7 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { Geometry, Position } from 'geojson';
+import { DRAW_SHAPE } from '../../../../../common/constants';
 import {
   DrawFeatureControl,
   ReduxDispatchProps,
@@ -42,6 +43,9 @@ function mapDispatchToProps(
     },
     disableDrawState() {
       dispatch(updateEditShape(null));
+    },
+    waitingState() {
+      dispatch(updateEditShape(DRAW_SHAPE.WAIT));
     },
   };
 }

@@ -369,10 +369,8 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     }
 
     try {
-      await dispatch(updateEditShape(DRAW_SHAPE.INSERT));
       await (layer as IVectorLayer).addFeature(geometry);
       await dispatch(syncDataForLayerDueToDrawing(layer));
-      await dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
     } catch (e) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.addFeatureError', {
@@ -398,10 +396,12 @@ export function deleteFeatureFromIndex(featureId: string) {
       return;
     }
     try {
-      await dispatch(updateEditShape(DRAW_SHAPE.INSERT));
       await (layer as IVectorLayer).deleteFeature(featureId);
-      await dispatch(syncDataForLayerDueToDrawing(layer));
-      await dispatch(updateEditShape(DRAW_SHAPE.DELETE));
+      await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
+        setTimeout(() => {
+          dispatch(updateEditShape(DRAW_SHAPE.DELETE));
+        }, 500);
+      });
     } catch (e) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.removeFeatureError', {
