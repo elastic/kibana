@@ -24,7 +24,7 @@ const StyledTitle = styled.h4`
 export const ExpandableUserDetailsTitle = ({ userName }: { userName: string }) => (
   <EuiTitle size="s">
     <StyledTitle>
-      {i18n.translate('xpack.securitySolution.timeline.sidePanel.networkDetails.title', {
+      {i18n.translate('xpack.securitySolution.timeline.sidePanel.userDetails.title', {
         defaultMessage: 'User details',
       })}
       {`: ${userName}`}
@@ -34,12 +34,9 @@ export const ExpandableUserDetailsTitle = ({ userName }: { userName: string }) =
 
 export const ExpandableUserDetailsPageLink = ({ userName }: ExpandableUserProps) => (
   <UserDetailsLink userName={userName} isButton>
-    {i18n.translate(
-      'xpack.securitySolution.timeline.sidePanel.networkDetails.networkDetailsPageLink',
-      {
-        defaultMessage: 'View details page',
-      }
-    )}
+    {i18n.translate('xpack.securitySolution.timeline.sidePanel.networkDetails.userDetails', {
+      defaultMessage: 'View details page',
+    })}
   </UserDetailsLink>
 );
 
