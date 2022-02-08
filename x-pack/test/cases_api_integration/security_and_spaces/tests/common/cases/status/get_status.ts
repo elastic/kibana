@@ -16,7 +16,6 @@ import {
   getAllCasesStatuses,
   deleteAllCaseItems,
   superUserSpace1Auth,
-  assertWarningHeader,
   extractWarningValueFromWarningHeader,
 } from '../../../../../common/lib/utils';
 import {
@@ -29,6 +28,7 @@ import {
   superUser,
 } from '../../../../../common/lib/authentication/users';
 import { CASE_STATUS_URL } from '../../../../../../../plugins/cases/common/constants';
+import { assertWarningHeader } from '../../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
