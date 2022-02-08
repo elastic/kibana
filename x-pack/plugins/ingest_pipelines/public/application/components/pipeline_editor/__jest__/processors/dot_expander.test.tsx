@@ -77,7 +77,7 @@ describe('Processor: Dot Expander', () => {
 
     // Expect form error as "field" does not contain '.'
     expect(form.getErrorsMessages()).toEqual([
-      'The field value should contain at least one dot character or equal to an asterisk.',
+      'The field name must be an asterisk or contain a dot character.',
     ]);
   });
 
