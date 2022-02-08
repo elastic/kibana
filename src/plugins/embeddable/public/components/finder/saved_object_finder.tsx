@@ -288,7 +288,7 @@ class SavedObjectFinderUi extends React.Component<
           });
         }}
       >
-        {i18n.translate('embeddable.finder.sortAsc', {
+        {i18n.translate('embeddableApi.finder.sortAsc', {
           defaultMessage: 'Ascending',
         })}
       </EuiContextMenuItem>,
@@ -301,7 +301,7 @@ class SavedObjectFinderUi extends React.Component<
           });
         }}
       >
-        {i18n.translate('embeddable.finder.sortDesc', {
+        {i18n.translate('embeddableApi.finder.sortDesc', {
           defaultMessage: 'Descending',
         })}
       </EuiContextMenuItem>,
@@ -317,7 +317,7 @@ class SavedObjectFinderUi extends React.Component<
             });
           }}
         >
-          {i18n.translate('embeddable.finder.sortAuto', {
+          {i18n.translate('embeddableApi.finder.sortAuto', {
             defaultMessage: 'Best match',
           })}
         </EuiContextMenuItem>
@@ -333,10 +333,10 @@ class SavedObjectFinderUi extends React.Component<
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            placeholder={i18n.translate('embeddable.finder.searchPlaceholder', {
+            placeholder={i18n.translate('embeddableApi.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
-            aria-label={i18n.translate('embeddable.finder.searchPlaceholder', {
+            aria-label={i18n.translate('embeddableApi.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
             fullWidth
@@ -372,7 +372,7 @@ class SavedObjectFinderUi extends React.Component<
                   isSelected={this.state.sortOpen}
                   data-test-subj="savedObjectFinderSortButton"
                 >
-                  {i18n.translate('embeddable.finder.sortButtonLabel', {
+                  {i18n.translate('embeddableApi.finder.sortButtonLabel', {
                     defaultMessage: 'Sort',
                   })}
                 </EuiFilterButton>
@@ -404,7 +404,7 @@ class SavedObjectFinderUi extends React.Component<
                     hasActiveFilters={this.state.filteredTypes.length > 0}
                     numActiveFilters={this.state.filteredTypes.length}
                   >
-                    {i18n.translate('embeddable.finder.filterButtonLabel', {
+                    {i18n.translate('embeddableApi.finder.filterButtonLabel', {
                       defaultMessage: 'Types',
                     })}
                   </EuiFilterButton>

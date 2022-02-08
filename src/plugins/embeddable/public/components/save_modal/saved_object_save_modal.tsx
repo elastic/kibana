@@ -88,7 +88,9 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       <>
         <EuiFormRow
           fullWidth
-          label={<FormattedMessage id="embeddable.saveModal.titleLabel" defaultMessage="Title" />}
+          label={
+            <FormattedMessage id="embeddableApi.saveModal.titleLabel" defaultMessage="Title" />
+          }
         >
           <EuiFieldText
             fullWidth
@@ -132,7 +134,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
-                id="embeddable.saveModal.saveTitle"
+                id="embeddableApi.saveModal.saveTitle"
                 defaultMessage="Save {objectType}"
                 values={{ objectType: this.props.objectType }}
               />
@@ -156,7 +158,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           <EuiModalFooter>
             <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
               <FormattedMessage
-                id="embeddable.saveModal.cancelButtonLabel"
+                id="embeddableApi.saveModal.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -178,7 +180,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         fullWidth
         label={
           <FormattedMessage
-            id="embeddable.saveModal.descriptionLabel"
+            id="embeddableApi.saveModal.descriptionLabel"
             defaultMessage="Description"
           />
         }
@@ -256,7 +258,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     const { isLoading, title } = this.state;
 
     let confirmLabel: string | React.ReactNode = i18n.translate(
-      'embeddable.saveModal.saveButtonLabel',
+      'embeddableApi.saveModal.saveButtonLabel',
       {
         defaultMessage: 'Save',
       }
@@ -292,7 +294,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           <EuiCallOut
             title={
               <FormattedMessage
-                id="embeddable.saveModal.duplicateTitleLabel"
+                id="embeddableApi.saveModal.duplicateTitleLabel"
                 defaultMessage="This {objectType} already exists"
                 values={{ objectType: this.props.objectType }}
               />
@@ -303,7 +305,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           >
             <p>
               <FormattedMessage
-                id="embeddable.saveModal.duplicateTitleDescription"
+                id="embeddableApi.saveModal.duplicateTitleDescription"
                 defaultMessage="Saving '{title}' creates a duplicate title."
                 values={{
                   title: this.state.title,
@@ -331,7 +333,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           onChange={this.onCopyOnSaveChange}
           label={
             <FormattedMessage
-              id="embeddable.saveModal.saveAsNewLabel"
+              id="embeddableApi.saveModal.saveAsNewLabel"
               defaultMessage="Save as new {objectType}"
               values={{ objectType: this.props.objectType }}
             />

@@ -14,7 +14,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       <EuiModalHeaderTitle>
         <FormattedMessage
           defaultMessage="Save {objectType}"
-          id="embeddable.saveModal.saveTitle"
+          id="embeddableApi.saveModal.saveTitle"
           values={
             Object {
               "objectType": "visualization",
@@ -34,7 +34,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Title"
-              id="embeddable.saveModal.titleLabel"
+              id="embeddableApi.saveModal.titleLabel"
               values={Object {}}
             />
           }
@@ -58,7 +58,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Description"
-              id="embeddable.saveModal.descriptionLabel"
+              id="embeddableApi.saveModal.descriptionLabel"
               values={Object {}}
             />
           }
@@ -79,7 +79,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       >
         <FormattedMessage
           defaultMessage="Cancel"
-          id="embeddable.saveModal.cancelButtonLabel"
+          id="embeddableApi.saveModal.cancelButtonLabel"
           values={Object {}}
         />
       </EuiButtonEmpty>
@@ -111,7 +111,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       <EuiModalHeaderTitle>
         <FormattedMessage
           defaultMessage="Save {objectType}"
-          id="embeddable.saveModal.saveTitle"
+          id="embeddableApi.saveModal.saveTitle"
           values={
             Object {
               "objectType": "visualization",
@@ -131,7 +131,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
           label={
             <FormattedMessage
               defaultMessage="Title"
-              id="embeddable.saveModal.titleLabel"
+              id="embeddableApi.saveModal.titleLabel"
               values={Object {}}
             />
           }
@@ -155,7 +155,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
           label={
             <FormattedMessage
               defaultMessage="Description"
-              id="embeddable.saveModal.descriptionLabel"
+              id="embeddableApi.saveModal.descriptionLabel"
               values={Object {}}
             />
           }
@@ -176,7 +176,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       >
         <FormattedMessage
           defaultMessage="Cancel"
-          id="embeddable.saveModal.cancelButtonLabel"
+          id="embeddableApi.saveModal.cancelButtonLabel"
           values={Object {}}
         />
       </EuiButtonEmpty>
@@ -208,7 +208,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       <EuiModalHeaderTitle>
         <FormattedMessage
           defaultMessage="Save {objectType}"
-          id="embeddable.saveModal.saveTitle"
+          id="embeddableApi.saveModal.saveTitle"
           values={
             Object {
               "objectType": "visualization",
@@ -228,7 +228,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
           label={
             <FormattedMessage
               defaultMessage="Title"
-              id="embeddable.saveModal.titleLabel"
+              id="embeddableApi.saveModal.titleLabel"
               values={Object {}}
             />
           }
@@ -252,7 +252,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
           label={
             <FormattedMessage
               defaultMessage="Description"
-              id="embeddable.saveModal.descriptionLabel"
+              id="embeddableApi.saveModal.descriptionLabel"
               values={Object {}}
             />
           }
@@ -273,7 +273,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       >
         <FormattedMessage
           defaultMessage="Cancel"
-          id="embeddable.saveModal.cancelButtonLabel"
+          id="embeddableApi.saveModal.cancelButtonLabel"
           values={Object {}}
         />
       </EuiButtonEmpty>
@@ -305,7 +305,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
       <EuiModalHeaderTitle>
         <FormattedMessage
           defaultMessage="Save {objectType}"
-          id="embeddable.saveModal.saveTitle"
+          id="embeddableApi.saveModal.saveTitle"
           values={
             Object {
               "objectType": "visualization",
@@ -329,7 +329,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
               label={
                 <FormattedMessage
                   defaultMessage="Title"
-                  id="embeddable.saveModal.titleLabel"
+                  id="embeddableApi.saveModal.titleLabel"
                   values={Object {}}
                 />
               }
@@ -353,7 +353,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
               label={
                 <FormattedMessage
                   defaultMessage="Description"
-                  id="embeddable.saveModal.descriptionLabel"
+                  id="embeddableApi.saveModal.descriptionLabel"
                   values={Object {}}
                 />
               }
@@ -384,7 +384,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
       >
         <FormattedMessage
           defaultMessage="Cancel"
-          id="embeddable.saveModal.cancelButtonLabel"
+          id="embeddableApi.saveModal.cancelButtonLabel"
           values={Object {}}
         />
       </EuiButtonEmpty>

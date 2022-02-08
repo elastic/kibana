@@ -35,10 +35,10 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
   const [returnToOriginMode, setReturnToOriginMode] = useState(Boolean(props.originatingApp));
   const { documentInfo } = props;
 
-  const returnLabel = i18n.translate('embeddable.saveModalOrigin.returnToOriginLabel', {
+  const returnLabel = i18n.translate('embeddableApi.saveModalOrigin.returnToOriginLabel', {
     defaultMessage: 'Return',
   });
-  const addLabel = i18n.translate('embeddable.saveModalOrigin.addToOriginLabel', {
+  const addLabel = i18n.translate('embeddableApi.saveModalOrigin.addToOriginLabel', {
     defaultMessage: 'Add',
   });
 
@@ -71,7 +71,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
               label={
                 props.returnToOriginSwitchLabel ?? (
                   <FormattedMessage
-                    id="embeddable.saveModalOrigin.originAfterSavingSwitchLabel"
+                    id="embeddableApi.saveModalOrigin.originAfterSavingSwitchLabel"
                     defaultMessage="{originVerb} to {origin} after saving"
                     values={{ originVerb, origin }}
                   />
@@ -92,7 +92,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
   };
 
   const confirmButtonLabel = returnToOriginMode
-    ? i18n.translate('embeddable.saveModalOrigin.saveAndReturnLabel', {
+    ? i18n.translate('embeddableApi.saveModalOrigin.saveAndReturnLabel', {
         defaultMessage: 'Save and return',
       })
     : null;
