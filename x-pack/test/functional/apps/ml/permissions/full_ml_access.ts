@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
     { user: USER.ML_POWERUSER_SPACES, discoverAvailable: false },
   ];
 
-  describe('for user with full ML access', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/124938
+  describe.skip('for user with full ML access', function () {
     this.tags(['skipFirefox', 'mlqa']);
 
     describe('with no data loaded', function () {
