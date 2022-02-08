@@ -76,6 +76,7 @@ export async function getLensServices(
     usageCollection,
     savedObjectsTagging,
     attributeService,
+    executionContext: coreStart.executionContext,
     http: coreStart.http,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,

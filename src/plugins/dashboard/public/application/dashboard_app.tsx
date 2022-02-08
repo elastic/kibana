@@ -48,6 +48,11 @@ export function DashboardApp({
     [core.notifications.toasts, history, uiSettings]
   );
 
+  core.executionContext.set({
+    page: 'app',
+    id: savedDashboardId || 'new',
+  });
+
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
     history,

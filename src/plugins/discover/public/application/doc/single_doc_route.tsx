@@ -31,10 +31,16 @@ export interface DocUrlParams {
 
 const SingleDoc = ({ id }: SingleDocRouteProps) => {
   const services = useDiscoverServices();
-  const { chrome, timefilter } = services;
+  const { chrome, timefilter, core } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
   const breadcrumb = useMainRouteBreadcrumb();
+
+  core.executionContext.set({
+    page: 'single-doc',
+    id: indexPatternId || '',
+  });
+
 
   useEffect(() => {
     chrome.setBreadcrumbs([

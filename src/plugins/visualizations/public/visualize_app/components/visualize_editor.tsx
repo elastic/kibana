@@ -33,6 +33,13 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
 
+
+  services.executionContext.set({
+    page: 'editor',
+    id: visualizationIdFromUrl,
+  })
+
+
   const isChromeVisible = useChromeVisibility(services.chrome);
   const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
     services,

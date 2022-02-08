@@ -31,6 +31,7 @@ export const VisualizeListing = () => {
   const {
     services: {
       application,
+      executionContext,
       chrome,
       history,
       toastNotifications,
@@ -95,6 +96,12 @@ export const VisualizeListing = () => {
     },
     [application, history]
   );
+
+  executionContext.set({
+    page: 'list',
+    id: '',
+  })
+
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
   const tableColumns = useMemo(

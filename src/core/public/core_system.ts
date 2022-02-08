@@ -31,6 +31,7 @@ import { DeprecationsService } from './deprecations';
 import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { ExecutionContextService } from './execution_context';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -87,6 +88,7 @@ export class CoreSystem {
   private readonly theme: ThemeService;
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
+  private readonly executionContext: ExecutionContextService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -121,6 +123,7 @@ export class CoreSystem {
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
+    this.executionContext = new ExecutionContextService();
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
@@ -137,7 +140,9 @@ export class CoreSystem {
       });
       await this.integrations.setup();
       this.docLinks.setup();
-      const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+
+      const executionContext = this.executionContext.setup();
+      const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup, executionContext });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
       const theme = this.theme.setup({ injectedMetadata });
@@ -153,6 +158,7 @@ export class CoreSystem {
         notifications,
         theme,
         uiSettings,
+        executionContext,
       };
 
       // Services that do not expose contracts at setup
@@ -180,6 +186,7 @@ export class CoreSystem {
       const i18n = await this.i18n.start();
       const fatalErrors = await this.fatalErrors.start();
       const theme = this.theme.start();
+      const executionContext = this.executionContext.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
@@ -201,6 +208,14 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
       });
       const application = await this.application.start({ http, theme, overlays });
+
+      application.currentAppId$.subscribe(appId => {
+        executionContext.clear();
+        executionContext.set({
+          appId
+        })
+      })
+      
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -216,6 +231,7 @@ export class CoreSystem {
         application,
         chrome,
         docLinks,
+        executionContext,
         http,
         theme,
         savedObjects,

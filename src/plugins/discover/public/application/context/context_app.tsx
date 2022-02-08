@@ -36,10 +36,16 @@ export interface ContextAppProps {
 
 export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const services = useDiscoverServices();
-  const { uiSettings, capabilities, indexPatterns, navigation, filterManager } = services;
+  const { uiSettings, capabilities, indexPatterns, navigation, filterManager, core } = services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+
+  core.executionContext.set({
+    page: 'context',
+    id: indexPattern.id || '',
+  });
+
 
   /**
    * Context app state

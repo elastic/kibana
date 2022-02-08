@@ -69,6 +69,7 @@ export function App({
     getOriginatingAppName,
     spaces,
     http,
+    executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
   } = lensAppServices;
@@ -105,6 +106,7 @@ export function App({
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
+  const savedObjectId = (initialInput as LensByReferenceInput)?.savedObjectId;
 
   useEffect(() => {
     if (currentDoc) {
@@ -115,6 +117,11 @@ export function App({
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
   }, [setIndicateNoData]);
+
+  executionContext.set({
+    id: savedObjectId || 'new',
+    page: 'editor',
+  });
 
   useEffect(() => {
     if (indicateNoData) {
@@ -128,9 +135,9 @@ export function App({
         // Temporarily required until the 'by value' paradigm is default.
         dashboardFeatureFlag.allowByValueEmbeddables &&
           isLinkedToOriginatingApp &&
-          !(initialInput as LensByReferenceInput)?.savedObjectId
+          !savedObjectId
       ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, initialInput]
+    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
   );
 
   useEffect(() => {

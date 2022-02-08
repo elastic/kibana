@@ -67,6 +67,11 @@ export const DashboardListing = ({
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
+  core.executionContext.set({
+    page: 'list',
+    id: '',
+  })
+
   // Set breadcrumbs useEffect
   useEffect(() => {
     setBreadcrumbs([

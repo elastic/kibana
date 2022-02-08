@@ -50,6 +50,12 @@ export function DiscoverMainRoute() {
   >([]);
   const { id } = useParams<DiscoverLandingParams>();
 
+  core.executionContext.set({
+    page: 'app',
+    id: id || 'new',
+  });
+
+
   const navigateToOverview = useCallback(() => {
     core.application.navigateToApp('kibanaOverview', { path: '#' });
   }, [core.application]);
