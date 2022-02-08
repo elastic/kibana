@@ -618,6 +618,7 @@
     "@types/kbn__telemetry-tools": "link:bazel-bin/packages/kbn-telemetry-tools/npm_module_types",
     "@types/kbn__test": "link:bazel-bin/packages/kbn-test/npm_module_types",
     "@types/kbn__test-jest-helpers": "link:bazel-bin/packages/kbn-test-jest-helpers/npm_module_types",
+    "@types/kbn__typed-react-router-config": "link:bazel-bin/packages/kbn-typed-react-router-config/npm_module_types",
     "@types/kbn__ui-shared-deps-npm": "link:bazel-bin/packages/kbn-ui-shared-deps-npm/npm_module_types",
     "@types/kbn__ui-shared-deps-src": "link:bazel-bin/packages/kbn-ui-shared-deps-src/npm_module_types",
     "@types/kbn__ui-theme": "link:bazel-bin/packages/kbn-ui-theme/npm_module_types",
