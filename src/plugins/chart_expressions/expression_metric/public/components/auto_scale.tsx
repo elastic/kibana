@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useEffect, useState, ComponentType } from 'react';
+import React, { useRef, useEffect, useState, ComponentType, useMemo } from 'react';
 import { throttle } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
 import { autoScaleWrapperStyle } from './auto_scale.styles';
@@ -41,29 +41,36 @@ export function computeScale(
   return Math.max(Math.min(MAX_SCALE, Math.min(scaleX, scaleY)), minScale);
 }
 
-export const withAutoScale =
-  (autoScaleParams?: AutoScaleParams) => (WrappedComponent: ComponentType<any>) => (props: any) => {
+export function withAutoScale<T>(
+  WrappedComponent: ComponentType<T>,
+  autoScaleParams?: AutoScaleParams
+) {
+  return (props: T) => {
     const [scale, setScale] = useState(0);
     const parentRef = useRef<HTMLDivElement>(null);
     const childrenRef = useRef<HTMLDivElement>(null);
     const parentDimensions = useResizeObserver(parentRef.current);
 
-    const scaleFn = throttle(() => {
-      const newScale = computeScale(
-        { clientHeight: parentDimensions.height, clientWidth: parentDimensions.width },
-        childrenRef.current,
-        autoScaleParams?.minScale
-      );
+    const scaleFn = useMemo(
+      () =>
+        throttle(() => {
+          const newScale = computeScale(
+            { clientHeight: parentDimensions.height, clientWidth: parentDimensions.width },
+            childrenRef.current,
+            autoScaleParams?.minScale
+          );
 
-      // Prevent an infinite render loop
-      if (scale !== newScale) {
-        setScale(newScale);
-      }
-    });
+          // Prevent an infinite render loop
+          if (scale !== newScale) {
+            setScale(newScale);
+          }
+        }),
+      [parentDimensions, setScale, scale, childrenRef]
+    );
 
     useEffect(() => {
       scaleFn();
-    }, [parentDimensions]);
+    }, [scaleFn]);
 
     return (
       <div ref={parentRef} css={autoScaleWrapperStyle}>
@@ -78,3 +85,4 @@ export const withAutoScale =
       </div>
     );
   };
+}

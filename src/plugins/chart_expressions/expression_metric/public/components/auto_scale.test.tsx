@@ -44,7 +44,7 @@ describe('AutoScale', () => {
   describe('withAutoScale', () => {
     it('renders', () => {
       const Component = () => <h1>Hoi!</h1>;
-      const WrappedComponent = withAutoScale()(Component);
+      const WrappedComponent = withAutoScale(Component);
       expect(mount(<WrappedComponent />)).toMatchInlineSnapshot(`
         <Component>
           <div

@@ -28,6 +28,8 @@ export interface MetricVisComponentProps {
   renderComplete: () => void;
 }
 
+const AutoScaleMetricVisValue = withAutoScale(MetricVisValue);
+
 class MetricVisComponent extends Component<MetricVisComponentProps> {
   private getColor(value: number, paletteParams: CustomPaletteState) {
     return getPaletteService().get('custom')?.getColorForValue?.(value, paletteParams, {
@@ -110,7 +112,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
 
   private renderMetric = (metric: MetricOptions, index: number) => {
     const MetricComponent = this.props.visParams.metric.autoScale
-      ? withAutoScale()(MetricVisValue)
+      ? AutoScaleMetricVisValue
       : MetricVisValue;
 
     return (
