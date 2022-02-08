@@ -49,7 +49,7 @@ describe('SuperUser - Packs', () => {
       findFormFieldByRowsLabelAndType('Description (optional)', 'Pack description');
       findFormFieldByRowsLabelAndType(
         'Scheduled agent policies (optional)',
-        'Default Fleet Server policy'
+        'Fleet Server policy 1'
       );
       cy.react('List').first().click();
       findAndClickButton('Add query');
@@ -180,16 +180,16 @@ describe('SuperUser - Packs', () => {
 
       cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
         .click()
-        .type('ONEMAPPING {downArrow} {enter}');
-      cy.contains('Custom key/value pairs');
-      cy.contains('Days of uptime');
+        .type('ONE_MAPPING {downArrow} {enter}');
+      cy.contains('Name of the continent');
+      cy.contains('Seconds of uptime');
 
       findAndClickButton('Save');
       cy.react('CustomItemAction', {
-        props: { index: 0, item: { id: 'ONEMAPPING' } },
+        props: { index: 0, item: { id: 'ONE_MAPPING_CHANGED' } },
       }).click();
-      cy.contains('Custom key/value pairs');
-      cy.contains('Days of uptime');
+      cy.contains('Name of the continent');
+      cy.contains('Seconds of uptime');
     });
 
     it('to click delete button', () => {
@@ -202,7 +202,7 @@ describe('SuperUser - Packs', () => {
     beforeEach(() => {
       login();
     });
-    const AGENT_NAME = 'PackTest';
+    const AGENT_NAME = 'PackTest2';
     const REMOVING_PACK = 'removing-pack';
     it('add integration', () => {
       cy.visit(FLEET_AGENT_POLICIES);
@@ -211,7 +211,7 @@ describe('SuperUser - Packs', () => {
       cy.get('.euiFlyoutFooter').contains('Create agent policy').click();
       cy.contains(`Agent policy '${AGENT_NAME}' created`);
       cy.visit(FLEET_AGENT_POLICIES);
-      cy.contains('Default Fleet Server policy').click();
+      cy.contains(AGENT_NAME).click();
       cy.contains('Add integration').click();
       cy.contains(integration).click();
       addIntegration(AGENT_NAME);
@@ -240,6 +240,7 @@ describe('SuperUser - Packs', () => {
       navigateTo('app/osquery/packs');
       cy.contains(REMOVING_PACK).click();
       cy.contains(`${REMOVING_PACK} details`);
+      cy.wait(1000);
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: '' } }).should('exist');
     });
