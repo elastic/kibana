@@ -43,6 +43,14 @@ export const INSPECT_PATTERN_DIFFERENT = i18n.translate(
   }
 );
 
+export const LOGS_EXCLUDE_MESSAGE = i18n.translate(
+  'xpack.securitySolution.inspectPatternDifferent',
+  {
+    defaultMessage:
+      'When the logs-* index pattern is selected, Elastic cloud logs are excluded from the search.',
+  }
+);
+
 export const QUERY_TIME = i18n.translate('xpack.securitySolution.inspect.modal.queryTimeLabel', {
   defaultMessage: 'Query time',
 });

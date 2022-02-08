@@ -136,13 +136,14 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
       )}
       {isShowingModal && request !== null && response !== null && (
         <ModalInspectQuery
-          closeModal={handleCloseModal}
-          request={request}
-          response={response}
           additionalRequests={additionalRequests}
           additionalResponses={additionalResponses}
-          title={title}
+          closeModal={handleCloseModal}
           data-test-subj="inspect-modal"
+          inputId={inputId}
+          request={request}
+          response={response}
+          title={title}
         />
       )}
     </>
