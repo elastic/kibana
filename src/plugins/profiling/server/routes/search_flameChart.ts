@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
 import { getRemoteRoutePaths } from '../../common';
+import { FlameGraph } from './flamegraph';
 
 export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   const paths = getRemoteRoutePaths();
@@ -150,13 +151,15 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           body: { ids: [...stackFrameDocIDs] },
         });
 
+        const flamegraph = new FlameGraph(
+          resEvents.body,
+          resTotalEvents.body,
+          resStackTraces.body.docs,
+          resStackFrames.body.docs
+        );
+
         return response.ok({
-          body: {
-            events: resEvents.body,
-            totalEvents: resTotalEvents.body,
-            stackTraces: resStackTraces.body.docs,
-            stackFrames: resStackFrames.body.docs,
-          },
+          body: flamegraph.toElastic(),
         });
       } catch (e) {
         return response.customError({
