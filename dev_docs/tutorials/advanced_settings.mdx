@@ -7,9 +7,9 @@ date: 2022-02-07
 tags: ['kibana','onboarding', 'dev', 'architecture', 'tutorials']
 ---
 
-_Note: Advanced settings, uiSettings, settings and config are often used to describe the same concept. While we work toward unifying naming, there will be some inconsistencies until unification is complete._
+_Note: Advanced settings, uiSettings, settings, and config are often used to describe the same concept. While we work toward unifying naming, there will be some inconsistencies until unification is complete._
 
-UI settings are configurable from the Advanced Settings page in Management and control the behavior of Kibana. When settings are changed from their default, the new value is persisted as a key/value pair in the `config` saved object registered by `core`.
+*Advanced Settings* control the behavior of Kibana. To configure the UI settings, open the main menu, then click *Stack Management > Advanced Settings*.  When settings are changed from their default, the new value is persisted as a key/value pair in the `config` saved object registered by `core`.
 
 There are several ways to configure an advanced setting:
  - <DocLink id="kibDevTutorialAdvancedSettings" section="configuration-with-advanced-settings-ui" text="Through the Advanced Settings UI"/>
@@ -27,15 +27,15 @@ Configuration through the Advanced Settings UI is restricted to users authorised
 
 ### Configuration with UI settings overrides
 
-When a setting is configured as an override in `kibana.yml`, it will override any other value store in the `config` saved object. The override applies to Kibana as a whole for all spaces and users and the option will be disabled in the Advanced Settings page. We refer to these as "global" overrides.
+When a setting is configured as an override in `kibana.yml`, it overrides any other value store in the `config` saved object. The override applies to Kibana as a whole for all spaces and users, and the option is disabled on the Advanced Settings page. We refer to these as "global" overrides.
 
-Note: If an override is misconfigured, it will fail config validation and prevent Kibana from starting up. Validation is, however, limited to value _type_ and not to _key_ (name). For example, if a plugin registers a setting `my_plugin_foo: 42` then declaring an override as
+Note: If an override is misconfigured, it fails config validation and prevents Kibana from starting up. Validation is, however, limited to value _type_ and not to _key_ (name). For example, when a plugin registers the `my_plugin_foo: 42` setting , then declares the following override, the config validation fails:
 
 ```kibana.yml
 uiSettings.overrides:
   my_plugin_foo: "42"
 ```
-will fail on config validation but the following won't:
+The following override results in a successful config validation:
 
 ```kibana.yml
 uiSettings.overrides:
@@ -47,10 +47,10 @@ uiSettings.overrides:
 On the client, the `uiSettings` service is accessible directly from `core` and the client provides plugins access to the `config` entries stored in Elasticsearch.
 
 <DocCallOut>
-  See [the client-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-public.iuisettingsclient.md)
+  Refer to [the client-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-public.iuisettingsclient.md)
 </DocCallOut>
 
-Here is a basic example for using the `uiSettings` service:
+The following is a basic example for using the `uiSettings` service:
 
 **src/plugins/charts/public/plugin.ts**
 ```ts
@@ -124,7 +124,7 @@ On the server side, `uiSettings` are accessible directly from `core`. The follow
 The example also shows how plugins can leverage the optional deprecation parameter on registration for handling deprecation notices and renames. The deprecation warnings are rendered in the Advanced Settings UI and should also be added to the Configure Kibana guide.
 
 <DocCallOut>
-  See [the server-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)
+  Refer to [the server-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)
 </DocCallOut>
 
 **src/plugins/charts/server/plugin.ts**
@@ -183,9 +183,9 @@ export class ChartsServerPlugin implements Plugin<object, object> {
   public stop() {}
 }  
 ```
-To keep Kibana fast, `uiSettings` are cached. Any changes that require a cache refresh should use the `requiresPageReload` parameter on registration. 
+For optimal Kibana performance, `uiSettings` are cached. Any changes that require a cache refresh should use the `requiresPageReload` parameter on registration. 
 
-For example, changing the time-picker refresh interval will trigger a prompt in the UI that the page needs to be refreshed to save the new value:
+For example, changing the time filter refresh interval triggers a prompt in the UI that the page needs to be refreshed to save the new value:
 
 **src/plugins/data/server/ui_settings.ts**
 
@@ -224,9 +224,9 @@ export function getUiSettings(
 ```
 
 ### Registering Migrations
-To change or remove a `uiSetting`, the whole `config` Saved Object needs to be migrated. `uiSettings` migrations are declared directly in the service.
+To change or remove a `uiSetting`, you must migrate the whole `config` Saved Object. `uiSettings` migrations are declared directly in the service.
 
-For example, in 7.9.0, `siem` as renamed to `securitySolution` and in 8.0.0, `theme:version` was removed:
+For example, in 7.9.0, `siem` as renamed to `securitySolution`, and in 8.0.0, `theme:version` was removed:
 
 **src/core/server/ui_settings/saved_objects/migrations.ts**
 
