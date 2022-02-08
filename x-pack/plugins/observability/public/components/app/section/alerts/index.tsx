@@ -166,11 +166,6 @@ export function AlertsSection() {
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup gutterSize="s" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiHealth color="primary" textSize="xs">
-                              Active
-                            </EuiHealth>
-                          </EuiFlexItem>
                           {alert.muteAll && (
                             <EuiFlexItem grow={false}>
                               <EuiBadge color="hollow">
