@@ -24,7 +24,6 @@ import {
   createComment,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromSavedObject,
-  assertWarningHeader,
   extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
@@ -39,6 +38,7 @@ import {
   obsSec,
 } from '../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../common/lib/authentication';
+import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

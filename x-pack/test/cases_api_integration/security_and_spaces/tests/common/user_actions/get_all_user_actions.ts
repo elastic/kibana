@@ -27,7 +27,6 @@ import {
   createComment,
   updateComment,
   deleteComment,
-  assertWarningHeader,
   extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
@@ -39,6 +38,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
