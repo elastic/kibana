@@ -258,12 +258,33 @@ export class SettingsPageObject extends FtrService {
     );
   }
 
+  async clearFieldTypeFilter(type: string) {
+    await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
+    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
   async setFieldTypeFilter(type: string) {
     await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
     await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
+  async clearScriptedFieldLanguageFilter(type: string) {
+    await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    await this.testSubjects.existOrFail(
+      `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
+    );
+    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${type}-checked`);
+    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${type}`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async setScriptedFieldLanguageFilter(language: string) {
@@ -274,6 +295,7 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.existOrFail(
       `scriptedFieldLanguageFilterDropdown-option-${language}-checked`
     );
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async filterField(name: string) {
