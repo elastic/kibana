@@ -136,7 +136,7 @@ describe('pollEsNodesVersion', () => {
 
   const nodeInfosSuccessOnce = (infos: NodesInfo) => {
     // @ts-expect-error not full interface
-    internalClient.nodes.info.mockImplementationOnce(() => Promise.resolve(infos));
+    internalClient.nodes.info.mockResponseOnce(infos);
   };
   const nodeInfosErrorOnce = (error: any) => {
     internalClient.nodes.info.mockImplementationOnce(() => Promise.reject(new Error(error)));
