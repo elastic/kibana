@@ -17,7 +17,7 @@ export function MachineLearningNavigationProvider({
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
   return {
     async navigateToMl() {
@@ -263,6 +263,12 @@ export function MachineLearningNavigationProvider({
         expectedUrlPart,
         `Expected the current URL "${currentUrl}" to not include ${expectedUrlPart}`
       );
+    },
+
+    async browserBackTo(backTestSubj: string) {
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail(backTestSubj, { timeout: 10 * 1000 });
     },
   };
 }

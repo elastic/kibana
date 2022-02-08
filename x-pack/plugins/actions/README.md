@@ -556,6 +556,8 @@ When creating a new action type, your plugin will eventually call `server.plugin
 
 Consider working with the alerting team on early structure /design feedback of new actions, especially as the APIs and infrastructure are still under development.
 
+Don't forget to ping @elastic/security-detections-response to see if the new connector should be enabled within their solution.
+
 ## licensing
 
 Currently actions are licensed as "basic" if the action only interacts with the stack, eg the server log and es index actions. Other actions are at least "gold" level.
