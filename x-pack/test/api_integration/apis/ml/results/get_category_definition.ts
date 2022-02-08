@@ -140,16 +140,6 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('should not produce the correct category for the job in the wrong space', async () => {
-      await getCategoryDefinition(
-        jobIdSpace1,
-        expectedCategoryDefinition.categoryId,
-        USER.ML_POWERUSER,
-        404,
-        idSpace2
-      );
-    });
-
     it('should produce the correct category for ml viewer user', async () => {
       const resp = await getCategoryDefinition(
         jobIdSpace1,
