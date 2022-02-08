@@ -271,4 +271,18 @@ export function registerCrawlerRoutes({
       path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
     })
   );
+
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/domain_configs',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v1/engines/:name/crawler/domain_configs',
+    })
+  );
 }

@@ -10,7 +10,6 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -19,38 +18,28 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiIcon,
-  EuiNotificationBadge,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
+import { Loading } from '../../../../../shared/loading';
 
 import { CrawlerLogic } from '../../crawler_logic';
 
-import { SimplifiedSelectable } from '../crawl_select_domains_modal/simplified_selectable';
-
+import { CrawlCustomSettingsFlyoutContent } from './crawl_custom_settings_flyout_content';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
 export const CrawlCustomSettingsFlyout: React.FC = () => {
-  const { domains } = useValues(CrawlerLogic);
-  const domainUrls = domains.map((domain) => domain.url);
-
-  const crawlCustomSettingsFlyoutLogic = CrawlCustomSettingsFlyoutLogic({ domains });
-  const { isDataLoading, isFlyoutVisible, selectedDomainUrls } = useValues(
-    crawlCustomSettingsFlyoutLogic
+  const { isDataLoading, isFormSubmitting, isFlyoutVisible, selectedDomainUrls } = useValues(
+    CrawlCustomSettingsFlyoutLogic
   );
-  const { hideFlyout, onSelectDomainUrls } = useActions(crawlCustomSettingsFlyoutLogic);
+  const { hideFlyout } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   const { startCrawl } = useActions(CrawlerLogic);
-
-  const domainAccordionId = useGeneratedHtmlId({ prefix: 'domainAccordion' });
 
   if (!isFlyoutVisible) {
     return null;
@@ -82,55 +71,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiPanel hasBorder>
-          <EuiAccordion
-            id={domainAccordionId}
-            initialIsOpen
-            buttonContent={
-              <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="globe" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h3>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.domainsAccordionButtonLabel',
-                        {
-                          defaultMessage: 'Add domains to your crawl',
-                        }
-                      )}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            extraAction={
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                <EuiNotificationBadge
-                  size="m"
-                  color={selectedDomainUrls.length > 0 ? 'accent' : 'subdued'}
-                >
-                  {selectedDomainUrls.length}
-                </EuiNotificationBadge>
-                <EuiFlexItem grow={false}>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.cralCustomSettingsFlyout.selectedDescriptor',
-                    {
-                      defaultMessage: 'selected',
-                    }
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
-            <SimplifiedSelectable
-              options={domainUrls}
-              selectedOptions={selectedDomainUrls}
-              onChange={onSelectDomainUrls}
-            />
-          </EuiAccordion>
-        </EuiPanel>
+        {isDataLoading ? <Loading /> : <CrawlCustomSettingsFlyoutContent />}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
@@ -143,8 +84,8 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
               onClick={() => {
                 startCrawl({ domain_allowlist: selectedDomainUrls });
               }}
-              disabled={selectedDomainUrls.length === 0}
-              isLoading={isDataLoading}
+              disabled={isDataLoading || selectedDomainUrls.length === 0}
+              isLoading={isFormSubmitting}
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.startCrawlButtonLabel',

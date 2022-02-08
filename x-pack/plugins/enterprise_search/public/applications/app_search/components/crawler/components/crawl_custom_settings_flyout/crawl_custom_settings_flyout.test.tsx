@@ -11,20 +11,22 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiAccordion, EuiButton, EuiButtonEmpty, EuiFlyout, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlyout, EuiFlyoutFooter } from '@elastic/eui';
 
+import { Loading } from '../../../../../shared/loading';
 import { rerender } from '../../../../../test_helpers';
 
-import { SimplifiedSelectable } from '../crawl_select_domains_modal/simplified_selectable';
-
 import { CrawlCustomSettingsFlyout } from './crawl_custom_settings_flyout';
+import { CrawlCustomSettingsFlyoutContent } from './crawl_custom_settings_flyout_content';
 
 const MOCK_VALUES = {
+  // CrawlCustomSettingsFlyoutLogic
+  isDataLoading: false,
+  isFormSubmitting: false,
+  isFlyoutVisible: true,
+  selectedDomainUrls: ['https://www.elastic.co'],
   // CrawlerLogic
   domains: [{ url: 'https://www.elastic.co' }, { url: 'https://www.swiftype.com' }],
-  // CrawlCustomSettingsFlyoutLogic
-  selectedDomainUrls: ['https://www.elastic.co'],
-  isFlyoutVisible: true,
 };
 
 const MOCK_ACTIONS = {
@@ -35,7 +37,7 @@ const MOCK_ACTIONS = {
   startCrawl: jest.fn(),
 };
 
-describe('CrawlSelectDomainsModal', () => {
+describe('CrawlCustomSettingsFlyout', () => {
   let wrapper: ShallowWrapper;
 
   beforeEach(() => {
@@ -68,17 +70,35 @@ describe('CrawlSelectDomainsModal', () => {
     );
   });
 
-  it('allows the user to select domains', () => {
-    const domainAccordion = wrapper.find(EuiAccordion);
+  it('lets the user customize their crawl', () => {
+    expect(wrapper.find(Loading)).toHaveLength(0);
+    expect(wrapper.find(CrawlCustomSettingsFlyoutContent)).toHaveLength(1);
+  });
 
-    expect(domainAccordion.find(SimplifiedSelectable).props()).toEqual({
-      options: ['https://www.elastic.co', 'https://www.swiftype.com'],
-      selectedOptions: ['https://www.elastic.co'],
-      onChange: MOCK_ACTIONS.onSelectDomainUrls,
+  it('shows a loading state', () => {
+    setMockValues({
+      ...MOCK_VALUES,
+      isDataLoading: true,
     });
+
+    rerender(wrapper);
+
+    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.find(CrawlCustomSettingsFlyoutContent)).toHaveLength(0);
   });
 
   describe('submit button', () => {
+    it('is enabled by default', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        selectedDomainUrls: [],
+      });
+
+      rerender(wrapper);
+
+      expect(wrapper.find(EuiFlyoutFooter).find(EuiButton).prop('disabled')).toEqual(true);
+    });
+
     it('is disabled when no domains are selected', () => {
       setMockValues({
         ...MOCK_VALUES,
@@ -88,6 +108,28 @@ describe('CrawlSelectDomainsModal', () => {
       rerender(wrapper);
 
       expect(wrapper.find(EuiFlyoutFooter).find(EuiButton).prop('disabled')).toEqual(true);
+    });
+
+    it('is disabled when data is loading', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        isDataLoading: true,
+      });
+
+      rerender(wrapper);
+
+      expect(wrapper.find(EuiFlyoutFooter).find(EuiButton).prop('disabled')).toEqual(true);
+    });
+
+    it('shows a loading state when the user makes a request', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        isFormSubmitting: true,
+      });
+
+      rerender(wrapper);
+
+      expect(wrapper.find(EuiFlyoutFooter).find(EuiButton).prop('isLoading')).toEqual(true);
     });
 
     it('starts a crawl and hides the modal', () => {
