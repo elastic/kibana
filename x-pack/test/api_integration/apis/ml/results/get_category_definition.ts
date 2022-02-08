@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
       expect(resp.regex.length).to.be.greaterThan(
         0,
-        `regex string length should be greater than 0 (got ${resp.terms.length})`
+        `regex string length should be greater than 0 (got ${resp.regex.length})`
       );
     });
 
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
       expect(resp.regex.length).to.be.greaterThan(
         0,
-        `regex string length should be greater than 0 (got ${resp.terms.length})`
+        `regex string length should be greater than 0 (got ${resp.regex.length})`
       );
     });
 
