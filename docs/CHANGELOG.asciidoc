@@ -265,6 +265,23 @@ For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
 
 To review the deprecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
 
+[float]
+[[known-issue-8.0.0-rc1]]
+=== Known issue
+
+[discrete]
+[[known-issue-123550]]
+.7.x saved object imports to 8.0.0-rc1 doesn't preserve dashboard UUIDs
+[%collapsible]
+====
+*Details* +
+When you export saved objects from 7.x to 8.0.0-rc1 with *Create new objects with random IDs* selected, the dashboard UUIDs change when you delete and import the dashboard.
+
+For more information, refer to {kibana-pull}123550[#123550].
+
+*Impact* +
+The known issue affects all 8.0.0 upgrades that migrate to a new cluster.
+====
 
 [float]
 [[features-8.0.0-rc1]]
