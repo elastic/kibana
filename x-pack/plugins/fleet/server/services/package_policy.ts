@@ -29,6 +29,7 @@ import {
   validatePackagePolicy,
   validationHasErrors,
   SO_SEARCH_LIMIT,
+  getMaxPackageName,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -1395,15 +1396,5 @@ export async function incrementPackageName(
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
   });
 
-  // Retrieve highest number appended to package policy name and increment it by one
-  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
-
-  const maxPkgPolicyName = Math.max(
-    ...(packagePolicyData?.items ?? [])
-      .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-      .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
-    0
-  );
-
-  return `${packageName}-${maxPkgPolicyName + 1}`;
+  return getMaxPackageName(packageName, packagePolicyData?.items);
 }

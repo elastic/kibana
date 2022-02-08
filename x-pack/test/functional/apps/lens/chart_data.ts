@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render heatmap chart', async () => {
-      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+      await PageObjects.lens.switchToVisualization('heatmap', 'heat');
       await PageObjects.lens.waitForVisualization();
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
