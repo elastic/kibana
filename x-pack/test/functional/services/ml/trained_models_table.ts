@@ -208,5 +208,35 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowDeleteAction'));
       await this.assertDeleteModalExists();
     }
+
+    public async ensureRowIsExpanded(modelId: string) {
+      await this.filterWithSearchString(modelId);
+      await retry.tryForTime(10 * 1000, async () => {
+        if (!(await testSubjects.exists('mlTrainedModelRowDetails'))) {
+          await testSubjects.click(`${this.rowSelector(modelId)} > mlModelsTableRowDetailsToggle`);
+          await testSubjects.existOrFail('mlTrainedModelRowDetails', { timeout: 1000 });
+        }
+      });
+    }
+
+    public async assertDetailsTabVisible() {
+      await testSubjects.existOrFail('mlTrainedModelDetails');
+    }
+
+    public async assertInferenceConfigTabVisible() {
+      await testSubjects.existOrFail('mlTrainedModelInferenceConfig');
+    }
+
+    public async assertStatsTabVisible() {
+      await testSubjects.existOrFail('mlTrainedModelStats');
+    }
+
+    public async assertPipelinesTabVisible(expectVisible: boolean = true) {
+      if (expectVisible) {
+        await testSubjects.existOrFail('mlTrainedModelPipelines');
+      } else {
+        await testSubjects.missingOrFail('mlTrainedModelPipelines');
+      }
+    }
   })();
 }

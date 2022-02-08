@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiTitle,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -151,9 +152,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     [stats.deployment_stats]
   );
 
-  const tabs = [
+  const tabs: EuiTabbedContentTab[] = [
     {
       id: 'details',
+      'data-test-subj': 'mlTrainedModelDetails',
       name: (
         <FormattedMessage
           id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTabLabel"
@@ -210,6 +212,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       ? [
           {
             id: 'config',
+            'data-test-subj': 'mlTrainedModelInferenceConfig',
             name: (
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.expandedRow.configTabLabel"
@@ -270,6 +273,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       ? [
           {
             id: 'stats',
+            'data-test-subj': 'mlTrainedModelStats',
             name: (
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel"
@@ -327,6 +331,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       ? [
           {
             id: 'pipelines',
+            'data-test-subj': 'mlTrainedModelPipelines',
             name: (
               <>
                 <FormattedMessage
@@ -355,6 +360,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       initialSelectedTab={tabs[0]}
       autoFocus="selected"
       onTabClick={(tab) => {}}
+      data-test-subj={'mlTrainedModelRowDetails'}
     />
   );
 };
