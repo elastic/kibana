@@ -61,12 +61,11 @@ export function embeddableFunctionFactory({
       (state: ExpressionAstFunction): ExpressionAstFunction => {
         const embeddableInput = decode(state.arguments.config[0] as string);
 
-        if (embeddableInput.attributes || embeddableInput.savedVis) {
-          const embeddableType = state.arguments.type[0];
-          const migratedInput = migrateFn({ ...embeddableInput, type: embeddableType });
-          state.arguments.config[0] = encode(migratedInput);
-          state.arguments.type[0] = migratedInput.type as string;
-        }
+        const embeddableType = state.arguments.type[0];
+        const migratedInput = migrateFn({ ...embeddableInput, type: embeddableType });
+
+        state.arguments.config[0] = encode(migratedInput);
+        state.arguments.type[0] = migratedInput.type as string;
 
         return state;
       };
