@@ -13,7 +13,7 @@ import { v4 } from 'uuid';
 import { difference } from 'lodash';
 import {
   AlertExecutorOptions,
-  AlertInstance,
+  Alert,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
@@ -62,7 +62,7 @@ export type LifecycleAlertService<
 > = (alert: {
   id: string;
   fields: ExplicitAlertFields;
-}) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+}) => Alert<InstanceState, InstanceContext, ActionGroupIds>;
 
 export interface LifecycleAlertServices<
   InstanceState extends AlertInstanceState = never,
@@ -143,7 +143,7 @@ export const createLifecycleExecutor =
     >
   ): Promise<WrappedLifecycleRuleState<State>> => {
     const {
-      services: { alertInstanceFactory, shouldWriteAlerts },
+      services: { alertFactory, shouldWriteAlerts },
       state: previousState,
     } = options;
 
@@ -165,7 +165,7 @@ export const createLifecycleExecutor =
     > = {
       alertWithLifecycle: ({ id, fields }) => {
         currentAlerts[id] = fields;
-        return alertInstanceFactory(id);
+        return alertFactory.create(id);
       },
     };
 
