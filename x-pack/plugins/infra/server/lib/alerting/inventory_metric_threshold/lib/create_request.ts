@@ -13,6 +13,8 @@ import {
 } from '../../../../../common/inventory_models/types';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { createMetricAggregations } from './create_metric_aggregations';
+import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import { createBucketSelector } from './create_bucket_selector';
 
 export const createRequest = (
   index: string,
@@ -21,6 +23,7 @@ export const createRequest = (
   timerange: InfraTimerangeInput,
   compositeSize: number,
   afterKey: { node: string } | undefined,
+  condition: InventoryMetricConditions,
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput
 ) => {
@@ -50,6 +53,7 @@ export const createRequest = (
     composite.after = afterKey;
   }
   const metricAggregations = createMetricAggregations(timerange, nodeType, metric, customMetric);
+  const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
   const request: ESSearchRequest = {
     allow_no_indices: true,
@@ -61,7 +65,7 @@ export const createRequest = (
       aggs: {
         nodes: {
           composite,
-          aggs: metricAggregations,
+          aggs: { ...metricAggregations, ...bucketSelector },
         },
       },
     },
