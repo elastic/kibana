@@ -34,7 +34,27 @@ export class PdfMaker {
   private worker?: Worker;
 
   protected workerModulePath = path.resolve(__dirname, './worker.js');
-  protected workerMaxHeapSizeMb = 128; // We should consider making this number dynamic?
+
+  /**
+   * The maximum heap size for the worker thread. Used for both young and
+   * old heap generation regions.
+   *
+   * @note We need to choose a sane number given that we need to load a the Kibana
+   * node environment, all the library code and the subsequent buffers that
+   * could result from generating PDFs.
+   *
+   * Local testing indicates that to trigger an OOM event for the worker we need
+   * to exhaust not only heap but also any compression optimization and fallback
+   * swap space.
+   *
+   * With this value we are able to generate PDFs in excess of 5000x5000 pixels
+   * at which point issues other than memory start to show like glitches in the
+   * image.
+   *
+   * TODO: Should we consider making this number dynamic? It is difficult to
+   * know how we'd describe this to users in the most helpful way.
+   */
+  protected workerMaxHeapSizeMb = 128;
 
   constructor(layout: Layout, logo: string | undefined) {
     this._layout = layout;
@@ -136,11 +156,11 @@ export class PdfMaker {
     };
   }
 
-  public async generate(): Promise<Buffer> {
+  public async generate(): Promise<Uint8Array> {
     if (this.worker) throw new Error('PDF generation already in progress!');
 
-    return await new Promise<Buffer>((resolve, reject) => {
-      let buffer: undefined | Buffer;
+    return await new Promise<Uint8Array>((resolve, reject) => {
+      let buffer: undefined | Uint8Array;
       this.worker = new Worker(this.workerModulePath, {
         resourceLimits: {
           maxYoungGenerationSizeMb: this.workerMaxHeapSizeMb,
@@ -157,7 +177,7 @@ export class PdfMaker {
       });
 
       // We expect one message from the work container the PDF buffer.
-      this.worker.on('message', (pdfBuffer: Buffer) => (buffer = pdfBuffer));
+      this.worker.on('message', (pdfBuffer: Uint8Array) => (buffer = pdfBuffer));
 
       this.worker.on('exit', (code) => {
         if (code !== 0) {
