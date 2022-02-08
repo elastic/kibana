@@ -151,11 +151,26 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           body: { ids: [...stackFrameDocIDs] },
         });
 
+        const executableDocIDs = new Set<string>();
+        for (const trace of resStackTraces.body.docs) {
+          if (trace.found) {
+            for (const fileID of trace._source.FileID) {
+              executableDocIDs.add(fileID);
+            }
+          }
+        }
+
+        const resExecutables = await esClient.mget<any>({
+          index: 'profiling-executables',
+          body: { ids: [...executableDocIDs] },
+        });
+
         const flamegraph = new FlameGraph(
           resEvents.body,
           resTotalEvents.body,
           resStackTraces.body.docs,
-          resStackFrames.body.docs
+          resStackFrames.body.docs,
+          resExecutables.body.docs
         );
 
         return response.ok({
