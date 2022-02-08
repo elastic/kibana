@@ -30,12 +30,12 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     display: flex;
     flex: 1;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow-x: hidden;
-      overflow-y: scroll;
+      overflow-y: auto;
       padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 64px`};
     }
   }
@@ -53,7 +53,7 @@ const StyledEuiFlexButtonWrapper = styled(EuiFlexItem)`
 const StyledPanelContent = styled.div`
   display: block;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
 `;
 

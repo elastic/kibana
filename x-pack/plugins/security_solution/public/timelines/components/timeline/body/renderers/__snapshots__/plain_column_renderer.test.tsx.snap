@@ -10,6 +10,7 @@ exports[`plain_column_renderer rendering renders correctly against snapshot 1`] 
     fieldType="keyword"
     isDraggable={true}
     key="plain-column-renderer-formatted-field-value-test-event.category-1-event.category-Access-0"
+    timelineId="test"
     value="Access"
   />
 </span>

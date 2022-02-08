@@ -6,44 +6,6 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
     timelineId="foo"
   />
   <Connect(StatefulSearchOrFilterComponent)
-    filterManager={
-      FilterManager {
-        "extract": [Function],
-        "fetch$": Subject {
-          "_isScalar": false,
-          "closed": false,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "filters": Array [],
-        "getAllMigrations": [Function],
-        "inject": [Function],
-        "telemetry": [Function],
-        "uiSettings": Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        },
-        "updated$": Subject {
-          "_isScalar": false,
-          "closed": false,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-      }
-    }
     timelineId="foo"
   />
 </Fragment>

@@ -204,14 +204,11 @@ describe('Timeline QueryBar ', () => {
         />
       );
       const queryBarProps = wrapper.find(QueryBar).props();
-      const onSubmitQueryRef = queryBarProps.onSubmitQuery;
       const onSavedQueryRef = queryBarProps.onSavedQuery;
 
       wrapper.setProps({ dataProviders: mockDataProviders.slice(1, 0) });
       await waitFor(() => wrapper.update());
-
       expect(onSavedQueryRef).not.toEqual(wrapper.find(QueryBar).props().onSavedQuery);
-      expect(onSubmitQueryRef).toEqual(wrapper.find(QueryBar).props().onSubmitQuery);
     });
 
     test('is only reference that changed when savedQueryId props get updated', async () => {
@@ -241,7 +238,6 @@ describe('Timeline QueryBar ', () => {
         />
       );
       const queryBarProps = wrapper.find(QueryBar).props();
-      const onSubmitQueryRef = queryBarProps.onSubmitQuery;
       const onSavedQueryRef = queryBarProps.onSavedQuery;
 
       wrapper.setProps({
@@ -250,7 +246,6 @@ describe('Timeline QueryBar ', () => {
       await waitFor(() => wrapper.update());
 
       expect(onSavedQueryRef).not.toEqual(wrapper.find(QueryBar).props().onSavedQuery);
-      expect(onSubmitQueryRef).toEqual(wrapper.find(QueryBar).props().onSubmitQuery);
     });
   });
 

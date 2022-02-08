@@ -12,7 +12,6 @@ import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { timelineActions } from '../../../../store/timeline';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -59,15 +58,6 @@ describe('HostName', () => {
     value: 'Mock Host',
   };
 
-  let toggleExpandedDetail: jest.SpyInstance;
-
-  beforeAll(() => {
-    toggleExpandedDetail = jest.spyOn(activeTimeline, 'toggleExpandedDetail');
-  });
-
-  afterEach(() => {
-    toggleExpandedDetail.mockClear();
-  });
   test('should render host name', () => {
     const wrapper = mount(
       <TestProviders>
@@ -104,7 +94,6 @@ describe('HostName', () => {
     wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });
   });
 
@@ -132,29 +121,7 @@ describe('HostName', () => {
     });
   });
 
-  test('if enableHostDetailsFlyout and timelineId equals to `timeline-1`, should call toggleExpandedDetail', async () => {
-    const newProps = {
-      timelineID: TimelineId.active,
-      tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <HostName {...props} {...newProps} />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
-    await waitFor(() => {
-      expect(toggleExpandedDetail).toHaveBeenCalledWith({
-        panelView: 'hostDetail',
-        params: {
-          hostName: props.value,
-        },
-      });
-    });
-  });
-
-  test('if enableHostDetailsFlyout but timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
+  test('if enableHostDetailsFlyout but timelineId not equals to `TimelineId.active`, should call toggleDetailPanel anyway', async () => {
     const newProps = {
       timelineID: 'detection',
       tabType: TimelineTabs.query,
@@ -175,7 +142,6 @@ describe('HostName', () => {
         tabType: TimelineTabs.query,
         timelineId: 'detection',
       });
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });
   });
 });

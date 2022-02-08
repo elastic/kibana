@@ -286,15 +286,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, timelineId });
-
-    if (
-      expandedDetail[TimelineTabs.query]?.panelView &&
-      timelineId === TimelineId.active &&
-      showExpandedDetails
-    ) {
-      activeTimeline.toggleExpandedDetail({});
-    }
-  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
+  }, [onEventClosed, timelineId]);
 
   useEffect(() => {
     dispatch(

@@ -10,6 +10,7 @@ import React from 'react';
 import type { Filter } from '@kbn/es-query';
 
 import { ColumnHeaderOptions } from '../../../../../../common/types';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { ColumnRenderer } from './column_renderer';
@@ -32,6 +33,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     truncate,
     values,
     linkValues,
+    tabType,
   }: {
     asPlainText?: boolean;
     columnName: string;
@@ -43,6 +45,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     truncate?: boolean;
     values: string[] | undefined | null;
     linkValues?: string[] | null | undefined;
+    tabType?: TimelineTabs;
   }) =>
     values != null
       ? values.map((value, i) => (
@@ -59,6 +62,7 @@ export const plainColumnRenderer: ColumnRenderer = {
             truncate={truncate}
             value={parseValue(value)}
             timelineId={timelineId}
+            tabType={tabType}
           />
         ))
       : getEmptyTagValue(),

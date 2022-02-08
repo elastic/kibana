@@ -5,14 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { render, fireEvent, act, cleanup } from '@testing-library/react';
 
 import { FormattedIp } from './index';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
 import { timelineActions } from '../../store/timeline';
-import { activeTimeline } from '../../containers/active_timeline_context';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -61,126 +59,89 @@ describe('FormattedIp', () => {
     eventId: 'test-event-id',
     isDraggable: false,
     fieldName: 'host.ip',
+    timelineId: 'test',
   };
 
-  let toggleExpandedDetail: jest.SpyInstance;
-
-  beforeAll(() => {
-    toggleExpandedDetail = jest.spyOn(activeTimeline, 'toggleExpandedDetail');
-  });
-
   afterEach(() => {
-    toggleExpandedDetail.mockClear();
+    cleanup();
+    jest.clearAllMocks();
   });
   test('should render ip address', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <FormattedIp {...props} />
       </TestProviders>
     );
 
-    expect(wrapper.text()).toEqual(props.value);
+    expect(wrapper.findByText(props.value)).toBeTruthy();
   });
 
-  test('should render DraggableWrapper if isDraggable is true', () => {
+  test('should render DraggableWrapper if isDraggable is true', async () => {
     const testProps = {
       ...props,
       isDraggable: true,
     };
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <FormattedIp {...testProps} />
       </TestProviders>
     );
+    const draggable = await wrapper.findByTestId('DraggableWrapper');
 
-    expect(wrapper.find('[data-test-subj="DraggableWrapper"]').exists()).toEqual(true);
+    expect(draggable).toBeTruthy();
   });
 
-  test('if not enableIpDetailsFlyout, should go to network details page', async () => {
-    const wrapper = mount(
+  test('should open NetworkDetailsSidePanel for the active timeline', async () => {
+    const newProps = {
+      ...props,
+      timelineId: TimelineId.active,
+      tabType: TimelineTabs.query,
+    };
+    const wrapper = render(
       <TestProviders>
-        <FormattedIp {...props} />
+        <FormattedIp {...newProps} />
       </TestProviders>
     );
+    const networkDetail = wrapper.getByTestId('network-details');
+    act(() => {
+      fireEvent.click(networkDetail, { bubbles: true });
+    });
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
-    await waitFor(() => {
-      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
+    expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+      panelView: 'networkDetail',
+      params: {
+        flowTarget: 'source',
+        ip: props.value,
+      },
+      tabType: TimelineTabs.query,
+      timelineId: 'timeline-1',
     });
   });
 
-  test('if enableIpDetailsFlyout, should open NetworkDetailsSidePanel', async () => {
+  test('should call toggle detail panel for a test timeline', async () => {
     const newProps = {
-      timelineID: TimelineId.active,
+      ...props,
+      timelineId: TimelineId.test,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
-        <FormattedIp {...props} {...newProps} />
+        <FormattedIp {...newProps} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
-    await waitFor(() => {
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
-        panelView: 'networkDetail',
-        params: {
-          flowTarget: 'source',
-          ip: props.value,
-        },
-        tabType: TimelineTabs.query,
-        timelineId: TimelineId.active,
-      });
+    const networkDetail = wrapper.getByTestId('network-details');
+    act(() => {
+      fireEvent.click(networkDetail);
     });
-  });
-
-  test('if enableIpDetailsFlyout and timelineId equals to `timeline-1`, should call toggleExpandedDetail', async () => {
-    const newProps = {
-      timelineID: TimelineId.active,
+    expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+      panelView: 'networkDetail',
+      params: {
+        flowTarget: 'source',
+        ip: props.value,
+      },
       tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <FormattedIp {...props} {...newProps} />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
-    await waitFor(() => {
-      expect(toggleExpandedDetail).toHaveBeenCalledWith({
-        panelView: 'networkDetail',
-        params: {
-          flowTarget: 'source',
-          ip: props.value,
-        },
-      });
-    });
-  });
-
-  test('if enableIpDetailsFlyout but timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
-    const newProps = {
-      timelineID: 'detection',
-      tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <FormattedIp {...props} {...newProps} />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
-    await waitFor(() => {
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
-        panelView: 'networkDetail',
-        params: {
-          flowTarget: 'source',
-          ip: props.value,
-        },
-        tabType: TimelineTabs.query,
-        timelineId: 'detection',
-      });
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
+      timelineId: TimelineId.test,
     });
   });
 });

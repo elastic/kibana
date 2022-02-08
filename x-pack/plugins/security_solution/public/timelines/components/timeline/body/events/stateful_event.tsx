@@ -198,10 +198,6 @@ const StatefulEventComponent: React.FC<Props> = ({
         timelineId,
       })
     );
-
-    if (timelineId === TimelineId.active && tabType === TimelineTabs.query) {
-      activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-    }
   }, [dispatch, event._id, event._index, refetch, tabType, timelineId]);
 
   const associateNote = useCallback(

@@ -30,7 +30,6 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import { activeTimeline } from '../../containers/active_timeline_context';
 import { timelineActions } from '../../store/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
 
@@ -174,8 +173,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   );
 
   const dispatch = useDispatch();
-  const isInTimeline = timelineId === TimelineId.active;
-
+  const isInTimeline = timelineId !== undefined;
   const openNetworkDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
@@ -201,10 +199,6 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
             timelineId,
           })
         );
-
-        if (isInTimeline && tabType === TimelineTabs.query) {
-          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-        }
       }
     },
     [onClick, isInTimeline, address, fieldName, dispatch, timelineId, tabType]
@@ -212,9 +206,17 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
   // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the IP Overview page
-  const content = useMemo(
-    () =>
-      Component ? (
+  const content = useMemo(() => {
+    return Component ? (
+      <NetworkDetailsLink
+        Component={Component}
+        ip={address}
+        isButton={isButton}
+        onClick={isInTimeline ? openNetworkDetailsSidePanel : undefined}
+        title={title}
+      />
+    ) : (
+      <Content field={fieldName} tooltipContent={fieldName}>
         <NetworkDetailsLink
           Component={Component}
           ip={address}
@@ -222,19 +224,9 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           onClick={isInTimeline ? openNetworkDetailsSidePanel : undefined}
           title={title}
         />
-      ) : (
-        <Content field={fieldName} tooltipContent={fieldName}>
-          <NetworkDetailsLink
-            Component={Component}
-            ip={address}
-            isButton={isButton}
-            onClick={isInTimeline ? openNetworkDetailsSidePanel : undefined}
-            title={title}
-          />
-        </Content>
-      ),
-    [Component, address, fieldName, isButton, openNetworkDetailsSidePanel, title, isInTimeline]
-  );
+      </Content>
+    );
+  }, [Component, address, fieldName, isButton, openNetworkDetailsSidePanel, title, isInTimeline]);
 
   const render = useCallback(
     (_props, _provided, snapshot) =>
@@ -342,6 +334,8 @@ const AddressLinks = React.memo(
     prevProps.fieldName === nextProps.fieldName &&
     prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
+    prevProps.tabType === nextProps.tabType &&
+    prevProps.timelineId === nextProps.timelineId &&
     deepEqual(prevProps.addresses, nextProps.addresses)
 );
 
@@ -436,5 +430,7 @@ export const FormattedIp = React.memo(
     prevProps.fieldName === nextProps.fieldName &&
     prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
+    prevProps.tabType === nextProps.tabType &&
+    prevProps.timelineId === nextProps.timelineId &&
     deepEqual(prevProps.value, nextProps.value)
 );

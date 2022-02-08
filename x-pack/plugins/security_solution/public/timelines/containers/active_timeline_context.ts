@@ -6,11 +6,6 @@
  */
 
 import {
-  TimelineExpandedDetail,
-  TimelineExpandedDetailType,
-  TimelineTabs,
-} from '../../../common/types/timeline';
-import {
   TimelineEqlRequestOptions,
   TimelineEventsAllRequestOptions,
 } from '../../../common/search_strategy/timeline';
@@ -29,7 +24,6 @@ import { TimelineArgs } from '.';
 
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedDetail: TimelineExpandedDetail = {};
   private _pageName: string = '';
   private _request: TimelineEventsAllRequestOptions | null = null;
   private _response: TimelineArgs | null = null;
@@ -42,42 +36,6 @@ class ActiveTimelineEvents {
 
   setActivePage(activePage: number) {
     this._activePage = activePage;
-  }
-
-  getExpandedDetail() {
-    return this._expandedDetail;
-  }
-
-  toggleExpandedDetail(expandedDetail: TimelineExpandedDetailType) {
-    const queryTab = TimelineTabs.query;
-    const currentExpandedDetail = this._expandedDetail[queryTab];
-    let isSameExpandedDetail;
-
-    // Check if the stored details matches the incoming detail
-    if (currentExpandedDetail?.panelView === 'eventDetail') {
-      isSameExpandedDetail =
-        expandedDetail?.panelView === 'eventDetail' &&
-        expandedDetail?.params?.eventId === currentExpandedDetail?.params?.eventId;
-    } else if (currentExpandedDetail?.panelView === 'hostDetail') {
-      isSameExpandedDetail =
-        expandedDetail?.panelView === 'hostDetail' &&
-        expandedDetail?.params?.hostName === currentExpandedDetail?.params?.hostName;
-    } else if (currentExpandedDetail?.panelView === 'networkDetail') {
-      isSameExpandedDetail =
-        expandedDetail?.panelView === 'networkDetail' &&
-        expandedDetail?.params?.ip === currentExpandedDetail?.params?.ip;
-    }
-
-    // if so, unset it, otherwise set it
-    if (isSameExpandedDetail) {
-      this._expandedDetail = {};
-    } else {
-      this._expandedDetail = { [queryTab]: { ...expandedDetail } };
-    }
-  }
-
-  setExpandedDetail(expandedDetail: TimelineExpandedDetail) {
-    this._expandedDetail = expandedDetail;
   }
 
   getPageName() {

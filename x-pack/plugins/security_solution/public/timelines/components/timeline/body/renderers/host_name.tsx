@@ -18,7 +18,6 @@ import {
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
 
 interface Props {
@@ -73,10 +72,6 @@ const HostNameComponent: React.FC<Props> = ({
             tabType,
           })
         );
-
-        if (isInTimeline && tabType === TimelineTabs.query) {
-          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-        }
       }
     },
     [onClick, hostName, dispatch, timelineId, tabType, isInTimeline]

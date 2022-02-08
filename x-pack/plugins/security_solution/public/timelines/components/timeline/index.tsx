@@ -22,7 +22,6 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
 import { TimelineType, TimelineId, RowRenderer } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
@@ -97,7 +96,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           columns: defaultHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
-          expandedDetail: activeTimeline.getExpandedDetail(),
+          expandedDetail: {},
           show: false,
         })
       );

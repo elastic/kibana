@@ -152,9 +152,9 @@ export const addTimelineToStore = ({
   timeline,
   timelineById,
 }: AddTimelineParams): TimelineById => {
-  if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
+  const shouldReset = shouldResetActiveTimelineContext(id, timelineById[id], timeline);
+  if (shouldReset) {
     activeTimeline.setActivePage(0);
-    activeTimeline.setExpandedDetail({});
   }
   return {
     ...timelineById,
@@ -163,6 +163,7 @@ export const addTimelineToStore = ({
       isLoading: timelineById[id].isLoading,
       initialized: timelineById[id].initialized,
       resolveTimelineConfig,
+      expandedDetail: shouldReset ? {} : timeline.expandedDetail,
       dateRange:
         timeline.status === TimelineStatus.immutable &&
         timeline.timelineType === TimelineType.template

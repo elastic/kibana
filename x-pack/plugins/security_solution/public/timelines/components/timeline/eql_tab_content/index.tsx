@@ -49,7 +49,6 @@ import { useEqlEventsCountPortal } from '../../../../common/hooks/use_timeline_e
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
 import { HeaderActions } from '../body/actions/header_actions';
@@ -225,15 +224,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.eql, timelineId });
-
-    if (
-      expandedDetail[TimelineTabs.eql]?.panelView &&
-      timelineId === TimelineId.active &&
-      showExpandedDetails
-    ) {
-      activeTimeline.toggleExpandedDetail({});
-    }
-  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
+  }, [onEventClosed, timelineId]);
 
   useEffect(() => {
     dispatch(
