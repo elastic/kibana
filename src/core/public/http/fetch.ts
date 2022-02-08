@@ -111,7 +111,7 @@ export class Fetch {
     const context = {
       ...this.params.executionContext?.getAll(),
       ...options.context,
-    }
+    };
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
       query,
@@ -130,7 +130,7 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
-        ...(!isEmpty(context)  ? new ExecutionContextContainer(context).toHeader() : {}),
+        ...(!isEmpty(context) ? new ExecutionContextContainer(context).toHeader() : {}),
       }),
     };
 

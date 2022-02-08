@@ -122,12 +122,11 @@ async function deleteMaps(items: object[]) {
 }
 
 export function MapsListView() {
-
   getExecutionContext().set({
     type: 'application',
     page: 'list',
     id: '',
-  })
+  });
 
   const isReadOnly = !getMapsCapabilities().save;
 
