@@ -181,3 +181,24 @@ const mergeTimelineFieldsWithHit = async <T>(
     return flattenedFields;
   }
 };
+
+const ECS_METADATA_FIELDS = ['_id', '_index', '_type', '_score'];
+
+export const buildEcsObjects = (hit: EventHit): Ecs => {
+  const ecsFields = [...TIMELINE_EVENTS_FIELDS];
+  return ecsFields.reduce(
+    (acc, field) => {
+      const nestedParentPath = getNestedParentPath(field, hit.fields);
+      if (
+        nestedParentPath != null ||
+        has(field, hit._source) ||
+        has(field, hit.fields) ||
+        ECS_METADATA_FIELDS.includes(field)
+      ) {
+        return merge(acc, buildObjectForFieldPath(field, hit));
+      }
+      return acc;
+    },
+    { _id: hit._id, timestamp: getTimestamp(hit), _index: hit._index }
+  );
+};
