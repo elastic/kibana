@@ -138,7 +138,7 @@ describe('useFetchAlertDetail', () => {
               "tags": Array [],
             },
             "link": undefined,
-            "reason": "A super rule",
+            "reason": "Document count reported no data in the last 1 hour for all hosts",
             "start": 1643639463649,
           },
         ]
