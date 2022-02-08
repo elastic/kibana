@@ -7,7 +7,6 @@
  */
 
 import type { RequestHandlerContext, KibanaRequest } from 'src/core/server';
-import type { Layout } from '../common';
 
 export interface ScreenshotModePluginStart {
   /**
@@ -31,9 +30,6 @@ export interface ScreenshotModePluginSetup extends ScreenshotModePluginStart {
    * on the page have run to ensure that screenshot mode is detected as early as possible.
    */
   setScreenshotModeEnabled(): void;
-
-  /** @deprecated */
-  setScreenshotLayout(value: Layout): void;
 }
 
 export interface ScreenshotModeRequestHandlerContext extends RequestHandlerContext {

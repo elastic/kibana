@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Layout } from '../common';
-
 export interface ScreenshotModePluginSetup {
   /**
    * Retrieves a value from the screenshotting context.
@@ -22,9 +20,6 @@ export interface ScreenshotModePluginSetup {
    * screenshots or printing.
    */
   isScreenshotMode(): boolean;
-
-  /** @deprecated */
-  getScreenshotLayout(): undefined | Layout;
 }
 
 export type ScreenshotModePluginStart = ScreenshotModePluginSetup;

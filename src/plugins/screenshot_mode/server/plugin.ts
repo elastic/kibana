@@ -27,19 +27,14 @@ export class ScreenshotModePlugin
       }
     );
 
-    const {
-      setScreenshotContext,
-      setScreenshotModeEnabled,
-      setScreenshotLayout,
-      // We use "require" here to ensure the import does not have external references due to code bundling that
-      // commonly happens during transpiling. External references would be missing in the environment puppeteer creates.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-    } = require('../common');
+    // We use "require" here to ensure the import does not have external references due to code bundling that
+    // commonly happens during transpiling. External references would be missing in the environment puppeteer creates.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { setScreenshotContext, setScreenshotModeEnabled } = require('../common');
 
     return {
       setScreenshotContext,
       setScreenshotModeEnabled,
-      setScreenshotLayout,
       isScreenshotMode,
     };
   }

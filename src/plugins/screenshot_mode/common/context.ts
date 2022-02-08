@@ -32,7 +32,7 @@ export function setScreenshotContext<T = unknown>(key: string, value: T): void {
       enumerable: true,
       writable: true,
       configurable: false,
-      value: undefined,
+      value: {},
     });
   }
 

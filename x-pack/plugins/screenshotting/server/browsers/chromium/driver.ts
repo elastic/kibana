@@ -10,7 +10,6 @@ import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { Logger } from 'src/core/server';
-import type { Layout } from 'src/plugins/screenshot_mode/common';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
@@ -57,7 +56,6 @@ interface OpenOptions {
   context?: Context;
   waitForSelector: string;
   timeout: number;
-  layout?: Layout;
 }
 
 interface WaitForSelectorOpts {
@@ -125,13 +123,7 @@ export class HeadlessChromiumDriver {
    */
   async open(
     url: string,
-    {
-      conditionalHeaders,
-      context,
-      layout,
-      waitForSelector: pageLoadSelector,
-      timeout,
-    }: OpenOptions,
+    { conditionalHeaders, context, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
     logger: Logger
   ): Promise<void> {
     logger.info(`opening url ${url}`);
@@ -147,10 +139,6 @@ export class HeadlessChromiumDriver {
 
     for (const [key, value] of Object.entries(context ?? {})) {
       await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotContext, key, value);
-    }
-
-    if (layout) {
-      await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotLayout, layout);
     }
 
     await this.page.setRequestInterception(true);
