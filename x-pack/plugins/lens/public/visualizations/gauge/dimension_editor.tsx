@@ -107,12 +107,12 @@ export function GaugeDimensionEditor(
                       stops: displayStops,
                     },
                   },
-                  ticksPosition: GaugeTicksPositions.bands,
-                  colorMode: GaugeColorModes.palette,
+                  ticksPosition: GaugeTicksPositions.BANDS,
+                  colorMode: GaugeColorModes.PALETTE,
                 }
               : {
-                  ticksPosition: GaugeTicksPositions.auto,
-                  colorMode: GaugeColorModes.none,
+                  ticksPosition: GaugeTicksPositions.AUTO,
+                  colorMode: GaugeColorModes.NONE,
                 };
 
             setState({
@@ -221,14 +221,14 @@ export function GaugeDimensionEditor(
               })}
               data-test-subj="lens-toolbar-gauge-ticks-position-switch"
               showLabel={false}
-              checked={state.ticksPosition === GaugeTicksPositions.bands}
+              checked={state.ticksPosition === GaugeTicksPositions.BANDS}
               onChange={() => {
                 setState({
                   ...state,
                   ticksPosition:
-                    state.ticksPosition === GaugeTicksPositions.bands
-                      ? GaugeTicksPositions.auto
-                      : GaugeTicksPositions.bands,
+                    state.ticksPosition === GaugeTicksPositions.BANDS
+                      ? GaugeTicksPositions.AUTO
+                      : GaugeTicksPositions.BANDS,
                 });
               }}
             />

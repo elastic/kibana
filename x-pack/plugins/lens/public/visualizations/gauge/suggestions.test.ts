@@ -41,7 +41,7 @@ describe('gauge suggestions', () => {
           changeType: 'unchanged' as const,
         },
         state: {
-          shape: GaugeShapes.horizontalBullet,
+          shape: GaugeShapes.HORIZONTAL_BULLET,
           layerId: 'first',
           layerType: layerTypes.DATA,
         } as GaugeVisualizationState,
@@ -75,7 +75,7 @@ describe('gauge suggestions', () => {
             changeType: 'initial',
           },
           state: {
-            shape: GaugeShapes.horizontalBullet,
+            shape: GaugeShapes.HORIZONTAL_BULLET,
             layerId: 'first',
             layerType: layerTypes.DATA,
             minAccessor: 'some-field',
@@ -150,7 +150,7 @@ describe('shows suggestions', () => {
         state: {
           layerId: 'first',
           layerType: layerTypes.DATA,
-          shape: GaugeShapes.horizontalBullet,
+          shape: GaugeShapes.HORIZONTAL_BULLET,
           metricAccessor: 'metric-column',
           labelMajorMode: 'auto',
           ticksPosition: 'auto',
@@ -169,7 +169,7 @@ describe('shows suggestions', () => {
           layerId: 'first',
           layerType: 'data',
           metricAccessor: 'metric-column',
-          shape: GaugeShapes.verticalBullet,
+          shape: GaugeShapes.VERTICAL_BULLET,
           ticksPosition: 'auto',
           labelMajorMode: 'auto',
         },
@@ -188,17 +188,17 @@ describe('shows suggestions', () => {
         state: {
           layerId: 'first',
           layerType: layerTypes.DATA,
-          shape: GaugeShapes.horizontalBullet,
+          shape: GaugeShapes.HORIZONTAL_BULLET,
           metricAccessor: 'metric-column',
         } as GaugeVisualizationState,
         keptLayerIds: ['first'],
-        subVisualizationId: GaugeShapes.verticalBullet,
+        subVisualizationId: GaugeShapes.VERTICAL_BULLET,
       })
     ).toEqual([
       {
         state: {
           layerType: layerTypes.DATA,
-          shape: GaugeShapes.verticalBullet,
+          shape: GaugeShapes.VERTICAL_BULLET,
           metricAccessor: 'metric-column',
           labelMajorMode: 'auto',
           ticksPosition: 'auto',

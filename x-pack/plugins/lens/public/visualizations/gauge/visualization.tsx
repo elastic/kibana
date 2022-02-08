@@ -128,7 +128,7 @@ const toExpression = (
           minAccessor: [state.minAccessor ?? ''],
           maxAccessor: [state.maxAccessor ?? ''],
           goalAccessor: [state.goalAccessor ?? ''],
-          shape: [state.shape ?? GaugeShapes.horizontalBullet],
+          shape: [state.shape ?? GaugeShapes.HORIZONTAL_BULLET],
           colorMode: [state?.colorMode ?? 'none'],
           palette: state.palette?.params
             ? [
@@ -157,12 +157,12 @@ export const getGaugeVisualization = ({
   visualizationTypes: [
     {
       ...CHART_NAMES.horizontalBullet,
-      id: GaugeShapes.horizontalBullet,
+      id: GaugeShapes.HORIZONTAL_BULLET,
       showExperimentalBadge: true,
     },
     {
       ...CHART_NAMES.verticalBullet,
-      id: GaugeShapes.verticalBullet,
+      id: GaugeShapes.VERTICAL_BULLET,
       showExperimentalBadge: true,
     },
   ],
@@ -184,7 +184,7 @@ export const getGaugeVisualization = ({
   },
 
   getDescription(state) {
-    if (state.shape === GaugeShapes.horizontalBullet) {
+    if (state.shape === GaugeShapes.HORIZONTAL_BULLET) {
       return CHART_NAMES.horizontalBullet;
     }
     return CHART_NAMES.verticalBullet;
@@ -194,9 +194,9 @@ export const getGaugeVisualization = ({
     return {
       ...state,
       shape:
-        visualizationTypeId === GaugeShapes.horizontalBullet
-          ? GaugeShapes.horizontalBullet
-          : GaugeShapes.verticalBullet,
+        visualizationTypeId === GaugeShapes.HORIZONTAL_BULLET
+          ? GaugeShapes.HORIZONTAL_BULLET
+          : GaugeShapes.VERTICAL_BULLET,
     };
   },
 
@@ -205,7 +205,7 @@ export const getGaugeVisualization = ({
       state || {
         layerId: addNewLayer(),
         layerType: layerTypes.DATA,
-        shape: GaugeShapes.horizontalBullet,
+        shape: GaugeShapes.HORIZONTAL_BULLET,
         palette: mainPalette,
         ticksPosition: 'auto',
         labelMajorMode: 'auto',
