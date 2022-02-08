@@ -174,7 +174,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(res.body.message).to.eql(
-          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`
+          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
         );
       });
       it('should respond 400 if trying to upgrade an agent that is unenrolling', async () => {
@@ -591,7 +591,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(res.body.message).to.eql(
-          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`
+          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
         );
       });
 
