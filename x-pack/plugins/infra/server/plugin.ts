@@ -11,14 +11,16 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import {
   CoreSetup,
-  PluginInitializerContext,
+  CoreStart,
   Plugin,
   PluginConfigDescriptor,
-  CoreStart,
+  PluginInitializerContext,
 } from 'src/core/server';
+import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
+import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { initInfraServer } from './infra_server';
 import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
@@ -34,20 +36,19 @@ import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
+import { initGetLogViewRoute } from './routes/log_views';
+import { logViewSavedObjectType } from './saved_objects';
 import { LogEntriesService } from './services/log_entries';
+import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
+import { LogViewsService } from './services/log_views/log_views_service';
+import { RulesService } from './services/rules';
 import {
-  InfraPluginRequestHandlerContext,
   InfraConfig,
+  InfraPluginRequestHandlerContext,
   InfraPluginSetup,
   InfraPluginStart,
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
-import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
-import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
-import { RulesService } from './services/rules';
-import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
-import { LogViewsService } from './services/log_views/log_views_service';
-import { initGetLogViewRoute } from './routes/log_views';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
@@ -146,6 +147,7 @@ export class InfraServerPlugin
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
     core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
+    core.savedObjects.registerType(logViewSavedObjectType);
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
     // and make them available via the request context so we can do away with

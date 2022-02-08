@@ -13,6 +13,8 @@ import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../common/alerting/metrics';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
+import { infraSourceConfigurationSavedObjectName } from './lib/sources/saved_object_type';
+import { logViewSavedObjectName } from './saved_objects';
 
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,
@@ -125,7 +127,7 @@ export const LOGS_FEATURE = {
       },
       savedObject: {
         all: [],
-        read: ['infrastructure-ui-source'],
+        read: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
       },
       ui: ['show'],
     },
