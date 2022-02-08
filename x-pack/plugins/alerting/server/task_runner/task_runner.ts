@@ -431,12 +431,8 @@ export class TaskRunner<
 
     if (ruleType.doesSetRecoveryContext) {
       for (const recoveredAlertId of Object.keys(recoveredAlerts)) {
-        this.logger.info(`task runner recovered alert ${JSON.stringify(alerts[recoveredAlertId])}`);
-        this.logger.info(
-          `task runner recovered alert hasContext ${alerts[recoveredAlertId].hasContext()}`
-        );
         if (!alerts[recoveredAlertId].hasContext()) {
-          this.logger.info(`No recovery context specified for recovered alert ${recoveredAlertId}`);
+          this.logger.warn(`No recovery context specified for recovered alert ${recoveredAlertId}`);
         } else if (alerts[recoveredAlertId].hasScheduledActions()) {
           this.logger.info(
             `Alert ${recoveredAlertId} but has scheduled actions. Something is wrong!`

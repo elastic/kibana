@@ -34,7 +34,13 @@ export type PublicAlert<
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
   Alert<State, Context, ActionGroupIds>,
-  'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+  | 'getState'
+  | 'replaceState'
+  | 'scheduleActions'
+  | 'scheduleActionsWithSubGroup'
+  | 'setContext'
+  | 'getContext'
+  | 'hasContext'
 >;
 
 export class Alert<

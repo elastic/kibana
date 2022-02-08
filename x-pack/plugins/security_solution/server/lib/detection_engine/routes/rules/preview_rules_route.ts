@@ -145,7 +145,13 @@ export const previewRulesRoute = async (
               id: string
             ) => Pick<
               Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
-              'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+              | 'getState'
+              | 'replaceState'
+              | 'scheduleActions'
+              | 'scheduleActionsWithSubGroup'
+              | 'setContext'
+              | 'getContext'
+              | 'hasContext'
             >;
             done: () => {};
           }

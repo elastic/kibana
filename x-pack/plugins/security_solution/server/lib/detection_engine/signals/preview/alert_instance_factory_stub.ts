@@ -48,4 +48,16 @@ export const alertInstanceFactoryStub = <
       meta: { lastScheduledActions: { group: 'default', date: new Date() } },
     });
   },
+  setContext(alertContext: TInstanceContext) {
+    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>({
+      state: {} as TInstanceState,
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+  },
+  getContext() {
+    return {} as unknown as TInstanceContext;
+  },
+  hasContext() {
+    return false;
+  },
 });
