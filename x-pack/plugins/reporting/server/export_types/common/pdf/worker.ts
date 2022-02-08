@@ -17,6 +17,7 @@ import concat from 'concat-stream';
 
 import { getTemplate } from './get_template';
 import type { TemplateLayout } from './types';
+import { assetPath } from './constants';
 
 export type PdfWorkerData = Ensure<
   {
@@ -34,7 +35,6 @@ if (!isMainThread) {
 }
 
 async function execute() {
-  const assetPath = path.resolve(__dirname, '..', '..', 'common', 'assets');
   const tableBorderWidth = 1;
 
   const fontPath = (filename: string) => path.resolve(assetPath, 'fonts', filename);
