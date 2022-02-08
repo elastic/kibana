@@ -198,6 +198,8 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToMl();
             await ml.navigation.navigateToOverview();
 
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
             await ml.testExecution.logTestStep('should display ML Nodes panel');
             await ml.mlNodesPanel.assertNodeOverviewPanel();
 
