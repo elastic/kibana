@@ -116,6 +116,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
             { id: 'recovered', name: 'Recovered' },
           ],
           defaultActionGroupId: 'default',
+          doesSetRecoveryContext: false,
           id: 'test.noop',
           name: 'Test: Noop',
           actionVariables: {

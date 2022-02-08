@@ -9,12 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
 import { RuleType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
-import {
-  ActionContext,
-  BaseActionContext,
-  addMessages,
-  addRecoveryMessages,
-} from './action_context';
+import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import {
   CoreQueryParamsSchemaProperties,
@@ -139,7 +134,7 @@ export function getAlertType(
   async function executor(
     options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
-    const { alertId, name, services, params } = options;
+    const { alertId: ruleId, name, services, params } = options;
     const { alertFactory, search } = services;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -179,19 +174,22 @@ export function getAlertType(
       abortableEsClient,
       query: queryParams,
     });
-    logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
+    logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
+
+    const unmetGroupValues: Record<string, number> = {};
+    const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
 
     const groupResults = result.results || [];
     // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
     for (const groupResult of groupResults) {
-      const instanceId = groupResult.group;
+      const alertId = groupResult.group;
       const metric =
         groupResult.metrics && groupResult.metrics.length > 0 ? groupResult.metrics[0] : null;
       const value = metric && metric.length === 2 ? metric[1] : null;
 
       if (value === null || value === undefined) {
         logger.debug(
-          `alert ${ID}:${alertId} "${name}": no metrics found for group ${instanceId}} from groupResult ${JSON.stringify(
+          `rule ${ID}:${ruleId} "${name}": no metrics found for group ${alertId}} from groupResult ${JSON.stringify(
             groupResult
           )}`
         );
@@ -200,21 +198,23 @@ export function getAlertType(
 
       const met = compareFn(value, params.threshold);
 
-      if (!met) continue;
+      if (!met) {
+        unmetGroupValues[alertId] = value;
+        continue;
+      }
 
-      const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
       const humanFn = `${agg} is ${getHumanReadableComparator(
         params.thresholdComparator
       )} ${params.threshold.join(' and ')}`;
 
       const baseContext: BaseActionContext = {
         date,
-        group: instanceId,
+        group: alertId,
         value,
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alert = alertFactory.create(instanceId);
+      const alert = alertFactory.create(alertId);
       alert.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
@@ -224,18 +224,16 @@ export function getAlertType(
       const recoveredAlerts = getRecoveredAlerts();
 
       for (const recoveredAlertId of Object.keys(recoveredAlerts)) {
-        logger.info(`recovered alert ${JSON.stringify(recoveredAlerts[recoveredAlertId])}`);
-        const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
-        const humanFn = `${agg} is NOT ${getHumanReadableComparator(
-          params.thresholdComparator
-        )} ${params.threshold.join(' and ')}`;
+        logger.debug(`setting context for recovered alert ${recoveredAlertId}`);
         const baseContext: BaseActionContext = {
           date,
-          value: 0, // this is a tricky value to set since rules may just know that the value did not meet the threshold, not what the actual value is
+          value: unmetGroupValues[recoveredAlertId] ?? 0,
           group: recoveredAlertId,
-          conditions: humanFn,
+          conditions: `${agg} is NOT ${getHumanReadableComparator(
+            params.thresholdComparator
+          )} ${params.threshold.join(' and ')}`,
         };
-        const recoveryContext = addRecoveryMessages(options, baseContext, params);
+        const recoveryContext = addMessages(options, baseContext, params, true);
         recoveredAlerts[recoveredAlertId].setContext(recoveryContext);
       }
     }
