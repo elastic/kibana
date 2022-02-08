@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const readSavedQueryRoute = (router: IRouter) => {
+export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
       path: '/internal/osquery/saved_query/{id}',
@@ -20,9 +20,17 @@ export const readSavedQueryRoute = (router: IRouter) => {
           id: schema.string(),
         }),
       },
-      options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
     },
     async (context, request, response) => {
+      const [coreStartServices] = await osqueryContext.getStartServices();
+
+      const {
+        osquery: { readSavedQueries },
+      } = await coreStartServices.capabilities.resolveCapabilities(request);
+
+      if (!readSavedQueries) {
+        return response.forbidden();
+      }
       const savedObjectsClient = context.core.savedObjects.client;
 
       const savedQuery = await savedObjectsClient.get<{

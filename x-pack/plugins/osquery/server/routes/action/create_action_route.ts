@@ -41,7 +41,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         osqueryContext.getStartServices
       );
       const [coreStartServices] = await osqueryContext.getStartServices();
-      let saved_query_id = request.body.saved_query_id;
+      let savedQueryId = request.body.saved_query_id;
 
       const {
         osquery: { writeLiveQueries, runSavedQueries },
@@ -63,7 +63,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         );
 
         if (actualSavedQuery) {
-          saved_query_id = actualSavedQuery.id;
+          savedQueryId = actualSavedQuery.id;
         }
       }
 
@@ -89,7 +89,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
             {
               id: uuid.v4(),
               query: request.body.query,
-              saved_query_id,
+              saved_query_id: savedQueryId,
               ecs_mapping: request.body.ecs_mapping,
             },
             (value) => !isEmpty(value)

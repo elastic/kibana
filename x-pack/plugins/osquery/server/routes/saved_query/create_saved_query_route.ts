@@ -7,7 +7,6 @@
 
 import { isEmpty, pickBy } from 'lodash';
 import { IRouter } from '../../../../../../src/core/server';
-import { PLUGIN_ID } from '../../../common';
 import {
   createSavedQueryRequestSchema,
   CreateSavedQueryRequestSchemaDecoded,
@@ -27,10 +26,19 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           CreateSavedQueryRequestSchemaDecoded
         >(createSavedQueryRequestSchema),
       },
-      options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
+
+      const [coreStartServices] = await osqueryContext.getStartServices();
+
+      const {
+        osquery: { writeSavedQueries },
+      } = await coreStartServices.capabilities.resolveCapabilities(request);
+
+      if (!writeSavedQueries) {
+        return response.forbidden();
+      }
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { id, description, platform, query, version, interval, ecs_mapping } = request.body;

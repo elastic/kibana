@@ -8,7 +8,6 @@
 import { filter } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
-import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -45,9 +44,18 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           { unknowns: 'allow' }
         ),
       },
-      options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
+      const [coreStartServices] = await osqueryContext.getStartServices();
+
+      const {
+        osquery: { writeSavedQueries },
+      } = await coreStartServices.capabilities.resolveCapabilities(request);
+
+      if (!writeSavedQueries) {
+        return response.forbidden();
+      }
+
       const savedObjectsClient = context.core.savedObjects.client;
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
