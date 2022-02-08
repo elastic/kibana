@@ -26,6 +26,7 @@ export function initGetAllCommentsApi({ router, logger, kibanaVersion }: RouteDe
     },
     async (context, request, response) => {
       try {
+        logger.warn(`The get all cases comments API '${CASE_COMMENTS_URL}' is deprecated.`);
         const client = await context.cases.getCasesClient();
 
         return response.ok({

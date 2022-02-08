@@ -22,6 +22,8 @@ export function initGetCasesStatusApi({ router, logger, kibanaVersion }: RouteDe
     },
     async (context, request, response) => {
       try {
+        logger.warn(`The get cases status API '${CASE_STATUS_URL}' is deprecated.`);
+
         const client = await context.cases.getCasesClient();
         return response.ok({
           headers: {

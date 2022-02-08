@@ -30,6 +30,8 @@ export function initGetAllCaseUserActionsApi({ router, logger, kibanaVersion }: 
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
+        logger.warn(`The get all cases user actions API '${CASE_USER_ACTIONS_URL}' is deprecated.`);
+
         const casesClient = await context.cases.getCasesClient();
         const caseId = request.params.case_id;
 
