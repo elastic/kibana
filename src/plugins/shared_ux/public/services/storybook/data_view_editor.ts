@@ -26,5 +26,5 @@ export const dataViewEditorPluginMock = {
 };
 
 export const dataViewEditorFactory = () => {
-  return dataViewEditorPluginMock;
+  return dataViewEditorPluginMock.createStartContract();
 };
