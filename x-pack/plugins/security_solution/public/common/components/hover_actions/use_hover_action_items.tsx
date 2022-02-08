@@ -143,43 +143,60 @@ export const useHoverActionItems = ({
     ]
   );
 
-  // eslint-disable-next-line complexity
-  const allItems = useMemo(() => {
+  const filterButtons = useMemo(() => {
     const showFilters =
       values != null &&
       (enableOverflowButton || (!showTopN && !enableOverflowButton)) &&
       !isCaseView &&
       filterManager !== undefined;
+    return showFilters
+      ? [
+          <div data-test-subj="hover-actions-filter-for" key="hover-actions-filter-for">
+            {getFilterForValueButton({
+              defaultFocusedButtonRef,
+              field,
+              filterManager,
+              keyboardEvent: stKeyboardEvent,
+              onClick: handleHoverActionClicked,
+              onFilterAdded,
+              ownFocus,
+              showTooltip: enableOverflowButton ? false : true,
+              value: values,
+            })}
+          </div>,
+          <div data-test-subj="hover-actions-filter-out" key="hover-actions-filter-out">
+            {getFilterOutValueButton({
+              field,
+              filterManager,
+              keyboardEvent: stKeyboardEvent,
+              onFilterAdded,
+              ownFocus,
+              onClick: handleHoverActionClicked,
+              showTooltip: enableOverflowButton ? false : true,
+              value: values,
+            })}
+          </div>,
+        ]
+      : [];
+  }, [
+    filterManager,
+    isCaseView,
+    enableOverflowButton,
+    showTopN,
+    values,
+    defaultFocusedButtonRef,
+    field,
+    getFilterForValueButton,
+    getFilterOutValueButton,
+    handleHoverActionClicked,
+    onFilterAdded,
+    ownFocus,
+    stKeyboardEvent,
+  ]);
+
+  const allItems = useMemo(() => {
     return [
-      showFilters ? (
-        <div data-test-subj="hover-actions-filter-for" key="hover-actions-filter-for">
-          {getFilterForValueButton({
-            defaultFocusedButtonRef,
-            field,
-            filterManager,
-            keyboardEvent: stKeyboardEvent,
-            onClick: handleHoverActionClicked,
-            onFilterAdded,
-            ownFocus,
-            showTooltip: enableOverflowButton ? false : true,
-            value: values,
-          })}
-        </div>
-      ) : null,
-      showFilters ? (
-        <div data-test-subj="hover-actions-filter-out" key="hover-actions-filter-out">
-          {getFilterOutValueButton({
-            field,
-            filterManager,
-            keyboardEvent: stKeyboardEvent,
-            onFilterAdded,
-            ownFocus,
-            onClick: handleHoverActionClicked,
-            showTooltip: enableOverflowButton ? false : true,
-            value: values,
-          })}
-        </div>
-      ) : null,
+      ...filterButtons,
       toggleColumn && !shouldDisableColumnToggle ? (
         <div data-test-subj="hover-actions-toggle-column" key="hover-actions-toggle-column">
           {getColumnToggleButton({
@@ -239,25 +256,19 @@ export const useHoverActionItems = ({
     browserFields,
     dataProvider,
     dataType,
-    defaultFocusedButtonRef,
     draggableId,
     enableOverflowButton,
     field,
-    filterManager,
+    filterButtons,
     getAddToTimelineButton,
     getColumnToggleButton,
     getCopyButton,
-    getFilterForValueButton,
-    getFilterOutValueButton,
     handleHoverActionClicked,
     hideTopN,
     isObjectArray,
-    onFilterAdded,
     ownFocus,
     shouldDisableColumnToggle,
     showTopNBtn,
-    isCaseView,
-    showTopN,
     stKeyboardEvent,
     toggleColumn,
     values,
