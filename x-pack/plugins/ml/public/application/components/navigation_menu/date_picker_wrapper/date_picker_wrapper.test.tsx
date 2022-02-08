@@ -144,7 +144,7 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     expect(displayWarningSpy).not.toHaveBeenCalled();
     const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
     expect(calledWith.isPaused).toBe(true);
-    expect(calledWith.refreshInterval).toBe(1000);
+    expect(calledWith.refreshInterval).toBe(10000);
   });
 
   test('should fallback to default interval when configured interval is too short', () => {
@@ -164,6 +164,6 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     expect(displayWarningSpy).toHaveBeenCalled();
     const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
     expect(calledWith.isPaused).toBe(false);
-    expect(calledWith.refreshInterval).toBe(1000);
+    expect(calledWith.refreshInterval).toBe(10000);
   });
 });
