@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationStart } from 'kibana/public';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { applicationServiceMock } from 'src/core/public/mocks';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { BehaviorSubject } from 'rxjs';
 
-import { RedirectAppLinks as RedirectAppLinksComponent } from './redirect_app_link';
 import { RedirectAppLinks } from './redirect_app_link';
 import mdx from './redirect_app_link.mdx';
 
 export default {
   title: 'Redirect App Links',
-  description: '',
+  description: 'app links component that takes in an application id and navigation url.',
   parameters: {
     docs: {
       page: mdx,
@@ -24,12 +24,22 @@ export default {
   },
 };
 
-export const ConnectedComponent = ({ application }: { application: ApplicationStart }) => {
-  return <RedirectAppLinks application={application} />;
-};
-
-ConnectedComponent.argTypes = {};
-
-export const PureComponent = () => {
-  return <RedirectAppLinksComponent application={applicationServiceMock.createStartContract()} />;
+export const ConnectedComponent = () => {
+  return (
+    <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+      <EuiFlexItem grow={false}>
+        <RedirectAppLinks
+          navigateToUrl={() => Promise.resolve()}
+          currentAppId$={new BehaviorSubject('test')}
+        >
+          <EuiButton data-test-subj="homeAddData" fill iconType="plusInCircle">
+            <FormattedMessage
+              id="home.addData.addDataButtonLabel"
+              defaultMessage="Add integrations"
+            />
+          </EuiButton>
+        </RedirectAppLinks>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };

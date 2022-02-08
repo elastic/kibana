@@ -13,7 +13,8 @@ import { RedirectAppLinksComponent as Component } from './redirect_app_link.comp
 import { createNavigateToUrlClickHandler } from './click_handler';
 
 export interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDivElement> {
-  application: ApplicationStart;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
+  currentAppId$: ApplicationStart['currentAppId$'];
   className?: string;
   'data-test-subj'?: string;
 }
@@ -36,12 +37,13 @@ export interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDiv
  * at the root level of an application or of the page that require the feature.
  */
 export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = ({
-  application,
+  navigateToUrl,
+  currentAppId$,
   children,
   className,
   ...otherProps
 }) => {
-  const currentAppId = useObservable(application.currentAppId$, undefined);
+  const currentAppId = useObservable(currentAppId$, undefined);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const clickHandler = useMemo(
@@ -49,11 +51,11 @@ export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = (
       containerRef.current && currentAppId
         ? createNavigateToUrlClickHandler({
             container: containerRef.current,
-            navigateToUrl: application.navigateToUrl,
+            navigateToUrl,
           })
         : undefined,
-    [application, currentAppId]
+    [navigateToUrl, currentAppId]
   );
 
-  return <Component application={application} {...{ clickHandler }} />;
+  return <Component {...otherProps} clickHandler={clickHandler} />;
 };

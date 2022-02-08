@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationStart } from 'kibana/public';
 import React, { useRef } from 'react';
 import classNames from 'classnames';
 
@@ -14,14 +13,12 @@ import classNames from 'classnames';
  * Props for the Redirect App Link component.
  */
 export interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  application: ApplicationStart;
   clickHandler: React.MouseEventHandler<HTMLElement> | undefined;
   className?: string;
   'data-test-subj'?: string;
 }
 
 export const RedirectAppLinksComponent = ({
-  application,
   clickHandler,
   children,
   className,
