@@ -116,6 +116,40 @@ describe('AlertSummaryView', () => {
       expect(getByText(fieldId));
     });
   });
+
+  test('DNS event renders the correct summary rows', () => {
+    const renderProps = {
+      ...props,
+      data: [
+        ...(mockAlertDetailsData.map((item) => {
+          if (item.category === 'event' && item.field === 'event.category') {
+            return {
+              ...item,
+              values: ['dns'],
+              originalValue: ['dns'],
+            };
+          }
+          return item;
+        }) as TimelineEventsDetailsItem[]),
+        {
+          category: 'dns',
+          field: 'dns.question.name',
+          values: ['www.example.com'],
+          originalValue: ['www.example.com'],
+        } as TimelineEventsDetailsItem,
+      ],
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    ['dns.question.name', 'process.name'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
   test('Memory event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
