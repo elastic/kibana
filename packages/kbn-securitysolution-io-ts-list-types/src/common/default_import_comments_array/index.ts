@@ -8,20 +8,20 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { updateCommentsArray, UpdateCommentsArray } from '../update_comment';
+import { importComment, ImportCommentsArray } from '../import_comment';
 
 /**
- * Types the DefaultUpdateComments as:
+ * Types the ImportCommentsArray as:
  *   - If null or undefined, then a default array of type entry will be set
  */
-export const DefaultUpdateCommentsArray = new t.Type<
-  UpdateCommentsArray,
-  UpdateCommentsArray,
+export const DefaultImportCommentsArray = new t.Type<
+  ImportCommentsArray,
+  ImportCommentsArray,
   unknown
 >(
-  'DefaultUpdateComments',
-  updateCommentsArray.is,
-  (input): Either<t.Errors, UpdateCommentsArray> =>
-    input == null ? t.success([]) : updateCommentsArray.decode(input),
+  'DefaultCreateComments',
+  t.array(importComment).is,
+  (input): Either<t.Errors, ImportCommentsArray> =>
+    input == null ? t.success([]) : t.array(importComment).decode(input),
   t.identity
 );

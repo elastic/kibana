@@ -29,6 +29,7 @@ export * from './exception_list_item_type';
 export * from './filter';
 export * from './id';
 export * from './immutable';
+export * from './import_comment';
 export * from './item_id';
 export * from './list_id';
 export * from './list_operator';

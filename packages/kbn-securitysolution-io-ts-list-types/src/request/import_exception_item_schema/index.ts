@@ -30,7 +30,7 @@ import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { ItemId } from '../../common/item_id';
 import { EntriesArray } from '../../common/entries';
 import { CreateCommentsArray } from '../../common/create_comment';
-import { DefaultCreateCommentsArray } from '../../common/default_create_comments_array';
+import { DefaultImportCommentsArray } from '../../common/default_import_comments_array';
 
 /**
  * Differences from this and the createExceptionsListItemSchema are
@@ -56,7 +56,7 @@ export const importExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       id, // defaults to undefined if not set during decode
-      comments: DefaultCreateCommentsArray, // defaults to empty array if not set during decode
+      comments: DefaultImportCommentsArray, // defaults to empty array if not set during decode
       created_at, // defaults undefined if not set during decode
       updated_at, // defaults undefined if not set during decode
       created_by, // defaults undefined if not set during decode
