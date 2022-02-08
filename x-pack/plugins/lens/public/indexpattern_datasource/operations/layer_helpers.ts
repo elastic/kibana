@@ -1635,7 +1635,7 @@ export function computeLayerFromContext(
         value: {
           id: format,
           params: {
-            decimals: 2,
+            decimals: 0,
           },
         },
       });

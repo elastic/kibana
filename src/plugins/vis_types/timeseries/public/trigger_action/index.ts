@@ -121,16 +121,16 @@ export const triggerTSVBtoLensConfiguration = async (
     configuration: {
       fill: model.series[0].fill ?? 0.3,
       legend: {
-        isVisible: Boolean(model.show_legend) ?? true,
-        showSingleSeries: Boolean(model.show_legend) ?? true,
+        isVisible: Boolean(model.show_legend),
+        showSingleSeries: Boolean(model.show_legend),
         position: model.legend_position ?? 'right',
-        shouldTruncate: Boolean(model.truncate_legend) ?? false,
+        shouldTruncate: Boolean(model.truncate_legend),
         maxLines: model.max_lines_legend ?? 1,
       },
       gridLinesVisibility: {
-        x: Boolean(model.show_grid) ?? true,
-        yLeft: Boolean(model.show_grid) ?? true,
-        yRight: Boolean(model.show_grid) ?? true,
+        x: Boolean(model.show_grid),
+        yLeft: Boolean(model.show_grid),
+        yRight: Boolean(model.show_grid),
       },
       extents,
     },
