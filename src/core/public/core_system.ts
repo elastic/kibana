@@ -264,6 +264,7 @@ export class CoreSystem {
 
       return {
         application,
+        executionContext,
       };
     } catch (error) {
       if (this.fatalErrorsSetup) {

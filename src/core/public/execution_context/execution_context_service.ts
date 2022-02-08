@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { isEqual } from 'lodash';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { CoreService } from '../../types';
 
+export type ExecutionContext = Record<string, any>;
 /** @public */
 export interface ExecutionContextSetup {
+  context$: Observable<ExecutionContext>;
   set(c$: Record<string, any>): void;
   getAll(): Record<string, any>;
   clear(): void;
@@ -23,23 +27,29 @@ export type ExecutionContextStart = ExecutionContextSetup;
 
 /** @internal */
 export class ExecutionContextService implements CoreService<ExecutionContextSetup, ExecutionContextStart> {
-  private context: Record<string, any> = {};
+  // private context: Record<string, any> = {};
+  private context$: BehaviorSubject<ExecutionContext> = new BehaviorSubject({});
 
   public setup() {
     return {
+      context$: this.context$,
       clear: () => {
-        this.context = {};
+        this.context$.next({});
       },
-      set: (c: Record<string, any>) => {
-        this.context = {
-          ...this.context,
+      set: (c: ExecutionContext) => {
+        const newVal = {
+          ...this.context$.value,
           ...c
-        } 
+        };
+        if (!isEqual(newVal, this.context$.value)) {
+          this.context$.next({
+            ...this.context$.value,
+            ...c
+          });
+        }
       }, 
       getAll: () => {
-        return {
-          app: this.context
-        }
+        return this.context$.value;
       }
     };
   }
