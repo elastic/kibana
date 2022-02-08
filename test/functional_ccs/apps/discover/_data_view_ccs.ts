@@ -20,6 +20,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
+  esClient.cluster.putSettings({
+    persistent: {
+      cluster: {
+        remote: {
+          local: {
+            mode: 'proxy',
+            proxy_address: '127.0.0.1:9302',
+            skip_unavailable: 'true',
+            // seeds: ['localhost:9320'],
+          },
+        },
+      },
+    },
+  });
+
   const createDataView = async (dataViewName: string) => {
     await PageObjects.discover.clickIndexPatternActions();
     await PageObjects.discover.clickCreateNewDataView();
@@ -32,7 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
-      // await esClient.create()
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
@@ -49,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows creating a new data view', async function () {
-      const dataViewToCreate = 'logstash';
+      const dataViewToCreate = 'remote:logstash';
       await createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
