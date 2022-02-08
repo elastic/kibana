@@ -44,7 +44,8 @@ export function arraysToEqual(array1?: object[], array2?: object[]) {
  *
  * Example: 299 Kibana-8.2.0 "Deprecated endpoint"
  */
-const WARNING_HEADER_REGEX = /299 Kibana-\d+.\d+.\d+ \".+\"/g;
+const WARNING_HEADER_REGEX =
+  /299 Kibana-\d+.\d+.\d+(?:-(?:alpha|beta|rc)\\d+)?(?:-SNAPSHOT)? \".+\"/g;
 
 export const assertWarningHeader = (warningHeader: string) => {
   const res = warningHeader.match(WARNING_HEADER_REGEX);
