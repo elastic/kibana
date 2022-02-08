@@ -8,11 +8,15 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { ScreenshotResult } from '../../../../../screenshotting/server';
 import { ReportingCore } from '../../../';
+import { ScreenshotResult } from '../../../../../screenshotting/server';
 import { LevelLogger } from '../../../lib';
 import { ScreenshotOptions } from '../../../types';
-import { PdfMaker } from '../../common/pdf';
+import {
+  PdfMaker,
+  PdfWorkerOutOfMemoryError,
+  extractScreenshotResultErrors,
+} from '../../common/pdf';
 import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
@@ -31,7 +35,7 @@ export function generatePdfObservable(
   title: string,
   options: ScreenshotOptions,
   logo?: string
-): Rx.Observable<{ buffer: Buffer | null; warnings: string[] }> {
+): Rx.Observable<{ buffer: Uint8Array | null; warnings: string[] }> {
   const tracker = getTracker();
   tracker.startScreenshots();
 
@@ -64,7 +68,9 @@ export function generatePdfObservable(
         });
       });
 
-      let buffer: Buffer | null = null;
+      const warnings = extractScreenshotResultErrors(results);
+
+      let buffer: Uint8Array | null = null;
       try {
         tracker.startCompile();
         logger.info(`Compiling PDF using "${layout.id}" layout...`);
@@ -79,21 +85,18 @@ export function generatePdfObservable(
       } catch (err) {
         logger.error(`Could not generate the PDF buffer!`);
         logger.error(err);
+        if (err instanceof PdfWorkerOutOfMemoryError) {
+          warnings.push(
+            'Failed to generate PDF due to low memory. Please consider generating a smaller PDF.'
+          );
+        }
       }
 
       tracker.end();
 
       return {
         buffer,
-        warnings: results.reduce((found, current) => {
-          if (current.error) {
-            found.push(current.error.message);
-          }
-          if (current.renderErrors) {
-            found.push(...current.renderErrors);
-          }
-          return found;
-        }, [] as string[]),
+        warnings,
       };
     })
   );
