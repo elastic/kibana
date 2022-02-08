@@ -125,31 +125,29 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
         });
 
         const tracesDocIDs: string[] = [];
-        resEvents.body.aggregations.sample.group_by.buckets.forEach(
-          (stackTraceItem: any) => {
-            tracesDocIDs.push(stackTraceItem.key);
-          }
-        );
+        resEvents.body.aggregations.sample.group_by.buckets.forEach((stackTraceItem: any) => {
+          tracesDocIDs.push(stackTraceItem.key);
+        });
 
         const resStackTraces = await esClient.mget<any>({
           index: 'profiling-stacktraces',
           body: { ids: tracesDocIDs },
         });
 
-        const stackFrameDocIDs: string[] = [];
-        resStackTraces.body.docs.forEach((trace: any) => {
-          // sometimes we don't find the trace - needs investigation as we should always find
-          // profiling-events to profiling-stack-traces
-          if (trace._source) {
-            for (let i = 0; i < trace._source.Offset.length; i++) {
-              stackFrameDocIDs.push(trace._source.FrameID[i]);
+        // sometimes we don't find the trace - needs investigation as we should always find
+        // profiling-events to profiling-stack-traces
+        const stackFrameDocIDs = new Set<string>();
+        for (const trace of resStackTraces.body.docs) {
+          if (trace.found) {
+            for (const frameID of trace._source.FrameID) {
+              stackFrameDocIDs.add(frameID);
             }
           }
-        });
+        }
 
         const resStackFrames = await esClient.mget<any>({
           index: 'profiling-stackframes',
-          body: { ids: stackFrameDocIDs },
+          body: { ids: [...stackFrameDocIDs] },
         });
 
         return response.ok({
