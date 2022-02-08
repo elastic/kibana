@@ -210,7 +210,6 @@ describe('When using EPM `get` services', () => {
     it('should fetch the info from the registry if we do not have the version installed', async () => {
       const soClient = savedObjectsClientMock.create();
       soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
-      soClient.bulkGet.mockResolvedValue({ saved_objects: [] });
 
       expect(
         await getPackageInfo({
@@ -267,7 +266,6 @@ describe('When using EPM `get` services', () => {
       it('should be not_installed when no package SO exists', async () => {
         const soClient = savedObjectsClientMock.create();
         soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
-        soClient.bulkGet.mockResolvedValue({ saved_objects: [] });
 
         expect(
           await getPackageInfo({
@@ -304,9 +302,7 @@ describe('When using EPM `get` services', () => {
 
       it('should be installed when package SO install_status is installed', async () => {
         const soClient = savedObjectsClientMock.create();
-        soClient.bulkGet.mockResolvedValue({ saved_objects: [] });
-
-        soClient.get.mockResolvedValueOnce({
+        soClient.get.mockResolvedValue({
           id: 'my_package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
           references: [],
@@ -314,7 +310,6 @@ describe('When using EPM `get` services', () => {
             install_status: 'installed',
           },
         });
-        soClient.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
         expect(
           await getPackageInfo({
@@ -329,9 +324,7 @@ describe('When using EPM `get` services', () => {
 
       it('should be install_failed when package SO install_status is install_failed', async () => {
         const soClient = savedObjectsClientMock.create();
-        soClient.bulkGet.mockResolvedValue({ saved_objects: [] });
-
-        soClient.get.mockResolvedValueOnce({
+        soClient.get.mockResolvedValue({
           id: 'my_package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
           references: [],

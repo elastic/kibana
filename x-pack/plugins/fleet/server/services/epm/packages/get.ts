@@ -115,32 +115,7 @@ export async function getPackageInfo(options: {
   if (!responsePkgVersion) {
     responsePkgVersion = latestPackage.version;
   }
-  let packageInfo: RegistryPackage | undefined;
-  // Look for the package locally
-  if (
-    savedObject &&
-    (savedObject.attributes.install_status === 'installed' ||
-      savedObject.attributes.install_status === 'installed_bundled')
-  ) {
-    const esRes = await getEsPackage(
-      pkgName,
-      pkgVersion,
-      savedObject.attributes.package_assets ?? [],
-      savedObjectsClient
-    ).catch((err) => {
-      if (savedObjectsClient.errors.isNotFoundError(err)) {
-        return undefined;
-      }
-      throw err;
-    });
-    if (esRes) {
-      packageInfo = esRes.packageInfo;
-    }
-  }
-
-  if (!packageInfo) {
-    packageInfo = await Registry.fetchInfo(pkgName, responsePkgVersion);
-  }
+  const packageInfo = await Registry.fetchInfo(pkgName, responsePkgVersion);
 
   // Fix the paths
   const paths =
