@@ -14,6 +14,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SHOW_MULTIFIELDS,
   SEARCH_FIELDS_FROM_SOURCE,
+  ROW_HEIGHT_OPTION,
 } from '../../common';
 
 export const uiSettingsMock = {
@@ -30,6 +31,8 @@ export const uiSettingsMock = {
       return false;
     } else if (key === SHOW_MULTIFIELDS) {
       return false;
+    } else if (key === ROW_HEIGHT_OPTION) {
+      return 3;
     }
   },
 } as unknown as IUiSettingsClient;

@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { IndexPattern } from './types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';

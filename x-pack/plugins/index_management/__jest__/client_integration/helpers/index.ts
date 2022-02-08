@@ -7,8 +7,8 @@
 
 import './mocks';
 
-export type { TestBed } from '@kbn/test/jest';
-export { nextTick, getRandomString, findTestSubject } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test-jest-helpers';
+export { nextTick, getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 
 export {
   setupEnvironment,

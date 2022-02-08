@@ -58,6 +58,16 @@ export class AggNotSupportedError extends UIError {
   }
 }
 
+export class TimeFieldNotSpecifiedError extends UIError {
+  constructor() {
+    super(
+      i18n.translate('visTypeTimeseries.errors.timeFieldNotSpecifiedError', {
+        defaultMessage: 'Time field is required to visualize the data',
+      })
+    );
+  }
+}
+
 export const filterCannotBeAppliedErrorMessage = i18n.translate(
   'visTypeTimeseries.filterCannotBeAppliedError',
   {
