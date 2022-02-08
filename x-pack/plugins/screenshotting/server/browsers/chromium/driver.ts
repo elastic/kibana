@@ -15,7 +15,6 @@ import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
 } from '../../../../../../src/plugins/screenshot_mode/server';
-import { Context, SCREENSHOTTING_CONTEXT_KEY } from '../../../common/context';
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
 
@@ -30,6 +29,8 @@ export interface ConditionalHeaders {
   headers: Record<string, string>;
   conditions: ConditionalHeadersConditions;
 }
+
+export type Context = Record<string, unknown>;
 
 export interface ElementPosition {
   boundingClientRect: {
@@ -144,19 +145,8 @@ export class HeadlessChromiumDriver {
      */
     await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotModeEnabled);
 
-    if (context) {
-      await this.page.evaluateOnNewDocument(
-        (key: string, value: unknown) => {
-          Object.defineProperty(window, key, {
-            configurable: false,
-            writable: true,
-            enumerable: true,
-            value,
-          });
-        },
-        SCREENSHOTTING_CONTEXT_KEY,
-        context
-      );
+    for (const [key, value] of Object.entries(context ?? {})) {
+      await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotContext, key, value);
     }
 
     if (layout) {

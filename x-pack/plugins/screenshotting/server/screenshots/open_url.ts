@@ -8,9 +8,8 @@
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { Layout } from 'src/plugins/screenshot_mode/common';
-import { Context } from '../../common';
 import type { HeadlessChromiumDriver } from '../browsers';
-import type { ConditionalHeaders } from '../browsers';
+import type { ConditionalHeaders, Context } from '../browsers';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 
 type Url = string;
