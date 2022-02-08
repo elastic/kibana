@@ -7,8 +7,6 @@
  */
 
 import _ from 'lodash';
-import { FilterStateStore } from '@kbn/es-query';
-
 import { Datatable } from '../../../../../plugins/expressions/public';
 import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns, getSearchService } from '../../../public/services';
@@ -136,9 +134,6 @@ export const createFiltersFromValueClickAction = async ({
         const filter: Filter[] = (await createFilter(table, column, row)) || [];
         if (filter) {
           filter.forEach((f) => {
-            if (!f.$state) {
-              f.$state = { store: FilterStateStore.APP_STATE };
-            }
             if (negate) {
               f = esFilters.toggleFilterNegated(f);
             }
