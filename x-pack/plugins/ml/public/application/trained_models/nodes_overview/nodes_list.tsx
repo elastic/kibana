@@ -157,6 +157,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
         label: i18n.translate('xpack.ml.trainedModels.nodesList.totalAmountLabel', {
           defaultMessage: 'Total machine learning nodes',
         }),
+        'data-test-subj': 'mlTotalNodesCount',
       },
     };
   }, [items]);
@@ -189,7 +190,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   }
 
   return (
-    <>
+    <div data-test-subj={'mlNodesOverviewPanel'}>
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         {nodesStats && (
@@ -218,6 +219,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
           data-test-subj={isLoading ? 'mlNodesTable loading' : 'mlNodesTable loaded'}
         />
       </div>
-    </>
+    </div>
   );
 };

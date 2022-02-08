@@ -50,6 +50,9 @@ describe('renderLegendDetailRow', () => {
       supportsFieldMetaFromEs: () => {
         return true;
       },
+      supportsFieldMetaFromLocalData: () => {
+        return true;
+      },
     } as unknown as IField;
     const sizeProp = new DynamicSizeProperty(
       { minSize: 0, maxSize: 10, fieldMetaOptions: { isEnabled: true } },
