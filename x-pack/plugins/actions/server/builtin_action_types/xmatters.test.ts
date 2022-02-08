@@ -243,10 +243,10 @@ describe('execute()', () => {
         },
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
-          "signalId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234",
           "date": "2022-01-18T19:01:08.818Z",
           "ruleName": "Test xMatters",
           "severity": "high",
+          "signalId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234",
           "spaceId": "default",
           "tags": "test1, test2",
         },
@@ -350,10 +350,10 @@ describe('execute()', () => {
         },
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
-          "signalId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234",
           "date": "2022-01-18T19:01:08.818Z",
           "ruleName": "Test xMatters",
           "severity": "high",
+          "signalId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234",
           "spaceId": "default",
           "tags": "test1, test2",
         },

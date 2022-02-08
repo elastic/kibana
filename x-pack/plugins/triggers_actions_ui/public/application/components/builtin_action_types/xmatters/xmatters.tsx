@@ -80,7 +80,6 @@ export function getActionType(): ActionTypeModel<
     ): Promise<
       GenericValidationResult<Pick<XmattersActionParams, 'alertActionGroupName' | 'signalId'>>
     > => {
-      const translations = await import('./translations');
       const errors = {
         alertActionGroupName: new Array<string>(),
         signalId: new Array<string>(),
