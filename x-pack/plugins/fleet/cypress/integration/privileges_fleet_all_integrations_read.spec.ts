@@ -24,12 +24,7 @@ import {
   AGENT_POLICY_SAVE_INTEGRATION,
   ADD_PACKAGE_POLICY_BTN,
 } from '../screens/fleet';
-import {
-  ADD_POLICY_BTN,
-  AGENT_POLICY_NAME_LINK,
-  POLICIES_TAB,
-  ADVANCED_TAB,
-} from '../screens/integrations';
+import { ADD_POLICY_BTN, AGENT_POLICY_NAME_LINK } from '../screens/integrations';
 
 const rolesToCreate = [FleetAllIntegrReadRole];
 const usersToCreate = [FleetAllIntegrReadUser];
