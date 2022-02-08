@@ -259,16 +259,20 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldTypeFilter(type: string) {
-    await this.find.clickByCssSelector(
-      'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[value="' + type + '"]'
-    );
+    await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
+    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
   }
 
   async setScriptedFieldLanguageFilter(language: string) {
-    await this.find.clickByCssSelector(
-      'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[value="' +
-        language +
-        '"]'
+    await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${language}`);
+    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${language}`);
+    await this.testSubjects.existOrFail(
+      `scriptedFieldLanguageFilterDropdown-option-${language}-checked`
     );
   }
 

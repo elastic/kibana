@@ -60,7 +60,7 @@ const searchAriaLabel = i18n.translate(
   }
 );
 
-const filterLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.filterAria', {
+const filterLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.filter', {
   defaultMessage: 'Field type',
 });
 
@@ -262,9 +262,11 @@ export function Tabs({
                 <EuiFilterGroup>
                   <EuiPopover
                     anchorPosition="downCenter"
+                    data-test-subj="indexedFieldTypeFilterDropdown-popover"
                     button={
                       <EuiFilterButton
                         aria-label={filterAriaLabel}
+                        data-test-subj="indexedFieldTypeFilterDropdown"
                         iconType="arrowDown"
                         onClick={() => setIsIndexedFilterOpen(!isIndexedFilterOpen)}
                         isSelected={isIndexedFilterOpen}
@@ -292,6 +294,9 @@ export function Tabs({
                           );
                           updateFilterItem(indexedFieldTypes, index, setIndexedFieldTypes);
                         }}
+                        data-test-subj={`indexedFieldTypeFilterDropdown-option-${item.value}${
+                          item.checked ? '-checked' : ''
+                        }`}
                       >
                         {item.name}
                       </EuiFilterSelectItem>
@@ -299,9 +304,11 @@ export function Tabs({
                   </EuiPopover>
                   <EuiPopover
                     anchorPosition="downCenter"
+                    data-test-subj="schemaFieldTypeFilterDropdown-popover"
                     button={
                       <EuiFilterButton
                         aria-label={schemaAriaLabel}
+                        data-test-subj="schemaFieldTypeFilterDropdown"
                         iconType="arrowDown"
                         onClick={() => setIsSchemaFilterOpen(!isSchemaFilterOpen)}
                         isSelected={isSchemaFilterOpen}
@@ -329,6 +336,9 @@ export function Tabs({
                           );
                           updateFilterItem(schemaItems, index, setSchemaItems);
                         }}
+                        data-test-subj={`schemaFieldTypeFilterDropdown-option-${item.value}${
+                          item.checked ? '-checked' : ''
+                        }`}
                       >
                         {item.name}
                       </EuiFilterSelectItem>
@@ -350,9 +360,11 @@ export function Tabs({
               <EuiFilterGroup>
                 <EuiPopover
                   anchorPosition="downCenter"
+                  data-test-subj="scriptedFieldLanguageFilterDropdown-popover"
                   button={
                     <EuiFilterButton
                       aria-label={scriptedFieldAriaLabel}
+                      data-test-subj="scriptedFieldLanguageFilterDropdown"
                       iconType="arrowDown"
                       onClick={() => setIsScriptedFieldFilterOpen(!isScriptedFieldFilterOpen)}
                       isSelected={isScriptedFieldFilterOpen}
@@ -382,6 +394,9 @@ export function Tabs({
                         );
                         updateFilterItem(scriptedFieldLanguages, index, setScriptedFieldLanguages);
                       }}
+                      data-test-subj={`scriptedFieldLanguageFilterDropdown-option-${item.value}${
+                        item.checked ? '-checked' : ''
+                      }`}
                     >
                       {item.name}
                     </EuiFilterSelectItem>
