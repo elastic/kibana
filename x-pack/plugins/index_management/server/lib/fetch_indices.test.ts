@@ -178,6 +178,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           status: undefined,
           documents: 0,
           size: '0b',
+          primary_size: '0b',
         }),
       ],
     });

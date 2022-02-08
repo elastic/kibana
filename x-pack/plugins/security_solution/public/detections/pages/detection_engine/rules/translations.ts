@@ -88,6 +88,50 @@ export const EDIT_PAGE_TITLE = i18n.translate(
   }
 );
 
+export const FEATURE_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.tourTitle',
+  {
+    defaultMessage: "What's new",
+  }
+);
+
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepDescription',
+  {
+    defaultMessage:
+      'The experimental rules table view allows for advanced sorting and filtering capabilities.',
+  }
+);
+
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepTitle',
+  {
+    defaultMessage: 'Step 1',
+  }
+);
+
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_NEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepNextButtonTitle',
+  {
+    defaultMessage: 'Ok, got it',
+  }
+);
+
+export const FEATURE_TOUR_BULK_ACTIONS_STEP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepTitle',
+  {
+    defaultMessage: 'Step 2',
+  }
+);
+
+export const FEATURE_TOUR_BULK_ACTIONS_STEP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepDescription',
+  {
+    defaultMessage:
+      'You can now bulk update index patterns and tags for multiple custom rules at once.',
+  }
+);
+
 export const REFRESH = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.refreshTitle',
   {
@@ -247,7 +291,7 @@ export const BULK_EDIT_ERROR_TOAST_TITLE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_ERROR_TOAST_DESCIRPTION = (rulesCount: number) =>
+export const BULK_EDIT_ERROR_TOAST_DESCRIPTION = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastDescription',
     {
