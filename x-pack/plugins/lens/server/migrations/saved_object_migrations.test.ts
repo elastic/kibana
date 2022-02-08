@@ -1642,4 +1642,79 @@ describe('Lens migrations', () => {
       },
     });
   });
+
+  describe('8.1.0 add parentFormat to terms operation', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      dataType: 'string',
+                      isBucketed: true,
+                      label: 'Top values of geoip.country_iso_code',
+                      operationType: 'terms',
+                      params: {},
+                      scale: 'ordinal',
+                      sourceField: 'geoip.country_iso_code',
+                    },
+                    '4': {
+                      label: 'Anzahl der Aufnahmen',
+                      dataType: 'number',
+                      operationType: 'count',
+                      sourceField: 'Aufnahmen',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                    '5': {
+                      label: 'Sum of bytes',
+                      dataType: 'numver',
+                      operationType: 'sum',
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('should change field for count operations but not for others, not changing the vis', () => {
+      const result = migrations['8.1.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      expect(
+        Object.values(
+          result.attributes.state.datasourceStates.indexpattern.layers['2'].columns
+        ).find(({ operationType }) => operationType === 'terms')
+      ).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({ parentFormat: { id: 'terms' } }),
+        })
+      );
+    });
+  });
 });
