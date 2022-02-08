@@ -165,3 +165,17 @@ export function getMissingIndexPatterns(indexPatternIds: string[]) {
     values: { count: indexPatternIds.length, ids: indexPatternIds.join(', ') },
   });
 }
+
+export function getUnknownVisualizationTypeError(visType: string) {
+  return {
+    shortMessage: i18n.translate('xpack.lens.unknownVisType.shortMessage', {
+      defaultMessage: `Unknown visualization type`,
+    }),
+    longMessage: i18n.translate('xpack.lens.unknownVisType.longMessage', {
+      defaultMessage: `The visualization type {visType} could not be resolved.`,
+      values: {
+        visType,
+      },
+    }),
+  };
+}
