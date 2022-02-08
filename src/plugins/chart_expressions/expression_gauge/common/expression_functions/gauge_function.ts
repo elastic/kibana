@@ -109,8 +109,16 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       }),
       required: false,
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('expressionGauge.functions.gaugeChart.config.ariaLabel.help', {
+        defaultMessage: 'Specifies the aria label of the gauge chart',
+      }),
+      required: false,
+    },
   },
-  fn(data, args) {
+
+  fn(data, args, handlers) {
     if (!Object.values(GaugeShapes).includes(args.shape)) {
       throw new Error(strings.invalidShapeError());
     }
@@ -120,7 +128,13 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       as: EXPRESSION_GAUGE_NAME,
       value: {
         data,
-        args,
+        args: {
+          ...args,
+          ariaLabel:
+            args.ariaLabel ??
+            (handlers.variables?.embeddableTitle as string) ??
+            handlers.getExecutionContext?.()?.description,
+        },
       },
     };
   },
