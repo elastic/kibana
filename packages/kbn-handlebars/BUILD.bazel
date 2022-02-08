@@ -1,6 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("//src/dev/bazel:index.bzl", "pkg_npm", "pkg_npm_types", "ts_project")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-handlebars"
 PKG_REQUIRE_NAME = "@kbn/handlebars"
@@ -38,6 +38,12 @@ TYPES_DEPS = [
   "@npm//handlebars",
 ]
 
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
+
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
@@ -64,7 +70,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS,
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

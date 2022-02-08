@@ -6,31 +6,37 @@
  * Side Public License, v 1.
  */
 
-import OriginalHandlebars = require('handlebars');
+import OriginalHandlebars from 'handlebars';
 import get from 'lodash/get';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace ExtendedHandlebars {
   export function compileAst(template: string): (context: any) => string;
-  export function create(): typeof Handlebars;
+  export function create(): typeof Handlebars; // eslint-disable-line @typescript-eslint/no-shadow
 }
 
 const originalCreate = OriginalHandlebars.create;
 const Handlebars: typeof ExtendedHandlebars & typeof OriginalHandlebars = OriginalHandlebars as any;
 
-export = Handlebars;
+// I've not been able to successfully re-export all of Handlebars, so for now we just re-export the features that we use.
+// The handlebars module uses `export =`, so it can't be re-exported using `export *`. However, because of Babel, we're not allowed to use `export =` ourselves.
+// Similarly we should technically be using `import OriginalHandlebars = require('handlebars')` above, but again, Babel will not allow this.
+export default Handlebars; // eslint-disable-line import/no-default-export
+export type { HelperDelegate, HelperOptions } from 'handlebars';
+
+// When creating new Handlebars environments, ensure the custom compileAst function is present in the new environment as well
+export function create(): typeof Handlebars {
+  const SandboxedHandlebars = originalCreate.call(Handlebars) as typeof Handlebars;
+  SandboxedHandlebars.compileAst = Handlebars.compileAst;
+  return SandboxedHandlebars;
+}
+
+Handlebars.create = create;
 
 // Custom function to compile only the AST so we don't have to use `eval`
 Handlebars.compileAst = function (template: string) {
   const visitor = new ElasticHandlebarsVisitor(template, this.helpers);
   return (context: any) => visitor.render(context);
-};
-
-// When creating new Handlebars environments, ensure the custom compileAst function is present in the new environment as well
-Handlebars.create = function () {
-  const SandboxedHandlebars = originalCreate.call(Handlebars) as typeof Handlebars;
-  SandboxedHandlebar.compileAst = Handlebars.compileAst;
-  return SandboxedHandlebars;
 };
 
 class ElasticHandlebarsVisitor extends Handlebars.Visitor {
