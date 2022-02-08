@@ -102,6 +102,9 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
                   `Endpoint package was not in response from ${SECURITY_PACKAGES_ROUTE}`
                 );
               }
+
+              log.info(`Endpoint package version: ${endpointPackageInfo.version}`);
+
               return Promise.resolve(endpointPackageInfo);
             });
         });
@@ -216,6 +219,11 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       } catch (error) {
         return logSupertestApiErrorAndThrow(`Unable to create Package Policy via Ingest!`, error);
       }
+
+      log.info(
+        `Created Fleet Agent Policy: ${agentPolicy.id}\n`,
+        `Created Fleet Endpoint Package Policy: ${packagePolicy.id}`
+      );
 
       return {
         agentPolicy,

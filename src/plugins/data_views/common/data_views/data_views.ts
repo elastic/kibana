@@ -58,12 +58,6 @@ export interface DataViewListItem {
   readableTitleDescription?: string;
 }
 
-/**
- * @deprecated Use DataViewListItem. All index pattern interfaces were renamed.
- */
-
-export type IndexPatternListItem = DataViewListItem;
-
 export interface DataViewsServiceDeps {
   uiSettings: UiSettingsCommon;
   savedObjectsClient: SavedObjectsClientCommon;
@@ -178,7 +172,7 @@ export class DataViewsService {
    * Get list of index pattern ids with titles
    * @param refresh Force refresh of index pattern list
    */
-  getIdsWithTitle = async (refresh: boolean = false): Promise<IndexPatternListItem[]> => {
+  getIdsWithTitle = async (refresh: boolean = false): Promise<DataViewListItem[]> => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -380,7 +374,7 @@ export class DataViewsService {
   /**
    * Converts index pattern saved object to index pattern spec
    * @param savedObject
-   * @returns IndexPatternSpec
+   * @returns DataViewSpec
    */
 
   savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {

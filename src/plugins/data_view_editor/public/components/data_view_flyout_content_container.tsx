@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPatternSpec, useKibana } from '../shared_imports';
+import { DataViewSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
 import { DataViewEditorContext, DataViewEditorProps } from '../types';
 
@@ -24,7 +24,7 @@ const IndexPatternFlyoutContentContainer = ({
     services: { dataViews, notifications },
   } = useKibana<DataViewEditorContext>();
 
-  const onSaveClick = async (indexPatternSpec: IndexPatternSpec) => {
+  const onSaveClick = async (dataViewSpec: DataViewSpec) => {
     try {
       let indexPattern;
       if (editData) {
@@ -33,14 +33,14 @@ const IndexPatternFlyoutContentContainer = ({
           readableTitleDescription = '',
           timeFieldName,
           title = '',
-        } = indexPatternSpec;
+        } = dataViewSpec;
         editData.title = title;
         editData.readableTitle = readableTitle;
         editData.readableTitleDescription = readableTitleDescription;
         editData.timeFieldName = timeFieldName;
         indexPattern = await dataViews.updateSavedObject(editData);
       } else {
-        indexPattern = await dataViews.createAndSave(indexPatternSpec);
+        indexPattern = await dataViews.createAndSave(dataViewSpec);
       }
 
       if (indexPattern && !(indexPattern instanceof Error)) {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { Layout } from 'src/plugins/screenshot_mode/common';
@@ -50,12 +49,7 @@ export const openUrl = async (
     );
   } catch (err) {
     logger.error(err);
-    throw new Error(
-      i18n.translate('xpack.screenshotting.screencapture.couldntLoadKibana', {
-        defaultMessage: `An error occurred when trying to open the Kibana URL: {error}`,
-        values: { error: err },
-      })
-    );
+    throw new Error(`An error occurred when trying to open the Kibana URL: ${err.message}`);
   }
 
   span?.end();

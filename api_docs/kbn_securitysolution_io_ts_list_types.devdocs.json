@@ -3790,7 +3790,7 @@
         "label": "SummaryExceptionListSchema",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; list_id?: string | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; }"
+          "{ filter?: string | undefined; id?: string | undefined; list_id?: string | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/summary_exception_list_schema/index.ts",
         "deprecated": false,
@@ -3804,7 +3804,7 @@
         "label": "SummaryExceptionListSchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ id: string | undefined; list_id: string | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; }, \"namespace_type\"> & { namespace_type: \"single\" | \"agnostic\"; }"
+          "Omit<{ filter: string | undefined; id: string | undefined; list_id: string | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; }, \"namespace_type\"> & { namespace_type: \"single\" | \"agnostic\"; filter: string; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/summary_exception_list_schema/index.ts",
         "deprecated": false,
@@ -8082,7 +8082,9 @@
           "ExactC",
           "<",
           "PartialC",
-          "<{ id: ",
+          "<{ filter: ",
+          "StringC",
+          "; id: ",
           "Type",
           "<string, string, unknown>; list_id: ",
           "Type",
