@@ -76,18 +76,20 @@ export const FormContext: React.FC<Props> = ({
           owner: selectedOwner ?? owner[0],
         });
 
-        if (afterCaseCreated && updatedCase) {
-          // add attachments to the case
-          if (Array.isArray(attachments)) {
-            // TODO currently the API only supports to add a comment at the time
-            // once the API is updated we should use bulk post comment #124814
-            for (const attachment of attachments) {
-              await postComment({
-                caseId: updatedCase.id,
-                data: attachment,
-              });
-            }
+        // add attachments to the case
+        if (updatedCase && Array.isArray(attachments)) {
+          // TODO currently the API only supports to add a comment at the time
+          // once the API is updated we should use bulk post comment #124814
+          // this operation is intentionally made in sequence
+          for (const attachment of attachments) {
+            await postComment({
+              caseId: updatedCase.id,
+              data: attachment,
+            });
           }
+        }
+
+        if (afterCaseCreated && updatedCase) {
           await afterCaseCreated(updatedCase, postComment);
         }
 
