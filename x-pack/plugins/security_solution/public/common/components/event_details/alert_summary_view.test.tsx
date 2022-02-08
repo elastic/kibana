@@ -174,32 +174,41 @@ describe('AlertSummaryView', () => {
     });
   });
   test('Behavior event code renders additional summary rows', () => {
+    const actualRuleDescription = 'The actual rule description';
     const renderProps = {
       ...props,
-      data: mockAlertDetailsData.map((item) => {
-        if (item.category === 'event' && item.field === 'event.code') {
-          return {
-            ...item,
-            values: ['behavior'],
-            originalValue: ['behavior'],
-          };
-        }
-        if (item.category === 'event' && item.field === 'event.category') {
-          return {
-            ...item,
-            values: ['malware', 'process', 'file'],
-            originalValue: ['malware', 'process', 'file'],
-          };
-        }
-        return item;
-      }) as TimelineEventsDetailsItem[],
+      data: [
+        ...mockAlertDetailsData.map((item) => {
+          if (item.category === 'event' && item.field === 'event.code') {
+            return {
+              ...item,
+              values: ['behavior'],
+              originalValue: ['behavior'],
+            };
+          }
+          if (item.category === 'event' && item.field === 'event.category') {
+            return {
+              ...item,
+              values: ['malware', 'process', 'file'],
+              originalValue: ['malware', 'process', 'file'],
+            };
+          }
+          return item;
+        }),
+        {
+          category: 'rule',
+          field: 'rule.description',
+          values: [actualRuleDescription],
+          originalValue: [actualRuleDescription],
+        },
+      ] as TimelineEventsDetailsItem[],
     };
     const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    ['host.name', 'user.name', 'process.name'].forEach((fieldId) => {
+    ['host.name', 'user.name', 'process.name', actualRuleDescription].forEach((fieldId) => {
       expect(getByText(fieldId));
     });
   });

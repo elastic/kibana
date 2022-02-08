@@ -6,11 +6,7 @@
  */
 
 import { find, isEmpty, uniqBy } from 'lodash/fp';
-import {
-  ALERT_RULE_NAMESPACE,
-  ALERT_RULE_TYPE,
-  ALERT_RULE_DESCRIPTION,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAMESPACE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -107,7 +103,7 @@ function getFieldsByEventCode(
   switch (eventCode) {
     case EventCode.BEHAVIOR:
       return [
-        { id: ALERT_RULE_DESCRIPTION, label: ALERTS_HEADERS_RULE_DESCRIPTION },
+        { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
         // Resolve more fields based on the source event
         ...getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined }),
       ];
