@@ -23,7 +23,7 @@ Review important information about the {kib} 8.0.0 releases.
 
 coming::[8.0.0]
 
-Review the {kib} 8.0.0 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+Review the {kib} 8.0.0 changes, then use the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant] to complete the upgrade.
 
 [float]
 [[breaking-changes-8.0.0]]
