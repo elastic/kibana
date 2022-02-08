@@ -25,7 +25,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
 import { initPromisePool } from '../../../../utils/promise_pool';
-import { isElasticRule } from '../../../../usage/detections';
+import { isElasticRule } from '../../../../usage/queries/utils/is_elastic_rule';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';

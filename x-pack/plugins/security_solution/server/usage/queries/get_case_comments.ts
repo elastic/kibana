@@ -8,28 +8,35 @@
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
-} from '../../../../../../src/core/server';
-import type { CasesSavedObject } from './types';
+  Logger,
+  SavedObjectsCreatePointInTimeFinderOptions,
+} from 'kibana/server';
+
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../cases/common/constants';
+import type { CommentAttributes } from '../../../../cases/common/api/cases/comment';
 
 export interface GetCasesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   maxSize: number;
   maxPerPage: number;
+  logger: Logger;
 }
 
-export const getCases = async ({
+export const getCaseComments = async ({
   savedObjectsClient,
   maxSize,
   maxPerPage,
-}: GetCasesOptions): Promise<Array<SavedObjectsFindResult<CasesSavedObject>>> => {
-  const finder = savedObjectsClient.createPointInTimeFinder<CasesSavedObject>({
+  logger,
+}: GetCasesOptions): Promise<Array<SavedObjectsFindResult<CommentAttributes>>> => {
+  const query: SavedObjectsCreatePointInTimeFinderOptions = {
     type: CASE_COMMENT_SAVED_OBJECT,
     perPage: maxPerPage,
     namespaces: ['*'],
     filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: alert`,
-  });
-  let responses: Array<SavedObjectsFindResult<CasesSavedObject>> = [];
+  };
+  logger.debug(`Getting cases with point in time (PIT) query:', ${JSON.stringify(query)}`);
+  const finder = savedObjectsClient.createPointInTimeFinder<CommentAttributes>(query);
+  let responses: Array<SavedObjectsFindResult<CommentAttributes>> = [];
   for await (const response of finder.find()) {
     const extra = responses.length + response.saved_objects.length - maxSize;
     if (extra > 0) {
@@ -38,5 +45,6 @@ export const getCases = async ({
       responses = [...responses, ...response.saved_objects];
     }
   }
+  logger.debug(`Returning cases response of length: "${responses.length}"`);
   return responses;
 };

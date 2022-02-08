@@ -19,11 +19,11 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { isElasticRule } from '../../../../usage/detections';
+import { isElasticRule } from '../../../../usage/queries/utils/is_elastic_rule';
 import { readRules } from '../../rules/read_rules';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
-jest.mock('../../../../usage/detections', () => ({ isElasticRule: jest.fn() }));
+jest.mock('../../../../usage/queries/utils/is_elastic_rule', () => ({ isElasticRule: jest.fn() }));
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
 
 describe.each([

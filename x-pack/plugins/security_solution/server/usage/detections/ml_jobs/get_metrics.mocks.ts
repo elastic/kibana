@@ -5,81 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-
-export const getMockJobSummaryResponse = () => [
-  {
-    id: 'linux_anomalous_network_activity_ecs',
-    description:
-      'SIEM Auditbeat: Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity (beta)',
-    groups: ['auditbeat', 'process', 'siem'],
-    processed_record_count: 141889,
-    memory_status: 'ok',
-    jobState: 'opened',
-    hasDatafeed: true,
-    datafeedId: 'datafeed-linux_anomalous_network_activity_ecs',
-    datafeedIndices: ['auditbeat-*'],
-    datafeedState: 'started',
-    latestTimestampMs: 1594085401911,
-    earliestTimestampMs: 1593054845656,
-    latestResultsTimestampMs: 1594085401911,
-    isSingleMetricViewerJob: true,
-    nodeName: 'node',
-  },
-  {
-    id: 'linux_anomalous_network_port_activity_ecs',
-    description:
-      'SIEM Auditbeat: Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity (beta)',
-    groups: ['auditbeat', 'process', 'siem'],
-    processed_record_count: 0,
-    memory_status: 'ok',
-    jobState: 'closed',
-    hasDatafeed: true,
-    datafeedId: 'datafeed-linux_anomalous_network_port_activity_ecs',
-    datafeedIndices: ['auditbeat-*'],
-    datafeedState: 'stopped',
-    isSingleMetricViewerJob: true,
-  },
-  {
-    id: 'other_job',
-    description: 'a job that is custom',
-    groups: ['auditbeat', 'process', 'security'],
-    processed_record_count: 0,
-    memory_status: 'ok',
-    jobState: 'closed',
-    hasDatafeed: true,
-    datafeedId: 'datafeed-other',
-    datafeedIndices: ['auditbeat-*'],
-    datafeedState: 'stopped',
-    isSingleMetricViewerJob: true,
-  },
-  {
-    id: 'another_job',
-    description: 'another job that is custom',
-    groups: ['auditbeat', 'process', 'security'],
-    processed_record_count: 0,
-    memory_status: 'ok',
-    jobState: 'opened',
-    hasDatafeed: true,
-    datafeedId: 'datafeed-another',
-    datafeedIndices: ['auditbeat-*'],
-    datafeedState: 'started',
-    isSingleMetricViewerJob: true,
-  },
-  {
-    id: 'irrelevant_job',
-    description: 'a non-security job',
-    groups: ['auditbeat', 'process'],
-    processed_record_count: 0,
-    memory_status: 'ok',
-    jobState: 'opened',
-    hasDatafeed: true,
-    datafeedId: 'datafeed-another',
-    datafeedIndices: ['auditbeat-*'],
-    datafeedState: 'started',
-    isSingleMetricViewerJob: true,
-  },
-];
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export const getMockListModulesResponse = () => [
   {
@@ -159,6 +85,80 @@ export const getMockListModulesResponse = () => [
     ],
     datafeeds: [],
     kibana: {},
+  },
+];
+
+export const getMockMlJobSummaryResponse = () => [
+  {
+    id: 'linux_anomalous_network_activity_ecs',
+    description:
+      'SIEM Auditbeat: Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity (beta)',
+    groups: ['auditbeat', 'process', 'siem'],
+    processed_record_count: 141889,
+    memory_status: 'ok',
+    jobState: 'opened',
+    hasDatafeed: true,
+    datafeedId: 'datafeed-linux_anomalous_network_activity_ecs',
+    datafeedIndices: ['auditbeat-*'],
+    datafeedState: 'started',
+    latestTimestampMs: 1594085401911,
+    earliestTimestampMs: 1593054845656,
+    latestResultsTimestampMs: 1594085401911,
+    isSingleMetricViewerJob: true,
+    nodeName: 'node',
+  },
+  {
+    id: 'linux_anomalous_network_port_activity_ecs',
+    description:
+      'SIEM Auditbeat: Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity (beta)',
+    groups: ['auditbeat', 'process', 'siem'],
+    processed_record_count: 0,
+    memory_status: 'ok',
+    jobState: 'closed',
+    hasDatafeed: true,
+    datafeedId: 'datafeed-linux_anomalous_network_port_activity_ecs',
+    datafeedIndices: ['auditbeat-*'],
+    datafeedState: 'stopped',
+    isSingleMetricViewerJob: true,
+  },
+  {
+    id: 'other_job',
+    description: 'a job that is custom',
+    groups: ['auditbeat', 'process', 'security'],
+    processed_record_count: 0,
+    memory_status: 'ok',
+    jobState: 'closed',
+    hasDatafeed: true,
+    datafeedId: 'datafeed-other',
+    datafeedIndices: ['auditbeat-*'],
+    datafeedState: 'stopped',
+    isSingleMetricViewerJob: true,
+  },
+  {
+    id: 'another_job',
+    description: 'another job that is custom',
+    groups: ['auditbeat', 'process', 'security'],
+    processed_record_count: 0,
+    memory_status: 'ok',
+    jobState: 'opened',
+    hasDatafeed: true,
+    datafeedId: 'datafeed-another',
+    datafeedIndices: ['auditbeat-*'],
+    datafeedState: 'started',
+    isSingleMetricViewerJob: true,
+  },
+  {
+    id: 'irrelevant_job',
+    description: 'a non-security job',
+    groups: ['auditbeat', 'process'],
+    processed_record_count: 0,
+    memory_status: 'ok',
+    jobState: 'opened',
+    hasDatafeed: true,
+    datafeedId: 'datafeed-another',
+    datafeedIndices: ['auditbeat-*'],
+    datafeedState: 'started',
+    isSingleMetricViewerJob: true,
   },
 ];
 
@@ -389,79 +389,4 @@ export const getMockRuleSearchResponse = (
       },
     ],
   },
-});
-
-export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<unknown, unknown> => ({
-  took: 7,
-  timed_out: false,
-  _shards: {
-    total: 1,
-    successful: 1,
-    skipped: 0,
-    failed: 0,
-  },
-  hits: {
-    total: {
-      value: 7322,
-      relation: 'eq',
-    },
-    max_score: null,
-    hits: [],
-  },
-  aggregations: {
-    detectionAlerts: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [
-        {
-          key: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
-          doc_count: docCount,
-        },
-      ],
-    },
-  },
-});
-
-export const getMockAlertCasesResponse = () => ({
-  page: 1,
-  per_page: 10000,
-  total: 4,
-  saved_objects: [
-    {
-      type: 'cases-comments',
-      id: '3bb5cc10-9249-11eb-85b7-254c8af1a983',
-      attributes: {
-        type: 'alert',
-        alertId: '54802763917f521249c9f68d0d4be0c26cc538404c26dfed1ae7dcfa94ea2226',
-        index: '.siem-signals-default-000001',
-        rule: {
-          id: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
-          name: 'Azure Diagnostic Settings Deletion',
-        },
-        created_at: '2021-03-31T17:47:59.449Z',
-        created_by: {
-          email: '',
-          full_name: '',
-          username: '',
-        },
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-      },
-      references: [
-        {
-          type: 'cases',
-          name: 'associated-cases',
-          id: '3a3a4fa0-9249-11eb-85b7-254c8af1a983',
-        },
-      ],
-      migrationVersion: {},
-      coreMigrationVersion: '8.0.0',
-      updated_at: '2021-03-31T17:47:59.818Z',
-      version: 'WzI3MDIyODMsNF0=',
-      namespaces: ['default'],
-      score: 0,
-    },
-  ],
 });

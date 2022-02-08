@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
+
 import {
   SIGNALS_ID,
   EQL_RULE_TYPE_ID,
@@ -15,16 +17,15 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import { ElasticsearchClient } from 'kibana/server';
-import { fetchWithPit } from './fetch_with_pit';
-
-import { RuleSearchResult } from './types';
+import { fetchHitsWithPit } from './utils/fetch_hits_with_pit';
+import { RuleSearchResult } from '../types';
 
 export interface GetDetectionRulesOptions {
   esClient: ElasticsearchClient;
   kibanaIndex: string;
   maxSize: number;
   maxPerPage: number;
+  logger: Logger;
 }
 
 export const getDetectionRules = async ({
@@ -32,8 +33,10 @@ export const getDetectionRules = async ({
   kibanaIndex,
   maxSize,
   maxPerPage,
+  logger,
 }: GetDetectionRulesOptions): Promise<Array<SearchHit<RuleSearchResult>>> => {
-  return fetchWithPit<RuleSearchResult>({
+  return fetchHitsWithPit<RuleSearchResult>({
+    logger,
     esClient,
     index: kibanaIndex,
     maxSize,
