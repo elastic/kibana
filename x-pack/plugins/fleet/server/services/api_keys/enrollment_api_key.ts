@@ -78,13 +78,13 @@ export async function getEnrollmentAPIKey(
   id: string
 ): Promise<EnrollmentAPIKey> {
   try {
-    const res = await esClient.get<FleetServerEnrollmentAPIKey>({
+    const body = await esClient.get<FleetServerEnrollmentAPIKey>({
       index: ENROLLMENT_API_KEYS_INDEX,
       id,
     });
 
     // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
-    return esDocToEnrollmentApiKey(res.body);
+    return esDocToEnrollmentApiKey(body);
   } catch (e) {
     if (e instanceof errors.ResponseError && e.statusCode === 404) {
       throw Boom.notFound(`Enrollment api key ${id} not found`);
@@ -300,7 +300,7 @@ export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, api
   });
 
   // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
-  const [enrollmentAPIKey] = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+  const [enrollmentAPIKey] = res.hits.hits.map(esDocToEnrollmentApiKey);
 
   if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
     throw new Error(
