@@ -138,9 +138,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clearTextArea() {
-    const textArea = await this.getEditorTextArea();
-    await this.retry.try(async () => {
-      await textArea.clearValueWithKeyboard();
-    });
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.clearValueWithKeyboard();
   }
 }
