@@ -14,5 +14,5 @@ export function registerTraceEventsTopNHostsSearchRoute(
   router: IRouter<DataRequestHandlerContext>
 ) {
   const paths = getRemoteRoutePaths();
-  return queryTopNCommon(router, paths.TopNHosts, 'HostName');
+  return queryTopNCommon(router, paths.TopNHosts, 'HostID');
 }
