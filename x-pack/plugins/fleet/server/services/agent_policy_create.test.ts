@@ -116,7 +116,7 @@ describe('createAgentPolicyWithPackages', () => {
     expect(response.id).toEqual('fleet-server-policy');
     expect(response.is_default_fleet_server).toBe(true);
     expect(mockedBulkInstallPackages).toHaveBeenCalledWith({
-      savedObjectsClient: soRepoMock,
+      savedObjectsRepo: soRepoMock,
       esClient: esClientMock,
       packagesToInstall: ['fleet_server', 'system', 'elastic_agent'],
       spaceId: 'default',
@@ -148,7 +148,7 @@ describe('createAgentPolicyWithPackages', () => {
 
     expect(response.id).toEqual('new_id');
     expect(mockedBulkInstallPackages).toHaveBeenCalledWith({
-      savedObjectsClient: soRepoMock,
+      savedObjectsRepo: soRepoMock,
       esClient: esClientMock,
       packagesToInstall: ['fleet_server'],
       spaceId: 'default',
@@ -171,7 +171,7 @@ describe('createAgentPolicyWithPackages', () => {
 
     expect(response.id).toEqual('new_id');
     expect(mockedBulkInstallPackages).toHaveBeenCalledWith({
-      savedObjectsClient: soRepoMock,
+      savedObjectsRepo: soRepoMock,
       esClient: esClientMock,
       packagesToInstall: ['system'],
       spaceId: 'default',
@@ -196,7 +196,7 @@ describe('createAgentPolicyWithPackages', () => {
 
     expect(response.id).toEqual('new_id');
     expect(mockedBulkInstallPackages).toHaveBeenCalledWith({
-      savedObjectsClient: soRepoMock,
+      savedObjectsRepo: soRepoMock,
       esClient: esClientMock,
       packagesToInstall: ['system', 'elastic_agent'],
       spaceId: 'default',
