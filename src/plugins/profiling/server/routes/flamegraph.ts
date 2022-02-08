@@ -7,11 +7,12 @@
  */
 
 export class FlameGraph {
-  constructor(events, totalEvents, stackTraces, stackFrames) {
+  constructor(events, totalEvents, stackTraces, stackFrames, executables) {
     this.events = events;
     this.totalEvents = totalEvents;
     this.stacktraces = stackTraces;
     this.stackframes = stackFrames;
+    this.executables = executables;
   }
 
   toElastic() {
