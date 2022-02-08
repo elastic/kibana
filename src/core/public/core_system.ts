@@ -186,7 +186,6 @@ export class CoreSystem {
       const i18n = await this.i18n.start();
       const fatalErrors = await this.fatalErrors.start();
       const theme = this.theme.start();
-      const executionContext = this.executionContext.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
@@ -209,13 +208,10 @@ export class CoreSystem {
       });
       const application = await this.application.start({ http, theme, overlays });
 
-      application.currentAppId$.subscribe(appId => {
-        executionContext.clear();
-        executionContext.set({
-          appId
-        })
-      })
-      
+      const executionContext = this.executionContext.start({
+        curApp$: application.currentAppId$
+      });
+
       const chrome = await this.chrome.start({
         application,
         docLinks,

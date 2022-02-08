@@ -51,6 +51,7 @@ export function DiscoverMainRoute() {
   const { id } = useParams<DiscoverLandingParams>();
 
   core.executionContext.set({
+    type: 'application',
     page: 'app',
     id: id || 'new',
   });

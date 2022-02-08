@@ -35,6 +35,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
 
   services.executionContext.set({
+    type: 'application',
     page: 'editor',
     id: visualizationIdFromUrl,
   })

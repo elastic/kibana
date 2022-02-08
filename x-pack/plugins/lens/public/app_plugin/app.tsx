@@ -119,6 +119,7 @@ export function App({
   }, [setIndicateNoData]);
 
   executionContext.set({
+    type: 'application',
     id: savedObjectId || 'new',
     page: 'editor',
   });

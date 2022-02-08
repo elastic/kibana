@@ -49,6 +49,7 @@ export function DashboardApp({
   );
 
   core.executionContext.set({
+    type: 'application',
     page: 'app',
     id: savedDashboardId || 'new',
   });

@@ -37,6 +37,7 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
   const breadcrumb = useMainRouteBreadcrumb();
 
   core.executionContext.set({
+    type: 'application',
     page: 'single-doc',
     id: indexPatternId || '',
   });

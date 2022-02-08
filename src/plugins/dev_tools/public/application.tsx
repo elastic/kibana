@@ -66,6 +66,7 @@ function DevToolsWrapper({
   }, [activeDevTool, docTitleService, breadcrumbService]);
 
   appServices.executionContext.set({
+    type: 'application',
     page: activeDevTool,
   })
 

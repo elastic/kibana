@@ -116,8 +116,8 @@ export class MapApp extends React.Component<Props, State> {
   componentDidMount() {
     this._isMounted = true;
 
-    
     getExecutionContext().set({
+      type: 'application',
       page: 'editor',
       id: this.props.savedMap.getSavedObjectId() || 'new',
     })

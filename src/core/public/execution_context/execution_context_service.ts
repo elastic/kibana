@@ -7,15 +7,17 @@
  */
 
 import { isEqual } from 'lodash';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { CoreService } from '../../types';
 
 export type ExecutionContext = Record<string, any>;
+
 /** @public */
 export interface ExecutionContextSetup {
   context$: Observable<ExecutionContext>;
-  set(c$: Record<string, any>): void;
-  getAll(): Record<string, any>;
+  set(c$: ExecutionContext): void;
+  getAll(): ExecutionContext;
   clear(): void;
 }
 
@@ -25,10 +27,15 @@ export interface ExecutionContextSetup {
  */
 export type ExecutionContextStart = ExecutionContextSetup;
 
+export type StartDeps = {
+  curApp$: Observable<string | undefined>,
+};
+
 /** @internal */
 export class ExecutionContextService implements CoreService<ExecutionContextSetup, ExecutionContextStart> {
-  // private context: Record<string, any> = {};
   private context$: BehaviorSubject<ExecutionContext> = new BehaviorSubject({});
+  private appId?: string;
+  private subscription?: Subscription;
 
   public setup() {
     return {
@@ -38,14 +45,13 @@ export class ExecutionContextService implements CoreService<ExecutionContextSetu
       },
       set: (c: ExecutionContext) => {
         const newVal = {
+          url: window.location.pathname,
+          name: this.appId,
           ...this.context$.value,
           ...c
         };
         if (!isEqual(newVal, this.context$.value)) {
-          this.context$.next({
-            ...this.context$.value,
-            ...c
-          });
+          this.context$.next(newVal);
         }
       }, 
       getAll: () => {
@@ -54,10 +60,17 @@ export class ExecutionContextService implements CoreService<ExecutionContextSetu
     };
   }
 
-  public start() {
-    return this.setup();
+  public start({ curApp$ }: StartDeps) {
+    const start = this.setup();
+    // Clear context on app change
+    this.subscription = curApp$.pipe(distinctUntilChanged()).subscribe(appId => {
+      start.clear();
+      this.appId = appId;
+    });
+    return start;
   }
 
   public stop() {
+    this.subscription?.unsubscribe();
   }
 }

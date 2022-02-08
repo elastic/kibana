@@ -414,12 +414,14 @@ export class Embeddable
     this.renderComplete.dispatchInProgress();
 
     const executionContext = {
-      type: 'lens',
-      name: this.savedVis.visualizationType ?? '',
-      id: this.id,
-      description: this.savedVis.title || this.input.title || '',
-      url: this.output.editUrl,
-      parent: this.input.executionContext,
+      ...this.input.executionContext,
+      child: {
+        type: 'lens',
+        name: this.savedVis.visualizationType ?? '',
+        id: this.id,
+        description: this.savedVis.title || this.input.title || '',
+        url: this.output.editUrl,
+      }
     };
 
     const input = this.getInput();

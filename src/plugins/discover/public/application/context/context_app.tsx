@@ -42,6 +42,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   core.executionContext.set({
+    type: 'application',
     page: 'context',
     id: indexPattern.id || '',
   });

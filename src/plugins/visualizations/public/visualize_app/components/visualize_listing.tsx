@@ -98,6 +98,7 @@ export const VisualizeListing = () => {
   );
 
   executionContext.set({
+    type: 'application',
     page: 'list',
     id: '',
   })

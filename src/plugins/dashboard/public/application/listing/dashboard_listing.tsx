@@ -68,6 +68,7 @@ export const DashboardListing = ({
   );
 
   core.executionContext.set({
+    type: 'application',
     page: 'list',
     id: '',
   })
