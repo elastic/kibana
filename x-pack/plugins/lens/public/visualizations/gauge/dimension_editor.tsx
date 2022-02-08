@@ -48,7 +48,7 @@ export function GaugeDimensionEditor(
   const { state, setState, frame, accessor } = props;
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
-  if (state?.metricAccessor !== accessor) return null;
+  if (state?.metric !== accessor) return null;
 
   const currentData = frame.activeData?.[state.layerId];
   const [firstRow] = currentData?.rows || [];

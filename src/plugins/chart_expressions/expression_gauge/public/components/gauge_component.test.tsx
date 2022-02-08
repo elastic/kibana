@@ -57,10 +57,10 @@ const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const formatService = fieldFormatsServiceMock.createStartContract();
 const args: GaugeArguments = {
   labelMajor: 'Gauge',
-  metricAccessor: 'metric-accessor',
-  minAccessor: '',
-  maxAccessor: '',
-  goalAccessor: '',
+  metric: 'metric-accessor',
+  min: '',
+  max: '',
+  goal: '',
   shape: 'verticalBullet',
   colorMode: GaugeColorModes.NONE,
   ticksPosition: GaugeTicksPositions.AUTO,
@@ -94,14 +94,14 @@ describe('GaugeComponent', function () {
     expect(component.find(Chart)).toMatchSnapshot();
   });
 
-  it('returns null when metricAccessor is not provided', async () => {
+  it('returns null when metric is not provided', async () => {
     const customProps = {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
-        metricAccessor: undefined,
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
+        metric: undefined,
+        min: 'min-accessor',
+        max: 'max-accessor',
       },
       data: createData({ 'min-accessor': 0, 'max-accessor': 10 }),
     };
@@ -114,9 +114,9 @@ describe('GaugeComponent', function () {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
+        metric: 'metric-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
       },
       data: createData({ 'metric-accessor': 0, 'min-accessor': 0, 'max-accessor': 0 }),
     };
@@ -128,9 +128,9 @@ describe('GaugeComponent', function () {
       ...wrapperProps,
       args: {
         ...wrapperProps.args,
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
+        metric: 'metric-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
       },
       data: createData({ 'metric-accessor': 0, 'min-accessor': 0, 'max-accessor': -10 }),
     };
@@ -143,9 +143,9 @@ describe('GaugeComponent', function () {
       args: {
         ...wrapperProps.args,
         ticksPosition: GaugeTicksPositions.BANDS,
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
+        metric: 'metric-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
       },
       data: createData({ 'metric-accessor': 12, 'min-accessor': 0, 'max-accessor': 10 }),
     } as GaugeRenderProps;
@@ -201,9 +201,9 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
         },
       };
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
@@ -226,9 +226,9 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
         },
       } as GaugeRenderProps;
@@ -252,9 +252,9 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
           ticksPosition: GaugeTicksPositions.BANDS,
         },
@@ -280,9 +280,9 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
           ticksPosition: GaugeTicksPositions.BANDS,
         },
@@ -308,9 +308,9 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
           ticksPosition: GaugeTicksPositions.BANDS,
         },
@@ -336,9 +336,9 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
           ticksPosition: GaugeTicksPositions.BANDS,
         },
@@ -364,9 +364,9 @@ describe('GaugeComponent', function () {
         ...wrapperProps,
         args: {
           ...wrapperProps.args,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
           palette,
           ticksPosition: GaugeTicksPositions.BANDS,
         },
@@ -395,9 +395,9 @@ describe('GaugeComponent', function () {
           colorMode: GaugeColorModes.PALETTE,
           palette,
           ticksPosition: GaugeTicksPositions.BANDS,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
@@ -424,9 +424,9 @@ describe('GaugeComponent', function () {
           colorMode: GaugeColorModes.PALETTE,
           palette,
           ticksPosition: GaugeTicksPositions.BANDS,
-          metricAccessor: 'metric-accessor',
-          minAccessor: 'min-accessor',
-          maxAccessor: 'max-accessor',
+          metric: 'metric-accessor',
+          min: 'min-accessor',
+          max: 'max-accessor',
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);

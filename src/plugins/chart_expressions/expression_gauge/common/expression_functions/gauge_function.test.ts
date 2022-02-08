@@ -28,8 +28,8 @@ describe('interpreter/functions#gauge', () => {
     labelMajor: 'title',
     shape: GaugeShapes.HORIZONTAL_BULLET,
     colorMode: GaugeColorModes.NONE,
-    minAccessor: 'col-1-2',
-    metricAccessor: 'col-0-1',
+    min: 'col-1-2',
+    metric: 'col-0-1',
   };
 
   it('returns an object with the correct structure', () => {

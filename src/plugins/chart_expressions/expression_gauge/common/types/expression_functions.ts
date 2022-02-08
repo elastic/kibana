@@ -29,10 +29,10 @@ export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
 export type GaugeTicksPosition = $Values<typeof GaugeTicksPositions>;
 
 export interface GaugeState {
-  metricAccessor?: string;
-  minAccessor?: string;
-  maxAccessor?: string;
-  goalAccessor?: string;
+  metric?: string;
+  min?: string;
+  max?: string;
+  goal?: string;
   ticksPosition: GaugeTicksPosition;
   labelMajorMode: GaugeLabelMajorMode;
   labelMajor?: string;

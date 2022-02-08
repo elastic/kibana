@@ -151,7 +151,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
   ({ data, args, formatFactory, chartsThemeService }) => {
     const {
       shape: subtype,
-      metricAccessor,
+      metric,
       palette,
       colorMode,
       labelMinor,
@@ -159,7 +159,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       labelMajorMode,
       ticksPosition,
     } = args;
-    if (!metricAccessor) {
+    if (!metric) {
       // Chart is not ready
       return null;
     }
@@ -167,14 +167,14 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const chartTheme = chartsThemeService.useChartsTheme();
 
     const table = data;
-    const metricColumn = table.columns.find((col) => col.id === metricAccessor);
+    const metricColumn = table.columns.find((col) => col.id === metric);
 
     const chartData = table.rows.filter(
-      (v) => typeof v[metricAccessor!] === 'number' || Array.isArray(v[metricAccessor!])
+      (v) => typeof v[metric!] === 'number' || Array.isArray(v[metric!])
     );
     const row = chartData?.[0];
 
-    const metricValue = getValueFromAccessor('metricAccessor', row, args);
+    const metricValue = getValueFromAccessor('metric', row, args);
 
     const icon =
       subtype === GaugeShapes.HORIZONTAL_BULLET ? GaugeIconHorizontal : GaugeIconVertical;
@@ -183,7 +183,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       return <EmptyPlaceholder icon={icon} />;
     }
 
-    const goal = getValueFromAccessor('goalAccessor', row, args);
+    const goal = getValueFromAccessor('goal', row, args);
     const min = getMinValue(row, args);
     const max = getMaxValue(row, args);
 

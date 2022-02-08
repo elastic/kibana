@@ -55,27 +55,27 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       }),
       required: true,
     },
-    metricAccessor: {
+    metric: {
       types: ['string'],
-      help: i18n.translate('expressionGauge.functions.gauge.args.metricAccessor.help', {
+      help: i18n.translate('expressionGauge.functions.gauge.args.metric.help', {
         defaultMessage: 'Current value',
       }),
     },
-    minAccessor: {
+    min: {
       types: ['string'],
-      help: i18n.translate('expressionGauge.functions.gauge.args.minAccessor.help', {
+      help: i18n.translate('expressionGauge.functions.gauge.args.min.help', {
         defaultMessage: 'Minimum value',
       }),
     },
-    maxAccessor: {
+    max: {
       types: ['string'],
-      help: i18n.translate('expressionGauge.functions.gauge.args.maxAccessor.help', {
+      help: i18n.translate('expressionGauge.functions.gauge.args.max.help', {
         defaultMessage: 'Maximum value',
       }),
     },
-    goalAccessor: {
+    goal: {
       types: ['string'],
-      help: i18n.translate('expressionGauge.functions.gauge.args.goalAccessor.help', {
+      help: i18n.translate('expressionGauge.functions.gauge.args.goal.help', {
         defaultMessage: 'Goal Value',
       }),
     },

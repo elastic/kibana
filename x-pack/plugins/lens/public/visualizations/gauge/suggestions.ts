@@ -29,14 +29,10 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
   keptLayerIds,
   subVisualizationId,
 }) => {
-  const isGauge = Boolean(
-    state && (state.minAccessor || state.maxAccessor || state.goalAccessor || state.metricAccessor)
-  );
+  const isGauge = Boolean(state && (state.min || state.max || state.goal || state.metric));
 
   const numberOfAccessors =
-    state &&
-    [state.minAccessor, state.maxAccessor, state.goalAccessor, state.metricAccessor].filter(Boolean)
-      .length;
+    state && [state.min, state.max, state.goal, state.metric].filter(Boolean).length;
 
   if (
     hasLayerMismatch(keptLayerIds, table) ||
@@ -66,7 +62,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
     }),
     previewIcon: 'empty',
     score: 0.5,
-    hide: !isGauge || state?.metricAccessor === undefined, // only display for gauges for beta
+    hide: !isGauge || state?.metric === undefined, // only display for gauges for beta
   };
 
   const suggestions = isGauge
@@ -88,14 +84,14 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
           ...baseSuggestion,
           state: {
             ...baseSuggestion.state,
-            metricAccessor: table.columns[0].columnId,
+            metric: table.columns[0].columnId,
           },
         },
         {
           ...baseSuggestion,
           state: {
             ...baseSuggestion.state,
-            metricAccessor: table.columns[0].columnId,
+            metric: table.columns[0].columnId,
             shape:
               state?.shape === GaugeShapes.VERTICAL_BULLET
                 ? GaugeShapes.HORIZONTAL_BULLET

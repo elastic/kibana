@@ -9,7 +9,7 @@
 import type { DatatableRow } from 'src/plugins/expressions';
 import type { GaugeState } from '../../common/types/expression_functions';
 
-type GaugeAccessors = 'maxAccessor' | 'minAccessor' | 'goalAccessor' | 'metricAccessor';
+type GaugeAccessors = 'max' | 'min' | 'goal' | 'metric';
 
 type GaugeAccessorsType = Pick<GaugeState, GaugeAccessors>;
 
@@ -58,14 +58,14 @@ function getNiceNumber(localRange: number) {
 
 export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): number => {
   const FALLBACK_VALUE = 100;
-  const currentValue = getValueFromAccessor('maxAccessor', row, state);
+  const currentValue = getValueFromAccessor('max', row, state);
   if (currentValue != null) {
     return currentValue;
   }
   if (row && state) {
-    const { metricAccessor, goalAccessor } = state;
-    const metricValue = metricAccessor && row[metricAccessor];
-    const goalValue = goalAccessor && row[goalAccessor];
+    const { metric, goal } = state;
+    const metricValue = metric && row[metric];
+    const goalValue = goal && row[goal];
     const minValue = getMinValue(row, state);
     if (metricValue != null) {
       const numberValues = [minValue, goalValue, metricValue].filter((v) => typeof v === 'number');
@@ -77,15 +77,15 @@ export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): num
 };
 
 export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
-  const currentValue = getValueFromAccessor('minAccessor', row, state);
+  const currentValue = getValueFromAccessor('min', row, state);
   if (currentValue != null) {
     return currentValue;
   }
   const FALLBACK_VALUE = 0;
   if (row && state) {
-    const { metricAccessor, maxAccessor } = state;
-    const metricValue = metricAccessor && row[metricAccessor];
-    const maxValue = maxAccessor && row[maxAccessor];
+    const { metric, max } = state;
+    const metricValue = metric && row[metric];
+    const maxValue = max && row[max];
     const numberValues = [metricValue, maxValue].filter((v) => typeof v === 'number');
     if (Math.min(...numberValues) <= 0) {
       return Math.min(...numberValues) - 10; // TODO: TO THINK THROUGH
@@ -95,7 +95,7 @@ export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
 };
 
 export const getGoalValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
-  const currentValue = getValueFromAccessor('goalAccessor', row, state);
+  const currentValue = getValueFromAccessor('goal', row, state);
   if (currentValue != null) {
     return currentValue;
   }

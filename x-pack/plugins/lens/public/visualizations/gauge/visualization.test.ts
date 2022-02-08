@@ -74,10 +74,10 @@ describe('gauge', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
         layerId: 'first',
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
-        goalAccessor: 'goal-accessor',
+        metric: 'metric-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
+        goal: 'goal-accessor',
       };
       frame.activeData = {
         first: { type: 'datatable', columns: [], rows: [{ 'metric-accessor': 200 }] },
@@ -147,7 +147,7 @@ describe('gauge', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
         layerId: 'first',
-        minAccessor: 'min-accessor',
+        min: 'min-accessor',
       };
       expect(
         getGaugeVisualization({
@@ -213,10 +213,10 @@ describe('gauge', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
         layerId: 'first',
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
-        goalAccessor: 'goal-accessor',
+        metric: 'metric-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
+        goal: 'goal-accessor',
       };
 
       frame.activeData = undefined;
@@ -285,10 +285,10 @@ describe('gauge', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
         layerId: 'first',
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
-        goalAccessor: 'goal-accessor',
+        metric: 'metric-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
+        goal: 'goal-accessor',
       };
       frame.activeData = {
         first: {
@@ -367,8 +367,8 @@ describe('gauge', () => {
     test('set dimension correctly', () => {
       const prevState: GaugeVisualizationState = {
         ...exampleState(),
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
+        min: 'min-accessor',
+        max: 'max-accessor',
       };
       expect(
         getGaugeVisualization({
@@ -382,7 +382,7 @@ describe('gauge', () => {
         })
       ).toEqual({
         ...prevState,
-        minAccessor: 'new-min-accessor',
+        min: 'new-min-accessor',
       });
     });
   });
@@ -390,13 +390,13 @@ describe('gauge', () => {
   describe('#removeDimension', () => {
     const prevState: GaugeVisualizationState = {
       ...exampleState(),
-      metricAccessor: 'metric-accessor',
-      minAccessor: 'min-accessor',
+      metric: 'metric-accessor',
+      min: 'min-accessor',
       palette: [] as unknown as PaletteOutput<CustomPaletteParams>,
       colorMode: 'palette',
       ticksPosition: 'bands',
     };
-    test('removes metricAccessor correctly', () => {
+    test('removes metric correctly', () => {
       expect(
         getGaugeVisualization({
           paletteService,
@@ -408,10 +408,10 @@ describe('gauge', () => {
         })
       ).toEqual({
         ...exampleState(),
-        minAccessor: 'min-accessor',
+        min: 'min-accessor',
       });
     });
-    test('removes minAccessor correctly', () => {
+    test('removes min correctly', () => {
       expect(
         getGaugeVisualization({
           paletteService,
@@ -423,7 +423,7 @@ describe('gauge', () => {
         })
       ).toEqual({
         ...exampleState(),
-        metricAccessor: 'metric-accessor',
+        metric: 'metric-accessor',
         palette: [] as unknown as PaletteOutput<CustomPaletteParams>,
         colorMode: 'palette',
         ticksPosition: 'bands',
@@ -443,8 +443,8 @@ describe('gauge', () => {
     it('should return the type only if the layer is in the state', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
-        minAccessor: 'minAccessor',
-        goalAccessor: 'value-accessor',
+        min: 'min',
+        goal: 'value-accessor',
       };
       const instance = getGaugeVisualization({
         paletteService,
@@ -470,10 +470,10 @@ describe('gauge', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
         layerId: 'first',
-        minAccessor: 'min-accessor',
-        goalAccessor: 'goal-accessor',
-        metricAccessor: 'metric-accessor',
-        maxAccessor: 'max-accessor',
+        min: 'min-accessor',
+        goal: 'goal-accessor',
+        metric: 'metric-accessor',
+        max: 'max-accessor',
         labelMinor: 'Subtitle',
       };
       expect(
@@ -487,10 +487,10 @@ describe('gauge', () => {
             type: 'function',
             function: 'gauge',
             arguments: {
-              metricAccessor: ['metric-accessor'],
-              minAccessor: ['min-accessor'],
-              maxAccessor: ['max-accessor'],
-              goalAccessor: ['goal-accessor'],
+              metric: ['metric-accessor'],
+              min: ['min-accessor'],
+              max: ['max-accessor'],
+              goal: ['goal-accessor'],
               colorMode: ['none'],
               ticksPosition: ['auto'],
               labelMajorMode: ['auto'],
@@ -507,7 +507,7 @@ describe('gauge', () => {
       const state: GaugeVisualizationState = {
         ...exampleState(),
         layerId: 'first',
-        minAccessor: 'minAccessor',
+        min: 'min',
       };
       expect(
         getGaugeVisualization({
@@ -540,10 +540,10 @@ describe('gauge', () => {
     const state: GaugeVisualizationState = {
       ...exampleState(),
       layerId: 'first',
-      metricAccessor: 'metric-accessor',
-      minAccessor: 'min-accessor',
-      maxAccessor: 'max-accessor',
-      goalAccessor: 'goal-accessor',
+      metric: 'metric-accessor',
+      min: 'min-accessor',
+      max: 'max-accessor',
+      goal: 'goal-accessor',
     };
     it('should not warn for data in bounds', () => {
       frame.activeData = {
