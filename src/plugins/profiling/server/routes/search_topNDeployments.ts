@@ -8,7 +8,7 @@
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
 import { getRemoteRoutePaths } from '../../common';
-import { queryTopNCommon } from "./search_topN";
+import { queryTopNCommon } from './search_topN';
 
 export function registerTraceEventsTopNDeploymentsSearchRoute(
   router: IRouter<DataRequestHandlerContext>
