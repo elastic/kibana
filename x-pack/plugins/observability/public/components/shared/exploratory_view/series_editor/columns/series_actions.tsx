@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -57,18 +57,18 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
     closePopover();
   };
 
-  const onRemoveSeriesClick = () => {
+  const closePopover = useCallback(() => {
+    setPopover(false);
+  }, [setPopover]);
+
+  const onRemoveSeriesClick = useCallback(() => {
     removeSeries(seriesId);
     closePopover();
-  };
+  }, [removeSeries, seriesId, closePopover]);
 
-  const changePopoverVisibility = () => {
+  const changePopoverVisibility = useCallback(() => {
     setPopover(!isPopoverOpen);
-  };
-
-  const closePopover = () => {
-    setPopover(false);
-  };
+  }, [setPopover, isPopoverOpen]);
 
   const popoverButton = (
     <EuiButtonIcon
