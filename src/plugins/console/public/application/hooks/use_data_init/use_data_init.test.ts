@@ -84,7 +84,7 @@ describe('useDataInit', () => {
     });
   });
 
-  it('should calls dispatch with new objects if texts are provided', async () => {
+  it('should call dispatch with found object if texts are provided', async () => {
     jest.spyOn(React, 'useState').mockImplementation(useStateMock);
 
     const mockObj: TextObject = {
