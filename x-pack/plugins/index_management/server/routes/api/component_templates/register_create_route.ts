@@ -54,7 +54,7 @@ export const registerCreateRoute = ({
       }
 
       try {
-        const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
+        const responseBody = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
           // @ts-expect-error ComponentTemplateSerialized conflicts with @elastic/elasticsearch ClusterPutComponentTemplateRequest
           body: serializedComponentTemplate,
