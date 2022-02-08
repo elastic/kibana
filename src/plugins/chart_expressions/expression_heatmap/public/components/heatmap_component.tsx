@@ -541,9 +541,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             }
             yAxisLabelFormatter={
               yAxisColumn
-                ? args.gridConfig.isYAxisLabelVisible
-                  ? `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
-                  : ''
+                ? (v) => `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
                 : undefined
             }
           />
