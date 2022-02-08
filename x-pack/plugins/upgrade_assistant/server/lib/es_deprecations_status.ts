@@ -132,21 +132,25 @@ const getCombinedIndexInfos = async (
 };
 
 interface Action {
-  actions: {
-    remove_settings: {
-      settings: string[];
-    };
-  };
+  action_type: 'remove_settings';
+  objects: string[];
 }
-type EsMetadata = Action & {
+
+interface Actions {
+  actions: Action[];
+}
+
+type EsMetadata = Actions & {
   [key: string]: string;
 };
 
 const getCorrectiveAction = (
   message: string,
-  metadata: EsMetadata
+  metadata?: EsMetadata
 ): EnrichedDeprecationInfo['correctiveAction'] => {
-  const indexSettingDeprecation = metadata.actions.remove_settings.settings.length > 0;
+  const indexSettingDeprecation = metadata?.actions?.find(
+    (action) => action.action_type === 'remove_settings'
+  );
   const requiresReindexAction = /Index created before/.test(message);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresMlAction = /[Mm]odel snapshot/.test(message);
@@ -160,12 +164,12 @@ const getCorrectiveAction = (
   if (requiresIndexSettingsAction) {
     return {
       type: 'indexSetting',
-      deprecatedSettings: metadata.actions.remove_settings.settings,
+      deprecatedSettings: indexSettingDeprecation!.objects,
     };
   }
 
   if (requiresMlAction) {
-    const { snapshot_id: snapshotId, job_id: jobId } = metadata;
+    const { snapshot_id: snapshotId, job_id: jobId } = metadata!;
 
     return {
       type: 'mlSnapshot',
