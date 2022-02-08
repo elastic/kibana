@@ -11,6 +11,7 @@ export interface StatsBarStat {
   label: string;
   value: number;
   show?: boolean;
+  'data-test-subj'?: string;
 }
 interface StatProps {
   stat: StatsBarStat;
@@ -19,7 +20,8 @@ interface StatProps {
 export const Stat: FC<StatProps> = ({ stat }) => {
   return (
     <span className="stat">
-      <span>{stat.label}</span>: <strong>{stat.value}</strong>
+      <span>{stat.label}</span>:{' '}
+      <strong data-test-subj={stat['data-test-subj']}>{stat.value}</strong>
     </span>
   );
 };
