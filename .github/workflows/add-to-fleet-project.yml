@@ -30,5 +30,7 @@ jobs:
           projectid: ${{ env.PROJECT_ID }}
           contentid: ${{ github.event.issue.node_id }}
         env:
+          # https://github.com/orgs/elastic/projects/763
           PROJECT_ID: "PN_kwDOAGc3Zs4AAsH6"
+          # Token with `write:org` access
           GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}
