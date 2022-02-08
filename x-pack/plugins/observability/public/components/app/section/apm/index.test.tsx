@@ -88,8 +88,8 @@ describe('APMSection', () => {
       <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
     );
 
-    expect(getByText('APM')).toBeInTheDocument();
-    expect(getByText('View in app')).toBeInTheDocument();
+    expect(getByText('Services')).toBeInTheDocument();
+    expect(getByText('Show service inventory')).toBeInTheDocument();
     expect(getByText('Services 11')).toBeInTheDocument();
     expect(getByText('Throughput 900.0 tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
@@ -105,8 +105,8 @@ describe('APMSection', () => {
       <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
     );
 
-    expect(getByText('APM')).toBeInTheDocument();
-    expect(getByText('View in app')).toBeInTheDocument();
+    expect(getByText('Services')).toBeInTheDocument();
+    expect(getByText('Show service inventory')).toBeInTheDocument();
     expect(getByText('Services 11')).toBeInTheDocument();
     expect(getByText('Throughput 312.00k tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
@@ -121,9 +121,9 @@ describe('APMSection', () => {
       <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
     );
 
-    expect(getByText('APM')).toBeInTheDocument();
+    expect(getByText('Services')).toBeInTheDocument();
     expect(getByTestId('loading')).toBeInTheDocument();
-    expect(queryAllByText('View in app')).toEqual([]);
+    expect(queryAllByText('Show service inventory')).toEqual([]);
     expect(queryAllByText('Services 11')).toEqual([]);
     expect(queryAllByText('Throughput 312.00k tpm')).toEqual([]);
   });
