@@ -81,6 +81,11 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       help: strings.getShowValuesInLegendArgHelp(),
       default: false,
     },
+    ariaLabel: {
+      types: ['string'],
+      help: strings.getAriaLabelHelp(),
+      required: false,
+    },
   },
   fn(context, args, handlers) {
     if (args.splitColumn && args.splitRow) {
@@ -90,6 +95,10 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {
       ...args,
+      ariaLabel:
+        args.ariaLabel ??
+        (handlers.variables?.embeddableTitle as string) ??
+        handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
         metric: args.metric,
