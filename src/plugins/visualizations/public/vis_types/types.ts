@@ -118,6 +118,7 @@ export interface NavigateToLensContext {
   layers: {
     [key: string]: VisualizeEditorLayersContext;
   };
+  type: string;
   configuration: {
     fill: number | string;
     legend: {

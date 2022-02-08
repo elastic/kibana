@@ -27,7 +27,13 @@ export const visualizeTSVBAction = (application: ApplicationStart) =>
         isVisualizeAction: true,
       };
       application.navigateToApp('lens', {
-        state: { type: ACTION_CONVERT_TO_LENS, payload, originatingApp: 'TSVB' },
+        state: {
+          type: ACTION_CONVERT_TO_LENS,
+          payload,
+          originatingApp: i18n.translate('xpack.lens.TSVBLabel', {
+            defaultMessage: 'TSVB',
+          }),
+        },
       });
     },
   });

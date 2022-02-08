@@ -522,6 +522,7 @@ describe('loader', () => {
               timeInterval: 'auto',
             },
           ],
+          type: 'lnsXY',
           configuration: {
             legend: {
               isVisible: true,

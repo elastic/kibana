@@ -1272,6 +1272,7 @@ describe('Lens App', () => {
               timeInterval: 'auto',
             },
           ],
+          type: 'lnsXY',
           configuration: {
             fill: 0.5,
             legend: {
@@ -1347,6 +1348,7 @@ describe('Lens App', () => {
               timeInterval: 'auto',
             },
           ],
+          type: 'lnsXY',
           configuration: {
             fill: 0.5,
             legend: {

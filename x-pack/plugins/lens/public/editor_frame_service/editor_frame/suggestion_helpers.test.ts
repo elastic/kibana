@@ -287,6 +287,7 @@ describe('suggestion helpers', () => {
           timeInterval: 'auto',
         },
       ],
+      type: 'lnsXY',
       configuration: {
         fill: '0.5',
         legend: {
@@ -365,6 +366,7 @@ describe('suggestion helpers', () => {
           timeInterval: 'auto',
         },
       ],
+      type: 'lnsXY',
       configuration: {
         fill: '0.5',
         legend: {

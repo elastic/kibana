@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Datatable } from 'src/plugins/expressions';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
   Datasource,
-  TableChangeType,
   TableSuggestion,
   DatasourceSuggestion,
   DatasourcePublicAPI,
   DatasourceMap,
   VisualizationMap,
   VisualizeEditorContext,
+  Suggestion,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
 import { LayerType, layerTypes } from '../../../common';
@@ -30,21 +28,6 @@ import {
   DatasourceStates,
   VisualizationState,
 } from '../../state_management';
-
-export interface Suggestion {
-  visualizationId: string;
-  datasourceState?: unknown;
-  datasourceId?: string;
-  columns: number;
-  score: number;
-  title: string;
-  visualizationState: unknown;
-  previewExpression?: Ast | string;
-  previewIcon: IconType;
-  hide?: boolean;
-  changeType: TableChangeType;
-  keptLayerIds: string[];
-}
 
 /**
  * This function takes a list of available data tables and a list of visualization
@@ -171,15 +154,6 @@ export function getSuggestions({
     .sort((a, b) => b.score - a.score);
 }
 
-interface StateWithLayers {
-  [prop: string]: unknown;
-  layers: Array<Record<string, unknown>>;
-}
-interface SuggestionMultipleLayers extends Suggestion {
-  datasourceState: StateWithLayers;
-  visualizationState: StateWithLayers;
-}
-
 export function getVisualizeFieldSuggestions({
   datasourceMap,
   datasourceStates,
@@ -203,56 +177,13 @@ export function getVisualizeFieldSuggestions({
   });
 
   if (visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext) {
-    const { layers, configuration } = visualizeTriggerFieldContext;
     const allSuggestions = suggestions.filter(
-      (s) => s.visualizationId === activeVisualization?.id
-    ) as SuggestionMultipleLayers[];
-    const fillOpacity = configuration.fill ? Number(configuration.fill) : undefined;
-
-    const visualizationStateLayers = [];
-    let datasourceStateLayers = {};
-
-    for (let suggestionIdx = 0; suggestionIdx < allSuggestions.length; suggestionIdx++) {
-      const currentSuggestion = allSuggestions[suggestionIdx];
-      const currentSuggestionsLayers = currentSuggestion.visualizationState.layers;
-      const contextLayer = layers.find(
-        (layer) => layer.layerId === Object.keys(currentSuggestion.datasourceState.layers)[0]
-      );
-      if (activeVisualization.updateLayersConfigurationFromContext && contextLayer) {
-        const updatedSuggestionState = activeVisualization.updateLayersConfigurationFromContext({
-          prevState: currentSuggestion.visualizationState,
-          layerId: currentSuggestionsLayers[0].layerId as string,
-          context: contextLayer,
-        }) as StateWithLayers;
-
-        visualizationStateLayers.push(...updatedSuggestionState.layers);
-        datasourceStateLayers = {
-          ...datasourceStateLayers,
-          ...currentSuggestion.datasourceState.layers,
-        };
-      }
-    }
-    let suggestion = allSuggestions[0];
-    suggestion = {
-      ...suggestion,
-      datasourceState: {
-        ...suggestion.datasourceState,
-        layers: {
-          ...suggestion.datasourceState.layers,
-          ...datasourceStateLayers,
-        },
-      },
-      visualizationState: {
-        ...suggestion.visualizationState,
-        fillOpacity,
-        yRightExtent: configuration.extents?.yRightExtent,
-        yLeftExtent: configuration.extents?.yLeftExtent,
-        legend: configuration.legend,
-        gridlinesVisibilitySettings: configuration.gridLinesVisibility,
-        layers: visualizationStateLayers,
-      },
-    };
-    return suggestion;
+      (s) => s.visualizationId === visualizeTriggerFieldContext.type
+    );
+    return activeVisualization?.getVisualizationSuggestionFromContext?.({
+      suggestions: allSuggestions,
+      context: visualizeTriggerFieldContext,
+    });
   }
 
   if (suggestions.length) {

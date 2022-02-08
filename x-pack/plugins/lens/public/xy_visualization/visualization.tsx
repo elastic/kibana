@@ -20,7 +20,7 @@ import { getSuggestions } from './xy_suggestions';
 import { XyToolbar, DimensionEditor } from './xy_config_panel';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
-import { State, visualizationTypes } from './types';
+import { State, visualizationTypes, XYSuggestion } from './types';
 import { SeriesType, XYLayerConfig, YAxisMode } from '../../common/expressions';
 import { LayerType, layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
@@ -554,6 +554,54 @@ export const getXyVisualization = ({
       ...prevState,
       layers: newLayers,
     };
+  },
+
+  getVisualizationSuggestionFromContext({ suggestions, context }) {
+    const visualizationStateLayers = [];
+    let datasourceStateLayers = {};
+    const fillOpacity = context.configuration.fill ? Number(context.configuration.fill) : undefined;
+    for (let suggestionIdx = 0; suggestionIdx < suggestions.length; suggestionIdx++) {
+      const currentSuggestion = suggestions[suggestionIdx] as XYSuggestion;
+      const currentSuggestionsLayers = currentSuggestion.visualizationState.layers;
+      const contextLayer = context.layers.find(
+        (layer) => layer.layerId === Object.keys(currentSuggestion.datasourceState.layers)[0]
+      );
+      if (this.updateLayersConfigurationFromContext && contextLayer) {
+        const updatedSuggestionState = this.updateLayersConfigurationFromContext({
+          prevState: currentSuggestion.visualizationState as unknown as State,
+          layerId: currentSuggestionsLayers[0].layerId as string,
+          context: contextLayer,
+        });
+
+        visualizationStateLayers.push(...updatedSuggestionState.layers);
+        datasourceStateLayers = {
+          ...datasourceStateLayers,
+          ...currentSuggestion.datasourceState.layers,
+        };
+      }
+    }
+    let suggestion = suggestions[0] as XYSuggestion;
+    suggestion = {
+      ...suggestion,
+      datasourceState: {
+        ...suggestion.datasourceState,
+        layers: {
+          ...suggestion.datasourceState.layers,
+          ...datasourceStateLayers,
+        },
+      },
+      visualizationState: {
+        ...suggestion.visualizationState,
+        fillOpacity,
+        yRightExtent: context.configuration.extents?.yRightExtent,
+        yLeftExtent: context.configuration.extents?.yLeftExtent,
+        legend: context.configuration.legend,
+        gridlinesVisibilitySettings: context.configuration.gridLinesVisibility,
+        valuesInLegend: true,
+        layers: visualizationStateLayers,
+      },
+    };
+    return suggestion;
   },
 
   removeDimension({ prevState, layerId, columnId, frame }) {

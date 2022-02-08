@@ -117,6 +117,7 @@ export const triggerTSVBtoLensConfiguration = async (
 
   return {
     layers: layersConfiguration,
+    type: 'lnsXY',
     configuration: {
       fill: model.series[0].fill ?? 0.3,
       legend: {

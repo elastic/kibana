@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
@@ -179,6 +179,7 @@ export interface VisualizeEditorContext {
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
+  type: string;
 }
 
 interface ChartSettings {
@@ -558,11 +559,30 @@ interface VisualizationDimensionChangeProps<T> {
   prevState: T;
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
+export interface Suggestion {
+  visualizationId: string;
+  datasourceState?: unknown;
+  datasourceId?: string;
+  columns: number;
+  score: number;
+  title: string;
+  visualizationState: unknown;
+  previewExpression?: Ast | string;
+  previewIcon: IconType;
+  hide?: boolean;
+  changeType: TableChangeType;
+  keptLayerIds: string[];
+}
 
 interface VisualizationConfigurationFromContextChangeProps<T> {
   layerId: string;
   prevState: T;
   context: VisualizeEditorLayersContext;
+}
+
+interface VisualizationStateFromContextChangeProps {
+  suggestions: Suggestion[];
+  context: VisualizeEditorContext;
 }
 
 /**
@@ -786,6 +806,13 @@ export interface Visualization<T = unknown> {
   updateLayersConfigurationFromContext?: (
     props: VisualizationConfigurationFromContextChangeProps<T>
   ) => T;
+
+  /**
+   * Update the visualization state from the context.
+   */
+  getVisualizationSuggestionFromContext?: (
+    props: VisualizationStateFromContextChangeProps
+  ) => Suggestion;
   /**
    * Additional editor that gets rendered inside the dimension popover.
    * This can be used to configure dimension-specific options

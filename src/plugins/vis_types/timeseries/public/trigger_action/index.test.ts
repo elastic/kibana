@@ -114,6 +114,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           showSingleSeries: false,
         },
       },
+      type: 'lnsXY',
       layers: {
         '0': {
           axisPosition: 'left',
@@ -258,6 +259,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           showSingleSeries: true,
         },
       },
+      type: 'lnsXY',
       layers: {
         '0': {
           axisPosition: 'right',
