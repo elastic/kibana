@@ -57,6 +57,14 @@ export const computeParentSeries = (
   meta?: number
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
+  if (subFunctionMetric.type === 'filter_ratio') {
+    const script = getFilterRatioFormula(subFunctionMetric);
+    if (!script) {
+      return null;
+    }
+    const formula = `${aggregationMap.name}(${script})`;
+    return getFormulaSeries(formula);
+  }
   const timeScale = getTimeScale(currentMetric);
   return [
     {
@@ -131,8 +139,6 @@ export const getParentPipelineSeriesFormula = (
   const [nestedFieldId, nestedMeta] = subMetricField?.split('[') ?? [];
   // support nested aggs
   const additionalSubFunction = metrics.find((metric) => metric.id === nestedFieldId);
-
-  // return `${aggregation}(max(${currentMetric.field}))`;
   if (additionalSubFunction) {
     // support nested aggs with formula
     const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
@@ -153,7 +159,13 @@ export const getParentPipelineSeriesFormula = (
     if (pipelineAgg === 'percentile' && percentileValue) {
       additionalFunctionArgs = `, percentile=${percentileValue}`;
     }
-    if (pipelineAgg === 'counter_rate') {
+    if (pipelineAgg === 'filter_ratio') {
+      const script = getFilterRatioFormula(subFunctionMetric);
+      if (!script) {
+        return null;
+      }
+      formula = `${aggregationMap.name}(${script}${additionalFunctionArgs ?? ''})`;
+    } else if (pipelineAgg === 'counter_rate') {
       formula = `${aggregationMap.name}(${pipelineAgg}(max(${subFunctionMetric.field}${
         additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
       })))`;

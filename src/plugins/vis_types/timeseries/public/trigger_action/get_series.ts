@@ -75,7 +75,8 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
           finalScript = finalScript?.replace(`params.${variable?.name}`, script);
         }
       }
-      if (finalScript.includes('params')) return null;
+      const scripthasNoStaticNumber = isNaN(Number(finalScript));
+      if (finalScript.includes('params') || !scripthasNoStaticNumber) return null;
       metricsArray = getFormulaSeries(finalScript);
       break;
     }
@@ -113,12 +114,14 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
         if (!formula) return null;
         metricsArray = getFormulaSeries(formula);
       } else {
-        metricsArray = computeParentSeries(
+        const series = computeParentSeries(
           aggregation,
           metrics[metricIdx],
           subFunctionMetric,
           pipelineAgg
         );
+        if (!series) return null;
+        metricsArray = series;
       }
       break;
     }
