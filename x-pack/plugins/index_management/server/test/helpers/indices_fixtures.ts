@@ -23,7 +23,8 @@ export const createTestIndexStats = (index?: Partial<IndicesStatsIndicesStats>) 
     health: 'green',
     status: 'open',
     uuid: 'test_index',
-    total: { docs: { count: 1 }, store: { size_in_bytes: 100 } },
+    total: { docs: { count: 1, deleted: 0 }, store: { size_in_bytes: 100 } },
+    primaries: { store: { size_in_bytes: 100 } },
     ...index,
   };
 };
@@ -33,6 +34,7 @@ export const createTestIndexResponse = (index?: Partial<Index>) => {
     aliases: 'none',
     data_stream: undefined,
     documents: 1,
+    documents_deleted: 0,
     health: 'green',
     hidden: false,
     isFrozen: false,
@@ -40,6 +42,7 @@ export const createTestIndexResponse = (index?: Partial<Index>) => {
     primary: 1,
     replica: 1,
     size: '100b',
+    primary_size: '100b',
     status: 'open',
     uuid: 'test_index',
     ...index,
