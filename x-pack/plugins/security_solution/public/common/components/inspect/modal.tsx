@@ -158,14 +158,14 @@ export const ModalInspectQuery = ({
           {!isSourcererPattern && (
             <p>
               <small>
-                <i>{i18n.INSPECT_PATTERN_DIFFERENT}</i>
+                <i data-test-subj="not-sourcerer-msg">{i18n.INSPECT_PATTERN_DIFFERENT}</i>
               </small>
             </p>
           )}
           {isLogsExclude && (
             <p>
               <small>
-                <i>{i18n.LOGS_EXCLUDE_MESSAGE}</i>
+                <i data-test-subj="exclude-logs-msg">{i18n.LOGS_EXCLUDE_MESSAGE}</i>
               </small>
             </p>
           )}
