@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import type { DataViewField, DataView } from 'src/plugins/data/common';
 import { i18n } from '@kbn/i18n';
 import { asyncMap } from '@kbn/std';
 import { getIndexPatternService } from './kibana_services';
@@ -13,7 +13,7 @@ import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 import { getIsGoldPlus } from './licensed_features';
 
-export function getGeoTileAggNotSupportedReason(field: IndexPatternField): string | null {
+export function getGeoTileAggNotSupportedReason(field: DataViewField): string | null {
   if (!field.aggregatable) {
     return i18n.translate('xpack.maps.geoTileAgg.disabled.docValues', {
       defaultMessage:
@@ -30,12 +30,10 @@ export function getGeoTileAggNotSupportedReason(field: IndexPatternField): strin
   return null;
 }
 
-export async function getIndexPatternsFromIds(
-  indexPatternIds: string[] = []
-): Promise<IndexPattern[]> {
+export async function getIndexPatternsFromIds(indexPatternIds: string[] = []): Promise<DataView[]> {
   const results = await asyncMap(indexPatternIds, async (indexPatternId) => {
     try {
-      return (await getIndexPatternService().get(indexPatternId)) as IndexPattern;
+      return (await getIndexPatternService().get(indexPatternId)) as DataView;
     } catch (error) {
       // Unable to load index pattern, better to not throw error so map can render
       // Error will be surfaced by layer since it too will be unable to locate the index pattern
@@ -43,10 +41,10 @@ export async function getIndexPatternsFromIds(
     }
   });
 
-  return results.filter((r): r is IndexPattern => r !== null);
+  return results.filter((r): r is DataView => r !== null);
 }
 
-export function getTermsFields(fields: IndexPatternField[]): IndexPatternField[] {
+export function getTermsFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
     return (
       field.aggregatable &&
@@ -56,7 +54,7 @@ export function getTermsFields(fields: IndexPatternField[]): IndexPatternField[]
   });
 }
 
-export function getSortFields(fields: IndexPatternField[]): IndexPatternField[] {
+export function getSortFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
     return field.sortable && !indexPatterns.isNestedField(field);
   });
@@ -70,23 +68,23 @@ export function getAggregatableGeoFieldTypes(): string[] {
   return aggregatableFieldTypes;
 }
 
-export function getGeoFields(fields: IndexPatternField[]): IndexPatternField[] {
+export function getGeoFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
     return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPES.includes(field.type);
   });
 }
 
-export function getGeoPointFields(fields: IndexPatternField[]): IndexPatternField[] {
+export function getGeoPointFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
     return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPE.GEO_POINT === field.type;
   });
 }
 
-export function getFieldsWithGeoTileAgg(fields: IndexPatternField[]): IndexPatternField[] {
+export function getFieldsWithGeoTileAgg(fields: DataViewField[]): DataViewField[] {
   return fields.filter(supportsGeoTileAgg);
 }
 
-export function supportsGeoTileAgg(field?: IndexPatternField): boolean {
+export function supportsGeoTileAgg(field?: DataViewField): boolean {
   return (
     !!field &&
     !!field.aggregatable &&
@@ -95,7 +93,7 @@ export function supportsGeoTileAgg(field?: IndexPatternField): boolean {
   );
 }
 
-export function getSourceFields(fields: IndexPatternField[]): IndexPatternField[] {
+export function getSourceFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.
     return !field.isSubtypeMulti() && !field.isSubtypeNested();

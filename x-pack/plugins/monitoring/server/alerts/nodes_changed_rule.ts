@@ -19,20 +19,12 @@ import {
   AlertInstanceState,
   AlertNodesChangedState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
-import {
-  RULE_NODES_CHANGED,
-  LEGACY_RULE_DETAILS,
-  INDEX_PATTERN_ELASTICSEARCH,
-} from '../../common/constants';
+import { Alert } from '../../../alerting/server';
+import { RULE_NODES_CHANGED, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerting/common';
-import { Globals } from '../static_globals';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { AlertSeverity } from '../../common/enums';
-
 interface AlertNodesChangedStates {
   removed: AlertClusterStatsNode[];
   added: AlertClusterStatsNode[];
@@ -104,17 +96,11 @@ export class NodesChangedRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
     const nodesFromClusterStats = await fetchNodesFromClusterStats(
       esClient,
       clusters,
-      esIndexPattern,
       params.filterQuery
     );
     return nodesFromClusterStats.map((nodes) => {
@@ -188,7 +174,7 @@ export class NodesChangedRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
 import { JobSelector } from '../components/job_selector';
@@ -21,12 +21,14 @@ import { MlPageHeader } from '../components/page_header';
 interface TimeSeriesExplorerPageProps {
   dateFormatTz: string;
   resizeRef?: any;
+  noSingleMetricJobsFound?: boolean;
 }
 
 export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
   children,
   dateFormatTz,
   resizeRef,
+  noSingleMetricJobsFound,
 }) => {
   const {
     services: { docLinks },
@@ -52,9 +54,11 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </MlPageHeader>
-        <JobSelector dateFormatTz={dateFormatTz} singleSelection={true} timeseriesOnly={true} />
-        <EuiHorizontalRule margin="none" />
-        <EuiSpacer size="s" />
+
+        {noSingleMetricJobsFound ? null : (
+          <JobSelector dateFormatTz={dateFormatTz} singleSelection={true} timeseriesOnly={true} />
+        )}
+
         {children}
         <HelpMenu docLink={helpLink} />
       </div>

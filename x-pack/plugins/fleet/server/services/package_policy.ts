@@ -29,6 +29,7 @@ import {
   validatePackagePolicy,
   validationHasErrors,
   SO_SEARCH_LIMIT,
+  getMaxPackageName,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -112,7 +113,9 @@ class PackagePolicyService {
 
       // Check that the name does not exist already
       if (existingPoliciesWithName.items.length > 0) {
-        throw new IngestManagerError('There is already an integration policy with the same name');
+        throw new IngestManagerError(
+          `There is already an integration policy with the same name: ${packagePolicy.name}`
+        );
       }
     }
 
@@ -730,14 +733,23 @@ class PackagePolicyService {
             })),
           } as NewPackagePolicyInput;
         });
+        let agentPolicyId;
+        // fallback to first agent policy id in case no policy_id is specified, BWC with 8.0
+        if (!newPolicy.policy_id) {
+          const { items: agentPolicies } = await agentPolicyService.list(soClient, {
+            perPage: 1,
+          });
+          if (agentPolicies.length > 0) {
+            agentPolicyId = agentPolicies[0].id;
+          }
+        }
         newPackagePolicy = {
           ...newPP,
           name: newPolicy.name,
           namespace: newPolicy.namespace ?? 'default',
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
-          policy_id:
-            newPolicy.policy_id ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient)),
+          policy_id: newPolicy.policy_id ?? agentPolicyId,
           output_id: newPolicy.output_id ?? '',
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
@@ -1369,7 +1381,7 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
 
     // Ensure that any value from the original object is persisted on the newly merged resulting object,
     // even if we merge other data about the given variable
-    if (keepOriginalValue && originalVar?.value) {
+    if (keepOriginalValue && originalVar?.value !== undefined) {
       result.vars[name].value = originalVar.value;
     }
   }
@@ -1380,26 +1392,12 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
 export async function incrementPackageName(
   soClient: SavedObjectsClientContract,
   packageName: string
-) {
+): Promise<string> {
   // Fetch all packagePolicies having the package name
   const packagePolicyData = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
   });
 
-  // Retrieve highest number appended to package policy name and increment it by one
-  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
-
-  const pkgPoliciesWithMatchingNames = packagePolicyData?.items
-    ? packagePolicyData.items
-        .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-        .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort((a, b) => a - b)
-    : [];
-
-  return `${packageName}-${
-    pkgPoliciesWithMatchingNames.length
-      ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-      : 1
-  }`;
+  return getMaxPackageName(packageName, packagePolicyData?.items);
 }

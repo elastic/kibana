@@ -10,7 +10,7 @@ import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
 } from './saved_search_utils';
-import type { SavedSearchSavedObject } from '../../../../common';
+import type { SavedSearchSavedObject } from '../../../../common/types';
 import type { SavedSearch } from '../../../../../../../src/plugins/discover/public';
 import type { Filter, FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '../../../../../../../src/plugins/data_views/common/data_view.stub';

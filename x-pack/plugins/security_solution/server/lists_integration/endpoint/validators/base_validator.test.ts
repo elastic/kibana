@@ -20,9 +20,9 @@ import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts';
+import { securityMock } from '../../../../../security/server/mocks';
 
-// FLAKY: https://github.com/elastic/kibana/issues/123495
-describe.skip('When using Artifacts Exceptions BaseValidator', () => {
+describe('When using Artifacts Exceptions BaseValidator', () => {
   let endpointAppContextServices: EndpointAppContextService;
   let kibanaRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let exceptionLikeItem: ExceptionItemLikeOptions;
@@ -48,6 +48,9 @@ describe.skip('When using Artifacts Exceptions BaseValidator', () => {
         const fleetAuthz = createFleetAuthzMock();
         fleetAuthz.fleet.all = false;
         (servicesStart.fleetAuthzService?.fromRequest as jest.Mock).mockResolvedValue(fleetAuthz);
+        (servicesStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue(
+          securityMock.createMockAuthenticatedUser()
+        );
       }
 
       if (withBasicLicense) {

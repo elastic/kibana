@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import {
   InspectButton,
   BUTTON_CLASS as INPECT_BUTTON_CLASS,
@@ -54,6 +54,12 @@ const RiskScoreContainer = styled(EuiFlexItem)`
   min-width: 80px;
 `;
 
+/**
+ * FUTURE ENGINEER: This is a host risk card for the host page.
+ * Due to not being able to apply KQL,
+ * we decided not to go forward with this for 8.1
+ * saving the code for future implementation
+ */
 const RiskyHostsComponent: React.FC<{
   error: unknown;
   loading: boolean;
