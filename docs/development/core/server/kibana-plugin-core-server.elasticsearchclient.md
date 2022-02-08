@@ -9,7 +9,5 @@ Client used to query the elasticsearch cluster.
 <b>Signature:</b>
 
 ```typescript
-export declare type ElasticsearchClient = Omit<Client, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'> & {
-    transport: Client['transport'];
-};
+export declare type ElasticsearchClient = Omit<Client, 'connectionPool' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'>;
 ```
