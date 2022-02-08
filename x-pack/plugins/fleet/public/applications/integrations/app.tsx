@@ -21,6 +21,7 @@ import {
   RedirectAppLinks,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { Chat } from '../../../../cloud/public';
 
 import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -32,6 +33,8 @@ import type { UIExtensionsStorage } from './types';
 import { EPMApp } from './sections/epm';
 import { PackageInstallProvider, UIExtensionsContext } from './hooks';
 import { IntegrationsHeader } from './components/header';
+
+const EmptyContext = () => <></>;
 
 /**
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
@@ -60,6 +63,7 @@ export const IntegrationsAppContext: React.FC<{
     theme$,
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
       <RedirectAppLinks application={startServices.application}>
@@ -73,17 +77,20 @@ export const IntegrationsAppContext: React.FC<{
                       <UIExtensionsContext.Provider value={extensions}>
                         <FleetStatusProvider>
                           <startServices.customIntegrations.ContextProvider>
-                            <Router history={history}>
-                              <AgentPolicyContextProvider>
-                                <PackageInstallProvider
-                                  notifications={startServices.notifications}
-                                  theme$={theme$}
-                                >
-                                  <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
-                                  {children}
-                                </PackageInstallProvider>
-                              </AgentPolicyContextProvider>
-                            </Router>
+                            <CloudContext>
+                              <Router history={history}>
+                                <AgentPolicyContextProvider>
+                                  <PackageInstallProvider
+                                    notifications={startServices.notifications}
+                                    theme$={theme$}
+                                  >
+                                    <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
+                                    {children}
+                                    <Chat />
+                                  </PackageInstallProvider>
+                                </AgentPolicyContextProvider>
+                              </Router>
+                            </CloudContext>
                           </startServices.customIntegrations.ContextProvider>
                         </FleetStatusProvider>
                       </UIExtensionsContext.Provider>

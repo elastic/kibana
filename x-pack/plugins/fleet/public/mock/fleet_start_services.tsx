@@ -16,7 +16,7 @@ import { setHttpClient } from '../hooks/use_request';
 
 import type { FleetAuthz } from '../../common';
 
-import { createStartDepsMock } from './plugin_dependencies';
+import { createStartDepsMock, createSetupDepsMock } from './plugin_dependencies';
 import type { MockedFleetStartServices } from './types';
 
 // Taken from core. See: src/plugins/kibana_utils/public/storage/storage.test.ts
@@ -55,12 +55,18 @@ const configureStartServices = (services: MockedFleetStartServices): void => {
   // Store the http for use by useRequest
   setHttpClient(services.http);
 
-  // Set Fleet available capabilities
+  // Set Fleet and Integrations capabilities
   services.application.capabilities = {
     ...services.application.capabilities,
+    // Fleet
+    fleetv2: {
+      read: true,
+      all: true,
+    },
+    // Integration
     fleet: {
       read: true,
-      write: true,
+      all: true,
     },
   };
 
@@ -71,9 +77,16 @@ const configureStartServices = (services: MockedFleetStartServices): void => {
 };
 
 export const createStartServices = (basePath: string = '/mock'): MockedFleetStartServices => {
+  const { cloud: cloudStart, ...startDeps } = createStartDepsMock();
+  const { cloud: cloudSetup } = createSetupDepsMock();
+
   const startServices: MockedFleetStartServices = {
     ...coreMock.createStart({ basePath }),
-    ...createStartDepsMock(),
+    ...startDeps,
+    cloud: {
+      ...cloudStart,
+      ...cloudSetup,
+    },
     storage: new Storage(createMockStore()) as jest.Mocked<Storage>,
     authz: fleetAuthzMock,
   };

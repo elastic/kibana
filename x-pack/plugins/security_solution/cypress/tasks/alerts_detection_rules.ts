@@ -49,7 +49,7 @@ import {
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
-export const activateRule = (rulePosition: number) => {
+export const enableRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
 };
 
@@ -157,7 +157,10 @@ export const goToTheRuleDetailsOf = (ruleName: string) => {
 };
 
 export const loadPrebuiltDetectionRules = () => {
-  cy.get(LOAD_PREBUILT_RULES_BTN).should('exist').click({ force: true });
+  cy.get(LOAD_PREBUILT_RULES_BTN)
+    .should('exist')
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.disabled');
 };
 
 export const reloadDeletedRules = () => {
@@ -191,9 +194,9 @@ export const confirmRulesDelete = () => {
   cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
 };
 
-export const sortByActivatedRules = () => {
-  cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
-  cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
+export const sortByEnabledRules = () => {
+  cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
+  cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
 };
 
 export const waitForRulesTableToBeLoaded = () => {
