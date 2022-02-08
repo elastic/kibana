@@ -425,16 +425,18 @@ export const CodeEditor: React.FC<Props> = ({
       {renderPrompt()}
 
       <FullScreenDisplay>
-        <div className="kibanaCodeEditor__controls">
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem>
-              <CopyButton />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FullScreenButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+        {allowFullScreen || isCopyable ? (
+          <div className="kibanaCodeEditor__controls">
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem>
+                <CopyButton />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <FullScreenButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        ) : null}
         <MonacoEditor
           theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
           language={languageId}
@@ -521,7 +523,7 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
 
   const FullScreenDisplay = useMemo(
     () =>
-      ({ children }: { children: JSX.Element[] }) => {
+      ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
         if (!isFullScreen) return <>{children}</>;
 
         return (

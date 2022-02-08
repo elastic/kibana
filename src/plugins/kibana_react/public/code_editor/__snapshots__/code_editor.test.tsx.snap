@@ -183,12 +183,6 @@ exports[`<CodeEditor /> is rendered 1`] = `
       </span>
     </EuiToolTip>
     <Component>
-      <div
-        className="kibanaCodeEditor__controls"
-      >
-        <FullScreenButton />
-        <CopyButton />
-      </div>
       <mockMonacoEditor
         editorDidMount={[Function]}
         editorWillMount={[Function]}
