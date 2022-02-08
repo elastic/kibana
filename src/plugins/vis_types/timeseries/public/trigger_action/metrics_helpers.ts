@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { Query } from '../../../../data/common';
 import type { Metric, MetricType } from '../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 
@@ -131,6 +132,7 @@ export const getParentPipelineSeriesFormula = (
   // support nested aggs
   const additionalSubFunction = metrics.find((metric) => metric.id === nestedFieldId);
 
+  // return `${aggregation}(max(${currentMetric.field}))`;
   if (additionalSubFunction) {
     // support nested aggs with formula
     const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
@@ -151,9 +153,15 @@ export const getParentPipelineSeriesFormula = (
     if (pipelineAgg === 'percentile' && percentileValue) {
       additionalFunctionArgs = `, percentile=${percentileValue}`;
     }
-    formula = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
-      additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
-    }))`;
+    if (pipelineAgg === 'counter_rate') {
+      formula = `${aggregationMap.name}(${pipelineAgg}(max(${subFunctionMetric.field}${
+        additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
+      })))`;
+    } else {
+      formula = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
+        additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
+      }))`;
+    }
   }
   return formula;
 };
@@ -194,17 +202,42 @@ const escapeQuotes = (str: string) => {
   return str?.replace(/'/g, "\\'");
 };
 
-export const getFilterRatioFormula = (currentMetric: Metric) => {
-  const { numerator, denominator } = currentMetric;
-  return `count(${numerator?.language === 'kuery' ? 'kql' : 'lucene'}='${
-    numerator?.query && typeof numerator?.query === 'string'
-      ? escapeQuotes(numerator?.query)
-      : numerator?.query ?? '*'
-  }') / count(${denominator?.language === 'kuery' ? 'kql' : 'lucene'}='${
-    denominator?.query && typeof denominator?.query === 'string'
-      ? escapeQuotes(denominator?.query)
-      : denominator?.query ?? '*'
+const constructFilterRationFormula = (operation: string, metric?: Query) => {
+  return `${operation}${metric?.language === 'kuery' ? 'kql' : 'lucene'}='${
+    metric?.query && typeof metric?.query === 'string'
+      ? escapeQuotes(metric?.query)
+      : metric?.query ?? '*'
   }')`;
+};
+
+export const getFilterRatioFormula = (currentMetric: Metric) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { numerator, denominator, metric_agg, field } = currentMetric;
+  let aggregation = SUPPORTED_METRICS.count;
+  if (metric_agg) {
+    aggregation = SUPPORTED_METRICS[metric_agg];
+    if (!aggregation) {
+      return null;
+    }
+  }
+  const operation =
+    metric_agg && metric_agg !== 'count' ? `${aggregation.name}('${field}',` : 'count(';
+
+  if (aggregation.name === 'counter_rate') {
+    const numeratorFormula = constructFilterRationFormula(
+      `${aggregation.name}(max('${field}',`,
+      numerator
+    );
+    const denominatorFormula = constructFilterRationFormula(
+      `${aggregation.name}(max('${field}',`,
+      denominator
+    );
+    return `${numeratorFormula}) / ${denominatorFormula})`;
+  } else {
+    const numeratorFormula = constructFilterRationFormula(operation, numerator);
+    const denominatorFormula = constructFilterRationFormula(operation, denominator);
+    return `${numeratorFormula} / ${denominatorFormula}`;
+  }
 };
 
 export const getFormulaEquivalent = (

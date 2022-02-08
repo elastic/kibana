@@ -100,7 +100,7 @@ export const triggerTSVBtoLensConfiguration = async (
         termsParams: {
           size: layer.terms_size ?? 10,
           otherBucket: false,
-          orderDirection: layer.terms_direction,
+          orderDirection: layer.terms_direction ?? 'desc',
           orderBy: layer.terms_order_by === '_key' ? { type: 'alphabetical' } : { type: 'column' },
           parentFormat: { id: 'terms' },
         },

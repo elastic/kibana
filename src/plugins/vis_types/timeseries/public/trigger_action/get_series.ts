@@ -135,6 +135,9 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
     }
     case 'filter_ratio': {
       const formula = getFilterRatioFormula(metrics[metricIdx]);
+      if (!formula) {
+        return null;
+      }
       metricsArray = getFormulaSeries(formula);
       break;
     }
