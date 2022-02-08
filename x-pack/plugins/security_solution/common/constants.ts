@@ -419,3 +419,6 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrenc
  */
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
+
+export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
+  'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';
