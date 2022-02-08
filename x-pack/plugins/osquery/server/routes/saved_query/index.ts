@@ -17,7 +17,7 @@ import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 export const initSavedQueryRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createSavedQueryRoute(router, context);
   deleteSavedQueryRoute(router);
-  findSavedQueryRoute(router);
+  findSavedQueryRoute(router, context);
   readSavedQueryRoute(router);
   updateSavedQueryRoute(router, context);
 };
