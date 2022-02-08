@@ -47,6 +47,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(
         Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_8.0.0')
       );
+
+      await esArchiver.unload(
+        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_test_data')
+      );
     });
 
     beforeEach(async () => {

@@ -19,7 +19,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./alerts/rule_stats'));
     loadTestFile(require.resolve('./alerts/state_synchronization'));
     loadTestFile(require.resolve('./alerts/table_storage'));
-    loadTestFile(require.resolve('./exploratory_view'));
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./exploratory_view'));
   });
 }
