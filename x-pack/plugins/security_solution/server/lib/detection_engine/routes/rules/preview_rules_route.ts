@@ -147,6 +147,7 @@ export const previewRulesRoute = async (
               Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
               'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
             >;
+            done: () => {};
           }
         ) => {
           let statePreview = runState as TState;
@@ -225,7 +226,7 @@ export const previewRulesRoute = async (
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({}) }
             );
             break;
           case 'threshold':
@@ -238,7 +239,7 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({}) }
             );
             break;
           case 'threat_match':
@@ -251,7 +252,7 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({}) }
             );
             break;
           case 'eql':
@@ -262,7 +263,7 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({}) }
             );
             break;
           case 'machine_learning':
@@ -273,7 +274,7 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({}) }
             );
             break;
         }

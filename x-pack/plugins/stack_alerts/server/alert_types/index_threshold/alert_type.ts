@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
 import { RuleType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
-import { ActionContext, BaseActionContext, addMessages } from './action_context';
+import {
+  ActionContext,
+  BaseActionContext,
+  addMessages,
+  addRecoveryMessages,
+} from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import {
   CoreQueryParamsSchemaProperties,
@@ -128,6 +133,7 @@ export function getAlertType(
     isExportable: true,
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
+    doesSetRecoveryContext: true,
   };
 
   async function executor(
@@ -208,9 +214,30 @@ export function getAlertType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = alertFactory.create(instanceId);
-      alertInstance.scheduleActions(ActionGroupId, actionContext);
+      const alert = alertFactory.create(instanceId);
+      alert.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+    }
+
+    const { getRecoveredAlerts } = services.alertFactory.done();
+    if (getRecoveredAlerts) {
+      const recoveredAlerts = getRecoveredAlerts();
+
+      for (const recoveredAlertId of Object.keys(recoveredAlerts)) {
+        logger.info(`recovered alert ${JSON.stringify(recoveredAlerts[recoveredAlertId])}`);
+        const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
+        const humanFn = `${agg} is NOT ${getHumanReadableComparator(
+          params.thresholdComparator
+        )} ${params.threshold.join(' and ')}`;
+        const baseContext: BaseActionContext = {
+          date,
+          value: 0, // this is a tricky value to set since rules may just know that the value did not meet the threshold, not what the actual value is
+          group: recoveredAlertId,
+          conditions: humanFn,
+        };
+        const recoveryContext = addRecoveryMessages(options, baseContext, params);
+        recoveredAlerts[recoveredAlertId].setContext(recoveryContext);
+      }
     }
   }
 }
