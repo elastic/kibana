@@ -10,7 +10,9 @@ jobs:
       contains(github.event.issue.labels.*.name, 'Team:Fleet') && (
         contains(github.event.issue.labels.*.name, 'technical debt') ||
         contains(github.event.issue.labels.*.name, 'bug') ||
-        contains(github.event.issue.labels.*.name, 'performance')
+        contains(github.event.issue.labels.*.name, 'performance') ||
+        contains(github.event.issue.labels.*.name, 'failed-test') || 
+        contains(github.event.issue.labels.*.name, 'chore')
       )
     steps:
       - uses: octokit/graphql-action@v2.x
