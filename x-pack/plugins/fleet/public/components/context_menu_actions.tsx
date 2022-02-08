@@ -67,6 +67,7 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
             aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
               defaultMessage: 'Open',
             })}
+            data-test-subj="agentActionsBtn"
           />
         )
       }

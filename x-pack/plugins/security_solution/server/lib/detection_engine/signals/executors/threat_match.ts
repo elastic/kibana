@@ -15,7 +15,7 @@ import {
 import { ListClient } from '../../../../../../lists/server';
 import { getInputIndex } from '../get_input_output_index';
 import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
 import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
@@ -46,7 +46,7 @@ export const threatMatchExecutor = async ({
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   experimentalFeatures: ExperimentalFeatures;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;

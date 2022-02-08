@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
-import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
+import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { monaco } from '@kbn/monaco';
 
 import { keys } from '@elastic/eui';

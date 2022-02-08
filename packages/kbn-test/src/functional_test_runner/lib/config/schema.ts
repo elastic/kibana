@@ -152,6 +152,7 @@ export const schema = Joi.object()
     mochaReporter: Joi.object()
       .keys({
         captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
 
