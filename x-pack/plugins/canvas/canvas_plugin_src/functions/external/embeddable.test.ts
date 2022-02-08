@@ -32,8 +32,16 @@ const filterContext: ExpressionValueFilter = {
   ],
 };
 
+const embeddablePersistableStateServiceMock = {
+  extract: jest.fn(),
+  inject: jest.fn(),
+  getAllMigrations: jest.fn(),
+};
+
 describe('embeddable', () => {
-  const fn = embeddableFunctionFactory({} as InitializeArguments)().fn;
+  const fn = embeddableFunctionFactory({
+    embeddablePersistableStateService: embeddablePersistableStateServiceMock,
+  })().fn;
   const config = {
     id: 'some-id',
     timerange: { from: '15m', to: 'now' },
