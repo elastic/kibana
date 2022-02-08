@@ -6,7 +6,7 @@
  */
 import * as React from 'react';
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { act } from 'react-dom/test-utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';

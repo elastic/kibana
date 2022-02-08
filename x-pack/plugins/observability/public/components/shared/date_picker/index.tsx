@@ -8,44 +8,40 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useHasData } from '../../../hooks/use_has_data';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { fromQuery, toQuery } from '../../../utils/url';
+import { TimePickerQuickRange } from './typings';
+import { ObservabilityPublicPluginsStart } from '../../../plugin';
 
-export interface TimePickerTime {
-  from: string;
-  to: string;
+export interface DatePickerProps {
+  rangeFrom?: string;
+  rangeTo?: string;
+  refreshPaused?: boolean;
+  refreshInterval?: number;
+  onTimeRangeRefresh?: (range: { start: string; end: string }) => void;
 }
 
-export interface TimePickerQuickRange extends TimePickerTime {
-  display: string;
-}
-
-export interface TimePickerRefreshInterval {
-  pause: boolean;
-  value: number;
-}
-
-interface Props {
-  rangeFrom: string;
-  rangeTo: string;
-  refreshPaused: boolean;
-  refreshInterval: number;
-}
-
-export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval }: Props) {
+export function DatePicker({
+  rangeFrom,
+  rangeTo,
+  refreshPaused,
+  refreshInterval,
+  onTimeRangeRefresh,
+}: DatePickerProps) {
   const location = useLocation();
   const history = useHistory();
-  const { plugins } = usePluginContext();
-  const { onRefreshTimeRange } = useHasData();
+  const { data } = useKibana<ObservabilityPublicPluginsStart>().services;
 
   useEffect(() => {
-    plugins.data.query.timefilter.timefilter.setTime({
-      from: rangeFrom,
-      to: rangeTo,
-    });
-  }, [plugins, rangeFrom, rangeTo]);
+    // set time if both to and from are given in the url
+    if (rangeFrom && rangeTo) {
+      data.query.timefilter.timefilter.setTime({
+        from: rangeFrom,
+        to: rangeTo,
+      });
+    }
+  }, [data, rangeFrom, rangeTo]);
 
   const timePickerQuickRanges = useKibanaUISettings<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
@@ -95,7 +91,10 @@ export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
       refreshInterval={refreshInterval}
       onRefreshChange={onRefreshChange}
       commonlyUsedRanges={commonlyUsedRanges}
-      onRefresh={onRefreshTimeRange}
+      onRefresh={onTimeRangeRefresh}
     />
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default DatePicker;
