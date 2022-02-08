@@ -151,6 +151,7 @@ export class Embeddable
   private errors: ErrorMessage[] | undefined;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
+  private embeddableTitle?: string;
   private lensInspector: LensInspector;
 
   private logError(type: 'runtime' | 'validation') {
@@ -188,6 +189,7 @@ export class Embeddable
     );
 
     const input$ = this.getInput$();
+    this.embeddableTitle = this.getTitle();
 
     this.inputReloadSubscriptions = [];
 
@@ -265,22 +267,10 @@ export class Embeddable
   }
 
   public supportedTriggers() {
-    if (!this.savedVis) {
+    if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];
     }
-    switch (this.savedVis.visualizationType) {
-      case 'lnsXY':
-      case 'lnsHeatmap':
-        return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
-      case 'lnsDatatable':
-        return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick];
-      case 'lnsPie':
-        return [VIS_EVENT_TO_TRIGGER.filter];
-      case 'lnsGauge':
-      case 'lnsMetric':
-      default:
-        return [];
-    }
+    return this.deps.visualizationMap[this.savedVis.visualizationType]?.triggers || [];
   }
 
   public getInspectorAdapters() {
@@ -378,7 +368,8 @@ export class Embeddable
       !isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
       !isEqual(containerState.query, this.externalSearchContext.query) ||
       !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
-      this.externalSearchContext.searchSessionId !== containerState.searchSessionId
+      this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
+      this.embeddableTitle !== this.getTitle()
     ) {
       this.externalSearchContext = {
         timeRange: containerState.timeRange,
@@ -386,6 +377,7 @@ export class Embeddable
         filters: cleanedFilters,
         searchSessionId: containerState.searchSessionId,
       };
+      this.embeddableTitle = this.getTitle();
       isDirty = true;
     }
     return isDirty;
@@ -440,7 +432,11 @@ export class Embeddable
           errors={this.errors}
           lensInspector={this.lensInspector}
           searchContext={this.getMergedSearchContext()}
-          variables={input.palette ? { theme: { palette: input.palette } } : {}}
+          variables={
+            input.palette
+              ? { theme: { palette: input.palette }, embeddableTitle: this.getTitle() }
+              : { embeddableTitle: this.getTitle() }
+          }
           searchSessionId={this.externalSearchContext.searchSessionId}
           handleEvent={this.handleEvent}
           onData$={this.updateActiveData}

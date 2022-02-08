@@ -8,7 +8,7 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock, notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { KibanaFeature } from '../../../../features/public';
