@@ -7,7 +7,12 @@
 import { sha256 } from 'js-sha256';
 import type { Logger } from 'src/core/server';
 import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
-import { MonitorFields, SyntheticsMonitor, ConfigKey } from '../../../../common/runtime_types';
+import {
+  MonitorFields,
+  SyntheticsMonitor,
+  ConfigKey,
+  ServiceLocationErrors,
+} from '../../../../common/runtime_types';
 import type { MonitorUpdateEvent } from '../../../lib/telemetry/types';
 
 import { TelemetryEventsSender } from '../../../lib/telemetry/sender';
@@ -48,7 +53,7 @@ export function formatTelemetryEvent({
   lastUpdatedAt?: string;
   durationSinceLastUpdated?: number;
   deletedAt?: string;
-  errors?: Array<{ locationId: string; error: Error }>;
+  errors?: ServiceLocationErrors;
 }) {
   const { attributes } = monitor;
 
@@ -76,7 +81,7 @@ export function formatTelemetryUpdateEvent(
   currentMonitor: SavedObjectsUpdateResponse<SyntheticsMonitor>,
   previousMonitor: SavedObject<SyntheticsMonitor>,
   kibanaVersion: string,
-  errors?: Array<{ locationId: string; error: Error }>
+  errors?: ServiceLocationErrors
 ) {
   let durationSinceLastUpdated: number = 0;
   if (currentMonitor.updated_at && previousMonitor.updated_at) {
@@ -98,7 +103,7 @@ export function formatTelemetryDeleteEvent(
   previousMonitor: SavedObject<SyntheticsMonitor>,
   kibanaVersion: string,
   deletedAt: string,
-  errors?: Array<{ locationId: string; error: Error }>
+  errors?: ServiceLocationErrors
 ) {
   let durationSinceLastUpdated: number = 0;
   if (deletedAt && previousMonitor.updated_at) {

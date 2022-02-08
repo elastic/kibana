@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ServiceLocationErrors } from '../../../common/runtime_types/monitor_management';
 
 export interface MonitorUpdateEvent {
   updatedAt?: string;
@@ -18,7 +19,7 @@ export interface MonitorUpdateEvent {
   locationsCount: number;
   scriptType?: 'inline' | 'recorder' | 'zip';
   revision?: number;
-  error?: Array<{ locationId: string; error: Error }>;
+  error?: ServiceLocationErrors;
   configId: string;
 }
 
