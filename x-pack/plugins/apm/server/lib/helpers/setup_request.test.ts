@@ -133,6 +133,7 @@ describe('setupRequest', () => {
         },
         {
           signal: expect.any(Object),
+          meta: true,
         }
       );
     });
