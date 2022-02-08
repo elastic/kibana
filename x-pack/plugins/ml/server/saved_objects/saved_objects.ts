@@ -6,13 +6,13 @@
  */
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
-import { mlJob, mlModel, mlModule } from './mappings';
+import { mlJob, mlTrainedModel, mlModule } from './mappings';
 
 import { migrations } from './migrations';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_MODULE_SAVED_OBJECT_TYPE,
-  ML_MODEL_SAVED_OBJECT_TYPE,
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
 } from '../../common/types/saved_objects';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
@@ -24,11 +24,11 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     mappings: mlJob,
   });
   savedObjects.registerType({
-    name: ML_MODEL_SAVED_OBJECT_TYPE,
+    name: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'multiple',
     migrations,
-    mappings: mlModel,
+    mappings: mlTrainedModel,
   });
   savedObjects.registerType({
     name: ML_MODULE_SAVED_OBJECT_TYPE,

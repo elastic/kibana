@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from 'kibana/server';
-import type { JobObject, JobSavedObjectService, ModelObject } from './service';
+import type { JobObject, JobSavedObjectService, TrainedModelObject } from './service';
 import type {
   JobType,
   SyncSavedObjectResponse,
@@ -15,7 +15,7 @@ import type {
 } from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
-import { getSavedObjectClientError, getJobDetailsFromModel } from './util';
+import { getSavedObjectClientError, getJobDetailsFromTrainedModel } from './util';
 
 import type { Datafeed } from '../../common/types/anomaly_detection_jobs';
 
@@ -105,10 +105,10 @@ export function syncSavedObjectsFactory(
       }
     }
 
-    for (const model of status.jobs.models) {
+    for (const model of status.jobs['trained-models']) {
       if (model.checks.savedObjectExits === false) {
         const { modelId } = model;
-        const type = 'models';
+        const type = 'trained-models';
         if (simulate === true) {
           results.savedObjectsCreated[modelId] = { success: true, type };
         } else {
@@ -117,8 +117,8 @@ export function syncSavedObjectsFactory(
             try {
               const mod = models.trained_model_configs.find((m) => m.model_id === modelId);
               // CHANGE ME!!!!!!!!!!!! throw here if mod is undefined
-              const job = getJobDetailsFromModel(mod!);
-              await jobSavedObjectService.createModel(modelId, job);
+              const job = getJobDetailsFromTrainedModel(mod!);
+              await jobSavedObjectService.createTrainedModel(modelId, job);
               results.savedObjectsCreated[modelId] = {
                 success: true,
                 type,
@@ -193,10 +193,10 @@ export function syncSavedObjectsFactory(
       }
     }
 
-    for (const model of status.savedObjects.models) {
-      if (model.checks.modelExists === false) {
+    for (const model of status.savedObjects['trained-models']) {
+      if (model.checks.trainedModelExists === false) {
         const { modelId, namespaces } = model;
-        const type = 'models';
+        const type = 'trained-models';
         if (simulate === true) {
           results.savedObjectsDeleted[modelId] = { success: true, type };
         } else {
@@ -204,9 +204,9 @@ export function syncSavedObjectsFactory(
           tasks.push(async () => {
             try {
               if (namespaces !== undefined && namespaces.length) {
-                await jobSavedObjectService.forceDeleteModel(modelId, namespaces[0]);
+                await jobSavedObjectService.forceDeleteTrainedModel(modelId, namespaces[0]);
               } else {
-                await jobSavedObjectService.deleteModel(modelId);
+                await jobSavedObjectService.deleteTrainedModel(modelId);
               }
               results.savedObjectsDeleted[modelId] = {
                 success: true,
@@ -294,7 +294,7 @@ export function syncSavedObjectsFactory(
     const results: InitializeSavedObjectResponse = {
       jobs: [],
       datafeeds: [],
-      models: [],
+      trainedModels: [],
       success: true,
     };
     const status = await checkStatus();
@@ -352,12 +352,14 @@ export function syncSavedObjectsFactory(
       }
     });
 
-    const models = status.jobs.models.filter((m) => m.checks.savedObjectExits === false);
-    const modelObjects: ModelObject[] = [];
+    const models = status.jobs['trained-models'].filter(
+      ({ checks }) => checks.savedObjectExits === false
+    );
+    const modelObjects: TrainedModelObject[] = [];
 
     if (models.length) {
       if (simulate === true) {
-        results.models = models.map(({ modelId }) => ({ id: modelId }));
+        results.trainedModels = models.map(({ modelId }) => ({ id: modelId }));
       } else {
         const {
           body: { trained_model_configs: trainedModelConfigs },
@@ -365,12 +367,12 @@ export function syncSavedObjectsFactory(
           model_id: models.map(({ modelId }) => modelId).join(','),
         });
         const jobDetails = trainedModelConfigs.reduce((acc, cur) => {
-          const job = getJobDetailsFromModel(cur);
+          const job = getJobDetailsFromTrainedModel(cur);
           if (job !== null) {
             acc[cur.model_id] = job;
           }
           return acc;
-        }, {} as Record<string, ModelObject['job']>);
+        }, {} as Record<string, TrainedModelObject['job']>);
 
         models.forEach(({ modelId }) => {
           modelObjects.push({
@@ -401,9 +403,12 @@ export function syncSavedObjectsFactory(
       }
 
       // use * space if no spaces for related jobs can be found.
-      const createModelsResults = await jobSavedObjectService.bulkCreateModel(modelObjects, '*');
+      const createModelsResults = await jobSavedObjectService.bulkCreateTrainedModel(
+        modelObjects,
+        '*'
+      );
       createModelsResults.saved_objects.forEach(({ attributes }) => {
-        results.models.push({
+        results.trainedModels.push({
           id: attributes.model_id,
         });
       });

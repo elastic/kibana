@@ -20,7 +20,7 @@ import {
   InitializeSavedObjectResponse,
   SavedObjectResult,
   JobsSpacesResponse,
-  ModelsSpacesResponse,
+  TrainedModelsSpacesResponse,
   SyncCheckResponse,
 } from '../../../../common/types/saved_objects';
 
@@ -82,16 +82,16 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
-  modelsSpaces() {
-    return httpService.http<ModelsSpacesResponse>({
-      path: `${basePath()}/saved_objects/models_spaces`,
+  trainedModelsSpaces() {
+    return httpService.http<TrainedModelsSpacesResponse>({
+      path: `${basePath()}/saved_objects/trained_models_spaces`,
       method: 'GET',
     });
   },
   updateModelsSpaces(modelIds: string[], spacesToAdd: string[], spacesToRemove: string[]) {
     const body = JSON.stringify({ modelIds, spacesToAdd, spacesToRemove });
     return httpService.http<SavedObjectResult>({
-      path: `${basePath()}/saved_objects/update_models_spaces`,
+      path: `${basePath()}/saved_objects/update_trained_models_spaces`,
       method: 'POST',
       body,
     });

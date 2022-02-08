@@ -61,8 +61,8 @@ export function jobSavedObjectsInitializationFactory(
       const jobSpaceOverrides = await createJobSpaceOverrides(client);
       // initialize jobs
       const { initSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
-      const { jobs, models } = await initSavedObjects(false, jobSpaceOverrides);
-      mlLog.info(`${jobs.length + models.length} ML saved objects initialized`);
+      const { jobs, trainedModels } = await initSavedObjects(false, jobSpaceOverrides);
+      mlLog.info(`${jobs.length + trainedModels.length} ML saved objects initialized`);
     } catch (error) {
       mlLog.error(`Error Initializing ML saved objects ${JSON.stringify(error)}`);
     }

@@ -8,12 +8,12 @@
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient, KibanaRequest } from 'kibana/server';
-import type { JobSavedObjectService, ModelJob } from './service';
+import type { JobSavedObjectService, TrainedModelJob } from './service';
 import type { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
 
 import type { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 import type { ResolveMlCapabilities } from '../../common/types/capabilities';
-import { getJobDetailsFromModel } from './util';
+import { getJobDetailsFromTrainedModel } from './util';
 
 export interface JobSavedObjectStatus {
   jobId: string;
@@ -26,12 +26,12 @@ export interface JobSavedObjectStatus {
   };
 }
 
-export interface ModelSavedObjectStatus {
+export interface TrainedModelSavedObjectStatus {
   modelId: string;
   namespaces: string[] | undefined;
-  job: null | ModelJob;
+  job: null | TrainedModelJob;
   checks: {
-    modelExists: boolean;
+    trainedModelExists: boolean;
     dfaJobExists: boolean | null;
   };
 }
@@ -44,7 +44,7 @@ export interface JobStatus {
   };
 }
 
-export interface ModelStatus {
+export interface TrainedModelStatus {
   modelId: string;
   checks: {
     savedObjectExits: boolean;
@@ -56,12 +56,12 @@ export interface StatusResponse {
   savedObjects: {
     'anomaly-detector': JobSavedObjectStatus[];
     'data-frame-analytics': JobSavedObjectStatus[];
-    models: ModelSavedObjectStatus[];
+    'trained-models': TrainedModelSavedObjectStatus[];
   };
   jobs: {
     'anomaly-detector': JobStatus[];
     'data-frame-analytics': JobStatus[];
-    models: ModelStatus[];
+    'trained-models': TrainedModelStatus[];
   };
 }
 
@@ -82,8 +82,8 @@ export function checksFactory(
     ] = await Promise.all([
       jobSavedObjectService.getAllJobObjects(undefined, false),
       jobSavedObjectService.getAllJobObjectsForAllSpaces(),
-      jobSavedObjectService.getAllModelObjects(false),
-      jobSavedObjectService.getAllModelObjectsForAllSpaces(),
+      jobSavedObjectService.getAllTrainedModelObjects(false),
+      jobSavedObjectService.getAllTrainedModelObjectsForAllSpaces(),
       client.asInternalUser.ml.getJobs(),
       client.asInternalUser.ml.getDatafeeds(),
       client.asInternalUser.ml.getDataFrameAnalytics() as unknown as {
@@ -127,7 +127,7 @@ export function checksFactory(
     }, new Map<string, number>());
 
     const modelJobExits = models.trained_model_configs.reduce((acc, cur) => {
-      const job = getJobDetailsFromModel(cur);
+      const job = getJobDetailsFromTrainedModel(cur);
       if (job === null) {
         return acc;
       }
@@ -141,9 +141,9 @@ export function checksFactory(
       return acc;
     }, new Map<string, boolean | null>());
 
-    const modelSavedObjectsStatus: ModelSavedObjectStatus[] = modelObjects.map(
+    const modelSavedObjectsStatus: TrainedModelSavedObjectStatus[] = modelObjects.map(
       ({ attributes: { job, model_id: modelId }, namespaces }) => {
-        const modelExists = models.trained_model_configs.some((m) => m.model_id === modelId);
+        const trainedModelExists = models.trained_model_configs.some((m) => m.model_id === modelId);
         const dfaJobExists = modelJobExits.get(modelId) ?? null;
 
         return {
@@ -151,7 +151,7 @@ export function checksFactory(
           namespaces,
           job,
           checks: {
-            modelExists,
+            trainedModelExists,
             dfaJobExists,
           },
         };
@@ -230,7 +230,7 @@ export function checksFactory(
         const modelId = model.model_id;
         const modelObject = nonSpaceModelObjectIds.get(modelId);
         const savedObjectExits = modelObject !== undefined;
-        const job = getJobDetailsFromModel(model);
+        const job = getJobDetailsFromTrainedModel(model);
         let dfaJobReferenced = null;
         if (job !== null) {
           dfaJobReferenced =
@@ -253,12 +253,12 @@ export function checksFactory(
         'data-frame-analytics': jobSavedObjectsStatus.filter(
           ({ type }) => type === 'data-frame-analytics'
         ),
-        models: modelSavedObjectsStatus,
+        'trained-models': modelSavedObjectsStatus,
       },
       jobs: {
         'anomaly-detector': anomalyDetectorsStatus,
         'data-frame-analytics': dataFrameAnalyticsStatus,
-        models: modelsStatus,
+        'trained-models': modelsStatus,
       },
     };
   }

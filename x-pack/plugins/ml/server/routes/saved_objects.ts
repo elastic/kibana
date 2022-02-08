@@ -201,7 +201,7 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {post} /api/ml/saved_objects/update_models_spaces Update what spaces jobs are assigned to
+   * @api {post} /api/ml/saved_objects/update_trained_models_spaces Update what spaces jobs are assigned to
    * @apiName UpdateModelsSpaces
    * @apiDescription Update a list of models to add and/or remove them from given spaces
    *
@@ -209,7 +209,7 @@ export function savedObjectsRoutes(
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/update_models_spaces',
+      path: '/api/ml/saved_objects/update_trained_models_spaces',
       validate: {
         body: updateModelsSpaces,
       },
@@ -221,7 +221,7 @@ export function savedObjectsRoutes(
       try {
         const { modelIds, spacesToAdd, spacesToRemove } = request.body;
 
-        const body = await jobSavedObjectService.updateModelsSpaces(
+        const body = await jobSavedObjectService.updateTrainedModelsSpaces(
           modelIds,
           spacesToAdd,
           spacesToRemove
@@ -301,7 +301,7 @@ export function savedObjectsRoutes(
       path: '/api/ml/saved_objects/jobs_spaces',
       validate: false,
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
@@ -336,31 +336,31 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/models_spaces Get all models and their spaces
+   * @api {get} /api/ml/saved_objects/trained_models_spaces Get all models and their spaces
    * @apiName ModelsSpaces
    * @apiDescription List all models and their spaces.
    *
    */
   router.get(
     {
-      path: '/api/ml/saved_objects/models_spaces',
+      path: '/api/ml/saved_objects/trained_models_spaces',
       validate: false,
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
       try {
         const { checkStatus } = checksFactory(client, jobSavedObjectService);
         const savedObjects = (await checkStatus()).savedObjects;
-        const modelStatus = savedObjects.models
-          .filter((s) => s.checks.modelExists)
+        const modelStatus = savedObjects['trained-models']
+          .filter((s) => s.checks.trainedModelExists)
           .reduce(
             (acc, cur) => {
-              acc.models[cur.modelId] = cur.namespaces;
+              acc.trainedModels[cur.modelId] = cur.namespaces;
               return acc;
             },
-            { models: {} } as { models: { [id: string]: string[] | undefined } }
+            { trainedModels: {} } as { trainedModels: { [id: string]: string[] | undefined } }
           );
 
         return response.ok({

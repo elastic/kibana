@@ -76,8 +76,8 @@ export class SavedObjectsSyncService {
                 isMlReady
               );
               const { initSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
-              const { jobs, models } = await initSavedObjects(false);
-              const count = jobs.length + models.length;
+              const { jobs, trainedModels } = await initSavedObjects(false);
+              const count = jobs.length + trainedModels.length;
 
               this.log.info(
                 count

@@ -17,7 +17,7 @@ import type { SecurityPluginSetup } from '../../../security/server';
 import {
   JobType,
   ML_JOB_SAVED_OBJECT_TYPE,
-  ML_MODEL_SAVED_OBJECT_TYPE,
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
   MlSavedObjectType,
 } from '../../common/types/saved_objects';
 import { MLJobNotFound } from '../lib/ml_client';
@@ -31,17 +31,17 @@ export interface JobObject {
 }
 type JobObjectFilter = { [k in keyof JobObject]?: string };
 
-export interface ModelObject {
+export interface TrainedModelObject {
   model_id: string;
-  job: null | ModelJob;
+  job: null | TrainedModelJob;
 }
 
-export interface ModelJob {
+export interface TrainedModelJob {
   job_id: string;
   create_time: number;
 }
 
-type ModelObjectFilter = { [k in keyof ModelObject]?: string };
+type TrainedModelObjectFilter = { [k in keyof TrainedModelObject]?: string };
 
 export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
 
@@ -406,41 +406,41 @@ export function jobSavedObjectServiceFactory(
     return (await authorizationCheck(request)).canCreateGlobally;
   }
 
-  async function getModelObject(
+  async function getTrainedModelObject(
     modelId: string,
     currentSpaceOnly: boolean = true
-  ): Promise<SavedObjectsFindResult<ModelObject> | undefined> {
-    const [modelObject] = await _getModelObjects(modelId, currentSpaceOnly);
+  ): Promise<SavedObjectsFindResult<TrainedModelObject> | undefined> {
+    const [modelObject] = await _getTrainedModelObjects(modelId, currentSpaceOnly);
     return modelObject;
   }
 
-  async function createModel(modelId: string, job: ModelJob | null, namespaces?: []) {
-    await _createModel(modelId, job, namespaces);
+  async function createTrainedModel(modelId: string, job: TrainedModelJob | null, namespaces?: []) {
+    await _createTrainedModel(modelId, job, namespaces);
   }
 
-  async function bulkCreateModel(models: ModelObject[], namespaceFallback?: string) {
-    return await _bulkCreateModel(models, namespaceFallback);
+  async function bulkCreateTrainedModel(models: TrainedModelObject[], namespaceFallback?: string) {
+    return await _bulkCreateTrainedModel(models, namespaceFallback);
   }
 
-  async function deleteModel(modelId: string) {
-    await _deleteModel(modelId);
+  async function deleteTrainedModel(modelId: string) {
+    await _deleteTrainedModel(modelId);
   }
 
-  async function forceDeleteModel(modelId: string, namespace: string) {
-    await _forceDeleteModel(modelId, namespace);
+  async function forceDeleteTrainedModel(modelId: string, namespace: string) {
+    await _forceDeleteTrainedModel(modelId, namespace);
   }
 
-  async function getAllModelObjects(currentSpaceOnly: boolean = true) {
-    return await _getModelObjects(undefined, currentSpaceOnly);
+  async function getAllTrainedModelObjects(currentSpaceOnly: boolean = true) {
+    return await _getTrainedModelObjects(undefined, currentSpaceOnly);
   }
 
   // async function bulkCreateModels(jobs: Array<{ job: JobObject; namespaces: string[] }>) {
   //   return await _bulkCreateJobs(jobs);
   // }
 
-  async function _getModelObjects(modelId?: string, currentSpaceOnly: boolean = true) {
+  async function _getTrainedModelObjects(modelId?: string, currentSpaceOnly: boolean = true) {
     await isMlReady();
-    const filterObject: ModelObjectFilter = {};
+    const filterObject: TrainedModelObjectFilter = {};
 
     if (modelId !== undefined) {
       filterObject.model_id = modelId;
@@ -448,40 +448,46 @@ export function jobSavedObjectServiceFactory(
 
     const { filter, searchFields } = createSavedObjectFilter(
       filterObject,
-      ML_MODEL_SAVED_OBJECT_TYPE
+      ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
     );
 
     const options: SavedObjectsFindOptions = {
-      type: ML_MODEL_SAVED_OBJECT_TYPE,
+      type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
       perPage: 10000,
       ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
       searchFields,
       filter,
     };
 
-    const models = await savedObjectsClient.find<ModelObject>(options);
+    const models = await savedObjectsClient.find<TrainedModelObject>(options);
 
     return models.saved_objects;
   }
 
-  async function _createModel(modelId: string, job: ModelJob | null, namespaces?: []) {
+  async function _createTrainedModel(
+    modelId: string,
+    job: TrainedModelJob | null,
+    namespaces?: []
+  ) {
     await isMlReady();
 
-    const modelObject: ModelObject = {
+    const modelObject: TrainedModelObject = {
       model_id: modelId,
       job,
     };
 
     try {
-      const [existingModelObject] = await getAllModelObjectsForAllSpaces([modelId]);
+      const [existingModelObject] = await getAllTrainedModelObjectsForAllSpaces([modelId]);
       if (existingModelObject !== undefined) {
         // a saved object for this job already exists, this may be left over from a previously deleted job
         if (existingModelObject.namespaces?.length) {
           // use a force delete just in case the saved object exists only in another space.
-          await _forceDeleteModel(modelId, existingModelObject.namespaces[0]);
+          await _forceDeleteTrainedModel(modelId, existingModelObject.namespaces[0]);
         } else {
           // the saved object has no spaces, this is unexpected, attempt a normal delete
-          await savedObjectsClient.delete(ML_MODEL_SAVED_OBJECT_TYPE, modelId, { force: true });
+          await savedObjectsClient.delete(ML_TRAINED_MODEL_SAVED_OBJECT_TYPE, modelId, {
+            force: true,
+          });
         }
       }
     } catch (error) {
@@ -500,13 +506,17 @@ export function jobSavedObjectServiceFactory(
       initialNamespaces = existingJobObject?.namespaces ?? undefined;
     }
 
-    await savedObjectsClient.create<ModelObject>(ML_MODEL_SAVED_OBJECT_TYPE, modelObject, {
-      id: modelId,
-      ...(initialNamespaces ? { initialNamespaces } : {}),
-    });
+    await savedObjectsClient.create<TrainedModelObject>(
+      ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+      modelObject,
+      {
+        id: modelId,
+        ...(initialNamespaces ? { initialNamespaces } : {}),
+      }
+    );
   }
 
-  async function _bulkCreateModel(models: ModelObject[], namespaceFallback?: string) {
+  async function _bulkCreateTrainedModel(models: TrainedModelObject[], namespaceFallback?: string) {
     await isMlReady();
 
     const namespacesPerJob = (await getAllJobObjectsForAllSpaces()).reduce((acc, cur) => {
@@ -514,7 +524,7 @@ export function jobSavedObjectServiceFactory(
       return acc;
     }, {} as Record<string, string[] | undefined>);
 
-    return await savedObjectsClient.bulkCreate<ModelObject>(
+    return await savedObjectsClient.bulkCreate<TrainedModelObject>(
       models.map((m) => {
         let initialNamespaces = m.job && namespacesPerJob[m.job.job_id];
         if (!initialNamespaces?.length && namespaceFallback) {
@@ -525,7 +535,7 @@ export function jobSavedObjectServiceFactory(
           initialNamespaces = [namespaceFallback];
         }
         return {
-          type: ML_MODEL_SAVED_OBJECT_TYPE,
+          type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
           id: m.model_id,
           attributes: m,
           ...(initialNamespaces ? { initialNamespaces } : {}),
@@ -534,59 +544,59 @@ export function jobSavedObjectServiceFactory(
     );
   }
 
-  async function getAllModelObjectsForAllSpaces(modelIds?: string[]) {
+  async function getAllTrainedModelObjectsForAllSpaces(modelIds?: string[]) {
     await isMlReady();
     const searchFields = ['model_id'];
     let filter = '';
 
     if (modelIds !== undefined && modelIds.length) {
       filter = modelIds
-        .map((m) => `${ML_MODEL_SAVED_OBJECT_TYPE}.attributes.model_id: "${m}"`)
+        .map((m) => `${ML_TRAINED_MODEL_SAVED_OBJECT_TYPE}.attributes.model_id: "${m}"`)
         .join(' OR ');
     }
 
     // const { filter searchFields } = createSavedObjectFilter(
     //   filterObject,
-    //   ML_MODEL_SAVED_OBJECT_TYPE
+    //   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
     // );
     const options: SavedObjectsFindOptions = {
-      type: ML_MODEL_SAVED_OBJECT_TYPE,
+      type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
       perPage: 10000,
       ...(spacesEnabled === false ? {} : { namespaces: ['*'] }),
       searchFields,
       filter,
     };
 
-    return (await internalSavedObjectsClient.find<ModelObject>(options)).saved_objects;
+    return (await internalSavedObjectsClient.find<TrainedModelObject>(options)).saved_objects;
   }
 
-  async function _deleteModel(modelId: string) {
-    const [model] = await _getModelObjects(modelId);
+  async function _deleteTrainedModel(modelId: string) {
+    const [model] = await _getTrainedModelObjects(modelId);
     if (model === undefined) {
       throw new MLJobNotFound('job not found');
     }
 
-    await savedObjectsClient.delete(ML_MODEL_SAVED_OBJECT_TYPE, model.id, { force: true });
+    await savedObjectsClient.delete(ML_TRAINED_MODEL_SAVED_OBJECT_TYPE, model.id, { force: true });
   }
 
-  async function _forceDeleteModel(modelId: string, namespace: string) {
+  async function _forceDeleteTrainedModel(modelId: string, namespace: string) {
     // const id = _jobSavedObjectId({
     //   model_id: modelId,
     // });
 
     // * space cannot be used in a delete call, so use undefined which
     // is the same as specifying the default space
-    await internalSavedObjectsClient.delete(ML_MODEL_SAVED_OBJECT_TYPE, modelId, {
+    await internalSavedObjectsClient.delete(ML_TRAINED_MODEL_SAVED_OBJECT_TYPE, modelId, {
       namespace: namespace === '*' ? undefined : namespace,
       force: true,
     });
   }
 
-  async function filterModelsForSpace<T>(list: T[], field: keyof T): Promise<T[]> {
+  async function filterTrainedModelsForSpace<T>(list: T[], field: keyof T): Promise<T[]> {
     return _filterModelObjectsForSpace<T>(list, field, 'model_id');
   }
 
-  async function filterModelIdsForSpace(
+  async function filterTrainedModelIdsForSpace(
     ids: string[],
     allowWildcards: boolean = false
   ): Promise<string[]> {
@@ -595,7 +605,7 @@ export function jobSavedObjectServiceFactory(
 
   async function _filterModelObjectIdsForSpace(
     ids: string[],
-    key: keyof ModelObject,
+    key: keyof TrainedModelObject,
     allowWildcards: boolean = false
   ): Promise<string[]> {
     if (ids.length === 0) {
@@ -622,7 +632,7 @@ export function jobSavedObjectServiceFactory(
   async function _filterModelObjectsForSpace<T>(
     list: T[],
     field: keyof T,
-    key: keyof ModelObject
+    key: keyof TrainedModelObject
   ): Promise<T[]> {
     if (list.length === 0) {
       return [];
@@ -631,12 +641,15 @@ export function jobSavedObjectServiceFactory(
     return list.filter((j) => modelIds.includes(j[field] as unknown as string));
   }
 
-  async function _getModelIds(idType: keyof ModelObject) {
-    const models = await _getModelObjects();
+  async function _getModelIds(idType: keyof TrainedModelObject) {
+    const models = await _getTrainedModelObjects();
     return models.map((o) => o.attributes[idType]);
   }
 
-  async function findModelsObjectForJobs(jobIds: string[], currentSpaceOnly: boolean = true) {
+  async function findTrainedModelsObjectForJobs(
+    jobIds: string[],
+    currentSpaceOnly: boolean = true
+  ) {
     await isMlReady();
     const {
       body: { data_frame_analytics: jobs },
@@ -648,20 +661,20 @@ export function jobSavedObjectServiceFactory(
       const filterObject = {
         'job.job_id': job.id,
         'job.create_time': createTime,
-      } as ModelObjectFilter;
+      } as TrainedModelObjectFilter;
       const { filter, searchFields } = createSavedObjectFilter(
         filterObject,
-        ML_MODEL_SAVED_OBJECT_TYPE
+        ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
       );
 
       const options: SavedObjectsFindOptions = {
-        type: ML_MODEL_SAVED_OBJECT_TYPE,
+        type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
         perPage: 10000,
         ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
         searchFields,
         filter,
       };
-      return savedObjectsClient.find<ModelObject>(options);
+      return savedObjectsClient.find<TrainedModelObject>(options);
     });
 
     const finedResult = await Promise.all(searches);
@@ -672,10 +685,10 @@ export function jobSavedObjectServiceFactory(
         acc[jobId] = so;
       }
       return acc;
-    }, {} as Record<string, SavedObjectsFindResult<ModelObject>>);
+    }, {} as Record<string, SavedObjectsFindResult<TrainedModelObject>>);
   }
 
-  async function updateModelsSpaces(
+  async function updateTrainedModelsSpaces(
     modelIds: string[],
     spacesToAdd: string[],
     spacesToRemove: string[]
@@ -684,8 +697,8 @@ export function jobSavedObjectServiceFactory(
       return {};
     }
     const results: UpdateJobsSpacesResult = {};
-    const models = await _getModelObjects();
-    const modelObjectIdMap = new Map<string, string>();
+    const models = await _getTrainedModelObjects();
+    const trainedModelObjectIdMap = new Map<string, string>();
     const objectsToUpdate: Array<{ type: string; id: string }> = [];
 
     for (const modelId of modelIds) {
@@ -693,12 +706,12 @@ export function jobSavedObjectServiceFactory(
       if (model === undefined) {
         results[modelId] = {
           success: false,
-          type: ML_MODEL_SAVED_OBJECT_TYPE,
-          error: createModelError(modelId),
+          type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+          error: createTrainedModelError(modelId),
         };
       } else {
-        modelObjectIdMap.set(model.id, model.attributes.model_id);
-        objectsToUpdate.push({ type: ML_MODEL_SAVED_OBJECT_TYPE, id: model.id });
+        trainedModelObjectIdMap.set(model.id, model.attributes.model_id);
+        objectsToUpdate.push({ type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE, id: model.id });
       }
     }
     try {
@@ -708,17 +721,17 @@ export function jobSavedObjectServiceFactory(
         spacesToRemove
       );
       updateResult.objects.forEach(({ id: objectId, error }) => {
-        const model = modelObjectIdMap.get(objectId)!;
+        const model = trainedModelObjectIdMap.get(objectId)!;
         if (error) {
           results[model] = {
             success: false,
-            type: ML_MODEL_SAVED_OBJECT_TYPE,
+            type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
             error: getSavedObjectClientError(error),
           };
         } else {
           results[model] = {
             success: true,
-            type: ML_MODEL_SAVED_OBJECT_TYPE,
+            type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
           };
         }
       });
@@ -726,10 +739,10 @@ export function jobSavedObjectServiceFactory(
       // If the entire operation failed, return success: false for each job
       const clientError = getSavedObjectClientError(error);
       objectsToUpdate.forEach(({ id: objectId }) => {
-        const modelId = modelObjectIdMap.get(objectId)!;
+        const modelId = trainedModelObjectIdMap.get(objectId)!;
         results[modelId] = {
           success: false,
-          type: ML_MODEL_SAVED_OBJECT_TYPE,
+          type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
           error: clientError,
         };
       });
@@ -757,17 +770,17 @@ export function jobSavedObjectServiceFactory(
     bulkCreateJobs,
     getAllJobObjectsForAllSpaces,
     canCreateGlobalJobs,
-    getModelObject,
-    createModel,
-    bulkCreateModel,
-    deleteModel,
-    forceDeleteModel,
-    updateModelsSpaces,
-    getAllModelObjects,
-    getAllModelObjectsForAllSpaces,
-    filterModelsForSpace,
-    filterModelIdsForSpace,
-    findModelsObjectForJobs,
+    getTrainedModelObject,
+    createTrainedModel,
+    bulkCreateTrainedModel,
+    deleteTrainedModel,
+    forceDeleteTrainedModel,
+    updateTrainedModelsSpaces,
+    getAllTrainedModelObjects,
+    getAllTrainedModelObjectsForAllSpaces,
+    filterTrainedModelsForSpace,
+    filterTrainedModelIdsForSpace,
+    findTrainedModelsObjectForJobs,
   };
 }
 
@@ -787,17 +800,17 @@ export function createJobError(id: string, key: keyof JobObject) {
   };
 }
 
-export function createModelError(id: string) {
+export function createTrainedModelError(id: string) {
   return {
     error: {
-      reason: `No known model with id '${id}'`,
+      reason: `No known trained model with id '${id}'`,
     },
     status: 404,
   };
 }
 
 function createSavedObjectFilter(
-  filterObject: JobObjectFilter | ModelObjectFilter,
+  filterObject: JobObjectFilter | TrainedModelObjectFilter,
   savedObjectType: string
 ) {
   const searchFields: string[] = [];

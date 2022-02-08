@@ -8,15 +8,15 @@
 import type { ErrorType } from '../util/errors';
 export type JobType = 'anomaly-detector' | 'data-frame-analytics';
 export const ML_JOB_SAVED_OBJECT_TYPE = 'ml-job';
-export const ML_MODEL_SAVED_OBJECT_TYPE = 'ml-model';
+export const ML_TRAINED_MODEL_SAVED_OBJECT_TYPE = 'ml-trained-model';
 export const ML_MODULE_SAVED_OBJECT_TYPE = 'ml-module';
 export type MlSavedObjectType =
   | typeof ML_JOB_SAVED_OBJECT_TYPE
-  | typeof ML_MODEL_SAVED_OBJECT_TYPE
+  | typeof ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
   | typeof ML_MODULE_SAVED_OBJECT_TYPE;
 
 export interface SavedObjectResult {
-  [id: string]: { success: boolean; type: JobType | 'models'; error?: ErrorType };
+  [id: string]: { success: boolean; type: JobType | 'trained-models'; error?: ErrorType };
 }
 
 export interface SyncSavedObjectResponse {
@@ -37,14 +37,14 @@ export type JobsSpacesResponse = {
   [jobType in JobType]: { [jobId: string]: string[] };
 };
 
-export interface ModelsSpacesResponse {
-  models: { [jobId: string]: string[] };
+export interface TrainedModelsSpacesResponse {
+  trainedModels: { [id: string]: string[] };
 }
 
 export interface InitializeSavedObjectResponse {
   jobs: Array<{ id: string; type: JobType }>;
   datafeeds: Array<{ id: string; type: JobType }>;
-  models: Array<{ id: string }>;
+  trainedModels: Array<{ id: string }>;
   success: boolean;
   error?: ErrorType;
 }

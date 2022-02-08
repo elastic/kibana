@@ -153,8 +153,8 @@ export const ModelsList: FC<Props> = ({
         size: 1000,
       });
       if (isManagementTable) {
-        const { models } = await savedObjectsApiService.modelsSpaces();
-        setModelSpaces(models);
+        const { trainedModels } = await savedObjectsApiService.trainedModelsSpaces();
+        setModelSpaces(trainedModels);
       }
 
       const newItems: ModelItem[] = [];

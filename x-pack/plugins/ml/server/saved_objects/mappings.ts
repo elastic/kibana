@@ -31,7 +31,7 @@ export const mlJob: SavedObjectsTypeMappingDefinition = {
   },
 };
 
-export const mlModel: SavedObjectsTypeMappingDefinition = {
+export const mlTrainedModel: SavedObjectsTypeMappingDefinition = {
   properties: {
     model_id: {
       type: 'text',

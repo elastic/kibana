@@ -133,7 +133,7 @@ export function getMlClient(
   }
 
   async function checkModelIds(modelIds: string[], allowWildcards: boolean = false) {
-    const filteredModelIds = await jobSavedObjectService.filterModelIdsForSpace(modelIds);
+    const filteredModelIds = await jobSavedObjectService.filterTrainedModelIdsForSpace(modelIds);
     let missingIds = modelIds.filter((j) => filteredModelIds.indexOf(j) === -1);
     if (allowWildcards === true && missingIds.join().match('\\*') !== null) {
       // filter out wildcard ids from the error
@@ -399,7 +399,7 @@ export function getMlClient(
       try {
         const { body } = await mlClient.getTrainedModels(...p);
         const models =
-          await jobSavedObjectService.filterModelsForSpace<estypes.MlTrainedModelConfig>(
+          await jobSavedObjectService.filterTrainedModelsForSpace<estypes.MlTrainedModelConfig>(
             body.trained_model_configs,
             'model_id'
           );
@@ -416,7 +416,7 @@ export function getMlClient(
       try {
         const { body } = await mlClient.getTrainedModelsStats(...p);
         const models =
-          await jobSavedObjectService.filterModelsForSpace<estypes.MlTrainedModelStats>(
+          await jobSavedObjectService.filterTrainedModelsForSpace<estypes.MlTrainedModelStats>(
             body.trained_model_stats,
             'model_id'
           );
