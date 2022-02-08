@@ -84,11 +84,11 @@ describe('APMSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByTestId } = render(
+    const { getByRole, getByText, queryAllByTestId } = render(
       <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
     );
 
-    expect(getByText('Services')).toBeInTheDocument();
+    expect(getByRole('heading')).toHaveTextContent('Services');
     expect(getByText('Show service inventory')).toBeInTheDocument();
     expect(getByText('Services 11')).toBeInTheDocument();
     expect(getByText('Throughput 900.0 tpm')).toBeInTheDocument();
@@ -101,11 +101,11 @@ describe('APMSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByTestId } = render(
+    const { getByRole, getByText, queryAllByTestId } = render(
       <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
     );
 
-    expect(getByText('Services')).toBeInTheDocument();
+    expect(getByRole('heading')).toHaveTextContent('Services');
     expect(getByText('Show service inventory')).toBeInTheDocument();
     expect(getByText('Services 11')).toBeInTheDocument();
     expect(getByText('Throughput 312.00k tpm')).toBeInTheDocument();
@@ -117,11 +117,11 @@ describe('APMSection', () => {
       status: fetcherHook.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByText, getByTestId } = render(
+    const { getByRole, queryAllByText, getByTestId } = render(
       <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
     );
 
-    expect(getByText('Services')).toBeInTheDocument();
+    expect(getByRole('heading')).toHaveTextContent('Services');
     expect(getByTestId('loading')).toBeInTheDocument();
     expect(queryAllByText('Show service inventory')).toEqual([]);
     expect(queryAllByText('Services 11')).toEqual([]);
