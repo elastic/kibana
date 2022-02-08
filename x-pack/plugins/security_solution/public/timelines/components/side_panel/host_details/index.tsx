@@ -28,12 +28,12 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
     display: flex;
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
 
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow-x: hidden;
-      overflow-y: auto;
+      overflow-y: scroll;
       margin-bottom: 64px; // account for firefox, which doesn't seem to respect the bottom padding
       padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 0px`};
     }
@@ -52,7 +52,7 @@ const StyledEuiFlexButtonWrapper = styled(EuiFlexItem)`
 const StyledPanelContent = styled.div`
   display: block;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
 `;
 
