@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { Anomaly } from '../../../common/components/ml/types';
 import { UsersTableType } from '../../store/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 

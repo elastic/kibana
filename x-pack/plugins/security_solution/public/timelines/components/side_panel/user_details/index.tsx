@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { FlowTarget } from '../../../../../common/search_strategy';
 import {
   ExpandableUserDetailsTitle,
   ExpandableUserDetailsPageLink,

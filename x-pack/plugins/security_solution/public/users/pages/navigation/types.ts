@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Filter } from '@kbn/es-query';
 import { UsersTableType, UsersType } from '../../store/model';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { ESTermQuery } from '../../../../common/typed_json';
