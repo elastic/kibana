@@ -9,12 +9,12 @@ import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
+import { ScreenshotResult } from '../../../../../screenshotting/server';
 import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../../common/types';
 import { LevelLogger } from '../../../lib';
-import { ScreenshotResult } from '../../../../../screenshotting/server';
 import { ScreenshotOptions } from '../../../types';
 import { PdfMaker } from '../../common/pdf';
-import { PdfWorkerOutOfMemoryError } from '../../common/pdf/pdf_generate_errors';
+import { PdfWorkerOutOfMemoryError, extractScreenshotResultErrors } from '../../common/pdf';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import type { TaskPayloadPDFV2 } from '../types';
 import { getTracker } from './tracker';
@@ -37,7 +37,7 @@ export function generatePdfObservable(
   locatorParams: LocatorParams[],
   options: Omit<ScreenshotOptions, 'urls'>,
   logo?: string
-): Rx.Observable<{ buffer: Buffer | null; warnings: string[] }> {
+): Rx.Observable<{ buffer: Uint8Array | null; warnings: string[] }> {
   const tracker = getTracker();
   tracker.startScreenshots();
 
@@ -78,19 +78,9 @@ export function generatePdfObservable(
         });
       });
 
-      let buffer: Buffer | null = null;
-      tracker.startCompile();
-      logger.debug(`Compiling PDF using "${layout.id}" layout...`);
-      const warnings = results.reduce((found, current) => {
-        if (current.error) {
-          found.push(current.error.message);
-        }
-        if (current.renderErrors) {
-          found.push(...current.renderErrors);
-        }
-        return found;
-      }, [] as string[]);
+      const warnings = extractScreenshotResultErrors(results);
 
+      let buffer: Uint8Array | null = null;
       try {
         tracker.startCompile();
         logger.info(`Compiling PDF using "${layout.id}" layout...`);
@@ -107,7 +97,7 @@ export function generatePdfObservable(
         logger.error(err);
         if (err instanceof PdfWorkerOutOfMemoryError) {
           warnings.push(
-            'Failed ot generate PDF due to low memory. Please consider generating a smaller PDF.'
+            'Failed to generate PDF due to low memory. Please consider generating a smaller PDF.'
           );
         }
       }
