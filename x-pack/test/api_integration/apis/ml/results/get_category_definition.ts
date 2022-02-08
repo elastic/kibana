@@ -124,19 +124,13 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('should produce the correct category for the job', async () => {
-      const categoryId = '2';
-      const resp = await getCategoryDefinition(
+    it('should not produce the correct category for the job in the wrong space', async () => {
+      await getCategoryDefinition(
         jobIdSpace1,
-        categoryId,
-        USER.ML_POWERUSER,
-        200,
-        idSpace1
-      );
-
-      expect(resp.categoryId).to.not.eql(
         expectedCategoryDefinition.categoryId,
-        `categoryId should not be ${expectedCategoryDefinition.categoryId} (got ${resp.categoryId})`
+        USER.ML_POWERUSER,
+        404,
+        idSpace2
       );
     });
 
