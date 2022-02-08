@@ -161,7 +161,7 @@ export class ResourceInstaller {
     const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
       name: index,
     });
-    const simulatedMapping = get(simulatedIndexMapping, ['body', 'template', 'mappings']);
+    const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
 
     try {
       await clusterClient.indices.putMapping({
