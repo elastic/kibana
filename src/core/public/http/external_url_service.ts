@@ -54,8 +54,8 @@ const createIsInternalUrlValidation = (
   location: Pick<Location, 'href'>,
   serverBasePath: string
 ) => {
-  const base = new URL(location.href);
   return function isInternallUrl(next: string) {
+    const base = new URL(location.href);
     const url = new URL(next, base);
 
     return (
@@ -70,10 +70,10 @@ const createExternalUrlValidation = (
   location: Pick<Location, 'href'>,
   serverBasePath: string
 ) => {
-  const base = new URL(location.href);
   const isInternalUrl = createIsInternalUrlValidation(location, serverBasePath);
 
   return function validateExternalUrl(next: string) {
+    const base = new URL(location.href);
     const url = new URL(next, base);
 
     if (isInternalUrl(next)) {
