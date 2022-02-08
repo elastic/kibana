@@ -9,7 +9,7 @@ import { PercolateExecutorOptions } from '../../../signals/types';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { getInputIndex } from '../../../signals/get_input_output_index';
 import { createSearchAfterReturnType, mergeReturns } from '../../../signals/utils';
-import { fetchPercolateEnrichEvents } from './fetch_source_events';
+import { findPercolateEnrichEvents } from './find_percolate_enrich_events';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DETECTION_ENGINE_MAX_PER_PAGE,
@@ -86,8 +86,6 @@ export const percolateExecutor = ({
     });
     logDebugMessage(`matchable source event count: ${matchableSourceEventCount}`);
 
-    console.log('____matchableEventCOunt', matchableSourceEventCount);
-
     if (matchableSourceEventCount) {
       if (tupleIndex === 0) {
         try {
@@ -125,9 +123,9 @@ export const percolateExecutor = ({
 
       const {
         enrichedHits,
-        errors: fetchSourceEventsErrors,
-        success: fetchSourceEventsSuccess,
-      } = await fetchPercolateEnrichEvents({
+        errors: eventErrors,
+        success: eventSuccess,
+      } = await findPercolateEnrichEvents({
         buildRuleMessage,
         exceptionsList: exceptionItems,
         filters,
@@ -146,11 +144,11 @@ export const percolateExecutor = ({
         spaceId,
       });
 
-      if (!fetchSourceEventsSuccess) {
+      if (!eventSuccess) {
         return {
           ...results,
           success: false,
-          errors: fetchSourceEventsErrors,
+          errors: eventErrors,
         };
       }
 
@@ -158,14 +156,10 @@ export const percolateExecutor = ({
 
       results.searchAfterTimes = [(end - start).toString()];
 
-      // console.log(JSON.stringify(enrichedHits[0]));
-
       const alertCandidates = wrapHits(
         enrichedHits.slice(0, tuple.maxSignals),
         buildReasonMessageForThreatMatchAlert
       );
-
-      // console.log(JSON.stringify(alertCandidates[0]));
 
       const {
         bulkCreateDuration: bulkDuration,

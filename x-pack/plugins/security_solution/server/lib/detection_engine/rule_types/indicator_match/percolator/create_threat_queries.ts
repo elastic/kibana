@@ -12,7 +12,7 @@ import {
 } from '../../../signals/threat_mapping/types';
 import { ENRICHMENT_TYPES } from '../../../../../../common/cti/constants';
 
-export const createPercolateQueries = ({
+export const createThreatQueries = ({
   ruleId,
   ruleVersion,
   threatMapping: orItemsWithAndSubItems,
@@ -20,8 +20,6 @@ export const createPercolateQueries = ({
   threatIndicatorPath,
 }: CreatePercolateQueriesOptions): PercolatorQuery[] => {
   const must = [{ match: { rule_id: ruleId } }, { match: { rule_version: ruleVersion } }];
-
-  console.log(threatList.length);
 
   return threatList.reduce<PercolatorQuery[]>((allQueries, indicator) => {
     const queriesFromOneIndicator = orItemsWithAndSubItems.reduce<PercolatorQuery[]>(

@@ -24,7 +24,7 @@ import { percolateSourceEvents } from './percolate_source_events';
 import { enrichEvents } from './enrich_events';
 import { IRuleDataClient } from '../../../../../../../rule_registry/server';
 
-export interface FetchSourceEventsOptions {
+export interface FindPercolateEnrichOptions {
   buildRuleMessage: BuildRuleMessage;
   exceptionsList: ExceptionListItemSchema[];
   filters: unknown[];
@@ -39,12 +39,11 @@ export interface FetchSourceEventsOptions {
   ruleVersion: number;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   spaceId: string;
-  threatIndicatorPath: string;
   timestampOverride?: string;
   tuple: RuleRangeTuple;
 }
 
-export const fetchPercolateEnrichEvents = async ({
+export const findPercolateEnrichEvents = async ({
   buildRuleMessage,
   exceptionsList,
   filters,
@@ -59,10 +58,9 @@ export const fetchPercolateEnrichEvents = async ({
   ruleVersion,
   services,
   spaceId,
-  threatIndicatorPath,
   timestampOverride,
   tuple,
-}: FetchSourceEventsOptions) => {
+}: FindPercolateEnrichOptions) => {
   let success = true;
   let enrichedHits: Array<estypes.SearchHit<SignalSource>> = [];
   const errors: string[] = [];
@@ -142,7 +140,6 @@ export const fetchPercolateEnrichEvents = async ({
           const currentEnrichedHits = enrichEvents({
             hits: filteredHits,
             percolatorResponse,
-            threatIndicatorPath,
           });
           enrichedHits = [...enrichedHits, ...currentEnrichedHits];
         }

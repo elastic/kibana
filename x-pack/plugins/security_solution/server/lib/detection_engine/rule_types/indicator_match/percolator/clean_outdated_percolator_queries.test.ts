@@ -28,7 +28,7 @@ describe('cleanOutdatedPercolatorQueries', () => {
       body: {
         query: {
           bool: {
-            should: [
+            must: [
               {
                 match: {
                   rule_id: mockRuleId,
@@ -43,7 +43,6 @@ describe('cleanOutdatedPercolatorQueries', () => {
                 },
               },
             ],
-            minimum_should_match: 2,
           },
         },
       },

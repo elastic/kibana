@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createPercolateQueries } from './create_percolate_queries';
+import { createThreatQueries } from './create_threat_queries';
 import {
   PercolatorQuery,
   CreatePercolatorQueriesOptions,
@@ -49,7 +49,7 @@ export const createPercolatorQueries = async ({
 
   while (indicatorPage.hits.hits.length) {
     items = items.concat(
-      createPercolateQueries({
+      createThreatQueries({
         ruleId,
         ruleVersion,
         threatList: indicatorPage.hits.hits,

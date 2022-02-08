@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createPercolateQueries } from './create_percolate_queries';
+import { createThreatQueries } from './create_percolate_queries';
 import { mockRuleId, mockRuleVersion } from './mocks';
 
-describe('createPercolateQueries', () => {
+describe('createThreatQueries', () => {
   it('creates expected queries when there is a single threat mapping', () => {
-    const actual = createPercolateQueries({
+    const actual = createThreatQueries({
       ruleId: mockRuleId,
       ruleVersion: mockRuleVersion,
       threatMapping: [
@@ -150,7 +150,7 @@ describe('createPercolateQueries', () => {
   });
 
   it('creates expected queries when there is a single AND clause', () => {
-    const actual = createPercolateQueries({
+    const actual = createThreatQueries({
       ruleId: mockRuleId,
       ruleVersion: mockRuleVersion,
       threatMapping: [
@@ -348,7 +348,7 @@ describe('createPercolateQueries', () => {
   });
 
   it('creates expected queries when there are multiple threat mappings', () => {
-    const actual = createPercolateQueries({
+    const actual = createThreatQueries({
       ruleId: mockRuleId,
       ruleVersion: mockRuleVersion,
       threatIndicatorPath: 'threat.indicator',
@@ -514,7 +514,7 @@ describe('createPercolateQueries', () => {
   });
 
   it('creates expected queries when there are multiple threat mappings and AND clauses', () => {
-    const actual = createPercolateQueries({
+    const actual = createThreatQueries({
       ruleId: mockRuleId,
       ruleVersion: mockRuleVersion,
       threatMapping: [

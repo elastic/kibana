@@ -25,7 +25,7 @@ export const cleanOutdatedPercolatorQueries = async ({
     body: {
       query: {
         bool: {
-          should: [
+          must: [
             {
               match: {
                 rule_id: ruleId,
@@ -40,7 +40,6 @@ export const cleanOutdatedPercolatorQueries = async ({
               },
             },
           ],
-          minimum_should_match: 2,
         },
       },
     },

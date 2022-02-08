@@ -15,7 +15,6 @@ interface EnrichEventsOptions {
     { threat: { enrichments: ThreatEnrichment[] } },
     unknown
   >;
-  threatIndicatorPath: string;
 }
 
 export type EnrichedEvent = BaseHit<SignalSource> & {
@@ -26,46 +25,36 @@ export type EnrichedEvent = BaseHit<SignalSource> & {
   };
 };
 
-export const enrichEvents = ({ hits, percolatorResponse }: EnrichEventsOptions) => {
-  const enrichedEvents: EnrichedEvent[] = [];
-
-  const percolatorHits = percolatorResponse.hits.hits;
-
-  percolatorHits.forEach((percolatorHit) => {
+export const enrichEvents = ({ hits, percolatorResponse }: EnrichEventsOptions) =>
+  percolatorResponse.hits.hits.reduce<EnrichedEvent[]>((enrichedEvents, percolatorHit) => {
     const enrichments = percolatorHit._source?.threat?.enrichments ?? [];
 
     percolatorHit.fields?._percolator_document_slot.forEach((indexOfEvent: number) => {
       const event = hits[indexOfEvent];
-      const indexOfAlreadyEnrichedEvent = enrichedEvents.findIndex(
-        (item) => item._id === event._id
+      const indexOfEnrichedEvent = enrichedEvents.findIndex(
+        (enrichedEvent) => enrichedEvent._id === event._id
       );
-      if (indexOfAlreadyEnrichedEvent > -1) {
-        enrichedEvents[indexOfAlreadyEnrichedEvent]._source.threat.enrichments.concat(enrichments);
+      if (indexOfEnrichedEvent > -1) {
+        enrichments.forEach((enrichment) =>
+          enrichedEvents[indexOfEnrichedEvent]._source.threat.enrichments.push(enrichment)
+        );
       } else {
-        enrichedEvents.push(enrichEvent(hits[indexOfEvent], enrichments));
+        const _source = (event._source as { threat?: object }) ?? {};
+        const threat = _source.threat ?? {};
+        const existingEnrichments =
+          (threat as { enrichments?: ThreatEnrichment[] }).enrichments ?? [];
+        enrichedEvents.push({
+          ...event,
+          _source: {
+            ..._source,
+            threat: {
+              ...threat,
+              enrichments: [...existingEnrichments, ...enrichments],
+            },
+          },
+        });
       }
     });
-  });
 
-  return enrichedEvents;
-};
-
-export const enrichEvent = (
-  event: estypes.SearchHit<SignalSource>,
-  enrichments: ThreatEnrichment[]
-): EnrichedEvent => {
-  const _source = (event._source as { threat?: object }) ?? {};
-  const threat = _source.threat ?? {};
-  const existingEnrichments = (threat as { enrichments?: ThreatEnrichment[] }).enrichments ?? [];
-
-  return {
-    ...event,
-    _source: {
-      ..._source,
-      threat: {
-        ...threat,
-        enrichments: [...existingEnrichments, ...enrichments],
-      },
-    },
-  };
-};
+    return enrichedEvents;
+  }, []);

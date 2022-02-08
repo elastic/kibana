@@ -8,19 +8,19 @@
 import isEqual from 'lodash/isEqual';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { createPercolatorQueries } from './create_percolator_queries';
-import { createPercolateQueries } from './create_percolate_queries';
+import { createThreatQueries } from './create_threat_queries';
 import { DETECTION_ENGINE_MAX_PER_PAGE } from '../../../../../../common/constants';
 import { getNextPage } from '../../../signals/threat_mapping/get_next_page';
 import { emptySearchResult, searchResultOneEvent } from './mocks';
 
 jest.mock('../../../signals/threat_mapping/get_next_page');
-jest.mock('./create_percolate_queries');
+jest.mock('./create_threat_queries');
 
 const getNextPageMock = getNextPage as jest.Mock;
 getNextPageMock.mockResolvedValue(emptySearchResult.searchResult);
 
-const createPercolateQueriesMock = createPercolateQueries as jest.Mock;
-createPercolateQueriesMock.mockResolvedValue([]);
+const createThreatQueriesMock = createThreatQueries as jest.Mock;
+createThreatQueriesMock.mockResolvedValue([]);
 
 describe('createPercolatorQueries', () => {
   const abortableEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -96,7 +96,7 @@ describe('createPercolatorQueries', () => {
       threatIndicatorPath: 'threat.indicator',
     });
 
-    const createPercolateQueriesArgs = createPercolateQueriesMock.mock.calls[0][0];
+    const createThreatQueriesArgs = createThreatQueriesMock.mock.calls[0][0];
     const expectedArgs = {
       ruleId: 'abcd-efgh-jkli-mnop',
       ruleVersion: 2,
@@ -113,6 +113,6 @@ describe('createPercolatorQueries', () => {
       ],
     };
 
-    expect(isEqual(createPercolateQueriesArgs, expectedArgs)).toBe(true);
+    expect(isEqual(createThreatQueriesArgs, expectedArgs)).toBe(true);
   });
 });

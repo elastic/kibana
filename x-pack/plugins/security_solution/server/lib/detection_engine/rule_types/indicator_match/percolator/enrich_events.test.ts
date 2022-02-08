@@ -5,249 +5,159 @@
  * 2.0.
  */
 
-import isEqual from 'lodash/isEqual';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
-  createEnrichmentFromPercolatorHit,
-  enrichEvent,
-  enrichEvents,
-  getMatchedFromId,
-  mergeDuplicates,
-} from './enrich_events';
-import {
-  duplicateEventHitWithEnrichment,
-  sampleChunkedSourceEventHits,
-  sampleEnrichment,
-  sampleEnrichment2,
-  sampleEventHit,
-  sampleEventHitWithEnrichment,
-  sampleEventHitWithThreat,
-  sampleIndicatorHit,
-  sampleIndicatorHit2,
-  sampleLegacyPercolatorHit,
-  samplePercolatorHit,
-  uniqueEventHitWithEnrichment,
-} from './mocks';
+import { enrichEvents } from './enrich_events';
+import { ThreatEnrichment } from '../../../signals/threat_mapping/types';
 
 describe('enrichEvents', () => {
-  it('getMatchedFromId returns expected object', () => {
-    const expected = {
-      atomic: 'ece123ece345ece678',
-      field: 'file.hash.md5',
-      id: '13371337',
-      index: 'test-index',
-      type: 'indicator_match_rule',
-    };
-
-    const actual = getMatchedFromId(sampleIndicatorHit);
-
-    expect(isEqual(expected, actual)).toEqual(true);
-  });
-
-  it('createEnrichmentFromPercolatorHit creates the expected enrichment', () => {
-    const actualEnrichment = createEnrichmentFromPercolatorHit(
-      samplePercolatorHit,
-      'threat.indicator'
-    );
-
-    expect(actualEnrichment).toEqual({
-      matched: {
-        atomic: '61.54.61.255',
-        field: 'destination.ip',
-        id: '123',
-        index: 'threat_index',
-        type: 'indicator_match_rule',
-      },
-      indicator: {
-        reference: 'https://urlhaus.abuse.ch/url/1996847/',
-        first_seen: '2022-01-22T00:45:06.000Z',
-        provider: 'geenensp',
-        ip: '61.54.61.255',
-        type: 'url',
-        url: {
-          path: '/bin.sh',
-          extension: 'sh',
-          original: 'http://61.54.61.255:42050/bin.sh',
-          scheme: 'http',
-          port: 42050,
-          domain: '61.54.61.255',
-          full: 'http://61.54.61.255:42050/bin.sh',
-        },
-      },
-      feed: { name: "Ece's Threat Feed", dashboard_id: '3456-3456-3456' },
-    });
-  });
-
-  describe('enrichEvent', () => {
-    it('enriches event with no threats', () => {
-      const actual = enrichEvent({ ...sampleEventHit }, sampleEnrichment);
-      expect(
-        isEqual(
+  it('enriches events', () => {
+    const percolatorResponse = {
+      hits: {
+        hits: [
           {
-            ...sampleEventHit,
             _source: {
-              ...sampleEventHit._source,
               threat: {
-                enrichments: [sampleEnrichment],
-              },
-            },
-          },
-          actual
-        )
-      ).toEqual(true);
-    });
-
-    it('enriches event with threats', () => {
-      const actual = enrichEvent({ ...sampleEventHitWithThreat }, sampleEnrichment);
-
-      expect(
-        isEqual(
-          {
-            ...sampleEventHitWithThreat,
-            _source: {
-              ...sampleEventHitWithThreat._source,
-              threat: {
-                ...sampleEventHitWithThreat._source.threat,
-                enrichments: [sampleEnrichment],
-              },
-            },
-          },
-          actual
-        )
-      ).toEqual(true);
-    });
-
-    it('enriches event with enrichments', () => {
-      const actual = enrichEvent({ ...sampleEventHitWithEnrichment }, sampleEnrichment);
-      expect(
-        isEqual(
-          {
-            ...sampleEventHitWithEnrichment,
-            _source: {
-              ...sampleEventHitWithEnrichment._source,
-              threat: {
-                ...sampleEventHitWithThreat._source.threat,
                 enrichments: [
-                  ...sampleEventHitWithEnrichment._source.threat.enrichments,
-                  sampleEnrichment,
+                  {
+                    matched: {
+                      id: 'HdmY0yLld01',
+                      index: 'test-index',
+                      atomic: "Ece's computer",
+                      field: 'host.name',
+                      type: 'indicator_match_rule',
+                    },
+                    indicator: {
+                      host: {
+                        name: "Ece's computer",
+                      },
+                      url: {
+                        full: 'www.bad.com',
+                      },
+                    },
+                    feed: {
+                      name: 'threatece-feed',
+                    },
+                  },
                 ],
               },
             },
+            fields: { _percolator_document_slot: [0, 2] },
           },
-          actual
-        )
-      ).toEqual(true);
-    });
-  });
+          {
+            _source: {
+              threat: {
+                enrichments: [
+                  {
+                    matched: {
+                      id: 'JsPsb989sS',
+                      index: 'test-index',
+                      atomic: 'www.bad.com',
+                      field: 'url',
+                      type: 'indicator_match_rule',
+                    },
+                    indicator: {
+                      host: {
+                        name: "Ece's computer",
+                      },
+                      url: {
+                        full: 'www.bad.com',
+                      },
+                    },
+                    feed: {
+                      name: 'threatece-feed',
+                    },
+                  },
+                ],
+              },
+            },
+            fields: { _percolator_document_slot: [0] },
+          },
+        ],
+      },
+    } as unknown as estypes.SearchResponse<
+      { threat: { enrichments: ThreatEnrichment[] } },
+      unknown
+    >;
 
-  it('enriches events', () => {
-    const percolatorResponses = [
-      {
-        hits: {
-          hits: [
+    const enrichedEvents = enrichEvents({
+      percolatorResponse,
+      hits: [
+        {
+          _id: '1111',
+          _index: 'event-index',
+          _source: { host: { name: "Ece's computer" }, url: 'www.bad.com' },
+        },
+        {
+          _id: '222',
+          _index: 'event-index',
+          _source: { host: { name: "not Ece's computer" }, url: 'www.good.com' },
+        },
+        {
+          _id: '333',
+          _index: 'event-index',
+          _source: { host: { name: "Ece's computer" }, url: 'www.good.com' },
+        },
+      ],
+    });
+
+    expect(enrichedEvents[0]).toEqual({
+      _id: '1111',
+      _index: 'event-index',
+      _source: {
+        host: { name: "Ece's computer" },
+        url: 'www.bad.com',
+        threat: {
+          enrichments: [
             {
-              ...sampleIndicatorHit,
-              fields: { _percolator_document_slot: [0] },
+              matched: {
+                id: 'HdmY0yLld01',
+                index: 'test-index',
+                atomic: "Ece's computer",
+                field: 'host.name',
+                type: 'indicator_match_rule',
+              },
+              indicator: { host: { name: "Ece's computer" }, url: { full: 'www.bad.com' } },
+              feed: { name: 'threatece-feed' },
             },
             {
-              ...sampleIndicatorHit2,
-              fields: { _percolator_document_slot: [0] },
+              matched: {
+                id: 'JsPsb989sS',
+                index: 'test-index',
+                atomic: 'www.bad.com',
+                field: 'url',
+                type: 'indicator_match_rule',
+              },
+              indicator: { host: { name: "Ece's computer" }, url: { full: 'www.bad.com' } },
+              feed: { name: 'threatece-feed' },
             },
           ],
         },
       },
-      {
-        hits: {
-          hits: [{ ...sampleIndicatorHit2, fields: { _percolator_document_slot: [1, 2] } }],
-        },
-      },
-    ] as unknown as Array<estypes.SearchResponse<unknown, unknown>>;
-
-    const enrichedEvents = enrichEvents({
-      chunkedSourceEventHits: sampleChunkedSourceEventHits,
-      percolatorResponses,
-      threatIndicatorPath: 'threat.indicator',
     });
 
-    // was unable to compare properly even with isEqual and got phantom fails, not sure why
-    expect(JSON.stringify(enrichedEvents[0])).toEqual(
-      JSON.stringify({
-        _id: '1',
-        _index: 'events-1',
-        _source: {
-          existingMockField: 1,
-          threat: {
-            enrichments: [
-              {
-                matched: {
-                  atomic: 'ece123ece345ece678',
-                  field: 'file.hash.md5',
-                  id: '13371337',
-                  index: 'test-index',
-                  type: 'indicator_match_rule',
-                },
-                indicator: { file: { hash: { md5: 'ece123ece345ece678' } } },
+    expect(enrichedEvents[1]).toEqual({
+      _id: '333',
+      _index: 'event-index',
+      _source: {
+        host: { name: "Ece's computer" },
+        url: 'www.good.com',
+        threat: {
+          enrichments: [
+            {
+              matched: {
+                id: 'HdmY0yLld01',
+                index: 'test-index',
+                atomic: "Ece's computer",
+                field: 'host.name',
+                type: 'indicator_match_rule',
               },
-              {
-                matched: {
-                  atomic: "Ece's MacBook",
-                  field: 'destination.name',
-                  id: '99999999',
-                  index: 'test-index2',
-                  type: 'indicator_match_rule',
-                },
-              },
-            ],
-          },
+              indicator: { host: { name: "Ece's computer" }, url: { full: 'www.bad.com' } },
+              feed: { name: 'threatece-feed' },
+            },
+          ],
         },
-      })
-    );
-
-    expect(JSON.stringify(enrichedEvents[1])).toEqual(
-      JSON.stringify({
-        _id: '1002',
-        _index: 'events-2',
-        _source: {
-          existingMockField: 5,
-          threat: {
-            enrichments: [
-              {
-                matched: {
-                  atomic: "Ece's MacBook",
-                  field: 'destination.name',
-                  id: '99999999',
-                  index: 'test-index2',
-                  type: 'indicator_match_rule',
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
-
-    expect(JSON.stringify(enrichedEvents[2])).toEqual(
-      JSON.stringify({
-        _id: '1003',
-        _index: 'events-2',
-        _source: {
-          existingMockField: 6,
-          threat: {
-            enrichments: [
-              {
-                matched: {
-                  atomic: "Ece's MacBook",
-                  field: 'destination.name',
-                  id: '99999999',
-                  index: 'test-index2',
-                  type: 'indicator_match_rule',
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
+      },
+    });
   });
 });

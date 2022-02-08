@@ -7,6 +7,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IRuleDataClient } from '../../../../../../../rule_registry/server';
 import { SignalSource } from '../../../signals/types';
+import { ThreatEnrichment } from '../../../signals/threat_mapping/types';
 
 interface PercolateSourceEventsOptions {
   hits: Array<estypes.SearchHit<SignalSource>>;
@@ -56,6 +57,9 @@ export const percolateSourceEvents = async ({
   return {
     success,
     errors,
-    percolatorResponse: percolatorResponse as estypes.SearchResponse<unknown, unknown>,
+    percolatorResponse: percolatorResponse as estypes.SearchResponse<
+      { threat: { enrichments: ThreatEnrichment[] } },
+      unknown
+    >,
   };
 };

@@ -32,12 +32,7 @@ describe('persistThreatQueries', () => {
       mockPercolatorRuleDataClient.getWriter({ namespace: mockSpaceId }).bulk.mock.calls[0][0]
     ).toEqual({
       body: [
-        {
-          create: {
-            _index: '.percolator.alerts-security.alertseces-space',
-            _id: '123__SEP__threat_index__SEP__source.ip__SEP__source.ip',
-          },
-        },
+        { create: { _index: '.percolator.alerts-security.alertseces-space', _id: 'test-id-0' } },
         {
           query: {
             bool: {
@@ -49,19 +44,29 @@ describe('persistThreatQueries', () => {
               minimum_should_match: 1,
             },
           },
-          '@timestamp': '2020-09-09T21:59:13Z',
-          host: { name: 'host-1', ip: '192.168.0.0.1' },
-          source: { ip: '127.0.0.1', port: 1 },
-          destination: { ip: '127.0.0.1', port: 1 },
+          threat: {
+            enrichments: [
+              {
+                matched: {
+                  id: '123',
+                  index: 'test-indicators',
+                  atomic: '127.0.0.1',
+                  field: 'source.ip',
+                  type: 'indicator_match_rule',
+                },
+                indicator: {
+                  host: { name: 'host-1', ip: '192.168.0.0.1' },
+                  source: { ip: '127.0.0.1', port: 1 },
+                  destination: { ip: '127.0.0.1', port: 1 },
+                },
+                feed: { name: 'threatquotient' },
+              },
+            ],
+          },
           rule_id: 'abcd-defg-hijk-lmno',
           rule_version: 1337,
         },
-        {
-          create: {
-            _index: '.percolator.alerts-security.alertseces-space',
-            _id: '123__SEP__threat_index__SEP__destination.ip__SEP__source.ip',
-          },
-        },
+        { create: { _index: '.percolator.alerts-security.alertseces-space', _id: 'test-id-1' } },
         {
           query: {
             bool: {
@@ -73,10 +78,25 @@ describe('persistThreatQueries', () => {
               minimum_should_match: 1,
             },
           },
-          '@timestamp': '2020-09-09T21:59:13Z',
-          host: { name: 'host-1', ip: '192.168.0.0.1' },
-          source: { ip: '127.0.0.1', port: 1 },
-          destination: { ip: '127.0.0.1', port: 1 },
+          threat: {
+            enrichments: [
+              {
+                matched: {
+                  id: '123',
+                  index: 'test-indicators',
+                  atomic: '127.0.0.1',
+                  field: 'destination.ip',
+                  type: 'indicator_match_rule',
+                },
+                indicator: {
+                  host: { name: 'host-1', ip: '192.168.0.0.1' },
+                  source: { ip: '127.0.0.1', port: 1 },
+                  destination: { ip: '127.0.0.1', port: 1 },
+                },
+                feed: { name: 'threatquotient' },
+              },
+            ],
+          },
           rule_id: 'abcd-defg-hijk-lmno',
           rule_version: 1337,
         },
