@@ -69,7 +69,7 @@ export const parsePoliciesAndFilterToKql = ({
   kuery?: string;
 }): string | undefined => {
   if (policies?.length === 0 && excludedPolicies?.length === 0) {
-    return kuery;
+    return kuery ? kuery : undefined;
   }
 
   const policiesKQL = parsePoliciesToKQL(policies, excludedPolicies);

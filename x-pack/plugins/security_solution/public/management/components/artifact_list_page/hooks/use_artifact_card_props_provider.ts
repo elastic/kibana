@@ -18,8 +18,11 @@ import { getLoadPoliciesError } from '../../../common/translations';
 import { useToasts } from '../../../../common/lib/kibana';
 import { useSetUrlParams } from './use_set_url_params';
 
+type CardActionType = 'edit' | 'delete';
+
 export interface UseArtifactCardPropsProviderProps {
   items: ExceptionListItemSchema[];
+  onAction: (action: { type: CardActionType; item: ExceptionListItemSchema }) => void;
   cardActionEditLabel: string;
   cardActionDeleteLabel: string;
   dataTestSubj?: string;
@@ -35,6 +38,7 @@ export type ArtifactCardPropsProvider = (
  */
 export const useArtifactCardPropsProvider = ({
   items,
+  onAction,
   cardActionDeleteLabel,
   cardActionEditLabel,
   dataTestSubj,
@@ -67,7 +71,7 @@ export const useArtifactCardPropsProvider = ({
           {
             icon: 'controlsHorizontal',
             onClick: () => {
-              setUrlParams({ show: 'edit', id: artifactItem.id });
+              onAction({ type: 'edit', item: artifactItem });
             },
             'data-test-subj': getTestId('cardEditAction'),
             children: cardActionEditLabel,
@@ -75,7 +79,7 @@ export const useArtifactCardPropsProvider = ({
           {
             icon: 'trash',
             onClick: () => {
-              // FIXME:PT implement delete individual item
+              onAction({ type: 'delete', item: artifactItem });
             },
             'data-test-subj': getTestId('cardDeleteAction'),
             children: cardActionDeleteLabel,
@@ -94,7 +98,7 @@ export const useArtifactCardPropsProvider = ({
     getTestId,
     cardActionEditLabel,
     cardActionDeleteLabel,
-    setUrlParams,
+    onAction,
   ]);
 
   return useCallback(

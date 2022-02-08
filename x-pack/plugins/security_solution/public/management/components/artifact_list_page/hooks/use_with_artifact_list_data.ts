@@ -7,7 +7,7 @@
 
 import type { QueryObserverResult } from 'react-query';
 import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pagination } from '@elastic/eui';
 import { useQuery } from 'react-query';
 import type { ServerApiError } from '../../../../common/types';
@@ -152,10 +152,13 @@ export const useWithArtifactListData = (
     page,
   ]);
 
-  return {
-    isPageInitializing,
-    doesDataExist: doesDataExist ?? false,
-    uiPagination,
-    ...listDataRequest,
-  };
+  return useMemo(
+    () => ({
+      isPageInitializing,
+      doesDataExist: doesDataExist ?? false,
+      uiPagination,
+      ...listDataRequest,
+    }),
+    [doesDataExist, isPageInitializing, listDataRequest, uiPagination]
+  );
 };

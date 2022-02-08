@@ -23,14 +23,13 @@ import { AutoFocusButton } from '../../../../common/components/autofocus_button/
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import {
   getPolicyIdsFromArtifact,
-  isArtifactByPolicy,
+  isArtifactGlobal,
 } from '../../../../../common/endpoint/service/artifacts';
 
 export const ARTIFACT_DELETE_LABELS = Object.freeze({
   deleteModalTitle: (itemName: string): string =>
     i18n.translate('xpack.securitySolution.artifactListPage.deleteModalTitle', {
-      // FIXME:PT adjust all `id` in this set of labels
-      defaultMessage: 'Delete "itemName"',
+      defaultMessage: 'Delete {itemName}',
       values: { itemName },
     }),
 
@@ -46,7 +45,11 @@ export const ARTIFACT_DELETE_LABELS = Object.freeze({
       defaultMessage:
         'Deleting this entry will remove it from {count} associated {count, plural, one {policy} other {policies}}.',
       values: {
-        count: isArtifactByPolicy(item) ? 'all' : getPolicyIdsFromArtifact(item).length,
+        count: isArtifactGlobal(item)
+          ? i18n.translate('xpack.securitySolution.artifactListPage.deleteModalImpactInfoAll', {
+              defaultMessage: 'all',
+            })
+          : getPolicyIdsFromArtifact(item).length,
       },
     });
   },

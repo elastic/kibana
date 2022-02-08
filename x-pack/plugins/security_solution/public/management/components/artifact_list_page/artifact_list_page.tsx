@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -21,7 +21,10 @@ import { ArtifactListPageLabels, artifactListPageLabels } from './translations';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
 import { SearchExceptions } from '../search_exceptions';
-import { useArtifactCardPropsProvider } from './hooks/use_artifact_card_props_provider';
+import {
+  useArtifactCardPropsProvider,
+  UseArtifactCardPropsProviderProps,
+} from './hooks/use_artifact_card_props_provider';
 import { NoDataEmptyState } from './components/no_data_empty_state';
 import { ArtifactFlyoutProps, MaybeArtifactFlyout } from './components/artifact_flyout';
 import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
@@ -81,8 +84,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       urlParams: { filter },
     } = useUrlParams<ArtifactListPageUrlParams>();
 
-    const itemToDelete = false;
-
     const {
       isPageInitializing,
       isLoading,
@@ -96,6 +97,10 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       return listDataResponse?.data ?? [];
     }, [listDataResponse?.data]);
 
+    const [selectedItemForDelete, setSelectedItemForDelete] = useState<
+      undefined | ExceptionListItemSchema
+    >(undefined);
+
     const labels = useMemo<typeof artifactListPageLabels>(() => {
       return {
         ...artifactListPageLabels,
@@ -103,8 +108,25 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       };
     }, [_labels]);
 
+    const handleOnCardActionClick = useCallback<UseArtifactCardPropsProviderProps['onAction']>(
+      ({ type, item }) => {
+        switch (type) {
+          case 'edit':
+            // FIXME:PT store item to edit and pass it to flyout
+            setUrlParams({ show: 'edit', id: item.id });
+            break;
+
+          case 'delete':
+            setSelectedItemForDelete(item);
+            break;
+        }
+      },
+      [setUrlParams]
+    );
+
     const handleCardProps = useArtifactCardPropsProvider({
       items,
+      onAction: handleOnCardActionClick,
       cardActionDeleteLabel: labels.cardActionDeleteLabel,
       cardActionEditLabel: labels.cardActionEditLabel,
       dataTestSubj: getTestId('card'),
@@ -129,12 +151,17 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const handleOnSearch = useCallback(
       (filterValue: string, includedPolicies: string) => {
         setUrlParams({
-          filter: filterValue,
-          included_policies: includedPolicies,
+          // `undefined` will drop the param from the url
+          filter: filterValue.trim() === '' ? undefined : filterValue,
+          included_policies: includedPolicies.trim() === '' ? undefined : includedPolicies,
         });
       },
       [setUrlParams]
     );
+
+    const handleArtifactDeleteModalOnCancel = useCallback(() => {
+      setSelectedItemForDelete(undefined);
+    }, []);
 
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
@@ -172,13 +199,13 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           data-test-subj={getTestId('flyout')}
         />
 
-        {itemToDelete && (
+        {selectedItemForDelete && (
           <ArtifactDeleteModal
-            item={itemToDelete}
+            item={selectedItemForDelete}
             labels={labels}
             data-test-subj={getTestId('deleteModal')}
             onSuccess={() => {}} // FIXME:PT handle delete
-            onCancel={() => {}} // FIXME:PT handle cancel
+            onCancel={handleArtifactDeleteModalOnCancel}
           />
         )}
 

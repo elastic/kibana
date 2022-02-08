@@ -7,10 +7,12 @@
 
 import { useHistory, useLocation } from 'react-router-dom';
 import { useCallback } from 'react';
+import { pickBy } from 'lodash';
 import { useUrlParams } from './use_url_params';
 
 // FIXME:PT delete/change once we get the common hook from @parkiino PR
 export const useSetUrlParams = (): ((
+  /** Any param whose value is `undefined` will be removed from the URl when in append mode */
   params: Record<string, string | number | null | undefined>,
   replace?: boolean
 ) => void) => {
@@ -22,7 +24,11 @@ export const useSetUrlParams = (): ((
     (params, replace = false) => {
       history.push({
         ...location,
-        search: toUrlParams(replace ? params : { ...currentUrlParams, ...params }),
+        search: toUrlParams(
+          replace
+            ? params
+            : pickBy({ ...currentUrlParams, ...params }, (value) => value !== undefined)
+        ),
       });
     },
     [currentUrlParams, history, location, toUrlParams]
