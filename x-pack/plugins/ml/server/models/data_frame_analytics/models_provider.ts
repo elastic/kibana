@@ -55,7 +55,7 @@ export function modelsProvider(
       );
 
       try {
-        const { body } = await client.asCurrentUser.ingest.getPipeline();
+        const body = await client.asCurrentUser.ingest.getPipeline();
 
         for (const [pipelineName, pipelineDefinition] of Object.entries(body)) {
           const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
