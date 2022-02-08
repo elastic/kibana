@@ -7,28 +7,22 @@
 
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert } from './alert';
+import { getRecoveredAlerts } from '../lib';
 
 export interface AlertFactoryDoneUtils<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > {
-  getRecoveredAlerts?: () => AlertsMap<InstanceState, InstanceContext>;
+  getRecoveredAlerts?: () => Record<string, Alert<InstanceState, InstanceContext>>;
 }
-
-export type AlertsMap<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string = never
-> = Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
 
 export interface CreateAlertFactoryOpts<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string
 > {
-  alerts: AlertsMap<InstanceState, InstanceContext, ActionGroupIds>;
-  setsRecoveryContext: boolean;
-  getRecoveredAlerts: () => AlertsMap<InstanceState, InstanceContext>;
+  alerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
+  canSetRecoveryContext?: boolean;
 }
 
 export function createAlertFactory<
@@ -37,14 +31,15 @@ export function createAlertFactory<
   ActionGroupIds extends string
 >({
   alerts,
-  setsRecoveryContext,
-  getRecoveredAlerts,
+  canSetRecoveryContext = false,
 }: CreateAlertFactoryOpts<InstanceState, InstanceContext, ActionGroupIds>) {
+  // Keep track of which alerts we started with so we can determine which have recovered
+  const initialAlertIds = new Set(Object.keys(alerts));
   let isDone = false;
   return {
     create: (id: string): Alert<InstanceState, InstanceContext, ActionGroupIds> => {
       if (isDone) {
-        throw new Error(`Can't create new alerts after calling done().`);
+        throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
       if (!alerts[id]) {
         alerts[id] = new Alert<InstanceState, InstanceContext, ActionGroupIds>();
@@ -54,9 +49,13 @@ export function createAlertFactory<
     },
     done: (): AlertFactoryDoneUtils<InstanceState, InstanceContext> => {
       isDone = true;
-      return setsRecoveryContext
+      return canSetRecoveryContext === true
         ? {
-            getRecoveredAlerts: () => getRecoveredAlerts(),
+            getRecoveredAlerts: () =>
+              getRecoveredAlerts(alerts, initialAlertIds) as Record<
+                string,
+                Alert<InstanceState, InstanceContext>
+              >,
           }
         : {};
     },

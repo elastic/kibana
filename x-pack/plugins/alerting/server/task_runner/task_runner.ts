@@ -15,7 +15,7 @@ import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
-import { Alert as CreatedAlert, createAlertFactory, AlertsMap } from '../alert';
+import { Alert as CreatedAlert, createAlertFactory } from '../alert';
 import {
   validateRuleTypeParams,
   executionStatusFromState,
@@ -66,6 +66,7 @@ import {
   Event,
 } from '../lib/create_alert_event_log_record_object';
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
+import { getRecoveredAlerts } from '../lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -364,8 +365,7 @@ export class TaskRunner<
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >({
               alerts,
-              setsRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-              getRecoveredAlerts: getRecoveredAlertsFn(alerts, originalAlertIds),
+              canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
             }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
@@ -448,16 +448,14 @@ export class TaskRunner<
     logActiveAndRecoveredAlerts({
       logger: this.logger,
       activeAlerts: alertsWithScheduledActions,
-      recoveredAlerts: recoveredAlerts as Dictionary<
-        CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>
-      >,
+      recoveredAlerts,
       ruleLabel,
     });
 
     trackAlertDurations({
       originalAlerts,
       currentAlerts: alertsWithScheduledActions,
-      recoveredAlerts: recoveredAlerts as Dictionary<CreatedAlert<InstanceState, InstanceContext>>,
+      recoveredAlerts,
     });
 
     if (this.shouldLogAndScheduleActionsForAlerts()) {
@@ -1238,33 +1236,6 @@ function logActiveAndRecoveredAlerts<
       )}`
     );
   }
-}
-
-function getRecoveredAlertsFn<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
->(
-  alerts: AlertsMap<InstanceState, InstanceContext, RecoveryActionGroupId>,
-  originalAlertIds: Set<string>
-) {
-  return () => getRecoveredAlerts(alerts, originalAlertIds);
-}
-
-function getRecoveredAlerts<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
->(
-  alerts: AlertsMap<InstanceState, InstanceContext, RecoveryActionGroupId>,
-  originalAlertIds: Set<string>
-) {
-  const recoveredAlerts = pickBy(
-    alerts,
-    (alert: CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>, id) =>
-      !alert.hasScheduledActions() && originalAlertIds.has(id)
-  );
-  return recoveredAlerts as AlertsMap<InstanceState, InstanceContext, RecoveryActionGroupId>;
 }
 
 /**

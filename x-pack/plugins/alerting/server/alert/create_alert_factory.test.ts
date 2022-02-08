@@ -21,8 +21,6 @@ describe('createAlertFactory()', () => {
   test('creates new alerts for ones not passed in', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
-      setsRecoveryContext: false,
-      getRecoveredAlerts: () => ({}),
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -42,8 +40,6 @@ describe('createAlertFactory()', () => {
       alerts: {
         '1': alert,
       },
-      setsRecoveryContext: false,
-      getRecoveredAlerts: () => ({}),
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -65,8 +61,6 @@ describe('createAlertFactory()', () => {
     const alerts = {};
     const alertFactory = createAlertFactory({
       alerts,
-      setsRecoveryContext: false,
-      getRecoveredAlerts: () => ({}),
     });
     alertFactory.create('1');
     expect(alerts).toMatchInlineSnapshot(`
@@ -82,8 +76,6 @@ describe('createAlertFactory()', () => {
   test('throws error when creating alerts after done() is called', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
-      setsRecoveryContext: false,
-      getRecoveredAlerts: () => ({}),
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -97,14 +89,15 @@ describe('createAlertFactory()', () => {
 
     expect(() => {
       alertFactory.create('2');
-    }).toThrowErrorMatchingInlineSnapshot(`"Can't create new alerts after calling done()."`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Can't create new alerts after calling done() in AlertsFactory."`
+    );
   });
 
   test('returns recovery context functions when setsRecoveryContext is true', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
-      setsRecoveryContext: true,
-      getRecoveredAlerts: jest.fn().mockReturnValue({ foo: 'bar' }),
+      canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -116,14 +109,12 @@ describe('createAlertFactory()', () => {
 
     const { getRecoveredAlerts } = alertFactory.done();
     expect(getRecoveredAlerts).toBeDefined();
-    expect(getRecoveredAlerts!()).toEqual({ foo: 'bar' });
   });
 
   test('returns undefined recovery context functions when setsRecoveryContext is false', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
-      setsRecoveryContext: false,
-      getRecoveredAlerts: jest.fn().mockReturnValue({ foo: 'bar' }),
+      canSetRecoveryContext: false,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
