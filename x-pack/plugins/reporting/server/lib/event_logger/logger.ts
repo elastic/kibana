@@ -37,31 +37,29 @@ export interface IReportingEventLogger {
 
 const getEventLog = (logger: LevelLogger) => ({
   getLogger(lProperties: Partial<LogMeta>): IReportingEventLogger {
-    return (function () {
-      let start: Date | undefined;
-      let end: Date | undefined;
-      let duration: number | undefined;
+    let start: Date | undefined;
+    let end: Date | undefined;
+    let duration: number | undefined;
 
-      return {
-        logEvent(message: string, properties: LogMeta) {
-          if (start && !end) {
-            end = start ? new Date() : undefined;
-          }
-          duration = end && start ? end.valueOf() - start.valueOf() : undefined;
-          const logMeta: Partial<LogMeta> = {
-            event: { duration, start: start?.toISOString(), end: end?.toISOString() },
-          };
-          const mProperties: LogMeta = deepMerge(lProperties, logMeta);
-          logger.debug(message, ['events'], deepMerge(mProperties, properties));
-        },
-        startTiming() {
-          start = new Date();
-        },
-        stopTiming() {
-          end = new Date();
-        },
-      };
-    })();
+    return {
+      logEvent(message: string, properties: LogMeta) {
+        if (start && !end) {
+          end = start ? new Date() : undefined;
+        }
+        duration = end && start ? end.valueOf() - start.valueOf() : undefined;
+        const logMeta: Partial<LogMeta> = {
+          event: { duration, start: start?.toISOString(), end: end?.toISOString() },
+        };
+        const mProperties: LogMeta = deepMerge(lProperties, logMeta);
+        logger.debug(message, ['events'], deepMerge(mProperties, properties));
+      },
+      startTiming() {
+        start = new Date();
+      },
+      stopTiming() {
+        end = new Date();
+      },
+    };
   },
 });
 
