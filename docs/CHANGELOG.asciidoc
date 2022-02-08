@@ -108,7 +108,7 @@ For the Elastic Security 8.0.0 release information, refer to {security-guide}/re
 [[fixes-v8.0.0]]
 ==== Bug Fixes
 APM::
-Restrict aggregated tx metrics search to date range {kibana-pull}123445[#123445]
+Restrict aggregated transaction metrics search to date range {kibana-pull}123445[#123445]
 
 Elastic Security::
 For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
