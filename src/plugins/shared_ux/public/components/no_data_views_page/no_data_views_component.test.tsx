@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helper';
 import { EuiButton } from '@elastic/eui';
 import { NoDataViewsComponent } from './no_data_views_component';
 

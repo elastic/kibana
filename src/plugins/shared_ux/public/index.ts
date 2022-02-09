@@ -17,5 +17,4 @@ export function plugin() {
 
 export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
 export { ExitFullScreenButton, LazyExitFullScreenButton } from './components';
-export { EmptyStatePage } from './components/empty_state_page';
 export { NoDataViewsPage } from './components/no_data_views_page';
