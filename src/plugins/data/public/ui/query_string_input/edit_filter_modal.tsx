@@ -653,7 +653,7 @@ export function EditFilterModal({
   };
 
   return (
-    <EuiModal maxWidth={800} onClose={onCancel} className="kbnQueryBar--addFilterModal">
+    <EuiModal style={{minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>

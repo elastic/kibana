@@ -619,7 +619,7 @@ export function AddFilterModal({
   };
 
   return (
-    <EuiModal maxWidth={800} onClose={onCancel} className="kbnQueryBar--addFilterModal">
+    <EuiModal style={{minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
@@ -662,7 +662,7 @@ export function AddFilterModal({
             <EuiFlexItem>
               <EuiFormRow
                 label={i18n.translate('data.filter.filterEditor.createCustomLabelInputLabel', {
-                  defaultMessage: 'Label (optional)',
+                  defaultMessage: 'Save as (optional)',
                 })}
                 display="columnCompressed"
               >
