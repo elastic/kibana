@@ -76,7 +76,8 @@ For more information, refer to {ref}/security-privileges.html[Security privilege
 
 .. Click *Customize*, then click *Analytics*.
 
-.. Next to the applications you want to grant reporting privileges, click *All* or *Customize*.
+.. Next each application listed, click *All* or click *Read*. You will need to enable the *Customize sub-feature
+privileges* checkbox to grant reporting privileges if you select *Read*.
 +
 If you’ve followed the example above, you should end up on a screen defining your customized privileges that looks like this:
 [role="screenshot"]
