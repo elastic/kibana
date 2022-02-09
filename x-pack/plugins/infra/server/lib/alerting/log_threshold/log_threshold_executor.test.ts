@@ -436,6 +436,7 @@ describe('Log threshold executor', () => {
               group: null,
               matchingDocuments: 10,
               isRatio: false,
+              reason: '10 log entries in the last 5 mins. Alert when (more than 5).',
             },
           },
         ]);
@@ -501,6 +502,8 @@ describe('Log threshold executor', () => {
               group: 'i-am-a-host-name-1, i-am-a-dataset-1',
               matchingDocuments: 10,
               isRatio: false,
+              reason:
+                '10 log entries in the last 5 mins for i-am-a-host-name-1, i-am-a-dataset-1. Alert when (more than 5).',
             },
           },
         ]);
