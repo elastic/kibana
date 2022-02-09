@@ -153,6 +153,7 @@ function DefaultEditorAggGroup({
                 index={index}
                 draggableId={`agg_group_dnd_${groupName}_${agg.id}`}
                 customDragHandle={true}
+                disableInteractiveElementBlocking // Allows button to be drag handle
               >
                 {(provided) => (
                   <DefaultEditorAgg
