@@ -179,6 +179,7 @@ export class ExceptionsListApiClient {
     return this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       query: {
         id,
+        item_id: itemId,
         namespace_type: 'agnostic',
       },
     });
@@ -220,6 +221,7 @@ export class ExceptionsListApiClient {
     return this.http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       query: {
         id,
+        item_id: itemId,
         namespace_type: 'agnostic',
       },
     });

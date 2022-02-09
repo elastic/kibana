@@ -9,6 +9,7 @@ import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types'
 import { useMutation, UseMutationResult } from 'react-query';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import type { HttpFetchError } from 'kibana/public';
 import { useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
@@ -44,11 +45,13 @@ export const useArtifactDeleteItem = (
 
   const mutation = useMutation(
     async (item: ExceptionListItemSchema) => {
-      return apiClient.delete(item.id);
+      return apiClient.delete(item.item_id);
     },
     {
-      onError: (error: Error, item) => {
-        toasts.addDanger(labels.deleteActionFailure(item.name, error.message));
+      onError: (error: HttpFetchError, item) => {
+        toasts.addDanger(
+          labels.deleteActionFailure(item.name, error.body?.message || error.message)
+        );
       },
       onSuccess: (response) => {
         toasts.addSuccess(labels.deleteActionSuccess(response.name));

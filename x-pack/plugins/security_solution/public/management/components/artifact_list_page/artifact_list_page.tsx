@@ -65,7 +65,7 @@ export interface ArtifactListPageProps {
   searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;
   /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
-  labels?: Partial<ArtifactListPageLabels>;
+  labels?: Partial<ArtifactListPageLabels>; // FIXME:PT alter the type to list required labels (those that have the artifact name in it)
   'data-test-subj'?: string;
 }
 
