@@ -23,7 +23,7 @@ import { useKibana } from '../../../../../../plugins/kibana_react/public';
 interface ScriptedFieldsTableProps {
   indexPattern: DataView;
   fieldFilter?: string;
-  scriptedFieldLanguageFilter?: string;
+  scriptedFieldLanguageFilter: string[];
   helpers: {
     redirectToRoute: Function;
     getRouteHref?: Function;
@@ -92,9 +92,9 @@ class ScriptedFields extends Component<ScriptedFieldsTableProps, ScriptedFieldsT
 
     let languageFilteredFields = fields;
 
-    if (scriptedFieldLanguageFilter) {
-      languageFilteredFields = fields.filter(
-        (field) => field.lang === this.props.scriptedFieldLanguageFilter
+    if (scriptedFieldLanguageFilter.length) {
+      languageFilteredFields = fields.filter((field) =>
+        scriptedFieldLanguageFilter.includes(field.lang)
       );
     }
 
