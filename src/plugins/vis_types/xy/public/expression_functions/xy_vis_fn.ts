@@ -232,10 +232,21 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       }),
       multi: true,
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('visTypeXy.function.args.ariaLabel.help', {
+        defaultMessage: 'Specifies the aria label of the xy chart',
+      }),
+      required: false,
+    },
   },
   fn(context, args, handlers) {
     const visType = args.chartType;
     const visConfig = {
+      ariaLabel:
+        args.ariaLabel ??
+        (handlers.variables?.embeddableTitle as string) ??
+        handlers.getExecutionContext?.()?.description,
       type: args.chartType,
       addLegend: args.addLegend,
       addTooltip: args.addTooltip,
