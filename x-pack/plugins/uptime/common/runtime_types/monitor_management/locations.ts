@@ -29,6 +29,26 @@ export const ServiceLocationCodec = t.interface({
   url: t.string,
 });
 
+export const ServiceLocationErrors = t.array(
+  t.intersection([
+    t.interface({
+      locationId: t.string,
+      error: t.interface({
+        reason: t.string,
+        status: t.number,
+      }),
+    }),
+    t.partial({
+      failed_monitors: t.array(
+        t.interface({
+          id: t.string,
+          message: t.string,
+        })
+      ),
+    }),
+  ])
+);
+
 export const ServiceLocationsCodec = t.array(ServiceLocationCodec);
 
 export const isServiceLocationInvalid = (location: ServiceLocation) =>
@@ -42,3 +62,4 @@ export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
 export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;
 export type ServiceLocations = t.TypeOf<typeof ServiceLocationsCodec>;
 export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;
+export type ServiceLocationErrors = t.TypeOf<typeof ServiceLocationErrors>;

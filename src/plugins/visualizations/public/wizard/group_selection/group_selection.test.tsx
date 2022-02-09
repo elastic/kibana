@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
 import { GroupSelection } from './group_selection';
 import { DocLinksStart } from '../../../../../core/public';

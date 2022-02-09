@@ -6,19 +6,20 @@
  */
 
 import * as React from 'react';
-
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { AlertsList } from './alerts_list';
-import { RuleTypeModel, ValidationResult } from '../../../../types';
+import { AlertsList, percentileFields } from './alerts_list';
+import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
 import {
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
   parseDuration,
 } from '../../../../../../alerting/common';
+import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
+
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
@@ -178,9 +179,25 @@ describe('alerts_list component with items', () => {
       },
       monitoring: {
         execution: {
-          history: [{ success: true }, { success: true }, { success: false }],
+          history: [
+            {
+              success: true,
+              duration: 1000000,
+            },
+            {
+              success: true,
+              duration: 200000,
+            },
+            {
+              success: false,
+              duration: 300000,
+            },
+          ],
           calculated_metrics: {
             success_ratio: 0.66,
+            p50: 200000,
+            p95: 300000,
+            p99: 300000,
           },
         },
       },
@@ -209,9 +226,21 @@ describe('alerts_list component with items', () => {
       },
       monitoring: {
         execution: {
-          history: [{ success: true }, { success: true }],
+          history: [
+            {
+              success: true,
+              duration: 100000,
+            },
+            {
+              success: true,
+              duration: 500000,
+            },
+          ],
           calculated_metrics: {
             success_ratio: 1,
+            p50: 0,
+            p95: 100000,
+            p99: 500000,
           },
         },
       },
@@ -240,7 +269,7 @@ describe('alerts_list component with items', () => {
       },
       monitoring: {
         execution: {
-          history: [{ success: false }],
+          history: [{ success: false, duration: 100 }],
           calculated_metrics: {
             success_ratio: 0,
           },
@@ -431,7 +460,7 @@ describe('alerts_list component with items', () => {
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(
-      'The length of time it took for the rule to run.'
+      'The length of time it took for the rule to run (mm:ss).'
     );
 
     // Status column
@@ -464,6 +493,7 @@ describe('alerts_list component with items', () => {
     const ratios = wrapper.find(
       'EuiTableRowCell[data-test-subj="alertsTableCell-successRatio"] span[data-test-subj="successRatio"]'
     );
+
     mockedAlertsData.forEach((rule, index) => {
       if (rule.monitoring) {
         expect(ratios.at(index).text()).toEqual(
@@ -473,6 +503,138 @@ describe('alerts_list component with items', () => {
         expect(ratios.at(index).text()).toEqual(`N/A`);
       }
     });
+
+    // P50 column is rendered initially
+    expect(
+      wrapper.find(`[data-test-subj="alertsTable-${Percentiles.P50}ColumnName"]`).exists()
+    ).toBeTruthy();
+
+    let percentiles = wrapper.find(
+      `EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
+    );
+
+    mockedAlertsData.forEach((rule, index) => {
+      if (typeof rule.monitoring?.execution.calculated_metrics.p50 === 'number') {
+        // Ensure the table cells are getting the correct values
+        expect(percentiles.at(index).text()).toEqual(
+          getFormattedDuration(rule.monitoring.execution.calculated_metrics.p50)
+        );
+        // Ensure the tooltip is showing the correct content
+        expect(
+          wrapper
+            .find(
+              'EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] [data-test-subj="rule-duration-format-tooltip"]'
+            )
+            .at(index)
+            .props().content
+        ).toEqual(getFormattedMilliseconds(rule.monitoring.execution.calculated_metrics.p50));
+      } else {
+        expect(percentiles.at(index).text()).toEqual('N/A');
+      }
+    });
+
+    // Click column to sort by P50
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P50}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P50],
+          direction: 'asc',
+        },
+      })
+    );
+
+    // Click column again to reverse sort by P50
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P50}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P50],
+          direction: 'desc',
+        },
+      })
+    );
+
+    // Hover over percentile selection button
+    wrapper
+      .find('[data-test-subj="percentileSelectablePopover-iconButton"]')
+      .first()
+      .simulate('click');
+
+    jest.runAllTimers();
+    wrapper.update();
+
+    // Percentile Selection
+    expect(
+      wrapper.find('[data-test-subj="percentileSelectablePopover-selectable"]').exists()
+    ).toBeTruthy();
+
+    const percentileOptions = wrapper.find(
+      '[data-test-subj="percentileSelectablePopover-selectable"] li'
+    );
+    expect(percentileOptions.length).toEqual(3);
+
+    // Select P95
+    percentileOptions.at(1).simulate('click');
+
+    jest.runAllTimers();
+    wrapper.update();
+
+    expect(
+      wrapper.find(`[data-test-subj="alertsTable-${Percentiles.P95}ColumnName"]`).exists()
+    ).toBeTruthy();
+
+    percentiles = wrapper.find(
+      `EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
+    );
+
+    mockedAlertsData.forEach((rule, index) => {
+      if (typeof rule.monitoring?.execution.calculated_metrics.p95 === 'number') {
+        expect(percentiles.at(index).text()).toEqual(
+          getFormattedDuration(rule.monitoring.execution.calculated_metrics.p95)
+        );
+      } else {
+        expect(percentiles.at(index).text()).toEqual('N/A');
+      }
+    });
+
+    // Click column to sort by P95
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P95}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P95],
+          direction: 'asc',
+        },
+      })
+    );
+
+    // Click column again to reverse sort by P95
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P95}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P95],
+          direction: 'desc',
+        },
+      })
+    );
 
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();

@@ -23,6 +23,7 @@ import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plu
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 import { collectApiStatsForPlugin } from './stats';
 import { countEslintDisableLine, EslintDisableCounts } from './count_eslint_disable';
+import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -248,6 +249,7 @@ export function runBuildApiDocsCli() {
           log.info(`Plugin ${pluginApi.id} has no public API.`);
         }
         writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+        writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
         writeDeprecationDocByApi(
           outputFolder,
           referencedDeprecations,

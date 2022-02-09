@@ -8,11 +8,11 @@
 
 export type {
   DataPublicPluginStart,
-  IndexPatternSpec,
   GetFieldsOptions,
   IndexPatternAggRestrictions,
 } from '../../data/public';
 export { IndexPattern, IndexPatternField } from '../../data/public';
+export type { DataViewSpec } from '../../data_views/public';
 export { DataView } from '../../data_views/public';
 
 export {
@@ -28,6 +28,7 @@ export type {
   ValidationFunc,
   FieldConfig,
   ValidationConfig,
+  ValidationFuncArg,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
 export {
   useForm,
