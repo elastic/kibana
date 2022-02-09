@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import moment from 'moment';
 import {
   EuiBasicTable,
@@ -36,7 +36,7 @@ export function RulesPage() {
     notifications: { toasts },
   } = core;
   const [rules, setRules] = useState<RuleState>({ data: [] });
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   async function loadObservabilityRules() {
     try {
@@ -75,8 +75,17 @@ export function RulesPage() {
   }
 
   const statuses = Object.values(RuleStatus);
-
-  const popOverButton = <EuiBadge>Enabled</EuiBadge>;
+  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const popOverButton = (
+    <EuiBadge
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={togglePopover}
+      onClickAriaLabel="Change status"
+    >
+      Enabled
+    </EuiBadge>
+  );
 
   const panelItems = statuses.map((status) => (
     <EuiContextMenuItem>
@@ -129,7 +138,7 @@ export function RulesPage() {
       }),
       render: (_enabled: boolean) => {
         return (
-          <EuiPopover button={popOverButton}>
+          <EuiPopover button={popOverButton} anchorPosition="downLeft" isOpen={isPopoverOpen}>
             <EuiContextMenuPanel items={panelItems} />
           </EuiPopover>
         );
