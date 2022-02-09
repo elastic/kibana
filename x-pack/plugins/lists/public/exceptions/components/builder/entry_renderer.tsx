@@ -166,7 +166,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
           data-test-subj="exceptionBuilderEntryField"
-          fieldInputWidth={275}
         />
       );
 
@@ -319,9 +318,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       className="exceptionItemEntryContainer"
       data-test-subj="exceptionItemEntryContainer"
     >
-      <EuiFlexItem grow={false}>{renderFieldInput(showLabel)}</EuiFlexItem>
+      <EuiFlexItem grow={2}>{renderFieldInput(showLabel)}</EuiFlexItem>
       <EuiFlexItem grow={false}>{renderOperatorInput(showLabel)}</EuiFlexItem>
-      <MyValuesInput grow={6}>
+      <MyValuesInput grow={5}>
         {renderFieldValueInput(
           showLabel,
           entry.nested === 'parent' ? OperatorTypeEnum.EXISTS : entry.operator.type
