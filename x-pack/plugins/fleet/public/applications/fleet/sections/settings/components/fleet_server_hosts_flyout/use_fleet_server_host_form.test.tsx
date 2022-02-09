@@ -26,7 +26,9 @@ describe('useFleetServerHostsForm', () => {
     const onSucess = jest.fn();
     const { result } = testRenderer.renderHook(() => useFleetServerHostsForm([], onSucess));
 
-    act(() => result.current.fleetServerHostsInput.setValue(['http://test.fr', 'http://test.fr']));
+    act(() =>
+      result.current.fleetServerHostsInput.props.onChange(['http://test.fr', 'http://test.fr'])
+    );
 
     await act(() => result.current.submit());
 
@@ -52,7 +54,7 @@ describe('useFleetServerHostsForm', () => {
     testRenderer.startServices.http.post.mockResolvedValue({});
     const { result } = testRenderer.renderHook(() => useFleetServerHostsForm([], onSucess));
 
-    act(() => result.current.fleetServerHostsInput.setValue(['http://test.fr']));
+    act(() => result.current.fleetServerHostsInput.props.onChange(['http://test.fr']));
 
     await act(() => result.current.submit());
     expect(onSucess).toBeCalled();
@@ -64,13 +66,15 @@ describe('useFleetServerHostsForm', () => {
     testRenderer.startServices.http.post.mockResolvedValue({});
     const { result } = testRenderer.renderHook(() => useFleetServerHostsForm([], onSucess));
 
-    act(() => result.current.fleetServerHostsInput.setValue(['http://test.fr', 'http://test.fr']));
+    act(() =>
+      result.current.fleetServerHostsInput.props.onChange(['http://test.fr', 'http://test.fr'])
+    );
 
     await act(() => result.current.submit());
     expect(onSucess).not.toBeCalled();
     expect(result.current.isDisabled).toBeTruthy();
 
-    act(() => result.current.fleetServerHostsInput.setValue(['http://test.fr']));
+    act(() => result.current.fleetServerHostsInput.props.onChange(['http://test.fr']));
     expect(result.current.isDisabled).toBeFalsy();
 
     await act(() => result.current.submit());
