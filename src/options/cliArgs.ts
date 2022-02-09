@@ -55,6 +55,13 @@ export function getOptionsFromCliArgs(
       choices: ['merge', 'rebase', 'squash'],
     })
 
+    .option('author', {
+      description: 'Show commits by a specific user',
+      alias: 'author',
+      type: 'string',
+      conflicts: 'all',
+    })
+
     .option('ci', {
       description: 'Disable interactive prompts',
       type: 'boolean',
@@ -252,11 +259,19 @@ export function getOptionsFromCliArgs(
     .option('repoOwner', {
       description: 'Repository owner',
       type: 'string',
+      conflicts: ['repo'],
     })
 
     .option('repoName', {
       description: 'Repository name',
       type: 'string',
+      conflicts: ['repo'],
+    })
+
+    .option('repo', {
+      description: 'Repo owner and name',
+      type: 'string',
+      conflicts: ['repoName', 'repoOwner'],
     })
 
     .option('sha', {
@@ -298,11 +313,9 @@ export function getOptionsFromCliArgs(
       string: true,
     })
 
-    .option('author', {
-      description: 'Show commits by a specific user',
-      alias: 'author',
+    .option('username', {
+      description: 'Defaults to the authenticated user ',
       type: 'string',
-      conflicts: 'all',
     })
 
     .option('verbose', {
@@ -347,6 +360,9 @@ export function getOptionsFromCliArgs(
     multipleCommits,
     all,
 
+    // repoName and repoOwner
+    repo,
+
     // filters
     author,
     since,
@@ -371,8 +387,17 @@ export function getOptionsFromCliArgs(
     ...restOptions
   } = yargsInstance.parseSync();
 
+  const [repoOwner, repoName] = repo?.split('/') ?? [
+    restOptions.repoOwner,
+    restOptions.repoName,
+  ];
+
   return excludeUndefined({
     ...restOptions,
+
+    // repoName and repoOwner
+    repoOwner,
+    repoName,
 
     // filters
     author: all ? null : author,

@@ -1,9 +1,9 @@
-import { getCommits } from './entrypoint.module';
+import { Commit, getCommits } from './entrypoint.module';
 import { getDevAccessToken } from './test/private/getDevAccessToken';
 
 describe('entrypoint.module', () => {
   it('getCommits', async () => {
-    const accessToken = await getDevAccessToken();
+    const accessToken = getDevAccessToken();
     const commits = await getCommits({
       accessToken: accessToken,
       repoName: 'backport-e2e',
@@ -11,9 +11,22 @@ describe('entrypoint.module', () => {
       pullNumber: 2,
     });
 
-    expect(commits).toEqual([
+    const expectedCommits: Commit[] = [
       {
-        committedDate: '2020-08-15T10:44:04Z',
+        sourceCommit: {
+          committedDate: '2020-08-15T10:44:04Z',
+          message: 'Add family emoji (#2)',
+          sha: '59d6ff1ca90a4ce210c0a4f0e159214875c19d60',
+        },
+        sourcePullRequest: {
+          number: 2,
+          url: 'https://github.com/backport-org/backport-e2e/pull/2',
+          mergeCommit: {
+            message: 'Add family emoji (#2)',
+            sha: '59d6ff1ca90a4ce210c0a4f0e159214875c19d60',
+          },
+        },
+        sourceBranch: 'master',
         expectedTargetPullRequests: [
           {
             branch: '7.x',
@@ -26,12 +39,9 @@ describe('entrypoint.module', () => {
             },
           },
         ],
-        originalMessage: 'Add family emoji (#2)',
-        pullNumber: 2,
-        pullUrl: 'https://github.com/backport-org/backport-e2e/pull/2',
-        sha: '59d6ff1ca90a4ce210c0a4f0e159214875c19d60',
-        sourceBranch: 'master',
       },
-    ]);
+    ];
+
+    expect(commits).toEqual(expectedCommits);
   });
 });

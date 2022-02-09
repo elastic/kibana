@@ -24,7 +24,7 @@ export async function getCommits(options: ValidConfigOptions) {
       spinner.text = `Loading commit "${getShortSha(options.sha)}"`;
       const commit = await fetchCommitBySha({ ...options, sha: options.sha });
       spinner.stopAndPersist(
-        getOraPersistsOption('Select commit', commit.originalMessage)
+        getOraPersistsOption('Select commit', commit.sourceCommit.message)
       );
       return [commit];
     }
@@ -40,7 +40,7 @@ export async function getCommits(options: ValidConfigOptions) {
       spinner.stopAndPersist(
         getOraPersistsOption(
           'Select pull request',
-          getFirstLine(commit.originalMessage)
+          getFirstLine(commit.sourceCommit.message)
         )
       );
 

@@ -167,6 +167,22 @@ describe('getOptionsFromCliArgs', () => {
     });
   });
 
+  describe('repo', () => {
+    it('splits into repoOwner and repoName', () => {
+      const argv = ['--repo', 'elastic/kibana'];
+      const res = getOptionsFromCliArgs(argv);
+      expect(res.repoOwner).toEqual('elastic');
+      expect(res.repoName).toEqual('kibana');
+    });
+
+    it('throw if both --repo and --repo-name is given', () => {
+      const argv = ['--repo', 'elastic/kibana', '--repo-name', 'foo'];
+      expect(() =>
+        getOptionsFromCliArgs(argv, { exitOnError: false })
+      ).toThrowError('Arguments repo and repoName are mutually exclusive');
+    });
+  });
+
   describe('since/until', () => {
     it('should always be UTC time (configured globally in jest.config.js)', () => {
       expect(new Date().getTimezoneOffset()).toBe(0);

@@ -2,9 +2,9 @@
 
 exports[`fetchCommitBySha snapshot request/response makes the right queries: Query: CommitsBySha 1`] = `
 "
-    query CommitsBySha($repoOwner: String!, $repoName: String!, $oid: String!) {
+    query CommitsBySha($repoOwner: String!, $repoName: String!, $sha: String!) {
       repository(owner: $repoOwner, name: $repoName) {
-        object(expression: $oid) {
+        object(expression: $sha) {
           ...SourceCommitWithTargetPullRequest
         }
       }
@@ -19,7 +19,7 @@ exports[`fetchCommitBySha snapshot request/response makes the right queries: Que
           login
         }
       }
-      oid
+      sha: oid
       message
       committedDate
 
@@ -37,8 +37,8 @@ exports[`fetchCommitBySha snapshot request/response makes the right queries: Que
             baseRefName
 
             # source merge commit (the commit that actually went into the source branch)
-            sourceMergeCommit: mergeCommit {
-              oid
+            mergeCommit {
+              sha: oid
               message
             }
 
@@ -54,7 +54,7 @@ exports[`fetchCommitBySha snapshot request/response makes the right queries: Que
                       ... on PullRequest {
                         # target merge commit: the backport commit that was merged into the target branch
                         targetMergeCommit: mergeCommit {
-                          oid
+                          sha: oid
                           message
                         }
                         repository {
@@ -73,7 +73,7 @@ exports[`fetchCommitBySha snapshot request/response makes the right queries: Que
                             node {
                               targetCommit: commit {
                                 message
-                                oid
+                                sha: oid
                               }
                             }
                           }
@@ -94,7 +94,6 @@ exports[`fetchCommitBySha snapshot request/response makes the right queries: Que
 
 exports[`fetchCommitBySha snapshot request/response returns the correct response 1`] = `
 Object {
-  "committedDate": "2021-12-20T14:20:16Z",
   "expectedTargetPullRequests": Array [
     Object {
       "branch": "8.0",
@@ -109,10 +108,19 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
       "url": "https://github.com/elastic/kibana/pull/121643",
     },
   ],
-  "originalMessage": "[APM] Add note about synthtrace to APM docs (#121633)",
-  "pullNumber": 121633,
-  "pullUrl": "https://github.com/elastic/kibana/pull/121633",
-  "sha": "d421ddcf6157150596581c7885afa3690cec6339",
   "sourceBranch": "main",
+  "sourceCommit": Object {
+    "committedDate": "2021-12-20T14:20:16Z",
+    "message": "[APM] Add note about synthtrace to APM docs (#121633)",
+    "sha": "d421ddcf6157150596581c7885afa3690cec6339",
+  },
+  "sourcePullRequest": Object {
+    "mergeCommit": Object {
+      "message": "[APM] Add note about synthtrace to APM docs (#121633)",
+      "sha": "d421ddcf6157150596581c7885afa3690cec6339",
+    },
+    "number": 121633,
+    "url": "https://github.com/elastic/kibana/pull/121633",
+  },
 }
 `;

@@ -6,7 +6,7 @@ describe('getOptionsFromGithub', () => {
   let devAccessToken: string;
 
   beforeAll(async () => {
-    devAccessToken = await getDevAccessToken();
+    devAccessToken = getDevAccessToken();
     jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
   });
 

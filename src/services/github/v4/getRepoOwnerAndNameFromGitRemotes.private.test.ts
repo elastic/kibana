@@ -8,8 +8,8 @@ const sandboxPath = getSandboxPath({ filename: __filename });
 describe('fetchRemoteProjectConfig', () => {
   let devAccessToken: string;
 
-  beforeEach(async () => {
-    devAccessToken = await getDevAccessToken();
+  beforeEach(() => {
+    devAccessToken = getDevAccessToken();
   });
 
   describe('when the remote is a fork', () => {

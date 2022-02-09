@@ -5,8 +5,8 @@ import { fetchExistingPullRequest } from './fetchExistingPullRequest';
 describe('fetchExistingPullRequest', () => {
   let devAccessToken: string;
 
-  beforeAll(async () => {
-    devAccessToken = await getDevAccessToken();
+  beforeAll(() => {
+    devAccessToken = getDevAccessToken();
   });
 
   describe('when PR does not exist', () => {

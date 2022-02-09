@@ -21,12 +21,21 @@ describe('getCommitsWithoutBackports', () => {
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
         .mockResolvedValueOnce([
           {
-            committedDate: '10',
+            sourceCommit: {
+              committedDate: '10',
+              message: 'First commit (#1)',
+              sha: 'xyz',
+            },
+            sourcePullRequest: {
+              url: 'https://www.github.com/foo/bar/pull/123',
+              number: 123,
+              mergeCommit: {
+                message: 'First commit (#1)',
+                sha: 'xyz',
+              },
+            },
             expectedTargetPullRequests,
-            originalMessage: 'First commit (#1)',
-            sha: 'xyz',
             sourceBranch: 'main',
-            pullUrl: 'https://www.github.com/foo/bar/pull/123',
           },
         ]);
 
@@ -36,10 +45,12 @@ describe('getCommitsWithoutBackports', () => {
       return getCommitsWithoutBackports({
         options: {} as ValidConfigOptions,
         commit: {
-          committedDate: '100',
+          sourceCommit: {
+            committedDate: '100',
+            message: 'Second commit (#2)',
+            sha: 'abc',
+          },
           expectedTargetPullRequests: [],
-          originalMessage: 'Second commit (#2)',
-          sha: 'abc',
           sourceBranch: 'main',
         },
         targetBranch: '7.x',
@@ -123,7 +134,20 @@ describe('getCommitsWithoutBackports', () => {
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
         .mockResolvedValueOnce([
           {
-            committedDate: offendingCommitDate,
+            sourceCommit: {
+              committedDate: offendingCommitDate,
+              message: 'First commit (#1)',
+              sha: 'xyz',
+            },
+            sourcePullRequest: {
+              number: 123,
+              url: 'https://www.github.com/foo/bar/pull/123',
+              mergeCommit: {
+                message: 'First commit (#1)',
+                sha: 'xyz',
+              },
+            },
+            sourceBranch: 'main',
             expectedTargetPullRequests: [
               {
                 state: 'OPEN',
@@ -132,11 +156,6 @@ describe('getCommitsWithoutBackports', () => {
                 url: 'https://www.github.com/foo/bar/pull/456',
               },
             ],
-            originalMessage: 'First commit (#1)',
-            sha: 'xyz',
-            sourceBranch: 'main',
-            pullNumber: 123,
-            pullUrl: 'https://www.github.com/foo/bar/pull/123',
           },
         ]);
 
@@ -146,11 +165,21 @@ describe('getCommitsWithoutBackports', () => {
       return getCommitsWithoutBackports({
         options: {} as ValidConfigOptions,
         commit: {
-          committedDate: currentCommitDate,
-          expectedTargetPullRequests: [],
-          originalMessage: 'Second commit (#2)',
-          sha: 'abc',
+          sourceCommit: {
+            committedDate: currentCommitDate,
+            message: 'Second commit (#2)',
+            sha: 'abc',
+          },
+          sourcePullRequest: {
+            number: 123,
+            url: 'https://www.github.com/foo/bar/pull/123',
+            mergeCommit: {
+              message: 'Second commit (#2)',
+              sha: 'abc',
+            },
+          },
           sourceBranch: 'main',
+          expectedTargetPullRequests: [],
         },
         targetBranch: '7.x',
         conflictingFiles: ['/foo/bar/baz.ts'],
@@ -189,9 +218,20 @@ describe('getCommitsWithoutBackports', () => {
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
         .mockResolvedValueOnce([
           {
-            pullUrl: 'https://www.github.com/foo/bar/pull/123',
-            pullNumber: 123,
-            committedDate: '10',
+            sourceCommit: {
+              committedDate: '10',
+              message: 'First commit (#1)',
+              sha: 'xyz',
+            },
+            sourcePullRequest: {
+              number: 123,
+              url: 'https://www.github.com/foo/bar/pull/123',
+              mergeCommit: {
+                message: 'First commit (#1)',
+                sha: 'xyz',
+              },
+            },
+            sourceBranch: 'main',
             expectedTargetPullRequests: [
               {
                 branch: offendingCommitTargetBranch,
@@ -200,9 +240,6 @@ describe('getCommitsWithoutBackports', () => {
                 number: 456,
               },
             ],
-            originalMessage: 'First commit (#1)',
-            sha: 'xyz',
-            sourceBranch: 'main',
           },
         ]);
 
@@ -214,12 +251,20 @@ describe('getCommitsWithoutBackports', () => {
 
         // commit that is being backported
         commit: {
-          pullUrl: 'https://www.github.com/foo/bar/pull/123',
-          pullNumber: 123,
-          committedDate: '100',
+          sourceCommit: {
+            committedDate: '100',
+            message: 'Second commit (#2)',
+            sha: 'abc',
+          },
+          sourcePullRequest: {
+            url: 'https://www.github.com/foo/bar/pull/123',
+            number: 123,
+            mergeCommit: {
+              message: 'Second commit (#2)',
+              sha: 'abc',
+            },
+          },
           expectedTargetPullRequests: [],
-          originalMessage: 'Second commit (#2)',
-          sha: 'abc',
           sourceBranch: 'main',
         },
         targetBranch: currentCommitTargetBranch,
@@ -252,13 +297,12 @@ describe('getCommitsWithoutBackports', () => {
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
         .mockResolvedValueOnce([
           {
-            // intentionally left out:
-            // pullNumber: 33,
-            // pullUrl: 'https://www.github.com/foo/bar/pull/123',
-            committedDate: '10',
+            sourceCommit: {
+              committedDate: '10',
+              sha: 'xyz',
+              message: 'First commit (#1)',
+            },
             expectedTargetPullRequests: [],
-            originalMessage: 'First commit (#1)',
-            sha: 'xyz',
             sourceBranch: 'main',
           },
         ]);
@@ -269,12 +313,20 @@ describe('getCommitsWithoutBackports', () => {
       const commitsWithoutBackports = await getCommitsWithoutBackports({
         options: {} as ValidConfigOptions,
         commit: {
-          pullUrl: 'https://www.github.com/foo/bar/pull/123',
-          pullNumber: 123,
-          committedDate: '100',
+          sourceCommit: {
+            committedDate: '100',
+            message: 'Second commit (#2)',
+            sha: 'abc',
+          },
+          sourcePullRequest: {
+            url: 'https://www.github.com/foo/bar/pull/123',
+            number: 123,
+            mergeCommit: {
+              message: 'Second commit (#2)',
+              sha: 'abc',
+            },
+          },
           expectedTargetPullRequests: [],
-          originalMessage: 'Second commit (#2)',
-          sha: 'abc',
           sourceBranch: 'main',
         },
         targetBranch: '7.x',

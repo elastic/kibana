@@ -1,21 +1,25 @@
 import { isEmpty } from 'lodash';
 import { ValidConfigOptions } from '../../options/options';
-import { extractPullNumber } from '../github/commitFormatters';
 import {
   ExpectedTargetPullRequest,
   getExpectedTargetPullRequests,
 } from './getExpectedTargetPullRequests';
 
 export interface Commit {
-  // source commit
-  committedDate: string;
+  sourceCommit: {
+    committedDate: string;
+    message: string;
+    sha: string;
+  };
+  sourcePullRequest?: {
+    number: number;
+    url: string;
+    mergeCommit: {
+      message: string;
+      sha: string;
+    };
+  };
   sourceBranch: string;
-  sha: string;
-  originalMessage: string; // TODO: rename to message
-  pullNumber?: number;
-  pullUrl?: string;
-
-  // target pull requests
   expectedTargetPullRequests: ExpectedTargetPullRequest[];
 }
 
@@ -28,8 +32,8 @@ export interface SourcePullRequestNode {
       name: string;
     }[];
   };
-  sourceMergeCommit: {
-    oid: string;
+  mergeCommit: {
+    sha: string;
     message: string;
   };
   timelineItems: {
@@ -50,7 +54,7 @@ export interface TimelinePullRequestEdge {
       number: number;
 
       targetMergeCommit: {
-        oid: string;
+        sha: string;
         message: string;
       } | null;
 
@@ -63,7 +67,7 @@ export interface TimelinePullRequestEdge {
 
       commits: {
         edges: Array<{
-          node: { targetCommit: { message: string; oid: string } };
+          node: { targetCommit: { message: string; sha: string } };
         }>;
       };
     };
@@ -79,7 +83,7 @@ export type SourceCommitWithTargetPullRequest = {
     name: string;
     owner: { login: string };
   };
-  oid: string;
+  sha: string;
   message: string;
   committedDate: string;
   associatedPullRequests: {
@@ -102,12 +106,6 @@ export function parseSourceCommit({
     sourceCommit.associatedPullRequests.edges?.[0]?.node;
 
   // use info from associated pull request if available. Fall back to commit info
-  const commitMessage =
-    sourcePullRequest?.sourceMergeCommit.message ?? sourceCommit.message;
-  const commitSha =
-    sourcePullRequest?.sourceMergeCommit.oid ?? sourceCommit.oid;
-  const pullNumber =
-    sourcePullRequest?.number ?? extractPullNumber(commitMessage);
 
   const sourceBranch = sourcePullRequest?.baseRefName ?? options.sourceBranch;
   const branchLabelMapping = getBranchLabelMappingForCommit(
@@ -122,12 +120,22 @@ export function parseSourceCommit({
   );
 
   return {
-    committedDate: sourceCommit.committedDate,
+    sourceCommit: {
+      committedDate: sourceCommit.committedDate,
+      message: sourceCommit.message,
+      sha: sourceCommit.sha,
+    },
+    sourcePullRequest: sourcePullRequest
+      ? {
+          number: sourcePullRequest.number,
+          url: sourcePullRequest.url,
+          mergeCommit: {
+            message: sourcePullRequest.mergeCommit.message,
+            sha: sourcePullRequest.mergeCommit.sha,
+          },
+        }
+      : undefined,
     sourceBranch,
-    sha: commitSha,
-    originalMessage: commitMessage,
-    pullNumber,
-    pullUrl: sourcePullRequest?.url,
     expectedTargetPullRequests,
   };
 }
@@ -142,7 +150,7 @@ export const sourceCommitWithTargetPullRequestFragment = {
           login
         }
       }
-      oid
+      sha: oid
       message
       committedDate
 
@@ -160,8 +168,8 @@ export const sourceCommitWithTargetPullRequestFragment = {
             baseRefName
 
             # source merge commit (the commit that actually went into the source branch)
-            sourceMergeCommit: mergeCommit {
-              oid
+            mergeCommit {
+              sha: oid
               message
             }
 
@@ -177,7 +185,7 @@ export const sourceCommitWithTargetPullRequestFragment = {
                       ... on PullRequest {
                         # target merge commit: the backport commit that was merged into the target branch
                         targetMergeCommit: mergeCommit {
-                          oid
+                          sha: oid
                           message
                         }
                         repository {
@@ -196,7 +204,7 @@ export const sourceCommitWithTargetPullRequestFragment = {
                             node {
                               targetCommit: commit {
                                 message
-                                oid
+                                sha: oid
                               }
                             }
                           }

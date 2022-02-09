@@ -1,17 +1,6 @@
-const fs = require('fs');
-const path = require('path');
+require('dotenv').config();
 
-// get credentials from config file
-const accessTokenFile = path.resolve(
-  __dirname,
-  './src/test/private/accessToken.txt'
-);
-
-const accessToken = fs
-  .readFileSync(accessTokenFile, {
-    encoding: 'utf-8',
-  })
-  .trim();
+const accessToken = process.env.ACCESS_TOKEN;
 
 module.exports = {
   schema: 'github-schema.graphql',

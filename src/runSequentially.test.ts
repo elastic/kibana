@@ -107,12 +107,21 @@ describe('runSequentially', () => {
 
     const commits: Commit[] = [
       {
-        sha: 'abcd',
-        committedDate: '1',
-        expectedTargetPullRequests: [],
-        originalMessage: 'My commit message',
+        sourceCommit: {
+          committedDate: '1',
+          message: 'My commit message',
+          sha: 'abcd',
+        },
+        sourcePullRequest: {
+          url: 'foo',
+          number: 55,
+          mergeCommit: {
+            message: 'My commit message',
+            sha: 'abcd',
+          },
+        },
         sourceBranch: 'master',
-        pullNumber: 55,
+        expectedTargetPullRequests: [],
       },
     ];
     const targetBranches: string[] = ['7.x'];
@@ -140,10 +149,10 @@ describe('runSequentially', () => {
           "base": "7.x",
           "body": "# Backport
 
-      This is an automatic backport to \`7.x\` of:
-       - #55
+      This will backport the following commits from \`master\` to \`7.x\`:
+       - [My commit message](foo)
 
-      <!--- Backport version: 1.2.3 -->
+      <!--- Backport version: 1.2.3-mocked -->
 
       ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",

@@ -63,7 +63,7 @@ Array [
           login
         }
       }
-      oid
+      sha: oid
       message
       committedDate
 
@@ -81,8 +81,8 @@ Array [
             baseRefName
 
             # source merge commit (the commit that actually went into the source branch)
-            sourceMergeCommit: mergeCommit {
-              oid
+            mergeCommit {
+              sha: oid
               message
             }
 
@@ -98,7 +98,7 @@ Array [
                       ... on PullRequest {
                         # target merge commit: the backport commit that was merged into the target branch
                         targetMergeCommit: mergeCommit {
-                          oid
+                          sha: oid
                           message
                         }
                         repository {
@@ -117,7 +117,7 @@ Array [
                             node {
                               targetCommit: commit {
                                 message
-                                oid
+                                sha: oid
                               }
                             }
                           }

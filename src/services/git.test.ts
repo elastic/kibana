@@ -514,9 +514,15 @@ describe('commitChanges', () => {
     repoName: 'kibana',
   } as ValidConfigOptions;
 
-  const commit = {
-    originalMessage: 'The original commit message',
-  } as Commit;
+  const commit: Commit = {
+    sourceCommit: {
+      message: 'The original commit message',
+      committedDate: '2020',
+      sha: 'abc',
+    },
+    sourceBranch: 'master',
+    expectedTargetPullRequests: [],
+  };
 
   it('should return when changes committed successfully', async () => {
     jest

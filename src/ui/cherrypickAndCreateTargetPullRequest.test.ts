@@ -64,19 +64,37 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 
       const commits: Commit[] = [
         {
-          committedDate: 'fff',
           sourceBranch: '7.x',
-          sha: 'mySha',
-          originalMessage: 'My original commit message (#1000)',
-          pullNumber: 1000,
+          sourceCommit: {
+            committedDate: 'fff',
+            sha: 'mySha',
+            message: 'My original commit message (#1000)',
+          },
+          sourcePullRequest: {
+            url: 'foo',
+            number: 1000,
+            mergeCommit: {
+              sha: 'mySha',
+              message: 'My original commit message (#1000)',
+            },
+          },
           expectedTargetPullRequests: [],
         },
         {
-          committedDate: 'ggg',
           sourceBranch: '7.x',
-          sha: 'mySha2',
-          originalMessage: 'My other commit message (#2000)',
-          pullNumber: 2000,
+          sourceCommit: {
+            committedDate: 'ggg',
+            sha: 'mySha2',
+            message: 'My other commit message (#2000)',
+          },
+          sourcePullRequest: {
+            url: 'foo',
+            number: 2000,
+            mergeCommit: {
+              sha: 'mySha2',
+              message: 'My other commit message (#2000)',
+            },
+          },
           expectedTargetPullRequests: [],
         },
       ];
@@ -104,11 +122,11 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             "base": "6.x",
             "body": "# Backport
 
-        This is an automatic backport to \`6.x\` of:
-         - #1000
-         - #2000
+        This will backport the following commits from \`7.x\` to \`6.x\`:
+         - [My original commit message (#1000)](foo)
+         - [My other commit message (#2000)](foo)
 
-        <!--- Backport version: 1.2.3 -->
+        <!--- Backport version: 1.2.3-mocked -->
 
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
@@ -172,12 +190,14 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         author: 'sqren',
       } as ValidConfigOptions;
 
-      const commits = [
+      const commits: Commit[] = [
         {
-          committedDate: 'hhh',
+          sourceCommit: {
+            committedDate: 'hhh',
+            sha: 'mySha',
+            message: 'My original commit message',
+          },
           sourceBranch: '7.x',
-          sha: 'mySha',
-          originalMessage: 'My original commit message',
           expectedTargetPullRequests: [],
         },
       ];
@@ -204,10 +224,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             "base": "6.x",
             "body": "# Backport
 
-        This is an automatic backport to \`6.x\` of:
+        This will backport the following commits from \`7.x\` to \`6.x\`:
          - My original commit message (mySha)
 
-        <!--- Backport version: 1.2.3 -->
+        <!--- Backport version: 1.2.3-mocked -->
 
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
@@ -267,10 +287,12 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         options,
         commits: [
           {
-            committedDate: '2021-08-18T16:11:38Z',
+            sourceCommit: {
+              committedDate: '2021-08-18T16:11:38Z',
+              sha: 'mySha',
+              message: 'My original commit message',
+            },
             sourceBranch: '7.x',
-            sha: 'mySha',
-            originalMessage: 'My original commit message',
             expectedTargetPullRequests: [],
           },
         ],
@@ -288,10 +310,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             "base": "6.x",
             "body": "# Backport
 
-        This is an automatic backport to \`6.x\` of:
+        This will backport the following commits from \`7.x\` to \`6.x\`:
          - My original commit message (mySha)
 
-        <!--- Backport version: 1.2.3 -->
+        <!--- Backport version: 1.2.3-mocked -->
 
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",

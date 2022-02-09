@@ -58,6 +58,7 @@ export async function runSequentially({
         error: e,
       });
       consoleLog(e.message);
+      logger.error('Could not backport commit', e);
     }
   });
 

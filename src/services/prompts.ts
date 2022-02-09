@@ -107,19 +107,23 @@ export function getChoicesForCommitPrompt(
 
     let name;
     if (showDetails) {
-      const message = stripPullNumber(c.originalMessage);
-      const prLink = c.pullUrl ? ` ` + getPrLink(c.pullNumber, c.pullUrl) : '';
+      const message = stripPullNumber(c.sourceCommit.message);
+      const prLink = c.sourcePullRequest
+        ? ` ` + getPrLink(c.sourcePullRequest.number, c.sourcePullRequest.url)
+        : '';
       const pullStatus = getDetailedPullStatus(c);
       name = `${position}${message}${prLink}${pullStatus}`;
     } else {
-      const message = getFirstLine(c.originalMessage);
+      const message = getFirstLine(c.sourceCommit.message);
       const pullStatus = getSimplePullStatus(c);
       name = `${position}${message} ${pullStatus}`;
     }
 
-    const short = c.pullNumber
-      ? `#${c.pullNumber} (${getShortSha(c.sha)})`
-      : getShortSha(c.sha);
+    const short = c.sourcePullRequest
+      ? `#${c.sourcePullRequest.number} (${getShortSha(
+          c.sourcePullRequest.mergeCommit.sha
+        )})`
+      : getShortSha(c.sourceCommit.sha);
 
     return { name, short, value: c };
   });

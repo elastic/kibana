@@ -69,7 +69,7 @@ describe.skip('enablePullRequestAutoMerge', () => {
   let options: ValidConfigOptions;
 
   beforeAll(async () => {
-    const accessToken = await getDevAccessToken();
+    const accessToken = getDevAccessToken();
     const randomString = crypto.randomBytes(4).toString('hex');
     branchName = `test-${randomString}`;
 

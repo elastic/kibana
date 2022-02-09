@@ -11,7 +11,7 @@ describe('allFetchers', () => {
   let commitByAuthor: Commit;
 
   beforeEach(async () => {
-    devAccessToken = await getDevAccessToken();
+    devAccessToken = getDevAccessToken();
 
     const commitsByAuthor = await fetchCommitsByAuthor({
       accessToken: devAccessToken,
@@ -30,7 +30,7 @@ describe('allFetchers', () => {
   });
 
   it('matches commitByAuthor with commitByPullNumber', async () => {
-    if (!commitByAuthor.pullNumber) {
+    if (!commitByAuthor.sourcePullRequest) {
       throw new Error('Missing pull number!');
     }
 
@@ -38,7 +38,7 @@ describe('allFetchers', () => {
       repoOwner: 'elastic',
       repoName: 'kibana',
       accessToken: devAccessToken,
-      pullNumber: commitByAuthor.pullNumber,
+      pullNumber: commitByAuthor.sourcePullRequest.number,
       sourceBranch: 'master',
       historicalBranchLabelMappings: [],
     });
@@ -51,7 +51,7 @@ describe('allFetchers', () => {
       repoOwner: 'elastic',
       repoName: 'kibana',
       accessToken: devAccessToken,
-      sha: commitByAuthor.sha,
+      sha: commitByAuthor.sourceCommit.sha,
       sourceBranch: 'main',
       historicalBranchLabelMappings: [],
     });
@@ -76,8 +76,21 @@ describe('allFetchers', () => {
   });
 
   it('returns correct response for commitByAuthor', async () => {
-    expect(commitByAuthor).toEqual({
-      committedDate: '2021-12-20T14:20:16Z',
+    const expectedCommit: Commit = {
+      sourceCommit: {
+        committedDate: '2021-12-20T14:20:16Z',
+        message: '[APM] Add note about synthtrace to APM docs (#121633)',
+        sha: 'd421ddcf6157150596581c7885afa3690cec6339',
+      },
+      sourcePullRequest: {
+        number: 121633,
+        url: 'https://github.com/elastic/kibana/pull/121633',
+        mergeCommit: {
+          message: '[APM] Add note about synthtrace to APM docs (#121633)',
+          sha: 'd421ddcf6157150596581c7885afa3690cec6339',
+        },
+      },
+      sourceBranch: 'main',
       expectedTargetPullRequests: [
         {
           branch: '8.0',
@@ -91,11 +104,7 @@ describe('allFetchers', () => {
           url: 'https://github.com/elastic/kibana/pull/121643',
         },
       ],
-      originalMessage: '[APM] Add note about synthtrace to APM docs (#121633)',
-      pullNumber: 121633,
-      pullUrl: 'https://github.com/elastic/kibana/pull/121633',
-      sha: 'd421ddcf6157150596581c7885afa3690cec6339',
-      sourceBranch: 'main',
-    });
+    };
+    expect(commitByAuthor).toEqual(expectedCommit);
   });
 });

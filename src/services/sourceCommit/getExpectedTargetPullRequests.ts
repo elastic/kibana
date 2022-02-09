@@ -106,7 +106,7 @@ function getExistingTargetPullRequests(
         state: targetPullRequest.state,
         mergeCommit: targetPullRequest.targetMergeCommit
           ? {
-              sha: targetPullRequest.targetMergeCommit.oid,
+              sha: targetPullRequest.targetMergeCommit.sha,
               message: targetPullRequest.targetMergeCommit.message,
             }
           : undefined,

@@ -4,8 +4,8 @@ import { fetchRemoteProjectConfig } from './fetchRemoteProjectConfig';
 describe('fetchRemoteProjectConfig', () => {
   let devAccessToken: string;
 
-  beforeEach(async () => {
-    devAccessToken = await getDevAccessToken();
+  beforeEach(() => {
+    devAccessToken = getDevAccessToken();
   });
 
   it('returns the backport config from "main" branch', async () => {

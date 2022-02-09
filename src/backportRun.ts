@@ -47,10 +47,19 @@ export async function backportRun(
 
   try {
     options = await getOptions(processArgs, optionsFromModule);
+    logger.info('Backporting options', options);
+
     spinner.stop();
+
     commits = await getCommits(options);
+    logger.info('Commits', commits);
+
     const targetBranches = await getTargetBranches(options, commits);
+    logger.info('Target branches', targetBranches);
+
     const results = await runSequentially({ options, commits, targetBranches });
+    logger.info('Results', results);
+
     const backportResponse: BackportResponse = {
       status: 'success',
       commits,
@@ -84,8 +93,7 @@ export async function backportRun(
       // output
       consoleLog('\n');
       consoleLog(chalk.bold('⚠️  Ouch! An unhandled error occured 😿'));
-      consoleLog(`Error message: ${e.message}`);
-
+      consoleLog(e.stack ? e.stack : e.message);
       consoleLog(
         'Please open an issue in https://github.com/sqren/backport/issues or contact me directly on https://twitter.com/sorenlouv'
       );
@@ -97,10 +105,10 @@ export async function backportRun(
           })}`
         )
       );
-
-      // write to log
-      logger.info('Unknown error:', e);
     }
+
+    logger.error('Unhandled exception', e);
+    process.exitCode = 1;
 
     return backportResponse;
   }

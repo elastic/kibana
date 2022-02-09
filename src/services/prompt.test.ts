@@ -5,12 +5,24 @@ import { Commit } from './sourceCommit/parseSourceCommit';
 describe('prompt', () => {
   describe('getChoicesForCommitPrompt', () => {
     it('should display status badges via `expectedTargetPullRequests`', () => {
-      const commits = [
+      const commits: Commit[] = [
         {
-          sha: 'ae9d51b7fe3ee6f30d0d196c782e0dcabb7ac5ff',
-          originalMessage:
-            '[APM] Remove log-log descriptions from correlation charts (#119700)',
-          pullNumber: 119700,
+          sourceBranch: 'master',
+          sourceCommit: {
+            committedDate: '1',
+            sha: 'ae9d51b7fe3ee6f30d0d196c782e0dcabb7ac5ff',
+            message:
+              '[APM] Remove log-log descriptions from correlation charts (#119700)',
+          },
+          sourcePullRequest: {
+            number: 119700,
+            url: 'foo',
+            mergeCommit: {
+              sha: 'ae9d51b7fe3ee6f30d0d196c782e0dcabb7ac5ff',
+              message:
+                '[APM] Remove log-log descriptions from correlation charts (#119700)',
+            },
+          },
           expectedTargetPullRequests: [
             { number: 120178, branch: '8.0', state: 'MERGED' },
             { number: 120179, branch: '7.16', state: 'MERGED' },
@@ -34,39 +46,78 @@ describe('prompt', () => {
     it('should list choices', () => {
       const commits: Commit[] = [
         {
-          committedDate: '',
           sourceBranch: 'master',
-          sha: 'b1b491959dab47aeb83c88ee2accb2db46d23793',
-          originalMessage:
-            '[APM] Prefer service.name for logs correlation (#120694)',
-          pullNumber: 120694,
+          sourceCommit: {
+            committedDate: '',
+            sha: 'b1b491959dab47aeb83c88ee2accb2db46d23793',
+            message: '[APM] Prefer service.name for logs correlation (#120694)',
+          },
+          sourcePullRequest: {
+            number: 120694,
+            url: 'foo',
+            mergeCommit: {
+              sha: 'b1b491959dab47aeb83c88ee2accb2db46d23793',
+              message:
+                '[APM] Prefer service.name for logs correlation (#120694)',
+            },
+          },
           expectedTargetPullRequests: [],
         },
         {
-          committedDate: '',
           sourceBranch: 'master',
-          sha: 'b1bb4a93959f19a653b9cfb207a5c6acb6559482',
-          originalMessage:
-            '[APM] Disable telemetry in agent config endpoint (#120106)',
-          pullNumber: 120106,
+          sourceCommit: {
+            committedDate: '',
+            sha: 'b1bb4a93959f19a653b9cfb207a5c6acb6559482',
+            message:
+              '[APM] Disable telemetry in agent config endpoint (#120106)',
+          },
+          sourcePullRequest: {
+            number: 120106,
+            url: 'foo',
+            mergeCommit: {
+              sha: 'b1bb4a93959f19a653b9cfb207a5c6acb6559482',
+              message:
+                '[APM] Disable telemetry in agent config endpoint (#120106)',
+            },
+          },
           expectedTargetPullRequests: [],
         },
         {
-          committedDate: '',
           sourceBranch: 'master',
-          sha: '434f6e6a88faf24dc1ea41f9f726db78e46355a7',
-          originalMessage:
-            '[APM] Remove index_pattern.json and add custom field formatters (#119915)',
-          pullNumber: 119915,
+          sourceCommit: {
+            committedDate: '',
+            sha: '434f6e6a88faf24dc1ea41f9f726db78e46355a7',
+            message:
+              '[APM] Remove index_pattern.json and add custom field formatters (#119915)',
+          },
+          sourcePullRequest: {
+            number: 119915,
+            url: 'foo',
+            mergeCommit: {
+              sha: '434f6e6a88faf24dc1ea41f9f726db78e46355a7',
+              message:
+                '[APM] Remove index_pattern.json and add custom field formatters (#119915)',
+            },
+          },
           expectedTargetPullRequests: [],
         },
         {
-          committedDate: '',
           sourceBranch: 'master',
-          sha: 'ae9d51b7fe3ee6f30d0d196c782e0dcabb7ac5ff',
-          originalMessage:
-            '[APM] Remove log-log descriptions from correlation charts (#119700)',
-          pullNumber: 119700,
+          sourceCommit: {
+            committedDate: '',
+            sha: 'ae9d51b7fe3ee6f30d0d196c782e0dcabb7ac5ff',
+            message:
+              '[APM] Remove log-log descriptions from correlation charts (#119700)',
+          },
+          sourcePullRequest: {
+            number: 119700,
+            url: 'foo',
+            mergeCommit: {
+              sha: 'ae9d51b7fe3ee6f30d0d196c782e0dcabb7ac5ff',
+              message:
+                '[APM] Remove log-log descriptions from correlation charts (#119700)',
+            },
+          },
           expectedTargetPullRequests: [],
         },
       ];

@@ -1,4 +1,4 @@
-import { Logger } from '../services/logger';
+import winston from 'winston';
 
 export interface TargetBranchChoice {
   name: string;
@@ -14,7 +14,7 @@ type AutoFixConflictsHandler = ({
 }: {
   files: string[];
   directory: string;
-  logger: Logger;
+  logger: winston.Logger;
   targetBranch: string;
 }) => boolean | Promise<boolean>;
 
@@ -60,6 +60,7 @@ type Options = Partial<{
   targetBranchChoices: TargetBranchChoiceOrString[];
   targetBranches: string[];
   targetPRLabels: string[];
+  username: string;
   verbose: boolean;
 }>;
 

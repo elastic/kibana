@@ -47,11 +47,11 @@ describe('getOptions', () => {
 
       await expect(() => getOptions([], { ci: true })).rejects
         .toThrowErrorMatchingInlineSnapshot(`
-      "Please update your config file: \\"/myHomeDir/.backport/config.json\\".
-      It must contain a valid \\"accessToken\\".
+                    "Please update your config file: \\"/myHomeDir/.backport/config.json\\".
+                    It must contain a valid \\"accessToken\\".
 
-      Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#global-config-backportconfigjson"
-      `);
+                    Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#global-config-backportconfigjson"
+                  `);
     });
 
     it('when `targetBranches`, `targetBranchChoices` and `branchLabelMapping` are all empty', async () => {
@@ -69,6 +69,34 @@ describe('getOptions', () => {
             `);
     });
 
+    describe('whe option is an empty string', () => {
+      it('throws for "username"', async () => {
+        await expect(() =>
+          getOptions([], { username: '', author: 'sqren' })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"\\"username\\" cannot be empty!"`
+        );
+      });
+
+      it('throws for "author"', async () => {
+        await expect(() =>
+          getOptions([], { author: '' })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"\\"author\\" cannot be empty!"`
+        );
+      });
+
+      it('throws for "accessToken"', async () => {
+        await expect(() => getOptions([], { accessToken: '' })).rejects
+          .toThrowErrorMatchingInlineSnapshot(`
+                "Please update your config file: \\"/myHomeDir/.backport/config.json\\".
+                It must contain a valid \\"accessToken\\".
+
+                Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#global-config-backportconfigjson"
+              `);
+      });
+    });
+
     describe('when repoName and repoOwner are missing', () => {
       beforeEach(() => {
         mockProjectConfig({ repoName: undefined, repoOwner: undefined });
@@ -79,10 +107,10 @@ describe('getOptions', () => {
 
         await expect(() => getOptions([], {})).rejects
           .toThrowErrorMatchingInlineSnapshot(`
-              "Please specify a repo name: \\"--repo-name kibana\\".
+                              "Please specify a repo name: \\"--repo-name kibana\\".
 
-              Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#project-config-backportrcjson"
-            `);
+                              Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#project-config-backportrcjson"
+                          `);
       });
 
       it('should get repoName from the remote', async () => {
@@ -105,7 +133,7 @@ describe('getOptions', () => {
   });
 
   it('should ensure that "backport" branch does not exist', async () => {
-    mockGithubConfigOptions({ refName: 'backport' });
+    mockGithubConfigOptions({ hasBackportBranch: true });
     await expect(getOptions([], {})).rejects.toThrowError(
       'You must delete the branch "backport" to continue. See https://github.com/sqren/backport/issues/155 for details'
     );
@@ -344,12 +372,12 @@ function mockProjectConfig(projectConfig: ConfigFileOptions) {
 function mockGithubConfigOptions({
   viewerLogin = 'DO_NOT_USE-sqren',
   defaultBranchRef = 'DO_NOT_USE-default-branch-name',
-  refName,
+  hasBackportBranch,
   historicalMappings = [],
 }: {
   viewerLogin?: string;
   defaultBranchRef?: string;
-  refName?: string;
+  hasBackportBranch?: boolean;
   historicalMappings?: Array<{
     committedDate: string;
     branchLabelMapping: Record<string, string>;
@@ -364,9 +392,7 @@ function mockGithubConfigOptions({
           login: viewerLogin,
         },
         repository: {
-          isFork: false,
-          parent: null,
-          ref: refName ? { name: refName } : null,
+          illegalBackportBranch: hasBackportBranch ? { id: 'foo' } : null,
           defaultBranchRef: {
             name: defaultBranchRef,
             target: {

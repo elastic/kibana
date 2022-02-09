@@ -108,10 +108,10 @@ export async function cherrypickAndCreateTargetPullRequest({
   // add labels to source pull requests
   if (options.sourcePRLabels.length > 0) {
     const promises = commits.map((commit) => {
-      if (commit.pullNumber) {
+      if (commit.sourcePullRequest) {
         return addLabelsToPullRequest(
           options,
-          commit.pullNumber,
+          commit.sourcePullRequest.number,
           options.sourcePRLabels
         );
       }
@@ -165,9 +165,9 @@ async function backportViaFilesystem({
 function getBackportBranchName(targetBranch: string, commits: Commit[]) {
   const refValues = commits
     .map((commit) =>
-      commit.pullNumber
-        ? `pr-${commit.pullNumber}`
-        : `commit-${getShortSha(commit.sha)}`
+      commit.sourcePullRequest
+        ? `pr-${commit.sourcePullRequest.number}`
+        : `commit-${getShortSha(commit.sourceCommit.sha)}`
     )
     .join('_')
     .slice(0, 200);
@@ -180,7 +180,7 @@ async function waitForCherrypick(
   targetBranch: string
 ) {
   const spinnerText = `Cherry-picking: ${chalk.greenBright(
-    getFirstLine(commit.originalMessage)
+    getFirstLine(commit.sourceCommit.message)
   )}`;
 
   const mergedTargetPullRequest = commit.expectedTargetPullRequests.find(
@@ -197,7 +197,7 @@ async function waitForCherrypick(
     await fetchBranch(options, commit.sourceBranch);
     ({ conflictingFiles, unstagedFiles, needsResolving } = await cherrypick(
       options,
-      commit.sha,
+      commit.sourceCommit.sha,
       mergedTargetPullRequest
     ));
 

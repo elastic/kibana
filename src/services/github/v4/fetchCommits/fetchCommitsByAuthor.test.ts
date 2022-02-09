@@ -56,28 +56,47 @@ describe('fetchCommitsByAuthor', () => {
     it('should return a list of commits with pullNumber and existing backports', () => {
       const expectedCommits: Commit[] = [
         {
-          committedDate: '2021-12-24T00:00:00Z',
-          sha: '2e63475c483f7844b0f2833bc57fdee32095bacb',
-          originalMessage: 'Add 👻',
+          sourceCommit: {
+            committedDate: '2021-12-24T00:00:00Z',
+            sha: '2e63475c483f7844b0f2833bc57fdee32095bacb',
+            message: 'Add 👻',
+          },
           expectedTargetPullRequests: [],
           sourceBranch: 'source-branch-from-options',
         },
         {
-          committedDate: '2021-12-23T00:00:00Z',
-          sha: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
-          originalMessage: 'Add witch (#85)',
-          pullNumber: 85,
-          pullUrl: 'https://github.com/elastic/kibana/pull/85',
+          sourceCommit: {
+            committedDate: '2021-12-23T00:00:00Z',
+            sha: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
+            message: 'Add witch (#85)',
+          },
+          sourcePullRequest: {
+            number: 85,
+            url: 'https://github.com/elastic/kibana/pull/85',
+            mergeCommit: {
+              sha: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
+              message: 'Add witch (#85)',
+            },
+          },
           expectedTargetPullRequests: [],
           sourceBranch: 'master',
         },
         {
-          committedDate: '2021-12-22T00:00:00Z',
-          sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
-          originalMessage:
-            'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
-          pullNumber: 80,
-          pullUrl: 'https://github.com/elastic/kibana/pull/80',
+          sourceCommit: {
+            committedDate: '2021-12-22T00:00:00Z',
+            sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
+            message:
+              'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
+          },
+          sourcePullRequest: {
+            number: 80,
+            url: 'https://github.com/elastic/kibana/pull/80',
+            mergeCommit: {
+              sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
+              message:
+                'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
+            },
+          },
           expectedTargetPullRequests: [
             {
               branch: '6.3',
@@ -94,16 +113,20 @@ describe('fetchCommitsByAuthor', () => {
           sourceBranch: 'master',
         },
         {
-          committedDate: '2021-12-21T00:00:00Z',
-          sha: '3827bbbaf39914eda4f02f6940189844375fd097',
-          originalMessage: 'Add backport config',
+          sourceCommit: {
+            committedDate: '2021-12-21T00:00:00Z',
+            sha: '3827bbbaf39914eda4f02f6940189844375fd097',
+            message: 'Add backport config',
+          },
           expectedTargetPullRequests: [],
           sourceBranch: 'source-branch-from-options',
         },
         {
-          committedDate: '2021-12-20T00:00:00Z',
-          sha: '5ea0da550ac191029459289d67f99ad7d310812b',
-          originalMessage: 'Initial commit',
+          sourceCommit: {
+            committedDate: '2021-12-20T00:00:00Z',
+            sha: '5ea0da550ac191029459289d67f99ad7d310812b',
+            message: 'Initial commit',
+          },
           expectedTargetPullRequests: [],
           sourceBranch: 'source-branch-from-options',
         },

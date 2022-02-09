@@ -7,8 +7,8 @@ import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
 describe('fetchCommitsByAuthor', () => {
   let devAccessToken: string;
 
-  beforeAll(async () => {
-    devAccessToken = await getDevAccessToken();
+  beforeAll(() => {
+    devAccessToken = getDevAccessToken();
   });
 
   describe('snapshot request/response', () => {
@@ -68,7 +68,7 @@ describe('fetchCommitsByAuthor', () => {
 
     const getCommitMessages = (commits: Commit[]) => {
       return commits.map((c) =>
-        c.originalMessage.replace(/(\r\n|\n|\r)/gm, '')
+        c.sourceCommit.message.replace(/(\r\n|\n|\r)/gm, '')
       );
     };
 
@@ -156,7 +156,9 @@ describe('fetchCommitsByAuthor', () => {
     });
 
     it('returns related OPEN PRs', async () => {
-      const commitWithOpenPR = res.find((commit) => commit.pullNumber === 9);
+      const commitWithOpenPR = res.find(
+        (commit) => commit.sourcePullRequest?.number === 9
+      );
       expect(commitWithOpenPR?.expectedTargetPullRequests).toEqual([
         {
           branch: '7.8',
@@ -168,7 +170,9 @@ describe('fetchCommitsByAuthor', () => {
     });
 
     it('returns related MERGED PRs', async () => {
-      const commitWithMergedPRs = res.find((commit) => commit.pullNumber === 5);
+      const commitWithMergedPRs = res.find(
+        (commit) => commit.sourcePullRequest?.number === 5
+      );
       expect(commitWithMergedPRs?.expectedTargetPullRequests).toEqual([
         {
           branch: '7.x',
@@ -194,7 +198,9 @@ describe('fetchCommitsByAuthor', () => {
     });
 
     it('returns empty if there are no related PRs', async () => {
-      const commitWithoutPRs = res.find((commit) => commit.pullNumber === 8);
+      const commitWithoutPRs = res.find(
+        (commit) => commit.sourcePullRequest?.number === 8
+      );
       expect(commitWithoutPRs?.expectedTargetPullRequests).toEqual([]);
     });
   });

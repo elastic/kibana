@@ -28,7 +28,7 @@ export async function getCommitsWithoutBackports({
     ...options,
     author: null, // retrieve commits across all authors
     dateSince: null,
-    dateUntil: commit.committedDate,
+    dateUntil: commit.sourceCommit.committedDate,
     commitPaths: conflictingFiles,
   });
 
@@ -36,17 +36,17 @@ export async function getCommitsWithoutBackports({
     commitsInConflictingPaths
       .filter((c) => {
         // exclude the commit we are currently trying to backport
-        if (c.sha === commit.sha) {
+        if (c.sourceCommit.sha === commit.sourceCommit.sha) {
           return false;
         }
 
         // exclude commits that are newer than the commit we are trying to backport
-        if (c.committedDate > commit.committedDate) {
+        if (c.sourceCommit.committedDate > commit.sourceCommit.committedDate) {
           return false;
         }
 
         // only consider commits that have an associated pull request
-        if (!c.pullUrl) {
+        if (!c.sourcePullRequest?.url) {
           return false;
         }
 
@@ -83,12 +83,12 @@ export async function getCommitsWithoutBackports({
       );
 
       const formatted = pendingBackportPr
-        ? ` - ${getFirstLine(c.originalMessage)} ${chalk.gray(
+        ? ` - ${getFirstLine(c.sourceCommit.message)} ${chalk.gray(
             '(backport pending)'
           )}\n   ${pendingBackportPr.url}`
-        : ` - ${getFirstLine(c.originalMessage)} ${chalk.red(
+        : ` - ${getFirstLine(c.sourceCommit.message)} ${chalk.red(
             '(backport missing)'
-          )}\n   ${c.pullUrl}`;
+          )}\n   ${c.sourcePullRequest?.url}`;
 
       return { formatted, commit: c };
     });

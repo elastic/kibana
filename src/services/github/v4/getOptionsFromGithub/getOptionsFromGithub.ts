@@ -17,11 +17,15 @@ import { GithubConfigOptionsResponse, query, RemoteConfig } from './query';
 // - verify the access token
 // - ensure no branch named "backport" exists
 
+export type OptionsFromGithub = Awaited<
+  ReturnType<typeof getOptionsFromGithub>
+>;
 export async function getOptionsFromGithub(options: {
   accessToken: string;
   githubApiBaseUrlV4?: string;
   repoName: string;
   repoOwner: string;
+  username?: string;
   skipRemoteConfig?: boolean;
   cwd?: string;
 }) {
@@ -46,17 +50,15 @@ export async function getOptionsFromGithub(options: {
     res = swallowErrorIfConfigFileIsMissing(error);
   }
 
-  // get the original repo (not the fork)
-  const repo = res.repository.isFork ? res.repository.parent : res.repository;
-
   // it is not possible to have a branch named "backport"
-  if (repo.ref?.name === 'backport') {
+  if (res.repository.illegalBackportBranch) {
     throw new HandledError(
       'You must delete the branch "backport" to continue. See https://github.com/sqren/backport/issues/155 for details'
     );
   }
 
-  const historicalRemoteConfigs = repo.defaultBranchRef.target.history.edges;
+  const historicalRemoteConfigs =
+    res.repository.defaultBranchRef.target.history.edges;
   const latestRemoteConfig = historicalRemoteConfigs[0]?.remoteConfig;
   const skipRemoteConfig = await getSkipRemoteConfigFile(
     options.cwd,
@@ -64,10 +66,14 @@ export async function getOptionsFromGithub(options: {
     latestRemoteConfig
   );
 
+  const remoteConfig = skipRemoteConfig
+    ? {}
+    : parseRemoteConfig(latestRemoteConfig);
+
   return {
-    authenticatedUsername: res.viewer.login,
-    sourceBranch: repo.defaultBranchRef.name,
-    ...(skipRemoteConfig ? {} : parseRemoteConfig(latestRemoteConfig)),
+    authenticatedUsername: options.username ?? res.viewer.login,
+    sourceBranch: res.repository.defaultBranchRef.name,
+    ...remoteConfig,
     historicalBranchLabelMappings: skipRemoteConfig
       ? []
       : getHistoricalBranchLabelMappings(historicalRemoteConfigs),
@@ -169,12 +175,14 @@ function getHistoricalBranchLabelMappings(
 function swallowErrorIfConfigFileIsMissing<T>(error: GithubV4Exception<T>) {
   const { data, errors } = error.axiosResponse.data;
 
-  const wasMissingConfigError = errors?.some(
-    (error) =>
-      error.type === 'NOT_FOUND' &&
-      error.path.join('.') ===
-        'repository.defaultBranchRef.target.history.edges.0.remoteConfig.file'
-  );
+  const wasMissingConfigError = errors?.some((error) => {
+    const isMatch =
+      /^repository.defaultBranchRef.target.history.edges.\d+.remoteConfig.file$/.test(
+        error.path.join('.')
+      );
+
+    return isMatch && error.type === 'NOT_FOUND';
+  });
 
   // swallow error if it's just the config file that's missing
   if (wasMissingConfigError && data != null) {

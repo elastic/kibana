@@ -7,8 +7,8 @@ import { fetchCommitByPullNumber } from './fetchCommitByPullNumber';
 describe('fetchCommitByPullNumber', () => {
   let devAccessToken: string;
 
-  beforeAll(async () => {
-    devAccessToken = await getDevAccessToken();
+  beforeAll(() => {
+    devAccessToken = getDevAccessToken();
   });
 
   describe('snapshot request/response', () => {
@@ -61,12 +61,20 @@ describe('fetchCommitByPullNumber', () => {
         historicalBranchLabelMappings: [],
       };
 
-      expect(await fetchCommitByPullNumber(options)).toEqual({
-        committedDate: '2020-08-15T12:40:19Z',
-        originalMessage: 'Add 🍏 emoji (#5)',
-        pullNumber: 5,
-        pullUrl: 'https://github.com/backport-org/backport-e2e/pull/5',
-        sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
+      const expectedCommit: Commit = {
+        sourceCommit: {
+          committedDate: '2020-08-15T12:40:19Z',
+          message: 'Add 🍏 emoji (#5)',
+          sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
+        },
+        sourcePullRequest: {
+          number: 5,
+          url: 'https://github.com/backport-org/backport-e2e/pull/5',
+          mergeCommit: {
+            message: 'Add 🍏 emoji (#5)',
+            sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
+          },
+        },
         sourceBranch: 'master',
         expectedTargetPullRequests: [
           {
@@ -90,7 +98,9 @@ describe('fetchCommitByPullNumber', () => {
             },
           },
         ],
-      });
+      };
+
+      expect(await fetchCommitByPullNumber(options)).toEqual(expectedCommit);
     });
   });
 

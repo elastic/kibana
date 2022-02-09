@@ -28,11 +28,20 @@ describe('getTargetBranches', () => {
 
       const commits: Commit[] = [
         {
-          committedDate: 'aaa',
-          originalMessage: 'hey',
-          sha: 'abcd',
+          sourceCommit: {
+            committedDate: 'aaa',
+            message: 'hey',
+            sha: 'abcd',
+          },
+          sourcePullRequest: {
+            url: 'foo',
+            number: 1337,
+            mergeCommit: {
+              message: 'hey',
+              sha: 'abcd',
+            },
+          },
           sourceBranch: '7.x',
-          pullNumber: 1337,
           expectedTargetPullRequests: [],
         },
       ];
@@ -128,11 +137,20 @@ describe('getTargetBranches', () => {
 
       const commits: Commit[] = [
         {
-          committedDate: 'bbb',
+          sourceCommit: {
+            committedDate: 'bbb',
+            message: '[backport] Bump to 5.1.3 (#62286)',
+            sha: 'my-sha',
+          },
+          sourcePullRequest: {
+            url: 'foo',
+            number: 62286,
+            mergeCommit: {
+              message: '[backport] Bump to 5.1.3 (#62286)',
+              sha: 'my-sha',
+            },
+          },
           sourceBranch: 'master',
-          sha: 'my-sha',
-          originalMessage: '[backport] Bump to 5.1.3 (#62286)',
-          pullNumber: 62286,
           expectedTargetPullRequests: [{ branch: '7.x', state: 'MISSING' }],
         },
       ];

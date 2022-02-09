@@ -5,8 +5,8 @@ import { fetchAuthorId } from './fetchAuthorId';
 describe('fetchAuthorId', () => {
   let devAccessToken: string;
 
-  beforeAll(async () => {
-    devAccessToken = await getDevAccessToken();
+  beforeAll(() => {
+    devAccessToken = getDevAccessToken();
   });
 
   describe('author = null', () => {

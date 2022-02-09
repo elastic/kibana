@@ -54,7 +54,7 @@ exports[`fetchCommitsByAuthor snapshot request/response makes the right queries:
           login
         }
       }
-      oid
+      sha: oid
       message
       committedDate
 
@@ -72,8 +72,8 @@ exports[`fetchCommitsByAuthor snapshot request/response makes the right queries:
             baseRefName
 
             # source merge commit (the commit that actually went into the source branch)
-            sourceMergeCommit: mergeCommit {
-              oid
+            mergeCommit {
+              sha: oid
               message
             }
 
@@ -89,7 +89,7 @@ exports[`fetchCommitsByAuthor snapshot request/response makes the right queries:
                       ... on PullRequest {
                         # target merge commit: the backport commit that was merged into the target branch
                         targetMergeCommit: mergeCommit {
-                          oid
+                          sha: oid
                           message
                         }
                         repository {
@@ -108,7 +108,7 @@ exports[`fetchCommitsByAuthor snapshot request/response makes the right queries:
                             node {
                               targetCommit: commit {
                                 message
-                                oid
+                                sha: oid
                               }
                             }
                           }
@@ -130,7 +130,6 @@ exports[`fetchCommitsByAuthor snapshot request/response makes the right queries:
 exports[`fetchCommitsByAuthor snapshot request/response returns the correct response 1`] = `
 Array [
   Object {
-    "committedDate": "2021-12-20T14:20:16Z",
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -145,23 +144,39 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
         "url": "https://github.com/elastic/kibana/pull/121643",
       },
     ],
-    "originalMessage": "[APM] Add note about synthtrace to APM docs (#121633)",
-    "pullNumber": 121633,
-    "pullUrl": "https://github.com/elastic/kibana/pull/121633",
-    "sha": "d421ddcf6157150596581c7885afa3690cec6339",
     "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-12-20T14:20:16Z",
+      "message": "[APM] Add note about synthtrace to APM docs (#121633)",
+      "sha": "d421ddcf6157150596581c7885afa3690cec6339",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "[APM] Add note about synthtrace to APM docs (#121633)",
+        "sha": "d421ddcf6157150596581c7885afa3690cec6339",
+      },
+      "number": 121633,
+      "url": "https://github.com/elastic/kibana/pull/121633",
+    },
   },
   Object {
-    "committedDate": "2021-12-08T20:03:55Z",
     "expectedTargetPullRequests": Array [],
-    "originalMessage": "[APM] Prefer service.name for logs correlation (#120694)",
-    "pullNumber": 120694,
-    "pullUrl": "https://github.com/elastic/kibana/pull/120694",
-    "sha": "b1b491959dab47aeb83c88ee2accb2db46d23793",
     "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-12-08T20:03:55Z",
+      "message": "[APM] Prefer service.name for logs correlation (#120694)",
+      "sha": "b1b491959dab47aeb83c88ee2accb2db46d23793",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "[APM] Prefer service.name for logs correlation (#120694)",
+        "sha": "b1b491959dab47aeb83c88ee2accb2db46d23793",
+      },
+      "number": 120694,
+      "url": "https://github.com/elastic/kibana/pull/120694",
+    },
   },
   Object {
-    "committedDate": "2021-12-01T23:26:48Z",
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -176,14 +191,22 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
         "url": "https://github.com/elastic/kibana/pull/120186",
       },
     ],
-    "originalMessage": "[APM] Disable telemetry in agent config endpoint (#120106)",
-    "pullNumber": 120106,
-    "pullUrl": "https://github.com/elastic/kibana/pull/120106",
-    "sha": "b1bb4a93959f19a653b9cfb207a5c6acb6559482",
     "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-12-01T23:26:48Z",
+      "message": "[APM] Disable telemetry in agent config endpoint (#120106)",
+      "sha": "b1bb4a93959f19a653b9cfb207a5c6acb6559482",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "[APM] Disable telemetry in agent config endpoint (#120106)",
+        "sha": "b1bb4a93959f19a653b9cfb207a5c6acb6559482",
+      },
+      "number": 120106,
+      "url": "https://github.com/elastic/kibana/pull/120106",
+    },
   },
   Object {
-    "committedDate": "2021-11-30T18:47:26Z",
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -206,7 +229,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
         "url": "https://github.com/elastic/kibana/pull/120012",
       },
     ],
-    "originalMessage": "[APM] Remove index_pattern.json and add custom field formatters (#119915)
+    "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-11-30T18:47:26Z",
+      "message": "[APM] Remove index_pattern.json and add custom field formatters (#119915)
 
 * [APM] Remove index_pattern.json and add custom field formatters
 
@@ -215,13 +241,26 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
 * Fix tests
 
 * Fix tutorial",
-    "pullNumber": 119915,
-    "pullUrl": "https://github.com/elastic/kibana/pull/119915",
-    "sha": "434f6e6a88faf24dc1ea41f9f726db78e46355a7",
-    "sourceBranch": "main",
+      "sha": "434f6e6a88faf24dc1ea41f9f726db78e46355a7",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "[APM] Remove index_pattern.json and add custom field formatters (#119915)
+
+* [APM] Remove index_pattern.json and add custom field formatters
+
+* Fix tests
+
+* Fix tests
+
+* Fix tutorial",
+        "sha": "434f6e6a88faf24dc1ea41f9f726db78e46355a7",
+      },
+      "number": 119915,
+      "url": "https://github.com/elastic/kibana/pull/119915",
+    },
   },
   Object {
-    "committedDate": "2021-11-29T15:12:27Z",
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -249,14 +288,22 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
         "url": "https://github.com/elastic/kibana/pull/120179",
       },
     ],
-    "originalMessage": "[APM] Remove log-log descriptions from correlation charts (#119700)",
-    "pullNumber": 119700,
-    "pullUrl": "https://github.com/elastic/kibana/pull/119700",
-    "sha": "ae9d51b7fe3ee6f30d0d196c782e0dcabb7ac5ff",
     "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-11-29T15:12:27Z",
+      "message": "[APM] Remove log-log descriptions from correlation charts (#119700)",
+      "sha": "ae9d51b7fe3ee6f30d0d196c782e0dcabb7ac5ff",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "[APM] Remove log-log descriptions from correlation charts (#119700)",
+        "sha": "ae9d51b7fe3ee6f30d0d196c782e0dcabb7ac5ff",
+      },
+      "number": 119700,
+      "url": "https://github.com/elastic/kibana/pull/119700",
+    },
   },
   Object {
-    "committedDate": "2021-11-29T13:40:01Z",
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -271,14 +318,22 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
         "url": "https://github.com/elastic/kibana/pull/119840",
       },
     ],
-    "originalMessage": "[APM] Fix bug in documentation on \`span.destination\` metrics (#119789)",
-    "pullNumber": 119789,
-    "pullUrl": "https://github.com/elastic/kibana/pull/119789",
-    "sha": "43253ecafa1365eae45d31dd284d0a0bf273bc4d",
     "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-11-29T13:40:01Z",
+      "message": "[APM] Fix bug in documentation on \`span.destination\` metrics (#119789)",
+      "sha": "43253ecafa1365eae45d31dd284d0a0bf273bc4d",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "[APM] Fix bug in documentation on \`span.destination\` metrics (#119789)",
+        "sha": "43253ecafa1365eae45d31dd284d0a0bf273bc4d",
+      },
+      "number": 119789,
+      "url": "https://github.com/elastic/kibana/pull/119789",
+    },
   },
   Object {
-    "committedDate": "2021-11-16T11:44:55Z",
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -303,7 +358,10 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
         "url": "https://github.com/elastic/kibana/pull/118675",
       },
     ],
-    "originalMessage": "[APM] Remove projections (#118327)
+    "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-11-16T11:44:55Z",
+      "message": "[APM] Remove projections (#118327)
 
 * Delete errors projection
 
@@ -314,13 +372,28 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
 * Fix tests
 
 Co-authored-by: Kibana Machine <42973632+kibanamachine@users.noreply.github.com>",
-    "pullNumber": 118327,
-    "pullUrl": "https://github.com/elastic/kibana/pull/118327",
-    "sha": "b48268dd0c42c9dc1fe310f7c0b3327117d066a5",
-    "sourceBranch": "main",
+      "sha": "b48268dd0c42c9dc1fe310f7c0b3327117d066a5",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "[APM] Remove projections (#118327)
+
+* Delete errors projection
+
+* Remove \`getMetricsProjection\`
+
+* Remove \`getServiceNodesProjection\`
+
+* Fix tests
+
+Co-authored-by: Kibana Machine <42973632+kibanamachine@users.noreply.github.com>",
+        "sha": "b48268dd0c42c9dc1fe310f7c0b3327117d066a5",
+      },
+      "number": 118327,
+      "url": "https://github.com/elastic/kibana/pull/118327",
+    },
   },
   Object {
-    "committedDate": "2021-11-15T22:54:40Z",
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -335,14 +408,22 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
         "url": "https://github.com/elastic/kibana/pull/118631",
       },
     ],
-    "originalMessage": "Update query_debugging_in_development_and_production.md (#118491)",
-    "pullNumber": 118491,
-    "pullUrl": "https://github.com/elastic/kibana/pull/118491",
-    "sha": "e66377790605274d2610f45eed35c9d8febdb7b9",
     "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-11-15T22:54:40Z",
+      "message": "Update query_debugging_in_development_and_production.md (#118491)",
+      "sha": "e66377790605274d2610f45eed35c9d8febdb7b9",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "Update query_debugging_in_development_and_production.md (#118491)",
+        "sha": "e66377790605274d2610f45eed35c9d8febdb7b9",
+      },
+      "number": 118491,
+      "url": "https://github.com/elastic/kibana/pull/118491",
+    },
   },
   Object {
-    "committedDate": "2021-11-08T15:12:52Z",
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -357,14 +438,22 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
         "url": "https://github.com/elastic/kibana/pull/117872",
       },
     ],
-    "originalMessage": "[APM] Ignore unavailable indices for ml jobs (#117632)",
-    "pullNumber": 117632,
-    "pullUrl": "https://github.com/elastic/kibana/pull/117632",
-    "sha": "acc7bd9d97a2147f752942dbcf01d7fb2478234b",
     "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-11-08T15:12:52Z",
+      "message": "[APM] Ignore unavailable indices for ml jobs (#117632)",
+      "sha": "acc7bd9d97a2147f752942dbcf01d7fb2478234b",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "[APM] Ignore unavailable indices for ml jobs (#117632)",
+        "sha": "acc7bd9d97a2147f752942dbcf01d7fb2478234b",
+      },
+      "number": 117632,
+      "url": "https://github.com/elastic/kibana/pull/117632",
+    },
   },
   Object {
-    "committedDate": "2021-11-08T11:52:20Z",
     "expectedTargetPullRequests": Array [
       Object {
         "branch": "8.0",
@@ -379,11 +468,20 @@ Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
         "url": "https://github.com/elastic/kibana/pull/117831",
       },
     ],
-    "originalMessage": "[APM] Document \`_inspect\` flag (#117635)",
-    "pullNumber": 117635,
-    "pullUrl": "https://github.com/elastic/kibana/pull/117635",
-    "sha": "d13ee69bdac1deebfea9f02a29cab0f9a87f2f8e",
     "sourceBranch": "main",
+    "sourceCommit": Object {
+      "committedDate": "2021-11-08T11:52:20Z",
+      "message": "[APM] Document \`_inspect\` flag (#117635)",
+      "sha": "d13ee69bdac1deebfea9f02a29cab0f9a87f2f8e",
+    },
+    "sourcePullRequest": Object {
+      "mergeCommit": Object {
+        "message": "[APM] Document \`_inspect\` flag (#117635)",
+        "sha": "d13ee69bdac1deebfea9f02a29cab0f9a87f2f8e",
+      },
+      "number": 117635,
+      "url": "https://github.com/elastic/kibana/pull/117635",
+    },
   },
 ]
 `;

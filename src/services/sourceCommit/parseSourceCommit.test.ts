@@ -1,6 +1,6 @@
 import { ValidConfigOptions } from '../../options/options';
 import { getMockSourceCommit } from './getMockSourceCommit';
-import { parseSourceCommit } from './parseSourceCommit';
+import { Commit, parseSourceCommit } from './parseSourceCommit';
 
 describe('parseSourceCommit', () => {
   describe('pullNumber', () => {
@@ -15,21 +15,7 @@ describe('parseSourceCommit', () => {
         options: {} as unknown as ValidConfigOptions,
       });
 
-      expect(commit.pullNumber).toBe(55);
-    });
-
-    it('extracts `pullNumber` from commit message if it doesnt have any associated PRs', () => {
-      const mockSourceCommit = getMockSourceCommit({
-        sourceCommit: { message: 'My commit message (#66)' },
-        sourcePullRequest: null,
-      });
-
-      const commit = parseSourceCommit({
-        sourceCommit: mockSourceCommit,
-        options: {} as unknown as ValidConfigOptions,
-      });
-
-      expect(commit.pullNumber).toBe(66);
+      expect(commit.sourcePullRequest?.number).toBe(55);
     });
   });
 
@@ -223,8 +209,21 @@ describe('parseSourceCommit', () => {
       } as unknown as ValidConfigOptions,
     });
 
-    expect(commit).toEqual({
-      committedDate: '2021-12-22T00:00:00Z',
+    const expectedCommit: Commit = {
+      sourceCommit: {
+        committedDate: '2021-12-22T00:00:00Z',
+        message: 'My commit message (#1234)',
+        sha: 'my-sha',
+      },
+      sourcePullRequest: {
+        number: 1234,
+        url: 'https://github.com/elastic/kibana/pull/1234',
+        mergeCommit: {
+          message: 'My commit message (#1234)',
+          sha: 'my-sha',
+        },
+      },
+      sourceBranch: 'source-branch-from-associated-pull-request',
       expectedTargetPullRequests: [
         {
           branch: '6.x',
@@ -247,11 +246,8 @@ describe('parseSourceCommit', () => {
           state: 'MISSING',
         },
       ],
-      originalMessage: 'My commit message (#1234)',
-      pullNumber: 1234,
-      pullUrl: 'https://github.com/elastic/kibana/pull/1234',
-      sha: 'my-sha',
-      sourceBranch: 'source-branch-from-associated-pull-request',
-    });
+    };
+
+    expect(commit).toEqual(expectedCommit);
   });
 });

@@ -149,8 +149,12 @@ export async function fetchCommitsByAuthor(options: {
     throw new HandledError(errorText);
   }
 
-  const commitsUnique = uniqBy(commits, 'sha');
-  const commitsSorted = orderBy(commitsUnique, 'committedDate', 'desc');
+  const commitsUnique = uniqBy(commits, (c) => c.sourceCommit.sha);
+  const commitsSorted = orderBy(
+    commitsUnique,
+    (c) => c.sourceCommit.committedDate,
+    'desc'
+  );
   return commitsSorted;
 }
 

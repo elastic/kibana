@@ -92,9 +92,13 @@ export function getPullRequestBody({
 }) {
   const commitMessages = commits
     .map((c) => {
-      const message = c.pullNumber
-        ? `#${c.pullNumber}`
-        : `${getFirstLine(c.originalMessage)} (${getShortSha(c.sha)})`;
+      const message = c.sourcePullRequest
+        ? `[${getFirstLine(c.sourceCommit.message)}](${
+            c.sourcePullRequest.url
+          })`
+        : `${getFirstLine(c.sourceCommit.message)} (${getShortSha(
+            c.sourceCommit.sha
+          )})`;
 
       return ` - ${message}`;
     })
@@ -102,7 +106,7 @@ export function getPullRequestBody({
 
   const defaultPrDescription = `# Backport
 
-This is an automatic backport to \`${targetBranch}\` of:
+This will backport the following commits from \`${commits[0].sourceBranch}\` to \`${targetBranch}\`:
 ${commitMessages}
 
 <!--- Backport version: ${PACKAGE_VERSION} -->
@@ -126,7 +130,7 @@ export function getTitle({
   targetBranch: string;
 }) {
   const commitMessages = commits
-    .map((commit) => getFirstLine(commit.originalMessage))
+    .map((c) => getFirstLine(c.sourceCommit.message))
     .join(' | ');
 
   const defaultPrTitle = '[{targetBranch}] {commitMessages}';

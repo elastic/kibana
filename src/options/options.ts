@@ -1,7 +1,10 @@
 import { isEmpty } from 'lodash';
 import { HandledError } from '../services/HandledError';
 import { getGlobalConfigPath } from '../services/env';
-import { getOptionsFromGithub } from '../services/github/v4/getOptionsFromGithub/getOptionsFromGithub';
+import {
+  getOptionsFromGithub,
+  OptionsFromGithub,
+} from '../services/github/v4/getOptionsFromGithub/getOptionsFromGithub';
 import { getRepoOwnerAndNameFromGitRemotes } from '../services/github/v4/getRepoOwnerAndNameFromGitRemotes';
 import { updateLogger } from './../services/logger';
 import { ConfigFileOptions, TargetBranchChoiceOrString } from './ConfigOptions';
@@ -62,7 +65,7 @@ export async function getOptions(
   });
 
   // combined options from cli and config files
-  const combined = getCombinedOptions({
+  const combined = getMergedOptionsFromConfigAndCli({
     optionsFromConfigFiles,
     optionsFromCliArgs,
   });
@@ -83,7 +86,7 @@ export async function getOptions(
     repoOwner,
   });
 
-  const res = {
+  const options = {
     // default author
     author: optionsFromGithub.authenticatedUsername,
 
@@ -105,12 +108,12 @@ export async function getOptions(
     repoOwner,
   };
 
-  requireTargetBranch(res);
+  throwForRequiredOptions(options);
 
-  return res;
+  return options;
 }
 
-async function getRequiredOptions(combined: CombinedOptions) {
+async function getRequiredOptions(combined: OptionsFromConfigAndCli) {
   const { accessToken, repoName, repoOwner } = combined;
 
   if (accessToken && repoName && repoOwner) {
@@ -151,8 +154,58 @@ async function getRequiredOptions(combined: CombinedOptions) {
   };
 }
 
-type CombinedOptions = ReturnType<typeof getCombinedOptions>;
-function getCombinedOptions({
+function throwForRequiredOptions(
+  options: OptionsFromConfigAndCli | OptionsFromGithub
+) {
+  // ensure `targetBranches` or `targetBranchChoices` are given
+  if (
+    isEmpty(options.targetBranches) &&
+    isEmpty(options.targetBranchChoices) &&
+    // this is primarily necessary on CI where `targetBranches` and `targetBranchChoices` and not given
+    isEmpty(options.branchLabelMapping)
+  ) {
+    throw new HandledError(
+      `Please specify a target branch: "--branch 6.1".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
+    );
+  }
+
+  const optionKeys: Array<keyof typeof options> = [
+    'accessToken',
+    'author',
+    'autoMergeMethod',
+    'backportBinary',
+    'configFile',
+    'dir',
+    'editor',
+    'gitHostname',
+    'githubApiBaseUrlV3',
+    'githubApiBaseUrlV4',
+    'logFilePath',
+    'prDescription',
+    'prFilter',
+    'prTitle',
+    'repoName',
+    'repoOwner',
+    'sha',
+    'sourceBranch',
+    'username',
+  ];
+
+  // Disallow empty strings
+  // this is primarily an issue in Github actions where inputs default to empty strings instead of undefined
+  // in those cases failing early provides a better UX
+  optionKeys.forEach((optionName) => {
+    const option = options[optionName] as string;
+    if (option === '') {
+      throw new HandledError(`"${optionName}" cannot be empty!`);
+    }
+  });
+}
+
+type OptionsFromConfigAndCli = ReturnType<
+  typeof getMergedOptionsFromConfigAndCli
+>;
+function getMergedOptionsFromConfigAndCli({
   optionsFromConfigFiles,
   optionsFromCliArgs,
 }: {
@@ -164,22 +217,4 @@ function getCombinedOptions({
     ...optionsFromConfigFiles,
     ...optionsFromCliArgs,
   };
-}
-
-function requireTargetBranch(config: {
-  targetBranches: CombinedOptions['targetBranches'];
-  targetBranchChoices: CombinedOptions['targetBranchChoices'];
-  branchLabelMapping?: CombinedOptions['branchLabelMapping'];
-}) {
-  // ensure `targetBranches` or `targetBranchChoices` are given
-  if (
-    isEmpty(config.targetBranches) &&
-    isEmpty(config.targetBranchChoices) &&
-    // this is primarily necessary on CI where `targetBranches` and `targetBranchChoices` and not given
-    isEmpty(config.branchLabelMapping)
-  ) {
-    throw new HandledError(
-      `Please specify a target branch: "--branch 6.1".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
-    );
-  }
 }

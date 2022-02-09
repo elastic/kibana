@@ -7,8 +7,8 @@ import { fetchCommitBySha } from './fetchCommitBySha';
 describe('fetchCommitBySha', () => {
   let devAccessToken: string;
 
-  beforeEach(async () => {
-    devAccessToken = await getDevAccessToken();
+  beforeEach(() => {
+    devAccessToken = getDevAccessToken();
   });
 
   describe('snapshot request/response', () => {
@@ -50,21 +50,20 @@ describe('fetchCommitBySha', () => {
   });
 
   it('should return single commit with pull request', async () => {
-    await expect(
-      await fetchCommitBySha({
-        repoOwner: 'elastic',
-        repoName: 'kibana',
-        accessToken: devAccessToken,
-        sha: 'cb6fbc0',
-        sourceBranch: 'master',
-        historicalBranchLabelMappings: [],
-      })
-    ).toEqual({
-      committedDate: '2020-07-07T20:40:28Z',
-      originalMessage: '[APM] Add API tests (#70740)',
-      pullNumber: 70740,
-      pullUrl: 'https://github.com/elastic/kibana/pull/70740',
-      sha: 'cb6fbc0e1b406675724181a3e9f59459b5f8f892',
+    const expectedCommit: Commit = {
+      sourceCommit: {
+        committedDate: '2020-07-07T20:40:28Z',
+        message: '[APM] Add API tests (#70740)',
+        sha: 'cb6fbc0e1b406675724181a3e9f59459b5f8f892',
+      },
+      sourcePullRequest: {
+        number: 70740,
+        url: 'https://github.com/elastic/kibana/pull/70740',
+        mergeCommit: {
+          message: '[APM] Add API tests (#70740)',
+          sha: 'cb6fbc0e1b406675724181a3e9f59459b5f8f892',
+        },
+      },
       sourceBranch: 'master',
       expectedTargetPullRequests: [
         {
@@ -78,7 +77,18 @@ describe('fetchCommitBySha', () => {
           },
         },
       ],
-    });
+    };
+
+    await expect(
+      await fetchCommitBySha({
+        repoOwner: 'elastic',
+        repoName: 'kibana',
+        accessToken: devAccessToken,
+        sha: 'cb6fbc0',
+        sourceBranch: 'master',
+        historicalBranchLabelMappings: [],
+      })
+    ).toEqual(expectedCommit);
   });
 
   it('throws if sha does not exist', async () => {

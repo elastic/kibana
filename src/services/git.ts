@@ -197,7 +197,7 @@ export async function fetchBranch(options: ValidConfigOptions, branch: string) {
 
 export async function cherrypick(
   options: ValidConfigOptions,
-  sha: Commit['sha'],
+  sha: string,
   mergedTargetPullRequest?: ExpectedTargetPullRequest
 ): Promise<{
   conflictingFiles: {
@@ -286,9 +286,12 @@ export async function commitChanges(
     // manually set the commit message if the inferred commit message is empty
     // this can happen if the user runs `git reset HEAD` and thereby aborts the cherrypick process
     if (e.stderr?.includes('Aborting commit due to empty commit message')) {
-      await exec(`git commit -m "${commit.originalMessage}" ${noVerifyFlag}`, {
-        cwd: getRepoPath(options),
-      });
+      await exec(
+        `git commit -m "${commit.sourceCommit.message}" ${noVerifyFlag}`,
+        {
+          cwd: getRepoPath(options),
+        }
+      );
       return;
     }
 

@@ -11,10 +11,3 @@ export function stripPullNumber(message: string) {
   const messageWithoutPullNumber = firstMessageLine.replace(/( \(#\d+\))$/, '');
   return messageWithoutPullNumber;
 }
-
-export function extractPullNumber(firstMessageLine: string) {
-  const matches = firstMessageLine.match(/\(#(\d+)\)/);
-  if (matches) {
-    return parseInt(matches[1], 10);
-  }
-}

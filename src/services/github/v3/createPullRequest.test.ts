@@ -1,5 +1,4 @@
 import { ValidConfigOptions } from '../../../options/options';
-import { Commit } from '../../sourceCommit/parseSourceCommit';
 import { getPullRequestBody, getTitle } from './createPullRequest';
 
 describe('getPullRequestBody', () => {
@@ -9,10 +8,24 @@ describe('getPullRequestBody', () => {
         options: {} as ValidConfigOptions,
         commits: [
           {
-            pullNumber: 55,
-            sha: 'abcdefghi',
-            originalMessage: 'My commit message',
-          } as Commit,
+            sourcePullRequest: {
+              number: 55,
+              url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
+              mergeCommit: {
+                sha: 'abcdefghi',
+                message: 'My commit message (#55)',
+              },
+            },
+
+            sourceCommit: {
+              committedDate: '2020',
+              sha: 'abcdefghi',
+              message: 'My commit message (#55)',
+            },
+
+            expectedTargetPullRequests: [],
+            sourceBranch: 'master',
+          },
         ],
 
         targetBranch: '7.x',
@@ -20,10 +33,10 @@ describe('getPullRequestBody', () => {
     ).toMatchInlineSnapshot(`
       "# Backport
 
-      This is an automatic backport to \`7.x\` of:
-       - #55
+      This will backport the following commits from \`master\` to \`7.x\`:
+       - [My commit message (#55)](https://github.com/backport-org/different-merge-strategies/pull/55)
 
-      <!--- Backport version: 1.2.3 -->
+      <!--- Backport version: 1.2.3-mocked -->
 
       ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
@@ -36,9 +49,15 @@ describe('getPullRequestBody', () => {
         options: {} as ValidConfigOptions,
         commits: [
           {
-            sha: 'abcdefghijklmw',
-            originalMessage: 'My commit message',
-          } as Commit,
+            sourceCommit: {
+              committedDate: '',
+              sha: 'abcdefghijklmw',
+              message: 'My commit message',
+            },
+
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
         ],
 
         targetBranch: '7.x',
@@ -46,10 +65,10 @@ describe('getPullRequestBody', () => {
     ).toMatchInlineSnapshot(`
       "# Backport
 
-      This is an automatic backport to \`7.x\` of:
+      This will backport the following commits from \`main\` to \`7.x\`:
        - My commit message (abcdefgh)
 
-      <!--- Backport version: 1.2.3 -->
+      <!--- Backport version: 1.2.3-mocked -->
 
       ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
@@ -62,14 +81,35 @@ describe('getPullRequestBody', () => {
         options: {} as ValidConfigOptions,
         commits: [
           {
-            pullNumber: 55,
-            sha: 'abcdefghijklm',
-            originalMessage: 'My commit message',
-          } as Commit,
+            sourcePullRequest: {
+              number: 55,
+              url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
+              mergeCommit: {
+                sha: 'abcdefghijklm',
+                message: 'My commit message (#55)',
+              },
+            },
+
+            sourceCommit: {
+              committedDate: '',
+              sha: 'abcdefghijklm',
+              message: 'My commit message (#55)',
+            },
+
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
+
           {
-            sha: 'qwertyuiop',
-            originalMessage: 'Another commit message',
-          } as Commit,
+            sourceCommit: {
+              committedDate: '',
+              sha: 'qwertyuiop',
+              message: 'Another commit message',
+            },
+
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
         ],
 
         targetBranch: '7.x',
@@ -77,11 +117,75 @@ describe('getPullRequestBody', () => {
     ).toMatchInlineSnapshot(`
       "# Backport
 
-      This is an automatic backport to \`7.x\` of:
-       - #55
+      This will backport the following commits from \`main\` to \`7.x\`:
+       - [My commit message (#55)](https://github.com/backport-org/different-merge-strategies/pull/55)
        - Another commit message (qwertyui)
 
-      <!--- Backport version: 1.2.3 -->
+      <!--- Backport version: 1.2.3-mocked -->
+
+      ### Questions ?
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
+    `);
+  });
+
+  it('when a PR is merged (instead of squashed) and the individual commits are selected', () => {
+    expect(
+      getPullRequestBody({
+        options: {} as ValidConfigOptions,
+        commits: [
+          {
+            sourceCommit: {
+              committedDate: '2022-02-07T23:53:14Z',
+              message: 'Merge strategy: Second commit',
+              sha: 'e8df5eaa4db7b94474b48e2320b02d33a830d9fb',
+            },
+
+            sourcePullRequest: {
+              number: 1,
+              url: 'https://github.com/backport-org/different-merge-strategies/pull/1',
+              mergeCommit: {
+                message:
+                  'Merge pull request #1 from backport-org/merge-strategy\n\nMerge commits to `main`',
+                sha: '0db7f1ac1233461563d8708511d1c14adbab46da',
+              },
+            },
+
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
+
+          {
+            sourceCommit: {
+              committedDate: '2022-02-07T23:51:59Z',
+              message: 'Merge strategy: First commit',
+              sha: '5411b1c1144093e422220008f23f2c2b909ed113',
+            },
+
+            sourcePullRequest: {
+              number: 1,
+              url: 'https://github.com/backport-org/different-merge-strategies/pull/1',
+              mergeCommit: {
+                message:
+                  'Merge pull request #1 from backport-org/merge-strategy\n\nMerge commits to `main`',
+                sha: '0db7f1ac1233461563d8708511d1c14adbab46da',
+              },
+            },
+
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
+        ],
+
+        targetBranch: '7.x',
+      })
+    ).toMatchInlineSnapshot(`
+      "# Backport
+
+      This will backport the following commits from \`main\` to \`7.x\`:
+       - [Merge strategy: Second commit](https://github.com/backport-org/different-merge-strategies/pull/1)
+       - [Merge strategy: First commit](https://github.com/backport-org/different-merge-strategies/pull/1)
+
+      <!--- Backport version: 1.2.3-mocked -->
 
       ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
@@ -97,21 +201,38 @@ describe('getPullRequestBody', () => {
         } as ValidConfigOptions,
         commits: [
           {
-            pullNumber: 55,
-            sha: 'abcdefghijklm',
-            originalMessage: 'My commit message',
-          } as Commit,
+            sourcePullRequest: {
+              number: 55,
+              url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
+              mergeCommit: {
+                sha: 'abcdefghijklm',
+                message: 'My commit message (#55)',
+              },
+            },
+            sourceCommit: {
+              committedDate: '',
+              sha: 'abcdefghijklm',
+              message: 'My commit message (#55)',
+            },
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
           {
-            sha: 'qwertyuiop',
-            originalMessage: 'Another commit message',
-          } as Commit,
+            sourceCommit: {
+              committedDate: '',
+              sha: 'qwertyuiop',
+              message: 'Another commit message',
+            },
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
         ],
 
         targetBranch: '7.x',
       })
     ).toMatchInlineSnapshot(`
       "Backporting the following to 7.x:
-       - #55
+       - [My commit message (#55)](https://github.com/backport-org/different-merge-strategies/pull/55)
        - Another commit message (qwertyui)"
     `);
   });
@@ -124,14 +245,35 @@ describe('getPullRequestBody', () => {
         } as ValidConfigOptions,
         commits: [
           {
-            pullNumber: 55,
-            sha: 'abcdefghijklm',
-            originalMessage: 'My commit message',
-          } as Commit,
+            sourcePullRequest: {
+              number: 55,
+              url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
+              mergeCommit: {
+                sha: 'abcdefghijklm',
+                message: 'My commit message (#55)',
+              },
+            },
+
+            sourceCommit: {
+              committedDate: '',
+              sha: 'abcdefghijklm',
+              message: 'My commit message (#55)',
+            },
+
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
+
           {
-            sha: 'qwertyuiop',
-            originalMessage: 'Another commit message',
-          } as Commit,
+            sourceCommit: {
+              committedDate: '',
+              sha: 'qwertyuiop',
+              message: 'Another commit message',
+            },
+
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
         ],
 
         targetBranch: '7.x',
@@ -139,11 +281,11 @@ describe('getPullRequestBody', () => {
     ).toMatchInlineSnapshot(`
       "# Backport
 
-      This is an automatic backport to \`7.x\` of:
-       - #55
+      This will backport the following commits from \`main\` to \`7.x\`:
+       - [My commit message (#55)](https://github.com/backport-org/different-merge-strategies/pull/55)
        - Another commit message (qwertyui)
 
-      <!--- Backport version: 1.2.3 -->
+      <!--- Backport version: 1.2.3-mocked -->
 
       ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
@@ -160,19 +302,43 @@ describe('getTitle', () => {
         options: {} as ValidConfigOptions,
         commits: [
           {
-            pullNumber: 55,
-            sha: 'abcdefghi',
-            originalMessage: 'My commit message',
-          } as Commit,
+            sourceBranch: 'main',
+            sourcePullRequest: {
+              number: 55,
+              url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
+              mergeCommit: {
+                sha: 'abcdefghi',
+                message: 'My commit message (#55)',
+              },
+            },
+            sourceCommit: {
+              committedDate: '2020',
+              sha: 'abcdefghi',
+              message: 'My commit message (#55)',
+            },
+            expectedTargetPullRequests: [],
+          },
           {
-            pullNumber: 56,
-            sha: 'jklmnopqr',
-            originalMessage: 'Another commit message',
-          } as Commit,
+            sourcePullRequest: {
+              number: 56,
+              url: 'https://github.com/backport-org/different-merge-strategies/pull/56',
+              mergeCommit: {
+                sha: 'jklmnopqr',
+                message: 'Another commit message (#56)',
+              },
+            },
+            sourceCommit: {
+              committedDate: '2020',
+              sha: 'jklmnopqr',
+              message: 'Another commit message (#56)',
+            },
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
         ],
         targetBranch: '7.x',
       })
-    ).toEqual('[7.x] My commit message | Another commit message');
+    ).toEqual('[7.x] My commit message (#55) | Another commit message (#56)');
   });
 
   it('replaces template variables in PR title', () => {
@@ -183,14 +349,25 @@ describe('getTitle', () => {
         } as ValidConfigOptions,
         commits: [
           {
-            pullNumber: 55,
-            sha: 'abcdefghi',
-            originalMessage: 'My commit message',
-          } as Commit,
+            sourcePullRequest: {
+              number: 55,
+              url: 'https://github.com/backport-org/different-merge-strategies/pull/55',
+              mergeCommit: {
+                sha: 'abcdefghi',
+                message: 'My commit message (#55)',
+              },
+            },
+            sourceCommit: {
+              committedDate: '',
+              sha: 'abcdefghi',
+              message: 'My commit message (#55)',
+            },
+            sourceBranch: 'main',
+            expectedTargetPullRequests: [],
+          },
         ],
-
         targetBranch: '7.x',
       })
-    ).toEqual('Branch: "7.x". Messages: My commit message');
+    ).toEqual('Branch: "7.x". Messages: My commit message (#55)');
   });
 });

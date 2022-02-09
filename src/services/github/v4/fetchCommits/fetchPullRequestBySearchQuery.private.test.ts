@@ -1,12 +1,13 @@
 import { ValidConfigOptions } from '../../../../options/options';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
+import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import { fetchPullRequestBySearchQuery } from './fetchPullRequestBySearchQuery';
 
 describe('fetchPullRequestBySearchQuery', () => {
   let devAccessToken: string;
 
-  beforeAll(async () => {
-    devAccessToken = await getDevAccessToken();
+  beforeAll(() => {
+    devAccessToken = getDevAccessToken();
   });
 
   describe('when filter does not match any PRs', () => {
@@ -39,9 +40,22 @@ describe('fetchPullRequestBySearchQuery', () => {
         author: 'sqren',
       } as ValidConfigOptions;
 
-      expect(await fetchPullRequestBySearchQuery(options)).toEqual([
+      const expectedCommits: Commit[] = [
         {
-          committedDate: '2020-08-16T21:44:28Z',
+          sourceCommit: {
+            committedDate: '2020-08-16T21:44:28Z',
+            message: 'Add sheep emoji (#9)',
+            sha: 'eebf165c82a4b718d95c11b3877e365b1949ff28',
+          },
+          sourcePullRequest: {
+            number: 9,
+            url: 'https://github.com/backport-org/backport-e2e/pull/9',
+            mergeCommit: {
+              message: 'Add sheep emoji (#9)',
+              sha: 'eebf165c82a4b718d95c11b3877e365b1949ff28',
+            },
+          },
+          sourceBranch: 'master',
           expectedTargetPullRequests: [
             {
               branch: '7.8',
@@ -50,14 +64,22 @@ describe('fetchPullRequestBySearchQuery', () => {
               url: 'https://github.com/backport-org/backport-e2e/pull/10',
             },
           ],
-          originalMessage: 'Add sheep emoji (#9)',
-          pullNumber: 9,
-          pullUrl: 'https://github.com/backport-org/backport-e2e/pull/9',
-          sha: 'eebf165c82a4b718d95c11b3877e365b1949ff28',
-          sourceBranch: 'master',
         },
         {
-          committedDate: '2020-08-15T12:40:19Z',
+          sourceCommit: {
+            committedDate: '2020-08-15T12:40:19Z',
+            message: 'Add 🍏 emoji (#5)',
+            sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
+          },
+          sourcePullRequest: {
+            number: 5,
+            url: 'https://github.com/backport-org/backport-e2e/pull/5',
+            mergeCommit: {
+              message: 'Add 🍏 emoji (#5)',
+              sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
+            },
+          },
+          sourceBranch: 'master',
           expectedTargetPullRequests: [
             {
               branch: '7.x',
@@ -80,13 +102,12 @@ describe('fetchPullRequestBySearchQuery', () => {
               },
             },
           ],
-          originalMessage: 'Add 🍏 emoji (#5)',
-          pullNumber: 5,
-          pullUrl: 'https://github.com/backport-org/backport-e2e/pull/5',
-          sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
-          sourceBranch: 'master',
         },
-      ]);
+      ];
+
+      expect(await fetchPullRequestBySearchQuery(options)).toEqual(
+        expectedCommits
+      );
     });
   });
 });

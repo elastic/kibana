@@ -4,6 +4,5 @@
 /dist
 /yarn-error.log
 .DS_Store
-/src/test/private/accessToken.txt
 /src/test/_tmp_sandbox_
-
+/.env

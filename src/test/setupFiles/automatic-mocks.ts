@@ -14,7 +14,11 @@ jest.mock('find-up', () => {
 
 // @ts-expect-error
 // eslint-disable-next-line no-import-assign
-packageVersionModule.PACKAGE_VERSION = '1.2.3';
+packageVersionModule.UNMOCKED_PACKAGE_VERSION =
+  packageVersionModule.PACKAGE_VERSION;
+// @ts-expect-error
+// eslint-disable-next-line no-import-assign
+packageVersionModule.PACKAGE_VERSION = '1.2.3-mocked';
 
 jest.mock('make-dir', () => {
   return jest.fn(() => Promise.resolve('/some/path'));

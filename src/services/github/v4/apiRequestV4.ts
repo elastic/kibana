@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import gql from 'graphql-tag';
 import { HandledError } from '../../HandledError';
 import { logger } from '../../logger';
 
@@ -91,10 +92,14 @@ function addDebugLogs({
   axiosResponse: AxiosResponse;
   didSucceed: boolean;
 }) {
-  logger.info(`POST ${githubApiBaseUrlV4} (status: ${axiosResponse.status})`);
+  const gqlQueryName = getGqlQueryName(query);
+  logger.info(
+    `POST ${githubApiBaseUrlV4} (name:${gqlQueryName}, status: ${axiosResponse.status})`
+  );
   const logMethod = didSucceed ? logger.verbose : logger.info;
 
-  logMethod('Query:', query);
+  logMethod(`Query name ${gqlQueryName}`);
+  logMethod(`Query: ${query}`);
   logMethod('Variables:', variables);
   logMethod('Response headers:', axiosResponse.headers);
   logMethod('Response data:', axiosResponse.data);
@@ -113,4 +118,10 @@ export class GithubV4Exception<DataResponse> extends Error {
     Error.captureStackTrace(this, HandledError);
     this.name = 'GithubV4Exception';
   }
+}
+
+function getGqlQueryName(query: string) {
+  const ast = gql(query);
+  //@ts-expect-error
+  return ast.definitions[0].name.value;
 }

@@ -16,7 +16,7 @@ const sandboxPath = getSandboxPath({ filename: __filename });
 const REPO_OWNER = 'backport-org';
 const REPO_NAME = 'integration-test';
 const BRANCH_WITH_ONE_COMMIT = 'backport/7.x/commit-5bf29b7d';
-const BRANCH_WITH_TWO_COMMITS = 'backport/7.x/commit-5bf29b7d_pr-2';
+const BRANCH_WITH_TWO_COMMITS = 'backport/7.x/commit-5bf29b7d_commit-59d6ff1c';
 const AUTHOR = 'sqren';
 
 describe('backport e2e', () => {
@@ -28,7 +28,7 @@ describe('backport e2e', () => {
   beforeAll(async () => {
     // set alternative homedir
     jest.spyOn(os, 'homedir').mockReturnValue(`${sandboxPath}/homedir`);
-    accessToken = await getDevAccessToken();
+    accessToken = getDevAccessToken();
 
     mockConfigFiles({
       globalConfig: {},
@@ -83,10 +83,10 @@ describe('backport e2e', () => {
             "base": "7.x",
             "body": "# Backport
 
-        This is an automatic backport to \`7.x\` of:
+        This will backport the following commits from \`master\` to \`7.x\`:
          - Add ❤️ emoji (5bf29b7d)
 
-        <!--- Backport version: 1.2.3 -->
+        <!--- Backport version: 1.2.3-mocked -->
 
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
@@ -162,15 +162,15 @@ describe('backport e2e', () => {
             "base": "7.x",
             "body": "# Backport
 
-        This is an automatic backport to \`7.x\` of:
+        This will backport the following commits from \`master\` to \`7.x\`:
          - Add ❤️ emoji (5bf29b7d)
-         - #2
+         - Add family emoji (#2) (59d6ff1c)
 
-        <!--- Backport version: 1.2.3 -->
+        <!--- Backport version: 1.2.3-mocked -->
 
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
-            "head": "sqren:backport/7.x/commit-5bf29b7d_pr-2",
+            "head": "sqren:backport/7.x/commit-5bf29b7d_commit-59d6ff1c",
             "title": "[7.x] Add ❤️ emoji | Add family emoji (#2)",
           },
         ]
@@ -247,10 +247,10 @@ describe('backport e2e', () => {
             "base": "7.x",
             "body": "# Backport
 
-        This is an automatic backport to \`7.x\` of:
+        This will backport the following commits from \`master\` to \`7.x\`:
          - Add ❤️ emoji (5bf29b7d)
 
-        <!--- Backport version: 1.2.3 -->
+        <!--- Backport version: 1.2.3-mocked -->
 
         ### Questions ?
         Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
@@ -368,26 +368,45 @@ async function deleteBranch({
 }
 
 async function resetState(accessToken: string) {
-  await deleteBranch({
+  const ownerBranches = await getBranches({
     accessToken,
     repoOwner: REPO_OWNER,
     repoName: REPO_NAME,
-    branchName: BRANCH_WITH_ONE_COMMIT,
   });
 
-  await deleteBranch({
+  // delete all branches except master and 7.x
+  await Promise.all(
+    ownerBranches
+      .filter((b) => b.name !== 'master' && b.name !== '7.x')
+      .map((b) => {
+        return deleteBranch({
+          accessToken,
+          repoOwner: REPO_OWNER,
+          repoName: REPO_NAME,
+          branchName: b.name,
+        });
+      })
+  );
+
+  const forkBranches = await getBranches({
     accessToken,
     repoOwner: AUTHOR,
     repoName: REPO_NAME,
-    branchName: BRANCH_WITH_ONE_COMMIT,
   });
 
-  await deleteBranch({
-    accessToken,
-    repoOwner: AUTHOR,
-    repoName: REPO_NAME,
-    branchName: BRANCH_WITH_TWO_COMMITS,
-  });
+  // delete all branches except master and 7.x
+  await Promise.all(
+    forkBranches
+      .filter((b) => b.name !== 'master' && b.name !== '7.x')
+      .map((b) => {
+        return deleteBranch({
+          accessToken,
+          repoOwner: AUTHOR,
+          repoName: REPO_NAME,
+          branchName: b.name,
+        });
+      })
+  );
 
   await resetSandbox(sandboxPath);
 }
