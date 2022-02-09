@@ -108,7 +108,7 @@ export const DOCUMENT_PERMISSIONS_TEXT = i18n.translate(
 export const DOCUMENT_PERMISSIONS_DISABLED_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.documentPermissionsDisabled.text',
   {
-    defaultMessage: 'Disabled for this sources',
+    defaultMessage: 'Disabled for this source',
   }
 );
 
@@ -162,7 +162,7 @@ export const DOC_PERMISSIONS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.docPermissions.description',
   {
     defaultMessage:
-      'Document-level permissions manage content access content on individual or group attributes. Allow or deny access to specific documents.',
+      'Document-level permissions manage content access on individual or group attributes. Allow or deny access to specific documents.',
   }
 );
 
