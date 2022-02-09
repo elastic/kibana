@@ -142,7 +142,7 @@ export function useFleetServerHostsForm(
 
   const submit = useCallback(async () => {
     try {
-      if (!validate) {
+      if (!validate()) {
         return;
       }
       const { agentCount, agentPolicyCount } = await getAgentAndPolicyCount();
