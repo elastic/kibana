@@ -1667,7 +1667,7 @@ export function getSplitByTermsLayer(
   dateField: IndexPatternField | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
-  const { termsParams, metrics, timeInterval } = layer;
+  const { termsParams, metrics, timeInterval, splitWithDateHistogram } = layer;
   const copyMetricsArray = [...metrics];
   const computedLayer = computeLayerFromContext(
     metrics.length === 1,
@@ -1679,7 +1679,7 @@ export function getSplitByTermsLayer(
 
   const columnId = generateId();
   let termsLayer = insertNewColumn({
-    op: 'terms',
+    op: splitWithDateHistogram ? 'date_histogram' : 'terms',
     layer: insertNewColumn({
       op: 'date_histogram',
       layer: computedLayer,

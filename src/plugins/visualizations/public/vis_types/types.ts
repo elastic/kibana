@@ -93,6 +93,7 @@ interface VisualizeEditorMetricContext {
 
 export interface VisualizeEditorLayersContext {
   indexPatternId: string;
+  splitWithDateHistogram?: boolean;
   timeFieldName?: string;
   chartType?: string;
   axisPosition?: string;

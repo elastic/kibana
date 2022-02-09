@@ -13,6 +13,7 @@ import type {
 import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { getDataSourceInfo } from './get_datasource_info';
+import { getFieldType } from './get_field_type';
 import { getSeries } from './get_series';
 import { getYExtents } from './get_extents';
 
@@ -78,6 +79,15 @@ export const triggerTSVBtoLensConfiguration = async (
 
     const palette = layer.palette as PaletteOutput;
 
+    // in case of terms in a date field, we want to apply the date_histogram
+    let splitWithDateHistogram = false;
+    if (layer.terms_field && layer.split_mode === 'terms') {
+      const fieldType = await getFieldType(indexPatternId, layer.terms_field);
+      if (fieldType === 'date') {
+        splitWithDateHistogram = true;
+      }
+    }
+
     const layerConfiguration: VisualizeEditorLayersContext = {
       indexPatternId,
       timeFieldName: timeField,
@@ -89,6 +99,7 @@ export const triggerTSVBtoLensConfiguration = async (
           : 'line',
       axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
       ...(layer.terms_field && { splitField: layer.terms_field }),
+      splitWithDateHistogram,
       ...(layer.split_mode !== 'everything' && { splitMode: layer.split_mode }),
       ...(splitFilters.length > 0 && { splitFilters }),
       // for non supported palettes, we will use the default palette
