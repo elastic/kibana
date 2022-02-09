@@ -11,7 +11,7 @@ set -e
 ./check_env_variables.sh
 
 # Uses a default if no argument is specified
-RULES=(${@:-./rules/queries/query_with_rule_id.json})
+RULES=(${@:-./rules/queries/query_with_list.json})
 
 # Example: ./post_rule.sh
 # Example: ./post_rule.sh ./rules/queries/query_with_rule_id.json
@@ -22,7 +22,7 @@ do {
   curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
-  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+  -u elastic:changeme \
   -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules \
    -d @${RULE} \
   | jq -S .;
