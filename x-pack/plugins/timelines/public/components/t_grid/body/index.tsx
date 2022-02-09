@@ -229,6 +229,7 @@ const transformControlColumns = ({
         isExpandable,
         isExpanded,
         rowIndex,
+        colIndex,
         setCellProps,
       }: EuiDataGridCellValueElementProps) => {
         const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
@@ -269,6 +270,7 @@ const transformControlColumns = ({
             onRowSelected={onRowSelected}
             onRuleChange={onRuleChange}
             rowIndex={rowIndex}
+            colIndex={colIndex}
             pageRowIndex={pageRowIndex}
             selectedEventIds={selectedEventIds}
             setCellProps={setCellProps}

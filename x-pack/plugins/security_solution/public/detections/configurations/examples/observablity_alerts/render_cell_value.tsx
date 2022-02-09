@@ -39,6 +39,7 @@ export const RenderCellValue: React.FC<
   isExpanded,
   linkValues,
   rowIndex,
+  colIndex,
   setCellProps,
   timelineId,
 }) => {
@@ -81,6 +82,7 @@ export const RenderCellValue: React.FC<
           isExpanded={isExpanded}
           linkValues={linkValues}
           rowIndex={rowIndex}
+          colIndex={colIndex}
           setCellProps={setCellProps}
           timelineId={timelineId}
         />
