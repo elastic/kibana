@@ -96,7 +96,7 @@ describe('monitor upgrade telemetry helpers', () => {
       monitorInterval: 180000,
       lastUpdatedAt: undefined,
       deletedAt: undefined,
-      error: errors,
+      errors,
       durationSinceLastUpdated: undefined,
       revision: 1,
     });
@@ -131,7 +131,7 @@ describe('monitor upgrade telemetry helpers', () => {
       monitorInterval: 180000,
       lastUpdatedAt: undefined,
       deletedAt: undefined,
-      error: errors,
+      errors,
       durationSinceLastUpdated: undefined,
       revision: 1,
     });
@@ -156,7 +156,7 @@ describe('monitor upgrade telemetry helpers', () => {
       monitorInterval: 180000,
       lastUpdatedAt: testConfig.updated_at,
       deletedAt: undefined,
-      error: errors,
+      errors,
       durationSinceLastUpdated: 7200000,
       revision: 1,
     });
@@ -181,7 +181,7 @@ describe('monitor upgrade telemetry helpers', () => {
       monitorInterval: 180000,
       lastUpdatedAt: testConfig.updated_at,
       deletedAt: '2011-10-05T16:48:00.000Z',
-      error: errors,
+      errors,
       durationSinceLastUpdated: 7200000,
       revision: 1,
     });
