@@ -57,7 +57,13 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
   async fn(
     input,
     args,
-    { getSearchSessionId, isSyncColorsEnabled, getExecutionContext, inspectorAdapters }
+    {
+      getSearchSessionId,
+      isSyncColorsEnabled,
+      getExecutionContext,
+      inspectorAdapters,
+      abortSignal: expressionAbortSignal,
+    }
   ) {
     const visParams: TimeseriesVisParams = JSON.parse(args.params);
     const uiState = JSON.parse(args.uiState);
@@ -70,6 +76,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       searchSessionId: getSearchSessionId(),
       executionContext: getExecutionContext(),
       inspectorAdapters,
+      expressionAbortSignal,
     });
 
     return {
