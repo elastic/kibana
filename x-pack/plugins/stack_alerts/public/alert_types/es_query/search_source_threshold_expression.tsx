@@ -6,20 +6,21 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import './search_source_threshold_expression.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle, EuiExpression, EuiPopover, EuiText } from '@elastic/eui';
 import { Filter, ISearchSource } from '../../../../../../src/plugins/data/common';
 import { QueryStringInput } from '../../../../../../src/plugins/data/public';
-import { FilterBar } from '../../../../../../src/plugins/data/public';
 import { EsQueryAlertParams } from './types';
 import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
   ThresholdExpression,
 } from '../../../../triggers_actions_ui/public';
-import { DEFAULT_VALUES } from './constans';
+import { DEFAULT_VALUES } from './constants';
+import { ReadOnlyFilterItems } from '../components/read_only_filter_items';
 
-export const IndexThresholdParameters = ({
+export const SearchSourceThresholdExpression = ({
   ruleParams,
   setRuleParams,
   setRuleProperty,
@@ -60,7 +61,6 @@ export const IndexThresholdParameters = ({
   }, []);
 
   const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
-  const editable = false;
 
   const { searchConfiguration } = ruleParams;
 
@@ -84,7 +84,9 @@ export const IndexThresholdParameters = ({
     return null;
   }
 
-  const filterArr = usedSearchSource.getField('filter') as Filter[];
+  const filters = (usedSearchSource.getField('filter') as Filter[]).filter(
+    ({ meta }) => !meta.disabled
+  );
 
   return (
     <Fragment>
@@ -110,11 +112,6 @@ export const IndexThresholdParameters = ({
             value={usedSearchSource.getField('query')!.query}
             isActive={true}
             display="columns"
-            onClick={() => {
-              if (editable) {
-                setShowQueryBar(!showQueryBar);
-              }
-            }}
           />
         }
         display="block"
@@ -134,43 +131,23 @@ export const IndexThresholdParameters = ({
       <EuiPopover
         button={
           <EuiExpression
+            className="searchSourceAlertFilters"
+            title={'sas'}
             description={'Filter'}
             value={
-              filterArr
-                ? filterArr
-                    .map((filter: Filter) => {
-                      // currently it's just displaying the filter key
-                      // but of course this needs to be improved
-                      return filter.meta.key;
-                    })
-                    .join(', ')
-                : ''
+              <ReadOnlyFilterItems
+                filters={filters}
+                indexPatterns={[usedSearchSource.getField('index')!]}
+              />
             }
             isActive={true}
             display="columns"
-            onClick={() => {
-              if (editable) {
-                setShowFilter(!showFilter);
-              }
-            }}
           />
         }
         display="block"
         isOpen={showFilter}
         closePopover={() => setShowFilter(false)}
-      >
-        <FilterBar
-          filters={filterArr}
-          appName="discover"
-          className={''}
-          intl={{} as never}
-          indexPatterns={[usedSearchSource.getField('index')!]}
-          onFiltersUpdated={(filters) => {
-            usedSearchSource.setField('filter', filters);
-            setUsedSearchSource(usedSearchSource.createCopy());
-          }}
-        />
-      </EuiPopover>
+      />
       <EuiText size="xs">
         <FormattedMessage
           id="xpack.stackAlerts.searchThreshold.ui.notEditable"

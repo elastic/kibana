@@ -13,7 +13,7 @@ import 'brace/theme/github';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import { EsQueryAlertParams } from './types';
-import { IndexThresholdParameters } from './index_threshold_expression';
+import { SearchSourceThresholdExpression } from './search_source_threshold_expression';
 import { EsQueryExpression } from './es_query_expression';
 
 const expressionFieldsWithValidation = [
@@ -63,7 +63,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       )}
 
       {isIndexThreshold ? (
-        <IndexThresholdParameters {...props} />
+        <SearchSourceThresholdExpression {...props} />
       ) : (
         <EsQueryExpression {...props} />
       )}

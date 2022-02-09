@@ -30,7 +30,7 @@ import { parseDuration } from '../../../../alerting/common';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { EsQueryAlertParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
-import { DEFAULT_VALUES } from './constans';
+import { DEFAULT_VALUES } from './constants';
 
 function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
   return typeof total === 'number' ? total : total?.value ?? 0;

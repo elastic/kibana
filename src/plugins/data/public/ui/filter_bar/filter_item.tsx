@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { CommonProps, EuiContextMenu, EuiPopover, EuiPopoverProps } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 import {
   Filter,
@@ -16,7 +16,7 @@ import {
   toggleFilterDisabled,
 } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { MouseEvent, useState, useEffect } from 'react';
+import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
@@ -37,6 +37,7 @@ export interface FilterItemProps {
   uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: PanelOptions[];
   timeRangeForSuggestionsOverride?: boolean;
+  readonly?: boolean;
 }
 
 interface LabelOptions {
@@ -359,22 +360,32 @@ export function FilterItem(props: FilterItemProps) {
       iconOnClick={() => props.onRemove()}
       onClick={handleBadgeClick}
       data-test-subj={getDataTestSubj(valueLabelConfig)}
+      readonly={props.readonly}
     />
   );
 
+  const popoverProps: CommonProps & HTMLAttributes<HTMLDivElement> & EuiPopoverProps = {
+    id: `popoverFor_filter${id}`,
+    className: `globalFilterItem__popover`,
+    anchorClassName: `globalFilterItem__popoverAnchor`,
+    isOpen: isPopoverOpen,
+    closePopover: () => {
+      setIsPopoverOpen(false);
+    },
+    button: badge,
+    panelPaddingSize: 'none',
+  };
+
+  if (props.readonly) {
+    return (
+      <EuiPopover {...popoverProps} anchorPosition="upCenter">
+        {badge}
+      </EuiPopover>
+    );
+  }
+
   return (
-    <EuiPopover
-      id={`popoverFor_filter${id}`}
-      className={`globalFilterItem__popover`}
-      anchorClassName={`globalFilterItem__popoverAnchor`}
-      isOpen={isPopoverOpen}
-      closePopover={() => {
-        setIsPopoverOpen(false);
-      }}
-      button={badge}
-      anchorPosition="downLeft"
-      panelPaddingSize="none"
-    >
+    <EuiPopover {...popoverProps} anchorPosition="downLeft">
       <EuiContextMenu initialPanelId={0} panels={getPanels()} />
     </EuiPopover>
   );
