@@ -119,7 +119,7 @@ export function EditFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(1);
+  const [groupsCount, setGroupsCount] = useState<number>(0);
 
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
@@ -442,6 +442,7 @@ export function EditFilterModal({
   const renderGroupedFilters = () => {
     const groupedFiltersNew = groupBy(localFilters, 'groupId');
     const GroupComponent: JSX.Element[] = [];
+    // debugger
     for (const [groupId, groupedFilters] of Object.entries(groupedFiltersNew)) {
       const filtersInGroup = groupedFilters.length;
       const groupBySubgroups = groupBy(groupedFilters, 'subGroupId');
@@ -556,7 +557,7 @@ export function EditFilterModal({
                                       },
                                     ]);
                                     if (filtersOnGroup.length <= 1) {
-                                      setGroupsCount((groupsCount) => groupsCount + 1);
+                                      setGroupsCount(groupsCount + 1);
                                     }
                                   }}
                                   iconType="plus"

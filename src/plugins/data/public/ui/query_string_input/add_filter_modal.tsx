@@ -94,7 +94,11 @@ export function AddFilterModal({
   saveFilters,
 }: {
   onSubmit: (filters: Filter[]) => void;
-  onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
+  onMultipleFiltersSubmit: (
+    filters: FilterGroup[],
+    buildFilters: Filter[],
+    alias: string | null
+  ) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -395,7 +399,7 @@ export function AddFilterModal({
         ) as Filter[];
         // onSubmit(finalFilters);
 
-        onMultipleFiltersSubmit(localFilters, finalFilters);
+        onMultipleFiltersSubmit(localFilters, finalFilters, alias);
         if (alias) {
           saveFilters({
             title: customLabel,

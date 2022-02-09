@@ -387,31 +387,56 @@ export const QueryBarTopRow = React.memo(
       props?.onFiltersUpdated?.(filters);
     }
 
-    function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
-      const lastFilter: any = props.multipleFilters[props.multipleFilters.length - 1];
-      const mappedFilters = mapAndFlattenFilters(buildFilters);
-      // if (lastFilter !== undefined) lastFilter.relationship = 'AND';
-      const mergedFilters = mappedFilters.map((filter, idx) => {
-        let groupId = selectedFilters[idx].groupId;
-        let id = selectedFilters[idx].id;
-        // groupId starts from 1; id starts from 0
+    function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[], alias = '') {
+      let mergedFilters = [];
+      const firstElement = selectedFilters[0];
+      if (alias && selectedFilters[0].relationship !== 'OR') {
+        const mappedFilters = mapAndFlattenFilters(buildFilters);
 
-        if (lastFilter !== undefined) {
-        //   groupId += lastFilter.groupId;
-        //   id += lastFilter.id + 1;
-        }
+        mergedFilters = mappedFilters.map((filter, idx) => {
+          // debugger
+          const selectedFilter = selectedFilters[idx];
+          if (selectedFilter.relationship === 'OR') {
+            let groupId = firstElement?.groupId;
+            let id = selectedFilter?.id;
+            let subGroupId = selectedFilter?.subGroupId + 1;
+            return {
+              ...filter,
+              groupId,
+              id,
+              relationship: selectedFilter.relationship,
+              subGroupId,
+            };
+          } else {
+            let groupId = firstElement.groupId;
+            let id = selectedFilter.id;
+            return {
+              ...filter,
+              groupId,
+              id,
+              relationship: selectedFilter.relationship,
+              subGroupId: selectedFilter.subGroupId,
+            };
+          }
+        });
+      } else {
+        const mappedFilters = mapAndFlattenFilters(buildFilters);
 
-        return {
-          ...filter,
-          groupId,
-          id,
-          relationship: selectedFilters[idx].relationship,
-          subGroupId: selectedFilters[idx].subGroupId,
-        };
-      });
+        mergedFilters = mappedFilters.map((filter, idx) => {
+          let groupId = selectedFilters[idx].groupId;
+          let id = selectedFilters[idx].id;
+          return {
+            ...filter,
+            groupId,
+            id,
+            relationship: selectedFilters[idx].relationship,
+            subGroupId: selectedFilters[idx].subGroupId,
+          };
+        });
+      }
+
       props.toggleAddFilterModal?.(false);
       props?.onMultipleFiltersUpdated?.([...props.multipleFilters, ...mergedFilters]);
-      // props?.onMultipleFiltersUpdated?.(mergedFilters);
 
       const filters = [...props.filters, ...buildFilters];
       props?.onFiltersUpdated?.(filters);
