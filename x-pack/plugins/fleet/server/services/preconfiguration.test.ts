@@ -166,10 +166,6 @@ jest.mock('./epm/packages/install', () => ({
 
       const installedPackage = mockInstalledPackages.get(pkgName);
 
-      if (installedPackage && installedPackage.version === '1.0.0') {
-        return installedPackage;
-      }
-
       // Just install every bundled package at version '1.0.0'
       const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
       mockInstalledPackages.set(pkgName, packageInstallation);
