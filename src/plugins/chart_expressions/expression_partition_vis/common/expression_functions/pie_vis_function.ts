@@ -109,6 +109,11 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       help: strings.getStartFromSecondLargestSliceArgHelp(),
       default: true,
     },
+    ariaLabel: {
+      types: ['string'],
+      help: strings.getAriaLabelHelp(),
+      required: false,
+    },
   },
   fn(context, args, handlers) {
     if (args.splitColumn && args.splitRow) {
@@ -117,6 +122,10 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
 
     const visConfig: PartitionVisParams = {
       ...args,
+      ariaLabel:
+        args.ariaLabel ??
+        (handlers.variables?.embeddableTitle as string) ??
+        handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
         metric: args.metric,
