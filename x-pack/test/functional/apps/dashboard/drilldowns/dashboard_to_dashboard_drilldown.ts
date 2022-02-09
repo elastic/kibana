@@ -78,13 +78,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('use dashboard to dashboard to dashboard drilldown via onClick action', async () => {
+      it('use dashboard to dashboard drilldown via onClick action', async () => {
         await testDashboardDrilldown(
           dashboardDrilldownPanelActions.clickActionByText.bind(dashboardDrilldownPanelActions) // preserve 'this'
         );
       });
 
-      it('use dashboard to dashboard to dashboard drilldown via getHref action', async () => {
+      it('use dashboard to dashboard drilldown via getHref action', async () => {
         await filterBar.removeAllFilters();
         await testDashboardDrilldown(
           dashboardDrilldownPanelActions.openHrefByText.bind(dashboardDrilldownPanelActions) // preserve 'this'
