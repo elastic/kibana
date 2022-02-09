@@ -41,8 +41,16 @@ export interface ClientApiMockInstance<T, Y extends any[]> extends jest.MockInst
    */
   mockResponseOnce(value: Awaited<T>, opts?: Partial<Omit<TransportResult<T>, 'body'>>): this;
 
+  /**
+   * Helper API around `mockImplementation` returning either the body or the whole TransportResult
+   * depending on the `meta` parameter used during the call
+   */
   mockResponseImplementation(handler: (...args: Y) => Partial<TransportResult<Awaited<T>>>): this;
 
+  /**
+   * Helper API around `mockImplementationOnce` returning either the body or the whole TransportResult
+   * depending on the `meta` parameter used during the call
+   */
   mockResponseImplementationOnce(
     handler: (...args: Y) => Partial<TransportResult<Awaited<T>>>
   ): this;
