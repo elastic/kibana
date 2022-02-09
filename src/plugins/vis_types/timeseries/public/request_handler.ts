@@ -34,7 +34,6 @@ export const metricsRequestHandler = async ({
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
   const config = getUISettings();
   const data = getDataStart();
-  const theme = getCoreStart().theme;
 
   const timezone = getTimezone(config);
   const uiStateObj = uiState[visParams.type] ?? {};
@@ -79,7 +78,7 @@ export const metricsRequestHandler = async ({
           .ok({ time: query.time });
 
         if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
-          handleResponse({ body: query.body }, { rawResponse: query.response }, theme);
+          handleResponse({ body: query.body }, { rawResponse: query.response });
         }
       });
 
