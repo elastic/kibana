@@ -76,7 +76,6 @@ async function getEnabledRoleMappingsFeatures(esClient: ElasticsearchClient, log
 
   const nodeScriptSettingsPromise = esClient.nodes
     .info({ filter_path: 'nodes.*.settings.script' })
-    .then((body) => body)
     .catch((error) => {
       // fall back to assuming that node settings are unset/at their default values.
       // this will allow the role mappings UI to permit both role template script types,
