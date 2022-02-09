@@ -58,5 +58,6 @@
     },
     "url": "https://example-url.com"
   }],
-  "namespace": "testnamespace"
+  "namespace": "testnamespace",
+  "revision": 1
 }
