@@ -50,3 +50,5 @@ export const plugin: PluginInitializer<
   RecursiveReadonly<SecurityPluginStart>,
   PluginSetupDependencies
 > = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);
+
+export type { CasesSupportedOperations } from '../server/authorization/privileges/feature_privilege_builder';
