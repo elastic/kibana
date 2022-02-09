@@ -17,7 +17,7 @@ import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { formatValue, shouldApplyColor } from '../utils';
 import { getColumnByAccessor } from '../utils/accessor';
 import { needsLightText } from '../utils/palette';
-import { withAutoScale } from './auto_scale';
+import { withAutoScale } from './with_auto_scale';
 
 import './metric.scss';
 

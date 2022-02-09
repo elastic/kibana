@@ -9,7 +9,7 @@
 import React, { useRef, useEffect, useState, ComponentType, useMemo } from 'react';
 import { throttle } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
-import { autoScaleWrapperStyle } from './auto_scale.styles';
+import { autoScaleWrapperStyle } from './with_auto_scale.styles';
 
 interface AutoScaleParams {
   minScale?: number;
@@ -46,6 +46,9 @@ export function withAutoScale<T>(
   autoScaleParams?: AutoScaleParams
 ) {
   return (props: T) => {
+    // An initial scale of 0 means we always redraw
+    // at least once, which is sub-optimal, but it
+    // prevents an annoying flicker.
     const [scale, setScale] = useState(0);
     const parentRef = useRef<HTMLDivElement>(null);
     const childrenRef = useRef<HTMLDivElement>(null);
@@ -65,7 +68,7 @@ export function withAutoScale<T>(
             setScale(newScale);
           }
         }),
-      [parentDimensions, setScale, scale, childrenRef]
+      [parentDimensions, setScale, scale]
     );
 
     useEffect(() => {
