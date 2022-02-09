@@ -25,7 +25,7 @@ import {
   convertSavedDashboardPanelToPanelState,
 } from '../../common/embeddable/embeddable_saved_object_converters';
 import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../data/common';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
@@ -49,7 +49,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
-      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       id: searchSource.index,
     });
     delete searchSource.index;
@@ -62,7 +62,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
-        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: filterRow.meta.index,
       });
       delete filterRow.meta.index;
