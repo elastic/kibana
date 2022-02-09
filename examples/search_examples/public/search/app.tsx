@@ -409,6 +409,11 @@ export const SearchExamplesApp = ({
     if (!dataView || !selectedNumericField) return;
     const abortController = new AbortController();
     setAbortController(abortController);
+
+    setTimeout(() => {
+      abortController.abort();
+    }, 400);
+
     setIsLoading(true);
     try {
       const res = await http.get(SERVER_SEARCH_ROUTE_PATH, {

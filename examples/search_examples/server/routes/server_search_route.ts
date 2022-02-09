@@ -28,10 +28,13 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
     async (context, request, response) => {
       const { index, field } = request.query;
 
+      request.events.aborted$.subscribe(() => {
+        console.log('examples: abort is working!');
+      });
       // User may abort the request without waiting for the results
       // we need to handle this scenario by aborting underlying server requests
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
-
+      await new Promise((res) => setTimeout(res, 1000));
       try {
         const res = await context
           .search!.search(

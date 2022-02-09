@@ -52,6 +52,11 @@ export const metricsRequestHandler = async ({
 
     try {
       const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+      const controller = new AbortController();
+
+      setTimeout(() => {
+        controller.abort();
+      }, 400);
 
       const visData: TimeseriesVisData = await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
@@ -68,6 +73,7 @@ export const metricsRequestHandler = async ({
           }),
         }),
         context: executionContext,
+        signal: controller.signal,
       });
 
       inspectorAdapters?.requests?.reset();

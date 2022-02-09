@@ -33,6 +33,17 @@ export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framew
         });
       }
 
+      // My question here, for some reason this one is not working for TSVB
+      request.events.aborted$.subscribe(() => {
+        console.log('tsvb: abort is not working');
+      });
+
+      request.events.completed$.subscribe(() => {
+        console.log('tsvb: completed$ is working');
+      });
+
+      await new Promise((res) => setTimeout(res, 1000));
+
       const results = await getVisData(requestContext, request, framework);
       return response.ok({ body: results });
     }
