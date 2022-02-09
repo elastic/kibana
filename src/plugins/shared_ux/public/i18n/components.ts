@@ -11,24 +11,24 @@ import { i18n } from '@kbn/i18n';
 export const ComponentStrings = {
   SolutionToolbar: {
     getEditorMenuButtonLabel: () =>
-      i18n.translate('presentationUtil.solutionToolbar.editorMenuButtonLabel', {
+      i18n.translate('sharedUX.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'All editors',
       }),
     getLibraryButtonLabel: () =>
-      i18n.translate('presentationUtil.solutionToolbar.libraryButtonLabel', {
+      i18n.translate('sharedUX.solutionToolbar.libraryButtonLabel', {
         defaultMessage: 'Add from library',
       }),
   },
   QuickButtonGroup: {
     getAriaButtonLabel: (createType: string) =>
-      i18n.translate('presentationUtil.solutionToolbar.quickButton.ariaButtonLabel', {
+      i18n.translate('sharedUX.solutionToolbar.quickButton.ariaButtonLabel', {
         defaultMessage: `Create new {createType}`,
         values: {
           createType,
         },
       }),
     getLegend: () =>
-      i18n.translate('presentationUtil.solutionToolbar.quickButton.legendLabel', {
+      i18n.translate('sharedUX.solutionToolbar.quickButton.legendLabel', {
         defaultMessage: 'Quick create',
       }),
   },

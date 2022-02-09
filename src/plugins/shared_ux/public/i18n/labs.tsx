@@ -15,37 +15,37 @@ export const LabsStrings = {
   Components: {
     Switch: {
       getKibanaSwitchText: () => ({
-        name: i18n.translate('presentationUtil.labs.components.kibanaSwitchName', {
+        name: i18n.translate('sharedUX.labs.components.kibanaSwitchName', {
           defaultMessage: 'Kibana',
         }),
-        help: i18n.translate('presentationUtil.labs.components.kibanaSwitchHelp', {
+        help: i18n.translate('sharedUX.labs.components.kibanaSwitchHelp', {
           defaultMessage: 'Enables this lab for all Kibana users.',
         }),
       }),
       getBrowserSwitchText: () => ({
-        name: i18n.translate('presentationUtil.labs.components.browserSwitchName', {
+        name: i18n.translate('sharedUX.labs.components.browserSwitchName', {
           defaultMessage: 'Browser',
         }),
-        help: i18n.translate('presentationUtil.labs.components.browserSwitchHelp', {
+        help: i18n.translate('sharedUX.labs.components.browserSwitchHelp', {
           defaultMessage: 'Enables the lab for this browser and persists after it closes.',
         }),
       }),
       getSessionSwitchText: () => ({
-        name: i18n.translate('presentationUtil.labs.components.sessionSwitchName', {
+        name: i18n.translate('sharedUX.labs.components.sessionSwitchName', {
           defaultMessage: 'Session',
         }),
-        help: i18n.translate('presentationUtil.labs.components.sessionSwitchHelp', {
+        help: i18n.translate('sharedUX.labs.components.sessionSwitchHelp', {
           defaultMessage: 'Enables the lab for this browser session, so it resets when it closes.',
         }),
       }),
     },
     List: {
       getNoProjectsMessage: () =>
-        i18n.translate('presentationUtil.labs.components.noProjectsMessage', {
+        i18n.translate('sharedUX.labs.components.noProjectsMessage', {
           defaultMessage: 'No labs currently available.',
         }),
       getNoProjectsInSolutionMessage: (solutionName: string) =>
-        i18n.translate('presentationUtil.labs.components.noProjectsinSolutionMessage', {
+        i18n.translate('sharedUX.labs.components.noProjectsinSolutionMessage', {
           defaultMessage: 'No labs currently in {solutionName}.',
           values: {
             solutionName,
@@ -54,16 +54,16 @@ export const LabsStrings = {
     },
     ListItem: {
       getOverrideLegend: () =>
-        i18n.translate('presentationUtil.labs.components.overrideFlagsLabel', {
+        i18n.translate('sharedUX.labs.components.overrideFlagsLabel', {
           defaultMessage: 'Overrides',
         }),
       getOverriddenIconTipLabel: () =>
-        i18n.translate('presentationUtil.labs.components.overridenIconTipLabel', {
+        i18n.translate('sharedUX.labs.components.overridenIconTipLabel', {
           defaultMessage: 'Default overridden',
         }),
       getEnabledStatusMessage: () => (
         <FormattedMessage
-          id="presentationUtil.labs.components.enabledStatusMessage"
+          id="sharedUX.labs.components.enabledStatusMessage"
           defaultMessage="Default: {status}"
           values={{
             status: <EuiCode>Enabled</EuiCode>,
@@ -73,7 +73,7 @@ export const LabsStrings = {
       ),
       getDisabledStatusMessage: () => (
         <FormattedMessage
-          id="presentationUtil.labs.components.disabledStatusMessage"
+          id="sharedUX.labs.components.disabledStatusMessage"
           defaultMessage="Default: {status}"
           values={{
             status: <EuiCode>Disabled</EuiCode>,
@@ -84,27 +84,27 @@ export const LabsStrings = {
     },
     Flyout: {
       getTitleLabel: () =>
-        i18n.translate('presentationUtil.labs.components.titleLabel', {
+        i18n.translate('sharedUX.labs.components.titleLabel', {
           defaultMessage: 'Labs',
         }),
       getDescriptionMessage: () =>
-        i18n.translate('presentationUtil.labs.components.descriptionMessage', {
+        i18n.translate('sharedUX.labs.components.descriptionMessage', {
           defaultMessage: 'Try out features that are in progress or in technical preview.',
         }),
       getResetToDefaultLabel: () =>
-        i18n.translate('presentationUtil.labs.components.resetToDefaultLabel', {
+        i18n.translate('sharedUX.labs.components.resetToDefaultLabel', {
           defaultMessage: 'Reset to defaults',
         }),
       getLabFlagsLabel: () =>
-        i18n.translate('presentationUtil.labs.components.labFlagsLabel', {
+        i18n.translate('sharedUX.labs.components.labFlagsLabel', {
           defaultMessage: 'Lab flags',
         }),
       getRefreshLabel: () =>
-        i18n.translate('presentationUtil.labs.components.calloutHelp', {
+        i18n.translate('sharedUX.labs.components.calloutHelp', {
           defaultMessage: 'Refresh to apply changes',
         }),
       getCloseButtonLabel: () =>
-        i18n.translate('presentationUtil.labs.components.closeButtonLabel', {
+        i18n.translate('sharedUX.labs.components.closeButtonLabel', {
           defaultMessage: 'Close',
         }),
     },
