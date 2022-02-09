@@ -5,25 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
-import {
-  ExpandableUserDetailsTitle,
-  ExpandableUserDetailsPageLink,
-  ExpandableUserDetails,
-} from './expandable_user';
-
 import { UserDetailsFlyout } from './user_details_flyout';
 import { UserDetailsSidePanel } from './user_details_side_panel';
+import type { UserDetailsProps } from './types';
 
 const UserDetailsPanelComponent = ({
   contextID,

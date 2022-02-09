@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
@@ -21,6 +14,7 @@ import {
   ExpandableUserDetailsPageLink,
   ExpandableUserDetails,
 } from './expandable_user';
+import type { UserDetailsProps } from './types';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   flex: 1 0 auto;

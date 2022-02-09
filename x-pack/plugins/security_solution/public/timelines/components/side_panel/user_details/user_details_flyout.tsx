@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import {
@@ -21,6 +13,7 @@ import {
   ExpandableUserDetailsPageLink,
   ExpandableUserDetails,
 } from './expandable_user';
+import type { UserDetailsProps } from './types';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
