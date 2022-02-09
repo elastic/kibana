@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function getCategoryExamples(
     jobId: string,
-    categoryId: string[],
+    categoryIds: string[],
     maxExamples: number,
     user: USER,
     expectedStatusCode: number,
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
       .post(`${space ? `/s/${space}` : ''}/api/ml/results/category_examples`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send({ jobId, categoryId, maxExamples })
+      .send({ jobId, categoryIds, maxExamples })
       .expect(expectedStatusCode);
 
     return body;
