@@ -6,4 +6,4 @@
  */
 
 export { PdfMaker } from './pdfmaker';
-export { PdfWorkerOutOfMemoryError } from './pdf_generate_errors';
+export { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';

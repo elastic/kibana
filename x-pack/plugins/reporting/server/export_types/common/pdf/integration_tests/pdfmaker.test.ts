@@ -8,7 +8,7 @@
 import { isUint8Array } from 'util/types';
 import { createMockLayout } from '../../../../../../screenshotting/server/layouts/mock';
 import { PdfMaker } from '../';
-import { PdfWorkerOutOfMemoryError } from '../pdf_generate_errors';
+import { PdfWorkerOutOfMemoryError } from '../pdfmaker_errors';
 import { MemoryLeakPdfMaker } from './memory_leak_pdfmaker';
 
 const imageBase64 = Buffer.from(

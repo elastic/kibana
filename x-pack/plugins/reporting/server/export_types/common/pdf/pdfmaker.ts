@@ -21,7 +21,7 @@ import {
   subheadingHeight,
   tableBorderWidth,
 } from './constants';
-import { PdfWorkerOutOfMemoryError } from './pdf_generate_errors';
+import { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
 
 import type { PdfWorkerData } from './worker';
 
