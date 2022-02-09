@@ -33,13 +33,22 @@ import { getCurrentArtifactsLocation } from '../../../store/policy_details/selec
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyHostIsolationExceptionsDeleteModal } from './delete_modal';
 import { useFetchHostIsolationExceptionsList } from '../../../../host_isolation_exceptions/view/hooks';
+import { useGetLinkTo } from './use_policy_host_isolation_exceptions_empty_hooks';
 
-export const PolicyHostIsolationExceptionsList = ({ policyId }: { policyId: string }) => {
+export const PolicyHostIsolationExceptionsList = ({
+  policyId,
+  policyName,
+}: {
+  policyId: string;
+  policyName: string;
+}) => {
   const history = useHistory();
   const { getAppUrl } = useAppUrl();
 
   const privileges = useUserPrivileges().endpointPrivileges;
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+
+  const { state } = useGetLinkTo(policyId, policyName);
 
   // load the list of policies>
   const policiesRequest = useGetEndpointSpecificPolicies();
@@ -127,7 +136,7 @@ export const PolicyHostIsolationExceptionsList = ({ policyId }: { policyId: stri
       ),
       href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
       navigateAppId: APP_UI_ID,
-      navigateOptions: { path: viewUrlPath },
+      navigateOptions: { path: viewUrlPath, state },
       'data-test-subj': 'view-full-details-action',
     };
 
@@ -172,6 +181,7 @@ export const PolicyHostIsolationExceptionsList = ({ policyId }: { policyId: stri
       {exceptionItemToDelete ? (
         <PolicyHostIsolationExceptionsDeleteModal
           policyId={policyId}
+          policyName={policyName}
           exception={exceptionItemToDelete}
           onCancel={handleDeleteModalClose}
         />
