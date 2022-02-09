@@ -20,24 +20,46 @@ export const testUsers: {
     username: 'fleet_no_access',
     password: 'changeme',
   },
-  fleet_read_only: {
+  fleet_all_only: {
     permissions: {
       feature: {
+        fleetv2: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_only',
+    password: 'changeme',
+  },
+  fleet_all_int_read: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
         fleet: ['read'],
       },
       spaces: ['*'],
     },
-    username: 'fleet_read_only',
+    username: 'fleet_all_int_read',
     password: 'changeme',
   },
-  fleet_all: {
+  fleet_all_int_all: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_int_all',
+    password: 'changeme',
+  },
+  integr_all_only: {
     permissions: {
       feature: {
         fleet: ['all'],
       },
       spaces: ['*'],
     },
-    username: 'fleet_all',
+    username: 'integr_all',
     password: 'changeme',
   },
 };

@@ -23,11 +23,10 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
-    // Only superuser can access Fleet for now.
     it.skip('should return a 200 if a user with the fleet all try to access the list', async () => {
       await supertest
         .get(`/api/fleet/agents`)
-        .auth(testUsers.fleet_all.username, testUsers.fleet_all.password)
+        .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
         .expect(200);
     });
 
