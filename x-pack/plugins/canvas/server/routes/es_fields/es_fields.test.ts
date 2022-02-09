@@ -30,7 +30,7 @@ describe('Retrieve ES Fields', () => {
     routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
 
-  it(`returns 200 with fields from existing index/index pattern`, async () => {
+  it(`returns 200 with fields from existing index/data view`, async () => {
     const index = 'test';
     const mockResults = {
       body: {
@@ -85,7 +85,7 @@ describe('Retrieve ES Fields', () => {
     `);
   });
 
-  it(`returns 200 with empty object when index/index pattern has no fields`, async () => {
+  it(`returns 200 with empty object when index/data view has no fields`, async () => {
     const index = 'test';
     const mockResults = { body: { indices: [index], fields: {} } };
     const request = httpServerMock.createKibanaRequest({
@@ -107,7 +107,7 @@ describe('Retrieve ES Fields', () => {
     expect(response.payload).toMatchInlineSnapshot('Object {}');
   });
 
-  it(`returns 200 with empty object when index/index pattern does not have specified field(s)`, async () => {
+  it(`returns 200 with empty object when index/data view does not have specified field(s)`, async () => {
     const index = 'test';
 
     const mockResults = {

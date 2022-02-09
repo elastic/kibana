@@ -10,10 +10,8 @@ import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { OverlayStart, ThemeServiceStart } from 'src/core/public';
 import { DataViewField, DataView } from '../../../../../../plugins/data_views/public';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
-import { IndexPatternManagmentContext } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: DataViewField[];
@@ -36,16 +34,10 @@ interface IndexedFieldsTableState {
   fields: IndexedFieldItem[];
 }
 
-const withHooks = (Comp: typeof Component) => {
-  return (props: any) => {
-    const { application } = useKibana<IndexPatternManagmentContext>().services;
-    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
-
-    return <Comp userEditPermission={userEditPermission} {...props} />;
-  };
-};
-
-class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTableState> {
+export class IndexedFieldsTable extends Component<
+  IndexedFieldsTableProps,
+  IndexedFieldsTableState
+> {
   constructor(props: IndexedFieldsTableProps) {
     super(props);
 
@@ -158,5 +150,3 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
     );
   }
 }
-
-export const IndexedFieldsTable = withHooks(IndexedFields);
