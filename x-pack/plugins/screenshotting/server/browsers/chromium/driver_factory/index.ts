@@ -49,7 +49,6 @@ interface CreatePageOptions {
 interface CreatePageResult {
   driver: HeadlessChromiumDriver;
   unexpectedExit$: Rx.Observable<never>;
-  metrics$: Rx.Observable<PerformanceMetrics>;
   /**
    * Close the page and the browser.
    *
@@ -57,7 +56,11 @@ interface CreatePageResult {
    * have concluded. This ensures the browser is closed and gives the OS a chance
    * to reclaim resources like memory.
    */
-  close: () => Rx.Observable<void>;
+  close: () => Rx.Observable<ClosePageResult>;
+}
+
+interface ClosePageResult {
+  metrics?: PerformanceMetrics;
 }
 
 export const DEFAULT_VIEWPORT = {
@@ -167,7 +170,6 @@ export class HeadlessChromiumDriverFactory {
 
       await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
       const startMetrics = await devTools.send('Performance.getMetrics');
-      const metrics$ = new Rx.Subject<PerformanceMetrics>();
 
       // Log version info for debugging / maintenance
       const versionInfo = await devTools.send('Browser.getVersion');
@@ -182,23 +184,25 @@ export class HeadlessChromiumDriverFactory {
       logger.debug(`Browser page driver created`);
 
       const childProcess = {
-        async kill(): Promise<void> {
-          if (page.isClosed()) return;
+        async kill(): Promise<ClosePageResult> {
+          if (page.isClosed()) {
+            return {};
+          }
+
+          let metrics: PerformanceMetrics | undefined;
+
           try {
             if (devTools && startMetrics) {
               const endMetrics = await devTools.send('Performance.getMetrics');
-              const metrics = getMetrics(startMetrics, endMetrics);
+              metrics = getMetrics(startMetrics, endMetrics);
               const { cpuInPercentage, memoryInMegabytes } = metrics;
 
-              metrics$.next(metrics);
               logger.debug(
                 `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
               );
             }
           } catch (error) {
             logger.error(error);
-          } finally {
-            metrics$.complete();
           }
 
           try {
@@ -209,6 +213,8 @@ export class HeadlessChromiumDriverFactory {
             // do not throw
             logger.error(err);
           }
+
+          return { metrics };
         },
       };
       const { terminate$ } = safeChildProcess(logger, childProcess);
@@ -245,7 +251,6 @@ export class HeadlessChromiumDriverFactory {
       observer.next({
         driver,
         unexpectedExit$,
-        metrics$: metrics$.asObservable(),
         close: () => Rx.from(childProcess.kill()),
       });
 

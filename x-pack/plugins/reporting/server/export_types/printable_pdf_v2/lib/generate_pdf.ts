@@ -7,7 +7,7 @@
 
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../../common/types';
 import { LevelLogger } from '../../../lib';
@@ -49,14 +49,15 @@ export function generatePdfObservable(
   ]) as UrlOrUrlLocatorTuple[];
 
   const screenshots$ = reporting.getScreenshots({ ...options, urls }).pipe(
-    mergeMap(async ({ layout, metrics$, results }) => {
-      metrics$.subscribe(({ cpu, memory }) => {
-        tracker.setCpuUsage(cpu);
-        tracker.setMemoryUsage(memory);
-      });
+    tap(({ metrics }) => {
+      if (metrics) {
+        tracker.setCpuUsage(metrics.cpu);
+        tracker.setMemoryUsage(metrics.memory);
+      }
       tracker.endScreenshots();
       tracker.startSetup();
-
+    }),
+    mergeMap(async ({ layout, results }) => {
       const pdfOutput = new PdfMaker(layout, logo);
       if (title) {
         const timeRange = getTimeRange(results);

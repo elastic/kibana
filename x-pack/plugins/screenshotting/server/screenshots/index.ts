@@ -11,10 +11,11 @@ import {
   catchError,
   concatMap,
   first,
-  mapTo,
+  map,
   mergeMap,
   take,
   takeUntil,
+  tap,
   toArray,
 } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
@@ -40,7 +41,7 @@ export interface ScreenshotResult {
   /**
    * Collected performance metrics during the screenshotting session.
    */
-  metrics$: Observable<PerformanceMetrics>;
+  metrics?: PerformanceMetrics;
 
   /**
    * Screenshotting results.
@@ -88,12 +89,8 @@ export class Screenshots {
       )
       .pipe(
         this.semaphore.acquire(),
-        mergeMap(({ driver, unexpectedExit$, metrics$, close }) => {
+        mergeMap(({ driver, unexpectedExit$, close }) => {
           apmCreatePage?.end();
-          metrics$.subscribe(({ cpu, memory }) => {
-            apmTrans?.setLabel('cpu', cpu, false);
-            apmTrans?.setLabel('memory', memory, false);
-          });
           unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
 
           const screen = new ScreenshotObservableHandler(driver, this.logger, layout, options);
@@ -113,10 +110,18 @@ export class Screenshots {
             ),
             take(options.urls.length),
             toArray(),
-            mergeMap((results) => {
+            mergeMap((results) =>
               // At this point we no longer need the page, close it.
-              return close().pipe(mapTo({ layout, metrics$, results }));
-            })
+              close().pipe(
+                tap(({ metrics }) => {
+                  if (metrics) {
+                    apmTrans?.setLabel('cpu', metrics.cpu, false);
+                    apmTrans?.setLabel('memory', metrics.memory, false);
+                  }
+                }),
+                map(({ metrics }) => ({ layout, metrics, results }))
+              )
+            )
           );
         }),
         first()
