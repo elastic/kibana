@@ -19,7 +19,7 @@ export interface MonitorUpdateEvent {
   locationsCount: number;
   scriptType?: 'inline' | 'recorder' | 'zip';
   revision?: number;
-  error?: ServiceLocationErrors;
+  errors?: ServiceLocationErrors;
   configId: string;
 }
 

@@ -71,7 +71,17 @@ export function formatTelemetryEvent({
     monitorInterval: parseInt(attributes[ConfigKey.SCHEDULE].number, 10) * 60 * 1000,
     stackVersion: kibanaVersion,
     scriptType: getScriptType(attributes as MonitorFields),
-    error: errors,
+    errors:
+      errors && errors?.length
+        ? errors.map((e) => ({
+            locationId: e.locationId,
+            error: {
+              // don't expose failed_monitors on error object
+              status: e.error?.status,
+              reason: e.error?.reason,
+            },
+          }))
+        : undefined,
     configId: sha256.create().update(monitor.id).hex(),
     revision: attributes[ConfigKey.REVISION],
   };
