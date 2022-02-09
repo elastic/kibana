@@ -66,10 +66,10 @@ export default function (providerContext: FtrProviderContext) {
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
         .expect(200);
       const packageInfo = res.body.item;
-      // the uploaded version will have this description
-      expect(packageInfo.description).to.equal('Apache Uploaded Test Integration');
-      // download property should not exist on uploaded packages
-      expect(packageInfo.download).to.equal(undefined);
+      // Get package info always return data from the registry
+      expect(packageInfo.description).to.not.equal('Apache Uploaded Test Integration');
+      // download property exist on uploaded packages
+      expect(packageInfo.download).to.not.equal(undefined);
       await uninstallPackage(testPkgName, testPkgVersion);
     });
     it('returns correct package info from registry if a different version is installed by upload', async function () {
