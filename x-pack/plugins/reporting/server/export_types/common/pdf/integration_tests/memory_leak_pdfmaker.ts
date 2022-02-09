@@ -9,6 +9,9 @@ import path from 'path';
 import { PdfMaker } from '../pdfmaker';
 
 export class MemoryLeakPdfMaker extends PdfMaker {
+  // From local testing:
+  // OOMs after 456.486 seconds  with high young generation size
+  // OOMs after 53.538 seconds low young generation size
   protected workerMaxOldHeapSizeMb = 2;
   protected workerMaxYoungHeapSizeMb = 2;
   protected workerModulePath = path.resolve(__dirname, './memory_leak_worker.js');
