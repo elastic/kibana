@@ -6,22 +6,28 @@
  * Side Public License, v 1.
  */
 
+import {
+  Filter,
+  compareFilters,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  COMPARE_ALL_OPTIONS,
+} from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { isEmpty, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
-import { Filter, compareFilters, buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
 
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { ControlsDataViewsService } from '../../services/data_views';
+import { DataView, DataViewField } from '../../../../data_views/public';
 import { Embeddable, IContainer } from '../../../../embeddable/public';
+import { ControlsDataViewsService } from '../../services/data_views';
 import { runOptionsListRequest } from './options_list_service';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
-import { DataView, DataViewField } from '../../../../data_views/public';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
 import {
@@ -35,14 +41,14 @@ const OptionsListReduxWrapper = withSuspense<
 >(LazyReduxEmbeddableWrapper);
 
 const diffDataFetchProps = (
-  current?: OptionsListDataFetchProps,
-  last?: OptionsListDataFetchProps
+  last?: OptionsListDataFetchProps,
+  current?: OptionsListDataFetchProps
 ) => {
   if (!current || !last) return false;
   const { filters: currentFilters, ...currentWithoutFilters } = current;
   const { filters: lastFilters, ...lastWithoutFilters } = last;
   if (!deepEqual(currentWithoutFilters, lastWithoutFilters)) return false;
-  if (!compareFilters(lastFilters ?? [], currentFilters ?? [])) return false;
+  if (!compareFilters(lastFilters ?? [], currentFilters ?? [], COMPARE_ALL_OPTIONS)) return false;
   return true;
 };
 
