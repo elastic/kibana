@@ -83,7 +83,7 @@ export const OptionsListStrings = {
         values: { invalidSelectionCount },
       }),
     getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
-      i18n.translate('controls.optionsList.popover.invalidSelectionsTitle', {
+      i18n.translate('controls.optionsList.popover.invalidSelectionsSectionTitle', {
         defaultMessage:
           'Ignored {invalidSelectionCount, plural, one {selection} other {selections}}',
         values: { invalidSelectionCount },
