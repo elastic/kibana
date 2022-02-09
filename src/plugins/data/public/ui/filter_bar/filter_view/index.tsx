@@ -55,11 +55,12 @@ export const FilterView: FC<Props> = ({
   const badgeProps: EuiBadgeProps = readonly
     ? {
         title,
+        color: 'hollow',
         onClick,
         onClickAriaLabel: i18n.translate('data.filter.filterBar.filterItemReadOnlyBadgeAriaLabel', {
           defaultMessage: 'Filter entry',
         }),
-        color: 'hollow',
+        iconOnClick,
       }
     : {
         title,
