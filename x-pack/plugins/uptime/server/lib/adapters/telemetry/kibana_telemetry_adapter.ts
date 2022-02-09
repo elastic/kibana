@@ -452,13 +452,13 @@ export class KibanaTelemetryAdapter {
 
     const { body: result } = await callCluster.search(params, 'telemetryLogSyntheticsServiceTests');
 
-    const numberOfTests: number = result?.hits.total.value;
+    const numberOfTests: number = result?.hits?.total?.value;
 
     const bucketId = this.getBucketToIncrement();
     const bucket = this.collector[bucketId];
 
     bucket.synthetics_service_no_of_tests = numberOfTests;
-    if (result?.hits.total.value) {
+    if (result?.hits?.total?.value) {
       bucket.synthetics_service_enabled = true;
     }
     return bucket;
