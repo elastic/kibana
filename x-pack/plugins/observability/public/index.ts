@@ -85,7 +85,7 @@ export { useRulesLink } from './hooks/use_rules_link';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
 export type { LinkDescriptor } from './hooks/use_link_props';
 
-export * from './utils/navigation_warning_prompt';
+export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warning_prompt';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
 export { ALL_VALUES_SELECTED } from './components/shared/field_value_suggestions/field_value_combobox';
