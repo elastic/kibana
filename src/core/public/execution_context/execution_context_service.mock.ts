@@ -9,10 +9,7 @@
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  ExecutionContextService,
-  ExecutionContextSetup,
-} from './execution_context_service';
+import { ExecutionContextService, ExecutionContextSetup } from './execution_context_service';
 
 const createContractMock = (): jest.Mocked<ExecutionContextSetup> => ({
   context$: new BehaviorSubject({}),
@@ -20,7 +17,6 @@ const createContractMock = (): jest.Mocked<ExecutionContextSetup> => ({
   set: jest.fn(),
   getAll: jest.fn(),
 });
-
 
 const createMock = (): jest.Mocked<PublicMethodsOf<ExecutionContextService>> => ({
   setup: jest.fn().mockReturnValue(createContractMock()),
