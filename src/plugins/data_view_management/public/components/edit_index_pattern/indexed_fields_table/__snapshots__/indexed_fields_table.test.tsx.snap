@@ -141,6 +141,24 @@ exports[`IndexedFieldsTable IndexedFieldsTable with rollup index pattern should 
           "name": "amount",
           "type": "long",
         },
+        Object {
+          "displayName": "runtime",
+          "excluded": false,
+          "format": "",
+          "hasRuntime": true,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": "number",
+          "name": "runtime",
+          "runtimeField": Object {
+            "script": Object {
+              "source": "emit('Hello');",
+            },
+            "type": "long",
+          },
+          "type": "long",
+        },
       ]
     }
   />
@@ -175,6 +193,43 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
           "name": "Elastic",
           "searchable": true,
           "type": "keyword",
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`IndexedFieldsTable should filter based on the schema filter 1`] = `
+<div>
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getFormatterForFieldNoDefault": [Function],
+        "getNonScriptedFields": [Function],
+      }
+    }
+    items={
+      Array [
+        Object {
+          "displayName": "runtime",
+          "excluded": false,
+          "format": "",
+          "hasRuntime": true,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": "number",
+          "name": "runtime",
+          "runtimeField": Object {
+            "script": Object {
+              "source": "emit('Hello');",
+            },
+            "type": "long",
+          },
+          "type": "long",
         },
       ]
     }
@@ -289,6 +344,24 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "isUserEditable": false,
           "kbnType": undefined,
           "name": "amount",
+          "type": "long",
+        },
+        Object {
+          "displayName": "runtime",
+          "excluded": false,
+          "format": "",
+          "hasRuntime": true,
+          "info": Array [],
+          "isMapped": false,
+          "isUserEditable": false,
+          "kbnType": "number",
+          "name": "runtime",
+          "runtimeField": Object {
+            "script": Object {
+              "source": "emit('Hello');",
+            },
+            "type": "long",
+          },
           "type": "long",
         },
       ]

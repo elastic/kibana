@@ -66,6 +66,7 @@ export default function ({ getService, getPageObjects }) {
           expect(lang).to.be('painless');
         }
       });
+      await PageObjects.settings.clearScriptedFieldLanguageFilter('painless');
 
       await PageObjects.settings.setScriptedFieldLanguageFilter('expression');
 
@@ -76,6 +77,7 @@ export default function ({ getService, getPageObjects }) {
           expect(lang).to.be('expression');
         }
       });
+      await PageObjects.settings.clearScriptedFieldLanguageFilter('expression');
     });
   });
 }

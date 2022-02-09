@@ -3933,8 +3933,6 @@
     "indexPatternManagement.editIndexPattern.deleteButton": "删除",
     "indexPatternManagement.editIndexPattern.deprecation": "脚本字段已弃用。改用 {runtimeDocs}。",
     "indexPatternManagement.editIndexPattern.fields.addFieldButtonLabel": "添加字段",
-    "indexPatternManagement.editIndexPattern.fields.allLangsDropDown": "所有语言",
-    "indexPatternManagement.editIndexPattern.fields.allTypesDropDown": "所有字段类型",
     "indexPatternManagement.editIndexPattern.fields.conflictModal.closeBtn": "关闭",
     "indexPatternManagement.editIndexPattern.fields.conflictModal.description": "{fieldName} 字段的类型在不同索引中会有所不同，并且可能无法用于搜索、可视化和其他分析。",
     "indexPatternManagement.editIndexPattern.fields.conflictModal.title": "此字段存在类型冲突",

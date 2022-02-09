@@ -68,6 +68,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -86,6 +87,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -117,6 +119,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -125,7 +128,7 @@ describe('ScriptedFieldsTable', () => {
     await component.update(); // Fire `componentWillMount()`
     await component.update(); // Force update the component post async actions
 
-    component.setProps({ scriptedFieldLanguageFilter: 'painless' });
+    component.setProps({ scriptedFieldLanguageFilter: ['painless'] });
     component.update();
 
     expect(component).toMatchSnapshot();
@@ -142,6 +145,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -162,6 +166,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -189,6 +194,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
