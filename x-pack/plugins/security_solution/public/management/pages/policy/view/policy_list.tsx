@@ -16,29 +16,20 @@ import {
   EuiToolTip,
   CriteriaWithPagination,
 } from '@elastic/eui';
-import { useQuery } from 'react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { useHttp } from '../../../../common/lib/kibana/hooks';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { TextValueDisplay } from '../../../components/artifact_entry_card/components/text_value_display';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { PolicyData } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
+import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 
 export const PolicyList = memo(() => {
-  const http = useHttp();
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const result = useQuery(['policyList'], () => {
-    return sendGetEndpointSpecificPackagePolicies(http, {
-      query: {
-        page: pagination.currentPage,
-        perPage: pagination.pageSize,
-      },
-    });
-  });
+  // load the list of policies>
+  const result = useGetEndpointSpecificPolicies();
 
   const totalItemCount = useMemo(() => {
     return result.data ? result.data.items.length : 0;

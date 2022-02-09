@@ -12,17 +12,21 @@ import { sendGetEndpointSpecificPackagePolicies } from './policies';
 
 export function useGetEndpointSpecificPolicies({
   onError,
+  page,
+  perPage,
 }: {
   onError?: (error: ServerApiError) => void;
-} = {}): QueryObserverResult<GetPolicyListResponse> {
+  page?: number;
+  perPage?: number;
+} = {page: 1, perPage: 1000}): QueryObserverResult<GetPolicyListResponse> {
   const http = useHttp();
   return useQuery<GetPolicyListResponse, ServerApiError>(
     ['endpointSpecificPolicies'],
     () => {
       return sendGetEndpointSpecificPackagePolicies(http, {
         query: {
-          page: 1,
-          perPage: 1000,
+          page,
+          perPage,
         },
       });
     },
