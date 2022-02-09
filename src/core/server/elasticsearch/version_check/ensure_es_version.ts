@@ -158,7 +158,6 @@ export const pollEsNodesVersion = ({
           filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
         })
       ).pipe(
-        map((body) => body),
         catchError((nodesInfoRequestError) => {
           return of({ nodes: {}, nodesInfoRequestError });
         })
