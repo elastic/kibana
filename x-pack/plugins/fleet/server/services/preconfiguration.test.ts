@@ -166,7 +166,7 @@ jest.mock('./epm/packages/install', () => ({
 
       const installedPackage = mockInstalledPackages.get(pkgName);
 
-      if (installedPackage) {
+      if (installedPackage && installedPackage.version === '1.0.0') {
         return installedPackage;
       }
 
