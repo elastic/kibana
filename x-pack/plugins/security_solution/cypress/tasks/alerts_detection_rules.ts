@@ -47,6 +47,7 @@ import {
   RULE_IMPORT_OVERWRITE_CHECKBOX,
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
   MODAL_CONFIRMATION_TITLE,
+  MODAL_CONFIRMATION_BODY,
   INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
@@ -58,6 +59,8 @@ import {
   RULES_BULK_EDIT_TAGS,
   RULES_BULK_EDIT_FORM_CONFIRM_BTN,
   TOASTER_BODY,
+  RULES_TAGS_POPOVER_BTN,
+  RULES_TAGS_POPOVER_WRAPPER,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -360,8 +363,8 @@ export const waitForElasticRulesBulkEditModal = (rulesCount: number) => {
     'have.text',
     `${rulesCount} Elastic rules cannot be edited`
   );
-
-  cy.contains(
+  cy.get(MODAL_CONFIRMATION_BODY).should(
+    'have.text',
     'Elastic rules are not modifiable. The update action will only be applied to Custom rules.'
   );
 };
@@ -375,16 +378,17 @@ export const waitForMixedRulesBulkEditModal = (
     `${elasticRulesCount} Elastic rules cannot be edited`
   );
 
-  cy.contains(
+  cy.get(MODAL_CONFIRMATION_BODY).should(
+    'have.text',
     `The update action will only be applied to ${customRulesCount} Custom rules you’ve selected.`
   );
 };
 
 export const testAllTagsBadges = (tags: string[]) => {
-  cy.get('[data-test-subj="tagsDisplayPopoverButton"]').each(($el) => {
+  cy.get(RULES_TAGS_POPOVER_BTN).each(($el) => {
     // open tags popover
     cy.wrap($el).click();
-    cy.get('[data-test-subj="tagsDisplayPopoverWrapper"]').should('have.text', tags.join(''));
+    cy.get(RULES_TAGS_POPOVER_WRAPPER).should('have.text', tags.join(''));
     // close tags popover
     cy.wrap($el).click();
   });

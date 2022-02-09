@@ -119,8 +119,8 @@ const IndexPatternsFormComponent = ({
         path="index"
         config={{ ...schema.index, label: indexLabel, helpText: indexHelpText }}
         componentProps={{
-          idAria: 'detectionEngineBulkEditRulesIndexPatterns',
-          'data-test-subj': 'detectionEngineBulkEditRulesIndexPatterns',
+          idAria: 'bulkEditRulesIndexPatterns',
+          'data-test-subj': 'bulkEditRulesIndexPatterns',
           euiFieldProps: {
             fullWidth: true,
             placeholder: '',
@@ -133,14 +133,14 @@ const IndexPatternsFormComponent = ({
         <CommonUseField
           path="overwrite"
           componentProps={{
-            idAria: 'detectionEngineBulkEditRulesOverwriteIndexPatterns',
-            'data-test-subj': 'detectionEngineBulkEditRulesOverwriteIndexPatterns',
+            idAria: 'bulkEditRulesOverwriteIndexPatterns',
+            'data-test-subj': 'bulkEditRulesOverwriteIndexPatterns',
           }}
         />
       )}
       {overwrite && (
         <EuiFormRow>
-          <EuiCallOut color="warning" size="s">
+          <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesIndexPatternsWarning">
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setIndexPatternsWarningCallout"
               defaultMessage="You’re about to overwrite index patterns for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to

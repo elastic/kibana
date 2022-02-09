@@ -94,6 +94,8 @@ export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButto
 
 export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"]';
 
+export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]';
+
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
 
 export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
@@ -120,10 +122,10 @@ export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
 export const INDEX_PATTERNS_RULE_BULK_MENU_ITEM = '[data-test-subj="indexPatternsBulkEditRule"]';
 
 export const ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM =
-  '[data-test-subj="indexPatternsBulkEditRule"]';
+  '[data-test-subj="addIndexPatternsBulkEditRule"]';
 
 export const DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM =
-  '[data-test-subj="indexPatternsBulkEditRule"]';
+  '[data-test-subj="deleteIndexPatternsBulkEditRule"]';
 
 export const TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="tagsBulkEditRule"]';
 
@@ -135,13 +137,21 @@ export const RULES_BULK_EDIT_FORM_TITLE = '[data-test-subj="rulesBulkEditFormTit
 
 export const RULES_BULK_EDIT_FORM_CONFIRM_BTN = '[data-test-subj="rulesBulkEditFormSaveBtn"]';
 
-export const RULES_BULK_EDIT_INDEX_PATTERNS =
-  '[data-test-subj="detectionEngineBulkEditIndexPatterns"]';
+export const RULES_BULK_EDIT_INDEX_PATTERNS = '[data-test-subj="bulkEditRulesIndexPatterns"]';
 
 export const RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX =
-  '[data-test-subj="detectionEngineBulkEditRulesOverwriteIndexPatterns"]';
+  '[data-test-subj="bulkEditRulesOverwriteIndexPatterns"]';
 
-export const RULES_BULK_EDIT_TAGS = '[data-test-subj="detectionEngineBulkEditRulesTags"]';
+export const RULES_BULK_EDIT_TAGS = '[data-test-subj="bulkEditRulesTags"]';
 
 export const RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX =
-  '[data-test-subj="detectionEngineBulkEditRulesOverwriteTags"]';
+  '[data-test-subj="bulkEditRulesOverwriteTags"]';
+
+export const RULES_TAGS_POPOVER_BTN = '[data-test-subj="tagsDisplayPopoverButton"]';
+
+export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWrapper"]';
+
+export const RULES_BULK_EDIT_INDEX_PATTERNS_WARNING =
+  '[data-test-subj="bulkEditRulesIndexPatternsWarning"]';
+
+export const RULES_BULK_EDIT_TAGS_WARNING = '[data-test-subj="bulkEditRulesTagsWarning"]';

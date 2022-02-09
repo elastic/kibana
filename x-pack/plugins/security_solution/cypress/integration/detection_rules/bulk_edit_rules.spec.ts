@@ -15,6 +15,8 @@ import {
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
+  RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
+  RULES_BULK_EDIT_TAGS_WARNING,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -79,7 +81,9 @@ describe('Detection rules, bulk edit', () => {
   });
 
   it('should show modal windows when Elastic rules selected and edit only custom rules', () => {
-    cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click().should('not.exist');
+    cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN)
+      .pipe(($el) => $el.trigger('click'))
+      .should('not.exist');
 
     // select few Elastic rules, check if we can't proceed further, as ELastic rules are not editable
     // filter rules, only Elastic rule to show
@@ -92,7 +96,7 @@ describe('Detection rules, bulk edit', () => {
     waitForElasticRulesBulkEditModal(5);
     cy.get(MODAL_CONFIRMATION_BTN).click();
 
-    // Select Elastic rules and custom rules, warning modal window, proceed with editing custom rules
+    // Select Elastic rules and custom rules, check mixed rules warning modal window, proceed with editing custom rules
     cy.get(ELASTIC_RULES_BTN).click();
 
     selectAllRules();
@@ -109,7 +113,7 @@ describe('Detection rules, bulk edit', () => {
     hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
   });
 
-  it('Adds/delete/overwrite index patterns in rules', () => {
+  it('should add/delete/overwrite index patterns in rules', () => {
     // First step: add index patterns to all rules
     // Switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
     // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
@@ -157,7 +161,8 @@ describe('Detection rules, bulk edit', () => {
       .should('have.text', 'Overwrite all selected rules index patterns')
       .click();
 
-    cy.contains(
+    cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
+      'have.text',
       'You’re about to overwrite index patterns for 6 selected rules, press Save to apply changes.'
     );
 
@@ -170,7 +175,7 @@ describe('Detection rules, bulk edit', () => {
     hasIndexPatterns(OVERWRITE_INDEX_PATTERNS.join(''));
   });
 
-  it('Adds/deletes/overwrites tags in rules', () => {
+  it('should add/delete/overwrite tags in rules', () => {
     // First step: add tags to all rules
     // Switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
     // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
@@ -199,12 +204,13 @@ describe('Detection rules, bulk edit', () => {
     testAllTagsBadges(['tag2']);
 
     // Third step: overwrite all tags
-
     openBulkEditAddTagsForm();
     cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
       .should('have.text', 'Overwrite all selected rules tags')
       .click();
-    cy.contains(
+
+    cy.get(RULES_BULK_EDIT_TAGS_WARNING).should(
+      'have.text',
       'You’re about to overwrite tags for 6 selected rules, press Save to apply changes.'
     );
 
