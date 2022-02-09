@@ -152,7 +152,7 @@ export const getDescriptionListContent = (
           {
             title: titleElement,
             description:
-              value.length > 55 ? (
+              value.length > 75 ? (
                 <EuiDescriptionListDescription style={{ height: 150, overflowY: 'hidden' }}>
                   <EuiText
                     tabIndex={0}

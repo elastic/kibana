@@ -287,10 +287,3 @@ export const OPERATING_SYSTEM_LINUX = i18n.translate(
     defaultMessage: 'Linux',
   }
 );
-
-export const EXCEPTION_ITEM_DESCRIPTION_TOGGLE_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.itemDescription.toggleTitle',
-  {
-    defaultMessage: 'Description...',
-  }
-);
