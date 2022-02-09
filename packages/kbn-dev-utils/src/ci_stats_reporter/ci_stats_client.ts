@@ -15,8 +15,8 @@ import { CiStatsMetadata } from './ci_stats_metadata';
 interface LatestTestGroupStatsOptions {
   /** The Kibana branch to get stats for, eg "main" */
   branch: string;
-  /** The CI job name to filter builds by, eg "kibana-hourly" */
-  ciJobName: string;
+  /** The CI job names to filter builds by, eg "kibana-hourly" */
+  ciJobNames: string[];
   /** Filter test groups by group type */
   testGroupType?: string;
 }
@@ -76,7 +76,7 @@ export class CiStatsClient {
       url: '/v1/test_group_stats',
       params: {
         branch: options.branch,
-        ci_job_name: options.ciJobName,
+        ci_job_name: options.ciJobNames.join(','),
         test_group_type: options.testGroupType,
       },
       headers: {
