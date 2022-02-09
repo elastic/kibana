@@ -8,14 +8,14 @@
 
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
 import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
 import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
 import { DashboardContainerInput, DashboardSavedObject } from '../..';
-import { ControlGroupContainer, ControlGroupInput } from '../../../../presentation_util/public';
+import { ControlGroupContainer, ControlGroupInput } from '../../../../controls/public';
 
 // only part of the control group input should be stored in dashboard state. The rest is passed down from the dashboard.
 export interface DashboardControlGroupInput {

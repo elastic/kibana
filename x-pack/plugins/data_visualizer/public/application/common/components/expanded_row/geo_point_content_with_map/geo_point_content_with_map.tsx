@@ -13,7 +13,7 @@ import { DocumentStatsTable } from '../../stats_table/components/field_data_expa
 import { ExamplesList } from '../../examples_list';
 import { FieldVisConfig } from '../../stats_table/types';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
-import { JOB_FIELD_TYPES } from '../../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
 import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '../../../../../../../maps/common';
 import { EmbeddedMapComponent } from '../../embedded_map';
 import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';

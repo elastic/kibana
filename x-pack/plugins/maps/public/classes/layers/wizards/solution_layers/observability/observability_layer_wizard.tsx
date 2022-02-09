@@ -14,6 +14,7 @@ import { APM_INDEX_PATTERN_ID } from './create_layer_descriptor';
 import { getIndexPatternService } from '../../../../../kibana_services';
 
 export const ObservabilityLayerWizardConfig: LayerWizard = {
+  order: 20,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],
   getIsDisabled: async () => {
     try {

@@ -8,7 +8,12 @@
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
-import { registerTestBed, TestBed, AsyncTestBedConfig, findTestSubject } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
+  findTestSubject,
+} from '@kbn/test-jest-helpers';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
@@ -30,6 +35,7 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickDataStreamAt: (index: number) => void;
     clickManageContextMenuButton: () => void;
     clickContextMenuOption: (optionDataTestSubject: string) => void;
+    clickModalConfirm: () => void;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
@@ -97,6 +103,15 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
     component.update();
   };
 
+  const clickModalConfirm = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('confirmModalConfirmButton').simulate('click');
+    });
+    component.update();
+  };
+
   const findDataStreamDetailPanel = () => {
     const { find } = testBed;
     return find('dataStreamDetailPanel');
@@ -116,6 +131,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
       clickDataStreamAt,
       clickManageContextMenuButton,
       clickContextMenuOption,
+      clickModalConfirm,
     },
     findDataStreamDetailPanel,
     findDataStreamDetailPanelTitle,

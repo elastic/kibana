@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common';
+import { DataView } from '../../../../../../plugins/data_views/public';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -40,10 +40,10 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 
 describe('ScriptedFieldsTable', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: DataView;
 
   beforeEach(() => {
     indexPattern = getIndexPatternMock({
@@ -56,7 +56,7 @@ describe('ScriptedFieldsTable', () => {
           script: 'z++',
         },
       ],
-    }) as IndexPattern;
+    }) as DataView;
   });
 
   test('should render normally', async () => {
@@ -68,6 +68,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -86,6 +87,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -112,11 +114,12 @@ describe('ScriptedFieldsTable', () => {
               { isUserEditable: true, name: 'JustATest', lang: 'painless', script: 'z++' },
               { isUserEditable: true, name: 'Bad', lang: 'somethingElse', script: 'z++' },
             ],
-          }) as IndexPattern
+          }) as DataView
         }
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -125,7 +128,7 @@ describe('ScriptedFieldsTable', () => {
     await component.update(); // Fire `componentWillMount()`
     await component.update(); // Force update the component post async actions
 
-    component.setProps({ scriptedFieldLanguageFilter: 'painless' });
+    component.setProps({ scriptedFieldLanguageFilter: ['painless'] });
     component.update();
 
     expect(component).toMatchSnapshot();
@@ -137,11 +140,12 @@ describe('ScriptedFieldsTable', () => {
         indexPattern={
           getIndexPatternMock({
             getScriptedFields: () => [],
-          }) as IndexPattern
+          }) as DataView
         }
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -162,6 +166,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 
@@ -184,11 +189,12 @@ describe('ScriptedFieldsTable', () => {
           {
             ...indexPattern,
             removeScriptedField,
-          } as unknown as IndexPattern
+          } as unknown as DataView
         }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={[]}
       />
     ).dive();
 

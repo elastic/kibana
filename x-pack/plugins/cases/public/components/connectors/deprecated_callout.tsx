@@ -37,5 +37,6 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ type = 'warning' }) => (
     {DEPRECATED_CONNECTOR_WARNING_DESC}
   </EuiCallOut>
 );
+DeprecatedCalloutComponent.displayName = 'DeprecatedCallout';
 
 export const DeprecatedCallout = React.memo(DeprecatedCalloutComponent);

@@ -1,19 +1,77 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FullTimeRangeSelector renders the selector 1`] = `
-<EuiButton
-  data-test-subj="mlButtonUseFullData"
-  isDisabled={false}
-  onClick={[Function]}
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="xs"
+  responsive={false}
 >
-  <FormattedMessage
-    defaultMessage="Use full {dataViewTitle} data"
-    id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
-    values={
-      Object {
-        "dataViewTitle": "test-data-view",
-      }
+  <EuiToolTip
+    content={
+      <FormattedMessage
+        defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
+        id="xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
+        values={Object {}}
+      />
     }
-  />
-</EuiButton>
+    delay="regular"
+    display="inlineBlock"
+    position="top"
+  >
+    <EuiButton
+      data-test-subj="mlButtonUseFullData"
+      isDisabled={false}
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Use full data"
+        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiToolTip>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downRight"
+      button={
+        <EuiButtonIcon
+          aria-label="More"
+          display="base"
+          iconType="boxesVertical"
+          onClick={[Function]}
+          size="m"
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="mlFullTimeRangeSelectorOption"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+    >
+      <EuiPanel>
+        <EuiRadioGroup
+          compressed={true}
+          idSelected="e"
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "id": "exclude-frozen",
+                "label": "Exclude frozen data tier",
+              },
+              Object {
+                "id": "include-frozen",
+                "label": "Include frozen data tier",
+              },
+            ]
+          }
+        />
+      </EuiPanel>
+    </EuiPopover>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;

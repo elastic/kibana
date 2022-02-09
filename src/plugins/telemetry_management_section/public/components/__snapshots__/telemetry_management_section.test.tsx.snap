@@ -258,6 +258,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "sendUsageTo": "staging",
       },
       "fetchExample": [Function],
+      "fetchLastReported": [Function],
       "fetchTelemetry": [Function],
       "getCanChangeOptInStatus": [Function],
       "getIsOptedIn": [Function],
@@ -279,6 +280,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         },
         "delete": [MockFunction],
         "externalUrl": Object {
+          "isInternalUrl": [MockFunction],
           "validateUrl": [MockFunction],
         },
         "fetch": [MockFunction],
@@ -308,6 +310,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "reportOptInStatusChange": false,
       "setOptIn": [Function],
       "setUserHasSeenNotice": [Function],
+      "updateLastReported": [Function],
       "updatedConfig": undefined,
     }
   }

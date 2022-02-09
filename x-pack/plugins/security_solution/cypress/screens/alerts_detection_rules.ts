@@ -64,17 +64,13 @@ export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
-export const RULES_MONIROTING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
+export const RULES_MONITORING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
 
 export const SEVERITY = '[data-test-subj="severity"]';
 
 export const SHOWING_RULES_TEXT = '[data-test-subj="showingRules"]';
 
 export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
-
-export const RULE_AUTO_REFRESH_IDLE_MODAL = '[data-test-subj="allRulesIdleModal"]';
-
-export const RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE = '[data-test-subj="allRulesIdleModal"] button';
 
 export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
 

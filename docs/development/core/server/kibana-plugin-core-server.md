@@ -70,6 +70,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationSettings](./kibana-plugin-core-server.deprecationsettings.md) | UiSettings deprecation field options. |
 |  [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) | The deprecations service provides a way for the Kibana platform to communicate deprecated features and configs with its users. These deprecations are only communicated if the deployment is using these features. Allowing for a user tailored experience for upgrading the stack version.<!-- -->The Deprecation service is consumed by the upgrade assistant to assist with the upgrade experience.<!-- -->If a deprecated feature can be resolved without manual user intervention. Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the deprecation upon a user trigger. |
 |  [DiscoveredPlugin](./kibana-plugin-core-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
+|  [DocLinksServiceSetup](./kibana-plugin-core-server.doclinksservicesetup.md) |  |
 |  [ElasticsearchConfigPreboot](./kibana-plugin-core-server.elasticsearchconfigpreboot.md) | A limited set of Elasticsearch configuration entries exposed to the <code>preboot</code> plugins at <code>setup</code>. |
 |  [ElasticsearchErrorDetails](./kibana-plugin-core-server.elasticsearcherrordetails.md) |  |
 |  [ElasticsearchServicePreboot](./kibana-plugin-core-server.elasticsearchservicepreboot.md) |  |
@@ -217,6 +218,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsUpdateObjectsSpacesResponseObject](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.md) | Details about a specific object's update result. |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-core-server.savedobjectsupdateresponse.md) |  |
+|  [SavedObjectsValidationMap](./kibana-plugin-core-server.savedobjectsvalidationmap.md) | A map of [validation specs](./kibana-plugin-core-server.savedobjectsvalidationspec.md) to be used for a given type. The map's keys must be valid semver versions.<!-- -->Any time you change the schema of a [SavedObjectsType](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->, you should add a new entry to this map for the Kibana version the change was introduced in. |
 |  [SearchResponse](./kibana-plugin-core-server.searchresponse.md) |  |
 |  [ServiceStatus](./kibana-plugin-core-server.servicestatus.md) | The current status of a service at a point in time. |
 |  [SessionCookieValidationResult](./kibana-plugin-core-server.sessioncookievalidationresult.md) | Return type from a function to validate cookie contents. |
@@ -229,6 +231,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |  |
+|  [UnauthorizedErrorHandlerNotHandledResult](./kibana-plugin-core-server.unauthorizederrorhandlernothandledresult.md) |  |
+|  [UnauthorizedErrorHandlerOptions](./kibana-plugin-core-server.unauthorizederrorhandleroptions.md) |  |
+|  [UnauthorizedErrorHandlerResultRetryParams](./kibana-plugin-core-server.unauthorizederrorhandlerresultretryparams.md) |  |
+|  [UnauthorizedErrorHandlerRetryResult](./kibana-plugin-core-server.unauthorizederrorhandlerretryresult.md) |  |
+|  [UnauthorizedErrorHandlerToolkit](./kibana-plugin-core-server.unauthorizederrorhandlertoolkit.md) | Toolkit passed to a [UnauthorizedErrorHandler](./kibana-plugin-core-server.unauthorizederrorhandler.md) used to generate responses from the handler |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Variables
@@ -237,6 +244,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [APP\_WRAPPER\_CLASS](./kibana-plugin-core-server.app_wrapper_class.md) | The class name for top level \*and\* nested application wrappers to ensure proper layout |
 |  [kibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution. |
+|  [mergeSavedObjectMigrationMaps](./kibana-plugin-core-server.mergesavedobjectmigrationmaps.md) | Merges two saved object migration maps.<!-- -->If there is a migration for a given version on only one of the maps, that migration function will be used:<!-- -->mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '4.5.6': g }<!-- -->) -<!-- -->&gt; { '1.2.3': f, '4.5.6': g }<!-- -->If there is a migration for a given version on both maps, the migrations will be composed:<!-- -->mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '1.2.3': g }<!-- -->) -<!-- -->&gt; { '1.2.3': (doc, context) =<!-- -->&gt; f(g(doc, context), context) } |
 |  [pollEsNodesVersion](./kibana-plugin-core-server.pollesnodesversion.md) |  |
 |  [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md) | The current "level" of availability of a service. |
 |  [validBodyOutput](./kibana-plugin-core-server.validbodyoutput.md) | The set of valid body.output |
@@ -253,6 +261,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CapabilitiesSwitcher](./kibana-plugin-core-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [DeprecationsDetails](./kibana-plugin-core-server.deprecationsdetails.md) |  |
 |  [DestructiveRouteMethod](./kibana-plugin-core-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
+|  [DocLinksServiceStart](./kibana-plugin-core-server.doclinksservicestart.md) |  |
 |  [ElasticsearchClient](./kibana-plugin-core-server.elasticsearchclient.md) | Client used to query the elasticsearch cluster. |
 |  [ElasticsearchClientConfig](./kibana-plugin-core-server.elasticsearchclientconfig.md) | Configuration options to be used to create a [cluster client](./kibana-plugin-core-server.iclusterclient.md) using the [createClient API](./kibana-plugin-core-server.elasticsearchservicestart.createclient.md) |
 |  [ExecutionContextStart](./kibana-plugin-core-server.executioncontextstart.md) |  |
@@ -320,6 +329,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsImportHook](./kibana-plugin-core-server.savedobjectsimporthook.md) | A hook associated with a specific saved object type, that will be invoked during the import process. The hook will have access to the objects of the registered type.<!-- -->Currently, the only supported feature for import hooks is to return warnings to be displayed in the UI when the import succeeds. The only interactions the hook can have with the import process is via the hook's response. Mutating the objects inside the hook's code will have no effect. |
 |  [SavedObjectsImportWarning](./kibana-plugin-core-server.savedobjectsimportwarning.md) | Composite type of all the possible types of import warnings.<!-- -->See [SavedObjectsImportSimpleWarning](./kibana-plugin-core-server.savedobjectsimportsimplewarning.md) and [SavedObjectsImportActionRequiredWarning](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.md) for more details. |
 |  [SavedObjectsNamespaceType](./kibana-plugin-core-server.savedobjectsnamespacetype.md) | The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces. \* multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be unique across all namespaces. This is intended to be an intermediate step when objects with a "single" namespace type are being converted to a "multiple" namespace type. In other words, objects with a "multiple-isolated" namespace type will be \*share-capable\*, but will not actually be shareable until the namespace type is changed to "multiple". \* agnostic: This type of saved object is global. |
+|  [SavedObjectsValidationSpec](./kibana-plugin-core-server.savedobjectsvalidationspec.md) | Allows for validating properties using @<!-- -->kbn/config-schema validations. |
 |  [SavedObjectTypeExcludeFromUpgradeFilterHook](./kibana-plugin-core-server.savedobjecttypeexcludefromupgradefilterhook.md) | If defined, allows a type to run a search query and return a query filter that may match any documents which may be excluded from the next migration upgrade process. Useful for cleaning up large numbers of old documents which are no longer needed and may slow the migration process.<!-- -->If this hook fails, the migration will proceed without these documents having been filtered out, so this should not be used as a guarantee that these documents have been deleted.<!-- -->Experimental and subject to change |
 |  [SavedObjectUnsanitizedDoc](./kibana-plugin-core-server.savedobjectunsanitizeddoc.md) | Describes Saved Object documents from Kibana &lt; 7.0.0 which don't have a <code>references</code> root property defined. This type should only be used in migrations. |
 |  [ScopeableRequest](./kibana-plugin-core-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md)<!-- -->. |
@@ -327,4 +337,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SharedGlobalConfig](./kibana-plugin-core-server.sharedglobalconfig.md) |  |
 |  [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. This should only be used inside handlers registered during <code>setup</code> that will only be executed after <code>start</code> lifecycle. |
 |  [UiSettingsType](./kibana-plugin-core-server.uisettingstype.md) | UI element type to represent the settings. |
+|  [UnauthorizedError](./kibana-plugin-core-server.unauthorizederror.md) |  |
+|  [UnauthorizedErrorHandler](./kibana-plugin-core-server.unauthorizederrorhandler.md) | A handler used to handle unauthorized error returned by elasticsearch |
+|  [UnauthorizedErrorHandlerResult](./kibana-plugin-core-server.unauthorizederrorhandlerresult.md) |  |
 

@@ -30,6 +30,7 @@ import {
   PieVisualizationState,
   TermsIndexPatternColumn,
 } from '../../../lens/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '../../../lens/common/constants';
 import { FilterStateStore, DataView } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
@@ -91,7 +92,7 @@ function getLensAttributes(
         },
       } as TermsIndexPatternColumn,
       'ed999e9d-204c-465b-897f-fe1a125b39ed': {
-        sourceField: 'Records',
+        sourceField: RECORDS_FIELD,
         isBucketed: false,
         dataType: 'number',
         scale: 'ratio',
@@ -157,7 +158,7 @@ function getLensAttributes(
         {
           $state: { store: FilterStateStore.APP_STATE },
           meta: {
-            indexRefName: 'filter-index-pattern-0',
+            index: 'filter-index-pattern-0',
             negate: false,
             alias: null,
             disabled: false,
@@ -180,7 +181,7 @@ function getLensAttributes(
                 meta: {
                   alias: 'agent IDs',
                   disabled: false,
-                  indexRefName: 'filter-index-pattern-0',
+                  index: 'filter-index-pattern-0',
                   key: 'query',
                   negate: false,
                   type: 'custom',
@@ -391,13 +392,13 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   toggleErrors,
   expanded,
 }) => {
-  const { data: lastResultsData, isFetched } = usePackQueryLastResults({
+  const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
     logsDataView,
   });
 
-  const { data: errorsData, isFetched: errorsFetched } = usePackQueryErrors({
+  const { data: errorsData, isLoading: errorsLoading } = usePackQueryErrors({
     actionId,
     interval,
     logsDataView,
@@ -408,7 +409,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     [queryId, interval, toggleErrors]
   );
 
-  if (!isFetched || !errorsFetched) {
+  if (isLoading || errorsLoading) {
     return <EuiLoadingSpinner />;
   }
 

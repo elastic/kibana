@@ -10,8 +10,6 @@ import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getIndices } from '../../../../lib/elasticsearch/indices';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
 export function esIndicesRoute(server) {
@@ -36,25 +34,14 @@ export function esIndicesRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
       const { clusterUuid } = req.params;
       const { show_system_indices: showSystemIndices } = req.query;
       const { ccs } = req.payload;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
-        const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
-          req,
-          esIndexPattern,
-          clusterStats
-        );
-        const indices = await getIndices(
-          req,
-          esIndexPattern,
-          showSystemIndices,
-          indicesUnassignedShardStats
-        );
+        const clusterStats = await getClusterStats(req, clusterUuid, ccs);
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);
+        const indices = await getIndices(req, showSystemIndices, indicesUnassignedShardStats);
 
         return {
           clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),

@@ -37,10 +37,8 @@ export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatur
 
 let licenseId: string | undefined;
 let isGoldPlus: boolean = false;
-let isEnterprisePlus: boolean = false;
 export const getLicenseId = () => licenseId;
 export const getIsGoldPlus = () => isGoldPlus;
-export const getIsEnterprisePlus = () => isEnterprisePlus;
 
 let licensingPluginStart: LicensingPluginStart;
 let initializeLicense: (value: unknown) => void;
@@ -64,10 +62,6 @@ export async function setLicensingPluginStart(licensingPlugin: LicensingPluginSt
 function updateLicenseState(license: ILicense) {
   const gold = license.check(APP_ID, 'gold');
   isGoldPlus = gold.state === 'valid';
-
-  const enterprise = license.check(APP_ID, 'enterprise');
-  isEnterprisePlus = enterprise.state === 'valid';
-
   licenseId = license.uid;
 }
 

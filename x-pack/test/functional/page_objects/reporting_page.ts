@@ -6,11 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { format as formatUrl } from 'url';
+import fs from 'fs';
+import path from 'path';
 import type SuperTest from 'supertest';
-
-import { FtrService } from '../ftr_provider_context';
+import { format as formatUrl } from 'url';
+import { promisify } from 'util';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../../plugins/reporting/common/constants';
+import { FtrService } from '../ftr_provider_context';
+
+const writeFileAsync = promisify(fs.writeFile);
+const mkdirAsync = promisify(fs.mkdir);
 
 export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
@@ -185,5 +190,21 @@ export class ReportingPageObject extends FtrService {
         };
       })
     );
+  }
+
+  async writeSessionReport(name: string, reportExt: string, rawPdf: Buffer, folder: string) {
+    const sessionDirectory = path.resolve(folder, 'session');
+    await mkdirAsync(sessionDirectory, { recursive: true });
+    const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
+    await writeFileAsync(sessionReportPath, rawPdf);
+    this.log.debug(`sessionReportPath (${sessionReportPath})`);
+    return sessionReportPath;
+  }
+
+  getBaselineReportPath(fileName: string, reportExt: string, folder: string) {
+    const baselineFolder = path.resolve(folder, 'baseline');
+    const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
+    this.log.debug(`getBaselineReportPath (${fullPath})`);
+    return fullPath;
   }
 }

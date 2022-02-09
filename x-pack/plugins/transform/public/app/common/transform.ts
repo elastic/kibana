@@ -9,8 +9,8 @@ import { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-
-import { TransformId } from '../../../common/types/transform';
+import { cloneDeep } from 'lodash';
+import type { TransformConfigUnion, TransformId } from '../../../common/types/transform';
 
 // Via https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/utils/TransformStrings.java#L24
 // Matches a string that contains lowercase characters, digits, hyphens, underscores or dots.
@@ -20,6 +20,9 @@ export function isTransformIdValid(transformId: TransformId) {
   return /^[a-z0-9](?:[a-z0-9_\-\.]*[a-z0-9])?$/g.test(transformId);
 }
 
+export const TRANSFORM_ERROR_TYPE = {
+  DANGLING_TASK: 'dangling_task',
+} as const;
 export enum REFRESH_TRANSFORM_LIST_STATE {
   ERROR = 'error',
   IDLE = 'idle',
@@ -77,4 +80,12 @@ export const useRefreshTransformList = (
       refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.LOADING);
     },
   };
+};
+
+export const overrideTransformForCloning = (originalConfig: TransformConfigUnion) => {
+  // 'Managed' means job is preconfigured and deployed by other solutions
+  // we should not clone this setting
+  const clonedConfig = cloneDeep(originalConfig);
+  delete clonedConfig._meta?.managed;
+  return clonedConfig;
 };

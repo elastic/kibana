@@ -12,14 +12,13 @@ import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../data/public';
-
-import { PieVisParams } from './types';
+import { PartitionVisParams } from '../../../chart_expressions/expression_partition_vis/common';
 
 /**
  * Get esaggs expressions function
  * @param vis
  */
-export function getEsaggsFn(vis: Vis<PieVisParams>) {
+export function getEsaggsFn(vis: Vis<PartitionVisParams>) {
   return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {

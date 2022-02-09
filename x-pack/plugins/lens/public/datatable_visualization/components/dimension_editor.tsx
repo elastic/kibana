@@ -27,7 +27,6 @@ import {
   applyPaletteParams,
   defaultPaletteParams,
   FIXED_PROGRESSION,
-  getStopsForFixedMode,
   useDebouncedValue,
   PalettePanelContainer,
   findMinMaxByColumnId,
@@ -352,7 +351,7 @@ export function TableDimensionEditor(
                 <EuiFlexItem>
                   <EuiColorPaletteDisplay
                     data-test-subj="lnsDatatable_dynamicColoring_palette"
-                    palette={getStopsForFixedMode(displayStops, activePalette.params?.colorStops)}
+                    palette={displayStops.map(({ color }) => color)}
                     type={FIXED_PROGRESSION}
                     onClick={() => {
                       setIsPaletteOpen(!isPaletteOpen);

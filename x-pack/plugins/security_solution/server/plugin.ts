@@ -37,8 +37,7 @@ import {
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
-import { isAlertExecutor } from './lib/detection_engine/signals/types';
-import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
+import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
@@ -52,7 +51,6 @@ import {
   DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
-import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -62,14 +60,17 @@ import { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
-import { TelemetryEventsSender } from './lib/telemetry/sender';
-import { TelemetryReceiver } from './lib/telemetry/receiver';
+import { ITelemetryEventsSender, TelemetryEventsSender } from './lib/telemetry/sender';
+import { ITelemetryReceiver, TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
-import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
+import {
+  registerEventLogProvider,
+  ruleExecutionLogForExecutorsFactory,
+} from './lib/detection_engine/rule_execution_log';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
@@ -92,6 +93,7 @@ import type {
   PluginInitializerContext,
 } from './plugin_contract';
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
+import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -102,8 +104,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly appClientFactory: AppClientFactory;
 
   private readonly endpointAppContextService = new EndpointAppContextService();
-  private readonly telemetryReceiver: TelemetryReceiver;
-  private readonly telemetryEventsSender: TelemetryEventsSender;
+  private readonly telemetryReceiver: ITelemetryReceiver;
+  private readonly telemetryEventsSender: ITelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -221,6 +223,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
       ilmPolicy: previewIlmPolicy,
+      secondaryAlias: undefined,
     });
 
     const securityRuleTypeOptions = {
@@ -229,6 +232,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
       ruleDataClient,
       eventLogService,
+      ruleExecutionLoggerFactory: ruleExecutionLogForExecutorsFactory,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -256,7 +260,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleOptions,
       core.getStartServices,
       securityRuleTypeOptions,
-      previewRuleDataClient
+      previewRuleDataClient,
+      this.telemetryReceiver
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -281,23 +286,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
-    // Continue to register legacy rules against alerting client exposed through rule-registry
     if (plugins.alerting != null) {
-      const signalRuleType = signalRulesAlertType({
-        logger,
-        eventsTelemetry: this.telemetryEventsSender,
-        version: pluginContext.env.packageInfo.version,
-        ml: plugins.ml,
-        lists: plugins.lists,
-        config,
-        experimentalFeatures,
-        eventLogService,
-      });
       const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
-
-      if (isAlertExecutor(signalRuleType)) {
-        plugins.alerting.registerType(signalRuleType);
-      }
 
       if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
         plugins.alerting.registerType(ruleNotificationType);
@@ -360,6 +350,19 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const exceptionListClient = this.lists!.getExceptionListClient(
+      savedObjectsClient,
+      'kibana',
+      // execution of Lists plugin server extension points callbacks should be turned off
+      // here because most of the uses of this client will be in contexts where some endpoint
+      // validations (specifically those around authz) can not be done (due ot the lack of a `KibanaRequest`
+      // from where authz can be derived)
+      false
+    );
+    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      plugins.fleet!;
     let manifestManager: ManifestManager | undefined;
 
     this.licensing$ = plugins.licensing.license$;
@@ -367,7 +370,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
       const taskManager = plugins.taskManager;
-      const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = new EndpointArtifactClient(
         plugins.fleet.createArtifactsClient('endpoint')
       );
@@ -408,21 +410,26 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.policyWatcher.start(licenseService);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
-
     this.endpointAppContextService.start({
-      agentService: plugins.fleet?.agentService,
-      packageService: plugins.fleet?.packageService,
-      packagePolicyService: plugins.fleet?.packagePolicyService,
-      agentPolicyService: plugins.fleet?.agentPolicyService,
+      fleetAuthzService: authz,
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        plugins.fleet?.agentPolicyService!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        plugins.fleet?.packagePolicyService!,
+        agentPolicyService,
+        packagePolicyService,
         logger
+      ),
+      endpointFleetServicesFactory: new EndpointFleetServicesFactory(
+        {
+          agentService,
+          packageService,
+          packagePolicyService,
+          agentPolicyService,
+        },
+        core.savedObjects
       ),
       security: plugins.security,
       alerting: plugins.alerting,
@@ -433,6 +440,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerIngestCallback,
       licenseService,
       exceptionListsClient: exceptionListClient,
+      registerListsServerExtension: this.lists?.registerExtension,
     });
 
     this.telemetryReceiver.start(
@@ -449,10 +457,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    this.checkMetadataTransformsTask?.start({
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      taskManager: plugins.taskManager!,
-    });
+    if (plugins.taskManager) {
+      this.checkMetadataTransformsTask?.start({
+        taskManager: plugins.taskManager,
+      });
+    }
 
     return {};
   }

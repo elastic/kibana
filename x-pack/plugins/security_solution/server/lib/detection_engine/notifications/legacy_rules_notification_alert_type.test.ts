@@ -39,6 +39,7 @@ describe('legacyRules_notification_alert_type', () => {
 
     payload = {
       alertId: '1111',
+      executionId: 'b33f65d7-b33f-4aae-8d20-c93613dec9f9',
       services: alertServices,
       params: { ruleAlertId: '2222' },
       state: {},
@@ -88,7 +89,7 @@ describe('legacyRules_notification_alert_type', () => {
       });
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalledWith(
-        `Security Solution notification (Legacy) saved object for alert ${payload.params.ruleAlertId} was not found`
+        `Security Solution notification (Legacy) saved object for alert ${payload.params.ruleAlertId} was not found with id: \"1111\". space id: \"\" This indicates a dangling (Legacy) notification alert. You should delete this rule through \"Kibana UI -> Stack Management -> Rules and Connectors\" to remove this error message.`
       );
     });
 
@@ -135,9 +136,9 @@ describe('legacyRules_notification_alert_type', () => {
       );
 
       await alert.executor(payload);
-      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).toHaveBeenCalled();
 
-      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      const [{ value: alertInstanceMock }] = alertServices.alertFactory.create.mock.results;
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
         'default',
         expect.objectContaining({
@@ -162,9 +163,9 @@ describe('legacyRules_notification_alert_type', () => {
         )
       );
       await alert.executor(payload);
-      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).toHaveBeenCalled();
 
-      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      const [{ value: alertInstanceMock }] = alertServices.alertFactory.create.mock.results;
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
         'default',
         expect.objectContaining({
@@ -191,9 +192,9 @@ describe('legacyRules_notification_alert_type', () => {
         )
       );
       await alert.executor(payload);
-      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).toHaveBeenCalled();
 
-      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      const [{ value: alertInstanceMock }] = alertServices.alertFactory.create.mock.results;
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
         'default',
         expect.objectContaining({
@@ -203,7 +204,7 @@ describe('legacyRules_notification_alert_type', () => {
       );
     });
 
-    it('should not call alertInstanceFactory if signalsCount was 0', async () => {
+    it('should not call alertFactory.create if signalsCount was 0', async () => {
       const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
@@ -217,7 +218,7 @@ describe('legacyRules_notification_alert_type', () => {
 
       await alert.executor(payload);
 
-      expect(alertServices.alertInstanceFactory).not.toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).not.toHaveBeenCalled();
     });
 
     it('should call scheduleActions if signalsCount was greater than 0', async () => {
@@ -236,9 +237,9 @@ describe('legacyRules_notification_alert_type', () => {
 
       await alert.executor(payload);
 
-      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+      expect(alertServices.alertFactory.create).toHaveBeenCalled();
 
-      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      const [{ value: alertInstanceMock }] = alertServices.alertFactory.create.mock.results;
       expect(alertInstanceMock.replaceState).toHaveBeenCalledWith(
         expect.objectContaining({ signals_count: 100 })
       );
