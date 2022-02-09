@@ -67,8 +67,8 @@ import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
-  VISUALIZE_EDITOR_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
+import { VISUALIZE_EDITOR_TRIGGER } from '../../../../src/plugins/visualizations/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
 import type { Visualization, VisualizationType, EditorFrameSetup } from './types';

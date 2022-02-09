@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from '.';
+import { Trigger } from '../../../ui_actions/public';
 
 export const VISUALIZE_EDITOR_TRIGGER = 'VISUALIZE_EDITOR_TRIGGER';
 export const visualizeEditorTrigger: Trigger = {
@@ -14,3 +14,5 @@ export const visualizeEditorTrigger: Trigger = {
   title: 'Convert legacy visualizations to Lens',
   description: 'Triggered when user navigates from a legacy visualization to Lens.',
 };
+
+export const ACTION_CONVERT_TO_LENS = 'ACTION_CONVERT_TO_LENS';

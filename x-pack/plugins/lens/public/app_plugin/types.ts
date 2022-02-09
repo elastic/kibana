@@ -30,8 +30,8 @@ import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_taggi
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
-  ACTION_CONVERT_TO_LENS,
 } from '../../../../../src/plugins/ui_actions/public';
+import { ACTION_CONVERT_TO_LENS } from '../../../../../src/plugins/visualizations/public';
 import type {
   EmbeddableEditorState,
   EmbeddableStateTransfer,

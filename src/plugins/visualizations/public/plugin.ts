@@ -58,6 +58,7 @@ import { VisualizeLocatorDefinition } from '../common/locator';
 import { showNewVisModal } from './wizard';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 import { FeatureCatalogueCategory } from '../../home/public';
+import { visualizeEditorTrigger } from './triggers';
 
 import type { VisualizeServices } from './visualize_app/types';
 import type {
@@ -69,7 +70,7 @@ import type {
   SavedObjectsClientContract,
 } from '../../../core/public';
 import type { UsageCollectionSetup } from '../../usage_collection/public';
-import type { UiActionsStart } from '../../ui_actions/public';
+import type { UiActionsStart, UiActionsSetup } from '../../ui_actions/public';
 import type { SavedObjectsStart } from '../../saved_objects/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type {
@@ -105,6 +106,7 @@ export interface VisualizationsSetupDeps {
   embeddable: EmbeddableSetup;
   expressions: ExpressionsSetup;
   inspector: InspectorSetup;
+  uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
@@ -165,6 +167,7 @@ export class VisualizationsPlugin
       home,
       urlForwarding,
       share,
+      uiActions,
     }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     const {
@@ -325,6 +328,7 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
+    uiActions.registerTrigger(visualizeEditorTrigger);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 

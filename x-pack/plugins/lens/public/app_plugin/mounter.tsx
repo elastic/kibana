@@ -28,10 +28,8 @@ import {
   LensByReferenceInput,
   LensByValueInput,
 } from '../embeddable/embeddable';
-import {
-  ACTION_VISUALIZE_LENS_FIELD,
-  ACTION_CONVERT_TO_LENS,
-} from '../../../../../src/plugins/ui_actions/public';
+import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public';
+import { ACTION_CONVERT_TO_LENS } from '../../../../../src/plugins/visualizations/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import {

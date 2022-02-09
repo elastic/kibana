@@ -27,8 +27,6 @@ export type { Trigger, RowClickContext } from './triggers';
 export {
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
-  VISUALIZE_EDITOR_TRIGGER,
-  visualizeEditorTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeGeoFieldTrigger,
   ROW_CLICK_TRIGGER,
@@ -39,6 +37,5 @@ export {
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
-  ACTION_CONVERT_TO_LENS,
 } from './types';
 export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';

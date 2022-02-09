@@ -43,7 +43,7 @@ import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
-import { VISUALIZE_EDITOR_TRIGGER } from '../../../../ui_actions/public';
+import { VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import './visualize_navigation.scss';
