@@ -11,26 +11,26 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 
 * <<general-reporting-settings,Enable the {report-features}>>
 * <<encryption-keys,Configure the encryption key>>
-* <<reporting-kibana-server-settings,Control how the {report-features} communicate with the {kib} server>>
 * <<reporting-job-queue-settings,Manage background jobs>>
 * <<reporting-capture-settings,Capture screenshots>>
 * <<reporting-network-policy,Restrict requests with a Reporting network policy>>
 * <<reporting-csv-settings,Increase the byte limit for CSV exports>>
+* <<reporting-kibana-server-settings,Control how the {report-features} communicate with the {kib} server>>
 
 [float]
 [[general-reporting-settings]]
 ==== Enable reporting
 
 [[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}::
-When `true`, enables the {report-features}. The {report-features} are automatically enabled in {kib}. Set this
-to `false` to disable {report-features} entirely. The default is `true`.
+When `true` (default), enables the {report-features}. Set this to `false` to disable {report-features} entirely.
 
 [NOTE]
 ============
-Disabling Reporting entirely is discouraged. Rather than disabling the entire Reporting plugin, please use
-`xpack.reporting.queue.pollEnabled: false` instead. This rule is mandatory if you intend to enable Reporting on
-a portion of Kibana instances in a deployment. If you need to disable Kibana features from the UI, you can do
-so on a per-role and per-space basis with <<kibana-privileges, {kib} application privileges>>.
+Disabling {report-features} entirely is discouraged. If you need to turn off the ability to generate reports in
+the UI, you can do so on a per-role and per-space basis with <<grant-user-access, {kib} application privileges>>.
+
+If needed, you can also prevent a {kib} instance from claiming reporting work by setting
+<<xpack-reportingQueue-pollEnabled, `xpack.reporting.queue.pollEnabled: false`>>.
 ============
 
 [float]
@@ -56,32 +56,6 @@ xpack.reporting.encryptionKey: "something_secret"
 --------------------------------------------------------------------------------
 
 [float]
-[[reporting-kibana-server-settings]]
-==== {kib} server settings
-
-To generate screenshots for PNG and PDF reports, Reporting opens the {kib} web interface using a local
-connection on the server. In most cases, using a local connection to the Kibana server presents no issue. If
-you prefer the headless browser to connect to Kibana using a specific hostname, Reporting has a set of
-experimental settings which can allow Reporting to connect to Kibana through a proxy.
-
-[NOTE]
-============
-The Reporting server settings are entirely optional. Take caution when editing these settings. Adding these
-settings brings a new category of reasons that Reporting might not work. If the host is not routable or has
-encryption that can not be validated by Kibana, finding clues to the reason will require deep inspection of the
-server logs: the full Kibana URL that Reporting is attempting to open is logged during report execution.
-============
-
-`xpack.reporting.kibanaServer.port`:: experimental[]
-The port for accessing {kib}, if different from the <<server-port, `server.port`>> value.
-
-`xpack.reporting.kibanaServer.protocol`:: experimental[]
-The protocol for accessing {kib}, typically `http` or `https`.
-
-[[xpack-kibanaServer-hostname]] `xpack.reporting.kibanaServer.hostname`:: experimental[]
-The hostname for accessing {kib}, if different from the <<server-host, `server.host`>> value.
-
-[float]
 [[reporting-job-queue-settings]]
 ==== Background job settings
 
@@ -92,8 +66,11 @@ reports, you might need to change the following settings.
 `xpack.reporting.queue.indexInterval`::
 How often the index that stores reporting jobs rolls over to a new index. Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
 
-`xpack.reporting.queue.pollEnabled` {ess-icon}::
-Set to `true` (default) to enable the {kib} instance to poll the index for pending jobs and claim them for execution. Setting this to `false` allows the {kib} instance to only add new jobs to the reporting queue, list jobs, and provide the downloads to completed report through the UI.
+[[xpack-reportingQueue-pollEnabled]] `xpack.reporting.queue.pollEnabled` {ess-icon}::
+Set to `true` (default) to enable the {kib} instance to poll Elasticsearch for pending jobs and claim them for
+execution. Setting this to `false` allows the {kib} instance to only add new jobs to the reporting queue, list
+jobs, and provide the downloads to completed reports through the UI. This requires a deployment where at least
+one other Kibana instance in the Elastic cluster has this setting to `true`.
 
 NOTE: Running multiple instances of {kib} in a cluster for load balancing of
 reporting requires identical values for <<xpack-reporting-encryptionKey, `xpack.reporting.encryptionKey`>> and, if
@@ -265,3 +242,26 @@ deprecated:[7.14.0,The default for this setting will be `false` in an upcoming v
 
 `xpack.reporting.roles.allow`::
 deprecated:[7.14.0] In addition to superusers, specifies the roles that can generate reports using the {ref}/security-api.html#security-role-apis[{es} role management APIs]. Requires `xpack.reporting.roles.enabled` to be `true`. Defaults to `[ "reporting_user" ]`.
+
+[float]
+[[reporting-kibana-server-settings]]
+==== {kib} server settings
+
+To generate screenshots for PNG and PDF reports, Reporting opens the {kib} web interface using a local
+connection on the server. In most cases, using a local connection to the {kib} server presents no issue. If
+you prefer the headless browser to connect to {kib} using a specific hostname, there are a number of
+settings which can allow the headless browser to connect to {kib} through a proxy, rather than directly.
+
+[NOTE]
+============
+The `xpack.reporting.kibanaServer` settings are optional. Take caution when editing these settings. Adding
+these settings brings a new category of reasons that {report-features} might not work. The clues to the reason
+for failing reports will require inspecting the server logs: the full {kib} URL that Reporting is attempting to
+  open is logged during report execution.
+============
+
+`xpack.reporting.kibanaServer.port`:: The port for accessing {kib}.port`>> value.
+
+`xpack.reporting.kibanaServer.protocol`:: The protocol for accessing {kib}, typically `http` or `https`.
+
+[[xpack-kibanaServer-hostname]] `xpack.reporting.kibanaServer.hostname`:: The hostname for accessing {kib}.
