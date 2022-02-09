@@ -74,7 +74,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, { user: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: both user and password must be specified"`
+      `"error validating action type secrets: Both user and password must be specified"`
     );
   });
 
@@ -111,7 +111,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type config: error configuring xMatters action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+      '"error validating action type config: Error configuring xMatters action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
     );
   });
 
@@ -148,7 +148,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring xMatters action: target url is not present in allowedHosts"`
+      `"error validating action type config: Error configuring xMatters action: target url is not present in allowedHosts"`
     );
   });
 });
@@ -306,7 +306,7 @@ describe('execute()', () => {
       },
     });
     expect(mockedLogger.error).toBeCalledWith(
-      'error on some-id xMatters event: maxContentLength size of 1000000 exceeded'
+      'Error on some-id xMatters event: maxContentLength size of 1000000 exceeded'
     );
   });
 

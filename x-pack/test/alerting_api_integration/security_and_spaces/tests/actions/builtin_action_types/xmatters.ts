@@ -121,7 +121,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: error configuring xMatters action: target url "https://events.xmatters.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
+              'error validating action type config: Error configuring xMatters action: target url "https://events.xmatters.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });
@@ -186,7 +186,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error calling xMatters, invalid response/);
+      expect(result.message).to.match(/Error calling xMatters, invalid response/);
     });
 
     it('should handle a 429 xmatters error', async () => {
@@ -203,7 +203,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error calling xMatters, invalid response/);
+      expect(result.message).to.match(/Error calling xMatters, invalid response/);
     });
 
     it('should handle a 500 xmatters error', async () => {
@@ -220,7 +220,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error calling xMatters, retry later/);
+      expect(result.message).to.match(/Error calling xMatters, retry later/);
       expect(result.retry).to.equal(true);
     });
 
