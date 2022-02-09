@@ -7,6 +7,7 @@
  */
 
 export type { MockPlatformServiceFactory } from './platform.mock';
+export { platformServiceFactory } from './platform.mock';
 
 import type { SharedUXServices } from '../.';
 import { PluginServiceFactory } from '../types';
