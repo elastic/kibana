@@ -41,6 +41,7 @@ Add a [project config](https://github.com/sqren/backport/blob/master/docs/config
   "targetBranchChoices": ["main", "6.3", "6.2", "6.1", "6.0"],
 
   // Optional: Automatically detect which branches a pull request should be backported to based on the pull request labels.
+  // In this case, adding the label "backport-to-production" will backport the PR to the "production" branch
   "branchLabelMapping": {
     "^backport-to-(.+)$": "$1"
   }
