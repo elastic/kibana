@@ -51,6 +51,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_states_generated'));
       loadTestFile(require.resolve('./telemetry_collectors'));
       loadTestFile(require.resolve('./telemetry_collectors_fleet'));
+      loadTestFile(require.resolve('./telemetry_collectors_synthetics_service.ts'));
     });
 
     describe('with real-world data', () => {

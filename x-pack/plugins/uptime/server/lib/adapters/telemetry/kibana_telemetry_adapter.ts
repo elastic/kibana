@@ -151,6 +151,27 @@ export class KibanaTelemetryAdapter {
                   'This field represents the number of unique configured fleet managed monitors',
               },
             },
+            synthetics_service_enabled: {
+              type: 'boolean',
+              _meta: {
+                description: 'Whether or not the synthetics service is in use by this cluster',
+              },
+            },
+            synthetics_service_no_of_tests: {
+              type: 'long',
+              _meta: {
+                description: 'The number of tests ran on the cluster in the last 24 hours',
+              },
+            },
+            synthetics_service_browser_steps: {
+              type: 'array',
+              items: {
+                type: 'long',
+                _meta: {
+                  description: 'An array of the number of steps for each browser monitor',
+                },
+              },
+            },
           },
         },
       },
@@ -160,6 +181,8 @@ export class KibanaTelemetryAdapter {
           const uptimeEsClient = createUptimeESClient({ esClient, savedObjectsClient });
           await this.countNoOfUniqueMonitorAndLocations(uptimeEsClient, savedObjectsClient);
           await this.countNoOfUniqueFleetManagedMonitors(uptimeEsClient);
+          await this.countOfSyntheticsTests(uptimeEsClient);
+          await this.countOfSyntheticsBrowserSteps(uptimeEsClient);
         }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
@@ -387,6 +410,118 @@ export class KibanaTelemetryAdapter {
     return bucket;
   }
 
+  public static async countOfSyntheticsTests(callCluster: UptimeESClient) {
+    const params = {
+      index: 'synthetics-*',
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d/d',
+                    lt: 'now',
+                  },
+                },
+              },
+              {
+                exists: {
+                  field: 'config_id',
+                },
+              },
+              {
+                exists: {
+                  field: 'summary',
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          number_of_tests: {
+            filter: {
+              exists: {
+                field: 'summary',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const { body: result } = await callCluster.search(params, 'telemetryLogSyntheticsServiceTests');
+
+    const numberOfTests: number = result?.hits.total.value;
+
+    const bucketId = this.getBucketToIncrement();
+    const bucket = this.collector[bucketId];
+
+    bucket.synthetics_service_no_of_tests = numberOfTests;
+    if (result?.hits.total.value) {
+      bucket.synthetics_service_enabled = true;
+    }
+    return bucket;
+  }
+
+  public static async countOfSyntheticsBrowserSteps(callCluster: UptimeESClient) {
+    const params = {
+      index: 'synthetics-*',
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d/d',
+                    lt: 'now',
+                  },
+                },
+              },
+              {
+                exists: {
+                  field: 'config_id',
+                },
+              },
+              {
+                term: {
+                  'synthetics.type': 'step/end',
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
+        aggs: {
+          monitors: {
+            terms: {
+              field: 'monitor.id',
+            },
+            aggs: {
+              check_groups: {
+                terms: {
+                  field: 'monitor.check_group',
+                  size: 1,
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const { body: result } = await callCluster.search(params, 'telemetryLogSyntheticsServiceSteps');
+
+    const bucketId = this.getBucketToIncrement();
+    const bucket = this.collector[bucketId];
+
+    bucket.synthetics_service_browser_steps = this.getMonitorSteps(
+      result.aggregations?.monitors?.buckets || []
+    );
+    return bucket;
+  }
+
   private static getMonitorsFrequency(uniqueMonitors = []) {
     const frequencies: number[] = [];
     uniqueMonitors
@@ -401,6 +536,13 @@ export class KibanaTelemetryAdapter {
         }
       });
     return frequencies;
+  }
+
+  private static getMonitorSteps(uniqueMonitors: any[] = []) {
+    const stepCounts: number[] = uniqueMonitors.map((monitor) => {
+      return monitor.check_groups?.buckets?.[0].doc_count as number;
+    });
+    return stepCounts;
   }
 
   private static collector: UptimeTelemetryCollector = {};
@@ -462,6 +604,10 @@ export class KibanaTelemetryAdapter {
           max_length: 0,
           avg_length: 0,
         },
+
+        synthetics_service_enabled: false,
+        synthetics_service_no_of_tests: 0,
+        synthetics_service_browser_steps: [],
       };
     }
     return bucketId;

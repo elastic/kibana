@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         'up',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
 
       await makeChecksWithStatus(
@@ -150,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
         'down',
         undefined,
         undefined,
-        true
+        testDataStreamName
       );
       await client.indices.refresh();
     });
@@ -195,6 +195,9 @@ export default function ({ getService }: FtrProviderContext) {
         fleet_monitor_frequency: [0.001, 0.001, 60, 60],
         fleet_monitor_name_stats: { min_length: 7, max_length: 22, avg_length: 12 },
         fleet_no_of_unique_monitors: 4,
+        synthetics_service_browser_steps: [],
+        synthetics_service_no_of_tests: 0,
+        synthetics_service_enabled: false,
       });
     });
 

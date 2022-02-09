@@ -11,7 +11,6 @@ import type { Client } from '@elastic/elasticsearch';
 import { makeTls, TlsProps } from './make_tls';
 
 const DEFAULT_INDEX_NAME = 'heartbeat-8-generated-test';
-const DATA_STREAM_INDEX_NAME = 'synthetics-http-default';
 
 export const makePing = async (
   es: Client,
@@ -20,7 +19,7 @@ export const makePing = async (
   mogrify: (doc: any) => any,
   refresh: boolean = true,
   tls: boolean | TlsProps = false,
-  isFleetManaged: boolean | undefined = false
+  customIndex?: string
 ) => {
   const timestamp = new Date();
   const baseDoc: any = {
@@ -58,32 +57,6 @@ export const makePing = async (
     host: {
       name: 'avc-x1e',
     },
-    http: {
-      rtt: {
-        response_header: {
-          us: 19349,
-        },
-        total: {
-          us: 48954,
-        },
-        write_request: {
-          us: 33,
-        },
-        content: {
-          us: 51,
-        },
-        validate: {
-          us: 19400,
-        },
-      },
-      response: {
-        status_code: 200,
-        body: {
-          bytes: 3,
-          hash: '27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf',
-        },
-      },
-    },
     monitor: {
       duration: {
         us: 49347,
@@ -118,7 +91,7 @@ export const makePing = async (
   const doc = mogrify(merge(baseDoc, fields));
 
   await es.index({
-    index: isFleetManaged ? DATA_STREAM_INDEX_NAME : DEFAULT_INDEX_NAME,
+    index: customIndex || DEFAULT_INDEX_NAME,
     refresh,
     body: doc,
   });
