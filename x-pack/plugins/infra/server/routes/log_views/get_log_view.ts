@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isBoom } from '@hapi/boom';
 import {
   getLogViewRequestParamsRT,
   getLogViewResponsePayloadRT,
@@ -30,7 +29,7 @@ export const initGetLogViewRoute = ({
         params: createValidationFunction(getLogViewRequestParamsRT),
       },
     },
-    framework.router.handleLegacyErrors(async (_requestContext, request, response) => {
+    async (_requestContext, request, response) => {
       const { logViewId } = request.params;
       const logViewsClient = (await getLogViewsService()).getScopedClient(request);
 
@@ -43,10 +42,6 @@ export const initGetLogViewRoute = ({
           }),
         });
       } catch (error) {
-        if (isBoom(error)) {
-          throw error;
-        }
-
         return response.customError({
           statusCode: error.statusCode ?? 500,
           body: {
@@ -54,6 +49,6 @@ export const initGetLogViewRoute = ({
           },
         });
       }
-    })
+    }
   );
 };
