@@ -111,7 +111,7 @@ The CLI options will override the [configuration options](https://github.com/sqr
 
 ## Backport Module API
 
-`backport` can be imported as a Node module and interacted with programatically. This can be useful when creating automation around the Backport tool. See for example the [Backport Github Action](https://github.com/elastic/kibana-github-actions/blob/f5c58195840b8b0cf6036cfeba6e0b497306fb39/backport/index.ts)
+`backport` can be imported as a Node module and interacted with programatically. This can be useful when creating automation around the Backport tool. See for example the [Backport Github Action](https://github.com/sqren/backport-github-action)
 
 ### `backportRun`
 
