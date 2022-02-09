@@ -68,7 +68,7 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
     position: fixed;
     right: ${euiThemeVars.euiSizeXL};
     visibility: ${isReady ? 'visible' : 'hidden'};
-    z-index: ${euiThemeVars.euiZMaskBelowHeader};
+    z-index: ${euiThemeVars.euiZMaskBelowHeader - 1};
 
     &:hover [name='cloudChatHide'] {
       visibility: visible;
