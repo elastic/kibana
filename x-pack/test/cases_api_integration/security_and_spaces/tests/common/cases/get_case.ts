@@ -195,15 +195,26 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('deprecations', () => {
-      it('should return a warning header', async () => {
+      for (const paramValue of [true, false]) {
+        it(`should return a warning header if includeComments=${paramValue}`, async () => {
+          const theCase = await createCase(supertest, postCaseReq);
+          const res = await supertest
+            .get(`${getCaseDetailsUrl(theCase.id)}?includeComments=${paramValue}`)
+            .expect(200);
+          const warningHeader = res.header.warning;
+
+          assertWarningHeader(warningHeader);
+
+          const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+          expect(warningValue).to.be('Deprecated query parameter includeComments');
+        });
+      }
+
+      it('should not return a warning header if includeComments is not provided', async () => {
         const theCase = await createCase(supertest, postCaseReq);
         const res = await supertest.get(getCaseDetailsUrl(theCase.id)).expect(200);
         const warningHeader = res.header.warning;
-
-        assertWarningHeader(warningHeader);
-
-        const warningValue = extractWarningValueFromWarningHeader(warningHeader);
-        expect(warningValue).to.be('Deprecated query parameter includeComments');
+        expect(warningHeader).to.be(undefined);
       });
     });
   });

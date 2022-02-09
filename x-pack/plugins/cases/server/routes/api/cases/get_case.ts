@@ -29,17 +29,24 @@ export function initGetCaseApi({ router, logger, kibanaVersion }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        logger.warn(
-          `The query parameter 'includeComments' of the get case API '${CASE_DETAILS_URL}' is deprecated`
-        );
+        const isIncludeCommentsParamProvidedByTheUser =
+          request.url.searchParams.has('includeComments');
+
+        if (isIncludeCommentsParamProvidedByTheUser) {
+          logger.warn(
+            `The query parameter 'includeComments' of the get case API '${CASE_DETAILS_URL}' is deprecated`
+          );
+        }
 
         const casesClient = await context.cases.getCasesClient();
         const id = request.params.case_id;
 
         return response.ok({
-          headers: {
-            ...getWarningHeader(kibanaVersion, 'Deprecated query parameter includeComments'),
-          },
+          ...(isIncludeCommentsParamProvidedByTheUser && {
+            headers: {
+              ...getWarningHeader(kibanaVersion, 'Deprecated query parameter includeComments'),
+            },
+          }),
           body: await casesClient.cases.get({
             id,
             includeComments: request.query.includeComments,
