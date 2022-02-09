@@ -95,8 +95,8 @@ Just like in *Dashboard*, you can promote favorites to the *Visualization Librar
 [float]
 === {ml-cap} model management
 
-You can now add more models to bring modern 
-{ml-docs}/ml-nlp.html[{nlp} (NLP)] use cases to the {stack}. NLP models exist 
+You can now add more trained models to bring modern 
+{ml-docs}/ml-nlp-overview.html[{nlp} (NLP)] use cases to the {stack}. NLP models exist 
 alongside {dfanalytics} models. The **Model Management** page shows 
 approximations for memory usage on each {ml} node and displays high level stats 
 for {infer} rates for each deployed trained model. These details enable you to 
