@@ -114,8 +114,8 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
+let finishedInitialRender: boolean;
 let expressionToRender: string | null | undefined;
-let finishedInitialRender = false;
 
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
@@ -136,6 +136,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const applyChangesDisabled = useLensSelector(selectApplyChangesDisabled);
+
+  useEffect(() => {
+    return () => {
+      finishedInitialRender = false;
+      expressionToRender = null;
+    };
+  }, []);
 
   const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
