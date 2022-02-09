@@ -174,7 +174,7 @@ Any changes made after an upgrade are lost when you roll back to a previous vers
 To rollback after a failed upgrade migration, you must also rollback the saved object indices to be compatible with the previous {kib} version.
 
 [float]
-===== Rollback by restoring a backup snapshot
+===== Roll back by restoring a backup snapshot
 
 . Before proceeding, {ref}/snapshots-take-snapshot.html[take a snapshot] that contains the `kibana` feature state.
    By default, snapshots include the `kibana` feature state.
