@@ -49,7 +49,7 @@ export const OptionsListPopover = ({
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { selectOption, deselectOption, deselectOptions, clearSelections, replaceSelection },
+    actions: { selectOption, deselectOption, clearSelections, replaceSelection },
   } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
@@ -68,19 +68,6 @@ export const OptionsListPopover = ({
     <>
       <EuiPopoverTitle className="optionsList__popoverTitle" paddingSize="s">
         {title}
-        {invalidSelections && invalidSelections.length > 0 && (
-          <EuiToolTip content={OptionsListStrings.popover.getInvalidSelectionsTooltip()}>
-            <EuiBadge
-              color="warning"
-              iconType="cross"
-              iconSide="right"
-              iconOnClick={() => dispatch(deselectOptions(invalidSelections))}
-              iconOnClickAriaLabel={OptionsListStrings.popover.getInvalidSelectionsAriaLabel()}
-            >
-              {OptionsListStrings.popover.getInvalidSelectionsTitle(invalidSelections.length)}
-            </EuiBadge>
-          </EuiToolTip>
-        )}
       </EuiPopoverTitle>
       {field?.type !== 'boolean' && (
         <div className="optionsList__actions">
@@ -91,17 +78,6 @@ export const OptionsListPopover = ({
               alignItems="center"
               justifyContent="spaceBetween"
             >
-              {totalCardinality && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={OptionsListStrings.popover.getTotalCardinalityTooltip(
-                      totalCardinality
-                    )}
-                  >
-                    <EuiBadge color="primary">{totalCardinality}</EuiBadge>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
               <EuiFlexItem>
                 <EuiFieldSearch
                   compressed
@@ -109,7 +85,30 @@ export const OptionsListPopover = ({
                   onChange={(event) => updateSearchString(event.target.value)}
                   value={searchString}
                   data-test-subj="optionsList-control-search-input"
+                  placeholder={
+                    totalCardinality
+                      ? OptionsListStrings.popover.getTotalCardinalityPlaceholder(totalCardinality)
+                      : undefined
+                  }
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {invalidSelections && invalidSelections.length > 0 && (
+                  <EuiToolTip
+                    content={OptionsListStrings.popover.getInvalidSelectionsTooltip(
+                      invalidSelections.length
+                    )}
+                  >
+                    <EuiBadge
+                      className="optionsList__ignoredBadge"
+                      color="warning"
+                      iconType="alert"
+                      iconSide="right"
+                    >
+                      {invalidSelections.length}
+                    </EuiBadge>
+                  </EuiToolTip>
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip

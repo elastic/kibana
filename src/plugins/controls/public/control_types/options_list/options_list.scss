@@ -35,6 +35,10 @@
   font-weight: 300;
 }
 
+.optionsList__ignoredBadge {
+  margin-left: $euiSizeS;
+}
+
 .optionsList__selectionInvalid {
   text-decoration: line-through;
   color: $euiTextSubduedColor;
