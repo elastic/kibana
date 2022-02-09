@@ -171,7 +171,7 @@ describe('Detection rules, bulk edit', () => {
     hasIndexPatterns(OVERWRITE_INDEX_PATTERNS.join(''));
   });
 
-  it.only('Adds/deletes/overwrites tags in rules', () => {
+  it('Adds/deletes/overwrites tags in rules', () => {
     // First step: add tags to all rules
     // Switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
     // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
