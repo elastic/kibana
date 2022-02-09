@@ -78,10 +78,9 @@ describe.each([
 
   describe('rules execution failures', () => {
     it('returns error if rule is immutable/elastic', async () => {
-      isElasticRuleMock.mockReturnValue(true);
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
-          data: [mockRule],
+          data: [{ ...mockRule, params: { ...mockRule.params, immutable: true } }],
           total: 1,
         })
       );
