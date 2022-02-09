@@ -28,7 +28,7 @@ export type {
   GrantAPIKeyResult,
   AuthenticationServiceStart,
 } from './authentication';
-export type { CheckPrivilegesPayload } from './authorization';
+export type { CheckPrivilegesPayload, CasesSupportedOperations } from './authorization';
 export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
 export type { AuditLogger, AuditEvent } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
@@ -50,5 +50,3 @@ export const plugin: PluginInitializer<
   RecursiveReadonly<SecurityPluginStart>,
   PluginSetupDependencies
 > = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);
-
-export type { CasesSupportedOperations } from '../server/authorization/privileges/feature_privilege_builder';
