@@ -186,6 +186,7 @@ export const OptionsListPopover = ({
 
             {!isEmpty(invalidSelections) && (
               <>
+                <EuiSpacer size="s" />
                 <EuiTitle size="xxs" className="optionsList-control-ignored-selection-title">
                   <label>
                     {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
@@ -197,7 +198,7 @@ export const OptionsListPopover = ({
                   {invalidSelections?.map((ignoredSelection, index) => (
                     <EuiFilterSelectItem
                       data-test-subj={`optionsList-control-ignored-selection-${ignoredSelection}`}
-                      checked={'off'}
+                      checked={'on'}
                       className="optionsList__selectionInvalid"
                       key={index}
                       onClick={() => dispatch(deselectOption(ignoredSelection))}
@@ -215,7 +216,7 @@ export const OptionsListPopover = ({
             {selectedOptions &&
               selectedOptions.map((availableOption, index) => (
                 <EuiFilterSelectItem
-                  checked={invalidSelectionsSet.has(availableOption) ? 'off' : 'on'}
+                  checked={'on'}
                   key={index}
                   onClick={() => dispatch(deselectOption(availableOption))}
                   className={
