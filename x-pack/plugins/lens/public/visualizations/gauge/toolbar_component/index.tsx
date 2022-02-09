@@ -18,7 +18,7 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
   const { state, setState, frame } = props;
   const metricDimensionTitle =
     state.layerId &&
-    frame.activeData?.[state.layerId]?.columns.find((col) => col.id === state.metric)?.name;
+    frame.activeData?.[state.layerId]?.columns.find((col) => col.id === state.metricAccessor)?.name;
 
   const [subtitleMode, setSubtitleMode] = useState<GaugeLabelMajorMode>(() =>
     state.labelMinor ? 'custom' : 'none'

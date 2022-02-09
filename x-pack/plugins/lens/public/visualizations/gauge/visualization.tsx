@@ -27,7 +27,12 @@ import {
 import { PaletteRegistry } from '../../../../../../src/plugins/charts/public';
 import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
-import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
+import {
+  GROUP_ID,
+  LENS_GAUGE_ID,
+  GaugeVisualizationState,
+  GaugeExpressionState,
+} from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams, CUSTOM_PALETTE } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
@@ -79,8 +84,8 @@ const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizatio
   if (!row || !state) {
     return;
   }
-  const minValue = getValueFromAccessor('min', row, state);
-  const maxValue = getValueFromAccessor('max', row, state);
+  const minValue = getValueFromAccessor('minAccessor', row, state);
+  const maxValue = getValueFromAccessor('maxAccessor', row, state);
   if (maxValue != null && minValue != null) {
     if (maxValue < minValue) {
       return {
@@ -108,12 +113,12 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  attributes?: Partial<Omit<GaugeArguments, keyof GaugeVisualizationState | 'ariaLabel'>>
+  attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
 
   const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
-  if (!originalOrder || !state.metric) {
+  if (!originalOrder || !state.metricAccessor) {
     return null;
   }
 
@@ -124,10 +129,10 @@ const toExpression = (
         type: 'function',
         function: EXPRESSION_GAUGE_NAME,
         arguments: {
-          metric: [state.metric ?? ''],
-          min: [state.min ?? ''],
-          max: [state.max ?? ''],
-          goal: [state.goal ?? ''],
+          metricAccessor: [state.metricAccessor ?? ''],
+          minAccessor: [state.minAccessor ?? ''],
+          maxAccessor: [state.maxAccessor ?? ''],
+          goalAccessor: [state.goalAccessor ?? ''],
           shape: [state.shape ?? GaugeShapes.HORIZONTAL_BULLET],
           colorMode: [state?.colorMode ?? 'none'],
           palette: state.palette?.params
@@ -174,10 +179,10 @@ export const getGaugeVisualization = ({
   },
   clearLayer(state) {
     const newState = { ...state };
-    delete newState.metric;
-    delete newState.min;
-    delete newState.max;
-    delete newState.goal;
+    delete newState.metricAccessor;
+    delete newState.minAccessor;
+    delete newState.maxAccessor;
+    delete newState.goalAccessor;
     delete newState.palette;
     delete newState.colorMode;
     return newState;
@@ -219,8 +224,11 @@ export const getGaugeVisualization = ({
 
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
     let palette;
-    if (!(row == null || state?.metric == null || state?.palette == null || !hasColoring)) {
-      const currentMinMax = { min: getMinValue(row, state), max: getMaxValue(row, state) };
+    if (!(row == null || state?.metricAccessor == null || state?.palette == null || !hasColoring)) {
+      const currentMinMax = {
+        min: getMinValue(row, state),
+        max: getMaxValue(row, state),
+      };
 
       const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
       palette = displayStops.map(({ color }) => color);
@@ -236,22 +244,22 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.metricLabel', {
             defaultMessage: 'Metric',
           }),
-          accessors: state.metric
+          accessors: state.metricAccessor
             ? [
                 palette
                   ? {
-                      columnId: state.metric,
+                      columnId: state.metricAccessor,
                       triggerIcon: 'colorBy',
                       palette,
                     }
                   : {
-                      columnId: state.metric,
+                      columnId: state.metricAccessor,
                       triggerIcon: 'none',
                     },
               ]
             : [],
           filterOperations: isNumericDynamicMetric,
-          supportsMoreColumns: !state.metric,
+          supportsMoreColumns: !state.metricAccessor,
           required: true,
           dataTestSubj: 'lnsGauge_metricDimensionPanel',
           enableDimensionEditor: true,
@@ -264,12 +272,12 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.minValueLabel', {
             defaultMessage: 'Minimum value',
           }),
-          accessors: state.min ? [{ columnId: state.min }] : [],
+          accessors: state.minAccessor ? [{ columnId: state.minAccessor }] : [],
           filterOperations: isNumericMetric,
-          supportsMoreColumns: !state.min,
+          supportsMoreColumns: !state.minAccessor,
           dataTestSubj: 'lnsGauge_minDimensionPanel',
           prioritizedOperation: 'min',
-          suggestedValue: () => (state.metric ? getMinValue(row, state) : undefined),
+          suggestedValue: () => (state.metricAccessor ? getMinValue(row, state) : undefined),
           ...invalidProps,
         },
         {
@@ -280,12 +288,12 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.maxValueLabel', {
             defaultMessage: 'Maximum value',
           }),
-          accessors: state.max ? [{ columnId: state.max }] : [],
+          accessors: state.maxAccessor ? [{ columnId: state.maxAccessor }] : [],
           filterOperations: isNumericMetric,
-          supportsMoreColumns: !state.max,
+          supportsMoreColumns: !state.maxAccessor,
           dataTestSubj: 'lnsGauge_maxDimensionPanel',
           prioritizedOperation: 'max',
-          suggestedValue: () => (state.metric ? getMaxValue(row, state) : undefined),
+          suggestedValue: () => (state.metricAccessor ? getMaxValue(row, state) : undefined),
           ...invalidProps,
         },
         {
@@ -296,9 +304,9 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.goalValueLabel', {
             defaultMessage: 'Goal value',
           }),
-          accessors: state.goal ? [{ columnId: state.goal }] : [],
+          accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,
-          supportsMoreColumns: !state.goal,
+          supportsMoreColumns: !state.goalAccessor,
           required: false,
           dataTestSubj: 'lnsGauge_goalDimensionPanel',
         },
@@ -309,16 +317,16 @@ export const getGaugeVisualization = ({
   setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
     const update: Partial<GaugeVisualizationState> = {};
     if (groupId === GROUP_ID.MIN) {
-      update.min = columnId;
+      update.minAccessor = columnId;
     }
     if (groupId === GROUP_ID.MAX) {
-      update.max = columnId;
+      update.maxAccessor = columnId;
     }
     if (groupId === GROUP_ID.GOAL) {
-      update.goal = columnId;
+      update.goalAccessor = columnId;
     }
     if (groupId === GROUP_ID.METRIC) {
-      update.metric = columnId;
+      update.metricAccessor = columnId;
     }
     return {
       ...prevState,
@@ -329,17 +337,17 @@ export const getGaugeVisualization = ({
   removeDimension({ prevState, layerId, columnId }) {
     const update = { ...prevState };
 
-    if (prevState.goal === columnId) {
-      delete update.goal;
+    if (prevState.goalAccessor === columnId) {
+      delete update.goalAccessor;
     }
-    if (prevState.min === columnId) {
-      delete update.min;
+    if (prevState.minAccessor === columnId) {
+      delete update.minAccessor;
     }
-    if (prevState.max === columnId) {
-      delete update.max;
+    if (prevState.maxAccessor === columnId) {
+      delete update.maxAccessor;
     }
-    if (prevState.metric === columnId) {
-      delete update.metric;
+    if (prevState.metricAccessor === columnId) {
+      delete update.metricAccessor;
       delete update.palette;
       delete update.colorMode;
       update.ticksPosition = 'auto';
@@ -385,21 +393,21 @@ export const getGaugeVisualization = ({
                 groupId: 'min',
                 columnId: generateId(),
                 dataType: 'number',
-                label: 'min',
+                label: 'minAccessor',
                 staticValue: minValue,
               },
               {
                 groupId: 'max',
                 columnId: generateId(),
                 dataType: 'number',
-                label: 'max',
+                label: 'maxAccessor',
                 staticValue: maxValue,
               },
               {
                 groupId: 'goal',
                 columnId: generateId(),
                 dataType: 'number',
-                label: 'goal',
+                label: 'goalAccessor',
                 staticValue: goalValue,
               },
             ]
@@ -425,12 +433,12 @@ export const getGaugeVisualization = ({
   },
 
   getWarningMessages(state, frame) {
-    const { max, min, goal, metric } = state;
-    if (!max && !min && !goal && !metric) {
+    const { maxAccessor, minAccessor, goalAccessor, metricAccessor } = state;
+    if (!maxAccessor && !minAccessor && !goalAccessor && !metricAccessor) {
       // nothing configured yet
       return;
     }
-    if (!metric) {
+    if (!metricAccessor) {
       return [];
     }
 
@@ -438,10 +446,10 @@ export const getGaugeVisualization = ({
     if (!row || checkInvalidConfiguration(row, state)) {
       return [];
     }
-    const metricValue = row[metric];
-    const maxValue = max && row[max];
-    const minValue = min && row[min];
-    const goalValue = goal && row[goal];
+    const metricValue = row[metricAccessor];
+    const maxValue = maxAccessor && row[maxAccessor];
+    const minValue = minAccessor && row[minAccessor];
+    const goalValue = goalAccessor && row[goalAccessor];
 
     const warnings = [];
     if (typeof minValue === 'number') {
