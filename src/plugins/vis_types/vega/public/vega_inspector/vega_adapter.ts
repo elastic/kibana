@@ -81,6 +81,7 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
 
 export class VegaAdapter {
   private debugValuesSubject = new ReplaySubject<DebugValues>();
+  private error = new ReplaySubject<string | undefined>();
 
   bindInspectValues(debugValues: DebugValues) {
     this.debugValuesSubject.next(debugValues);
@@ -158,5 +159,17 @@ export class VegaAdapter {
       filter((debugValues) => Boolean(debugValues)),
       map((debugValues) => JSON.stringify(debugValues.spec, null, 2))
     );
+  }
+
+  getErrorSubscription() {
+    return this.error.asObservable();
+  }
+
+  setError(error: string) {
+    this.error.next(error);
+  }
+
+  clearError() {
+    this.error.next(undefined);
   }
 }
