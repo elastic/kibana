@@ -164,8 +164,6 @@ jest.mock('./epm/packages/install', () => ({
       // Treat the buffer value passed in tests as the package's name for simplicity
       const pkgName = archiveBuffer.toString('utf8');
 
-      const installedPackage = mockInstalledPackages.get(pkgName);
-
       // Just install every bundled package at version '1.0.0'
       const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
       mockInstalledPackages.set(pkgName, packageInstallation);
