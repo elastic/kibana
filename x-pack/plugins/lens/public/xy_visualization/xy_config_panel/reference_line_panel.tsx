@@ -7,14 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonGroup,
-  EuiComboBox,
-  EuiFormRow,
-  EuiIcon,
-  EuiRange,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon, EuiRange } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState } from '../types';
@@ -279,7 +272,7 @@ export const ReferenceLinePanel = (
       >
         <EuiButtonGroup
           legend={i18n.translate('xpack.lens.referenceLineMarker.textVisibility', {
-            defaultMessage: 'Show display name',
+            defaultMessage: 'Text decoration',
           })}
           data-test-subj="lns-referenceLineMaker-text-visibility"
           name="textVisibilityStyle"
@@ -484,6 +477,7 @@ const LineThicknessSlider = ({
       min={minRange}
       max={maxRange}
       step={1}
+      append="px"
       compressed
       onChange={({ currentTarget: { value: newValue } }) => {
         setUnsafeValue(newValue);
