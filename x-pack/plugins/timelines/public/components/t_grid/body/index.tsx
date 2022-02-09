@@ -229,6 +229,7 @@ const transformControlColumns = ({
         isExpandable,
         isExpanded,
         rowIndex,
+        colIndex,
         setCellProps,
       }: EuiDataGridCellValueElementProps) => {
         const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
@@ -269,6 +270,7 @@ const transformControlColumns = ({
             onRowSelected={onRowSelected}
             onRuleChange={onRuleChange}
             rowIndex={rowIndex}
+            colIndex={colIndex}
             pageRowIndex={pageRowIndex}
             selectedEventIds={selectedEventIds}
             setCellProps={setCellProps}
@@ -729,6 +731,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
         columnId,
         rowIndex,
+        colIndex,
         setCellProps,
         isDetails,
       }): React.ReactElement | null => {
@@ -767,6 +770,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           isExpanded: false,
           linkValues: getOr([], header.linkField ?? '', ecs),
           rowIndex,
+          colIndex,
           rowRenderers,
           setCellProps,
           timelineId: id,

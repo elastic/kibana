@@ -67,6 +67,7 @@ function makeAlertsTableRow({ alertStatus }: AlertsTableRow) {
 
 const requiredProperties: CellValueElementProps = {
   rowIndex: 0,
+  colIndex: 0,
   columnId: '',
   setCellProps: jest.fn(),
   isExpandable: false,
