@@ -127,7 +127,7 @@ function useTabs(isMlEnabledInSpace: boolean, spacesApi: SpacesPluginStart | und
       {
         'data-test-subj': 'mlStackManagementJobsListAnalyticsTab',
         id: 'trained-models',
-        name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
+        name: i18n.translate('xpack.ml.management.jobsList.trainedModelsTab', {
           defaultMessage: 'Trained models',
         }),
         content: (
