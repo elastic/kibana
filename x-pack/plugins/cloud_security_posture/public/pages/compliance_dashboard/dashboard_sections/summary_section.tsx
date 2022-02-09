@@ -10,7 +10,6 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { PartitionElementEvent } from '@elastic/charts';
 import { Query } from '@kbn/es-query';
-import { ScorePerAccountChart } from '../compliance_charts/score_per_account_chart';
 import { ChartPanel } from '../../../components/chart_panel';
 import { useCloudPostureStatsApi } from '../../../common/api';
 import * as TEXT from '../translations';
@@ -19,6 +18,7 @@ import { allNavigationItems } from '../../../common/navigation/constants';
 import { encodeQuery } from '../../../common/navigation/query_utils';
 import { Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
+import { CasesTable } from '../compliance_charts/cases_table';
 
 const getEvaluationQuery = (evaluation: Evaluation): Query => ({
   language: 'kuery',
@@ -70,12 +70,11 @@ export const SummarySection = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <ChartPanel
-          title={TEXT.SCORE_PER_CLUSTER_CHART_TITLE}
+          title={TEXT.OPEN_CASES}
           isLoading={getStats.isLoading}
           isError={getStats.isError}
         >
-          {/* TODO: no api for this chart yet, using empty state for now. needs BE */}
-          <ScorePerAccountChart />
+          <CasesTable />
         </ChartPanel>
       </EuiFlexItem>
     </EuiFlexGrid>

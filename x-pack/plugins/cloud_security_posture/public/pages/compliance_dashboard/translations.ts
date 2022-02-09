@@ -19,12 +19,13 @@ export const RISKS = i18n.translate('xpack.csp.risks', {
   defaultMessage: 'Risks',
 });
 
-export const SCORE_PER_CLUSTER_CHART_TITLE = i18n.translate(
-  'xpack.csp.score_per_cluster_chart_title',
-  {
-    defaultMessage: 'Score Per Account / Cluster',
-  }
-);
+export const OPEN_CASES = i18n.translate('xpack.csp.open_cases', {
+  defaultMessage: 'Open Cases',
+});
+
+export const COMING_SOON = i18n.translate('xpack.csp.coming_soon', {
+  defaultMessage: 'Coming soon',
+});
 
 export const COMPLIANCE_SCORE = i18n.translate('xpack.csp.compliance_score', {
   defaultMessage: 'Compliance Score',
