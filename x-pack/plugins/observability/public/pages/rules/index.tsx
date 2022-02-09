@@ -90,7 +90,11 @@ export function RulesPage() {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiBasicTable items={rules.data} columns={rulesTableColumns} />
+          <EuiBasicTable
+            items={rules.data}
+            columns={rulesTableColumns}
+            selection={{ selectable: () => true }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
