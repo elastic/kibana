@@ -12,8 +12,6 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import path from 'path';
 import Printer from 'pdfmake';
-// @ts-ignore: no module definition
-import concat from 'concat-stream';
 
 import { getTemplate } from './get_template';
 import type { TemplateLayout } from './types';
@@ -77,7 +75,7 @@ async function execute() {
     },
   });
 
-  const buffer = await new Promise((resolve, reject) => {
+  const buffer = await new Promise<Buffer>((resolve, reject) => {
     if (!pdfDoc) {
       throw new Error(
         i18n.translate(
@@ -89,14 +87,16 @@ async function execute() {
       );
     }
 
-    const concatStream = concat(function (pdfBuffer: Buffer) {
-      resolve(pdfBuffer);
-    });
-
+    const buffers: Buffer[] = [];
     pdfDoc.on('error', reject);
-    pdfDoc.pipe(concatStream);
+    pdfDoc.on('data', (data: Buffer) => {
+      buffers.push(data);
+    });
+    pdfDoc.on('end', () => {
+      resolve(Buffer.concat(buffers));
+    });
     pdfDoc.end();
   });
 
-  parentPort!.postMessage(buffer);
+  parentPort!.postMessage(buffer, [buffer.buffer /* Transfer buffer instead of copying */]);
 }
