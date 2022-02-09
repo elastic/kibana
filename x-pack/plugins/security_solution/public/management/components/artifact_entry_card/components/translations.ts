@@ -61,10 +61,17 @@ export const CONDITION_OPERATOR_TYPE_NOT_MATCH = i18n.translate(
   }
 );
 
-export const CONDITION_OPERATOR_TYPE_WILDCARD = i18n.translate(
-  'xpack.securitySolution.artifactCard.conditions.wildcardOperator',
+export const CONDITION_OPERATOR_TYPE_WILDCARD_MATCHES = i18n.translate(
+  'xpack.securitySolution.artifactCard.conditions.wildcardMatchesOperator',
   {
     defaultMessage: 'MATCHES',
+  }
+);
+
+export const CONDITION_OPERATOR_TYPE_WILDCARD_NOT_MATCH = i18n.translate(
+  'xpack.securitySolution.artifactCard.conditions.wildcardNotMatchOperator',
+  {
+    defaultMessage: 'NOT MATCH',
   }
 );
 
