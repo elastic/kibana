@@ -9,7 +9,6 @@
 import { HttpService } from '../public/http';
 import { fatalErrorsServiceMock } from '../public/fatal_errors/fatal_errors_service.mock';
 import { injectedMetadataServiceMock } from '../public/injected_metadata/injected_metadata_service.mock';
-import { ExecutionContextService } from '../public/execution_context';
 import { executionContextServiceMock } from '../public/execution_context/execution_context_service.mock';
 
 export type SetupTap = (

@@ -18,9 +18,9 @@ describe('KibanaExecutionContext', () => {
   describe('constructor', () => {
     it('allows context to define parent explicitly', () => {
       const parentContext: KibanaExecutionContext = {
-        type: 'parent-type',
-        name: 'parent-name',
-        id: '44',
+        type: 'test-type',
+        name: 'test-name',
+        id: '42',
         description: 'parent-descripton',
       };
       const parentContainer = new ExecutionContextContainer(parentContext);
@@ -30,11 +30,11 @@ describe('KibanaExecutionContext', () => {
         name: 'test-name',
         id: '42',
         description: 'test-descripton',
-        parent: {
-          type: 'custom-parent-type',
-          name: 'custom-parent-name',
+        child: {
+          type: 'custom-child-type',
+          name: 'custom-child-name',
           id: '41',
-          description: 'custom-parent-descripton',
+          description: 'custom-child-descripton',
         },
       };
 
@@ -56,24 +56,25 @@ describe('KibanaExecutionContext', () => {
       expect(value).toBe('test-type:test-name:42');
     });
 
-    it('includes a parent context to string representation', () => {
-      const parentContext: KibanaExecutionContext = {
-        type: 'parent-type',
-        name: 'parent-name',
-        id: '41',
-        description: 'parent-descripton',
-      };
-      const parentContainer = new ExecutionContextContainer(parentContext);
-
+    it('includes a child context to string representation', () => {
       const context: KibanaExecutionContext = {
-        type: 'test-type',
-        name: 'test-name',
+        type: 'type',
+        name: 'name',
+        id: '41',
+        description: 'descripton',
+      };
+
+      const childContext: KibanaExecutionContext = {
+        type: 'child-test-type',
+        name: 'child-test-name',
         id: '42',
         description: 'test-descripton',
       };
 
-      const value = new ExecutionContextContainer(context, parentContainer).toString();
-      expect(value).toBe('parent-type:parent-name:41;test-type:test-name:42');
+      const childContainer = new ExecutionContextContainer(childContext);
+
+      const value = new ExecutionContextContainer(context, childContainer).toString();
+      expect(value).toBe('type:name:41;child-test-type:child-test-name:42');
     });
 
     it('returns an escaped string representation of provided execution contextStringified', () => {
@@ -115,24 +116,24 @@ describe('KibanaExecutionContext', () => {
       expect(value).toEqual(context);
     });
 
-    it('returns a context object with registered parent object', () => {
-      const parentContext: KibanaExecutionContext = {
-        type: 'parent-type',
-        name: 'parent-name',
-        id: '41',
-        description: 'parent-descripton',
-      };
-      const parentContainer = new ExecutionContextContainer(parentContext);
-
+    it('returns a context object with registered context object', () => {
       const context: KibanaExecutionContext = {
-        type: 'test-type',
-        name: 'test-name',
+        type: 'type',
+        name: 'name',
+        id: '41',
+        description: 'descripton',
+      };
+
+      const childContext: KibanaExecutionContext = {
+        type: 'child-test-type',
+        name: 'child-test-name',
         id: '42',
         description: 'test-descripton',
       };
+      const childContainer = new ExecutionContextContainer(childContext);
 
-      const value = new ExecutionContextContainer(context, parentContainer).toJSON();
-      expect(value).toEqual({ ...context, parent: parentContext });
+      const value = new ExecutionContextContainer(context, childContainer).toJSON();
+      expect(value).toEqual({ child: childContext, ...context });
     });
   });
 });
