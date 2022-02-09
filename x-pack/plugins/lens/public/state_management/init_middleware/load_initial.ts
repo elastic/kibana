@@ -8,6 +8,7 @@
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { setState, initEmpty, LensStoreDeps } from '..';
 import { getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
@@ -17,6 +18,7 @@ import { initializeDatasources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { Document } from '../../persistence';
+import { readFromStorage } from '../../settings_storage';
 
 export const getPersisted = async ({
   initialInput,
@@ -207,6 +209,9 @@ export function loadInitial(
                     {}
                   ),
                   isLoading: false,
+                  applyChangesDisabled: Boolean(
+                    readFromStorage(new Storage(localStorage), 'applyChangesDisabled')
+                  ),
                 })
               );
             })

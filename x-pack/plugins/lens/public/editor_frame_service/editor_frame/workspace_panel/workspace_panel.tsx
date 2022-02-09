@@ -115,6 +115,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
 });
 
 let expressionToRender: string | null | undefined;
+let finishedInitialRender = false;
 
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
@@ -134,7 +135,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const visualization = useLensSelector(selectVisualization);
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
-  const shouldApplyChanges = !useLensSelector(selectApplyChangesDisabled);
+  const applyChangesDisabled = useLensSelector(selectApplyChangesDisabled);
 
   const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
@@ -227,11 +228,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     missingRefsErrors.length,
   ]);
 
-  if (shouldApplyChanges) {
+  if (!finishedInitialRender || !applyChangesDisabled) {
     expressionToRender = expression;
   }
 
   const expressionExists = Boolean(expressionToRender);
+  if (expressionExists) {
+    finishedInitialRender = true;
+  }
+
   useEffect(() => {
     dispatchLens(setSaveable(expressionExists));
   }, [expressionExists, dispatchLens]);

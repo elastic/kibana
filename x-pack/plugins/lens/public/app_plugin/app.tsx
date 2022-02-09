@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
 import {
   createKbnUrlStateStorage,
+  Storage,
   withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -37,6 +38,7 @@ import { SaveModalContainer, runSaveLensVisualization } from './save_modal_conta
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
+import { readFromStorage, writeToStorage } from '../settings_storage';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -108,6 +110,7 @@ export function App({
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
+  const [applyingChanges, setApplyingChanges] = useState(false);
 
   useEffect(() => {
     if (currentDoc) {
@@ -294,10 +297,19 @@ export function App({
     ]
   );
 
-  const applyChangesEnabled = !applyChangesDisabled;
   const toggleAutoApply = useCallback(() => {
-    dispatch(applyChangesEnabled ? disableApplyChanges() : enableApplyChanges());
-  }, [dispatch, applyChangesEnabled]);
+    writeToStorage(
+      new Storage(localStorage),
+      'applyChangesDisabled',
+      String(!applyChangesDisabled)
+    );
+    dispatch(applyChangesDisabled ? enableApplyChanges() : disableApplyChanges());
+  }, [dispatch, applyChangesDisabled]);
+
+  const applyChanges = useCallback(() => {
+    dispatch(enableApplyChanges());
+    setImmediate(() => dispatch(disableApplyChanges())); // wait for render
+  }, [dispatch]);
 
   return (
     <>
@@ -314,12 +326,9 @@ export function App({
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
-          autoApplyEnabled={applyChangesEnabled}
+          autoApplyEnabled={!applyingChanges && !applyChangesDisabled}
           onToggleAutoApply={toggleAutoApply}
-          onApplyChanges={() => {
-            dispatch(enableApplyChanges());
-            setImmediate(() => dispatch(disableApplyChanges())); // wait for render
-          }}
+          onApplyChanges={applyChanges}
         />
 
         {getLegacyUrlConflictCallout()}
