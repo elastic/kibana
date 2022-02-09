@@ -379,41 +379,35 @@ export class TaskRunner<
         alertLabel,
       });
 
-      const instancesToExecute =
-        notifyWhen === 'onActionGroupChange'
-          ? Object.entries(instancesWithScheduledActions).filter(
-              ([alertInstanceName, alertInstance]: [
-                string,
-                AlertInstance<InstanceState, InstanceContext>
-              ]) => {
-                const shouldExecuteAction =
-                  alertInstance.scheduledActionGroupOrSubgroupHasChanged();
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
-                  );
-                }
-                return shouldExecuteAction;
-              }
-            )
-          : Object.entries(instancesWithScheduledActions).filter(
-              ([alertInstanceName, alertInstance]: [
-                string,
-                AlertInstance<InstanceState, InstanceContext>
-              ]) => {
-                const throttled = alertInstance.isThrottled(throttle);
-                const muted = mutedInstanceIdsSet.has(alertInstanceName);
-                const shouldExecuteAction = !throttled && !muted;
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
-                      muted ? 'muted' : 'throttled'
-                    }`
-                  );
-                }
-                return shouldExecuteAction;
-              }
+      const instancesToExecute = Object.entries(instancesWithScheduledActions).filter(
+        ([alertInstanceName, alertInstance]: [
+          string,
+          AlertInstance<InstanceState, InstanceContext>
+        ]) => {
+          const throttled = alertInstance.isThrottled(throttle);
+          const muted = mutedInstanceIdsSet.has(alertInstanceName);
+          let shouldExecuteAction = true;
+
+          if (throttled || muted) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                muted ? 'muted' : 'throttled'
+              }`
             );
+          } else if (
+            notifyWhen === 'onActionGroupChange' &&
+            !alertInstance.scheduledActionGroupOrSubgroupHasChanged()
+          ) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
+            );
+          }
+
+          return shouldExecuteAction;
+        }
+      );
 
       await Promise.all(
         instancesToExecute.map(
