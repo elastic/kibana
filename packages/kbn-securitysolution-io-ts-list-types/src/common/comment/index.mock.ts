@@ -16,4 +16,14 @@ export const getCommentsMock = (): Comment => ({
   id: ID,
 });
 
+export const getCommentsWithMetaMock = (): Comment => ({
+  comment: 'some old comment',
+  created_at: DATE_NOW,
+  created_by: USER,
+  id: ID,
+  meta: {
+    any_key: 'test',
+  },
+});
+
 export const getCommentsArrayMock = (): CommentsArray => [getCommentsMock(), getCommentsMock()];

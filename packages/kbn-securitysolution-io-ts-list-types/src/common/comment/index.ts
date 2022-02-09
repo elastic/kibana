@@ -14,6 +14,7 @@ import { created_by } from '../created_by';
 import { id } from '../id';
 import { updated_at } from '../updated_at';
 import { updated_by } from '../updated_by';
+import { metaOrUndefined } from '../meta';
 
 export const comment = t.intersection([
   t.exact(
@@ -28,6 +29,7 @@ export const comment = t.intersection([
     t.partial({
       updated_at,
       updated_by,
+      meta: metaOrUndefined,
     })
   ),
 ]);

@@ -8,7 +8,11 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { getUpdateCommentMock, getUpdateCommentsArrayMock } from './index.mock';
+import {
+  getUpdateCommentMock,
+  getUpdateCommentsArrayMock,
+  getUpdateCommentWithMetaMock,
+} from './index.mock';
 import {
   UpdateComment,
   updateComment,
@@ -23,6 +27,15 @@ describe('CommentsUpdate', () => {
   describe('updateComment', () => {
     test('it should pass validation when supplied typical comment update', () => {
       const payload = getUpdateCommentMock();
+      const decoded = updateComment.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('it should pass validation when supplied typical comment update with "meta"', () => {
+      const payload = getUpdateCommentWithMetaMock();
       const decoded = updateComment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -99,7 +112,7 @@ describe('CommentsUpdate', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
+        'Invalid value "undefined" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString, meta: (object | undefined) |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -110,7 +123,7 @@ describe('CommentsUpdate', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString, meta: (object | undefined) |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -141,7 +154,7 @@ describe('CommentsUpdate', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString, meta: (object | undefined) |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });

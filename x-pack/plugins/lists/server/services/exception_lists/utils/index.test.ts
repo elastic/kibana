@@ -52,6 +52,24 @@ describe('utils', () => {
       ]);
     });
 
+    test('it formats new comments with "meta"', () => {
+      const comments = transformUpdateCommentsToComments({
+        comments: [{ comment: 'Im a new comment', meta: { import: { created_by: 'me' } } }],
+        existingComments: [],
+        user: 'lily',
+      });
+
+      expect(comments).toEqual([
+        {
+          comment: 'Im a new comment',
+          created_at: dateNow,
+          created_by: 'lily',
+          id: '123',
+          meta: { import: { created_by: 'me' } },
+        },
+      ]);
+    });
+
     test('it formats new comments and preserves existing comments', () => {
       const comments = transformUpdateCommentsToComments({
         comments: [{ comment: 'Im an old comment', id: '1' }, { comment: 'Im a new comment' }],
@@ -73,6 +91,42 @@ describe('utils', () => {
           created_at: dateNow,
           created_by: 'lily',
           id: '123',
+        },
+      ]);
+    });
+
+    test('it formats new comments and preserves existing comments with "meta"', () => {
+      const comments = transformUpdateCommentsToComments({
+        comments: [
+          { comment: 'Im an old comment', id: '1' },
+          { comment: 'Im a new comment', meta: { import: { created_by: 'someone' } } },
+        ],
+        existingComments: [
+          {
+            comment: 'Im an old comment',
+            created_at: oldDate,
+            created_by: 'bane',
+            id: '1',
+            meta: { import: { created_by: 'me' } },
+          },
+        ],
+        user: 'lily',
+      });
+
+      expect(comments).toEqual([
+        {
+          comment: 'Im an old comment',
+          created_at: oldDate,
+          created_by: 'bane',
+          id: '1',
+          meta: { import: { created_by: 'me' } },
+        },
+        {
+          comment: 'Im a new comment',
+          created_at: dateNow,
+          created_by: 'lily',
+          id: '123',
+          meta: { import: { created_by: 'someone' } },
         },
       ]);
     });
@@ -135,6 +189,32 @@ describe('utils', () => {
           created_at: dateNow,
           created_by: 'lily',
           id: '123',
+        },
+        {
+          comment: 'Im another new comment',
+          created_at: dateNow,
+          created_by: 'lily',
+          id: '456',
+        },
+      ]);
+    });
+
+    test('it includes "meta" if one exists', () => {
+      const comments = transformCreateCommentsToComments({
+        incomingComments: [
+          { comment: 'Im a new comment', meta: { import: { created_by: 'me' } } },
+          { comment: 'Im another new comment' },
+        ],
+        user: 'lily',
+      });
+
+      expect(comments).toEqual([
+        {
+          comment: 'Im a new comment',
+          created_at: dateNow,
+          created_by: 'lily',
+          id: '123',
+          meta: { import: { created_by: 'me' } },
         },
         {
           comment: 'Im another new comment',

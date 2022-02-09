@@ -19,7 +19,7 @@ export const DefaultImportCommentsArray = new t.Type<
   ImportCommentsArray,
   unknown
 >(
-  'DefaultCreateComments',
+  'DefaultImportComments',
   t.array(importComment).is,
   (input): Either<t.Errors, ImportCommentsArray> =>
     input == null ? t.success([]) : t.array(importComment).decode(input),

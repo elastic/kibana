@@ -10,10 +10,10 @@ import * as t from 'io-ts';
 import { createComment } from '../create_comment';
 import { comment } from '../comment';
 
-export const importComment = t.union([createComment, comment]);
+export const importComment = t.union([comment, createComment]);
 
 export type ImportComment = t.TypeOf<typeof importComment>;
 export const importCommentsArray = t.array(importComment);
 export type ImportCommentsArray = t.TypeOf<typeof importCommentsArray>;
 export const importCommentsArrayOrUndefined = t.union([importCommentsArray, t.undefined]);
-export type CreateCommentsArrayOrUndefined = t.TypeOf<typeof importCommentsArrayOrUndefined>;
+export type ImportCommentsArrayOrUndefined = t.TypeOf<typeof importCommentsArrayOrUndefined>;

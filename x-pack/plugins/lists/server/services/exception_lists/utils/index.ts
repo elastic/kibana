@@ -293,12 +293,24 @@ export const transformCreateCommentsToComments = ({
   user: string;
 }): CommentsArray => {
   const dateNow = new Date().toISOString();
-  return incomingComments.map((comment: CreateComment) => ({
-    comment: comment.comment,
-    created_at: dateNow,
-    created_by: user,
-    id: uuid.v4(),
-  }));
+  return incomingComments.map((comment: CreateComment) => {
+    if (comment.meta == null) {
+      return {
+        comment: comment.comment,
+        created_at: dateNow,
+        created_by: user,
+        id: uuid.v4(),
+      };
+    } else {
+      return {
+        comment: comment.comment,
+        created_at: dateNow,
+        created_by: user,
+        id: uuid.v4(),
+        meta: comment.meta,
+      };
+    }
+  });
 };
 
 export const transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema = ({

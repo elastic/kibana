@@ -12,4 +12,11 @@ export const getCreateCommentsMock = (): CreateComment => ({
   comment: 'some comments',
 });
 
+export const getCreateCommentsWithMetaMock = (): CreateComment => ({
+  comment: 'some comments',
+  meta: {
+    any_key: 'test',
+  },
+});
+
 export const getCreateCommentsArrayMock = (): CreateCommentsArray => [getCreateCommentsMock()];

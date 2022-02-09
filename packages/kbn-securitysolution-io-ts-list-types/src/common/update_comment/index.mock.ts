@@ -14,6 +14,14 @@ export const getUpdateCommentMock = (): UpdateComment => ({
   id: ID,
 });
 
+export const getUpdateCommentWithMetaMock = (): UpdateComment => ({
+  comment: 'some comment',
+  id: ID,
+  meta: {
+    any_key: 'test',
+  },
+});
+
 export const getUpdateCommentsArrayMock = (): UpdateCommentsArray => [
   getUpdateCommentMock(),
   getUpdateCommentMock(),

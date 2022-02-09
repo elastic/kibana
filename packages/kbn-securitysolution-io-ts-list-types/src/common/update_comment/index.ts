@@ -9,6 +9,7 @@
 import * as t from 'io-ts';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { id } from '../id';
+import { metaOrUndefined } from '../meta';
 
 export const updateComment = t.intersection([
   t.exact(
@@ -19,6 +20,7 @@ export const updateComment = t.intersection([
   t.exact(
     t.partial({
       id,
+      meta: metaOrUndefined,
     })
   ),
 ]);

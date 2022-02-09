@@ -127,7 +127,9 @@ export const sortExceptionsStream = (): Transform => {
  * comment creation schema. Attach
  * @returns {stream} incoming exceptions sorted into lists and items
  */
-export const manageExceptionComments = (comments: ImportCommentsArray): CreateCommentsArray => {
+export const manageExceptionComments = (
+  comments: ImportCommentsArray | undefined
+): CreateCommentsArray => {
   if (comments == null || !comments.length) {
     return [];
   } else {

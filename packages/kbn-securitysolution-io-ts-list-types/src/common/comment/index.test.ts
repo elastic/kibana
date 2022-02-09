@@ -8,7 +8,7 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { getCommentsArrayMock, getCommentsMock } from './index.mock';
+import { getCommentsArrayMock, getCommentsMock, getCommentsWithMetaMock } from './index.mock';
 import {
   Comment,
   comment,
@@ -42,6 +42,15 @@ describe('Comment', () => {
       expect(message.schema).toEqual(payload);
     });
 
+    test('it passes validation with a comment with "meta"', () => {
+      const payload = getCommentsWithMetaMock();
+      const decoded = comment.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
     test('it passes validation with "updated_at" and "updated_by" fields included', () => {
       const payload = getCommentsMock();
       payload.updated_at = DATE_NOW;
@@ -59,7 +68,7 @@ describe('Comment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)"',
+        'Invalid value "undefined" supplied to "({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>)"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -187,7 +196,7 @@ describe('Comment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "undefined" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -198,7 +207,7 @@ describe('Comment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -229,7 +238,7 @@ describe('Comment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });

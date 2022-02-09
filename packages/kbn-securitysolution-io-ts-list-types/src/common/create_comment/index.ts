@@ -8,12 +8,20 @@
 
 import * as t from 'io-ts';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import { metaOrUndefined } from '../meta';
 
-export const createComment = t.exact(
-  t.type({
-    comment: NonEmptyString,
-  })
-);
+export const createComment = t.intersection([
+  t.exact(
+    t.type({
+      comment: NonEmptyString,
+    })
+  ),
+  t.exact(
+    t.partial({
+      meta: metaOrUndefined,
+    })
+  ),
+]);
 
 export type CreateComment = t.TypeOf<typeof createComment>;
 export const createCommentsArray = t.array(createComment);
