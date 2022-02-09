@@ -69,6 +69,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -88,6 +89,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -120,6 +122,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -128,7 +131,7 @@ describe('ScriptedFieldsTable', () => {
     await component.update(); // Fire `componentWillMount()`
     await component.update(); // Force update the component post async actions
 
-    component.setProps({ scriptedFieldLanguageFilter: 'painless' });
+    component.setProps({ scriptedFieldLanguageFilter: ['painless'] });
     component.update();
 
     expect(component).toMatchSnapshot();
@@ -146,6 +149,7 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -167,6 +171,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
     );
 
@@ -195,6 +200,7 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
         userEditPermission={false}
+        scriptedFieldLanguageFilter={[]}
       />
     );
 

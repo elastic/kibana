@@ -17,7 +17,8 @@ interface IndexedFieldsTableProps {
   fields: DataViewField[];
   indexPattern: DataView;
   fieldFilter?: string;
-  indexedFieldTypeFilter?: string;
+  indexedFieldTypeFilter: string[];
+  schemaFieldTypeFilter: string[];
   helpers: {
     editField: (fieldName: string) => void;
     deleteField: (fieldName: string) => void;
@@ -85,7 +86,8 @@ export class IndexedFieldsTable extends Component<
     (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.fieldFilter,
     (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) =>
       props.indexedFieldTypeFilter,
-    (fields, fieldFilter, indexedFieldTypeFilter) => {
+    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.schemaFieldTypeFilter,
+    (fields, fieldFilter, indexedFieldTypeFilter, schemaFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();
         fields = fields.filter(
@@ -95,14 +97,34 @@ export class IndexedFieldsTable extends Component<
         );
       }
 
-      if (indexedFieldTypeFilter) {
+      if (indexedFieldTypeFilter.length) {
         // match conflict fields
         fields = fields.filter((field) => {
-          if (indexedFieldTypeFilter === 'conflict' && field.kbnType === 'conflict') {
+          if (indexedFieldTypeFilter.includes('conflict') && field.kbnType === 'conflict') {
+            return true;
+          }
+          if (
+            'runtimeField' in field &&
+            field.runtimeField?.type &&
+            indexedFieldTypeFilter.includes(field.runtimeField?.type)
+          ) {
             return true;
           }
           // match one of multiple types on a field
-          return field.esTypes?.length && field.esTypes?.indexOf(indexedFieldTypeFilter) !== -1;
+          return (
+            field.esTypes?.length &&
+            field.esTypes.filter((val) => indexedFieldTypeFilter.includes(val)).length
+          );
+        });
+      }
+
+      if (schemaFieldTypeFilter.length) {
+        // match fields of schema type
+        fields = fields.filter((field) => {
+          return (
+            (schemaFieldTypeFilter.includes('runtime') && 'runtimeField' in field) ||
+            (schemaFieldTypeFilter.includes('indexed') && !('runtimeField' in field))
+          );
         });
       }
 
