@@ -101,12 +101,12 @@ executions. If you configure the rule with a schedule interval smaller than the
 time window, and a document matches a query in multiple rule executions, it is 
 alerted on only once. The rule uses the timestamp of the matches for 
 de-duplication; the timestamp of the latest match is used for evaluating the 
-rule conditions when it's executed. Only matches between the latest timestamp 
-and the actual rule execution are considered.
+rule conditions when the rule is executed. Only matches between the latest 
+timestamp and the actual rule execution are considered.
 
-For example, let's suppose you have a rule configured to run every minute. The 
-rule uses a time window of 1 hour and checks if there are more than 99 matches 
-for the query. The {es} query rule type does the following:
+Suppose you have a rule configured to run every minute. The rule uses a time 
+window of 1 hour and checks if there are more than 99 matches for the query. The 
+{es} query rule type does the following:
 
 [cols="3*<"]
 |===
