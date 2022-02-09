@@ -187,7 +187,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     labels.map((label) => {
       // we should have same groupIds on our labeled filters group
       gId = (groupedByAlias[label][0] as any).groupId;
-      groupedByAlias[label].forEach((filter) => ((filter as any).groupId = groupId));
+      groupedByAlias[label].forEach((filter) => ((filter as any).groupId = gId));
       const labelBadge = (
         <FilterExpressionItem
           groupId={gId}
