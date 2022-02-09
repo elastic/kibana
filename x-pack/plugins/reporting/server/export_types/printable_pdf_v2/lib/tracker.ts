@@ -43,25 +43,25 @@ export function getTracker(): PdfTracker {
       apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
     },
     endScreenshots() {
-      apmScreenshots?.end();
+      if (apmScreenshots) apmScreenshots.end();
     },
     startSetup() {
       apmSetup = apmTrans?.startSpan('setup-pdf', SPANTYPE_SETUP) || null;
     },
     endSetup() {
-      apmSetup?.end();
+      if (apmSetup) apmSetup.end();
     },
     startAddImage() {
       apmAddImage = apmTrans?.startSpan('add-pdf-image', SPANTYPE_OUTPUT) || null;
     },
     endAddImage() {
-      apmAddImage?.end();
+      if (apmAddImage) apmAddImage.end();
     },
     startCompile() {
       apmCompilePdf = apmTrans?.startSpan('compile-pdf', SPANTYPE_OUTPUT) || null;
     },
     endCompile() {
-      apmCompilePdf?.end();
+      if (apmCompilePdf) apmCompilePdf.end();
     },
     setByteLength(byteLength: number) {
       apmTrans?.setLabel('byte-length', byteLength, false);
@@ -73,7 +73,7 @@ export function getTracker(): PdfTracker {
       apmTrans?.setLabel('memory', memory, false);
     },
     end() {
-      apmTrans?.end();
+      if (apmTrans) apmTrans.end();
     },
   };
 }
