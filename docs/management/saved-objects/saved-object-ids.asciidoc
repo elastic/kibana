@@ -16,7 +16,7 @@ how it will affect you.
 [[saved-object-ids-impact-upon-upgrading]]
 ==== Impact upon upgrading to 8.x
 
-Every time you upgrade the {kib} server to a new version, <<saved-object-migrations,saved objects are migrated to a new format>>. When you
+Every time you upgrade {kib}, <<saved-object-migrations,saved objects are migrated to a new format>>. When you
 first upgrade from 7.x to 8.x, this migration process will start enforcing globally unique saved object IDs.
 
 In practical terms, **any old saved objects that exist in a custom space will have their IDs changed to a new UUID**, while saved objects in
