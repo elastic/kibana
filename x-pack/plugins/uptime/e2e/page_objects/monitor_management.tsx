@@ -7,6 +7,7 @@
 
 import { Page } from '@elastic/synthetics';
 import { DataStream } from '../../common/runtime_types/monitor_management';
+import { getQuerystring } from '../journeys/utils';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
 
@@ -46,8 +47,8 @@ export function monitorManagementPageProvider({
       });
     },
 
-    async navigateToOverviewPage() {
-      await page.goto(overview, {
+    async navigateToOverviewPage(options?: object) {
+      await page.goto(`${overview}${options ? `?${getQuerystring(options)}` : ''}`, {
         waitUntil: 'networkidle',
       });
     },
