@@ -85,8 +85,7 @@ describe('inquirer cli', () => {
         -b, --targetBranch, --branch          Branch(es) to backport to                            [array]
             --targetBranchChoice              List branches to backport to                         [array]
         -l, --targetPRLabel, --label          Add labels to the target (backport) PR               [array]
-            --username                        User repo that branch will be pushed to. Defaults to the
-                                              authenticated user                                  [string]
+            --username                        Defaults to the authenticated user                  [string]
             --verbose                         Show additional debug information                  [boolean]
             --verify                          Opposite of no-verify                              [boolean]
             --help                            Show help                                          [boolean]
