@@ -11,10 +11,10 @@ import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '
 
 describe('getRecoveredAlerts', () => {
   test('considers alert recovered if it has no scheduled actions', () => {
-    const alert1 = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>();
+    const alert1 = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
     alert1.scheduleActions('default', { foo: '1' });
 
-    const alert2 = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>();
+    const alert2 = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2');
     alert2.setContext({ foo: '2' });
     const alerts = {
       '1': alert1,
@@ -27,9 +27,9 @@ describe('getRecoveredAlerts', () => {
   });
 
   test('does not consider alert recovered if it has no actions but was not in original alerts list', () => {
-    const alert1 = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>();
+    const alert1 = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
     alert1.scheduleActions('default', { foo: '1' });
-    const alert2 = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>();
+    const alert2 = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2');
     const alerts = {
       '1': alert1,
       '2': alert2,
