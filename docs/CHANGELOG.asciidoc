@@ -67,7 +67,8 @@ user in free text. Such weak links can break if **both** of the following condit
 1. You are importing the saved object(s) into multiple spaces, _OR_ you are copying the saved object(s) into another space
 2. The saved object(s) did not already exist in the destination(s) prior to upgrading to the 8.0.0 release
 
-We are planning to address this issue in a bugfix for the 8.0.1 and 8.1 releases. For more information, refer to
+This problem occurs because <<saved-object-ids-impact-when-using-import-and-copy,saved object IDs can change during import/copy starting in
+8.0>>. We are planning to address this issue in a bugfix for the 8.0.1 and 8.1 releases. For more information, refer to
 {kibana-pull}123550[#123550]. If you are impacted, you will be able to re-import (or re-copy) your saved objects after the bugfix is
 implemented to preserve these weak links.
 
