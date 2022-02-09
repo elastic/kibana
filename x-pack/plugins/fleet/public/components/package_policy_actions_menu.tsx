@@ -60,6 +60,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     ...(showAddAgent && !agentPolicy.is_managed
       ? [
           <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsAddAgentItem"
             icon="plusInCircle"
             onClick={() => {
               setIsActionsMenuOpen(false);
@@ -75,6 +76,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         ]
       : []),
     <EuiContextMenuItem
+      data-test-subj="PackagePolicyActionsEditItem"
       disabled={!canWriteIntegrationPolicies}
       icon="pencil"
       href={getHref('integration_policy_edit', {
@@ -88,6 +90,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
+      data-test-subj="PackagePolicyActionsUpgradeItem"
       disabled={!packagePolicy.hasUpgrade || !canWriteIntegrationPolicies}
       icon="refresh"
       href={upgradePackagePolicyHref}
@@ -113,6 +116,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         {(deletePackagePoliciesPrompt) => {
           return (
             <DangerEuiContextMenuItem
+              data-test-subj="PackagePolicyActionsDeleteItem"
               disabled={!canWriteIntegrationPolicies}
               icon="trash"
               onClick={() => {
