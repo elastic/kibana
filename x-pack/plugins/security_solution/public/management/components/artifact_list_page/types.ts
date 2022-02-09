@@ -11,6 +11,7 @@ export interface ArtifactListPageUrlParams {
   filter?: string;
   includedPolicies?: string;
   show?: 'create' | 'edit';
+  itemId?: string;
   sortField?: string;
   sortOrder?: string;
 }

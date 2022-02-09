@@ -102,6 +102,10 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       undefined | ExceptionListItemSchema
     >(undefined);
 
+    const [selectedItemForEdit, setSelectedItemForEdit] = useState<
+      undefined | ExceptionListItemSchema
+    >(undefined);
+
     const labels = useMemo<typeof artifactListPageLabels>(() => {
       return {
         ...artifactListPageLabels,
@@ -113,8 +117,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       ({ type, item }) => {
         switch (type) {
           case 'edit':
-            // FIXME:PT store item to edit and pass it to flyout
-            setUrlParams({ show: 'edit', id: item.id });
+            setSelectedItemForEdit(item);
+            setUrlParams({ show: 'edit', itemId: item.item_id });
             break;
 
           case 'delete':
@@ -202,6 +206,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         {/* Flyout component is driven by URL params and may or may not be displayed based on those */}
         <MaybeArtifactFlyout
           apiClient={apiClient}
+          item={selectedItemForEdit}
           onCancel={() => {}} // FIXME:pt handle cancel
           onSuccess={() => {}} // FIXME:pt handle success
           FormComponent={ArtifactFormComponent}

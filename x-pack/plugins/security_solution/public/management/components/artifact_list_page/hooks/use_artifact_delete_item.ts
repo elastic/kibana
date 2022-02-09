@@ -29,7 +29,7 @@ export const ARTIFACT_DELETE_ACTION_LABELS = Object.freeze({
 
 type UseArtifactDeleteItemMutationResult = UseMutationResult<
   ExceptionListItemSchema,
-  Error,
+  HttpFetchError,
   ExceptionListItemSchema
 >;
 

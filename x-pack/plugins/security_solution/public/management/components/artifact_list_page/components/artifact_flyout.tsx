@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -25,6 +25,10 @@ import { useUrlParams } from '../hooks/use_url_params';
 import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useSetUrlParams } from '../hooks/use_set_url_params';
+import { useArtifactGetItem } from '../hooks/use_artifact_get_item';
+import { ArtifactListPageUrlParams } from '../types';
+import { ManagementPageLoader } from '../../management_page_loader';
+import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -73,7 +77,7 @@ interface ArtifactFormComponentProps {
 }
 
 export interface ArtifactFlyoutProps {
-  apiClient: unknown; // ExceptionsListApiClient; // FIXME:PT use api client type
+  apiClient: ExceptionsListApiClient;
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
   onCancel(): void;
   onSuccess(): void;
@@ -81,7 +85,7 @@ export interface ArtifactFlyoutProps {
    * If the artifact data is provided and it matches the id in the URL, then it will not be
    * retrieved again via the API
    */
-  artifact?: ExceptionListItemSchema;
+  item?: ExceptionListItemSchema;
   /** Any label overrides */
   labels?: Partial<typeof ARTIFACT_FLYOUT_LABELS>;
   showExpiredLicenseBanner?: boolean;
@@ -94,9 +98,11 @@ export interface ArtifactFlyoutProps {
  */
 export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
   ({
+    apiClient,
+    item,
     FormComponent,
     labels: _labels = {},
-    showExpiredLicenseBanner = false,
+    showExpiredLicenseBanner = false, // FIXME:PT can can calculate this in here, right, rather than have a prop
     'data-test-subj': dataTestSubj,
     size = 'm',
   }) => {
@@ -107,11 +113,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
-    const { urlParams } = useUrlParams<{
-      id?: string;
-      show?: string;
-      [key: string]: string | undefined;
-    }>();
+    const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
 
     const labels = useMemo<typeof ARTIFACT_FLYOUT_LABELS>(() => {
       return {
@@ -122,16 +124,39 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     const isEditFlow = urlParams.show === 'edit';
 
+    const {
+      isLoading: isLoadingItemForEdit,
+      data,
+      error,
+      refetch: fetchItemForEdit,
+    } = useArtifactGetItem(apiClient, urlParams.itemId ?? '', false);
+
+    const itemForEdit = useMemo<undefined | ExceptionListItemSchema>(() => {
+      return item || data;
+    }, [data, item]);
+
+    const isInitializing = useMemo(() => {
+      return isEditFlow && !itemForEdit;
+    }, [isEditFlow, itemForEdit]);
+
     const handleFlyoutClose = useCallback(() => {
       // FIXME:PT Question: Prevent closing it if update is underway?
 
-      const { id, show, ...others } = urlParams;
-      setUrlParams(others, true);
-    }, [setUrlParams, urlParams]);
+      // `undefined` will cause params to be dropped from url
+      setUrlParams({ id: undefined, show: undefined }, true);
+    }, [setUrlParams]);
 
     const handleSubmitClick = useCallback(() => {
       // FIXME: implement submit
     }, []);
+
+    // If we don't have the actual Artifact data yet (in initialization phase - ex. came in with an
+    // ID in the url that was not in the list), then retrieve it now
+    useEffect(() => {
+      if (isEditFlow && !itemForEdit && !error && isInitializing && !isLoadingItemForEdit) {
+        fetchItemForEdit();
+      }
+    }, [error, fetchItemForEdit, isEditFlow, isInitializing, isLoadingItemForEdit, itemForEdit]);
 
     if (!isFlyoutOpened) {
       return null;
@@ -159,43 +184,49 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         )}
 
         <EuiFlyoutBody>
-          <FormComponent
-            onChange={() => {}}
-            disabled={false}
-            item={{}}
-            mode={(urlParams.show ?? 'create') as ArtifactFormComponentProps['mode']}
-          />
+          {isInitializing && <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />}
+
+          {!isInitializing && (
+            <FormComponent
+              onChange={() => {}} // FIXME:PT implement onchange callback
+              disabled={false}
+              item={{}} // FIXME:PT pass along the item
+              mode={(urlParams.show ?? 'create') as ArtifactFormComponentProps['mode']}
+            />
+          )}
         </EuiFlyoutBody>
 
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj={getTestId('cancelButton')}
-                onClick={handleFlyoutClose}
-              >
-                {labels.flyoutCancelButtonLabel}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {/*
+        {!isInitializing && (
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj={getTestId('cancelButton')}
+                  onClick={handleFlyoutClose}
+                >
+                  {labels.flyoutCancelButtonLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {/*
                 FIXME:PT implement disabled property
                 FIXME:PT implement isLoading
                */}
-              <EuiButton
-                data-test-subj={getTestId('submitButton')}
-                fill
-                disabled={false}
-                onClick={handleSubmitClick}
-                isLoading={false}
-              >
-                {isEditFlow
-                  ? labels.flyoutEditSubmitButtonLabel
-                  : labels.flyoutCreateSubmitButtonLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
+                <EuiButton
+                  data-test-subj={getTestId('submitButton')}
+                  fill
+                  disabled={false}
+                  onClick={handleSubmitClick}
+                  isLoading={false}
+                >
+                  {isEditFlow
+                    ? labels.flyoutEditSubmitButtonLabel
+                    : labels.flyoutCreateSubmitButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        )}
       </EuiFlyout>
     );
   }
