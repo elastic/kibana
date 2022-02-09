@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
     });
 
-    it('allows creating a new data view', async function () {
+    it('use ccs to create a new data view', async function () {
       const dataViewToCreate = 'remote:logstash';
       await createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
