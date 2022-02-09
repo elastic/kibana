@@ -14,7 +14,7 @@ import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../../common/types';
 import { LevelLogger } from '../../../lib';
 import { ScreenshotOptions } from '../../../types';
 import { PdfMaker } from '../../common/pdf';
-import { PdfWorkerOutOfMemoryError, extractScreenshotResultErrors } from '../../common/pdf';
+import { PdfWorkerOutOfMemoryError } from '../../common/pdf';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import type { TaskPayloadPDFV2 } from '../types';
 import { getTracker } from './tracker';

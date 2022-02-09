@@ -12,11 +12,7 @@ import { ReportingCore } from '../../../';
 import { ScreenshotResult } from '../../../../../screenshotting/server';
 import { LevelLogger } from '../../../lib';
 import { ScreenshotOptions } from '../../../types';
-import {
-  PdfMaker,
-  PdfWorkerOutOfMemoryError,
-  extractScreenshotResultErrors,
-} from '../../common/pdf';
+import { PdfMaker, PdfWorkerOutOfMemoryError } from '../../common/pdf';
 import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
