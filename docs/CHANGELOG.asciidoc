@@ -79,7 +79,7 @@ To review the deprecations in previous versions, refer to the following:
 <<deprecations-8.0.0-rc1,8.0.0-rc1>> | <<deprecations-8.0.0-alpha1,8.0.0-alpha1>>
 
 [float]
-[[known-issue-8.0.0-rc2]]
+[[known-issue-8.0.0]]
 === Known issue
 
 [discrete]
@@ -95,11 +95,11 @@ another dashboard. Weak links are defined by free text, but are undefined by the
 * Before you upgraded to 8.0.0, the saved objects did not already exist in the destinations
 
 In 8.0.0 and later, weak links break because <<saved-object-ids-impact-when-using-import-and-copy,saved object IDs can change during import or copy>>. 
-This issue will be fixed 8.0.1 and 8.1.0. For more information, refer to {kibana-pull}123550[#123550].
+This issue will be fixed 8.0.1 and 8.1.0. For more information, refer to {kibana-issue}123550[#123550].
 
 *Impact* +
 Saved objects in 7.x that are migrated during upgrade are **not** impacted.
-Only _new_ saved objects that are imported or copied _multiple times_ are be impacted.
+Only _new_ saved objects that are imported or copied _multiple times_ (causing object IDs to change) are impacted.
 If you are impacted, you can re-import or re-copy your saved objects after the fix is
 implemented to preserve the weak links.
 ====
