@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
         } catch (e) {
-          log.debug('Error deleting text index');
+          log.debug('Error deleting remote cluster');
           throw e;
         }
       });
