@@ -224,9 +224,7 @@ export class InfraServerPlugin
     });
 
     return {
-      defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(
-        sources.defineInternalSourceConfiguration
-      ),
+      defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(sources),
       logViews,
     } as InfraPluginSetup;
   }
