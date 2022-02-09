@@ -322,7 +322,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       className="exceptionItemEntryContainer"
       data-test-subj="exceptionItemEntryContainer"
     >
-      <FieldFlexItem grow={3}>{renderFieldInput(showLabel)}</FieldFlexItem>
+      <FieldFlexItem grow={4}>{renderFieldInput(showLabel)}</FieldFlexItem>
       <EuiFlexItem grow={false}>{renderOperatorInput(showLabel)}</EuiFlexItem>
       <FieldFlexItem grow={5}>
         {renderFieldValueInput(

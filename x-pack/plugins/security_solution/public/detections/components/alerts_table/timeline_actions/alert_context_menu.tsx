@@ -29,7 +29,7 @@ import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useAlertsActions } from './use_alerts_actions';
-import { useExceptionFlyout } from './use_add_exception_modal';
+import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
