@@ -56,7 +56,7 @@ function getNiceNumber(localRange: number) {
 
 export const getMaxValue = (row?: DatatableRow, accessors?: Accessors): number => {
   const FALLBACK_VALUE = 100;
-  const currentValue = accessors?.max ? getValueFromAccessor(accessors.max, row) : null;
+  const currentValue = accessors?.max ? getValueFromAccessor(accessors.max, row) : undefined;
   if (currentValue !== undefined && currentValue !== null) {
     return currentValue;
   }
@@ -75,7 +75,7 @@ export const getMaxValue = (row?: DatatableRow, accessors?: Accessors): number =
 };
 
 export const getMinValue = (row?: DatatableRow, accessors?: Accessors) => {
-  const currentValue = accessors?.min ? getValueFromAccessor(accessors.min, row) : null;
+  const currentValue = accessors?.min ? getValueFromAccessor(accessors.min, row) : undefined;
   if (currentValue !== undefined && currentValue !== null) {
     return currentValue;
   }
@@ -93,7 +93,7 @@ export const getMinValue = (row?: DatatableRow, accessors?: Accessors) => {
 };
 
 export const getGoalValue = (row?: DatatableRow, accessors?: Accessors) => {
-  const currentValue = accessors?.goal ? getValueFromAccessor(accessors.goal, row) : null;
+  const currentValue = accessors?.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
   if (currentValue !== undefined && currentValue !== null) {
     return currentValue;
   }
@@ -124,9 +124,9 @@ export const getAccessorsFromArgs = (
   }
 
   return {
-    min: min && getAccessor(min, columns),
-    max: max && getAccessor(max, columns),
-    goal: goal && getAccessor(goal, columns),
-    metric: metric && getAccessor(metric, columns),
+    min: min ? getAccessor(min, columns) : undefined,
+    max: max ? getAccessor(max, columns) : undefined,
+    goal: goal ? getAccessor(goal, columns) : undefined,
+    metric: metric ? getAccessor(metric, columns) : undefined,
   };
 };

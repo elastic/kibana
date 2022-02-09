@@ -175,7 +175,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     );
     const row = chartData?.[0];
 
-    const metricValue = args.metric && getValueFromAccessor(accessors.metric, row);
+    const metricValue = args.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
 
     const icon =
       subtype === GaugeShapes.HORIZONTAL_BULLET ? GaugeIconHorizontal : GaugeIconVertical;
@@ -184,7 +184,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       return <EmptyPlaceholder icon={icon} />;
     }
 
-    const goal = accessors.goal && getValueFromAccessor(accessors.goal, row);
+    const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
     const min = getMinValue(row, accessors);
     const max = getMaxValue(row, accessors);
 

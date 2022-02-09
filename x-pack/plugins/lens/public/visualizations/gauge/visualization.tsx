@@ -87,8 +87,8 @@ const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizatio
   }
   const minAccessor = state?.minAccessor;
   const maxAccessor = state?.maxAccessor;
-  const minValue = minAccessor ? getValueFromAccessor(minAccessor, row) : null;
-  const maxValue = maxAccessor ? getValueFromAccessor(maxAccessor, row) : null;
+  const minValue = minAccessor ? getValueFromAccessor(minAccessor, row) : undefined;
+  const maxValue = maxAccessor ? getValueFromAccessor(maxAccessor, row) : undefined;
   if (maxValue !== null && maxValue !== undefined && minValue != null && minValue !== undefined) {
     if (maxValue < minValue) {
       return {
