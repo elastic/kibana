@@ -219,7 +219,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
       },
     };
 
-    const { body } = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         size: 0,
         body: requestBody,

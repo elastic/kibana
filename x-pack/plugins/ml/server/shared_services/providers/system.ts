@@ -78,8 +78,7 @@ export function getMlSystemProvider(
             .isFullLicense()
             .hasMlCapabilities(['canAccessML'])
             .ok(async ({ mlClient }) => {
-              const { body } = await mlClient.anomalySearch<T>(searchParams, jobIds);
-              return body;
+              return await mlClient.anomalySearch<T>(searchParams, jobIds);
             });
         },
       };

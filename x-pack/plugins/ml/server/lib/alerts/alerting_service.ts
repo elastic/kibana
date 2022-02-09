@@ -451,7 +451,7 @@ export function alertingServiceProvider(
         : getResultTypeAggRequest(params.resultType, params.severity),
     };
 
-    const response = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         // @ts-expect-error
         body: requestBody,
@@ -459,7 +459,7 @@ export function alertingServiceProvider(
       jobIds
     );
 
-    const result = response.body.aggregations;
+    const result = body.aggregations;
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
@@ -590,7 +590,7 @@ export function alertingServiceProvider(
       },
     };
 
-    const response = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         // @ts-expect-error
         body: requestBody,
@@ -598,7 +598,7 @@ export function alertingServiceProvider(
       jobIds
     );
 
-    const result = response.body.aggregations as {
+    const result = body.aggregations as {
       alerts_over_time: {
         buckets: Array<
           {

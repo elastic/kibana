@@ -189,7 +189,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       });
     }
 
-    const { body } = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         size: maxRecords,
         body: {
@@ -344,7 +344,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       },
     };
 
-    const { body } = await mlClient.anomalySearch(query, jobIds);
+    const body = await mlClient.anomalySearch(query, jobIds);
     const maxScore = get(body, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
@@ -382,7 +382,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     // Size of job terms agg, consistent with maximum number of jobs supported by Java endpoints.
     const maxJobs = 10000;
 
-    const { body } = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         size: 0,
         body: {
@@ -428,7 +428,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
   // from the given index and job ID.
   // Returned response consists of a list of examples against category ID.
   async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
-    const { body } = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
         body: {
@@ -465,7 +465,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
   // Returned response contains four properties - categoryId, regex, examples
   // and terms (space delimited String of the common tokens matched in values of the category).
   async function getCategoryDefinition(jobId: string, categoryId: string) {
-    const { body } = await mlClient.anomalySearch<any>(
+    const body = await mlClient.anomalySearch<any>(
       {
         size: 1,
         body: {
@@ -508,7 +508,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
       });
     }
-    const { body } = await mlClient.anomalySearch<AnomalyCategorizerStatsDoc>(
+    const body = await mlClient.anomalySearch<AnomalyCategorizerStatsDoc>(
       {
         body: {
           query: {
@@ -597,7 +597,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       ];
-      const { body: results } = await mlClient.anomalySearch<any>(
+      const results = await mlClient.anomalySearch<any>(
         {
           size: 0,
           body: {
