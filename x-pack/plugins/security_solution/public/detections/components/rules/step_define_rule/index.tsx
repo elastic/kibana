@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { isEqual } from 'lodash';
@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/constants';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -57,6 +58,8 @@ import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
+import { Sourcerer } from '../../../../common/components/sourcerer';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -136,6 +139,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
+  const {
+    browserFields,
+    docValueFields,
+    indexPattern,
+    runtimeMappings,
+    selectedPatterns,
+    dataViewId: selectedDataViewId,
+    loading: isLoadingIndexPattern,
+  } = useSourcererDataView();
+  console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
+  console.log('docValueFields', JSON.stringify(runtimeMappings, null, 2));
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -191,7 +205,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
   const isPreviewRouteEnabled = useMemo(() => ruleType !== 'threat_match', [ruleType]);
-  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
+  // const [indexPatternsLoading, { indexPatterns }] = useFetchIndex(index);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {
       return {
@@ -317,12 +331,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [aggregatableFields]
   );
+  const SourcererFlex = styled(EuiFlexItem)`
+    align-items: flex-end;
+  `;
+
+  SourcererFlex.displayName = 'SourcererFlex';
 
   const ThreatMatchInputChildren = useCallback(
     ({ threatMapping }) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
-        indexPatterns={indexPatterns}
+        indexPatterns={indexPattern}
         threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns}
@@ -333,7 +352,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [
       handleResetThreatIndices,
-      indexPatterns,
+      indexPattern,
       threatBrowserFields,
       threatIndexModified,
       threatIndexPatterns,
@@ -344,7 +363,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
-        indexPatterns={indexPatterns}
+        indexPatterns={indexPattern}
         schema={filterRuleFieldsForType(schema, ruleType)}
         data={filterRuleFieldsForType(initialState, ruleType)}
       />
@@ -352,6 +371,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
+        <SourcererFlex grow={1}>
+          <Sourcerer scope={SourcererScopeName.timeline} />
+        </SourcererFlex>
         <Form form={form} data-test-subj="stepDefineRule">
           <UseField
             path="ruleType"
@@ -384,6 +406,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                 }}
               />
+
               {isEqlRule(ruleType) ? (
                 <UseField
                   key="EqlQueryBar"
@@ -393,7 +416,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
-                    isLoading: indexPatternsLoading,
+                    isLoading: isLoadingIndexPattern,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
                   }}
                   config={{
@@ -420,10 +443,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   component={QueryBarDefineRule}
                   componentProps={{
                     browserFields,
+                    docValueFields,
+                    runtimeMappings,
                     idAria: 'detectionEngineStepDefineRuleQueryBar',
-                    indexPattern: indexPatterns,
+                    indexPattern,
                     isDisabled: isLoading,
-                    isLoading: indexPatternsLoading,
+                    isLoading: isLoadingIndexPattern,
                     dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
                     openTimelineSearch,
                     onValidityChange: setIsQueryBarValid,
