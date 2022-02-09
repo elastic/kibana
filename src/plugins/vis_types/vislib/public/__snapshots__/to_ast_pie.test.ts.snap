@@ -5,7 +5,7 @@ Object {
   "addArgument": [Function],
   "arguments": Object {
     "visConfig": Array [
-      "{\\"type\\":\\"pie\\",\\"addTooltip\\":true,\\"addLegend\\":true,\\"legendPosition\\":\\"right\\",\\"isDonut\\":true,\\"labels\\":{\\"show\\":true,\\"values\\":true,\\"last_level\\":true,\\"truncate\\":100},\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"format\\":{\\"id\\":\\"number\\"},\\"params\\":{}},\\"buckets\\":[{\\"accessor\\":1,\\"format\\":{\\"id\\":\\"terms\\",\\"params\\":{\\"id\\":\\"string\\",\\"otherBucketLabel\\":\\"Other\\",\\"missingBucketLabel\\":\\"Missing\\",\\"parsedUrl\\":{\\"origin\\":\\"http://localhost:5801\\",\\"pathname\\":\\"/app/visualize\\",\\"basePath\\":\\"\\"}}},\\"params\\":{}}]}}",
+      "{\\"type\\":\\"pie\\",\\"addTooltip\\":true,\\"legendDisplay\\":\\"show\\",\\"legendPosition\\":\\"right\\",\\"isDonut\\":true,\\"labels\\":{\\"show\\":true,\\"values\\":true,\\"last_level\\":true,\\"truncate\\":100},\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"format\\":{\\"id\\":\\"number\\"},\\"params\\":{}},\\"buckets\\":[{\\"accessor\\":1,\\"format\\":{\\"id\\":\\"terms\\",\\"params\\":{\\"id\\":\\"string\\",\\"otherBucketLabel\\":\\"Other\\",\\"missingBucketLabel\\":\\"Missing\\",\\"parsedUrl\\":{\\"origin\\":\\"http://localhost:5801\\",\\"pathname\\":\\"/app/visualize\\",\\"basePath\\":\\"\\"}}},\\"params\\":{}}]}}",
     ],
   },
   "getArgument": [Function],
