@@ -12,7 +12,7 @@ import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   PartialRuleParams,
 } from '../../../common/alerting/logs/log_threshold';
-import { FORMATTERS } from '../../../common/formatters';
+import { formatRuleData } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
 export function createLogThresholdRuleType(): ObservabilityRuleTypeModel<PartialRuleParams> {
@@ -34,6 +34,6 @@ export function createLogThresholdRuleType(): ObservabilityRuleTypeModel<Partial
       }
     ),
     requiresAppContext: false,
-    format: FORMATTERS.ruleData,
+    format: formatRuleData,
   };
 }

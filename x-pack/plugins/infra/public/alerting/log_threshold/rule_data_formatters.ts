@@ -7,7 +7,7 @@
 
 import { ALERT_REASON, ALERT_START } from '@kbn/rule-data-utils';
 import { modifyUrl } from '@kbn/std';
-import type { ObservabilityRuleTypeFormatter } from '../../../observability/common';
+import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatRuleData: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '';

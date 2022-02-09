@@ -11,7 +11,7 @@ import { formatPercent } from './percent';
 import { InventoryFormatterType } from '../inventory_models/types';
 import { formatHighPercision } from './high_precision';
 import { InfraWaffleMapDataFormat } from './types';
-import { formatRuleData } from './rule_type';
+
 export const FORMATTERS = {
   number: formatNumber,
   // Because the implimentation for formatting large numbers is the same as formatting
@@ -23,7 +23,6 @@ export const FORMATTERS = {
   bits: createBytesFormatter(InfraWaffleMapDataFormat.bitsDecimal),
   percent: formatPercent,
   highPercision: formatHighPercision,
-  ruleData: formatRuleData,
 };
 
 export const createFormatter =
