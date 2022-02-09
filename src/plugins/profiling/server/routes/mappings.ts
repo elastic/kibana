@@ -88,7 +88,7 @@ function flattenTree(root, depth) {
         id: root.id,
         value: root.value,
         depth: root.depth,
-        layers: {
+        pathFromRoot: {
           [depth]: root.id,
         },
       },
@@ -98,7 +98,7 @@ function flattenTree(root, depth) {
   const children = root.Callees.flatMap((child) => flattenTree(child, depth + 1));
 
   children.forEach((child) => {
-    child.layers[depth] = root.id;
+    child.pathFromRoot[depth] = root.id;
   });
 
   return children;
@@ -116,10 +116,10 @@ export function mapFlamechart(src) {
     id: node.id,
     value: node.value,
     depth: node.depth,
-    layers: node.layers,
+    pathFromRoot: node.pathFromRoot,
   }));
 
   return {
-    facts: newRoot,
+    leaves: newRoot,
   };
 }

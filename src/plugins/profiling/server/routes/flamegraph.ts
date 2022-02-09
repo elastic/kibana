@@ -16,7 +16,7 @@ export class FlameGraph {
   }
 
   toElastic() {
-    let facts = [];
+    let leaves = [];
     for (const trace of this.stacktraces) {
       if (trace.found) {
         const pairs = ['root'].concat(trace._source.FrameID).map((item, i) => [i, item]);
@@ -24,12 +24,12 @@ export class FlameGraph {
           id: trace._source.FrameID[trace._source.FrameID.length - 1],
           value: 1,
           depth: trace._source.FrameID.length,
-          layers: Object.fromEntries(pairs),
+          pathFromRoot: Object.fromEntries(pairs),
         };
-        facts.push(fact);
+        leaves.push(fact);
       }
     }
-    return { facts };
+    return { leaves };
   }
 
   toPixi() {

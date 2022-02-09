@@ -39,7 +39,7 @@ function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) 
     series: new Map(),
   });
 
-  const [elasticFlamegraph, setElasticFlamegraph] = useState({});
+  const [elasticFlamegraph, setElasticFlamegraph] = useState({ leaves: [] });
   const [pixiFlamegraph, setPixiFlamegraph] = useState({});
 
   const tabs = [
