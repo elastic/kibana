@@ -103,25 +103,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.pressEnter();
       await PageObjects.console.pressEnter();
       await PageObjects.console.promptAutocomplete();
+      await retry.waitFor('autocomplete to be visible', () =>
+        PageObjects.console.hasAutocompleter()
+      );
       await PageObjects.console.pressEnter();
 
       await retry.try(async () => {
         const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
         log.debug(textOfPreviousNonEmptyLine);
         const lastChar = textOfPreviousNonEmptyLine.charAt(textOfPreviousNonEmptyLine.length - 1);
-        const request = await PageObjects.console.getRequest();
-        expect(request.trim()).to.eql(
-          `
-        {
-            "query": {
-                  "match": {},
-
-                  "bool": {}
-            }
-        }
-        `.trim()
-        );
-        expect(lastChar).to.eql(',');
+        expect(lastChar).to.be.eql(',');
       });
     });
 
