@@ -168,7 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         tags: '',
         interval: '1 min',
       });
-      expect(searchResultAfterSave.duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+      expect(searchResultAfterSave.duration).to.match(/\d{2,}:\d{2}/);
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
