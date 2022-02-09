@@ -26,16 +26,15 @@ export class TestingEmbeddedLensPlugin
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
       id: 'testing_embedded_lens',
-      title: 'Embedded Lens example',
+      title: 'Embedded Lens testing playground',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: mount(core),
     });
 
     developerExamples.register({
       appId: 'testing_embedded_lens',
-      title: 'Embedded Lens',
-      description:
-        'Embed Lens visualizations into other applications and link to a pre-configured Lens editor to allow users to use visualizations in your app as starting points for further explorations.',
+      title: 'Testing Embedded Lens',
+      description: 'Testing playground used to test Lens embeddable',
       links: [
         {
           label: 'README',

@@ -9,7 +9,8 @@
     "lens",
     "data",
     "embeddable",
-    "developerExamples"
+    "developerExamples",
+    "kibanaReact"
   ],
   "optionalPlugins": [],
   "requiredBundles": [],
