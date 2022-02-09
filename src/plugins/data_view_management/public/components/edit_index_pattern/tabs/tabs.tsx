@@ -80,7 +80,7 @@ export function Tabs({
   location,
   refreshFields,
 }: TabsProps) {
-  const { application, uiSettings, docLinks, dataViewFieldEditor, overlays, theme } =
+  const { uiSettings, docLinks, dataViewFieldEditor, overlays, theme, dataViews } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -154,7 +154,7 @@ export function Tabs({
     [uiSettings]
   );
 
-  const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+  const userEditPermission = dataViews.getCanSaveSync();
   const getFilterSection = useCallback(
     (type: string) => {
       return (
@@ -236,7 +236,8 @@ export function Tabs({
                       getFieldInfo,
                     }}
                     openModal={overlays.openModal}
-                    theme={theme}
+                    theme={theme!}
+                    userEditPermission={dataViews.getCanSaveSync()}
                   />
                 )}
               </DeleteRuntimeFieldProvider>
@@ -260,6 +261,7 @@ export function Tabs({
                 }}
                 onRemoveField={refreshFilters}
                 painlessDocLink={docLinks.links.scriptedFields.painless}
+                userEditPermission={dataViews.getCanSaveSync()}
               />
             </Fragment>
           );
@@ -297,6 +299,7 @@ export function Tabs({
       refreshFields,
       overlays,
       theme,
+      dataViews,
     ]
   );
 
