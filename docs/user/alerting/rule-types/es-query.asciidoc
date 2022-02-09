@@ -113,15 +113,15 @@ window of 1 hour and checks if there are more than 99 matches for the query. The
 | Rule is active and user is alerted.
 
 | `Execution 2 (0:01)`
-| Rule finds 127 matches in the last hour. 105 of the matches are duplicates that were alerted on in Execution 1, so you actually have 22 matches: `22 !> 99`
+| Rule finds 127 matches in the last hour. 105 of the matches are duplicates that were already alerted on previously, so you actually have 22 matches: `22 !> 99`
 | No alert.
 
 | `Execution 3 (0:02)`
-| Rule finds 159 matches in the last hour. 88 of the matches are duplicates that were alerted on in Execution 1, so you actually have 71 matches: `71 !> 99`
+| Rule finds 159 matches in the last hour. 88 of the matches are duplicates that were already alerted on previously, so you actually have 71 matches: `71 !> 99`
 | No alert.
 
 | `Execution 4 (0:03)`
-| Rule finds 190 matches in the last hour. 71 of them are duplicates that were alerted on in Exeuction 1, so you actually have 119 matches: `119 > 99`
+| Rule finds 190 matches in the last hour. 71 of them are duplicates that were already alerted on previously, so you actually have 119 matches: `119 > 99`
 | Rule is active and user is alerted.
 
 |===
