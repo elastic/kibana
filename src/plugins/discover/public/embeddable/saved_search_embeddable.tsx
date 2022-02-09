@@ -176,7 +176,7 @@ export class SavedSearchEmbeddable
         id: this.savedSearch.id!,
         description: this.output.title || this.output.defaultTitle || '',
         url: this.output.editUrl,
-      }
+      },
     };
 
     try {

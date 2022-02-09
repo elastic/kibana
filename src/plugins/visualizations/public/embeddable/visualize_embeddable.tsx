@@ -406,7 +406,7 @@ export class VisualizeEmbeddable
         id: this.vis.id ?? 'an_unsaved_vis',
         description: this.vis.title || this.input.title || this.vis.type.name,
         url: this.output.editUrl,
-      }
+      },
     };
 
     const expressionParams: IExpressionLoaderParams = {

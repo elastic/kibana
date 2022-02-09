@@ -1326,12 +1326,13 @@ export interface IUiSettingsClient {
 
 // @public
 export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
-    readonly description: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
+    readonly description?: string;
     readonly url?: string;
-    parent?: KibanaExecutionContext;
+    child?: KibanaExecutionContext;
 };
 
 // @public

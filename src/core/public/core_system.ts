@@ -142,7 +142,11 @@ export class CoreSystem {
       this.docLinks.setup();
 
       const executionContext = this.executionContext.setup();
-      const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup, executionContext });
+      const http = this.http.setup({
+        injectedMetadata,
+        fatalErrors: this.fatalErrorsSetup,
+        executionContext,
+      });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
       const theme = this.theme.setup({ injectedMetadata });
@@ -209,7 +213,7 @@ export class CoreSystem {
       const application = await this.application.start({ http, theme, overlays });
 
       const executionContext = this.executionContext.start({
-        curApp$: application.currentAppId$
+        curApp$: application.currentAppId$,
       });
 
       const chrome = await this.chrome.start({

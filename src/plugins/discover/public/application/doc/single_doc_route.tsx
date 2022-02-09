@@ -42,7 +42,6 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
     id: indexPatternId || '',
   });
 
-
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...getRootBreadcrumbs(breadcrumb),

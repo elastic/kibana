@@ -134,9 +134,7 @@ export function App({
     () =>
       Boolean(
         // Temporarily required until the 'by value' paradigm is default.
-        dashboardFeatureFlag.allowByValueEmbeddables &&
-          isLinkedToOriginatingApp &&
-          !savedObjectId
+        dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
       ),
     [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
   );

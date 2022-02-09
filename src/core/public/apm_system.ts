@@ -36,7 +36,7 @@ export class ApmSystem {
   private pageLoadTransaction?: Transaction;
   private resourceObserver: CachedResourceObserver;
   private apm?: ApmBase;
-  
+
   /**
    * `apmConfig` would be populated with relevant APM RUM agent
    * configuration if server is started with elastic.apm.* config.
@@ -67,7 +67,7 @@ export class ApmSystem {
 
     this.markPageLoadStart();
 
-    start.executionContext.context$.subscribe(c => {
+    start.executionContext.context$.subscribe((c) => {
       // We're using labels because we want the context to be indexed
       // https://www.elastic.co/guide/en/apm/get-started/current/metadata.html
       this.apm?.addLabels(c);

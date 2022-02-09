@@ -27,12 +27,14 @@ export interface ExecutionContextSetup {
  */
 export type ExecutionContextStart = ExecutionContextSetup;
 
-export type StartDeps = {
-  curApp$: Observable<string | undefined>,
-};
+export interface StartDeps {
+  curApp$: Observable<string | undefined>;
+}
 
 /** @internal */
-export class ExecutionContextService implements CoreService<ExecutionContextSetup, ExecutionContextStart> {
+export class ExecutionContextService
+  implements CoreService<ExecutionContextSetup, ExecutionContextStart>
+{
   private context$: BehaviorSubject<ExecutionContext> = new BehaviorSubject({});
   private appId?: string;
   private subscription?: Subscription;
@@ -48,22 +50,22 @@ export class ExecutionContextService implements CoreService<ExecutionContextSetu
           url: window.location.pathname,
           name: this.appId,
           ...this.context$.value,
-          ...c
+          ...c,
         };
         if (!isEqual(newVal, this.context$.value)) {
           this.context$.next(newVal);
         }
-      }, 
+      },
       getAll: () => {
         return this.context$.value;
-      }
+      },
     };
   }
 
   public start({ curApp$ }: StartDeps) {
     const start = this.setup();
     // Clear context on app change
-    this.subscription = curApp$.pipe(distinctUntilChanged()).subscribe(appId => {
+    this.subscription = curApp$.pipe(distinctUntilChanged()).subscribe((appId) => {
       start.clear();
       this.appId = appId;
     });

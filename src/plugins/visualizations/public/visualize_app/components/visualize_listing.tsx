@@ -101,8 +101,7 @@ export const VisualizeListing = () => {
     type: 'application',
     page: 'list',
     id: '',
-  })
-
+  });
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
   const tableColumns = useMemo(

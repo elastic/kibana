@@ -421,7 +421,7 @@ export class Embeddable
         id: this.id,
         description: this.savedVis.title || this.input.title || '',
         url: this.output.editUrl,
-      }
+      },
     };
 
     const input = this.getInput();

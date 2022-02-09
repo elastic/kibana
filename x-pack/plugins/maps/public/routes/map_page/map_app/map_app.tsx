@@ -120,8 +120,7 @@ export class MapApp extends React.Component<Props, State> {
       type: 'application',
       page: 'editor',
       id: this.props.savedMap.getSavedObjectId() || 'new',
-    })
-
+    });
 
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()

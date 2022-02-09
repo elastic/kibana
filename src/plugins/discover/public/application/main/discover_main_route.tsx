@@ -56,7 +56,6 @@ export function DiscoverMainRoute() {
     id: id || 'new',
   });
 
-
   const navigateToOverview = useCallback(() => {
     core.application.navigateToApp('kibanaOverview', { path: '#' });
   }, [core.application]);

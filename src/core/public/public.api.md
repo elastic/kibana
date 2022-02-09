@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import { Action } from 'history';
+import { BehaviorSubject } from 'rxjs';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigPath } from '@kbn/config';
@@ -398,6 +399,11 @@ export interface CoreContext {
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     application: ApplicationSetup;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionContextSetup" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ExecutionContextSetup"
+    //
+    // (undocumented)
+    executionContext: ExecutionContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
@@ -426,6 +432,11 @@ export interface CoreStart {
     deprecations: DeprecationsServiceStart;
     // (undocumented)
     docLinks: DocLinksStart;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionContextStart" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ExecutionContextStart"
+    //
+    // (undocumented)
+    executionContext: ExecutionContextStart;
     // (undocumented)
     fatalErrors: FatalErrorsStart;
     // (undocumented)
@@ -459,6 +470,12 @@ export class CoreSystem {
     // (undocumented)
     start(): Promise<{
         application: InternalApplicationStart;
+        executionContext: {
+            context$: BehaviorSubject<ExecutionContext>;
+            clear: () => void;
+            set: (c: ExecutionContext) => void;
+            getAll: () => ExecutionContext;
+        };
     } | undefined>;
     // (undocumented)
     stop(): void;
@@ -749,12 +766,13 @@ export interface IUiSettingsClient {
 
 // @public
 export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
-    readonly description: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
+    readonly description?: string;
     readonly url?: string;
-    parent?: KibanaExecutionContext;
+    child?: KibanaExecutionContext;
 };
 
 // @public
@@ -1520,6 +1538,7 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:173:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:179:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:182:24 - (ae-forgotten-export) The symbol "ExecutionContext" needs to be exported by the entry point index.d.ts
 
 ```

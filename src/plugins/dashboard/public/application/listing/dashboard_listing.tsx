@@ -71,7 +71,7 @@ export const DashboardListing = ({
     type: 'application',
     page: 'list',
     id: '',
-  })
+  });
 
   // Set breadcrumbs useEffect
   useEffect(() => {
