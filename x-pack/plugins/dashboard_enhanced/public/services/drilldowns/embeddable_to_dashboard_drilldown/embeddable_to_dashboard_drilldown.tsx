@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type Filter, isFilters, isFilterPinned } from '@kbn/es-query';
 import type { KibanaLocation } from 'src/plugins/share/public';
 import {
   DashboardAppLocatorParams,
@@ -14,13 +14,11 @@ import { setStateToKbnUrl } from '../../../../../../../src/plugins/kibana_utils/
 import {
   ApplyGlobalFilterActionContext,
   APPLY_FILTER_TRIGGER,
-  esFilters,
-  Filter,
-  isFilters,
   isQuery,
   isTimeRange,
   Query,
   TimeRange,
+  extractTimeRange,
 } from '../../../../../../../src/plugins/data/public';
 import { IEmbeddable, EmbeddableInput } from '../../../../../../../src/plugins/embeddable/public';
 import {
@@ -78,11 +76,13 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       if (isFilters(input.filters))
         params.filters = config.useCurrentFilters
           ? input.filters
-          : input.filters?.filter((f) => esFilters.isFilterPinned(f));
+          : input.filters?.filter((f) => isFilterPinned(f));
     }
 
-    const { restOfFilters: filtersFromEvent, timeRange: timeRangeFromEvent } =
-      esFilters.extractTimeRange(context.filters, context.timeFieldName);
+    const { restOfFilters: filtersFromEvent, timeRange: timeRangeFromEvent } = extractTimeRange(
+      context.filters,
+      context.timeFieldName
+    );
 
     if (filtersFromEvent) {
       params.filters = [...(params.filters ?? []), ...filtersFromEvent];
@@ -106,7 +106,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       '_a',
       cleanEmptyKeys({
         query: state.query,
-        filters: state.filters?.filter((f) => !esFilters.isFilterPinned(f)),
+        filters: state.filters?.filter((f) => !isFilterPinned(f)),
         savedQuery: state.savedQuery,
       }),
       { useHash: false, storeInHashQuery: true },
