@@ -68,38 +68,47 @@ export function getScreenshots(
     timeouts: { openUrl: openUrlTimeout },
   } = options;
 
-  return browserDriverFactory.createPage({ browserTimezone, openUrlTimeout }, logger).pipe(
-    mergeMap(({ driver, unexpectedExit$, metrics$, close }) => {
-      apmCreatePage?.end();
-      metrics$.subscribe(({ cpu, memory }) => {
-        apmTrans?.setLabel('cpu', cpu, false);
-        apmTrans?.setLabel('memory', memory, false);
-      });
-      unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
+  return browserDriverFactory
+    .createPage(
+      {
+        browserTimezone,
+        openUrlTimeout,
+        defaultViewport: { height: layout.height, width: layout.width },
+      },
+      logger
+    )
+    .pipe(
+      mergeMap(({ driver, unexpectedExit$, metrics$, close }) => {
+        apmCreatePage?.end();
+        metrics$.subscribe(({ cpu, memory }) => {
+          apmTrans?.setLabel('cpu', cpu, false);
+          apmTrans?.setLabel('memory', memory, false);
+        });
+        unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
 
-      const screen = new ScreenshotObservableHandler(driver, logger, layout, options);
+        const screen = new ScreenshotObservableHandler(driver, logger, layout, options);
 
-      return from(options.urls).pipe(
-        concatMap((url, index) =>
-          screen.setupPage(index, url, apmTrans).pipe(
-            catchError((error) => {
-              screen.checkPageIsOpen(); // this fails the job if the browser has closed
+        return from(options.urls).pipe(
+          concatMap((url, index) =>
+            screen.setupPage(index, url, apmTrans).pipe(
+              catchError((error) => {
+                screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
-              logger.error(error);
-              return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
-            }),
-            takeUntil(unexpectedExit$),
-            screen.getScreenshots()
-          )
-        ),
-        take(options.urls.length),
-        toArray(),
-        mergeMap((results) => {
-          // At this point we no longer need the page, close it.
-          return close().pipe(mapTo({ layout, metrics$, results }));
-        })
-      );
-    }),
-    first()
-  );
+                logger.error(error);
+                return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
+              }),
+              takeUntil(unexpectedExit$),
+              screen.getScreenshots()
+            )
+          ),
+          take(options.urls.length),
+          toArray(),
+          mergeMap((results) => {
+            // At this point we no longer need the page, close it.
+            return close().pipe(mapTo({ layout, metrics$, results }));
+          })
+        );
+      }),
+      first()
+    );
 }

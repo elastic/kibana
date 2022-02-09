@@ -7,6 +7,7 @@
 
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
+import _ from 'lodash';
 import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
@@ -36,6 +37,12 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
+  defaultViewport: {
+    /** Size in pixels */
+    width?: number;
+    /** Size in pixels */
+    height?: number;
+  };
   openUrlTimeout: number;
 }
 
@@ -110,7 +117,7 @@ export class HeadlessChromiumDriverFactory {
       userDataDir: this.userDataDir,
       disableSandbox: this.config.browser.chromium.disableSandbox,
       proxy: this.config.browser.chromium.proxy,
-      viewport: DEFAULT_VIEWPORT,
+      windowSize: DEFAULT_VIEWPORT, // Approximate the default viewport size
     });
   }
 
@@ -118,7 +125,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { browserTimezone, openUrlTimeout }: CreatePageOptions,
+    { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     // FIXME: 'create' is deprecated
@@ -139,6 +146,13 @@ export class HeadlessChromiumDriverFactory {
           ignoreHTTPSErrors: true,
           handleSIGHUP: false,
           args: chromiumArgs,
+
+          // We optionally set this at page creation to reduce the chances of
+          // browser reflow. In most cases only the height needs to be adjusted
+          // before taking a screenshot.
+          // NOTE: _.defaults assigns to the target object, so we copy it.
+          // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
+          defaultViewport: _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT),
           env: {
             TZ: browserTimezone,
           },
