@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, PropsWithChildren } from 'react';
 import { createContext, useContext } from 'react';
 
 interface ContextValues {
@@ -21,8 +21,7 @@ export const useNavigationWarningPrompt = () => {
   return useContext(NavigationWarningPromptContext);
 };
 
-// eslint-disable-next-line react/function-component-definition
-export const NavigationWarningPromptProvider: React.FC = ({ children }) => {
+export function NavigationWarningPromptProvider({ children }: PropsWithChildren<{}>) {
   const [prompt, setPrompt] = useState<string | undefined>(undefined);
 
   return (
@@ -30,4 +29,4 @@ export const NavigationWarningPromptProvider: React.FC = ({ children }) => {
       {children}
     </NavigationWarningPromptContext.Provider>
   );
-};
+}
