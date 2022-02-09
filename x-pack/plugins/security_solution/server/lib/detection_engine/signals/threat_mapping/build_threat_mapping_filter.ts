@@ -43,7 +43,6 @@ export const buildThreatMappingFilter = ({
     },
     query,
   };
-  console.log(JSON.stringify(threatMapping));
   return filterChunk;
 };
 

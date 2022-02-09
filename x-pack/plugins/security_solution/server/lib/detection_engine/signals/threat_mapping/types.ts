@@ -187,7 +187,7 @@ export interface BooleanFilter {
   bool: { should: unknown[]; minimum_should_match: number };
 }
 
-interface ThreatListConfig {
+export interface ThreatListConfig {
   _source: string[] | boolean;
   fields: string[] | undefined;
   sort?: estypes.Sort;

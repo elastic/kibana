@@ -9,6 +9,7 @@ import { createThreatQueries } from './create_threat_queries';
 import {
   PercolatorQuery,
   CreatePercolatorQueriesOptions,
+  ThreatListConfig,
 } from '../../../signals/threat_mapping/types';
 import { getNextPage } from '../../../signals/threat_mapping/get_next_page';
 
@@ -29,7 +30,7 @@ export const createPercolatorQueries = async ({
 }: CreatePercolatorQueriesOptions) => {
   let items: PercolatorQuery[] = [];
   let updatedSearchAfter;
-  const threatListConfig = {
+  const threatListConfig: ThreatListConfig = {
     _source: [`${threatIndicatorPath}.*`, 'threat.feed.name'],
     fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
     sort: [{ '@timestamp': 'asc' }],
