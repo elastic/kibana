@@ -7,11 +7,11 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { useEndpointSelector } from '../hooks';
-import { nonExistingPolicies } from '../../store/selectors';
-import { getPolicyDetailPath } from '../../../../common/routing';
-import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
+import { nonExistingPolicies } from '../pages/endpoint_hosts/store/selectors';
+import { getPolicyDetailPath } from '../common/routing';
+import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
+import { useAppUrl } from '../../common/lib/kibana/hooks';
+import { useEndpointSelector } from '../pages/endpoint_hosts/view/hooks';
 
 /**
  * A policy link (to details) that first checks to see if the policy id exists against
