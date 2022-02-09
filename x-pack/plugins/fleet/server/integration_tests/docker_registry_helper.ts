@@ -12,6 +12,8 @@ import fetch from 'node-fetch';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const DOCKER_START_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+
 export function useDockerRegistry() {
   const packageRegistryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT || '8081';
 
@@ -32,8 +34,9 @@ export function useDockerRegistry() {
       isExited = true;
     });
 
-    let retries = 0;
-    while (!isExited && retries++ <= 20) {
+    const startedAt = Date.now();
+
+    while (!isExited && Date.now() - startedAt <= DOCKER_START_TIMEOUT) {
       try {
         const res = await fetch(`http://localhost:${packageRegistryPort}/`);
         if (res.status === 200) {

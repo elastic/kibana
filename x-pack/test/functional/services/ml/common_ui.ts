@@ -334,5 +334,9 @@ export function MachineLearningCommonUIProvider({
       await PageObjects.spaceSelector.goToSpecificSpace(spaceId);
       await PageObjects.spaceSelector.expectHomePage(spaceId);
     },
+
+    async waitForDatePickerIndicatorLoaded() {
+      await testSubjects.waitForEnabled('superDatePickerApplyTimeButton');
+    },
   };
 }
