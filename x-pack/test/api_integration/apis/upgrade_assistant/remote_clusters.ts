@@ -11,9 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { API_BASE_PATH } from '../../../../plugins/upgrade_assistant/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
-  const security = getService('security');
   const es = getService('es');
   const log = getService('log');
 
@@ -63,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('returns an array of remote clusters', () => {
+      it('returns an array of remote clusters', async () => {
         const { body: apiRequestResponse } = await supertest
           .get(`${API_BASE_PATH}/remote_clusters`)
           .set('kbn-xsrf', 'xxx')

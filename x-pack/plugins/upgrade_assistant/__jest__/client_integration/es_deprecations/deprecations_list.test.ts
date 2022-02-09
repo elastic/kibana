@@ -108,8 +108,6 @@ describe('ES deprecations table', () => {
 
   describe('remote clusters callout', () => {
     beforeEach(async () => {
-      const { exists, find, component } = testBed;
-
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(['test_remote_cluster']);
 
       await act(async () => {
@@ -120,7 +118,7 @@ describe('ES deprecations table', () => {
     });
 
     it('shows a warning message if a user has remote clusters configured', () => {
-      const { exists, find } = testBed;
+      const { exists } = testBed;
 
       // Verify warning exists
       expect(exists('remoteClustersWarningCallout')).toBe(true);
