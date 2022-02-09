@@ -159,23 +159,65 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
       });
 
-      it('Applies dashboard filters to options list control', async () => {
-        await filterBar.addFilter('sound.keyword', 'is one of', ['bark', 'bow ow ow', 'ruff']);
-        await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
+      describe('Apply dashboard filters to controls', async () => {
+        let controlId: string;
 
-        const controlIds = await dashboardControls.getAllControlIds();
-        await dashboardControls.optionsListOpenPopover(controlIds[0]);
-        await retry.try(async () => {
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(3);
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
-            'ruff',
-            'bark',
-            'bow ow ow',
-          ]);
+        before(async () => {
+          controlId = (await dashboardControls.getAllControlIds())[0];
         });
 
-        await filterBar.removeAllFilters();
+        it('Applies dashboard filters to options list control', async () => {
+          await filterBar.addFilter('sound.keyword', 'is one of', ['bark', 'bow ow ow', 'ruff']);
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(3);
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
+              'ruff',
+              'bark',
+              'bow ow ow',
+            ]);
+          });
+        });
+
+        it('Does not apply disabled dashboard filters to options list control', async () => {
+          await filterBar.toggleFilterEnabled('sound.keyword');
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(8);
+          });
+
+          await filterBar.toggleFilterEnabled('sound.keyword');
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+        });
+
+        it('Negated filters apply to options control', async () => {
+          await filterBar.toggleFilterNegated('sound.keyword');
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(5);
+            expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql([
+              'hiss',
+              'grrr',
+              'meow',
+              'growl',
+              'grr',
+            ]);
+          });
+        });
+
+        after(async () => {
+          await filterBar.removeAllFilters();
+        });
       });
 
       it('Can select multiple available options', async () => {
