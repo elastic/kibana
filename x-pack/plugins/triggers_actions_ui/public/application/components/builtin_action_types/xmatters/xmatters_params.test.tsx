@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { XmattersSeverityOptions } from '../types';
 import XmattersParamsFields from './xmatters_params';
 
@@ -40,20 +40,11 @@ describe('XmattersParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="ruleNameInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="dateInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="spaceIdInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="tagsInput"]').length > 0).toBeTruthy();
 
-    expect(wrapper.find('[data-test-subj="ruleNameInput"]').first().prop('value')).toStrictEqual(
-      'Test xMatters'
-    );
     expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
       'high'
-    );
-    expect(wrapper.find('[data-test-subj="spaceIdInput"]').first().prop('value')).toStrictEqual(
-      'default'
     );
     expect(wrapper.find('[data-test-subj="tagsInput"]').first().prop('value')).toStrictEqual(
       'test1, test2'

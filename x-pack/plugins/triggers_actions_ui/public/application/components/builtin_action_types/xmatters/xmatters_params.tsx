@@ -74,7 +74,10 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
         'actionParams',
         {
           signalId: '{{rule.id}}:{{alert.id}}',
-          ruleActionGroupName: '{{alert.actionGroupName}}',
+          alertActionGroupName: '{{alert.actionGroupName}}',
+          ruleName: '{{rule.name}}',
+          date: '{{date}}',
+          spaceId: '{{rule.spaceId}}',
         },
         index
       );
@@ -83,50 +86,6 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
   }, [actionParams]);
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="xmattersRuleName"
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.ruleName',
-              {
-                defaultMessage: 'Rule name',
-              }
-            )}
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editAction}
-              messageVariables={messageVariables}
-              paramsProperty={'ruleName'}
-              inputTargetValue={actionParams.ruleName}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="xmattersDate"
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.date',
-              {
-                defaultMessage: 'Date',
-              }
-            )}
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editAction}
-              messageVariables={messageVariables}
-              paramsProperty={'date'}
-              inputTargetValue={actionParams.date}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -148,28 +107,6 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
               onChange={(e) => {
                 editAction('severity', e.target.value, index);
               }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="xmattersSpaceId"
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.spaceId',
-              {
-                defaultMessage: 'Space ID',
-              }
-            )}
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editAction}
-              messageVariables={messageVariables}
-              paramsProperty={'spaceId'}
-              inputTargetValue={actionParams.spaceId}
             />
           </EuiFormRow>
         </EuiFlexItem>

@@ -32,7 +32,7 @@ export const getDefaultsForActionParams = (
     case '.xmatters':
       const xmattersDefaults = {
         alertActionGroupName: `{{${AlertProvidedActionVariables.alertActionGroupName}}}`,
-        signalId: `{{${AlertProvidedActionVariables.ruleId}:${AlertProvidedActionVariables.alertId}}}`,
+        signalId: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
       };
       return xmattersDefaults;
   }

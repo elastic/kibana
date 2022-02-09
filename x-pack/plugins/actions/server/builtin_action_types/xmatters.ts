@@ -46,7 +46,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
     if (!secrets.password && !secrets.user) return;
     if (secrets.password && secrets.user) return;
     return i18n.translate('xpack.actions.builtin.xmatters.invalidUsernamePassword', {
-      defaultMessage: 'both user and password must be specified',
+      defaultMessage: 'Both user and password must be specified',
     });
   },
 });
@@ -98,7 +98,7 @@ function validateActionTypeConfig(
     new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring xMatters action: unable to parse url: {err}',
+      defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
       values: {
         err,
       },
@@ -109,7 +109,7 @@ function validateActionTypeConfig(
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
-      defaultMessage: 'error configuring xMatters action: {message}',
+      defaultMessage: 'Error configuring xMatters action: {message}',
       values: {
         message: allowListError.message,
       },
@@ -140,9 +140,9 @@ export async function executor(
     result = await postXmatters({ url, data, basicAuth }, logger, configurationUtilities);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.xmatters.postingErrorMessage', {
-      defaultMessage: 'error triggering xMatters workflow',
+      defaultMessage: 'Error triggering xMatters workflow',
     });
-    logger.warn(`error thrown triggering xMatters workflow: ${err.message}`);
+    logger.warn(`Error thrown triggering xMatters workflow: ${err.message}`);
     return {
       status: 'error',
       actionId,
@@ -168,7 +168,7 @@ export async function executor(
       } = error.response;
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
       const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
-      logger.error(`error on ${actionId} xMatters event: ${message}`);
+      logger.error(`Error on ${actionId} xMatters event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
@@ -178,15 +178,15 @@ export async function executor(
       return errorResultInvalid(actionId, message);
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
-      logger.error(`error on ${actionId} xMatters event: ${message}`);
+      logger.error(`Error on ${actionId} xMatters event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     } else if (error.isAxiosError) {
       const message = `${error.message}`;
-      logger.error(`error on ${actionId} xMatters event: ${message}`);
+      logger.error(`Error on ${actionId} xMatters event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     }
 
-    logger.error(`error on ${actionId} xMatters action: unexpected error`);
+    logger.error(`Error on ${actionId} xMatters action: unexpected error`);
     return errorResultUnexpectedError(actionId);
   }
 }
@@ -201,7 +201,7 @@ function errorResultInvalid(
   serviceMessage: string
 ): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.xmatters.invalidResponseErrorMessage', {
-    defaultMessage: 'error calling xMatters, invalid response',
+    defaultMessage: 'Error calling xMatters, invalid response',
   });
   return {
     status: 'error',
@@ -216,7 +216,7 @@ function errorResultRequestFailed(
   serviceMessage: string
 ): ActionTypeExecutorResult<unknown> {
   const errMessage = i18n.translate('xpack.actions.builtin.xmatters.requestFailedErrorMessage', {
-    defaultMessage: 'error calling xMatters, request failed',
+    defaultMessage: 'Error calling xMatters, request failed',
   });
   return {
     status: 'error',
@@ -228,7 +228,7 @@ function errorResultRequestFailed(
 
 function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.xmatters.unreachableErrorMessage', {
-    defaultMessage: 'error calling xMatters, unexpected error',
+    defaultMessage: 'Error calling xMatters, unexpected error',
   });
   return {
     status: 'error',
@@ -241,7 +241,7 @@ function retryResult(actionId: string, serviceMessage: string): ActionTypeExecut
   const errMessage = i18n.translate(
     'xpack.actions.builtin.xmatters.invalidResponseRetryLaterErrorMessage',
     {
-      defaultMessage: 'error calling xMatters, retry later',
+      defaultMessage: 'Error calling xMatters, retry later',
     }
   );
   return {

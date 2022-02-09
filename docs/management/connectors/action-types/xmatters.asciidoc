@@ -8,6 +8,17 @@
 The xMatters connector uses https://github.com/axios/axios[axios] to send a POST request to an xMatters trigger.
 
 [float]
+[[xmatters-connector-prerequisites]]
+==== Prerequisites ** still needs to be string reviewed by the xMatters team **
+First Elastic must be configured within your xMatters instance. In your xMatters instance, navigate to workflows. Once you have installed the Elastic workflow template or created a custom workflow with the Elastic trigger, you can begin configuration.
+
+. Open the trigger in the workflow
+. Choose the type of authentication
+. Copy the URL (this is the URL to use in the xMatters connector in Elastic)
+
+For more information and documentation visit https://help.xmatters.com/integrations/#cshid=Elastic[xMatters Documentation].
+
+[float]
 [[xmatters-connector-configuration]]
 ==== Connector configuration
 
@@ -71,19 +82,14 @@ image::management/connectors/images/xmatters-params-test.png[xMatters params tes
 
 xMatters rules have the following properties.
 
-ruleName:                                                 Name of the Elastic rule. 
-date:                                           Date the rule scheduled the action.
 severity:                                                     Severity of the rule.
-spaceId:                                    Unique ID of the rule space in Elastic.
 tags: Comma-separated list of tags for the rule as provided by the user in Elastic.
 
 Here is an example set of inputs:
 --
 {
-  "ruleName": "{{ruleName}}",
-  "date": "{{date}}",
   "severity": "High",
-  ...
+  "tags": "{tags}",
 }
 --
 
