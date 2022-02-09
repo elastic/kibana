@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiLink,
   EuiText,
   EuiSpacer,
