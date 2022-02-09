@@ -414,7 +414,8 @@ export function roundValue(value: number, fractionDigits: number = 2) {
 export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[], max: number) {
   const length = newColorStops.length;
   // workout the steps from the last 2 items
-  const dataStep = newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1;
+  const dataStep =
+    length > 1 ? newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1 : 1;
   let step = Number(dataStep.toFixed(2));
   if (max < colorStops[length - 1].stop + step) {
     const diffToMax = max - colorStops[length - 1].stop;
