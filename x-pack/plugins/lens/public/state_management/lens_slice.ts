@@ -7,7 +7,7 @@
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { cloneDeep, mapValues } from 'lodash';
+import { mapValues } from 'lodash';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -85,10 +85,8 @@ export const getPreloadedState = ({
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
-export const enableAutoApply = createAction<void>('lens/enableAutoApply');
-export const disableAutoApply = createAction<void>('lens/disableAutoApply');
-// this action is only relevant when auto-apply is disabled
-export const applyWorkingState = createAction<void>('lens/applyWorkingState');
+export const enableApplyChanges = createAction<void>('lens/enableApplyChanges');
+export const disableApplyChanges = createAction<void>('lens/disableApplyChanges');
 export const updateState = createAction<{
   updater: (prevState: LensAppState) => LensAppState;
 }>('lens/updateState');
@@ -168,9 +166,8 @@ export const lensActions = {
   setState,
   onActiveDataChange,
   setSaveable,
-  enableAutoApply,
-  disableAutoApply,
-  applyWorkingState,
+  enableApplyChanges,
+  disableApplyChanges,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -211,20 +208,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         isSaveable: payload,
       };
     },
-    [enableAutoApply.type]: (state) => {
-      delete state.appliedState;
+    [enableApplyChanges.type]: (state) => {
+      state.applyChangesDisabled = false;
     },
-    [disableAutoApply.type]: (state) => {
-      state.appliedState = {
-        visualization: cloneDeep(state.visualization),
-        datasourceStates: cloneDeep(state.datasourceStates),
-      };
-    },
-    [applyWorkingState.type]: (state) => {
-      state.appliedState = {
-        visualization: cloneDeep(state.visualization),
-        datasourceStates: cloneDeep(state.datasourceStates),
-      };
+    [disableApplyChanges.type]: (state) => {
+      state.applyChangesDisabled = true;
     },
     [updateState.type]: (
       state,

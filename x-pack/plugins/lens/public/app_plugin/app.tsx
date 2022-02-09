@@ -30,14 +30,13 @@ import {
   LensAppState,
   DispatchSetState,
   selectSavedObjectFormat,
-  enableAutoApply,
-  applyWorkingState,
+  enableApplyChanges,
+  disableApplyChanges,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
-import { disableAutoApply } from '../state_management/lens_slice';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -87,7 +86,7 @@ export function App({
     sharingSavedObjectProps,
     isLinkedToOriginatingApp,
     searchSessionId,
-    appliedState,
+    applyChangesDisabled,
     isLoading,
     isSaveable,
   } = useLensSelector((state) => state.lens);
@@ -295,11 +294,10 @@ export function App({
     ]
   );
 
-  const autoApplyEnabled = !Boolean(appliedState);
-  const toggleAutoApply = useCallback(
-    () => dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply()),
-    [dispatch, autoApplyEnabled]
-  );
+  const applyChangesEnabled = !applyChangesDisabled;
+  const toggleAutoApply = useCallback(() => {
+    dispatch(applyChangesEnabled ? disableApplyChanges() : enableApplyChanges());
+  }, [dispatch, applyChangesEnabled]);
 
   return (
     <>
@@ -316,9 +314,12 @@ export function App({
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
-          autoApplyEnabled={autoApplyEnabled}
+          autoApplyEnabled={applyChangesEnabled}
           onToggleAutoApply={toggleAutoApply}
-          onApplyChanges={() => dispatch(applyWorkingState())}
+          onApplyChanges={() => {
+            dispatch(enableApplyChanges());
+            setImmediate(() => dispatch(disableApplyChanges())); // wait for render
+          }}
         />
 
         {getLegacyUrlConflictCallout()}

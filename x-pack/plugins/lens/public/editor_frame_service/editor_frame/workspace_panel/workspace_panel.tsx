@@ -62,7 +62,7 @@ import {
   selectDatasourceStates,
   selectActiveDatasourceId,
   selectSearchSessionId,
-  selectAppliedState,
+  selectApplyChangesDisabled,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 
@@ -114,6 +114,8 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
+let expressionToRender: string | null | undefined;
+
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
@@ -130,9 +132,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const dispatchLens = useLensDispatch();
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const visualization = useLensSelector(selectVisualization);
-  const appliedState = useLensSelector(selectAppliedState);
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const shouldApplyChanges = !useLensSelector(selectApplyChangesDisabled);
 
   const { datasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
@@ -186,9 +188,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
-          visualizationState: appliedState?.visualization.state || visualization.state,
+          visualizationState: visualization.state,
           datasourceMap,
-          datasourceStates: appliedState?.datasourceStates || datasourceStates,
+          datasourceStates,
           datasourceLayers,
         });
 
@@ -223,10 +225,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     configurationValidationError?.length,
     missingRefsErrors.length,
-    appliedState,
   ]);
 
-  const expressionExists = Boolean(expression);
+  if (shouldApplyChanges) {
+    expressionToRender = expression;
+  }
+
+  const expressionExists = Boolean(expressionToRender);
   useEffect(() => {
     dispatchLens(setSaveable(expressionExists));
   }, [expressionExists, dispatchLens]);
@@ -325,12 +330,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    if (expression === null) {
+    if (!expressionExists) {
       return renderEmptyWorkspace();
     }
     return (
       <VisualizationWrapper
-        expression={expression}
+        expression={expressionToRender}
         framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
@@ -342,8 +347,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       />
     );
   };
-
-  const element = expression !== null ? renderVisualization() : renderEmptyWorkspace();
 
   const dragDropContext = useContext(DragContext);
 
@@ -374,7 +377,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         order={dropProps.order}
       >
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {element}
+          {renderVisualization()}
         </EuiPageContentBody>
       </DragDrop>
     );
