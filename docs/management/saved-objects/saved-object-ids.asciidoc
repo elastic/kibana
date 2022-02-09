@@ -32,7 +32,7 @@ After you upgrade, or if you set up a new {kib} instance using 8.x, there are a 
 [[saved-object-ids-impact-when-using-legacy-urls]]
 ===== Accessing saved objects using old URLs
 
-When you upgrade {kib} and saved object IDs change, the "deep link" URLs to access those saved objects will change too. To reduce the impact
+When you upgrade {kib} and saved object IDs change, the "deep link" URLs to access those saved objects will also change. To reduce the impact,
 for users, each existing URL is preserved with a special <<legacy-url-aliases,legacy URL alias>>. This means that if you use a bookmark for
 a saved object ID that was changed, you'll be redirected to the new URL for that saved object.
 
