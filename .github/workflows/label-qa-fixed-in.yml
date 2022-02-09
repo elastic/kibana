@@ -41,8 +41,8 @@ jobs:
       - uses: sergeysova/jq-action@v2
         id: issues_to_label
         with:
-          # Filter closing issues to only include the ones that are labeled with "bug" and then map to the issue's node id
-          cmd: echo $CLOSING_ISSUES | jq -c '.repository.pullRequest.closingIssuesReferences.nodes | map(select(.labels | any(map(.name == "bug")))) | map(.id)'
+          # Map to the issues' node id
+          cmd: echo $CLOSING_ISSUES | jq -c '.repository.pullRequest.closingIssuesReferences.nodes | map(.id)'
           multiline: true
         env:
           CLOSING_ISSUES: ${{ steps.closing_issues.outputs.data }}
