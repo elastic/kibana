@@ -11,9 +11,15 @@ import { agentPolicyStatuses, dataTypes } from '../../../common';
 
 import { PackagePolicySchema, NamespaceSchema } from './package_policy';
 
+function validateNonEmptyString(val: string) {
+  if (val.trim() === '') {
+    return 'Invalid empty string';
+  }
+}
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
-  name: schema.string({ minLength: 1 }),
+  name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
   namespace: NamespaceSchema,
   description: schema.maybe(schema.string()),
   is_managed: schema.maybe(schema.boolean()),
