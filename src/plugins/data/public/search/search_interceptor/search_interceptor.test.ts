@@ -119,6 +119,7 @@ describe('SearchInterceptor', () => {
       }),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
+      executionContext: mockCoreSetup.executionContext,
       session: sessionService,
       theme: themeServiceMock.createSetupContract(),
     });
