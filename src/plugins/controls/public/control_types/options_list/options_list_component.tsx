@@ -20,10 +20,12 @@ import { useReduxEmbeddableContext } from '../../../../presentation_util/public'
 import './options_list.scss';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { OptionsListEmbeddableInput } from './types';
+import { DataViewField } from '../../../../data_views/public';
 
 // OptionsListComponentState is controlled by the embeddable, but is not considered embeddable input.
 export interface OptionsListComponentState {
   loading: boolean;
+  field?: DataViewField;
   totalCardinality?: number;
   availableOptions?: string[];
   invalidSelections?: string[];
@@ -52,7 +54,7 @@ export const OptionsListComponent = ({
   );
 
   // useStateObservable to get component state from Embeddable
-  const { availableOptions, loading, invalidSelections, validSelections, totalCardinality } =
+  const { availableOptions, loading, invalidSelections, validSelections, totalCardinality, field } =
     useStateObservable<OptionsListComponentState>(
       componentStateSubject,
       componentStateSubject.getValue()
@@ -136,6 +138,7 @@ export const OptionsListComponent = ({
         repositionOnScroll
       >
         <OptionsListPopover
+          field={field}
           loading={loading}
           searchString={searchString}
           totalCardinality={totalCardinality}

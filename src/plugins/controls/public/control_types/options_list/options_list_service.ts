@@ -36,6 +36,7 @@ const getRoundedTimeRange = (timeRange: TimeRange) => ({
 
 const optionsListCacheResolver = (request: OptionsListRequest) => {
   const {
+    query,
     filters,
     timeRange,
     searchString,
@@ -48,6 +49,7 @@ const optionsListCacheResolver = (request: OptionsListRequest) => {
     Math.floor(Date.now() / 1000 / 60), // Only cache results for a minute in case data changes in ES index
     selectedOptions?.join(','),
     JSON.stringify(filters),
+    JSON.stringify(query),
     dataViewTitle,
     searchString,
     fieldName,

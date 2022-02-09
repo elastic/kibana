@@ -92,5 +92,10 @@ export const OptionsListStrings = {
         defaultMessage: 'Could not locate data view: {dataViewId}',
         values: { dataViewId },
       }),
+    getfieldNotFoundError: (fieldId: string) =>
+      i18n.translate('controls.optionsList.errors.fieldNotFound', {
+        defaultMessage: 'Could not locate field: {fieldId}',
+        values: { fieldId },
+      }),
   },
 };

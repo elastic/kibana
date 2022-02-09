@@ -23,11 +23,13 @@ import {
 
 import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
+import { DataViewField } from '../../../../data_views/public';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListComponentState } from './options_list_component';
 import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
 
 export const OptionsListPopover = ({
+  field,
   loading,
   searchString,
   availableOptions,
@@ -35,6 +37,7 @@ export const OptionsListPopover = ({
   invalidSelections,
   updateSearchString,
 }: {
+  field?: DataViewField;
   searchString: string;
   totalCardinality?: number;
   loading: OptionsListComponentState['loading'];
@@ -79,70 +82,74 @@ export const OptionsListPopover = ({
           </EuiToolTip>
         )}
       </EuiPopoverTitle>
-      <div className="optionsList__actions">
-        <EuiFormRow>
-          <EuiFlexGroup
-            gutterSize="xs"
-            direction="row"
-            alignItems="center"
-            justifyContent="spaceBetween"
-          >
-            {totalCardinality && (
+      {field?.type !== 'boolean' && (
+        <div className="optionsList__actions">
+          <EuiFormRow>
+            <EuiFlexGroup
+              gutterSize="xs"
+              direction="row"
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              {totalCardinality && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={OptionsListStrings.popover.getTotalCardinalityTooltip(
+                      totalCardinality
+                    )}
+                  >
+                    <EuiBadge color="primary">{totalCardinality}</EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <EuiFieldSearch
+                  compressed
+                  disabled={showOnlySelected}
+                  onChange={(event) => updateSearchString(event.target.value)}
+                  value={searchString}
+                  data-test-subj="optionsList-control-search-input"
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={OptionsListStrings.popover.getTotalCardinalityTooltip(totalCardinality)}
+                  position="top"
+                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
                 >
-                  <EuiBadge color="primary">{totalCardinality}</EuiBadge>
+                  <EuiButtonIcon
+                    size="s"
+                    color="danger"
+                    iconType="eraser"
+                    data-test-subj="optionsList-control-clear-all-selections"
+                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                    onClick={() => dispatch(clearSelections({}))}
+                  />
                 </EuiToolTip>
               </EuiFlexItem>
-            )}
-            <EuiFlexItem>
-              <EuiFieldSearch
-                compressed
-                disabled={showOnlySelected}
-                onChange={(event) => updateSearchString(event.target.value)}
-                value={searchString}
-                data-test-subj="optionsList-control-search-input"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                position="top"
-                content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-              >
-                <EuiButtonIcon
-                  size="s"
-                  color="danger"
-                  iconType="eraser"
-                  data-test-subj="optionsList-control-clear-all-selections"
-                  aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                  onClick={() => dispatch(clearSelections({}))}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                position="top"
-                content={
-                  showOnlySelected
-                    ? OptionsListStrings.popover.getAllOptionsButtonTitle()
-                    : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
-                }
-              >
-                <EuiButtonIcon
-                  size="s"
-                  iconType="list"
-                  aria-pressed={showOnlySelected}
-                  color={showOnlySelected ? 'primary' : 'text'}
-                  display={showOnlySelected ? 'base' : 'empty'}
-                  aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                  onClick={() => setShowOnlySelected(!showOnlySelected)}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-      </div>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={
+                    showOnlySelected
+                      ? OptionsListStrings.popover.getAllOptionsButtonTitle()
+                      : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
+                  }
+                >
+                  <EuiButtonIcon
+                    size="s"
+                    iconType="list"
+                    aria-pressed={showOnlySelected}
+                    color={showOnlySelected ? 'primary' : 'text'}
+                    display={showOnlySelected ? 'base' : 'empty'}
+                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                    onClick={() => setShowOnlySelected(!showOnlySelected)}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </div>
+      )}
       <div
         className="optionsList__items"
         data-option-count={availableOptions?.length ?? 0}
