@@ -96,11 +96,3 @@ export const find = async (
     });
   }
 };
-
-const asArray = <T>(field?: T | T[] | null): T[] | undefined => {
-  if (field === undefined || field === null) {
-    return;
-  }
-
-  return Array.isArray(field) ? field : [field];
-};
