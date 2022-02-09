@@ -59,33 +59,26 @@ xpack.reporting.encryptionKey: "something_secret"
 [[reporting-kibana-server-settings]]
 ==== {kib} server settings
 
-For PNG and PDF reports, Reporting opens the {kib} web interface in a headless server process to generate
-screenshots of {kib} visualizations. In most cases, the default settings
-work and you don't need to configure the {report-features} to communicate with {kib}.
-
-If your {kib} instance requires a reverse proxy (such as NGINX, Apache, etc.) for
-access, because of rewrite rules or special headers being added by the proxy,
-you must configure the `xpack.reporting.kibanaServer` settings to make
-the headless browser process connect to the proxy.
+To generate screenshots for PNG and PDF reports, Reporting opens the {kib} web interface using a local
+connection on the server. In most cases, using a local connection to the Kibana server presents no issue. If
+you prefer the headless browser to connect to Kibana using a specific hostname, Reporting has a set of
+experimental settings which can allow Reporting to connect to Kibana through a proxy.
 
 [NOTE]
 ============
-If a reverse proxy carries encrypted traffic from user
-clients back to a {kib} server, the proxy port, protocol, and hostname
-in `xpack.reporting.kibanaServer` must be valid for the encryption that the Reporting
-browser receives. Encrypted communications fail if there are
-mismatches in the host information between the request and the certificate on the server.
-
-Configuring the `xpack.reporting.kibanaServer` settings to point to a
-proxy host requires that the {kib} server has network access to the proxy.
+The Reporting server settings are entirely optional. Take caution when editing these settings. Adding these
+settings brings a new category of reasons that Reporting might not work. If the host is not routable or has
+encryption that can not be validated by Kibana, finding clues to the reason will require deep inspection of the
+server logs: the full Kibana URL that Reporting is attempting to open is logged during report execution.
 ============
 
-`xpack.reporting.kibanaServer.port`:: The port for accessing {kib}, if different from the <<server-port, `server.port`>> value.
+`xpack.reporting.kibanaServer.port`:: experimental[]
+The port for accessing {kib}, if different from the <<server-port, `server.port`>> value.
 
-`xpack.reporting.kibanaServer.protocol`::
+`xpack.reporting.kibanaServer.protocol`:: experimental[]
 The protocol for accessing {kib}, typically `http` or `https`.
 
-[[xpack-kibanaServer-hostname]] `xpack.reporting.kibanaServer.hostname`::
+[[xpack-kibanaServer-hostname]] `xpack.reporting.kibanaServer.hostname`:: experimental[]
 The hostname for accessing {kib}, if different from the <<server-host, `server.host`>> value.
 
 [float]
