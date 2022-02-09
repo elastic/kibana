@@ -17,7 +17,10 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
-import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import {
+  getPerformBulkActionSchemaMock,
+  getPerformBulkActionEditSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { isElasticRule } from '../../../../usage/detections';
 import { readRules } from '../../rules/read_rules';
@@ -45,7 +48,6 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
     isElasticRuleMock.mockReturnValue(false);
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-
     performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
   });
 
@@ -178,7 +180,57 @@ describe.each([
       });
     });
 
-    it('returns partial failure error if couple of rule validations fail and the rest are successfull', async () => {
+    it('returns error if index patterns action is applied to machine learning rule', async () => {
+      readRulesMock.mockImplementationOnce(() =>
+        Promise.resolve({ ...mockRule, params: { ...mockRule.params, type: 'machine_learning' } })
+      );
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionEditSchemaMock(),
+          ids: ['failed-mock-id'],
+          query: undefined,
+          edit: [
+            {
+              type: 'add_index_patterns',
+              value: ['new-index-*'],
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+          errors: [
+            {
+              message:
+                "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+        },
+        message: 'Bulk edit failed',
+        status_code: 500,
+      });
+    });
+
+    it('returns partial failure error if couple of rule validations fail and the rest are successful', async () => {
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
           data: [

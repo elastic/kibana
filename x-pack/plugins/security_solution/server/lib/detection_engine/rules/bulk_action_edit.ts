@@ -40,24 +40,32 @@ export const applyBulkActionEditToRule = (
       break;
 
     // index_patterns actions
-    // index is not present in all rule types(machine learning). But it's mandatory for the rest.
-    // So we check if index is present and only in that case apply action
+    // index pattern is not present in machine learning rule type, so we throw error on it
     case BulkActionEditType.add_index_patterns:
-      if (rule.params && 'index' in rule.params) {
-        rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
+      if (rule.params.type === 'machine_learning') {
+        throw Error(
+          "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
+        );
       }
+      rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
       break;
 
     case BulkActionEditType.delete_index_patterns:
-      if (rule.params && 'index' in rule.params) {
-        rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
+      if (rule.params.type === 'machine_learning') {
+        throw Error(
+          "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
+        );
       }
+      rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
       break;
 
     case BulkActionEditType.set_index_patterns:
-      if (rule.params && 'index' in rule.params) {
-        rule.params.index = action.value;
+      if (rule.params.type === 'machine_learning') {
+        throw Error(
+          "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+        );
       }
+      rule.params.index = action.value;
       break;
 
     // timeline actions

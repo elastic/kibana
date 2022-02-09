@@ -95,28 +95,37 @@ describe('bulk_action_edit', () => {
         expect(editedRule.params).toHaveProperty('index', ['index']);
       });
 
-      test('should not add new index pattern to rule if index pattern is absent', () => {
-        const editedRule = applyBulkActionEditToRule({ params: {} } as RuleAlertType, {
-          type: BulkActionEditType.add_index_patterns,
-          value: ['my-index-*'],
-        });
-        expect(editedRule.params).not.toHaveProperty('index');
+      test('should throw error on adding index pattern if rule is of machine learning type', () => {
+        expect(() =>
+          applyBulkActionEditToRule({ params: { type: 'machine_learning' } } as RuleAlertType, {
+            type: BulkActionEditType.add_index_patterns,
+            value: ['my-index-*'],
+          })
+        ).toThrow(
+          "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
+        );
       });
 
-      test('should not remove index pattern to rule if index pattern is absent', () => {
-        const editedRule = applyBulkActionEditToRule({ params: {} } as RuleAlertType, {
-          type: BulkActionEditType.delete_index_patterns,
-          value: ['initial-index-*'],
-        });
-        expect(editedRule.params).not.toHaveProperty('index');
+      test('should throw error on deleting index pattern if rule is of machine learning type', () => {
+        expect(() =>
+          applyBulkActionEditToRule({ params: { type: 'machine_learning' } } as RuleAlertType, {
+            type: BulkActionEditType.delete_index_patterns,
+            value: ['my-index-*'],
+          })
+        ).toThrow(
+          "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
+        );
       });
 
-      test('should not set index pattern to rule if index pattern is absent', () => {
-        const editedRule = applyBulkActionEditToRule({ params: {} } as RuleAlertType, {
-          type: BulkActionEditType.set_index_patterns,
-          value: ['index-*'],
-        });
-        expect(editedRule.params).not.toHaveProperty('index');
+      test('should throw error on overwriting index pattern if rule is of machine learning type', () => {
+        expect(() =>
+          applyBulkActionEditToRule({ params: { type: 'machine_learning' } } as RuleAlertType, {
+            type: BulkActionEditType.set_index_patterns,
+            value: ['my-index-*'],
+          })
+        ).toThrow(
+          "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+        );
       });
     });
 
