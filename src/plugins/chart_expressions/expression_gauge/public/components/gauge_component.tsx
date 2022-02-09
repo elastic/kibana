@@ -106,7 +106,9 @@ function getTitle(
 ) {
   if (labelMajorMode === GaugeLabelMajorModes.NONE) {
     return '';
-  } else if (labelMajorMode === GaugeLabelMajorModes.AUTO) {
+  }
+
+  if (labelMajorMode === GaugeLabelMajorModes.AUTO) {
     return `${fallbackTitle || ''}   `; // added extra space for nice rendering
   }
   return `${labelMajor || fallbackTitle || ''}   `; // added extra space for nice rendering
@@ -200,7 +202,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           }
         />
       );
-    } else if (min > max) {
+    }
+
+    if (min > max) {
       return (
         <EmptyPlaceholder
           icon={icon}
