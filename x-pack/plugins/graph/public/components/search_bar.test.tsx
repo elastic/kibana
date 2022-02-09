@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SearchBar, SearchBarProps } from './search_bar';
 import React, { Component, ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';

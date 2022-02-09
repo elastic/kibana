@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { mount } from 'enzyme';
-import { nextTick } from '@kbn/test/jest';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ChartWrapper } from './chart_wrapper';
 import { SnapshotHeading } from '../../overview/snapshot/snapshot_heading';
 import { DonutChart } from './donut_chart';

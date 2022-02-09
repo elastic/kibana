@@ -89,7 +89,7 @@ export const LabsStrings = {
         }),
       getDescriptionMessage: () =>
         i18n.translate('presentationUtil.labs.components.descriptionMessage', {
-          defaultMessage: 'Try out our features that are in progress or experimental.',
+          defaultMessage: 'Try out features that are in progress or in technical preview.',
         }),
       getResetToDefaultLabel: () =>
         i18n.translate('presentationUtil.labs.components.resetToDefaultLabel', {

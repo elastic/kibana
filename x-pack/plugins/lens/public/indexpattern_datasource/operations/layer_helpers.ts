@@ -422,6 +422,7 @@ export function replaceColumn({
         op,
         field,
         visualizationGroups,
+        incompleteParams: previousColumn,
       });
 
       // if the formula label is not the default one, propagate it to the new operation
