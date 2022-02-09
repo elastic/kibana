@@ -161,6 +161,7 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter={[]}
         schemaFieldTypeFilter={[]}
         fieldFilter=""
+        {...mockedServices}
       />
     ).dive();
 
