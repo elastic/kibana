@@ -163,7 +163,7 @@ describe('IndexedFieldsTable', () => {
         fieldFilter=""
         {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ indexedFieldTypeFilter: ['date'] });
