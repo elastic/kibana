@@ -12,6 +12,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '../../../../expressions';
+import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -29,10 +30,10 @@ export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
 export type GaugeTicksPosition = $Values<typeof GaugeTicksPositions>;
 
 export interface GaugeState {
-  metric?: string;
-  min?: string;
-  max?: string;
-  goal?: string;
+  metric?: string | ExpressionValueVisDimension;
+  min?: string | ExpressionValueVisDimension;
+  max?: string | ExpressionValueVisDimension;
+  goal?: string | ExpressionValueVisDimension;
   ticksPosition: GaugeTicksPosition;
   labelMajorMode: GaugeLabelMajorMode;
   labelMajor?: string;
@@ -68,3 +69,10 @@ export type GaugeExpressionFunctionDefinition = ExpressionFunctionDefinition<
   GaugeArguments,
   ExpressionValueRender<GaugeExpressionProps>
 >;
+
+export interface Accessors {
+  min?: string;
+  max?: string;
+  metric?: string;
+  goal?: string;
+}

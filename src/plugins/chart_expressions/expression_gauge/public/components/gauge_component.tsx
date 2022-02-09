@@ -19,7 +19,7 @@ import {
 } from '../../common';
 import { GaugeShapes, GaugeTicksPositions } from '../../common';
 import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
-import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
+import { getAccessorsFromArgs, getMaxValue, getMinValue, getValueFromAccessor } from './utils';
 import './index.scss';
 declare global {
   interface Window {
@@ -151,7 +151,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
   ({ data, args, formatFactory, chartsThemeService }) => {
     const {
       shape: subtype,
-      metric,
       palette,
       colorMode,
       labelMinor,
@@ -159,22 +158,24 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       labelMajorMode,
       ticksPosition,
     } = args;
-    if (!metric) {
+    const table = data;
+    const accessors = getAccessorsFromArgs(args, table.columns);
+
+    if (!accessors || !accessors.metric) {
       // Chart is not ready
       return null;
     }
 
     const chartTheme = chartsThemeService.useChartsTheme();
 
-    const table = data;
-    const metricColumn = table.columns.find((col) => col.id === metric);
+    const metricColumn = table.columns.find((col) => col.id === accessors.metric);
 
     const chartData = table.rows.filter(
-      (v) => typeof v[metric!] === 'number' || Array.isArray(v[metric!])
+      (v) => typeof v[accessors.metric!] === 'number' || Array.isArray(v[accessors.metric!])
     );
     const row = chartData?.[0];
 
-    const metricValue = getValueFromAccessor('metric', row, args);
+    const metricValue = args.metric && getValueFromAccessor(accessors.metric, row);
 
     const icon =
       subtype === GaugeShapes.HORIZONTAL_BULLET ? GaugeIconHorizontal : GaugeIconVertical;
@@ -183,9 +184,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       return <EmptyPlaceholder icon={icon} />;
     }
 
-    const goal = getValueFromAccessor('goal', row, args);
-    const min = getMinValue(row, args);
-    const max = getMaxValue(row, args);
+    const goal = accessors.goal && getValueFromAccessor(accessors.goal, row);
+    const min = getMinValue(row, accessors);
+    const max = getMaxValue(row, accessors);
 
     if (min === max) {
       return (

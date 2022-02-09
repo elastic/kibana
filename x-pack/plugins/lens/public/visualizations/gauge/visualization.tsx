@@ -38,6 +38,7 @@ import { applyPaletteParams, CUSTOM_PALETTE } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
+import { getAccessorsFromState } from './utils';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
@@ -84,9 +85,11 @@ const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizatio
   if (!row || !state) {
     return;
   }
-  const minValue = getValueFromAccessor('minAccessor', row, state);
-  const maxValue = getValueFromAccessor('maxAccessor', row, state);
-  if (maxValue != null && minValue != null) {
+  const minAccessor = state?.minAccessor;
+  const maxAccessor = state?.maxAccessor;
+  const minValue = minAccessor ? getValueFromAccessor(minAccessor, row) : null;
+  const maxValue = maxAccessor ? getValueFromAccessor(maxAccessor, row) : null;
+  if (maxValue !== null && maxValue !== undefined && minValue != null && minValue !== undefined) {
     if (maxValue < minValue) {
       return {
         invalid: true,
@@ -129,10 +132,10 @@ const toExpression = (
         type: 'function',
         function: EXPRESSION_GAUGE_NAME,
         arguments: {
-          metricAccessor: [state.metricAccessor ?? ''],
-          minAccessor: [state.minAccessor ?? ''],
-          maxAccessor: [state.maxAccessor ?? ''],
-          goalAccessor: [state.goalAccessor ?? ''],
+          metric: state.metricAccessor ? [state.metricAccessor] : [],
+          min: state.minAccessor ? [state.minAccessor] : [],
+          max: state.maxAccessor ? [state.maxAccessor] : [],
+          goal: state.goalAccessor ? [state.goalAccessor] : [],
           shape: [state.shape ?? GaugeShapes.HORIZONTAL_BULLET],
           colorMode: [state?.colorMode ?? 'none'],
           palette: state.palette?.params
@@ -223,11 +226,15 @@ export const getGaugeVisualization = ({
     const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
 
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
+    const { metricAccessor } = state ?? {};
+
+    const accessors = getAccessorsFromState(state);
+
     let palette;
-    if (!(row == null || state?.metricAccessor == null || state?.palette == null || !hasColoring)) {
+    if (!(row == null || metricAccessor == null || state?.palette == null || !hasColoring)) {
       const currentMinMax = {
-        min: getMinValue(row, state),
-        max: getMaxValue(row, state),
+        min: getMinValue(row, accessors),
+        max: getMaxValue(row, accessors),
       };
 
       const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
@@ -244,22 +251,22 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.metricLabel', {
             defaultMessage: 'Metric',
           }),
-          accessors: state.metricAccessor
+          accessors: metricAccessor
             ? [
                 palette
                   ? {
-                      columnId: state.metricAccessor,
+                      columnId: metricAccessor,
                       triggerIcon: 'colorBy',
                       palette,
                     }
                   : {
-                      columnId: state.metricAccessor,
+                      columnId: metricAccessor,
                       triggerIcon: 'none',
                     },
               ]
             : [],
           filterOperations: isNumericDynamicMetric,
-          supportsMoreColumns: !state.metricAccessor,
+          supportsMoreColumns: !metricAccessor,
           required: true,
           dataTestSubj: 'lnsGauge_metricDimensionPanel',
           enableDimensionEditor: true,
@@ -277,7 +284,7 @@ export const getGaugeVisualization = ({
           supportsMoreColumns: !state.minAccessor,
           dataTestSubj: 'lnsGauge_minDimensionPanel',
           prioritizedOperation: 'min',
-          suggestedValue: () => (state.metricAccessor ? getMinValue(row, state) : undefined),
+          suggestedValue: () => (state.metricAccessor ? getMinValue(row, accessors) : undefined),
           ...invalidProps,
         },
         {
@@ -293,7 +300,7 @@ export const getGaugeVisualization = ({
           supportsMoreColumns: !state.maxAccessor,
           dataTestSubj: 'lnsGauge_maxDimensionPanel',
           prioritizedOperation: 'max',
-          suggestedValue: () => (state.metricAccessor ? getMaxValue(row, state) : undefined),
+          suggestedValue: () => (state.metricAccessor ? getMaxValue(row, accessors) : undefined),
           ...invalidProps,
         },
         {
@@ -376,10 +383,10 @@ export const getGaugeVisualization = ({
 
   getSupportedLayers(state, frame) {
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
-
-    const minValue = getMinValue(row, state);
-    const maxValue = getMaxValue(row, state);
-    const goalValue = getGoalValue(row, state);
+    const accessors = getAccessorsFromState(state);
+    const minValue = getMinValue(row, accessors);
+    const maxValue = getMaxValue(row, accessors);
+    const goalValue = getGoalValue(row, accessors);
 
     return [
       {

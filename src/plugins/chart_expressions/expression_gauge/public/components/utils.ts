@@ -6,29 +6,27 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableRow } from 'src/plugins/expressions';
-import type { GaugeState } from '../../common/types/expression_functions';
-
-type GaugeAccessors = 'max' | 'min' | 'goal' | 'metric';
-
-type GaugeAccessorsType = Pick<GaugeState, GaugeAccessors>;
+import type { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
+import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import { Accessors, GaugeArguments } from '../../common';
 
 export const getValueFromAccessor = (
-  accessorName: GaugeAccessors,
-  row?: DatatableRow,
-  state?: GaugeAccessorsType
-) => {
-  if (row && state) {
-    const accessor = state[accessorName];
-    const value = accessor && row[accessor];
-    if (typeof value === 'number') {
-      return value;
-    }
-    if (value?.length) {
-      if (typeof value[value.length - 1] === 'number') {
-        return value[value.length - 1];
-      }
-    }
+  accessor: string,
+  row?: DatatableRow
+): DatatableRow[string] | number | undefined => {
+  if (!row || !accessor) return;
+
+  const value = accessor && row[accessor];
+  if (value === null || (Array.isArray(value) && !value.length)) {
+    return;
+  }
+
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  if (Array.isArray(value) && typeof value[value.length - 1] === 'number') {
+    return value[value.length - 1];
   }
 };
 
@@ -56,17 +54,17 @@ function getNiceNumber(localRange: number) {
   return niceFraction * Math.pow(10, exponent);
 }
 
-export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): number => {
+export const getMaxValue = (row?: DatatableRow, accessors?: Accessors): number => {
   const FALLBACK_VALUE = 100;
-  const currentValue = getValueFromAccessor('max', row, state);
-  if (currentValue != null) {
+  const currentValue = accessors?.max ? getValueFromAccessor(accessors.max, row) : null;
+  if (currentValue !== undefined && currentValue !== null) {
     return currentValue;
   }
-  if (row && state) {
-    const { metric, goal } = state;
+  if (row && accessors) {
+    const { metric, goal } = accessors;
     const metricValue = metric && row[metric];
     const goalValue = goal && row[goal];
-    const minValue = getMinValue(row, state);
+    const minValue = getMinValue(row, accessors);
     if (metricValue != null) {
       const numberValues = [minValue, goalValue, metricValue].filter((v) => typeof v === 'number');
       const maxValue = Math.max(...numberValues);
@@ -76,14 +74,14 @@ export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): num
   return FALLBACK_VALUE;
 };
 
-export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
-  const currentValue = getValueFromAccessor('min', row, state);
-  if (currentValue != null) {
+export const getMinValue = (row?: DatatableRow, accessors?: Accessors) => {
+  const currentValue = accessors?.min ? getValueFromAccessor(accessors.min, row) : null;
+  if (currentValue !== undefined && currentValue !== null) {
     return currentValue;
   }
   const FALLBACK_VALUE = 0;
-  if (row && state) {
-    const { metric, max } = state;
+  if (row && accessors) {
+    const { metric, max } = accessors;
     const metricValue = metric && row[metric];
     const maxValue = max && row[max];
     const numberValues = [metricValue, maxValue].filter((v) => typeof v === 'number');
@@ -94,12 +92,41 @@ export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
   return FALLBACK_VALUE;
 };
 
-export const getGoalValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
-  const currentValue = getValueFromAccessor('goal', row, state);
-  if (currentValue != null) {
+export const getGoalValue = (row?: DatatableRow, accessors?: Accessors) => {
+  const currentValue = accessors?.goal ? getValueFromAccessor(accessors.goal, row) : null;
+  if (currentValue !== undefined && currentValue !== null) {
     return currentValue;
   }
-  const minValue = getMinValue(row, state);
-  const maxValue = getMaxValue(row, state);
+
+  const minValue = getMinValue(row, accessors);
+  const maxValue = getMaxValue(row, accessors);
   return Math.round((maxValue - minValue) * 0.75 + minValue);
+};
+
+const getAccessor = (value: string | ExpressionValueVisDimension, columns: DatatableColumn[]) => {
+  if (typeof value === 'string') {
+    return value;
+  }
+  const accessor = value.accessor;
+  if (typeof accessor === 'number') {
+    return columns[accessor].id;
+  }
+  return accessor.id;
+};
+
+export const getAccessorsFromArgs = (
+  args: GaugeArguments,
+  columns: DatatableColumn[]
+): Accessors | undefined => {
+  const { metric, min, max, goal } = args;
+  if (!metric && !min && !max && !goal) {
+    return;
+  }
+
+  return {
+    min: min && getAccessor(min, columns),
+    max: max && getAccessor(max, columns),
+    goal: goal && getAccessor(goal, columns),
+    metric: metric && getAccessor(metric, columns),
+  };
 };

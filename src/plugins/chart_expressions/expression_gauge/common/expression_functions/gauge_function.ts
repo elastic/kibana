@@ -56,25 +56,25 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       required: true,
     },
     metric: {
-      types: ['string'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionGauge.functions.gauge.args.metric.help', {
         defaultMessage: 'Current value',
       }),
     },
     min: {
-      types: ['string'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionGauge.functions.gauge.args.min.help', {
         defaultMessage: 'Minimum value',
       }),
     },
     max: {
-      types: ['string'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionGauge.functions.gauge.args.max.help', {
         defaultMessage: 'Maximum value',
       }),
     },
     goal: {
-      types: ['string'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionGauge.functions.gauge.args.goal.help', {
         defaultMessage: 'Goal Value',
       }),

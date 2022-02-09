@@ -39,6 +39,7 @@ import type { VisualizationDimensionEditorProps } from '../../types';
 import './dimension_editor.scss';
 import { GaugeVisualizationState } from './constants';
 import { defaultPaletteParams } from './palette_config';
+import { getAccessorsFromState } from './utils';
 
 export function GaugeDimensionEditor(
   props: VisualizationDimensionEditorProps<GaugeVisualizationState> & {
@@ -57,11 +58,13 @@ export function GaugeDimensionEditor(
     return null;
   }
 
+  const accessors = getAccessorsFromState(state);
+
   const hasDynamicColoring = state?.colorMode === 'palette';
 
   const currentMinMax = {
-    min: getMinValue(firstRow, state),
-    max: getMaxValue(firstRow, state),
+    min: getMinValue(firstRow, accessors),
+    max: getMaxValue(firstRow, accessors),
   };
 
   const activePalette = state?.palette || {
