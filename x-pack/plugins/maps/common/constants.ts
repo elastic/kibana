@@ -216,6 +216,8 @@ export enum LABEL_BORDER_SIZES {
 }
 
 export const DEFAULT_ICON = 'marker';
+export const DEFAULT_CUSTOM_ICON_CUTOFF = 0.25;
+export const DEFAULT_CUSTOM_ICON_RADIUS = 0.25;
 
 export enum VECTOR_STYLES {
   SYMBOLIZE_AS = 'symbolizeAs',

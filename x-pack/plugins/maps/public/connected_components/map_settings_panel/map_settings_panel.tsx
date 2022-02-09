@@ -22,6 +22,7 @@ import { MapSettings } from '../../reducers/map';
 import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
 import { DisplayPanel } from './display_panel';
+import { CustomIconsPanel } from './custom_icons_panel';
 import { MapCenter } from '../../../common/descriptor_types';
 
 export interface Props {
@@ -77,6 +78,8 @@ export function MapSettingsPanel({
           />
           <EuiSpacer size="s" />
           <SpatialFiltersPanel settings={settings} updateMapSetting={updateMapSetting} />
+          <EuiSpacer size="s" />
+          <CustomIconsPanel settings={settings} updateMapSetting={updateMapSetting} />
         </div>
       </div>
 

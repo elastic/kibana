@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
 // @ts-expect-error
 import { ValidatedRange } from '../../../../../components/validated_range';
+import { CustomIcon } from '../../../../../../common/descriptor_types';
 
 const MAX_NAME_LENGTH = 40;
 
@@ -48,6 +49,10 @@ const strings = {
     i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
       defaultMessage: 'Alpha Threshold',
     }),
+  getDeleteButtonLabel: () =>
+    i18n.translate('xpack.maps.customIconModal.deleteButtonLabel', {
+      defaultMessage: 'Delete',
+    }),
   getIconPreviewTitle: () =>
     i18n.translate('xpack.maps.customIconModal.elementPreviewTitle', {
       defaultMessage: 'Icon preview',
@@ -58,8 +63,7 @@ const strings = {
     }),
   getImageInputDescription: () =>
     i18n.translate('xpack.maps.customIconModal.imageInputDescription', {
-      defaultMessage:
-        'Upload your SVG icon here and preview it on the right.',
+      defaultMessage: 'Upload your SVG icon here and preview it on the right.',
     }),
   getImageInputLabel: () =>
     i18n.translate('xpack.maps.customIconModal.imageInputLabel', {
@@ -80,13 +84,17 @@ const strings = {
 };
 interface Props {
   /**
+   * initial value for the id of image added to map
+   */
+  symbolId?: string;
+  /**
    * initial value of the name of the custom element
    */
   name?: string;
   /**
    * initial value of the preview image of the custom element as a base64 dataurl
    */
-  image?: string;
+  svg?: string;
   /**
    * intial value of alpha threshold for signed-distance field
    */
@@ -102,14 +110,22 @@ interface Props {
   /**
    * A click handler for the save button
    */
-  onSave: (name: string, image: string, cutoff: number, radius: number) => void;
+  onSave: (icon: CustomIcon) => void;
   /**
    * A click handler for the cancel button
    */
   onCancel: () => void;
+  /**
+   * A click handler for the delete button
+   */
+  onDelete?: (icon: CustomIcon) => void;
 }
 
 interface State {
+  /**
+   * id of image added to map
+   */
+  symbolId?: string;
   /**
    * name of the custom element to be saved
    */
@@ -117,7 +133,7 @@ interface State {
   /**
    * image of the custom element to be saved
    */
-  image?: string;
+  svg?: string;
 
   cutoff?: number;
   radius?: number;
@@ -125,23 +141,26 @@ interface State {
 
 export class CustomIconModal extends PureComponent<Props, State> {
   public static propTypes = {
+    symbolId: PropTypes.string,
     name: PropTypes.string,
-    image: PropTypes.string,
+    svg: PropTypes.string,
     cutoff: PropTypes.number.isRequired,
     radius: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
     onSave: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
+    onDelete: PropTypes.func,
   };
 
   public state = {
+    symbolId: this.props.symbolId || '',
     name: this.props.name || '',
-    image: this.props.image || '',
+    svg: this.props.svg || '',
     cutoff: this.props.cutoff,
     radius: this.props.radius,
   };
 
-  private _handleChange = (type: 'name' | 'id' | 'image' | 'cutoff' | 'radius', value: string) => {
+  private _handleChange = (type: 'name' | 'id' | 'svg' | 'cutoff' | 'radius', value: string) => {
     this.setState({ [type]: value });
   };
 
@@ -151,20 +170,20 @@ export class CustomIconModal extends PureComponent<Props, State> {
 
   private _handleRadiusChange = (value: number) => {
     this.setState({ radius: value });
-  }
+  };
 
   private _handleUpload = (files: FileList | null) => {
     if (files == null) return;
     const file = files[0];
     const [type, subtype] = get(file, 'type', '').split('/');
     if (type === 'image') {
-      file.text().then((img: string) => this._handleChange('image', img));
+      file.text().then((img: string) => this._handleChange('svg', img));
     }
   };
 
   public render() {
-    const { onSave, onCancel, title, ...rest } = this.props;
-    const { name, image, cutoff, radius } = this.state;
+    const { onSave, onCancel, onDelete, title, ...rest } = this.props;
+    const { symbolId, name, svg, cutoff, radius } = this.state;
 
     return (
       <EuiModal
@@ -249,19 +268,12 @@ export class CustomIconModal extends PureComponent<Props, State> {
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem
-              className="mapsIconPreview__wrapper mapsCustomIconForm__preview"
-              grow={1}
-            >
+            <EuiFlexItem className="mapsIconPreview__wrapper mapsCustomIconForm__preview" grow={1}>
               <EuiTitle size="xxxs">
                 <h4>{strings.getIconPreviewTitle()}</h4>
               </EuiTitle>
               <EuiSpacer size="s" />
-                <IconPreview
-                  svg={image}
-                  cutoff={cutoff}
-                  radius={radius}
-                />
+              <IconPreview svg={svg} cutoff={cutoff} radius={radius} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalBody>
@@ -274,13 +286,26 @@ export class CustomIconModal extends PureComponent<Props, State> {
               <EuiButton
                 fill
                 onClick={() => {
-                  onSave(name, image, cutoff, radius);
+                  onSave({ symbolId, name, svg, cutoff, radius });
                 }}
                 data-test-subj="mapsCustomIconForm-submit"
               >
                 {strings.getSaveButtonLabel()}
               </EuiButton>
             </EuiFlexItem>
+            {onDelete ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="danger"
+                  onClick={() => {
+                    onDelete({ symbolId, name, svg, cutoff, radius });
+                  }}
+                  data-test-subj="mapsCustomIconForm-submit"
+                >
+                  {strings.getDeleteButtonLabel()}
+                </EuiButton>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiModalFooter>
       </EuiModal>

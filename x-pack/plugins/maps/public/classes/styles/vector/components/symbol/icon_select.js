@@ -16,13 +16,14 @@ import {
   keys,
   EuiSelectable,
 } from '@elastic/eui';
+import {
+  DEFAULT_CUSTOM_ICON_CUTOFF,
+  DEFAULT_CUSTOM_ICON_RADIUS,
+} from '../../../../../../common/constants';
 import { SymbolIcon } from '../legend/symbol_icon';
 import { getCustomIconId, SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
-
-const DEFAULT_CUSTOM_ICON_CUTOFF = 0.25;
-const DEFAULT_CUSTOM_ICON_RADIUS = 0.25;
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
@@ -34,13 +35,13 @@ export class IconSelect extends Component {
     isModalVisible: false,
   };
 
-  _handleSave = (name, image, cutoff, radius) => {
-    const symbolId = getCustomIconId();
+  _handleSave = (icon) => {
+    const { symbolId, name, svg, radius, cutoff } = icon;
     const icons = [
       ...this.props.customIcons,
       {
-        symbolId,
-        svg: image,
+        symbolId: symbolId || getCustomIconId(),
+        svg,
         name,
         cutoff,
         radius,

@@ -14,7 +14,7 @@ interface Props {
   svg?: string;
   fill?: string;
   stroke?: string;
-  style: CSSProperties;
+  style?: CSSProperties;
 }
 
 interface State {
