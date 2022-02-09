@@ -112,6 +112,7 @@ export function makeDefaultServices(
     chrome: core.chrome,
     overlays: core.overlays,
     uiSettings: core.uiSettings,
+    executionContext: core.executionContext,
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
