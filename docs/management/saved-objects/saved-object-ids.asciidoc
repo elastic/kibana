@@ -27,7 +27,7 @@ dashboard "456" in Another space.
 [[saved-object-ids-impact-when-using]]
 ==== Impact when using 8.x
 
-After you upgrade, or if you set up a brand new {kib} server using 8.x, there are a few more things that behave differently.
+After you upgrade, or if you set up a new {kib} instance using 8.x, there are a few more things that behave differently.
 
 [[saved-object-ids-impact-when-using-legacy-urls]]
 ===== Accessing saved objects using old URLs
