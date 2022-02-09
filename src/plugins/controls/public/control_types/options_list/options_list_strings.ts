@@ -71,6 +71,12 @@ export const OptionsListStrings = {
         defaultMessage: '{totalOptions} available options.',
         values: { totalOptions },
       }),
+    getTotalCardinalityPlaceholder: (totalOptions: number) =>
+      i18n.translate('controls.optionsList.popover.cardinalityPlaceholder', {
+        defaultMessage:
+          'Search {totalOptions} available {totalOptions, plural, one {option} other {options}}',
+        values: { totalOptions },
+      }),
     getInvalidSelectionsTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsTitle', {
         defaultMessage: '{invalidSelectionCount} selected options ignored',
@@ -80,10 +86,11 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
         defaultMessage: 'Deselect all ignored selections',
       }),
-    getInvalidSelectionsTooltip: () =>
+    getInvalidSelectionsTooltip: (selectedOptions: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsTooltip', {
         defaultMessage:
-          'One or more selected options are ignored because they are no longer in the data.',
+          '{selectedOptions} selected options are ignored because they are no longer in the data.',
+        values: { selectedOptions },
       }),
   },
   errors: {
