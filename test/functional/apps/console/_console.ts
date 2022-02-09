@@ -106,10 +106,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.promptAutocomplete();
       await PageObjects.console.pressEnter();
 
-      const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
-      log.debug(textOfPreviousNonEmptyLine);
-      const lastChar = textOfPreviousNonEmptyLine.charAt(textOfPreviousNonEmptyLine.length - 1);
-      expect(lastChar).to.be.equal(',');
+      await retry.try(async () => {
+        const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
+        log.debug(textOfPreviousNonEmptyLine);
+        const lastChar = textOfPreviousNonEmptyLine.charAt(textOfPreviousNonEmptyLine.length - 1);
+        expect(lastChar).to.be.equal(',');
+      });
     });
 
     describe('with a data URI in the load_from query', () => {

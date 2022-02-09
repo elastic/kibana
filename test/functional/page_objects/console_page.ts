@@ -138,7 +138,15 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clearTextArea() {
-    const textArea = await this.testSubjects.find('console-textarea');
-    await textArea.clearValueWithKeyboard();
+    await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
+      const textArea = await this.testSubjects.find('console-textarea');
+      await textArea.clickMouseButton();
+      await textArea.clearValueWithKeyboard();
+
+      const editor = await this.getEditor();
+      const lines = await editor.findAllByClassName('ace_line_group');
+      // there should be only one empty line after clearing the textarea
+      return lines.length === 1;
+    });
   }
 }
