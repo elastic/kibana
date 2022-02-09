@@ -58,6 +58,17 @@ export const triggerTSVBtoLensConfiguration = async (
     if (!metricsArray) {
       return null;
     }
+    let filter: {
+      kql?: string | { [key: string]: any } | undefined;
+      lucene?: string | { [key: string]: any } | undefined;
+    };
+    if (layer.filter) {
+      if (layer.filter.language === 'kuery') {
+        filter = { kql: layer.filter.query };
+      } else if (layer.filter.language === 'lucene') {
+        filter = { lucene: layer.filter.query };
+      }
+    }
 
     metricsArray = metricsArray.map((metric) => {
       return {
@@ -66,6 +77,7 @@ export const triggerTSVBtoLensConfiguration = async (
         params: {
           ...metric.params,
           ...(timeShift && { shift: timeShift }),
+          ...(filter && filter),
         },
       };
     });

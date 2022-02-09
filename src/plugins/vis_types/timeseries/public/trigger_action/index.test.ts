@@ -170,6 +170,23 @@ describe('triggerTSVBtoLensConfiguration', () => {
     expect(triggerOptions?.layers[0]?.metrics?.[0]?.params?.shift).toBe('1h');
   });
 
+  test('should return filter in the params if it is provided', async () => {
+    const modelWithFill = {
+      ...model,
+      series: [
+        {
+          ...model.series[0],
+          filter: {
+            language: 'kuery',
+            query: 'test',
+          },
+        },
+      ],
+    };
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithFill);
+    expect(triggerOptions?.layers[0]?.metrics?.[0]?.params?.kql).toBe('test');
+  });
+
   test('should return splitFilters information if the chart is broken down by filters', async () => {
     const modelWithSplitFilters = {
       ...model,
