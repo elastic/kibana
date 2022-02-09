@@ -8,7 +8,7 @@
 import { EuiButtonIcon, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 
 import {

@@ -2248,29 +2248,29 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.14.0":
-  version "5.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.14.0.tgz#b3eb2569b3bb3dc706f92e6ec830f45efef5e76c"
-  integrity sha512-AhmbApgdvfJGcZZD1RUIGQsFtWe89LN5fzMpse7yVqrhytKoSxaG3r1ap6xhHQIvTwHVIE3Bg8t1vviak1f4DQ==
+"@elastic/apm-rum-core@^5.14.1":
+  version "5.14.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.14.1.tgz#8f65060967c8d68498f2c520e4169ec07eb3b5bb"
+  integrity sha512-RFgTpXUIEIoy44TPnEN7cVcf2YIBOwaNdALrYVc4lOTMH3u0v4gaS0n9/Aee5nTGqWBLKWXXvMk/dAkjQW6qEg==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^1.3.3":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.3.3.tgz#99ba436ecbbc9332c98fba402c0f602de1bc747b"
-  integrity sha512-jrI29O1xRtiQov0OMuUSgM157RlcBDglxOhkkPxxzAXDW8NGZ/s3qAVwN/xoVNuhdIPRiRU2+ooODs3QPTfj/Q==
+"@elastic/apm-rum-react@^1.3.4":
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.3.4.tgz#f60f1ba55696f4e04eba64edb323e43ef9d67acb"
+  integrity sha512-HPKU/tnTbiSQr6HYxHB9rP4TKBHZ9HKhBPzmCvZj8PNH5tkMFR4nj0PLN9eYL59A7omAmtH2Sg95T47OIG9ZtQ==
   dependencies:
-    "@elastic/apm-rum" "^5.10.1"
+    "@elastic/apm-rum" "^5.10.2"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.10.1":
-  version "5.10.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.10.1.tgz#d907f50799b7c5d61ef292558784d55eaafb109f"
-  integrity sha512-UtYjzmg6A2dpeU4mue/z75yvJSFhbBlngdz95rXJhPKLKXJWiUpKWParfNOaH52B7H/UzFDoHTaButVkdGC7UA==
+"@elastic/apm-rum@^5.10.2":
+  version "5.10.2"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.10.2.tgz#06d3e9f08adc19e1227073dda7e5c4ab34be48c7"
+  integrity sha512-NrBQcgautAGwJOrJ20WUUXV1Ynux4dEEU/fgeqfdG7G3JGqMbuIlF8s/nqLgQ9oXz72Z5MirOf68P7m5Zh/5HA==
   dependencies:
-    "@elastic/apm-rum-core" "^5.14.0"
+    "@elastic/apm-rum-core" "^5.14.1"
 
 "@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
   version "0.0.0"
@@ -3195,6 +3195,13 @@
     js-yaml "^3.13.1"
     resolve-from "^5.0.0"
 
+"@istanbuljs/nyc-config-typescript@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@istanbuljs/nyc-config-typescript/-/nyc-config-typescript-1.0.2.tgz#1f5235b28540a07219ae0dd42014912a0b19cf89"
+  integrity sha512-iKGIyMoyJuFnJRSVTZ78POIRvNnwZaWIf8vG4ZS3rQq58MMDrqEX2nnzx0R28V2X8JvmKYiqY9FP2hlJsm8A0w==
+  dependencies:
+    "@istanbuljs/schema" "^0.1.2"
+
 "@istanbuljs/schema@^0.1.2":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.2.tgz#26520bf09abe4a5644cd5414e37125a8954241dd"
@@ -3826,6 +3833,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/logging-mocks@link:bazel-bin/packages/kbn-logging-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging@link:bazel-bin/packages/kbn-logging":
   version "0.0.0"
   uid ""
@@ -3939,6 +3950,10 @@
   uid ""
 
 "@kbn/telemetry-tools@link:bazel-bin/packages/kbn-telemetry-tools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-jest-helpers@link:bazel-bin/packages/kbn-test-jest-helpers":
   version "0.0.0"
   uid ""
 
@@ -6794,6 +6809,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__logging-mocks@link:bazel-bin/packages/kbn-logging-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__logging@link:bazel-bin/packages/kbn-logging/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6895,6 +6918,18 @@
   uid ""
 
 "@types/kbn__telemetry-tools@link:bazel-bin/packages/kbn-telemetry-tools/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__test-jest-helpers@link:bazel-bin/packages/kbn-test-jest-helpers/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__test@link:bazel-bin/packages/kbn-test/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__typed-react-router-config@link:bazel-bin/packages/kbn-typed-react-router-config/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -11522,10 +11557,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.20.3, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.20.3"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.20.3.tgz#c710d0a676e684522f3db4ee84e5e18a9d11d69a"
-  integrity sha512-vVl8j8ph6tRS3B8qir40H7yw7voy17xL0piAjlbBUsH7WIfzoedL/ZOr1OV9FyZQLWXsayOJyV4tnRyXR85/ag==
+core-js@^3.0.4, core-js@^3.21.0, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.21.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.21.0.tgz#f479dbfc3dffb035a0827602dd056839a774aa71"
+  integrity sha512-YUdI3fFu4TF/2WykQ2xzSiTQdldLB4KVuL9WeAy5XONZYt5Cun/fpQvctoKbCgvPhmzADeesTk/j2Rdx77AcKQ==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
