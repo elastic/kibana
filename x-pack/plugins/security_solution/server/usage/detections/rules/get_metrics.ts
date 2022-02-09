@@ -56,7 +56,7 @@ export const getRuleMetrics = async ({
     }
 
     // gets the alerts data objects
-    const detectionAlertsResp = await getAlerts({
+    const detectionAlertsRespPromise = getAlerts({
       esClient,
       signalsIndex: `${signalsIndex}*`,
       maxPerPage: MAX_PER_PAGE,
@@ -65,7 +65,7 @@ export const getRuleMetrics = async ({
     });
 
     // gets cases saved objects
-    const caseComments = await getCaseComments({
+    const caseCommentsPromise = getCaseComments({
       savedObjectsClient,
       maxSize: MAX_PER_PAGE,
       maxPerPage: MAX_RESULTS_WINDOW,
@@ -73,12 +73,18 @@ export const getRuleMetrics = async ({
     });
 
     // gets the legacy rule actions to track legacy notifications.
-    const legacyRuleActions = await legacyGetRuleActions({
+    const legacyRuleActionsPromise = legacyGetRuleActions({
       savedObjectsClient,
       maxSize: MAX_PER_PAGE,
       maxPerPage: MAX_RESULTS_WINDOW,
       logger,
     });
+
+    const [detectionAlertsResp, caseComments, legacyRuleActions] = await Promise.all([
+      detectionAlertsRespPromise,
+      caseCommentsPromise,
+      legacyRuleActionsPromise,
+    ]);
 
     // create in-memory maps for correlation
     const legacyNotificationRuleIds = getRuleIdToEnabledMap(legacyRuleActions);

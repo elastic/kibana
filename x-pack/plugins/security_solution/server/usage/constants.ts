@@ -19,9 +19,8 @@
 export const MAX_RESULTS_WINDOW = 10_000;
 
 /**
- * We arbitrarily choose our max per page based on 100 as that
- * appears to be what others are choosing here in documentation:
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
- * and within the saved objects client examples and documentation.
+ * We choose our max per page based on 1k as that
+ * appears to be what others are choosing here in the other sections of telemetry:
+ * https://github.com/elastic/kibana/pull/99031
  */
-export const MAX_PER_PAGE = 100;
+export const MAX_PER_PAGE = 1_000;
