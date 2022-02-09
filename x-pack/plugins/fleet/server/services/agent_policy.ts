@@ -821,7 +821,8 @@ export async function addPackageToAgentPolicy(
   packagePolicyName?: string,
   packagePolicyId?: string | number,
   packagePolicyDescription?: string,
-  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy
+  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy,
+  bumpAgentPolicyRevison = false
 ) {
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
@@ -850,7 +851,10 @@ export async function addPackageToAgentPolicy(
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     id,
-    bumpRevision: false,
+    bumpRevision: bumpAgentPolicyRevison,
     skipEnsureInstalled: true,
+    skipUniqueNameVerification: true,
+    overwrite: true,
+    force: true, // To add package to managed policy we need the force flag
   });
 }
