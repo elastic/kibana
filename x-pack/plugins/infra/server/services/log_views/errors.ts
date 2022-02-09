@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { LogViewsService } from './log_views_service';
-export { LogViewsClient } from './log_views_client';
+export class NotFoundError extends Error {
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}

@@ -6,13 +6,11 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { SavedObjectsClientContract } from 'src/core/server';
 import {
   getLogViewRequestParamsRT,
   getLogViewResponsePayloadRT,
   LOG_VIEW_URL,
 } from '../../../common/http_api/log_views';
-import type { LogView } from '../../../common/log_views';
 import { createValidationFunction } from '../../../common/runtime_types';
 import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { LogViewsServiceStart } from '../../services/log_views/types';
@@ -32,7 +30,7 @@ export const initGetLogViewRoute = ({
         params: createValidationFunction(getLogViewRequestParamsRT),
       },
     },
-    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
+    framework.router.handleLegacyErrors(async (_requestContext, request, response) => {
       const { logViewId } = request.params;
       const logViewsClient = (await getLogViewsService()).getScopedClient(request);
 

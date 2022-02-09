@@ -40,7 +40,7 @@ import { initGetLogViewRoute } from './routes/log_views';
 import { logViewSavedObjectType } from './saved_objects';
 import { LogEntriesService } from './services/log_entries';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
-import { LogViewsService } from './services/log_views/log_views_service';
+import { LogViewsService } from './services/log_views';
 import { RulesService } from './services/rules';
 import {
   InfraConfig,
