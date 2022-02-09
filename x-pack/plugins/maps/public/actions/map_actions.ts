@@ -370,7 +370,11 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
 
     try {
       await (layer as IVectorLayer).addFeature(geometry);
-      await dispatch(syncDataForLayerDueToDrawing(layer));
+      await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
+        setTimeout(() => {
+          dispatch(updateEditShape(DRAW_SHAPE.SIMPLE_SELECT));
+        }, 500);
+      });
     } catch (e) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.addFeatureError', {

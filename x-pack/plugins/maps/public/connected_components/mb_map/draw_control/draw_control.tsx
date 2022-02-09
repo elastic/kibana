@@ -20,15 +20,6 @@ import { DRAW_SHAPE } from '../../../../common/constants';
 import { DrawCircle, DRAW_CIRCLE_RADIUS_LABEL_STYLE } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
 
-const mbModeEquivalencies = new Map<string, DRAW_SHAPE>([
-  ['simple_select', DRAW_SHAPE.SIMPLE_SELECT],
-  ['draw_rectangle', DRAW_SHAPE.BOUNDS],
-  ['draw_circle', DRAW_SHAPE.DISTANCE],
-  ['draw_polygon', DRAW_SHAPE.POLYGON],
-  ['draw_line_string', DRAW_SHAPE.LINE],
-  ['draw_point', DRAW_SHAPE.POINT],
-]);
-
 const DRAW_RECTANGLE = 'draw_rectangle';
 const DRAW_CIRCLE = 'draw_circle';
 const mbDrawModes = MapboxDraw.modes;
@@ -69,6 +60,7 @@ export class DrawControl extends Component<Props> {
 
   _onDraw = (event: { features: Feature[] }) => {
     this.props.onDraw(event, this._mbDrawControl);
+    this.props.updateEditShape(DRAW_SHAPE.WAIT);
   };
 
   _onClick = (event: MapMouseEvent) => {
@@ -91,12 +83,6 @@ export class DrawControl extends Component<Props> {
     }
   }, 0);
 
-  _onModeChange = ({ mode }: { mode: string }) => {
-    if (mbModeEquivalencies.has(mode)) {
-      this.props.updateEditShape(mbModeEquivalencies.get(mode)!);
-    }
-  };
-
   _removeDrawControl() {
     // Do not remove draw control after mbMap.remove is called, causes execeptions and mbMap.remove cleans up all map resources.
     const isMapRemoved = !this.props.mbMap.loaded();
@@ -105,7 +91,6 @@ export class DrawControl extends Component<Props> {
     }
 
     this.props.mbMap.getCanvas().style.cursor = '';
-    this.props.mbMap.off('draw.modechange', this._onModeChange);
     this.props.mbMap.off('draw.create', this._onDraw);
     if (this.props.onClick) {
       this.props.mbMap.off('click', this._onClick);
@@ -118,7 +103,6 @@ export class DrawControl extends Component<Props> {
     if (!this._mbDrawControlAdded) {
       this.props.mbMap.addControl(this._mbDrawControl);
       this._mbDrawControlAdded = true;
-      this.props.mbMap.on('draw.modechange', this._onModeChange);
       this.props.mbMap.on('draw.create', this._onDraw);
 
       if (this.props.onClick) {

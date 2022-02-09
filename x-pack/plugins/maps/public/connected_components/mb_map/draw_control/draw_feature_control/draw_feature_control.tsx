@@ -59,6 +59,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
             this.props.drawMode === DRAW_MODE.DRAW_POINTS
               ? feature.geometry.coordinates
               : feature.geometry;
+          this.props.waitingState();
           this.props.addNewFeatureToIndex(featureGeom);
         }
       });
@@ -72,7 +73,6 @@ export class DrawFeatureControl extends Component<Props, {}> {
         })
       );
     } finally {
-      this.props.disableDrawState();
       try {
         mbDrawControl.deleteAll();
       } catch (_e) {
