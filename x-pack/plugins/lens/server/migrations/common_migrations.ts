@@ -199,3 +199,34 @@ export const getLensFilterMigrations = (
       state: { ...lensDoc.attributes.state, filters: migrate(lensDoc.attributes.state.filters) },
     },
   }));
+
+export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): LensDocShape810 => {
+  const newAttributes = cloneDeep(attributes);
+  const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
+  (newAttributes as LensDocShape810).state.datasourceStates.indexpattern.layers =
+    Object.fromEntries(
+      Object.entries(datasourceLayers).map(([layerId, layer]) => {
+        return [
+          layerId,
+          {
+            ...layer,
+            columns: Object.fromEntries(
+              Object.entries(layer.columns).map(([columnId, column]) => {
+                if (column.operationType === 'terms') {
+                  return [
+                    columnId,
+                    {
+                      ...column,
+                      params: { ...column.params, parentFormat: { id: 'terms' } },
+                    },
+                  ];
+                }
+                return [columnId, column];
+              })
+            ),
+          },
+        ];
+      })
+    );
+  return newAttributes as LensDocShape810;
+};
