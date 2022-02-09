@@ -5,29 +5,31 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import {
-  getSetupModeState,
-  initSetupModeState,
-  updateSetupModeData,
-  disableElasticsearchInternalCollection,
-  toggleSetupMode,
-} from '../../lib/setup_mode';
-import { Flyout } from '../metricbeat_migration/flyout';
 import {
   EuiBottomBar,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextColor,
   EuiIcon,
   EuiSpacer,
+  EuiTextColor,
 } from '@elastic/eui';
-import { findNewUuid } from './lib/find_new_uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { GlobalStateContext } from '../../application/contexts/global_state_context';
+import React, { Fragment } from 'react';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { useRequestErrorHandler } from '../../application/hooks/use_request_error_handler';
+import {
+  disableElasticsearchInternalCollection,
+  getSetupModeState,
+  initSetupModeState,
+  markSetupModeSupported,
+  markSetupModeUnsupported,
+  toggleSetupMode,
+  updateSetupModeData,
+} from '../../lib/setup_mode';
+import { Flyout } from '../metricbeat_migration/flyout';
 import { SetupModeExitButton } from '../setup_mode/exit_button';
+import { findNewUuid } from './lib/find_new_uuid';
 
 export class WrappedSetupModeRenderer extends React.Component {
   globalState;
@@ -42,6 +44,7 @@ export class WrappedSetupModeRenderer extends React.Component {
   UNSAFE_componentWillMount() {
     this.globalState = this.context;
     const { kibana, onHttpError } = this.props;
+    markSetupModeSupported();
     initSetupModeState(this.globalState, kibana.services.http, onHttpError, (_oldData) => {
       const newState = { renderState: true };
 
@@ -68,6 +71,10 @@ export class WrappedSetupModeRenderer extends React.Component {
 
       this.setState(newState);
     });
+  }
+
+  componentWillUnmount() {
+    markSetupModeUnsupported();
   }
 
   reset() {

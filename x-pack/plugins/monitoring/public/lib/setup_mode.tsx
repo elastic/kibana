@@ -18,12 +18,14 @@ let httpService: HttpStart;
 let errorHandler: (error: IHttpFetchError<ResponseErrorBody>) => void;
 
 interface ISetupModeState {
+  supported: boolean;
   enabled: boolean;
   data: any;
   callback?: (() => void) | null;
   hideBottomBar: boolean;
 }
 const setupModeState: ISetupModeState = {
+  supported: false,
   enabled: false,
   data: null,
   callback: null,
@@ -130,6 +132,14 @@ export const toggleSetupMode = (inSetupMode: boolean) => {
     // Intentionally do not await this so we don't block UI operations
     updateSetupModeData();
   }
+};
+
+export const markSetupModeSupported = () => {
+  setupModeState.supported = true;
+};
+
+export const markSetupModeUnsupported = () => {
+  setupModeState.supported = false;
 };
 
 export const initSetupModeState = async (
