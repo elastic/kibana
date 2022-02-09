@@ -255,6 +255,7 @@ export class ReportingStore {
         created_by: document._source?.created_by,
         max_attempts: document._source?.max_attempts,
         meta: document._source?.meta,
+        metrics: document._source?.metrics,
         payload: document._source?.payload,
         process_expiration: document._source?.process_expiration,
         status: document._source?.status,

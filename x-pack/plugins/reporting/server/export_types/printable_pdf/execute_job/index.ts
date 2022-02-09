@@ -65,8 +65,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
             stream.write(buffer);
           }
         }),
-        map(({ warnings }) => ({
+        map(({ metrics, warnings }) => ({
           content_type: 'application/pdf',
+          metrics,
           warnings,
         })),
         catchError((err) => {

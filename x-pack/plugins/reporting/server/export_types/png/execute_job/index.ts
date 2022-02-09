@@ -49,8 +49,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
           });
         }),
         tap(({ buffer }) => stream.write(buffer)),
-        map(({ warnings }) => ({
+        map(({ metrics, warnings }) => ({
           content_type: 'image/png',
+          metrics,
           warnings,
         })),
         tap({ error: (error) => jobLogger.error(error) }),

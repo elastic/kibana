@@ -197,6 +197,12 @@ describe('ReportingStore', () => {
         max_attempts: 1,
         timeout: 30000,
         output: null,
+        metrics: {
+          cpu: 0.02,
+          cpuInPercentage: 2,
+          memory: 1024 * 1024,
+          memoryInMegabytes: 1,
+        },
       },
     };
     mockEsClient.get.mockResolvedValue({ body: mockReport } as any);
@@ -222,6 +228,12 @@ describe('ReportingStore', () => {
         "max_attempts": 1,
         "meta": Object {
           "testMeta": "meta",
+        },
+        "metrics": Object {
+          "cpu": 0.02,
+          "cpuInPercentage": 2,
+          "memory": 1048576,
+          "memoryInMegabytes": 1,
         },
         "migration_version": "7.14.0",
         "output": null,

@@ -59,4 +59,13 @@ export const mapping = {
       content: { type: 'object', enabled: false },
     },
   },
+  metrics: {
+    type: 'object',
+    properties: {
+      cpu: { type: 'double' },
+      cpuInPercentage: { type: 'double' },
+      memory: { type: 'long' },
+      memoryInMegabytes: { type: 'double' },
+    },
+  },
 } as const;

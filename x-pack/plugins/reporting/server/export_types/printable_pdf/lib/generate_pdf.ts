@@ -9,6 +9,7 @@ import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { ScreenshotResult } from '../../../../../screenshotting/server';
+import type { TaskRunMetrics } from '../../../../common/types';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { ScreenshotOptions } from '../../../types';
@@ -25,13 +26,19 @@ const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
   return null;
 };
 
+interface PdfResult {
+  buffer: Buffer | null;
+  metrics?: TaskRunMetrics;
+  warnings: string[];
+}
+
 export function generatePdfObservable(
   reporting: ReportingCore,
   logger: LevelLogger,
   title: string,
   options: ScreenshotOptions,
   logo?: string
-): Rx.Observable<{ buffer: Buffer | null; warnings: string[] }> {
+): Rx.Observable<PdfResult> {
   const tracker = getTracker();
   tracker.startScreenshots();
 
@@ -44,7 +51,7 @@ export function generatePdfObservable(
       tracker.endScreenshots();
       tracker.startSetup();
     }),
-    mergeMap(async ({ layout, results }) => {
+    mergeMap(async ({ layout, metrics, results }) => {
       const pdfOutput = new PdfMaker(layout, logo);
       if (title) {
         const timeRange = getTimeRange(results);
@@ -90,6 +97,7 @@ export function generatePdfObservable(
 
       return {
         buffer,
+        metrics,
         warnings: results.reduce((found, current) => {
           if (current.error) {
             found.push(current.error.message);

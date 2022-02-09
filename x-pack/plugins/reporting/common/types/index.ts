@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ScreenshotResult } from '../../../screenshotting/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
 export type { JobParamsPNGDeprecated } from './export_types/png';
@@ -33,12 +35,15 @@ export interface ReportOutput extends TaskRunResult {
   size: number;
 }
 
+export type TaskRunMetrics = Partial<Required<ScreenshotResult>['metrics']>;
+
 export interface TaskRunResult {
   content_type: string | null;
   csv_contains_formulas?: boolean;
   csv_rows?: number;
   max_size_reached?: boolean;
   warnings?: string[];
+  metrics?: TaskRunMetrics;
 }
 
 export interface ReportSource {
@@ -76,6 +81,7 @@ export interface ReportSource {
   started_at?: string; // timestamp in UTC
   completed_at?: string; // timestamp in UTC
   process_expiration?: string | null; // timestamp in UTC - is overwritten with `null` when the job needs a retry
+  metrics?: TaskRunMetrics;
 }
 
 /*

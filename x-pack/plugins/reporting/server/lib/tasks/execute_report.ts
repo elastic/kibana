@@ -271,6 +271,7 @@ export class ExecuteReportTask implements ReportingTask {
     const store = await this.getStore();
     const doc = {
       completed_at: completedTime,
+      metrics: output.metrics,
       output: docOutput,
     };
     docId = `/${report._index}/_doc/${report._id}`;

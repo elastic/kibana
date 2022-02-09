@@ -10,15 +10,22 @@ import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
 import { LayoutTypes } from '../../../../screenshotting/common';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
+import type { TaskRunMetrics } from '../../../common/types';
 import { ReportingCore } from '../../';
 import { ScreenshotOptions } from '../../types';
 import { LevelLogger } from '../../lib';
+
+interface PngResult {
+  buffer: Buffer;
+  metrics?: TaskRunMetrics;
+  warnings: string[];
+}
 
 export function generatePngObservable(
   reporting: ReportingCore,
   logger: LevelLogger,
   options: ScreenshotOptions
-): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
+): Rx.Observable<PngResult> {
   const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
   const apmLayout = apmTrans?.startSpan('create-layout', 'setup');
   if (!options.layout.dimensions) {
@@ -43,7 +50,8 @@ export function generatePngObservable(
       apmScreenshots?.end();
       apmBuffer = apmTrans?.startSpan('get-buffer', 'output') ?? null;
     }),
-    map(({ results }) => ({
+    map(({ metrics, results }) => ({
+      metrics,
       buffer: results[0].screenshots[0].data,
       warnings: results.reduce((found, current) => {
         if (current.error) {

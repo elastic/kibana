@@ -57,6 +57,7 @@ export class Job {
   public csv_contains_formulas?: TaskRunResult['csv_contains_formulas'];
   public csv_rows?: TaskRunResult['csv_rows'];
   public max_size_reached?: TaskRunResult['max_size_reached'];
+  public metrics?: ReportSource['metrics'];
   public warnings?: TaskRunResult['warnings'];
 
   public locatorParams?: BaseParamsV2['locatorParams'];
@@ -92,6 +93,7 @@ export class Job {
     this.max_size_reached = report.output?.max_size_reached;
     this.warnings = report.output?.warnings;
     this.locatorParams = (report.payload as BaseParamsV2).locatorParams;
+    this.metrics = report.metrics;
   }
 
   getStatusMessage() {
