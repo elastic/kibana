@@ -17,7 +17,6 @@ import {
   EuiCodeBlock,
   EuiCopy,
   EuiDataGrid,
-  EuiDataGridPopoverContentProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMutationObserver,
@@ -120,7 +119,7 @@ export const DataGrid: FC<Props> = memo(
         analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
         analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
         ? {
-            featureImportance: ({ children }: EuiDataGridPopoverContentProps) => {
+            featureImportance: ({ children }: { children: any }) => {
               const rowIndex = children?.props?.rowIndex;
               const row = data[rowIndex];
               if (!row) return <div />;
