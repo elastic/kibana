@@ -51,6 +51,32 @@ To review the breaking changes in previous versions, refer to the following:
 <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
  
 [float]
+[[known-issue-8.0.0-rc2]]
+=== Known issue
+
+[discrete]
+[[known-issue-123550]]
+.Importing or copying saved objects in 8.0.0 can cause "weak links" to break
+[%collapsible]
+====
+*Details* +
+Sometimes users add "weak links" in saved objects -- for example, a dashboard may include a Markdown panel that contains a relative URL to
+another dashboard. This is considered a weak link because it is not defined by the saved object's relationships, rather it is defined by a
+user in free text. Such weak links can break if **both** of the following conditions are true:
+
+1. You are importing the saved object(s) into multiple spaces, _OR_ you are copying the saved object(s) into another space
+2. The saved object(s) did not already exist in the destination(s) prior to upgrading to the 8.0.0 release
+
+We are planning to address this issue in a bugfix for the 8.0.1 and 8.1 releases. For more information, refer to
+{kibana-pull}123550[#123550]. If you are impacted, you will be able to re-import (or re-copy) your saved objects after the bugfix is
+implemented to preserve these weak links.
+
+*Impact* +
+Saved objects that existed in 7.x and are migrated upon upgrade will **not** be impacted.
+Only _new_ saved objects that are imported/copied _multiple times_ will be impacted.
+====
+
+[float]
 [[features-8.0.0-rc2]]
 === Features
 {kib} 8.0.0-rc2 adds the following new and notable features.
@@ -265,23 +291,6 @@ For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
 
 To review the deprecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
 
-[float]
-[[known-issue-8.0.0-rc1]]
-=== Known issue
-
-[discrete]
-[[known-issue-123550]]
-.7.x saved object imports to 8.0.0-rc1 doesn't preserve dashboard UUIDs
-[%collapsible]
-====
-*Details* +
-When you export saved objects from 7.x to 8.0.0-rc1 with *Create new objects with random IDs* selected, the dashboard UUIDs change when you delete and import the dashboard.
-
-For more information, refer to {kibana-pull}123550[#123550].
-
-*Impact* +
-The known issue affects all 8.0.0 upgrades that migrate to a new cluster.
-====
 
 [float]
 [[features-8.0.0-rc1]]
