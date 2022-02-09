@@ -5,7 +5,6 @@
  * 2.0.
  */
 import apm from 'elastic-apm-node';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep, concat, set, omit } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
@@ -27,7 +26,6 @@ import {
 import {
   RawRule,
   IntervalSchedule,
-  Services,
   RawAlertInstance,
   RuleTaskState,
   Alert,
@@ -47,7 +45,6 @@ import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
   ActionGroup,
@@ -66,6 +63,7 @@ import {
   Event,
 } from '../lib/create_alert_event_log_record_object';
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
+import { wrapScopedClusterClient } from '../lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -169,7 +167,7 @@ export class TaskRunner<
     return { apiKey, enabled };
   }
 
-  private getFakeKibanaRequest(spaceId: string, apiKey: RawRule['apiKey']) {
+  private generateKibanaRequestFromApiKey(spaceId: string, apiKey: RawRule['apiKey']) {
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {
@@ -197,14 +195,6 @@ export class TaskRunner<
     return fakeRequest;
   }
 
-  private getServicesWithSpaceLevelPermissions(
-    spaceId: string,
-    apiKey: RawRule['apiKey']
-  ): [Services, PublicMethodsOf<RulesClient>] {
-    const request = this.getFakeKibanaRequest(spaceId, apiKey);
-    return [this.context.getServices(request), this.context.getRulesClientWithRequest(request)];
-  }
-
   private getExecutionHandler(
     ruleId: string,
     ruleName: string,
@@ -213,7 +203,8 @@ export class TaskRunner<
     apiKey: RawRule['apiKey'],
     kibanaBaseUrl: string | undefined,
     actions: Alert<Params>['actions'],
-    ruleParams: Params
+    ruleParams: Params,
+    request: KibanaRequest
   ) {
     return createExecutionHandler<
       Params,
@@ -236,7 +227,7 @@ export class TaskRunner<
       ruleType: this.ruleType,
       kibanaBaseUrl,
       eventLogger: this.context.eventLogger,
-      request: this.getFakeKibanaRequest(spaceId, apiKey),
+      request,
       ruleParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerRule: this.context.maxEphemeralActionsPerRule,
@@ -300,7 +291,7 @@ export class TaskRunner<
   }
 
   async executeAlerts(
-    services: Services,
+    generatedRequest: KibanaRequest,
     rule: SanitizedAlert<Params>,
     params: Params,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
@@ -352,12 +343,19 @@ export class TaskRunner<
         }] namespace`,
       };
 
+      const scopedClusterClient = this.context.elasticsearch.client.asScoped(generatedRequest);
+
       updatedRuleTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.ruleType.executor({
           alertId: ruleId,
           executionId: this.executionId,
           services: {
-            ...services,
+            savedObjectsClient: this.context.savedObjects.getScopedClient(generatedRequest, {
+              includedHiddenTypes: ['alert', 'action'],
+            }),
+            scopedClusterClient: wrapScopedClusterClient({
+              scopedClusterClient,
+            }),
             alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,
@@ -368,7 +366,7 @@ export class TaskRunner<
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
             search: createAbortableEsClientFactory({
-              scopedClusterClient: services.scopedClusterClient,
+              scopedClusterClient,
               abortController: this.searchAbortController,
             }),
           },
@@ -540,7 +538,7 @@ export class TaskRunner<
   }
 
   async validateAndExecuteRule(
-    services: Services,
+    generatedRequest: KibanaRequest,
     apiKey: RawRule['apiKey'],
     rule: SanitizedAlert<Params>,
     event: Event
@@ -559,9 +557,17 @@ export class TaskRunner<
       apiKey,
       this.context.kibanaBaseUrl,
       rule.actions,
-      rule.params
+      rule.params,
+      generatedRequest
     );
-    return this.executeAlerts(services, rule, validatedParams, executionHandler, spaceId, event);
+    return this.executeAlerts(
+      generatedRequest,
+      rule,
+      validatedParams,
+      executionHandler,
+      spaceId,
+      event
+    );
   }
 
   async loadRuleAttributesAndRun(
@@ -587,7 +593,10 @@ export class TaskRunner<
       );
     }
 
-    const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+    const generatedRequest = this.generateKibanaRequestFromApiKey(spaceId, apiKey);
+
+    // Get rules client with space level permissions
+    const rulesClient = this.context.getRulesClientWithRequest(generatedRequest);
 
     let rule: SanitizedAlert<Params>;
 
@@ -626,7 +635,7 @@ export class TaskRunner<
     return {
       monitoring: asOk(rule.monitoring),
       state: await promiseResult<RuleTaskStateWithActions, Error>(
-        this.validateAndExecuteRule(services, apiKey, rule, event)
+        this.validateAndExecuteRule(generatedRequest, apiKey, rule, event)
       ),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have

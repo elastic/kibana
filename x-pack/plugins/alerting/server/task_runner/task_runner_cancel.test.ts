@@ -23,6 +23,8 @@ import {
   savedObjectsRepositoryMock,
   httpServiceMock,
   executionContextServiceMock,
+  savedObjectsServiceMock,
+  elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
@@ -87,6 +89,8 @@ describe('Task Runner Cancel', () => {
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+  const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -95,7 +99,8 @@ describe('Task Runner Cancel', () => {
   };
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
-    getServices: jest.fn().mockReturnValue(services),
+    savedObjects: savedObjectsService,
+    elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
@@ -162,7 +167,8 @@ describe('Task Runner Cancel', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    taskRunnerFactoryInitializerParams.getServices.mockReturnValue(services);
+    savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
+    elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
