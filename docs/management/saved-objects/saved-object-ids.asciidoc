@@ -51,7 +51,7 @@ uses either the saved object ID _or_ the origin to determine its destination.
 If you import a saved object using the "Check for existing objects" option -- whether it was exported from 7.x or 8.x -- {kib} will
 take the following steps:
 
-1. If {kib} finds a matching saved object with the exact same ID, that will be the import destination -- you can **overwrite** that
+1. If {kib} finds a matching saved object with the exact same ID in the target space, that will be the import destination -- you can **overwrite** that
 destination or **skip** it.
 
 2. Otherwise, if {kib} finds a matching saved object with a _different_ ID that has the same origin, that will be the import destination
