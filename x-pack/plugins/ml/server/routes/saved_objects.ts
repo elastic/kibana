@@ -148,7 +148,7 @@ export function savedObjectsRoutes(
       try {
         const { jobType } = request.body;
         const { isSyncNeeded } = syncSavedObjectsFactory(client, jobSavedObjectService);
-        const result = await isSyncNeeded(jobType as JobType);
+        const result = await isSyncNeeded(jobType as JobType | 'trained-models');
 
         return response.ok({
           body: { result },

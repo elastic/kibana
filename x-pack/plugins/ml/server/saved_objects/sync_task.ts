@@ -19,7 +19,7 @@ import { syncSavedObjectsFactory } from './sync';
 
 const SAVED_OBJECTS_SYNC_TASK_TYPE = 'ML:saved-objects-sync';
 const SAVED_OBJECTS_SYNC_TASK_ID = 'ML:saved-objects-sync-task';
-const SAVED_OBJECTS_SYNC_INTERVAL_DEFAULT = '1m';
+const SAVED_OBJECTS_SYNC_INTERVAL_DEFAULT = '1h';
 
 export class SavedObjectsSyncService {
   private core: CoreStart | null = null;

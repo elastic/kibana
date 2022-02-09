@@ -52,6 +52,7 @@ import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { JobSpacesList } from '../../components/job_spaces_list';
+import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -147,6 +148,7 @@ export const ModelsList: FC<Props> = ({
    * Fetches trained models.
    */
   const fetchModelsData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
@@ -750,7 +752,15 @@ export const ModelsList: FC<Props> = ({
 
   return (
     <>
-      {isManagementTable ? null : <EuiSpacer size="m" />}
+      {isManagementTable ? null : (
+        <>
+          <SavedObjectsWarning
+            jobType="trained-models"
+            onCloseFlyout={fetchModelsData}
+            forceRefresh={isLoading}
+          />
+        </>
+      )}
       <EuiFlexGroup justifyContent="spaceBetween">
         {modelsStats && (
           <>

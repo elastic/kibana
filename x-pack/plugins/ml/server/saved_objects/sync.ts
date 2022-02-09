@@ -420,14 +420,17 @@ export function syncSavedObjectsFactory(
     return results;
   }
 
-  async function isSyncNeeded(jobType: JobType) {
-    const { jobs, datafeeds } = await initSavedObjects(true);
+  async function isSyncNeeded(jobType?: JobType | 'trained-models') {
+    const { jobs, datafeeds, trainedModels } = await initSavedObjects(true);
     const missingJobs =
       jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
 
+    const missingModels =
+      trainedModels.length > 0 && (jobType === undefined || jobType === 'trained-models');
+
     const missingDatafeeds = datafeeds.length > 0 && jobType !== 'data-frame-analytics';
 
-    return missingJobs || missingDatafeeds;
+    return missingJobs || missingModels || missingDatafeeds;
   }
 
   return { checkStatus, syncSavedObjects, initSavedObjects, isSyncNeeded };
