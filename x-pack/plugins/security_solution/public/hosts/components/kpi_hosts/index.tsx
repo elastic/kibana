@@ -16,6 +16,7 @@ import { CallOutSwitcher } from '../../../common/components/callouts';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import * as i18n from './translations';
 import { useHostRiskScore } from '../../containers/host_risk_score';
+import { ExploratoryCharts } from './embeddables';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
@@ -82,6 +83,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <ExploratoryCharts from={from} to={to} indexNames={indexNames} />
       </>
     );
   }

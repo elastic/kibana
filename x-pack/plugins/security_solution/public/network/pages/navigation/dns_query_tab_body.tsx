@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
+import { EuiFlexItem, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 
 import { NetworkDnsTable } from '../../components/network_dns_table';
 import { useNetworkDns } from '../../containers/network_dns';
@@ -23,6 +24,11 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { StartServices } from '../../../types';
+import { STACK_BY } from '../../../common/components/matrix_histogram/translations';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { dnsTopDomainsAttrs } from '../../configs/dns_top_domains';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
@@ -62,6 +68,31 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     (state) => getNetworkDnsSelector(state).isPtrIncluded
   );
 
+  const { observability } = useKibana<StartServices>().services;
+  const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
+  const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
+    histogramConfigs.defaultStackByOption
+  );
+
+  const setSelectedChartOptionCallback = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedStackByOption(
+        histogramConfigs.stackByOptions.find((co) => co.value === event.target.value) ??
+          histogramConfigs.defaultStackByOption
+      );
+    },
+    []
+  );
+  const { patternList, dataViewId } = useSourcererDataView();
+
+  const customLensAttrs = useMemo(
+    () => ({
+      ...dnsTopDomainsAttrs,
+      references: dnsTopDomainsAttrs.references.map((ref) => ({ ...ref, id: dataViewId })),
+    }),
+    [dataViewId]
+  );
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -83,17 +114,34 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     type,
   });
 
-  const getTitle = useCallback(
-    (option: MatrixHistogramOption) => i18n.DOMAINS_COUNT_BY(option.text),
-    []
+  const title = useMemo(
+    () => i18n.DOMAINS_COUNT_BY(selectedStackByOption.text),
+    [selectedStackByOption.text]
   );
 
   const dnsHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
-      title: getTitle,
+      title,
     }),
-    [getTitle]
+    [title]
+  );
+
+  const appendTitle = useMemo(
+    () => (
+      <EuiFlexItem grow={false}>
+        {histogramConfigs.stackByOptions.length > 1 && (
+          <EuiSelect
+            onChange={setSelectedChartOptionCallback}
+            options={histogramConfigs.stackByOptions}
+            prepend={STACK_BY}
+            value={selectedStackByOption?.value}
+            compressed={true}
+          />
+        )}
+      </EuiFlexItem>
+    ),
+    [selectedStackByOption?.value, setSelectedChartOptionCallback]
   );
 
   return (
@@ -110,6 +158,29 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         startDate={startDate}
         {...dnsHistogramConfigs}
       />
+      <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>
+        <ExploratoryViewEmbeddable
+          appId="security"
+          appendTitle={appendTitle}
+          title={title}
+          dataTypesIndexPatterns={patternList?.join(',')}
+          reportType="kpi-over-time"
+          attributes={[
+            {
+              dataType: 'security',
+            },
+          ]}
+          disableBorder
+          disableShadow
+          compressed
+          customHeight="100%"
+          customLensAttrs={customLensAttrs}
+          customTimeRange={{ from: startDate, to: endDate }}
+          withActions={['save', 'addToCase', 'openInLens']}
+        />
+      </EuiPanel>
+
+      <EuiSpacer />
       <NetworkDnsTableManage
         data={networkDns}
         fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}

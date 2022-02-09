@@ -102,24 +102,28 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
 }
 
 interface EmbeddablePanelWrapperProps {
-  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
-  uiActions: PluginsStartDependencies['uiActions'];
-  inspector: PluginsStartDependencies['inspector'];
   actionPredicate: (id: string) => boolean;
-  input: EmbeddableComponentProps;
-  theme: ThemeServiceStart;
+  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
   extraActions?: Action[];
+  hideHeader?: boolean;
+  input: EmbeddableComponentProps;
+  inspector: PluginsStartDependencies['inspector'];
+  showShadow?: boolean;
+  theme: ThemeServiceStart;
+  uiActions: PluginsStartDependencies['uiActions'];
   withDefaultActions?: boolean;
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
-  embeddable,
-  uiActions,
   actionPredicate,
-  inspector,
-  input,
-  theme,
+  embeddable,
   extraActions,
+  hideHeader = false,
+  input,
+  inspector,
+  showShadow = false,
+  theme,
+  uiActions,
   withDefaultActions,
 }) => {
   useEffect(() => {
@@ -128,7 +132,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
 
   return (
     <EmbeddablePanel
-      hideHeader={false}
+      hideHeader={hideHeader}
       embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
       getActions={async (triggerId, context) => {
         const actions = withDefaultActions
@@ -139,7 +143,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
       }}
       inspector={inspector}
       actionPredicate={actionPredicate}
-      showShadow={false}
+      showShadow={showShadow}
       showBadges={false}
       showNotifications={false}
       theme={theme}

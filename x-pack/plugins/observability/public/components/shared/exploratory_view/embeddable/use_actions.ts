@@ -15,24 +15,32 @@ import {
   Action,
   ActionExecutionContext,
 } from '../../../../../../../../src/plugins/ui_actions/public';
+import { ObservabilityAppServices } from '../../../../application/types';
 
-export type ActionTypes = 'explore' | 'save' | 'addToCase';
+export type ActionTypes = 'explore' | 'save' | 'addToCase' | 'openInLens';
 
 export function useActions({
-  withActions,
-  attributes,
-  reportType,
-  setIsSaveOpen,
-  setAddToCaseOpen,
   appId = 'observability',
+  attributes,
+  lensAttributes,
+  reportType,
+  setAddToCaseOpen,
+  setIsSaveOpen,
+  timeRange,
+  withActions,
 }: {
-  withActions?: boolean | ActionTypes[];
-  reportType: ReportViewType;
-  attributes: AllSeries;
   appId?: 'security' | 'observability';
-  setIsSaveOpen: (val: boolean) => void;
+  attributes: AllSeries;
+  reportType: ReportViewType;
   setAddToCaseOpen: (val: boolean) => void;
+  setIsSaveOpen: (val: boolean) => void;
+  withActions?: boolean | ActionTypes[];
+  timeRange: { from: string; to: string };
+  lensAttributes: any;
 }) {
+  const kServices = useKibana<ObservabilityAppServices>().services;
+
+  const { lens } = kServices;
   const [defaultActions, setDefaultActions] = useState(['explore', 'save', 'addToCase']);
 
   useEffect(() => {
@@ -54,6 +62,21 @@ export function useActions({
 
   const routePath = createExploratoryViewRoutePath({ reportType, allSeries: attributes });
 
+  const openInLensCallback = useCallback(() => {
+    if (lensAttributes) {
+      lens.navigateToPrefilledEditor(
+        {
+          id: '',
+          timeRange,
+          attributes: lensAttributes,
+        },
+        {
+          openInNewTab: true,
+        }
+      );
+    }
+  }, [lens, lensAttributes, timeRange]);
+
   const exploreCallback = useCallback(() => {
     application?.navigateToApp(appId, { path: routePath });
   }, [appId, application, routePath]);
@@ -73,9 +96,34 @@ export function useActions({
     if (action === 'addToCase') {
       return getAddToCaseAction({ callback: addToCaseCallback });
     }
+    if (action === 'openInLens') {
+      return getOpenInLensAction({ callback: openInLensCallback });
+    }
     return getExploreAction({ href, callback: exploreCallback });
   });
 }
+
+const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {
+  return {
+    id: 'expViewOpenInLens',
+    getDisplayName(context: ActionExecutionContext<object>): string {
+      return i18n.translate('xpack.observability.expView.openInLens', {
+        defaultMessage: 'Open in Lens',
+      });
+    },
+    getIconType(context: ActionExecutionContext<object>): string | undefined {
+      return 'visArea';
+    },
+    type: 'link',
+    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+      return true;
+    },
+    async execute(context: ActionExecutionContext<object>): Promise<void> {
+      callback();
+      return;
+    },
+  };
+};
 
 const getExploreAction = ({ href, callback }: { href: string; callback: () => void }): Action => {
   return {

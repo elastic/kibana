@@ -59,8 +59,10 @@ export function getExploratoryViewEmbeddable(
     );
 
     useEffect(() => {
-      loadIndexPattern({ dataType: series.dataType });
-    }, [series.dataType, loadIndexPattern]);
+      if (series) {
+        loadIndexPattern({ dataType: series.dataType });
+      }
+    }, [series, loadIndexPattern]);
 
     if (Object.keys(indexPatterns).length === 0 || loading) {
       return <EuiLoadingSpinner />;

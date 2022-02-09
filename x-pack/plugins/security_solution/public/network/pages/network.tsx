@@ -52,6 +52,8 @@ import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
+import { NetworkKpiEmbeddablesComponent } from '../components/kpi_network/embeddables';
+
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -203,6 +205,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   skip={isInitializing || filterQuery === undefined}
                   to={to}
                 />
+
+                <NetworkKpiEmbeddablesComponent from={from} to={to} filterQuery={filterQuery} />
               </Display>
 
               {capabilitiesFetched && !isInitializing ? (

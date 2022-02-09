@@ -42,6 +42,7 @@ import type { Ueba } from './ueba';
 import type { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
+import { ObservabilityPublicStart } from '../../observability/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -50,6 +51,7 @@ export interface SetupPlugins {
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
+  observability: ObservabilityPublicStart;
 }
 
 export interface StartPlugins {
