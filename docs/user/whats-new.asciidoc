@@ -2,7 +2,7 @@
 == What's new in 8.0
 
 This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes>>. 
+full list, see <<release-notes>> and <<breaking-changes-8.0.0>>. 
 
 coming[8.0.0]
 
