@@ -7,4 +7,3 @@
 
 export { PdfMaker } from './pdfmaker';
 export { PdfWorkerOutOfMemoryError } from './pdf_generate_errors';
-export { extractScreenshotResultErrors } from './extract_screenshot_result_errors';

@@ -68,7 +68,15 @@ export function generatePdfObservable(
         });
       });
 
-      const warnings = extractScreenshotResultErrors(results);
+      const warnings = results.reduce<string[]>((found, current) => {
+        if (current.error) {
+          found.push(current.error.message);
+        }
+        if (current.renderErrors) {
+          found.push(...current.renderErrors);
+        }
+        return found;
+      }, []);
 
       let buffer: Uint8Array | null = null;
       try {
