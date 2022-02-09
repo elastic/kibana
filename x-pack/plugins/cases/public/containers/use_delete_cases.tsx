@@ -7,7 +7,7 @@
 
 import { useCallback, useReducer, useRef, useEffect } from 'react';
 import * as i18n from './translations';
-import { deleteCases, deleteSubCases } from './api';
+import { deleteCases } from './api';
 import { DeleteCase } from './types';
 import { useToasts } from '../common/lib/kibana';
 
@@ -85,11 +85,8 @@ export const useDeleteCases = (): UseDeleteCase => {
       dispatch({ type: 'FETCH_INIT' });
 
       const caseIds = cases.map((theCase) => theCase.id);
-      // We don't allow user batch delete sub cases on UI at the moment.
-      if (cases[0].type != null || cases.length > 1) {
+      if (cases.length > 0) {
         await deleteCases(caseIds, abortCtrlRef.current.signal);
-      } else {
-        await deleteSubCases(caseIds, abortCtrlRef.current.signal);
       }
 
       if (!isCancelledRef.current) {

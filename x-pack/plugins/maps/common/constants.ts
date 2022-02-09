@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
-export const EMS_APP_NAME = 'kibana';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';

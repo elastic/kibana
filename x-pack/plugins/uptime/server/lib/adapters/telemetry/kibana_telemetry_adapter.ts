@@ -11,6 +11,7 @@ import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_c
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { savedObjectsAdapter } from '../../saved_objects/saved_objects';
 import { UptimeESClient, createUptimeESClient } from '../../lib';
+import { createEsQuery } from '../../../../common/utils/es_search';
 
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
@@ -215,7 +216,7 @@ export class KibanaTelemetryAdapter {
     savedObjectsClient: SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
-    const params = {
+    const params = createEsQuery({
       index: dynamicSettings.heartbeatIndices,
       body: {
         query: {
@@ -227,6 +228,11 @@ export class KibanaTelemetryAdapter {
                     gte: 'now-1d/d',
                     lt: 'now',
                   },
+                },
+              },
+              {
+                exists: {
+                  field: 'summary',
                 },
               },
             ],
@@ -271,9 +277,9 @@ export class KibanaTelemetryAdapter {
           },
         },
       },
-    };
+    });
 
-    const { body: result } = await callCluster.search(params);
+    const { body: result } = await callCluster.search(params, 'telemetryLog');
 
     const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
     const numberOfUniqueLocations: number = result?.aggregations?.unique_locations?.value ?? 0;
@@ -319,6 +325,11 @@ export class KibanaTelemetryAdapter {
                 },
               },
               {
+                exists: {
+                  field: 'summary',
+                },
+              },
+              {
                 term: {
                   'monitor.fleet_managed': true,
                 },
@@ -356,7 +367,7 @@ export class KibanaTelemetryAdapter {
       },
     };
 
-    const { body: result } = await callCluster.search(params);
+    const { body: result } = await callCluster.search(params, 'telemetryLogFleet');
 
     const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
     const monitorNameStats = result?.aggregations?.monitor_name;

@@ -83,7 +83,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     );
 
     // Errors state
-    const errorCount = countValidationErrors(inputValidationResults);
+    const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
     const hasErrors = forceShowErrors && errorCount;
 
     const hasInputStreams = useMemo(

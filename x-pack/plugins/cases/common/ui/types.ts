@@ -6,18 +6,16 @@
  */
 
 import {
-  AssociationType,
   CaseAttributes,
   CaseConnector,
   CasePatchRequest,
   CaseStatuses,
-  CaseType,
-  CommentRequest,
   User,
   ActionConnector,
   CaseExternalServiceBasic,
   CaseUserActionResponse,
   CaseMetricsResponse,
+  CommentResponse,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -62,18 +60,7 @@ export type CaseViewRefreshPropInterface = null | {
   refreshCase: () => Promise<void>;
 };
 
-export type Comment = CommentRequest & {
-  associationType: AssociationType;
-  id: string;
-  createdAt: string;
-  createdBy: ElasticUser;
-  pushedAt: string | null;
-  pushedBy: string | null;
-  updatedAt: string | null;
-  updatedBy: ElasticUser | null;
-  version: string;
-};
-
+export type Comment = SnakeToCamelCase<CommentResponse>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 
@@ -94,20 +81,12 @@ interface BasicCase {
   version: string;
 }
 
-export interface SubCase extends BasicCase {
-  associationType: AssociationType;
-  caseParentId: string;
-}
-
 export interface Case extends BasicCase {
   connector: CaseConnector;
   description: string;
   externalService: CaseExternalService | null;
-  subCases?: SubCase[] | null;
-  subCaseIds: string[];
   settings: CaseAttributes['settings'];
   tags: string[];
-  type: CaseType;
 }
 
 export interface ResolvedCase {
@@ -129,7 +108,6 @@ export interface FilterOptions {
   tags: string[];
   reporters: User[];
   owner: string[];
-  onlyCollectionType?: boolean;
 }
 
 export interface CasesStatus {
@@ -150,6 +128,7 @@ export type CaseMetricsFeature =
   | 'alerts.count'
   | 'alerts.users'
   | 'alerts.hosts'
+  | 'actions.isolateHost'
   | 'connectors'
   | 'lifespan';
 
@@ -188,7 +167,6 @@ export interface ActionLicense {
 
 export interface DeleteCase {
   id: string;
-  type: CaseType | null;
   title: string;
 }
 
@@ -205,7 +183,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
+  fetchCaseUserActions?: (caseId: string, caseConnectorId: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;
@@ -260,7 +238,7 @@ export interface SignalEcs {
 }
 
 export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
-  rule?: Exclude<RuleEcs, 'id'> & { uuid: string[] };
+  rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
   building_block_type?: string[];
   workflow_status?: string[];
 };

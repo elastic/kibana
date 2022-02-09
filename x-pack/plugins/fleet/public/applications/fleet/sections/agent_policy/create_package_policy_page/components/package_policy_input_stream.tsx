@@ -106,8 +106,12 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
         <FlexItemWithMaxWidth>
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
+              if (!packagePolicyInputStream.vars) return null;
               const { name: varName, type: varType } = varDef;
-              const { value, frozen } = packagePolicyInputStream.vars![varName];
+              const varConfigEntry = packagePolicyInputStream.vars?.[varName];
+              const value = varConfigEntry?.value;
+              const frozen = varConfigEntry?.frozen ?? false;
+
               return (
                 <EuiFlexItem key={varName}>
                   <PackagePolicyInputVarField
@@ -163,8 +167,10 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                 </EuiFlexItem>
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
+                      if (!packagePolicyInputStream.vars) return null;
                       const { name: varName, type: varType } = varDef;
-                      const value = packagePolicyInputStream.vars![varName].value;
+                      const value = packagePolicyInputStream.vars?.[varName]?.value;
+
                       return (
                         <EuiFlexItem key={varName}>
                           <PackagePolicyInputVarField

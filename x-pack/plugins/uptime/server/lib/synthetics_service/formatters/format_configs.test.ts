@@ -95,7 +95,7 @@ describe('formatMonitorConfig', () => {
           "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
         params: '',
         screenshots: 'on',
-        synthetics_args: [],
+        synthetics_args: ['--hasTouch true'],
         'filter_journeys.match': '',
         'filter_journeys.tags': ['dev'],
         ignore_https_errors: false,
@@ -119,6 +119,7 @@ describe('formatMonitorConfig', () => {
         throttling: '5d/3u/20l',
         timeout: '16s',
         type: 'browser',
+        synthetics_args: ['--hasTouch true'],
       };
     });
 

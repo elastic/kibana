@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMemo } from 'react';
 import pMap from 'p-map';
 import {
   ExceptionListItemSchema,
@@ -13,24 +12,20 @@ import {
 import { QueryObserverResult, useMutation, useQuery, useQueryClient } from 'react-query';
 import { ServerApiError } from '../../../../../common/types';
 import { useHttp } from '../../../../../common/lib/kibana';
-import { EventFiltersHttpService } from '../../../event_filters/service';
+import { getList, updateOne } from '../../../event_filters/service/service_actions';
 import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../event_filters/constants';
-
-export function useGetEventFiltersService() {
-  const http = useHttp();
-  return useMemo(() => new EventFiltersHttpService(http), [http]);
-}
 
 export function useGetAllAssignedEventFilters(
   policyId: string,
   enabled: boolean = true
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
-  const service = useGetEventFiltersService();
+  const http = useHttp();
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'assigned', policyId],
     () => {
-      return service.getList({
+      return getList({
+        http,
         filter: parsePoliciesAndFilterToKql({ policies: [...(policyId ? [policyId] : []), 'all'] }),
       });
     },
@@ -48,13 +43,14 @@ export function useSearchAssignedEventFilters(
   policyId: string,
   options: { filter?: string; page?: number; perPage?: number }
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
-  const service = useGetEventFiltersService();
+  const http = useHttp();
   const { filter, page, perPage } = options;
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'assigned', 'search', policyId, options],
     () => {
-      return service.getList({
+      return getList({
+        http,
         filter: parsePoliciesAndFilterToKql({
           policies: [policyId, 'all'],
           kuery: parseQueryFilterToKQL(filter || '', SEARCHABLE_FIELDS),
@@ -71,18 +67,18 @@ export function useSearchAssignedEventFilters(
     }
   );
 }
-
 export function useSearchNotAssignedEventFilters(
   policyId: string,
   options: { filter?: string; perPage?: number; enabled?: boolean }
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
-  const service = useGetEventFiltersService();
+  const http = useHttp();
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'notAssigned', policyId, options],
     () => {
       const { filter, perPage } = options;
 
-      return service.getList({
+      return getList({
+        http,
         filter: parsePoliciesAndFilterToKql({
           excludedPolicies: [policyId, 'all'],
           kuery: parseQueryFilterToKQL(filter || '', SEARCHABLE_FIELDS),
@@ -103,11 +99,11 @@ export function useSearchNotAssignedEventFilters(
 export function useBulkUpdateEventFilters(
   callbacks: {
     onUpdateSuccess?: (updatedExceptions: ExceptionListItemSchema[]) => void;
-    onUpdateError?: () => void;
+    onUpdateError?: (error?: ServerApiError) => void;
     onSettledCallback?: () => void;
   } = {}
 ) {
-  const service = useGetEventFiltersService();
+  const http = useHttp();
   const queryClient = useQueryClient();
 
   const {
@@ -116,12 +112,17 @@ export function useBulkUpdateEventFilters(
     onSettledCallback = () => {},
   } = callbacks;
 
-  return useMutation(
+  return useMutation<
+    ExceptionListItemSchema[],
+    ServerApiError,
+    ExceptionListItemSchema[],
+    () => void
+  >(
     (eventFilters: ExceptionListItemSchema[]) => {
       return pMap(
         eventFilters,
         (eventFilter) => {
-          return service.updateOne(eventFilter);
+          return updateOne(http, eventFilter);
         },
         {
           concurrency: 5,
@@ -144,11 +145,11 @@ export function useGetAllEventFilters(): QueryObserverResult<
   FoundExceptionListItemSchema,
   ServerApiError
 > {
-  const service = useGetEventFiltersService();
+  const http = useHttp();
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'all'],
     () => {
-      return service.getList();
+      return getList({ http });
     },
     {
       refetchIntervalInBackground: false,

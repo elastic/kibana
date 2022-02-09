@@ -586,6 +586,17 @@ export interface ElasticsearchMetricbeatSource {
   };
   logstash?: {
     node?: {
+      state?: {
+        pipeline?: {
+          id: string;
+          name: string;
+          representation?: {
+            graph?: {
+              vertices: ElasticsearchSourceLogstashPipelineVertex[];
+            };
+          };
+        };
+      };
       stats?: {
         timestamp?: string;
         logstash?: {

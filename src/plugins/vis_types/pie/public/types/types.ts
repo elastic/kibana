@@ -7,9 +7,23 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
+import { SerializedFieldFormat } from '../../../../field_formats/common';
 import { ChartsPluginSetup } from '../../../../charts/public';
 
-export type { Dimension, Dimensions } from '../../../../chart_expressions/expression_pie/common';
+export interface Dimension {
+  accessor: number;
+  format: {
+    id?: string;
+    params?: SerializedFieldFormat<object>;
+  };
+}
+
+export interface Dimensions {
+  metric: Dimension;
+  buckets?: Dimension[];
+  splitRow?: Dimension[];
+  splitColumn?: Dimension[];
+}
 
 export interface PieTypeProps {
   showElasticChartsOptions?: boolean;

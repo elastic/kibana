@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { darkMode, euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { darkMode, euiThemeVars } from '@kbn/ui-theme';
 import { useMemo } from 'react';
 
 type ResolverColorNames =

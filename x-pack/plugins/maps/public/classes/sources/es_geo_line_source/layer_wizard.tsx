@@ -17,6 +17,7 @@ import { getIsGoldPlus } from '../../../licensed_features';
 import { TracksLayerIcon } from '../../layers/wizards/icons/tracks_layer_icon';
 
 export const geoLineLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGeoLineDescription', {
     defaultMessage: 'Create lines from points',

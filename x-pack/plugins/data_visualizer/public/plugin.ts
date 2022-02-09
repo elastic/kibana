@@ -7,8 +7,9 @@
 
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
+import type { CloudStart } from '../../cloud/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { SharePluginStart } from '../../../../src/plugins/share/public';
+import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { Plugin } from '../../../../src/core/public';
 
 import { setStartServices } from './kibana_services';
@@ -24,11 +25,13 @@ import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
 import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import type { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
+  share: SharePluginSetup;
 }
 export interface DataVisualizerStartDependencies {
   data: DataPublicPluginStart;
@@ -42,6 +45,7 @@ export interface DataVisualizerStartDependencies {
   dataViewFieldEditor?: IndexPatternFieldEditorStart;
   fieldFormats: FieldFormatsStart;
   uiActions?: UiActionsStart;
+  cloud?: CloudStart;
 }
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
@@ -64,9 +68,9 @@ export class DataVisualizerPlugin
       registerHomeAddData(plugins.home);
       registerHomeFeatureCatalogue(plugins.home);
     }
-    if (plugins.embeddable) {
-      registerEmbeddables(plugins.embeddable, core);
-    }
+
+    registerEmbeddables(plugins.embeddable, core);
+    plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
   }
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {

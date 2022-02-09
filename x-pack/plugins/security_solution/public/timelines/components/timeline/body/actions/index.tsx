@@ -48,7 +48,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
   checked,
   columnValues,
-  data,
   ecsData,
   eventId,
   eventIdToNoteIds,

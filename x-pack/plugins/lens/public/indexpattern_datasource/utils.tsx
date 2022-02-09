@@ -6,21 +6,31 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from 'kibana/public';
-import { EuiLink, EuiTextColor } from '@elastic/eui';
+import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { DatatableColumn } from 'src/plugins/expressions';
-import type { FramePublicAPI } from '../types';
+import type { FramePublicAPI, StateSetter } from '../types';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
-import { operationDefinitionMap, GenericIndexPatternColumn } from './operations';
+import {
+  operationDefinitionMap,
+  GenericIndexPatternColumn,
+  TermsIndexPatternColumn,
+  CountIndexPatternColumn,
+  updateColumnParam,
+  updateDefaultLabels,
+} from './operations';
 
-import { getInvalidFieldMessage } from './operations/definitions/helpers';
+import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
 import { isQueryValid } from './operations/definitions/filters';
 import { checkColumnForPrecisionError } from '../../../../../src/plugins/data/common';
 import { hasField } from './pure_utils';
+import { mergeLayer } from './state_helpers';
+import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -80,53 +90,125 @@ export function fieldIsInvalid(
 export function getPrecisionErrorWarningMessages(
   state: IndexPatternPrivateState,
   { activeData }: FramePublicAPI,
-  docLinks: DocLinksStart
+  docLinks: DocLinksStart,
+  setState: StateSetter<IndexPatternPrivateState>
 ) {
   const warningMessages: React.ReactNode[] = [];
 
   if (state && activeData) {
-    Object.values(activeData)
-      .reduce((acc: DatatableColumn[], { columns }) => [...acc, ...columns], [])
-      .forEach((column) => {
-        if (checkColumnForPrecisionError(column)) {
-          warningMessages.push(
-            <FormattedMessage
-              id="xpack.lens.indexPattern.precisionErrorWarning"
-              defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try increasing the number of {topValues} or use {filters} instead of {topValues} for precise results. To learn more about this limit, {link}."
-              values={{
-                name: <EuiTextColor color="accent">{column.name}</EuiTextColor>,
-                topValues: (
-                  <EuiTextColor color="subdued">
-                    <FormattedMessage
-                      id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
-                      defaultMessage="Top values"
-                    />
-                  </EuiTextColor>
-                ),
-                filters: (
-                  <EuiTextColor color="subdued">
-                    <FormattedMessage
-                      id="xpack.lens.indexPattern.precisionErrorWarning.filters"
-                      defaultMessage="Filters"
-                    />
-                  </EuiTextColor>
-                ),
-                link: (
-                  <EuiLink
-                    href={docLinks.links.aggs.terms_doc_count_error}
-                    color="text"
-                    target="_blank"
-                    external={true}
-                  >
-                    <FormattedMessage
-                      defaultMessage="visit the documentation"
-                      id="xpack.lens.indexPattern.precisionErrorWarning.link"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          );
+    Object.entries(activeData)
+      .reduce(
+        (acc, [layerId, { columns }]) => [
+          ...acc,
+          ...columns.map((column) => ({ layerId, column })),
+        ],
+        [] as Array<{ layerId: string; column: DatatableColumn }>
+      )
+      .forEach(({ layerId, column }) => {
+        const currentLayer = state.layers[layerId];
+        const currentColumn = currentLayer?.columns[column.id];
+        if (currentLayer && currentColumn && checkColumnForPrecisionError(column)) {
+          const indexPattern = state.indexPatterns[currentLayer.indexPatternId];
+          const isAscendingCountSorting =
+            isColumnOfType<TermsIndexPatternColumn>('terms', currentColumn) &&
+            currentColumn.params.orderBy.type === 'column' &&
+            currentColumn.params.orderDirection === 'asc' &&
+            isColumnOfType<CountIndexPatternColumn>(
+              'count',
+              currentLayer.columns[currentColumn.params.orderBy.columnId]
+            );
+          if (!isAscendingCountSorting) {
+            warningMessages.push(
+              <FormattedMessage
+                id="xpack.lens.indexPattern.precisionErrorWarning"
+                defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try increasing the number of {topValues} or use {filters} instead of {topValues} for precise results. To learn more about this limit, {link}."
+                values={{
+                  name: <EuiTextColor color="accent">{column.name}</EuiTextColor>,
+                  topValues: (
+                    <EuiTextColor color="subdued">
+                      <FormattedMessage
+                        id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
+                        defaultMessage="Top values"
+                      />
+                    </EuiTextColor>
+                  ),
+                  filters: (
+                    <EuiTextColor color="subdued">
+                      <FormattedMessage
+                        id="xpack.lens.indexPattern.precisionErrorWarning.filters"
+                        defaultMessage="Filters"
+                      />
+                    </EuiTextColor>
+                  ),
+                  link: (
+                    <EuiLink
+                      href={docLinks.links.aggs.terms_doc_count_error}
+                      color="text"
+                      target="_blank"
+                      external={true}
+                    >
+                      <FormattedMessage
+                        defaultMessage="visit the documentation"
+                        id="xpack.lens.indexPattern.precisionErrorWarning.link"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            );
+          } else {
+            warningMessages.push(
+              <>
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning"
+                  defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records. To learn more about this limit, {link}."
+                  values={{
+                    name: <EuiTextColor color="accent">{column.name}</EuiTextColor>,
+                    link: (
+                      <EuiLink
+                        href={docLinks.links.aggs.rare_terms}
+                        color="text"
+                        target="_blank"
+                        external={true}
+                      >
+                        <FormattedMessage
+                          defaultMessage="visit the documentation"
+                          id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning.link"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+                <EuiSpacer size="s" />
+                <EuiButton
+                  onClick={() => {
+                    setState((prevState) =>
+                      mergeLayer({
+                        state: prevState,
+                        layerId,
+                        newLayer: updateDefaultLabels(
+                          updateColumnParam({
+                            layer: currentLayer,
+                            columnId: column.id,
+                            paramName: 'orderBy',
+                            value: {
+                              type: 'rare',
+                              maxDocCount: DEFAULT_MAX_DOC_COUNT,
+                            },
+                          }),
+                          indexPattern
+                        ),
+                      })
+                    );
+                  }}
+                >
+                  {i18n.translate('xpack.lens.indexPattern.switchToRare', {
+                    defaultMessage: 'Rank by rarity',
+                  })}
+                </EuiButton>
+              </>
+            );
+          }
         }
       });
   }

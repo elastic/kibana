@@ -41,12 +41,20 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
     try {
       const editMonitor: SavedObjectsUpdateResponse<MonitorFields> =
-        await savedObjectsClient.update(syntheticsMonitorType, monitorId, monitor);
+        await savedObjectsClient.update<MonitorFields>(
+          syntheticsMonitorType,
+          monitorId,
+          monitor.type === 'browser' ? { ...monitor, urls: '' } : monitor
+        );
 
       const errors = await syntheticsService.pushConfigs(request, [
         {
           ...(editMonitor.attributes as SyntheticsMonitor),
           id: editMonitor.id,
+          fields: {
+            config_id: editMonitor.id,
+          },
+          fields_under_root: true,
         },
       ]);
 

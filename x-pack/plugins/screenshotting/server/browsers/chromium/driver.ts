@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { map, truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
@@ -92,10 +91,7 @@ const WAIT_FOR_DELAY_MS: number = 100;
 
 function getDisallowedOutgoingUrlError(interceptedUrl: string) {
   return new Error(
-    i18n.translate('xpack.screenshotting.chromiumDriver.disallowedOutgoingUrl', {
-      defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}". Failing the request and closing the browser.`,
-      values: { interceptedUrl },
-    })
+    `Received disallowed outgoing URL: "${interceptedUrl}". Failing the request and closing the browser.`
   );
 }
 
@@ -323,15 +319,7 @@ export class HeadlessChromiumDriver {
             headers,
           });
         } catch (err) {
-          logger.error(
-            i18n.translate(
-              'xpack.screenshotting.chromiumDriver.failedToCompleteRequestUsingHeaders',
-              {
-                defaultMessage: 'Failed to complete a request using headers: {error}',
-                values: { error: err },
-              }
-            )
-          );
+          logger.error(`Failed to complete a request using headers: ${err.message}`);
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
@@ -339,28 +327,21 @@ export class HeadlessChromiumDriver {
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
-          logger.error(
-            i18n.translate('xpack.screenshotting.chromiumDriver.failedToCompleteRequest', {
-              defaultMessage: 'Failed to complete a request: {error}',
-              values: { error: err },
-            })
-          );
+          logger.error(`Failed to complete a request: ${err.message}`);
         }
       }
 
       this.interceptedCount = this.interceptedCount + (isData ? 0 : 1);
     });
 
-    // Even though 3xx redirects go through our request
-    // handler, we should probably inspect responses just to
-    // avoid being bamboozled by some malicious request
     this.page.on('response', (interceptedResponse: puppeteer.HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
+      const status = interceptedResponse.status();
 
-      if (!interceptedResponse.ok()) {
+      if (status >= 400 && !interceptedResponse.ok()) {
         logger.warn(
-          `Chromium received a non-OK response (${interceptedResponse.status()}) for request ${interceptedUrl}`
+          `Chromium received a non-OK response (${status}) for request ${interceptedUrl}`
         );
       }
 

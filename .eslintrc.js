@@ -226,10 +226,6 @@ const RESTRICTED_IMPORTS = [
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
   },
-  {
-    name: '@kbn/io-ts-utils',
-    message: `Import directly from @kbn/io-ts-utils/{method} submodules`,
-  },
 ];
 
 module.exports = {
@@ -857,12 +853,13 @@ module.exports = {
     },
 
     /**
-     * APM and Observability overrides
+     * APM, UX and Observability overrides
      */
     {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -1072,6 +1069,13 @@ module.exports = {
         'symbol-description': 'error',
         'vars-on-top': 'error',
         '@typescript-eslint/no-duplicate-imports': ['error'],
+      },
+    },
+    {
+      files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      rules: {
+        'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
     },
 
@@ -1569,7 +1573,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-flot-charts/lib/**/*.js'],
       env: {
         jquery: true,
       },
