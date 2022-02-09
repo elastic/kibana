@@ -150,16 +150,18 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       );
 
     const handleOnSearch = useCallback(
-      (filterValue: string, selectedPolicies: string) => {
-        // FIXME:PT talk to David about possibly having the ExceptionsSearch also return a boolean that indicates if a refresh of existing data should be done
-
+      (filterValue: string, selectedPolicies: string, doHardRefresh) => {
         setUrlParams({
           // `undefined` will drop the param from the url
           filter: filterValue.trim() === '' ? undefined : filterValue,
           included_policies: selectedPolicies.trim() === '' ? undefined : selectedPolicies,
         });
+
+        if (doHardRefresh) {
+          refetchListData();
+        }
       },
-      [setUrlParams]
+      [refetchListData, setUrlParams]
     );
 
     const handleArtifactDeleteModalOnSuccess = useCallback(() => {

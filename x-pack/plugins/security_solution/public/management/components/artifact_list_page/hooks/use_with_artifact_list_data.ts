@@ -137,7 +137,7 @@ export const useWithArtifactListData = (
       !listDataError &&
       listData &&
       listData.total === 0 &&
-      page === 1 &&
+      String(page) === '1' &&
       !filter &&
       doesDataExist
     ) {
