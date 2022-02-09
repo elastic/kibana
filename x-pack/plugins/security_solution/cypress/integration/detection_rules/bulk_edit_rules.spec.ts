@@ -8,16 +8,9 @@
 import { hasIndexPatterns } from '../../screens/rule_details';
 
 import {
-  COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
   CUSTOM_RULES_BTN,
   MODAL_CONFIRMATION_BTN,
-  pageSelector,
-  RELOAD_PREBUILT_RULES_BTN,
-  RULES_EMPTY_PROMPT,
-  RULE_SWITCH,
-  SHOWING_RULES_TEXT,
-  RULES_MONITORING_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 
@@ -27,13 +20,11 @@ import {
   selectAllRules,
   openBulkEditAddIndexPatternsForm,
   openBulkEditDeleteIndexPatternsForm,
-  typeIndexPattern,
+  typeIndexPatterns,
   waitForBulkEditActionToFinish,
   goToTheRuleDetailsOf,
   confirmBulkEditForm,
   getOverwriteCheckbox,
-  loadPrebuiltDetectionRules,
-  waitForPrebuiltDetectionRulesToBeLoaded,
   getOverwriteTagsCheckbox,
   waitForRulesTableToBeRefreshed,
   selectNumberOfRules,
@@ -86,220 +77,137 @@ describe('Detection rules, bulk edit', () => {
     waitForRulesTableToBeLoaded();
   });
 
-  describe('Elastic rules', () => {
-    beforeEach(() => {
-      cy.get('[data-test-subj="loadPrebuiltRulesBtn"]').click().should('not.exist');
-    });
+  it('should show modal windows when Elastic rules selected and edit only custom rules', () => {
+    cy.get('[data-test-subj="loadPrebuiltRulesBtn"]').click().should('not.exist');
 
-    it('should show modal windows when only Elastic rules selected', () => {
-      // filter rules, only Elastic rule to show
-      cy.get(ELASTIC_RULES_BTN).click();
-      waitForRulesTableToBeRefreshed();
+    // select few Elastic rules, check if we can't proceed further, as ELastic rules are not editable
+    // filter rules, only Elastic rule to show
+    cy.get(ELASTIC_RULES_BTN).click();
+    waitForRulesTableToBeRefreshed();
 
-      // check modal window for few selected rules
-      selectNumberOfRules(5);
+    // check modal window for few selected rules
+    selectNumberOfRules(5);
+    clickAddIndexPatternsMenuItem();
+    waitForElasticRulesBulkEditModal(5);
+    cy.get(MODAL_CONFIRMATION_BTN).click();
 
-      clickAddIndexPatternsMenuItem();
-      waitForElasticRulesBulkEditModal(5);
+    // Select Elastic rules and custom rules, warning modal window, proceed with editing custom rules
+    cy.get(ELASTIC_RULES_BTN).click();
 
-      // close modal
-      cy.get(MODAL_CONFIRMATION_BTN).click();
+    selectAllRules();
+    clickAddIndexPatternsMenuItem();
+    waitForMixedRulesBulkEditModal(totalNumberOfPrebuiltRules, 6);
+    cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Edit custom rules').click();
 
-      selectAllRules();
+    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
+    confirmBulkEditForm();
 
-      clickAddIndexPatternsMenuItem();
-      waitForElasticRulesBulkEditModal(totalNumberOfPrebuiltRules);
-    });
-
-    it('should show modal window when mixed rules selected and edit only custom', () => {
-      selectAllRules();
-
-      clickAddIndexPatternsMenuItem();
-
-      waitForMixedRulesBulkEditModal(totalNumberOfPrebuiltRules, 6);
-      cy.get(MODAL_CONFIRMATION_BTN).should('have.text', 'Edit custom rules').click();
-
-      // proceed to form
-      cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Add index patterns');
-
-      typeIndexPattern(CUSTOM_INDEX_PATTERN_1);
-      confirmBulkEditForm();
-
-      // check if rule has been updated
-      cy.get(CUSTOM_RULES_BTN).click();
-      goToTheRuleDetailsOf(RULE_NAME);
-      hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
-    });
+    // check if rule has been updated
+    cy.get(CUSTOM_RULES_BTN).click();
+    goToTheRuleDetailsOf(RULE_NAME);
+    hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
   });
 
-  describe('Index patterns', () => {
-    it('Adds new index pattern to a rule', () => {
-      // switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
-      changeRowsPerPageTo(5);
-      selectAllRules();
+  it('Adds/delete/overwrite index patterns in rules', () => {
+    // First step: add index patterns to all rules
+    // Switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
+    // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
+    changeRowsPerPageTo(5);
+    selectAllRules();
 
-      openBulkEditAddIndexPatternsForm();
+    openBulkEditAddIndexPatternsForm();
 
-      typeIndexPattern(CUSTOM_INDEX_PATTERN_1);
-      confirmBulkEditForm();
+    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
+    confirmBulkEditForm();
 
-      waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: 6 });
 
-      changeRowsPerPageTo(20);
+    changeRowsPerPageTo(20);
 
-      // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
-      hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
-    });
+    // check if rule has been updated
+    goToTheRuleDetailsOf(RULE_NAME);
+    hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
 
-    it('Delete index pattern from all rules', () => {
-      // switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
-      changeRowsPerPageTo(5);
-      selectAllRules();
+    cy.go('back');
 
-      openBulkEditDeleteIndexPatternsForm();
+    // Second step: remove one index pattern
+    // select all rules on page (as page displays all existing rules).
+    // This way we also test bulk edit with rules ids parameter instead if a query.
+    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+    openBulkEditDeleteIndexPatternsForm();
 
-      typeIndexPattern(DEFAULT_INDEX_PATTERNS[0]);
-      confirmBulkEditForm();
+    typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
+    confirmBulkEditForm();
 
-      waitForBulkEditActionToFinish({ rulesCount: 6 });
+    waitForBulkEditActionToFinish({ rulesCount: 6 });
 
-      changeRowsPerPageTo(20);
+    // check if rule has been updated
+    goToTheRuleDetailsOf(RULE_NAME);
+    hasIndexPatterns(DEFAULT_INDEX_PATTERNS.join(''));
 
-      // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
-      hasIndexPatterns(DEFAULT_INDEX_PATTERNS.slice(1).join(''));
-    });
+    cy.go('back');
 
-    it('Overwrite index patterns for all rules', () => {
-      const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
-      // switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
-      changeRowsPerPageTo(5);
-      selectAllRules();
+    // Third step: overwrite index patterns
+    // select all rules on page (as page displays all existing rules).
+    // This way we also test bulk edit with rules ids parameter instead if a query.
+    const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
 
-      openBulkEditAddIndexPatternsForm();
+    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+    openBulkEditAddIndexPatternsForm();
+    getOverwriteCheckbox()
+      .should('have.text', 'Overwrite all selected rules index patterns')
+      .click();
+    cy.contains(
+      'You’re about to overwrite index patterns for 6 selected rules, press Save to apply changes.'
+    );
 
-      getOverwriteCheckbox()
-        .should('have.text', 'Overwrite all selected rules index patterns')
-        .click();
+    typeIndexPatterns(OVERWRITE_INDEX_PATTERNS);
+    confirmBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount: 6 });
 
-      cy.contains(
-        'You’re about to overwrite index patterns for 6 selected rules, press Save to apply changes.'
-      );
-
-      OVERWRITE_INDEX_PATTERNS.forEach((index) => {
-        typeIndexPattern(index);
-      });
-
-      confirmBulkEditForm();
-
-      waitForBulkEditActionToFinish({ rulesCount: 6 });
-
-      changeRowsPerPageTo(20);
-
-      // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
-      hasIndexPatterns(OVERWRITE_INDEX_PATTERNS.join(''));
-    });
+    // check if rule has been updated
+    goToTheRuleDetailsOf(RULE_NAME);
+    hasIndexPatterns(OVERWRITE_INDEX_PATTERNS.join(''));
   });
 
-  describe('tags', () => {
-    it.only('Adds new tags to all rules', () => {
-      // First step: add tags to all rules
-      // switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
-      changeRowsPerPageTo(5);
-      selectAllRules();
-      // open add tags from and add save 2 new tags
-      openBulkEditAddTagsForm();
-      typeTags(['tag1', 'tag2']);
-      confirmBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: 6 });
-      // check if all rule have been updated
-      changeRowsPerPageTo(20);
-      testAllTagsBadges(['tag1', 'tag2']);
+  it('Adds/deletes/overwrites tags in rules', () => {
+    // First step: add tags to all rules
+    // Switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
+    // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
+    changeRowsPerPageTo(5);
+    selectAllRules();
 
-      // Second step: remove one tag from all rules
-      changeRowsPerPageTo(5);
-      selectAllRules();
+    // open add tags from and add save 2 new tags
+    openBulkEditAddTagsForm();
+    typeTags(['tag1', 'tag2']);
+    confirmBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount: 6 });
 
-      openBulkEditDeleteTagsForm();
-      typeTags(['tag1']);
-      confirmBulkEditForm();
-      waitForBulkEditActionToFinish({ rulesCount: 6 });
+    // check if all rules have been updated
+    changeRowsPerPageTo(20);
+    testAllTagsBadges(['tag1', 'tag2']);
 
-      changeRowsPerPageTo(20);
-      testAllTagsBadges(['tag2']);
+    // Second step: remove one tag from all rules
+    // select all rules on page (as page displays all existing rules).
+    // This way we also test bulk edit with rules ids parameter instead if a query.
+    cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
 
-      // Third step: overwrite all tags
-      changeRowsPerPageTo(5);
-      selectAllRules();
+    openBulkEditDeleteTagsForm();
+    typeTags(['tag1']);
+    confirmBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    testAllTagsBadges(['tag2']);
 
-      openBulkEditAddTagsForm();
-      getOverwriteTagsCheckbox().should('have.text', 'Overwrite all selected rules tags').click();
+    // Third step: overwrite all tags
 
-      cy.contains(
-        'You’re about to overwrite tags for 6 selected rules, press Save to apply changes.'
-      );
-      typeTags(['overwrite-tag']);
-
-      confirmBulkEditForm();
-
-      waitForBulkEditActionToFinish({ rulesCount: 6 });
-
-      changeRowsPerPageTo(20);
-
-      // check if all rule have been updated
-      testAllTagsBadges(['overwrite-tag']);
-    });
-
-    it('Delete index pattern from all rules', () => {
-      // switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
-      changeRowsPerPageTo(5);
-      selectAllRules();
-
-      openBulkEditDeleteIndexPatternsForm();
-
-      typeIndexPattern(DEFAULT_INDEX_PATTERNS[0]);
-      confirmBulkEditForm();
-
-      waitForBulkEditActionToFinish({ rulesCount: 6 });
-
-      changeRowsPerPageTo(20);
-
-      // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
-      hasIndexPatterns(DEFAULT_INDEX_PATTERNS.slice(1).join(''));
-    });
-
-    it('Overwrite index patterns for all rules', () => {
-      const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
-      // switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
-      changeRowsPerPageTo(5);
-      selectAllRules();
-
-      openBulkEditAddIndexPatternsForm();
-
-      getOverwriteCheckbox()
-        .should('have.text', 'Overwrite all selected rules index patterns')
-        .click();
-
-      cy.contains(
-        'You’re about to overwrite index patterns for 6 selected rules, press Save to apply changes.'
-      );
-
-      OVERWRITE_INDEX_PATTERNS.forEach((index) => {
-        typeIndexPattern(index);
-      });
-
-      confirmBulkEditForm();
-
-      waitForBulkEditActionToFinish({ rulesCount: 6 });
-
-      changeRowsPerPageTo(20);
-
-      // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
-      hasIndexPatterns(OVERWRITE_INDEX_PATTERNS.join(''));
-    });
+    openBulkEditAddTagsForm();
+    getOverwriteTagsCheckbox().should('have.text', 'Overwrite all selected rules tags').click();
+    cy.contains(
+      'You’re about to overwrite tags for 6 selected rules, press Save to apply changes.'
+    );
+    typeTags(['overwrite-tag']);
+    confirmBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount: 6 });
+    testAllTagsBadges(['overwrite-tag']);
   });
 });
