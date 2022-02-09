@@ -10,10 +10,11 @@ import { Alert } from './alert';
 import { getRecoveredAlerts } from '../lib';
 
 export interface AlertFactoryDoneUtils<
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string
 > {
-  getRecoveredAlerts?: () => Record<string, Alert<InstanceState, InstanceContext>>;
+  getRecoveredAlerts?: () => Array<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
 }
 
 export interface CreateAlertFactoryOpts<
@@ -42,20 +43,21 @@ export function createAlertFactory<
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
       if (!alerts[id]) {
-        alerts[id] = new Alert<InstanceState, InstanceContext, ActionGroupIds>();
+        alerts[id] = new Alert<InstanceState, InstanceContext, ActionGroupIds>(id);
       }
 
       return alerts[id];
     },
-    done: (): AlertFactoryDoneUtils<InstanceState, InstanceContext> => {
+    done: (): AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds> => {
       isDone = true;
       return canSetRecoveryContext === true
         ? {
-            getRecoveredAlerts: () =>
-              getRecoveredAlerts(alerts, initialAlertIds) as Record<
-                string,
-                Alert<InstanceState, InstanceContext>
-              >,
+            getRecoveredAlerts: () => {
+              const recoveredAlerts = getRecoveredAlerts(alerts, initialAlertIds);
+              return Object.keys(recoveredAlerts).map(
+                (alertId: string) => recoveredAlerts[alertId]
+              );
+            },
           }
         : {};
     },

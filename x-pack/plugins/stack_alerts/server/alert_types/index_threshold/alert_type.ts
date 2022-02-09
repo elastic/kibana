@@ -221,20 +221,19 @@ export function getAlertType(
 
     const { getRecoveredAlerts } = services.alertFactory.done();
     if (getRecoveredAlerts) {
-      const recoveredAlerts = getRecoveredAlerts();
-
-      for (const recoveredAlertId of Object.keys(recoveredAlerts)) {
-        logger.debug(`setting context for recovered alert ${recoveredAlertId}`);
+      for (const recoveredAlert of getRecoveredAlerts()) {
+        const alertId = recoveredAlert.getId();
+        logger.debug(`setting context for recovered alert ${alertId}`);
         const baseContext: BaseActionContext = {
           date,
-          value: unmetGroupValues[recoveredAlertId] ?? 0,
-          group: recoveredAlertId,
+          value: unmetGroupValues[alertId] ?? 0,
+          group: alertId,
           conditions: `${agg} is NOT ${getHumanReadableComparator(
             params.thresholdComparator
           )} ${params.threshold.join(' and ')}`,
         };
         const recoveryContext = addMessages(options, baseContext, params, true);
-        recoveredAlerts[recoveredAlertId].setContext(recoveryContext);
+        recoveredAlert.setContext(recoveryContext);
       }
     }
   }

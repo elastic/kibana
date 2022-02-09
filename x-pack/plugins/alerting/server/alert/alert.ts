@@ -52,11 +52,17 @@ export class Alert<
   private meta: AlertInstanceMeta;
   private state: State;
   private context: Context;
+  private readonly id: string;
 
-  constructor({ state, meta = {} }: RawAlertInstance = {}) {
+  constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
+    this.id = id;
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
+  }
+
+  getId() {
+    return this.id;
   }
 
   hasScheduledActions() {

@@ -335,7 +335,11 @@ export class TaskRunner<
     const alerts = mapValues<
       Record<string, RawAlertInstance>,
       CreatedAlert<InstanceState, InstanceContext>
-    >(alertRawInstances, (rawAlert) => new CreatedAlert<InstanceState, InstanceContext>(rawAlert));
+    >(
+      alertRawInstances,
+      (rawAlert, alertId) => new CreatedAlert<InstanceState, InstanceContext>(alertId, rawAlert)
+    );
+
     const originalAlerts = cloneDeep(alerts);
     const originalAlertIds = new Set(Object.keys(originalAlerts));
 

@@ -76,7 +76,7 @@ export interface AlertServices<
 > extends Services {
   alertFactory: {
     create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
-    done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext>;
+    done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
   };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
