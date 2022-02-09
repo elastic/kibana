@@ -95,7 +95,113 @@ export default function ({ getService }: FtrProviderContext) {
                         ],
                     } as AnalyticsTableRowDetails,
                 },
-            },  
+            },
+            {
+                suiteTitle: 'with lucene query',
+                jobType: 'classification',
+                jobSource: 'ft_farequote_lucene',
+                jobId: `fq_saved_search_2_${dateNow}`,
+                jobDescription: 'Classification job based on a saved search with lucene query',
+                source: 'ft_farequote_lucene',
+                get destinationIndex(): string {
+                    return `user-${this.jobId}`;
+                },
+                runtimeFields: {
+                    uppercase_airline: {
+                        type: 'keyword',
+                        script: 'emit(params._source.airline.toUpperCase())',
+                    },
+                },
+                dependentVariable: 'airline',
+                trainingPercent: 20,
+                modelMemory: '20mb',
+                createIndexPattern: true,
+                expected: {
+                    source: 'ft_farequote',
+                    rocCurveColorState: [
+                        // tick/grid/axis
+                        { color: '#DDDDDD', percentage: 50 },
+                        // line
+                        { color: '#98A2B3', percentage: 10 },
+                    ],
+                    runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+                    row: {
+                        memoryStatus: 'ok',
+                        type: 'classification',
+                        status: 'stopped',
+                        progress: '100',
+                    },
+                    rowDetails: {
+                        jobDetails: [
+                            {
+                                section: 'state',
+                                expectedEntries: {
+                                    id: `fq_saved_search_2_${dateNow}`,
+                                    state: 'stopped',
+                                    data_counts:
+                                        '{"training_docs_count":6881,"test_docs_count":27535,"skipped_docs_count":0}',
+                                    description:
+                                        "Classification job based on a saved search with lucene query",
+                                },
+                            },
+                            { section: 'progress', expectedEntries: { Phase: '8/8' } },
+                        ],
+                    } as AnalyticsTableRowDetails,
+                },
+            },
+            {
+                suiteTitle: 'with kuery query',
+                jobType: 'classification',
+                jobSource: 'ft_farequote_kuery',
+                jobId: `fq_saved_search_3_${dateNow}`,
+                jobDescription: 'Classification job based on a saved search with kuery query',
+                source: 'ft_farequote_lucene',
+                get destinationIndex(): string {
+                    return `user-${this.jobId}`;
+                },
+                runtimeFields: {
+                    uppercase_airline: {
+                        type: 'keyword',
+                        script: 'emit(params._source.airline.toUpperCase())',
+                    },
+                },
+                dependentVariable: 'airline',
+                trainingPercent: 20,
+                modelMemory: '20mb',
+                createIndexPattern: true,
+                expected: {
+                    source: 'ft_farequote',
+                    rocCurveColorState: [
+                        // tick/grid/axis
+                        { color: '#DDDDDD', percentage: 50 },
+                        // line
+                        { color: '#98A2B3', percentage: 10 },
+                    ],
+                    runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+                    row: {
+                        memoryStatus: 'ok',
+                        type: 'classification',
+                        status: 'stopped',
+                        progress: '100',
+                    },
+                    rowDetails: {
+                        jobDetails: [
+                            {
+                                section: 'state',
+                                expectedEntries: {
+                                    id: `fq_saved_search_3_${dateNow}`,
+                                    state: 'stopped',
+                                    data_counts:
+                                        '{"training_docs_count":6881,"test_docs_count":27535,"skipped_docs_count":0}',
+                                    description:
+                                        "Classification job based on a saved search with kuery query",
+                                },
+                            },
+                            { section: 'progress', expectedEntries: { Phase: '8/8' } },
+                        ],
+                    } as AnalyticsTableRowDetails,
+                },
+            }, 
         ];
 
         for (const testData of testDataList) {

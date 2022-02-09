@@ -56,21 +56,6 @@ export default function ({ getService }: FtrProviderContext) {
                 createIndexPattern: true,
                 expected: {
                     source: 'ft_farequote',
-                    rocCurveColorState: [
-                        // tick/grid/axis
-                        { color: '#DDDDDD', percentage: 50 },
-                        // line
-                        { color: '#98A2B3', percentage: 10 },
-                    ],
-                    scatterplotMatrixColorStats: [
-                        // marker colors
-                        { color: '#7FC6B3', percentage: 1 },
-                        { color: '#88ADD0', percentage: 0.03 },
-                        // tick/grid/axis
-                        { color: '#DDDDDD', percentage: 8 },
-                        { color: '#D3DAE6', percentage: 8 },
-                        { color: '#F5F7FA', percentage: 15 },
-                    ],
                     runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
                     row: {
                         memoryStatus: 'ok',
@@ -89,6 +74,100 @@ export default function ({ getService }: FtrProviderContext) {
                                         '{"training_docs_count":17254,"test_docs_count":69020,"skipped_docs_count":0}',
                                     description:
                                         "Regression job based on a saved search with filter' with dependentVariable 'responsetime' and trainingPercent '20'",
+                                },
+                            },
+                            { section: 'progress', expectedEntries: { Phase: '8/8' } },
+                        ],
+                    } as AnalyticsTableRowDetails,
+                },
+            },
+            {
+                suiteTitle: 'with lucene query',
+                jobType: 'regression',
+                jobSource: 'ft_farequote_lucene',
+                jobId: `fq_saved_search_2_${dateNow}`,
+                jobDescription: 'Regression job based on a saved search with lucene query',
+                source: 'ft_farequote_lucene',
+                get destinationIndex(): string {
+                    return `user-${this.jobId}`;
+                },
+                runtimeFields: {
+                    uppercase_airline: {
+                        type: 'keyword',
+                        script: 'emit(params._source.airline.toUpperCase())',
+                    },
+                },
+                dependentVariable: 'responsetime',
+                trainingPercent: 20,
+                modelMemory: '20mb',
+                createIndexPattern: true,
+                expected: {
+                    source: 'ft_farequote',
+                    runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+                    row: {
+                        memoryStatus: 'ok',
+                        type: 'regression',
+                        status: 'stopped',
+                        progress: '100',
+                    },
+                    rowDetails: {
+                        jobDetails: [
+                            {
+                                section: 'state',
+                                expectedEntries: {
+                                    id: `fq_saved_search_2_${dateNow}`,
+                                    state: 'stopped',
+                                    data_counts:
+                                        '{"training_docs_count":6883,"test_docs_count":27533,"skipped_docs_count":0}',
+                                    description:
+                                        "Regression job based on a saved search with lucene query",
+                                },
+                            },
+                            { section: 'progress', expectedEntries: { Phase: '8/8' } },
+                        ],
+                    } as AnalyticsTableRowDetails,
+                },
+            },
+            {
+                suiteTitle: 'with kuery query',
+                jobType: 'regression',
+                jobSource: 'ft_farequote_kuery',
+                jobId: `fq_saved_search_3_${dateNow}`,
+                jobDescription: 'Regression job based on a saved search with kuery query',
+                source: 'ft_farequote_lucene',
+                get destinationIndex(): string {
+                    return `user-${this.jobId}`;
+                },
+                runtimeFields: {
+                    uppercase_airline: {
+                        type: 'keyword',
+                        script: 'emit(params._source.airline.toUpperCase())',
+                    },
+                },
+                dependentVariable: 'responsetime',
+                trainingPercent: 20,
+                modelMemory: '20mb',
+                createIndexPattern: true,
+                expected: {
+                    source: 'ft_farequote',
+                    runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+                    row: {
+                        memoryStatus: 'ok',
+                        type: 'regression',
+                        status: 'stopped',
+                        progress: '100',
+                    },
+                    rowDetails: {
+                        jobDetails: [
+                            {
+                                section: 'state',
+                                expectedEntries: {
+                                    id: `fq_saved_search_3_${dateNow}`,
+                                    state: 'stopped',
+                                    data_counts:
+                                        '{"training_docs_count":6883,"test_docs_count":27533,"skipped_docs_count":0}',
+                                    description:
+                                        "Regression job based on a saved search with kuery query",
                                 },
                             },
                             { section: 'progress', expectedEntries: { Phase: '8/8' } },
@@ -290,21 +369,6 @@ export default function ({ getService }: FtrProviderContext) {
                     await ml.dataFrameAnalyticsResults.assertResultsTableExists();
                     await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
                     await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-
-                    // await ml.testExecution.logTestStep(
-                    //     'sets the sample size to 10000 for the scatterplot matrix'
-                    // );
-                    // await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
-
-                    // await ml.testExecution.logTestStep(
-                    //     'sets the randomize query switch to true for the scatterplot matrix'
-                    // );
-                    // await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
-
-                    // await ml.testExecution.logTestStep('displays the scatterplot matrix');
-                    // await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
-                    //     testData.expected.scatterplotMatrixColorStats
-                    // );
 
                     await ml.commonUI.resetAntiAliasing();
                 });

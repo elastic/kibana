@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
     const ml = getService('ml');
     const editedDescription = 'Edited description';
 
-    describe('classification creation', function () {
+    describe('outlier detection creation', function () {
         before(async () => {
             await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
             await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -55,9 +55,8 @@ export default function ({ getService }: FtrProviderContext) {
                 expected: {
                     histogramCharts: [
                         { chartAvailable: true, id: 'uppercase_airline', legend: '19 categories' },
-                        { chartAvailable: true, id: 'responsetime', legend: '4.25 - 10297.25' },
+                        { chartAvailable: true, id: 'responsetime', legend: '4.25 - 10237.83' },
                         { chartAvailable: true, id: 'airline', legend: '19 categories' },
-                        { chartAvailable: true, id: '@timestamp', legend: '1455101163000 - 1455192154000' },
                     ],
                     scatterplotMatrixColorsWizard: [
                         // markers
@@ -97,6 +96,138 @@ export default function ({ getService }: FtrProviderContext) {
                                         '{"training_docs_count":1460,"test_docs_count":0,"skipped_docs_count":0}',
                                     description:
                                         'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
+                                },
+                            },
+                            { section: 'progress', expectedEntries: { Phase: '4/4' } },
+                        ],
+                    } as AnalyticsTableRowDetails,
+                },
+            },
+            {
+                suiteTitle: 'with lucene query',
+                jobType: 'outlier_detection',
+                jobSource: 'ft_farequote_lucene',
+                jobId: `fq_saved_search_2_${dateNow}`,
+                jobDescription: 'Outlier detection job based on a saved search with lucene query',
+                source: 'ft_farequote_lucene',
+                get destinationIndex(): string {
+                    return `user-${this.jobId}`;
+                },
+                runtimeFields: {
+                    uppercase_airline: {
+                        type: 'keyword',
+                        script: 'emit(params._source.airline.toUpperCase())',
+                    },
+                },
+                modelMemory: '65mb',
+                createIndexPattern: true,
+                expected: {
+                    source: 'ft_farequote',
+                    histogramCharts: [
+                        { chartAvailable: true, id: 'uppercase_airline', legend: '5 categories' },
+                        { chartAvailable: true, id: 'responsetime', legend: '4.25 - 190.36' },
+                        { chartAvailable: true, id: 'airline', legend: '5 categories' },
+                    ],
+                    scatterplotMatrixColorsWizard: [
+                        // markers
+                        { color: '#52B398', percentage: 15 },
+                        // grey boilerplate
+                        { color: '#6A717D', percentage: 13 },
+                    ],
+                    scatterplotMatrixColorStatsResults: [
+                        // red markers
+                        { color: '#D98071', percentage: 1 },
+                        // tick/grid/axis, grey markers
+                        { color: '#6A717D', percentage: 12 },
+                        { color: '#D3DAE6', percentage: 8 },
+                        { color: '#98A1B3', percentage: 12 },
+                        // anti-aliasing
+                        { color: '#F5F7FA', percentage: 30 },
+                    ],
+                    runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+                    row: {
+                        memoryStatus: 'ok',
+                        type: 'outlier_detection',
+                        status: 'stopped',
+                        progress: '100',
+                    },
+                    rowDetails: {
+                        jobDetails: [
+                            {
+                                section: 'state',
+                                expectedEntries: {
+                                    id: `fq_saved_search_2_${dateNow}`,
+                                    state: 'stopped',
+                                    data_counts:
+                                        '{"training_docs_count":34416,"test_docs_count":0,"skipped_docs_count":0}',
+                                    description:
+                                        "Outlier detection job based on a saved search with lucene query",
+                                },
+                            },
+                            { section: 'progress', expectedEntries: { Phase: '4/4' } },
+                        ],
+                    } as AnalyticsTableRowDetails,
+                },
+            },
+            {
+                suiteTitle: 'with kuery query',
+                jobType: 'outlier_detection',
+                jobSource: 'ft_farequote_kuery',
+                jobId: `fq_saved_search_3_${dateNow}`,
+                jobDescription: 'Outlier detection job based on a saved search with kuery query',
+                source: 'ft_farequote_lucene',
+                get destinationIndex(): string {
+                    return `user-${this.jobId}`;
+                },
+                runtimeFields: {
+                    uppercase_airline: {
+                        type: 'keyword',
+                        script: 'emit(params._source.airline.toUpperCase())',
+                    },
+                },
+                modelMemory: '65mb',
+                createIndexPattern: true,
+                expected: {
+                    source: 'ft_farequote',
+                    histogramCharts: [
+                        { chartAvailable: true, id: 'uppercase_airline', legend: '5 categories' },
+                        { chartAvailable: true, id: 'responsetime', legend: '4.25 - 190.36' },
+                        { chartAvailable: true, id: 'airline', legend: '5 categories' },
+                    ],
+                    scatterplotMatrixColorsWizard: [
+                        // markers
+                        { color: '#52B398', percentage: 15 },
+                        // grey boilerplate
+                        { color: '#6A717D', percentage: 13 },
+                    ],
+                    scatterplotMatrixColorStatsResults: [
+                        // red markers
+                        { color: '#D98071', percentage: 1 },
+                        // tick/grid/axis, grey markers
+                        { color: '#6A717D', percentage: 12 },
+                        { color: '#D3DAE6', percentage: 8 },
+                        { color: '#98A1B3', percentage: 12 },
+                        // anti-aliasing
+                        { color: '#F5F7FA', percentage: 30 },
+                    ],
+                    runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+                    row: {
+                        memoryStatus: 'ok',
+                        type: 'outlier_detection',
+                        status: 'stopped',
+                        progress: '100',
+                    },
+                    rowDetails: {
+                        jobDetails: [
+                            {
+                                section: 'state',
+                                expectedEntries: {
+                                    id: `fq_saved_search_3_${dateNow}`,
+                                    state: 'stopped',
+                                    data_counts:
+                                        '{"training_docs_count":34416,"test_docs_count":0,"skipped_docs_count":0}',
+                                    description:
+                                        "Outlier detection job based on a saved search with kuery query",
                                 },
                             },
                             { section: 'progress', expectedEntries: { Phase: '4/4' } },
@@ -246,7 +377,7 @@ export default function ({ getService }: FtrProviderContext) {
                         id: testData.jobId,
                         description: testData.jobDescription,
                         memoryStatus: testData.expected.row.memoryStatus,
-                        sourceIndex: testData.source,
+                        sourceIndex: testData.expected.source,
                         destinationIndex: testData.destinationIndex,
                         type: testData.expected.row.type,
                         status: testData.expected.row.status,
@@ -285,7 +416,7 @@ export default function ({ getService }: FtrProviderContext) {
                         id: testData.jobId,
                         description: editedDescription,
                         memoryStatus: testData.expected.row.memoryStatus,
-                        sourceIndex: testData.source,
+                        sourceIndex: testData.expected.source,
                         destinationIndex: testData.destinationIndex,
                         type: testData.expected.row.type,
                         status: testData.expected.row.status,
@@ -304,21 +435,6 @@ export default function ({ getService }: FtrProviderContext) {
                     await ml.dataFrameAnalyticsResults.assertResultsTableExists();
                     await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
                     await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
-
-                    await ml.testExecution.logTestStep(
-                        'sets the sample size to 10000 for the scatterplot matrix'
-                    );
-                    await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
-
-                    await ml.testExecution.logTestStep(
-                        'sets the randomize query switch to true for the scatterplot matrix'
-                    );
-                    await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
-
-                    await ml.testExecution.logTestStep('displays the scatterplot matrix');
-                    await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
-                        testData.expected.scatterplotMatrixColorStatsResults
-                    );
 
                     await ml.commonUI.resetAntiAliasing();
                 });
