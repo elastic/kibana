@@ -138,11 +138,32 @@ export function RulesPage() {
       }),
       render: (_enabled: boolean) => {
         return (
-          <EuiPopover button={popOverButton} anchorPosition="downLeft" isOpen={isPopoverOpen}>
+          <EuiPopover
+            button={popOverButton}
+            anchorPosition="downLeft"
+            isOpen={isPopoverOpen}
+            panelPaddingSize="none"
+          >
             <EuiContextMenuPanel items={panelItems} />
           </EuiPopover>
         );
       },
+    },
+    {
+      name: i18n.translate('xpack.observability.rules.rulesTable.columns.actionsTitle', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          name: 'Edit',
+          isPrimary: true,
+          description: 'Edit this rule',
+          icon: 'pencil',
+          type: 'icon',
+          onClick: () => {},
+          'data-test-subj': 'action-edit',
+        },
+      ]
     },
   ];
   console.log(rules.data, '!!data');
