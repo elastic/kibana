@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export type { PublicAlertInstance } from './alert_instance';
-export { AlertInstance } from './alert_instance';
-export { createAlertInstanceFactory } from './create_alert_instance_factory';
+export * from './locations';
