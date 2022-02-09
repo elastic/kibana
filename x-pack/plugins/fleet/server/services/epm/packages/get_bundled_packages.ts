@@ -9,11 +9,13 @@ import path from 'path';
 import fs from 'fs/promises';
 
 import { appContextService } from '../../app_context';
+import { splitPkgKey } from '../registry';
 
 const BUNDLED_PACKAGE_DIRECTORY = path.join(__dirname, '../../../bundled_packages');
 
 interface BundledPackage {
   name: string;
+  version: string;
   buffer: Buffer;
 }
 
@@ -26,8 +28,11 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
       zipFiles.map(async (zipFile) => {
         const file = await fs.readFile(path.join(BUNDLED_PACKAGE_DIRECTORY, zipFile));
 
+        const { pkgName, pkgVersion } = splitPkgKey(zipFile.replace(/\.zip$/, ''));
+
         return {
-          name: zipFile.replace(/\.zip$/, ''),
+          name: pkgName,
+          version: pkgVersion,
           buffer: file,
         };
       })

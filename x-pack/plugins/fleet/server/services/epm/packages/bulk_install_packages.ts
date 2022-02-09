@@ -12,6 +12,8 @@ import * as Registry from '../registry';
 
 import type { InstallResult } from '../../../types';
 
+import { BundledPackageNotFoundError } from '../../../errors';
+
 import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 import { getBundledPackages } from './get_bundled_packages';
@@ -39,8 +41,32 @@ export async function bulkInstallPackages({
 
   const packagesResults = await Promise.allSettled(
     packagesToInstall.map((pkg) => {
-      if (typeof pkg === 'string') return Registry.fetchFindLatestPackage(pkg);
-      return Promise.resolve(pkg);
+      if (typeof pkg !== 'string') {
+        return Promise.resolve(pkg);
+      }
+
+      return Registry.fetchFindLatestPackage(pkg).catch((error) => {
+        // For registry preferred bulk installs, consider an inability to reach the configured
+        // registry a fotal error
+        if (preferredSource === 'registry') {
+          return Promise.reject(error);
+        }
+
+        // For bundled preferred bulk installs, we want to allow the installation to continue, even
+        // if the registry is not reachable
+        const bundledPackage = bundledPackages.find((b) => b.name === pkg);
+
+        if (!bundledPackage) {
+          return Promise.reject(
+            new BundledPackageNotFoundError(`No bundled package found with name ${pkg}`)
+          );
+        }
+
+        return Promise.resolve({
+          name: bundledPackage.name,
+          version: bundledPackage.version,
+        });
+      });
     })
   );
 
@@ -86,7 +112,7 @@ export async function bulkInstallPackages({
       let installResult: InstallResult;
       const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
 
-      const bundledPackage = bundledPackages.find((pkg) => pkg.name === pkgkey);
+      const bundledPackage = bundledPackages.find((pkg) => `${pkg.name}-${pkg.version}` === pkgkey);
 
       // If preferred source is bundled packages on disk, attempt to install from disk first, then fall back to registry
       if (preferredSource === 'bundled') {

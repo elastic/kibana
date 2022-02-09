@@ -71,7 +71,7 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
 
   setKibanaVersion(url);
 
-  const res = await fetchUrl(url.toString());
+  const res = await fetchUrl(url.toString(), 1);
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
     return searchResults[0];
