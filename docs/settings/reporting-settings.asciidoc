@@ -22,7 +22,16 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 ==== Enable reporting
 
 [[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}::
-When `true`, enables the {report-features}. The {report-features} are automatically enabled in {kib}. The default is `true`.
+When `true`, enables the {report-features}. The {report-features} are automatically enabled in {kib}. Set this
+to `false` to disable {report-features} entirely. The default is `true`.
+
+[NOTE]
+============
+Disabling Reporting entirely is discouraged. Rather than disabling the entire Reporting plugin, please use
+`xpack.reporting.queue.pollEnabled: false` instead. This rule is mandatory if you intend to enable Reporting on
+a portion of Kibana instances in a deployment. If you need to disable Kibana features from the UI, you can do
+so on a per-role and per-space basis with <<kibana-privileges, {kib} application privileges>>.
+============
 
 [float]
 [[encryption-keys]]
