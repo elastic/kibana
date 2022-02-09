@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { AddRoleTemplateButton } from './add_role_template_button';
 

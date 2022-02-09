@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import type { DocLinksStart } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 

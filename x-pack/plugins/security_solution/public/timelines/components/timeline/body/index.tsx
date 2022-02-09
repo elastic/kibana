@@ -89,6 +89,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     setSelected,
     clearSelected,
     onRuleChange,
+    show,
     showCheckboxes,
     refetch,
     renderCellValue,
@@ -244,6 +245,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
               onSelectAll={onSelectAll}
+              show={show}
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
@@ -298,7 +300,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     prevProps.renderCellValue === nextProps.renderCellValue &&
     prevProps.rowRenderers === nextProps.rowRenderers &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
-    prevProps.tabType === nextProps.tabType
+    prevProps.tabType === nextProps.tabType &&
+    prevProps.show === nextProps.show
 );
 
 BodyComponent.displayName = 'BodyComponent';
@@ -321,6 +324,7 @@ const makeMapStateToProps = () => {
       pinnedEventIds,
       selectedEventIds,
       showCheckboxes,
+      show,
     } = timeline;
 
     return {
@@ -333,6 +337,7 @@ const makeMapStateToProps = () => {
       pinnedEventIds,
       selectedEventIds,
       showCheckboxes,
+      show,
     };
   };
   return mapStateToProps;
