@@ -8,7 +8,15 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import './search_source_threshold_expression.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiTitle, EuiExpression, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTitle,
+  EuiExpression,
+  EuiPopover,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { Filter, ISearchSource } from '../../../../../../src/plugins/data/common';
 import { QueryStringInput } from '../../../../../../src/plugins/data/public';
 import { EsQueryAlertParams } from './types';
@@ -18,7 +26,7 @@ import {
   ThresholdExpression,
 } from '../../../../triggers_actions_ui/public';
 import { DEFAULT_VALUES } from './constants';
-import { ReadOnlyFilterItems } from '../components/read_only_filter_items';
+import { ReadOnlyFilterItems } from './read_only_filter_items';
 
 export const SearchSourceThresholdExpression = ({
   ruleParams,
@@ -80,13 +88,27 @@ export const SearchSourceThresholdExpression = ({
   }, [data.search.searchSource, searchConfiguration]);
 
   if (!usedSearchSource) {
-    // there should be a loading indicator
-    return null;
+    return (
+      <EuiEmptyPrompt
+        title={<EuiLoadingSpinner size="xl" />}
+        body={
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.stackAlerts.searchThreshold.ui.loadingPrompt"
+              defaultMessage="Loading rule type params…"
+            />
+          </EuiText>
+        }
+      />
+    );
   }
 
+  const dataView = usedSearchSource.getField('index')!;
+  const query = usedSearchSource.getField('query')!;
   const filters = (usedSearchSource.getField('filter') as Filter[]).filter(
     ({ meta }) => !meta.disabled
   );
+  const indexPatterns = [dataView];
 
   return (
     <Fragment>
@@ -101,7 +123,7 @@ export const SearchSourceThresholdExpression = ({
       <EuiSpacer size="s" />
       <EuiExpression
         description={'Data view'}
-        value={usedSearchSource.getField('index')!.title}
+        value={dataView.title}
         isActive={true}
         display="columns"
       />
@@ -109,7 +131,7 @@ export const SearchSourceThresholdExpression = ({
         button={
           <EuiExpression
             description={'Query'}
-            value={usedSearchSource.getField('query')!.query}
+            value={query.query}
             isActive={true}
             display="columns"
           />
@@ -118,14 +140,7 @@ export const SearchSourceThresholdExpression = ({
         isOpen={showQueryBar}
         closePopover={() => setShowQueryBar(false)}
       >
-        <QueryStringInput
-          indexPatterns={[usedSearchSource.getField('index')!]}
-          query={usedSearchSource.getField('query')!}
-          onChange={(query) => {
-            usedSearchSource.setField('query', query);
-            setUsedSearchSource(usedSearchSource.createCopy());
-          }}
-        />
+        <QueryStringInput indexPatterns={indexPatterns} query={query} />
       </EuiPopover>
       <EuiSpacer size="s" />
       <EuiPopover
@@ -134,12 +149,7 @@ export const SearchSourceThresholdExpression = ({
             className="searchSourceAlertFilters"
             title={'sas'}
             description={'Filter'}
-            value={
-              <ReadOnlyFilterItems
-                filters={filters}
-                indexPatterns={[usedSearchSource.getField('index')!]}
-              />
-            }
+            value={<ReadOnlyFilterItems filters={filters} indexPatterns={indexPatterns} />}
             isActive={true}
             display="columns"
           />
