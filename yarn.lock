@@ -7528,10 +7528,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.0.16":
-  version "4.0.16"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.0.16.tgz#c3205c6691a1d645cf4163684bd119230a60e6f5"
-  integrity sha512-0UAzu2lFXpLK4lU4yhgUtM/KxoN8hIpyI+q22KAwzIDHNk4kLJ/Ut5mJZLFSxfQx58OBQ9SJXZkSL065fe/WdQ==
+"@types/selenium-webdriver@^4.0.18":
+  version "4.0.18"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.0.18.tgz#98f6e1ccd2d92f6fddaccfc7c148d2e158da0f92"
+  integrity sha512-gkrUo3QldGr8V9im/DjgKkX4UVd1rtflfEBuPG9hPSA1keu7A0rF8h/MQjpTMm2EPVhBCd2K8tn5nlC9Vsd5Xw==
 
 "@types/semver@^7":
   version "7.3.4"
@@ -10706,10 +10706,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^97.0.2:
-  version "97.0.2"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-97.0.2.tgz#b6c26f6667ad40dc8cf08818878cc064787116fc"
-  integrity sha512-sOAfKCR3WsHvmKedZoWa+3tBVGdPtxq4zKxgKZCoJ2c924olBTW4Bnha6SHl93Yo7+QqsNn6ZpAC0ojhutacAg==
+chromedriver@^98.0.0:
+  version "98.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-98.0.0.tgz#b2c3c1941fad4cdfadad5d4c46923e02f089fd30"
+  integrity sha512-Oi6Th5teK+VI4nti+423/dFkENYHEMOdUvqwJHzOaNwXqLwZ8FuSaKBybgALCctGapwJbd+tmPv3qSd6tUUIHQ==
   dependencies:
     "@testim/chrome-version" "^1.1.2"
     axios "^0.24.0"
