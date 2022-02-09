@@ -268,7 +268,7 @@ describe('useSecuritySolutionNavigation', () => {
     `);
   });
 
-  // TODO: Steph/ueba remove when no longer experimental
+  // TODO: Steph/users remove when no longer experimental
   it('should include users when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(

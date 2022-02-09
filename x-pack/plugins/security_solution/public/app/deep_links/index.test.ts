@@ -145,7 +145,7 @@ describe('deepLinks', () => {
     expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeFalsy();
   });
 
-  it('should return ueba link when enableExperimental.uebaEnabled === true', () => {
+  it('should return users link when enableExperimental.usersEnabled === true', () => {
     const deepLinks = getDeepLinks({
       ...mockGlobalState.app.enableExperimental,
       usersEnabled: true,
