@@ -17,14 +17,12 @@ describe('<NoDataViewsComponent />', () => {
       <NoDataViewsComponent onClick={jest.fn()} canCreateNewDataView={true} />
     );
 
-    expect(component).toMatchSnapshot();
     expect(component.find(EuiButton).length).toBe(1);
   });
 
   test('does not render button if canCreateNewDataViews is false', () => {
     const component = mountWithIntl(<NoDataViewsComponent canCreateNewDataView={false} />);
 
-    expect(component).toMatchSnapshot();
     expect(component.find(EuiButton).length).toBe(0);
   });
 

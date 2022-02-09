@@ -31,12 +31,6 @@ describe('<NoDataViewsPageTest />', () => {
     jest.resetAllMocks();
   });
 
-  test('is rendered', () => {
-    const component = mount(<NoDataViewsPage onDataViewCreated={jest.fn()} />);
-
-    expect(component).toMatchSnapshot();
-  });
-
   test('on dataView created', () => {
     const component = mount(<NoDataViewsPage onDataViewCreated={jest.fn()} />);
 
