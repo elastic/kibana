@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {KibanaRequest} from 'kibana/server';
 
 export const PLUGIN_ID = 'profiling';
 export const PLUGIN_NAME = 'profiling';
@@ -24,7 +23,7 @@ export function getLocalRoutePaths() {
     TopNThreads: `${BASE_LOCAL_ROUTE_PATH}/topn/threads`,
     TopNTraces: `${BASE_LOCAL_ROUTE_PATH}/topn/traces`,
     FlamechartElastic: `${BASE_LOCAL_ROUTE_PATH}/flamechart/elastic`,
-    FlamechartPixi: `${BASE_LOCAL_ROUTE_PATH}/flamechart/pixi`
+    FlamechartPixi: `${BASE_LOCAL_ROUTE_PATH}/flamechart/pixi`,
   };
 }
 
@@ -37,7 +36,7 @@ export function getRemoteRoutePaths() {
     TopNThreads: `${BASE_REMOTE_ROUTE_PATH}/topn/threads`,
     TopNTraces: `${BASE_REMOTE_ROUTE_PATH}/topn/traces`,
     FlamechartElastic: `${BASE_REMOTE_ROUTE_PATH}/flamechart/elastic`,
-    FlamechartPixi: `${BASE_REMOTE_ROUTE_PATH}/flamechart/pixi`
+    FlamechartPixi: `${BASE_REMOTE_ROUTE_PATH}/flamechart/pixi`,
   };
 }
 

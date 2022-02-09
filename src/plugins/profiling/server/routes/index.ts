@@ -5,4 +5,39 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { registerRoutes } from './register_routes';
+import type { IRouter } from 'kibana/server';
+import { DataRequestHandlerContext } from '../../../data/server';
+import { registerFlameChartElasticRoute, registerFlameChartPixiRoute } from './load_flamechart';
+import {
+  registerTraceEventsTopNContainersRoute,
+  registerTraceEventsTopNDeploymentsRoute,
+  registerTraceEventsTopNHostsRoute,
+  registerTraceEventsTopNStackTracesRoute,
+  registerTraceEventsTopNThreadsRoute,
+} from './load_topn';
+
+import { registerFlameChartSearchRoute } from './search_flamechart';
+import {
+  registerTraceEventsTopNContainersSearchRoute,
+  registerTraceEventsTopNDeploymentsSearchRoute,
+  registerTraceEventsTopNHostsSearchRoute,
+  registerTraceEventsTopNStackTracesSearchRoute,
+  registerTraceEventsTopNThreadsSearchRoute,
+} from './search_topn';
+
+export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {
+  registerFlameChartElasticRoute(router);
+  registerFlameChartPixiRoute(router);
+  registerTraceEventsTopNContainersRoute(router);
+  registerTraceEventsTopNDeploymentsRoute(router);
+  registerTraceEventsTopNHostsRoute(router);
+  registerTraceEventsTopNStackTracesRoute(router);
+  registerTraceEventsTopNThreadsRoute(router);
+
+  registerFlameChartSearchRoute(router);
+  registerTraceEventsTopNContainersSearchRoute(router);
+  registerTraceEventsTopNDeploymentsSearchRoute(router);
+  registerTraceEventsTopNHostsSearchRoute(router);
+  registerTraceEventsTopNStackTracesSearchRoute(router);
+  registerTraceEventsTopNThreadsSearchRoute(router);
+}

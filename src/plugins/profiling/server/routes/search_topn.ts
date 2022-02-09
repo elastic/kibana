@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import type { IRouter } from 'kibana/server';
 import { IEsSearchRequest } from '../../../data/server';
 import { IEsSearchResponse } from '../../../data/common';
 import type { DataRequestHandlerContext } from '../../../data/server';
-import type { IRouter } from '../../../../core/server';
+import { getRemoteRoutePaths } from '../../common';
 
 export function queryTopNCommon(
   router: IRouter<DataRequestHandlerContext>,
@@ -133,4 +134,39 @@ export function queryTopNCommon(
       }
     }
   );
+}
+
+export function registerTraceEventsTopNContainersSearchRoute(
+  router: IRouter<DataRequestHandlerContext>
+) {
+  const paths = getRemoteRoutePaths();
+  return queryTopNCommon(router, paths.TopNContainers, 'ContainerName');
+}
+
+export function registerTraceEventsTopNDeploymentsSearchRoute(
+  router: IRouter<DataRequestHandlerContext>
+) {
+  const paths = getRemoteRoutePaths();
+  return queryTopNCommon(router, paths.TopNDeployments, 'PodName');
+}
+
+export function registerTraceEventsTopNHostsSearchRoute(
+  router: IRouter<DataRequestHandlerContext>
+) {
+  const paths = getRemoteRoutePaths();
+  return queryTopNCommon(router, paths.TopNHosts, 'HostID');
+}
+
+export function registerTraceEventsTopNStackTracesSearchRoute(
+  router: IRouter<DataRequestHandlerContext>
+) {
+  const paths = getRemoteRoutePaths();
+  return queryTopNCommon(router, paths.TopNTraces, 'StackTraceID');
+}
+
+export function registerTraceEventsTopNThreadsSearchRoute(
+  router: IRouter<DataRequestHandlerContext>
+) {
+  const paths = getRemoteRoutePaths();
+  return queryTopNCommon(router, paths.TopNThreads, 'ThreadName');
 }
