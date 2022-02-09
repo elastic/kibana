@@ -9,7 +9,7 @@ import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { setState, initEmpty, LensStoreDeps } from '..';
-import { getPreloadedState } from '../lens_slice';
+import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
@@ -17,6 +17,8 @@ import { initializeDatasources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { Document } from '../../persistence';
+import { readFromStorage } from '../../settings_storage';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 export const getPersisted = async ({
   initialInput,
@@ -209,6 +211,12 @@ export function loadInitial(
                   isLoading: false,
                 })
               );
+
+              const autoApplyDisabled =
+                readFromStorage(new Storage(localStorage), 'autoApplyDisabled') === 'true';
+              if (autoApplyDisabled) {
+                store.dispatch(disableAutoApply());
+              }
             })
             .catch((e: { message: string }) =>
               notifications.toasts.addDanger({

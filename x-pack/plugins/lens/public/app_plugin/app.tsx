@@ -10,8 +10,10 @@ import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   createKbnUrlStateStorage,
+  Storage,
   withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -38,6 +40,7 @@ import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
 import { disableAutoApply } from '../state_management/lens_slice';
+import { readFromStorage, writeToStorage } from '../settings_storage';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -296,10 +299,14 @@ export function App({
   );
 
   const autoApplyEnabled = !Boolean(appliedState);
-  const toggleAutoApply = useCallback(
-    () => dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply()),
-    [dispatch, autoApplyEnabled]
-  );
+  const toggleAutoApply = useCallback(() => {
+    writeToStorage(
+      new Storage(localStorage),
+      'autoApplyDisabled',
+      String(typeof appliedState === 'undefined')
+    );
+    dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
+  }, [dispatch, appliedState, autoApplyEnabled]);
 
   return (
     <>

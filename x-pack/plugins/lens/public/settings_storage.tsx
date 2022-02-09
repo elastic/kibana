@@ -14,5 +14,5 @@ export const readFromStorage = (storage: IStorageWrapper, key: string) => {
   return data && data[key];
 };
 export const writeToStorage = (storage: IStorageWrapper, key: string, value: string) => {
-  storage.set(STORAGE_KEY, { [key]: value });
+  storage.set(STORAGE_KEY, { ...storage.get(STORAGE_KEY), [key]: value });
 };
