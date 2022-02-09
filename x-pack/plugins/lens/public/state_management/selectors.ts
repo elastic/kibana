@@ -9,7 +9,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { SavedObjectReference } from 'kibana/server';
 import { FilterManager } from 'src/plugins/data/public';
 import { LensState } from './types';
-import { Datasource, DatasourceMap, VisualizationMap } from '../types';
+import { Datasource, DatasourceMap, FramePublicAPI, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
@@ -151,13 +151,23 @@ export const selectDatasourceLayers = createSelector(
 export const selectFramePublicAPI = createSelector(
   [
     selectDatasourceStates,
+    selectAppliedState,
     selectActiveData,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
   ],
-  (datasourceStates, activeData, datasourceMap) => {
-    return {
+  (datasourceStates, appliedState, activeData, datasourceMap) => {
+    const api: FramePublicAPI = {
       datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
       activeData,
     };
+
+    if (appliedState) {
+      api.appliedDatasourceLayers = getDatasourceLayers(
+        appliedState.datasourceStates,
+        datasourceMap
+      );
+    }
+
+    return api;
   }
 );

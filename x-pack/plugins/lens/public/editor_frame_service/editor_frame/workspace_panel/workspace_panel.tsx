@@ -134,7 +134,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
 
-  const { datasourceLayers } = framePublicAPI;
+  const { datasourceLayers, appliedDatasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
@@ -189,7 +189,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           visualizationState: appliedState?.visualization.state || visualization.state,
           datasourceMap,
           datasourceStates: appliedState?.datasourceStates || datasourceStates,
-          datasourceLayers,
+          datasourceLayers: appliedDatasourceLayers || datasourceLayers,
         });
 
         if (ast) {
@@ -224,6 +224,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     configurationValidationError?.length,
     missingRefsErrors.length,
     appliedState,
+    appliedDatasourceLayers,
   ]);
 
   const expressionExists = Boolean(expression);
@@ -325,7 +326,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    if (expression === null) {
+    if (!expressionExists) {
       return renderEmptyWorkspace();
     }
     return (
@@ -342,8 +343,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       />
     );
   };
-
-  const element = expression !== null ? renderVisualization() : renderEmptyWorkspace();
 
   const dragDropContext = useContext(DragContext);
 
@@ -374,7 +373,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         order={dropProps.order}
       >
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {element}
+          {renderVisualization()}
         </EuiPageContentBody>
       </DragDrop>
     );
