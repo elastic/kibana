@@ -32,6 +32,7 @@ import type {
   TermsIndexPatternColumn,
   LensPublicStart,
   RangeIndexPatternColumn,
+  PieVisualizationState,
 } from '../../../plugins/lens/public';
 import type { StartDependencies } from './plugin';
 import type { ActionExecutionContext } from '../../../../src/plugins/ui_actions/public';
@@ -289,6 +290,35 @@ function getLensAttributesGauge(
   };
 }
 
+function getLensAttributesPartition(
+  defaultIndexPattern: DataView,
+  fields: FieldsMap
+): TypedLensByValueInput['attributes'] {
+  const baseAttributes = getBaseAttributes(defaultIndexPattern, fields, 'number');
+  const pieConfig: PieVisualizationState = {
+    layers: [
+      {
+        groups: ['col1'],
+        metric: 'col2',
+        layerId: 'layer1',
+        layerType: 'data',
+        numberDisplay: 'percent',
+        categoryDisplay: 'default',
+        legendDisplay: 'default',
+      },
+    ],
+    shape: 'pie',
+  };
+  return {
+    ...baseAttributes,
+    visualizationType: 'lnsPie',
+    state: {
+      ...baseAttributes.state,
+      visualization: pieConfig,
+    },
+  };
+}
+
 function getFieldsByType(dataView: DataView) {
   const aggregatableFields = dataView.fields.filter((f) => f.aggregatable);
   const fields: Partial<FieldsMap> = {
@@ -349,6 +379,7 @@ export const App = (props: {
       id: 'area',
       attributes: getLensAttributes(props.defaultDataView, fields, 'area', 'green'),
     },
+    { id: 'pie', attributes: getLensAttributesPartition(props.defaultDataView, fields) },
     { id: 'table', attributes: getLensAttributesDatatable(props.defaultDataView, fields) },
     { id: 'heatmap', attributes: getLensAttributesHeatmap(props.defaultDataView, fields) },
     { id: 'gauge', attributes: getLensAttributesGauge(props.defaultDataView, fields) },
