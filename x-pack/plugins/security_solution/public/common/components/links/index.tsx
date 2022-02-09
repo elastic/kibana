@@ -73,7 +73,7 @@ const UserDetailsLinkComponent: React.FC<{
   return isButton ? (
     <GenericLinkButton
       Component={Component}
-      data-test-subj={'users-link-button'}
+      dataTestSubj="data-grid-user-details"
       href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
       onClick={onClick ?? goToUsersDetails}
       title={title ?? userName}
@@ -82,7 +82,7 @@ const UserDetailsLinkComponent: React.FC<{
     </GenericLinkButton>
   ) : (
     <LinkAnchor
-      data-test-subj={'users-link-anchor'}
+      data-test-subj="users-link-anchor"
       onClick={onClick ?? goToUsersDetails}
       href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
     >
