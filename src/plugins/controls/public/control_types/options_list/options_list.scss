@@ -39,6 +39,10 @@
   margin-left: $euiSizeS;
 }
 
+.optionsList-control-ignored-selection-title {
+  padding-left: $euiSizeS;
+}
+
 .optionsList__selectionInvalid {
   text-decoration: line-through;
   color: $euiTextSubduedColor;

@@ -44,11 +44,11 @@ export const OptionsListStrings = {
   popover: {
     getLoadingMessage: () =>
       i18n.translate('controls.optionsList.popover.loading', {
-        defaultMessage: 'Loading filters',
+        defaultMessage: 'Loading options',
       }),
     getEmptyMessage: () =>
       i18n.translate('controls.optionsList.popover.empty', {
-        defaultMessage: 'No filters found',
+        defaultMessage: 'No options found',
       }),
     getSelectionsEmptyMessage: () =>
       i18n.translate('controls.optionsList.popover.selectionsEmpty', {
@@ -80,6 +80,12 @@ export const OptionsListStrings = {
     getInvalidSelectionsTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsTitle', {
         defaultMessage: '{invalidSelectionCount} selected options ignored',
+        values: { invalidSelectionCount },
+      }),
+    getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionsTitle', {
+        defaultMessage:
+          'Ignored {invalidSelectionCount, plural, one {selection} other {selections}}',
         values: { invalidSelectionCount },
       }),
     getInvalidSelectionsAriaLabel: () =>

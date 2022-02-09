@@ -19,7 +19,9 @@ import {
   EuiSpacer,
   EuiBadge,
   EuiIcon,
+  EuiTitle,
 } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 
 import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
@@ -99,12 +101,7 @@ export const OptionsListPopover = ({
                       invalidSelections.length
                     )}
                   >
-                    <EuiBadge
-                      className="optionsList__ignoredBadge"
-                      color="warning"
-                      iconType="alert"
-                      iconSide="right"
-                    >
+                    <EuiBadge className="optionsList__ignoredBadge" color="warning">
                       {invalidSelections.length}
                     </EuiBadge>
                   </EuiToolTip>
@@ -186,6 +183,31 @@ export const OptionsListPopover = ({
                 </div>
               </div>
             )}
+
+            {!isEmpty(invalidSelections) && (
+              <>
+                <EuiTitle size="xxs" className="optionsList-control-ignored-selection-title">
+                  <label>
+                    {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
+                      invalidSelections?.length ?? 0
+                    )}
+                  </label>
+                </EuiTitle>
+                <>
+                  {invalidSelections?.map((ignoredSelection, index) => (
+                    <EuiFilterSelectItem
+                      data-test-subj={`optionsList-control-ignored-selection-${ignoredSelection}`}
+                      checked={'off'}
+                      className="optionsList__selectionInvalid"
+                      key={index}
+                      onClick={() => dispatch(deselectOption(ignoredSelection))}
+                    >
+                      {`${ignoredSelection}`}
+                    </EuiFilterSelectItem>
+                  ))}
+                </>
+              </>
+            )}
           </>
         )}
         {showOnlySelected && (
@@ -193,7 +215,7 @@ export const OptionsListPopover = ({
             {selectedOptions &&
               selectedOptions.map((availableOption, index) => (
                 <EuiFilterSelectItem
-                  checked="on"
+                  checked={invalidSelectionsSet.has(availableOption) ? 'off' : 'on'}
                   key={index}
                   onClick={() => dispatch(deselectOption(availableOption))}
                   className={
