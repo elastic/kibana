@@ -21,6 +21,7 @@ import {
   ALERTS_PATH,
   CASES_PATH,
   HOSTS_PATH,
+  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
@@ -405,6 +406,7 @@ export const sourcererPaths = [
   ALERTS_PATH,
   `${RULES_PATH}/id/:id`,
   HOSTS_PATH,
+  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
 ];
