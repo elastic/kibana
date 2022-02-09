@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import type { IRouter } from 'kibana/server';
 import type { DataRequestHandlerContext } from '../../../data/server';
-import type { IRouter } from '../../../../core/server';
 import { getRemoteRoutePaths } from '../../common';
 import { FlameGraph } from './flamegraph';
 
@@ -145,6 +145,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           sampleCountFromSmallestTable
         );
 
+        // eslint-disable-next-line no-console
         console.log('Index', eventsIndex, sampleRate, estimatedSampleCount);
 
         const resEvents = await esClient.search({
@@ -249,6 +250,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           body: flamegraph.toElastic(),
         });
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.log('Caught', e);
         return response.customError({
           statusCode: e.statusCode ?? 500,
