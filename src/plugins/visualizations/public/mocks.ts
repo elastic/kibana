@@ -50,6 +50,7 @@ const createInstance = async () => {
     inspector: inspectorPluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
+    uiActions: uiActionsPluginMock.createSetupContract(),
   });
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
