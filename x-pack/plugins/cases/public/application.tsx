@@ -37,12 +37,15 @@ const CasesApp = () => {
 
   return (
     <StyledComponentsThemeProvider darkMode={darkMode}>
-      {getCasesLazy({
-        owner: [APP_OWNER],
-        useFetchAlertData: () => [false, {}],
-        userCanCrud: true,
-        basePath: '/',
-      })}
+      {/* TODO: Replace div with page wrapper */}
+      <div>
+        {getCasesLazy({
+          owner: [APP_OWNER],
+          useFetchAlertData: () => [false, {}],
+          userCanCrud: true,
+          basePath: '/',
+        })}
+      </div>
     </StyledComponentsThemeProvider>
   );
 };
