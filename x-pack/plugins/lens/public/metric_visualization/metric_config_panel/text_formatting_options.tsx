@@ -24,7 +24,7 @@ export const TextFormattingOptions: React.FC<TitlePositionProps> = ({ state, set
       display="columnCompressed"
       label={
         <>
-          {i18n.translate('xpack.lens.metricChart.titleAlignLabel', {
+          {i18n.translate('xpack.lens.metricChart.textFormattingLabel', {
             defaultMessage: 'Text formatting',
           })}
         </>
