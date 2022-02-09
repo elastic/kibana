@@ -18,7 +18,7 @@ import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
+import { syntheticsMonitorType, syntheticsMonitor } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../../common/config';
 import { ServiceAPIClient } from './service_api_client';
@@ -272,22 +272,32 @@ export class SyntheticsService {
 
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
+    const encryptedClient = this.server.encryptedSavedObjects.getClient();
+    const monitors: SyntheticsMonitorSavedObject = [];
 
     if (!savedObjectsClient?.find) {
       return [] as SyntheticsMonitorWithId[];
     }
 
-    const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
+    const { saved_objects: encryptedMonitors } = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
       namespaces: ['*'],
     });
 
+    for (const monitor of encryptedMonitors) {
+      const decryptedMonitor = await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitor>(
+        syntheticsMonitor.name,
+        monitor.id
+      );
+      monitors.push(decryptedMonitor);
+    }
+
     hydrateSavedObjects({
-      monitors: findResult.saved_objects as unknown as SyntheticsMonitorSavedObject[],
+      monitors: monitors as unknown as SyntheticsMonitorSavedObject[],
       server: this.server,
     });
 
-    return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
+    return (monitors ?? []).map(({ attributes, id }) => ({
       ...attributes,
       id,
       fields_under_root: true,

@@ -6,10 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
+import { MonitorFields, SyntheticsMonitor, ConfigKey } from '../../../common/runtime_types';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
+import {
+  syntheticsMonitorType,
+  syntheticsMonitor,
+} from '../../lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from './service_errors';
 
 export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
@@ -20,10 +25,19 @@ export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, response, savedObjectsClient }): Promise<any> => {
+  handler: async ({
+    request,
+    response,
+    savedObjectsClient,
+    server: { encryptedSavedObjects },
+  }): Promise<any> => {
     const { monitorId } = request.params;
+    const encryptedClient = encryptedSavedObjects.getClient();
     try {
-      return await savedObjectsClient.get(syntheticsMonitorType, monitorId);
+      return await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitor>(
+        syntheticsMonitor.name,
+        monitorId
+      );
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
@@ -46,25 +60,47 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       search: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ request, savedObjectsClient }): Promise<any> => {
+  handler: async ({
+    request,
+    savedObjectsClient,
+    server: { encryptedSavedObjects },
+  }): Promise<any> => {
     const { perPage = 50, page, sortField, sortOrder, search } = request.query;
     // TODO: add query/filtering params
-    const {
-      saved_objects: monitors,
-      per_page: perPageT,
-      ...rest
-    } = await savedObjectsClient.find({
-      type: syntheticsMonitorType,
-      perPage,
-      page,
-      sortField,
-      sortOrder,
-      filter: search ? `${syntheticsMonitorType}.attributes.name: ${search}` : '',
-    });
-    return {
-      ...rest,
-      perPage: perPageT,
-      monitors,
-    };
+    const monitors: Array<SavedObject<SyntheticsMonitor>> = [];
+    try {
+      const encryptedClient = encryptedSavedObjects.getClient();
+      const {
+        saved_objects: encryptedMonitors,
+        per_page: perPageT,
+        ...rest
+      } = await savedObjectsClient.find({
+        type: syntheticsMonitorType,
+        perPage,
+        page,
+        sortField,
+        sortOrder,
+        filter: search ? `${syntheticsMonitorType}.attributes.name: ${search}` : '',
+      });
+      for (const monitor of encryptedMonitors) {
+        const decryptedMonitor =
+          await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitor>(
+            syntheticsMonitor.name,
+            monitor.id
+          );
+        monitors.push(decryptedMonitor);
+      }
+      return {
+        ...rest,
+        perPage: perPageT,
+        monitors,
+      };
+    } catch (e) {
+      // todo, handle error for failed decryption or an error in general
+      return {
+        perPage,
+        monitors: [],
+      };
+    }
   },
 });

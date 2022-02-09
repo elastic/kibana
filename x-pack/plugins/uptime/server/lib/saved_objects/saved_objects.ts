@@ -12,7 +12,7 @@ import {
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { DynamicSettings } from '../../../common/runtime_types';
+import { DynamicSettings, ConfigKey } from '../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
 import { UptimeConfig } from '../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
@@ -34,6 +34,42 @@ export const registerUptimeSavedObjects = (
       type: syntheticsServiceApiKey.name,
       attributesToEncrypt: new Set(['apiKey']),
     });
+    encryptedSavedObjects.registerType({
+      type: syntheticsMonitor.name,
+      attributesToEncrypt: new Set([
+        ConfigKey.HOSTS,
+        ConfigKey.LOCATIONS,
+        ConfigKey.PASSWORD,
+        ConfigKey.PROXY_URL,
+        ConfigKey.PROXY_USE_LOCAL_RESOLVER,
+        ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
+        ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
+        ConfigKey.RESPONSE_HEADERS_CHECK,
+        ConfigKey.RESPONSE_RECEIVE_CHECK,
+        ConfigKey.RESPONSE_STATUS_CHECK,
+        ConfigKey.REQUEST_BODY_CHECK,
+        ConfigKey.REQUEST_HEADERS_CHECK,
+        ConfigKey.REQUEST_METHOD_CHECK,
+        ConfigKey.REQUEST_SEND_CHECK,
+        ConfigKey.SOURCE_INLINE,
+        ConfigKey.SOURCE_ZIP_URL,
+        ConfigKey.SOURCE_ZIP_USERNAME,
+        ConfigKey.SOURCE_ZIP_PASSWORD,
+        ConfigKey.SOURCE_ZIP_FOLDER,
+        ConfigKey.SOURCE_ZIP_PROXY_URL,
+        ConfigKey.TAGS,
+        ConfigKey.TLS_CERTIFICATE_AUTHORITIES,
+        ConfigKey.TLS_CERTIFICATE,
+        ConfigKey.TLS_KEY,
+        ConfigKey.TLS_KEY_PASSPHRASE,
+        ConfigKey.URLS,
+        ConfigKey.USERNAME,
+        ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES,
+        ConfigKey.ZIP_URL_TLS_CERTIFICATE,
+        ConfigKey.ZIP_URL_TLS_KEY,
+        ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE,
+      ]),
+    });
   }
 };
 
@@ -53,7 +89,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       const config = savedObjectsAdapter.config;
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         if (config?.index) {
-          return { ...DYNAMIC_SETTINGS_DEFAULTS, heartbeatIndices: config.index };
+          return { ...DYNAMIC_SETTINGS_DEFAULTS, heartbeatIndices: ConfigKey.index };
         }
         return DYNAMIC_SETTINGS_DEFAULTS;
       }
