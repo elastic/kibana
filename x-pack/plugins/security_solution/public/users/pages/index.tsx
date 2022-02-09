@@ -11,24 +11,10 @@ import { USERS_PATH } from '../../../common/constants';
 import { UsersTableType } from '../store/model';
 import { Users } from './users';
 import { UsersDetails } from './details';
-
-const usersTabPath = `${USERS_PATH}/:tabName(${UsersTableType.allUsers})`;
-
-import { usersDetailsPagePath } from './types';
-
-const usersDetailsTabPath = `${usersDetailsPagePath}/:tabName(${UsersTableType.allUsers})`;
+import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './constants';
 
 export const UsersContainer = React.memo(() => (
   <Switch>
-    <Route
-      exact
-      strict
-      path={USERS_PATH}
-      render={({ location: { search = '' } }) => (
-        <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />
-      )}
-    />
-
     <Route path={usersTabPath}>
       <Users />
     </Route>
@@ -55,6 +41,12 @@ export const UsersContainer = React.memo(() => (
             search,
           }}
         />
+      )}
+    />
+    <Route
+      path={USERS_PATH}
+      render={({ location: { search = '' } }) => (
+        <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />
       )}
     />
   </Switch>

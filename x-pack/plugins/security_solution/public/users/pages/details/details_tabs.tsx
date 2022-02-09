@@ -15,28 +15,25 @@ import { UsersDetailsTabsProps } from './types';
 import { type } from './utils';
 
 import { AllUsersQueryTabBody } from '../navigation';
-import { AllUsersQueryProps } from '../navigation/types';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({ docValueFields, filterQuery, indexNames, usersDetailsPagePath }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
 
-    const tabProps: AllUsersQueryProps = {
-      deleteQuery,
-      endDate: to,
-      filterQuery,
-      skip: isInitializing || filterQuery === undefined,
-      setQuery,
-      startDate: from,
-      type,
-      indexNames,
-      docValueFields,
-    };
-
     return (
       <Switch>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.allUsers})`}>
-          <AllUsersQueryTabBody {...tabProps} />
+          <AllUsersQueryTabBody
+            deleteQuery={deleteQuery}
+            endDate={to}
+            filterQuery={filterQuery}
+            skip={isInitializing || filterQuery === undefined}
+            setQuery={setQuery}
+            startDate={from}
+            type={type}
+            indexNames={indexNames}
+            docValueFields={docValueFields}
+          />
         </Route>
       </Switch>
     );

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import {
   EuiFlexGroup,
   EuiFlyoutHeader,
@@ -24,92 +22,26 @@ import {
   ExpandableUserDetails,
 } from './expandable_user';
 
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  .euiFlyoutBody__overflow {
-    display: flex;
-    flex: 1;
-    overflow-x: hidden;
-    overflow-y: scroll;
+import { UserDetailsFlyout } from './user_details_flyout';
+import { UserDetailsSidePanel } from './user_details_side_panel';
 
-    .euiFlyoutBody__overflowContent {
-      flex: 1;
-      overflow-x: hidden;
-      overflow-y: scroll;
-      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 64px`};
-    }
-  }
-`;
+const UserDetailsPanelComponent = ({
+  contextID,
+  userName,
+  handleOnClose,
+  isFlyoutView,
+  isDraggable,
+}: UserDetailsProps) => {
+  return isFlyoutView ? (
+    <UserDetailsFlyout userName={userName} contextID={contextID} />
+  ) : (
+    <UserDetailsSidePanel
+      userName={userName}
+      contextID={contextID}
+      isDraggable={isDraggable}
+      handleOnClose={handleOnClose}
+    />
+  );
+};
 
-const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  flex: 1 0 auto;
-`;
-
-const StyledEuiFlexButtonWrapper = styled(EuiFlexItem)`
-  align-self: flex-start;
-  flex: 1 0 auto;
-`;
-
-const StyledPanelContent = styled.div`
-  display: block;
-  height: 100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
-`;
-
-interface UserDetailsProps {
-  contextID: string;
-  userName: string;
-  handleOnClose: () => void;
-  isFlyoutView?: boolean;
-  isDraggable?: boolean;
-}
-
-export const UserDetailsPanel = React.memo(
-  ({ contextID, userName, handleOnClose, isFlyoutView, isDraggable }: UserDetailsProps) => {
-    return isFlyoutView ? (
-      <>
-        <EuiFlyoutHeader hasBorder>
-          <ExpandableUserDetailsTitle userName={userName} />
-        </EuiFlyoutHeader>
-        <StyledEuiFlyoutBody>
-          <EuiSpacer size="m" />
-          <ExpandableUserDetailsPageLink userName={userName} />
-          <EuiSpacer size="m" />
-          <ExpandableUserDetails contextID={contextID} userName={userName} />
-        </StyledEuiFlyoutBody>
-      </>
-    ) : (
-      <>
-        <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={false}>
-          <EuiFlexItem grow={false}>
-            <ExpandableUserDetailsTitle userName={userName} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={i18n.translate(
-                'xpack.securitySolution.timeline.sidePanel.networkDetails.close',
-                {
-                  defaultMessage: 'close',
-                }
-              )}
-              onClick={handleOnClose}
-            />
-          </EuiFlexItem>
-        </StyledEuiFlexGroup>
-        <EuiSpacer size="m" />
-        <StyledEuiFlexButtonWrapper grow={false}>
-          <ExpandableUserDetailsPageLink userName={userName} />
-        </StyledEuiFlexButtonWrapper>
-        <EuiSpacer size="m" />
-        <StyledPanelContent>
-          <ExpandableUserDetails
-            contextID={contextID}
-            userName={userName}
-            isDraggable={isDraggable}
-          />
-        </StyledPanelContent>
-      </>
-    );
-  }
-);
+export const UserDetailsPanel = React.memo(UserDetailsPanelComponent);

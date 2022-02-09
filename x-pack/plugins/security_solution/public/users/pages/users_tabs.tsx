@@ -12,7 +12,6 @@ import { UsersTabsProps } from './types';
 import { UsersTableType } from '../store/model';
 import { USERS_PATH } from '../../../common/constants';
 import { AllUsersQueryTabBody } from './navigation';
-import { AllUsersQueryProps } from './navigation/types';
 
 export const UsersTabs = memo<UsersTabsProps>(
   ({
@@ -26,22 +25,20 @@ export const UsersTabs = memo<UsersTabsProps>(
     to,
     type,
   }) => {
-    const tabProps: AllUsersQueryProps = {
-      deleteQuery,
-      endDate: to,
-      filterQuery,
-      indexNames,
-      skip: isInitializing || filterQuery === undefined,
-      setQuery,
-      startDate: from,
-      type,
-      docValueFields,
-    };
-
     return (
       <Switch>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}>
-          <AllUsersQueryTabBody {...tabProps} />
+          <AllUsersQueryTabBody
+            deleteQuery={deleteQuery}
+            endDate={to}
+            filterQuery={filterQuery}
+            indexNames={indexNames}
+            skip={isInitializing || filterQuery === undefined}
+            setQuery={setQuery}
+            startDate={from}
+            type={type}
+            docValueFields={docValueFields}
+          />
         </Route>
       </Switch>
     );
