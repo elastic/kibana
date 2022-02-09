@@ -123,7 +123,7 @@ export default new Datasource('es', {
         {
           ...tlConfig.request?.body.searchSession,
         },
-        { ...tlConfig.context, signal: abortSignal }
+        { ...tlConfig.context, abortSignal }
       )
       .toPromise();
 
