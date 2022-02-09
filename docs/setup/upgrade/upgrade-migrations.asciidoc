@@ -197,7 +197,7 @@ to v7.12.0, use `DELETE /.kibana_7.12.0_*,.kibana_task_manager_7.12.0_*`.
 If the `.kibana` or `.kibana_task_manager` aliases are missing, you must create them manually.
 Find the latest index from the output of `GET /_cat/indices` and create the missing alias to point to the latest index.
 For example, if the `.kibana` alias is missing, and the latest index is `.kibana_3`, create a new alias using `POST /.kibana_3/_aliases/.kibana`.
-. To remove the write block from the rollback indices, use
+. To remove the write block from the roll back indices, use
 `PUT /.kibana,.kibana_task_manager/_settings {"index.blocks.write": false}`
 . Start {kib} on the older version you want to rollback to.
 
