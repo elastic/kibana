@@ -6,7 +6,18 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import moment from 'moment';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiText,
+  EuiBadge,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -25,6 +36,7 @@ export function RulesPage() {
     notifications: { toasts },
   } = core;
   const [rules, setRules] = useState<RuleState>({ data: [] });
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   async function loadObservabilityRules() {
     try {
@@ -57,6 +69,21 @@ export function RulesPage() {
     }
   }
 
+  enum RuleStatus {
+    enabled = 'enabled',
+    disabled = 'disabled',
+  }
+
+  const statuses = Object.values(RuleStatus);
+
+  const popOverButton = <EuiBadge>Enabled</EuiBadge>;
+
+  const panelItems = statuses.map((status) => (
+    <EuiContextMenuItem>
+      <EuiBadge>{status}</EuiBadge>
+    </EuiContextMenuItem>
+  ));
+
   useEffect(() => {
     loadObservabilityRules();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,9 +91,52 @@ export function RulesPage() {
   const rulesTableColumns = [
     {
       field: 'name',
-      name: 'Rule Name',
+      name: i18n.translate('xpack.observability.rules.rulesTable.columns.nameTitle', {
+        defaultMessage: 'Rule Name',
+      }),
+    },
+    {
+      field: 'executionStatus.lastExecutionDate',
+      name: i18n.translate('xpack.observability.rules.rulesTable.columns.lastRunTitle', {
+        defaultMessage: 'Last run',
+      }),
+      render: (date: Date) => {
+        if (date) {
+          return (
+            <>
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="xs">
+                    {moment(date).fromNow()}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          );
+        }
+      },
+    },
+    {
+      field: 'executionStatus.status',
+      name: i18n.translate('xpack.observability.rules.rulesTable.columns.lastResponseTitle', {
+        defaultMessage: 'Last response',
+      }),
+    },
+    {
+      field: 'enabled',
+      name: i18n.translate('xpack.observability.rules.rulesTable.columns.statusTitle', {
+        defaultMessage: 'Status',
+      }),
+      render: (_enabled: boolean) => {
+        return (
+          <EuiPopover button={popOverButton}>
+            <EuiContextMenuPanel items={panelItems} />
+          </EuiPopover>
+        );
+      },
     },
   ];
+  console.log(rules.data, '!!data');
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -93,7 +163,14 @@ export function RulesPage() {
           <EuiBasicTable
             items={rules.data}
             columns={rulesTableColumns}
-            selection={{ selectable: () => true }}
+            isSelectable={true}
+            selection={{
+              selectable: () => true,
+              onSelectionChange: (selectedItems) => {
+                console.log(selectedItems, '!!selectd');
+                setSelectedIds(selectedItems);
+              },
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
