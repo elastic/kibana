@@ -391,16 +391,18 @@ export class MbMap extends Component<Props, State> {
       }
     }
 
-    if (this._prevCustomIcons === undefined || this._prevCustomIcons !== this.props.settings.customIcons) {
+    if (
+      this._prevCustomIcons === undefined ||
+      !_.isEqual(this._prevCustomIcons, this.props.settings.customIcons)
+    ) {
       this._prevCustomIcons = this.props.settings.customIcons;
+      const mbMap = this.state.mbMap;
       for (const { symbolId, svg, cutoff, radius } of this.props.settings.customIcons) {
-        if (!this.state.mbMap.hasImage(symbolId)) {
-          createSdfIcon({ svg, cutoff, radius }).then((imageData: ImageData) => {
-            this.state.mbMap!.addImage(symbolId, imageData, {
-              sdf: true
-            });
-          });
-        }
+        createSdfIcon({ svg, cutoff, radius }).then((imageData: ImageData) => {
+          // @ts-expect-error MapboxMap type is missing updateImage method
+          if (mbMap.hasImage(symbolId)) mbMap.updateImage(symbolId, imageData);
+          else mbMap.addImage(symbolId, imageData, { sdf: true });
+        });
       }
     }
 
