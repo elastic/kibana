@@ -131,7 +131,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertSourceDataPreviewHistogramChartButtonCheckState(expectedDefaultButtonState);
       if (expectedDefaultButtonState === false) {
         await testSubjects.click('mlAnalyticsCreationDataGridHistogramButton');
-        await this.assertSourceDataPreviewHistogramChartButtonCheckState(true);
+        await this.assertSourceDataPreviewHistogramChartButtonCheckState(
+          expectedDefaultButtonState
+        );
       }
     },
 

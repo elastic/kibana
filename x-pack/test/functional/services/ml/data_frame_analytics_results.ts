@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 
+import { chunk } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
@@ -19,6 +20,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return {
     async assertRegressionEvaluatePanelElementsExists() {
@@ -51,6 +53,10 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       await testSubjects.existOrFail('mlDFExpandableSection-results');
     },
 
+    resultsTableSelector(subSelector?: string) {
+      return `~mlExplorationDataGrid loaded > ~${subSelector}`;
+    },
+
     async assertResultsTableExists() {
       await testSubjects.existOrFail('mlExplorationDataGrid loaded', { timeout: 5000 });
     },
@@ -58,6 +64,209 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     async assertResultsTableTrainingFiltersExist() {
       await testSubjects.existOrFail('mlDFAnalyticsExplorationQueryBarFilterButtons', {
         timeout: 5000,
+      });
+    },
+
+    async assertResultsTablePreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute(
+          'mlExplorationDataGridHistogramButton',
+          'aria-pressed'
+        )) === 'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async enableResultsTablePreviewHistogramCharts(expectedDefaultButtonState: boolean) {
+      await retry.tryForTime(5000, async () => {
+        const actualCheckState =
+          (await testSubjects.getAttribute(
+            'mlExplorationDataGridHistogramButton',
+            'aria-pressed'
+          )) === 'true';
+
+        if (actualCheckState !== expectedDefaultButtonState) {
+          await testSubjects.click('mlExplorationDataGridHistogramButton');
+          await this.assertResultsTablePreviewHistogramChartButtonCheckState(
+            expectedDefaultButtonState
+          );
+        }
+      });
+    },
+
+    async assertResultsTablePreviewHistogramChartsMissing(
+      expectedHistogramCharts: Array<{
+        chartAvailable: boolean;
+        id: string;
+        legend?: string;
+      }>
+    ) {
+      for (const expected of expectedHistogramCharts.values()) {
+        const id = expected.id;
+        await testSubjects.missingOrFail(`mlDataGridChart-${id}`);
+      }
+    },
+
+    async assertResultsTablePreviewHistogramCharts(
+      expectedHistogramCharts: Array<{
+        chartAvailable: boolean;
+        id: string;
+        legend?: string;
+      }>
+    ) {
+      // For each chart, get the content of each header cell and assert
+      // the legend text and column id and if the chart should be present or not.
+      await retry.tryForTime(5000, async () => {
+        for (const expected of expectedHistogramCharts.values()) {
+          const id = expected.id;
+          await testSubjects.existOrFail(`mlDataGridChart-${id}`);
+
+          if (expected.chartAvailable) {
+            await testSubjects.existOrFail(`mlDataGridChart-${id}-histogram`);
+          }
+
+          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${id}-legend`);
+          if (expected.legend) {
+            expect(actualLegend).to.eql(
+              expected.legend,
+              `Legend text for column '${id}' should be '${expected.legend}' (got '${actualLegend}')`
+            );
+          }
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${id}-id`);
+          expect(actualId).to.eql(
+            expected.id,
+            `Id text for column '${id}' should be '${expected.id}' (got '${actualId}')`
+          );
+        }
+      });
+    },
+
+    async assertColumnSelectPopoverOpenState(expectedState: boolean) {
+      if (expectedState === true) {
+        await testSubjects.existOrFail('~mlExplorationDataGrid > dataGridColumnSelectorPopover', {
+          timeout: 30 * 1000,
+        });
+      } else {
+        await testSubjects.missingOrFail('~mlExplorationDataGrid > dataGridColumnSelectorPopover', {
+          timeout: 30 * 1000,
+        });
+      }
+    },
+
+    async toggleColumnSelectPopoverState(state: boolean) {
+      await retry.tryForTime(15 * 1000, async () => {
+        const popoverIsOpen = await testSubjects.exists(
+          '~mlExplorationDataGrid > ~dataGridColumnSelectorPopoverButton'
+        );
+        if (popoverIsOpen !== state) {
+          await testSubjects.click('~mlExplorationDataGrid > ~dataGridColumnSelectorButton');
+        }
+        await this.assertColumnSelectPopoverOpenState(state);
+      });
+    },
+
+    async hideAllResultsTableColumns() {
+      await this.toggleColumnSelectPopoverState(true);
+      await testSubjects.click('dataGridColumnSelectorHideAllButton');
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await this.assertResultsTableEmpty();
+    },
+
+    async showAllResultsTableColumns() {
+      await this.toggleColumnSelectPopoverState(true);
+      await testSubjects.click('dataGridColumnSelectorShowAllButton');
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await this.assertResultsTableNotEmpty();
+    },
+
+    async assertColumnSortPopoverOpenState(expectedOpenState: boolean) {
+      if (expectedOpenState === true) {
+        await testSubjects.existOrFail('~mlExplorationDataGrid > dataGridColumnSortingPopover', {
+          timeout: 30 * 1000,
+        });
+      } else {
+        await testSubjects.missingOrFail('~mlExplorationDataGrid > dataGridColumnSortingPopover', {
+          timeout: 30 * 1000,
+        });
+      }
+    },
+
+    async toggleColumnSortPopoverState(expectedState: boolean) {
+      await retry.tryForTime(15 * 1000, async () => {
+        const popoverIsOpen = await testSubjects.exists('dataGridColumnSortingSelectionButton');
+        if (popoverIsOpen !== expectedState) {
+          await testSubjects.click('~mlExplorationDataGrid > dataGridColumnSortingButton');
+        }
+        await this.assertColumnSortPopoverOpenState(expectedState);
+      });
+    },
+
+    async setColumnToSortBy(columnId: string, sortDirection: 'asc' | 'desc') {
+      await this.toggleColumnSortPopoverState(true);
+      await retry.tryForTime(15 * 1000, async () => {
+        // Pick fields to sort by
+        await testSubjects.existOrFail('dataGridColumnSortingSelectionButton');
+        await testSubjects.click('dataGridColumnSortingSelectionButton');
+        await testSubjects.existOrFail(`dataGridColumnSortingPopoverColumnSelection-${columnId}`);
+        await testSubjects.click(`dataGridColumnSortingPopoverColumnSelection-${columnId}`);
+        await testSubjects.existOrFail(`euiDataGridColumnSorting-sortColumn-${columnId}`);
+        // Click sorting direction
+        await testSubjects.click(
+          `euiDataGridColumnSorting-sortColumn-${columnId}-${sortDirection}`
+        );
+        // Close popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+      });
+    },
+
+    async parseEuiDataGrid(tableSubj: string, maxColumnsToParse: number) {
+      const table = await testSubjects.find(`~${tableSubj}`);
+      const $ = await table.parseDomContent();
+
+      // Get the content of each cell and divide them up into rows.
+      // Virtualized cells outside the view area are not present in the DOM until they
+      // are scroilled into view, so we're limiting the number of parsed columns.
+      // To determine row and column of a cell, we're utilizing the screen reader
+      // help text, which enumerates the rows and columns 1-based.
+      const cells = $.findTestSubjects('dataGridRowCell')
+        .toArray()
+        .map((cell) => {
+          const cellText = $(cell).text();
+          const pattern = /^(.*)Row: (\d+); Column: (\d+)$/;
+          const matches = cellText.match(pattern);
+          expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
+          return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };
+        })
+        .filter((cell) => cell?.column <= maxColumnsToParse)
+        .sort(function (a, b) {
+          return a.row - b.row || a.column - b.column;
+        })
+        .map((cell) => cell.text);
+
+      const rows = chunk(cells, maxColumnsToParse);
+      return rows;
+    },
+
+    async assertResultsTableColumnValues(column: number, expectedColumnValues: string[]) {
+      await retry.tryForTime(20 * 1000, async () => {
+        // get a 2D array of rows and cell values
+        // only parse columns up to the one we want to assert
+        const rows = await this.parseEuiDataGrid('mlExplorationDataGrid', column + 1);
+
+        // reduce the rows data to an array of unique values in the specified column
+        const uniqueColumnValues = rows
+          .map((row) => row[column])
+          .flat()
+          .filter((v, i, a) => a.indexOf(v) === i);
+
+        uniqueColumnValues.sort();
+        // check if the returned unique value matches the supplied filter value
+        expect(uniqueColumnValues).to.eql(
+          expectedColumnValues,
+          `Unique EuiDataGrid column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
+        );
       });
     },
 
@@ -72,6 +281,14 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       expect(resultTableRows.length).to.be.greaterThan(
         0,
         `DFA results table should have at least one row (got '${resultTableRows.length}')`
+      );
+    },
+
+    async assertResultsTableEmpty() {
+      const resultTableRows = await this.getResultTableRows();
+      expect(resultTableRows.length).to.eql(
+        0,
+        `DFA results table should be empty (got '${resultTableRows.length} rows')`
       );
     },
 

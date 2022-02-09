@@ -14,12 +14,23 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('total feature importance panel and decision path popover', function () {
+  describe('results view content and total feature importance', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
       indexPattern: { name: string; timeField: string };
       job: DeepPartial<DataFrameAnalyticsConfig>;
+      sortBy: {
+        column: string;
+        sortDirection: 'asc' | 'desc';
+      };
+      expected: {
+        histogramCharts: Array<{ chartAvailable: boolean; id: string; legend?: string }>;
+        sortBy: {
+          columnIndex: number;
+          expectedValues: string[];
+        };
+      };
     }> = (() => {
       const timestamp = Date.now();
 
@@ -69,6 +80,29 @@ export default function ({ getService }: FtrProviderContext) {
             model_memory_limit: '60mb',
             allow_lazy_start: false,
           },
+          sortBy: {
+            column: 'ml_central_air.is_training',
+            // asc is `False-True`
+            sortDirection: 'asc',
+          },
+          expected: {
+            histogramCharts: [
+              // We are not checking for chart's legend content here
+              // because results can always change
+              { chartAvailable: true, id: 'ml_central_air.is_training' },
+              { chartAvailable: true, id: 'ml_central_air.CentralAir_prediction' },
+              { chartAvailable: true, id: 'CentralAir' },
+              { chartAvailable: true, id: 'ml_central_air.prediction_probability' },
+              { chartAvailable: false, id: 'ml_central_air.feature_importance' },
+              { chartAvailable: true, id: 'ml_central_air.prediction_score' },
+              { chartAvailable: false, id: 'ml_central_air.top_classes' },
+              { chartAvailable: true, id: '1stFlrSF' },
+            ],
+            sortBy: {
+              columnIndex: 0,
+              expectedValues: ['false'],
+            },
+          },
         },
         {
           suiteTitle: 'multi class classification job',
@@ -114,6 +148,31 @@ export default function ({ getService }: FtrProviderContext) {
             },
             model_memory_limit: '60mb',
             allow_lazy_start: false,
+          },
+          sortBy: {
+            column: 'ml_heating_qc.is_training',
+            // asc is `True-False`
+            sortDirection: 'desc',
+          },
+          expected: {
+            histogramCharts: [
+              { chartAvailable: true, id: 'ml_heating_qc.is_training' },
+              { chartAvailable: true, id: 'ml_heating_qc.heatingqc' },
+              { chartAvailable: true, id: 'HeatingQC' },
+              { chartAvailable: true, id: 'ml_heating_qc.prediction_probability' },
+              { chartAvailable: false, id: 'ml_heating_qc.feature_importance' },
+              { chartAvailable: true, id: 'ml_heating_qc.prediction_score' },
+              {
+                chartAvailable: false,
+                id: 'ml_heating_qc.top_classes',
+                legend: 'Chart not supported.',
+              },
+              { chartAvailable: true, id: '1stFlrSF' },
+            ],
+            sortBy: {
+              columnIndex: 0,
+              expectedValues: ['true'],
+            },
           },
         },
         {
@@ -164,6 +223,26 @@ export default function ({ getService }: FtrProviderContext) {
             },
             model_memory_limit: '20mb',
           },
+          sortBy: {
+            column: 'ml.is_training',
+            // asc is `True-False`
+            sortDirection: 'desc',
+          },
+          expected: {
+            histogramCharts: [
+              { chartAvailable: true, id: 'ml.is_training' },
+              { chartAvailable: true, id: 'ml.test' },
+              { chartAvailable: true, id: 'stab', legend: '-0.06 - 0.11' },
+              { chartAvailable: true, id: 'g1', legend: '0.05 - 1' },
+              { chartAvailable: true, id: 'g2', legend: '0.05 - 1' },
+              { chartAvailable: true, id: 'g3', legend: '0.05 - 1' },
+              { chartAvailable: true, id: 'g4', legend: '0.05 - 1' },
+            ],
+            sortBy: {
+              columnIndex: 0,
+              expectedValues: ['true'],
+            },
+          },
         },
       ];
     })();
@@ -212,6 +291,39 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
           await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
+        });
+
+        it('should display the histogram charts', async () => {
+          await ml.testExecution.logTestStep(
+            'displays the histogram charts when option is enabled'
+          );
+          await ml.dataFrameAnalyticsResults.enableResultsTablePreviewHistogramCharts(true);
+          await ml.dataFrameAnalyticsResults.assertResultsTablePreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
+
+          await ml.testExecution.logTestStep('hides the histogram charts when option is disabled');
+          await ml.dataFrameAnalyticsResults.enableResultsTablePreviewHistogramCharts(false);
+          await ml.dataFrameAnalyticsResults.assertResultsTablePreviewHistogramChartsMissing(
+            testData.expected.histogramCharts
+          );
+        });
+
+        it('should display the results table content', async () => {
+          await ml.testExecution.logTestStep('sorts table');
+          await ml.dataFrameAnalyticsResults.toggleColumnSortPopoverState(true);
+          await ml.dataFrameAnalyticsResults.setColumnToSortBy(
+            testData.sortBy.column,
+            testData.sortBy.sortDirection
+          );
+          await ml.dataFrameAnalyticsResults.assertResultsTableColumnValues(
+            testData.expected.sortBy.columnIndex,
+            testData.expected.sortBy.expectedValues
+          );
+
+          await ml.testExecution.logTestStep('shows all and hides all columns');
+          await ml.dataFrameAnalyticsResults.showAllResultsTableColumns();
+          await ml.dataFrameAnalyticsResults.hideAllResultsTableColumns();
         });
       });
     }
