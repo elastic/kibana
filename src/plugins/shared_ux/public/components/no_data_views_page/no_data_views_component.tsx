@@ -9,7 +9,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCard } from '@elastic/eui';
-import { NoResultsIllustration } from './assets/no_results_illustration';
 
 interface NoDataViewsComponentProps {
   onClick?: () => void;
@@ -36,9 +35,6 @@ export const NoDataViewsComponent = (props: NoDataViewsComponentProps) => {
       })}
       style={{ width: '50%', margin: 'auto', flexGrow: 0 }}
     >
-      <div className="dscNoResults__illustration">
-        <NoResultsIllustration />
-      </div>
       <div>{canCreateNewDataView ? button : undefined}</div>
     </EuiCard>
   );
