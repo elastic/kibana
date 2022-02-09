@@ -72,12 +72,15 @@ export const createSourcererDataViewRoute = (
         const siemDataViewTitle = siemDataView ? siemDataView.title.split(',').sort().join() : '';
         if (siemDataView == null) {
           try {
-            siemDataView = await dataViewService.createAndSave({
-              allowNoIndex: true,
-              id: dataViewId,
-              title: patternListAsTitle,
-              timeFieldName: DEFAULT_TIME_FIELD,
-            });
+            siemDataView = await dataViewService.createAndSave(
+              {
+                allowNoIndex: true,
+                id: dataViewId,
+                title: patternListAsTitle,
+                timeFieldName: DEFAULT_TIME_FIELD,
+              },
+              true
+            );
           } catch (err) {
             const error = transformError(err);
             if (err.name === 'DuplicateDataViewError' || error.statusCode === 409) {
