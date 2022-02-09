@@ -15,12 +15,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 
 import React from 'react';
-import {
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiDescriptionListDescription, EuiText, EuiToolTip } from '@elastic/eui';
 import { formatOperatingSystems } from '../helpers';
 import type { FormattedEntry, DescriptionListItem } from '../types';
 import * as i18n from '../translations';
@@ -132,13 +127,6 @@ export const getDescriptionListContent = (
 
   return details.reduce<DescriptionListItem[]>((acc, { value, title }) => {
     if (value != null && value.trim() !== '') {
-      const titleElement = (
-        <EuiToolTip content={title} anchorClassName="eventFiltersDescriptionListTitle">
-          <EuiDescriptionListTitle className="eui-textTruncate eui-fullWidth">
-            {title}
-          </EuiDescriptionListTitle>
-        </EuiToolTip>
-      );
       const valueElement = (
         <EuiToolTip content={value} anchorClassName="eventFiltersDescriptionListDescription">
           <EuiDescriptionListDescription className="eui-fullWidth">
@@ -150,7 +138,7 @@ export const getDescriptionListContent = (
         return [
           ...acc,
           {
-            title: titleElement,
+            title,
             description:
               value.length > 75 ? (
                 <EuiDescriptionListDescription style={{ height: 150, overflowY: 'hidden' }}>
@@ -170,7 +158,7 @@ export const getDescriptionListContent = (
           },
         ];
       }
-      return [...acc, { title: titleElement, description: valueElement }];
+      return [...acc, { title, description: valueElement }];
     } else {
       return acc;
     }

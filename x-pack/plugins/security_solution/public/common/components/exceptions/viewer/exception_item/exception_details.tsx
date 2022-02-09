@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexGroup, EuiDescriptionList, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiDescriptionList,
+  EuiButtonEmpty,
+  EuiDescriptionListTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
 
@@ -91,7 +98,11 @@ const ExceptionDetailsComponent = ({
           >
             {descriptionListItems.map((item) => (
               <Fragment key={`${item.title}`}>
-                {item.title}
+                <EuiToolTip content={item.title} anchorClassName="eventFiltersDescriptionListTitle">
+                  <EuiDescriptionListTitle className="eui-textTruncate eui-fullWidth">
+                    {item.title}
+                  </EuiDescriptionListTitle>
+                </EuiToolTip>
                 {item.description}
               </Fragment>
             ))}
