@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,7 +19,7 @@ import {
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '../../../../src/plugins/kibana_react/common';
 import { RenderAppProps } from './types';
 import { getCasesLazy } from './methods';
-import { APP_ID } from '../common/constants';
+import { APP_OWNER } from '../common/constants';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -38,7 +38,7 @@ const CasesApp = () => {
   return (
     <StyledComponentsThemeProvider darkMode={darkMode}>
       {getCasesLazy({
-        owner: [APP_ID],
+        owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],
         userCanCrud: true,
         basePath: '/',
