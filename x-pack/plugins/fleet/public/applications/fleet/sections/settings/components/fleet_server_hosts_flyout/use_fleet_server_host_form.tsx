@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -178,9 +178,12 @@ export function useFleetServerHostsForm(
     }
   }, [fleetServerHostsInput.value, validate, notifications, confirm, onSuccess]);
 
+  const isDisabled =
+    isLoading || !fleetServerHostsInput.hasChanged || fleetServerHostsInput.props.isInvalid;
+
   return {
     isLoading,
-    isDisabled: isLoading || !fleetServerHostsInput.hasChanged,
+    isDisabled,
     submit,
     fleetServerHostsInput,
   };

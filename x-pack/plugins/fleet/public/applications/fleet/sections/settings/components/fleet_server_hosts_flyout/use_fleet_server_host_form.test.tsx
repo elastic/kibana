@@ -43,6 +43,7 @@ describe('useFleetServerHostsForm', () => {
       ]
     `);
     expect(onSucess).not.toBeCalled();
+    expect(result.current.isDisabled).toBeTruthy();
   });
 
   it('should submit a valid form', async () => {
@@ -52,6 +53,25 @@ describe('useFleetServerHostsForm', () => {
     const { result } = testRenderer.renderHook(() => useFleetServerHostsForm([], onSucess));
 
     act(() => result.current.fleetServerHostsInput.setValue(['http://test.fr']));
+
+    await act(() => result.current.submit());
+    expect(onSucess).toBeCalled();
+  });
+
+  it('should allow the user to correct and submit a invalid form', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSucess = jest.fn();
+    testRenderer.startServices.http.post.mockResolvedValue({});
+    const { result } = testRenderer.renderHook(() => useFleetServerHostsForm([], onSucess));
+
+    act(() => result.current.fleetServerHostsInput.setValue(['http://test.fr', 'http://test.fr']));
+
+    await act(() => result.current.submit());
+    expect(onSucess).not.toBeCalled();
+    expect(result.current.isDisabled).toBeTruthy();
+
+    act(() => result.current.fleetServerHostsInput.setValue(['http://test.fr']));
+    expect(result.current.isDisabled).toBeFalsy();
 
     await act(() => result.current.submit());
     expect(onSucess).toBeCalled();
