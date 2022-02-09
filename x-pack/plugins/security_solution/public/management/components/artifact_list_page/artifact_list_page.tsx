@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { AdministrationListPage as _AdministrationListPage } from '../administration_list_page';
 
@@ -177,6 +177,10 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setSelectedItemForDelete(undefined);
     }, []);
 
+    const handleArtifactFlyoutOnSuccess = useCallback(() => {
+      refetchListData();
+    }, [refetchListData]);
+
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
     }
@@ -207,8 +211,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         <MaybeArtifactFlyout
           apiClient={apiClient}
           item={selectedItemForEdit}
-          onCancel={() => {}} // FIXME:pt handle cancel
-          onSuccess={() => {}} // FIXME:pt handle success
+          onSuccess={handleArtifactFlyoutOnSuccess}
           FormComponent={ArtifactFormComponent}
           labels={labels}
           data-test-subj={getTestId('flyout')}
@@ -269,16 +272,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             />
           </>
         )}
-
-        {/* ----------------------------- DEV ONLY ----------------------------- */}
-        {/* ----------------------------- DEV ONLY ----------------------------- */}
-        {/* ----------------------------- DEV ONLY ----------------------------- */}
-        <EuiCallOut style={{ marginTop: '3em' }} color="danger">
-          <p style={{ fontSize: '8em' }}>{'ALPHA - In development'}</p>
-        </EuiCallOut>
-        {/* ----------------------------- DEV ONLY ----------------------------- */}
-        {/* ----------------------------- DEV ONLY ----------------------------- */}
-        {/* ----------------------------- DEV ONLY ----------------------------- */}
       </AdministrationListPage>
     );
   }
