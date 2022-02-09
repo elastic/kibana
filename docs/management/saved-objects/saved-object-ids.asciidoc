@@ -62,7 +62,7 @@ destination, preserving the saved object's origin.
 
 4. Otherwise, {kib} creates the saved object with the given ID.
 
-For example, you have a saved object in an `export.ndjson` file, and you set up a brand new {kib} server. You attempt to import the saved
+For example, you have a saved object in an `export.ndjson` file, and you set up a brand new {kib} instance. You attempt to import the saved
 object using the "Check for existing objects" and "Automatically overwrite conflicts" options. The first time you import the saved object,
 {kib} will create a new object with the same ID (step 4 above). If you import it again, {kib} will find that object and overwrite it (step 1
 above). If you then create a _different_ space and import it there, {kib} will create a new object with a random ID (step 3 above). Finally,
