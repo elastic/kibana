@@ -15,6 +15,7 @@ import { first } from 'rxjs/operators';
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
 import { HttpResponse, HttpFetchOptionsWithPath } from './types';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 
 function delay<T>(duration: number) {
   return new Promise<T>((r) => setTimeout(r, duration));
@@ -26,6 +27,7 @@ describe('Fetch', () => {
   const fetchInstance = new Fetch({
     basePath: new BasePath(BASE_PATH),
     kibanaVersion: 'VERSION',
+    executionContext: executionContextServiceMock.createSetupContract(),
   });
   afterEach(() => {
     fetchMock.restore();
