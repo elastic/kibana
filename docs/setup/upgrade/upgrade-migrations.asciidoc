@@ -184,7 +184,7 @@ To rollback after a failed upgrade migration, you must also rollback the saved o
 . Start all {kib} instances on the older version you want to rollback to.
 
 [float]
-===== (Not recommended) Rollback without a backup snapshot
+===== (Not recommended) Roll back without a backup snapshot
 
 . To make sure no {kib} instances are performing an upgrade migration, shut down all {kib} instances.
 . {ref}/snapshots-take-snapshot.html[Take a snapshot] that includes the `kibana` feature state. By default, snapshots include the `kibana` feature state.
