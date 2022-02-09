@@ -6,12 +6,11 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
-import { AdministrationListPage as _AdministrationListPage } from '../administration_list_page';
+import { AdministrationListPage } from '../administration_list_page';
 
 import { PaginatedContent, PaginatedContentProps } from '../paginated_content';
 
@@ -43,19 +42,6 @@ type ArtifactListPagePaginatedContentComponent = PaginatedContentProps<
   ExceptionListItemSchema,
   ArtifactEntryCardType
 >;
-
-const AdministrationListPage = styled(_AdministrationListPage)`
-  // TODO:PT Ask David - why do we have this here? because the Card already has similar code:
-  // https://github.com/elastic/kibana/blob/36ce6bda672c55551a175888fac0cf5131f5fd7f/x-pack/plugins/security_solution/public/management/components/artifact_entry_card/components/card_container_panel.tsx#L15
-  // Maybe this should be moved there?
-  .card-container > * {
-    margin-bottom: ${({ theme }) => theme.eui.spacerSizes.l};
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-`;
 
 export interface ArtifactListPageProps {
   apiClient: ExceptionsListApiClient;
@@ -268,7 +254,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               pagination={uiPagination}
               contentClassName="card-container"
               data-test-subj={getTestId('cardContent')}
-              noItemsMessage={<>{'no items'}</>} // FIXME: implement no results message
             />
           </>
         )}
