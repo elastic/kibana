@@ -122,7 +122,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
     },
     async (context, request, response) => {
       const { index, projectID, timeFrom, timeTo } = request.query;
-      const sampleSize = 20000;
+      const sampleSize = 200;
 
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -150,6 +150,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
         const resEvents = await esClient.search({
           index: eventsIndex,
           body: {
+            size: 0,
             query: {
               function_score: {
                 query: filter,
@@ -176,6 +177,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
         const resTotalEvents = await esClient.search({
           index,
           body: {
+            size: 0,
             query: filter,
             aggs: {
               histogram: {
