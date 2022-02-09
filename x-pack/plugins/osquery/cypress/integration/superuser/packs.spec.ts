@@ -49,7 +49,7 @@ describe('SuperUser - Packs', () => {
       findFormFieldByRowsLabelAndType('Description (optional)', 'Pack description');
       findFormFieldByRowsLabelAndType(
         'Scheduled agent policies (optional)',
-        'Fleet Server policy 1'
+        'Default Fleet Server policy'
       );
       cy.react('List').first().click();
       findAndClickButton('Add query');
