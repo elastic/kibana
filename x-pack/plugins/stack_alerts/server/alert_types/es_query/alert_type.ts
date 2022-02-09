@@ -160,7 +160,7 @@ export function getAlertType(logger: Logger): RuleType<
     >
   ) {
     const { alertId, name, services, params, state } = options;
-    const { alertInstanceFactory, scopedClusterClient } = services;
+    const { alertFactory, scopedClusterClient } = services;
     const previousTimestamp = state.latestTimestamp;
 
     const abortableEsClient = scopedClusterClient.asCurrentUser;
@@ -255,7 +255,7 @@ export function getAlertType(logger: Logger): RuleType<
       };
 
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = alertInstanceFactory(ConditionMetAlertInstanceId);
+      const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
       alertInstance
         // store the params we would need to recreate the query that led to this alert instance
         .replaceState({ latestTimestamp: timestamp, dateStart, dateEnd })

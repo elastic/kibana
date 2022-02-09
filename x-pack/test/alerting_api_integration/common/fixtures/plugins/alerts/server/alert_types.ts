@@ -122,7 +122,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
   }
 
   if (group) {
-    const instance = services.alertInstanceFactory('1').replaceState({ instanceStateValue: true });
+    const instance = services.alertFactory.create('1').replaceState({ instanceStateValue: true });
 
     if (subgroup) {
       instance.scheduleActionsWithSubGroup(group, subgroup, {
@@ -177,8 +177,8 @@ function getCumulativeFiringAlertType() {
       const runCount = (state.runCount || 0) + 1;
 
       times(runCount, (index) => {
-        services
-          .alertInstanceFactory(`instance-${index}`)
+        services.alertFactory
+          .create(`instance-${index}`)
           .replaceState({ instanceStateValue: true })
           .scheduleActions(group);
       });
@@ -446,13 +446,13 @@ function getPatternFiringAlertType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          services.alertInstanceFactory(instanceId).scheduleActions('default', {
+          services.alertFactory.create(instanceId).scheduleActions('default', {
             ...EscapableStrings,
             deep: DeepContextVariables,
           });
         } else if (typeof scheduleByPattern === 'string') {
-          services
-            .alertInstanceFactory(instanceId)
+          services.alertFactory
+            .create(instanceId)
             .scheduleActionsWithSubGroup('default', scheduleByPattern);
         }
       }
@@ -538,7 +538,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         return {};
       }
 
-      services.alertInstanceFactory('alert').scheduleActions('default', {});
+      services.alertFactory.create('alert').scheduleActions('default', {});
 
       // run long if pattern says to
       if (pattern[globalPatternIndex++] === true) {

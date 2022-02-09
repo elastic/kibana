@@ -134,7 +134,7 @@ export function getAlertType(
     options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
     const { alertId, name, services, params } = options;
-    const { alertInstanceFactory, scopedClusterClient } = services;
+    const { alertFactory, scopedClusterClient } = services;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -148,7 +148,7 @@ export function getAlertType(
       );
     }
 
-    const abortableEsClient = scopedClusterClient.asCurrentUser;
+    const esClient = scopedClusterClient.asCurrentUser;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
@@ -170,7 +170,7 @@ export function getAlertType(
       await data
     ).timeSeriesQuery({
       logger,
-      abortableEsClient,
+      esClient,
       query: queryParams,
     });
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
@@ -208,7 +208,7 @@ export function getAlertType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = alertInstanceFactory(instanceId);
+      const alertInstance = alertFactory.create(instanceId);
       alertInstance.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
