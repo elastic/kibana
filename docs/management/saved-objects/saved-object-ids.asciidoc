@@ -10,7 +10,7 @@ that URL includes the saved object ID.
 support sharing saved objects to multiple spaces. Most saved objects cannot be shared to multiple spaces _yet_, but we needed to start
 enforcing globally unique object IDs first.
 
-We have made several enhancements to minimize the impact to users, and this document describes what you need to know about the changes and
+We have made several enhancements to minimize the impact, and this document describes what you need to know about the changes and
 how it will affect you.
 
 [[saved-object-ids-impact-upon-upgrading]]
