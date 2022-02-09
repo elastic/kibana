@@ -29,7 +29,7 @@ export const getDetailPanelProcess = (process: Process | null) => {
 
   process.events.forEach((event) => {
     if (!processData.user) {
-      processData.user = event.process.user.name;
+      processData.user = event.user.name;
     }
     if (!processData.pid) {
       processData.pid = event.process.pid;

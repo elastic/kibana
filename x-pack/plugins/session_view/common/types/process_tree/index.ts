@@ -76,7 +76,7 @@ export interface ProcessFields {
   tty: Teletype;
 }
 
-export interface ProcessSelf extends ProcessFields {
+export interface ProcessSelf extends Omit<ProcessFields, 'user'> {
   parent: ProcessFields;
   session_leader: ProcessFields;
   entry_leader: ProcessFields;
@@ -131,6 +131,7 @@ export interface ProcessEvent {
     category: string;
     action: EventAction;
   };
+  user: User;
   host: ProcessEventHost;
   process: ProcessSelf;
   kibana?: {

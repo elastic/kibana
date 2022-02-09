@@ -15,27 +15,35 @@ import {
   ProcessMap,
 } from '../../types/process_tree';
 
-export const mockEvents = [
+export const mockEvents: ProcessEvent[] = [
   {
     '@timestamp': new Date('2021-11-23T15:25:04.210Z'),
+    user: {
+      name: '',
+      id: '1000',
+    },
     process: {
       pid: 3535,
-      pgid: 2442,
-      user: {
-        name: '',
-        id: '-1',
-      },
       executable: '/usr/bin/bash',
+      command_line: 'bash',
       interactive: false,
-      entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
+      entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+      tty: {
+        descriptor: 0,
+        type: 'char_device',
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
       parent: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -43,15 +51,23 @@ export const mockEvents = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:04.210Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      session: {
+      session_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -59,15 +75,23 @@ export const mockEvents = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:04.210Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      entry: {
+      entry_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -75,6 +99,38 @@ export const mockEvents = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:04.210Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
+      },
+      group_leader: {
+        pid: 2442,
+        user: {
+          name: '',
+          id: '1000',
+        },
+        executable: '/usr/bin/bash',
+        command_line: 'bash',
+        interactive: true,
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        name: '',
+        args: [],
+        args_count: 0,
+        working_directory: '/home/vagrant',
+        start: new Date('2021-11-23T15:25:04.210Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
       name: '',
       args_count: 0,
@@ -87,27 +143,51 @@ export const mockEvents = [
       category: 'process',
       kind: EventKind.event,
     },
+    host: {
+      architecture: 'x86_64',
+      hostname: 'james-fleet-714-2',
+      id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
+      ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
+      mac: '42:01:0a:84:00:32',
+      name: 'james-fleet-714-2',
+      os: {
+        family: 'centos',
+        full: 'CentOS 7.9.2009',
+        kernel: '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021',
+        name: 'Linux',
+        platform: 'centos',
+        version: '7.9.2009',
+      },
+    },
   },
   {
     '@timestamp': new Date('2021-11-23T15:25:04.218Z'),
+    user: {
+      name: '',
+      id: '1000',
+    },
     process: {
       pid: 3535,
-      pgid: 3535,
-      user: {
-        name: 'vagrant',
-        id: '1000',
-      },
       executable: '/usr/bin/vi',
+      command_line: 'bash',
       interactive: true,
       entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3727',
+      tty: {
+        descriptor: 0,
+        type: 'char_device',
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
       parent: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -115,15 +195,23 @@ export const mockEvents = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:04.218Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      session: {
+      session_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -131,15 +219,23 @@ export const mockEvents = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:04.218Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      entry: {
+      entry_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -147,6 +243,38 @@ export const mockEvents = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:04.218Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
+      },
+      group_leader: {
+        pid: 2442,
+        user: {
+          name: '',
+          id: '1000',
+        },
+        executable: '/usr/bin/bash',
+        command_line: 'bash',
+        interactive: true,
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        name: '',
+        args: [],
+        args_count: 0,
+        working_directory: '/home/vagrant',
+        start: new Date('2021-11-23T15:25:04.218Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
       name: '',
       args_count: 2,
@@ -162,19 +290,27 @@ export const mockEvents = [
   },
   {
     '@timestamp': new Date('2021-11-23T15:25:05.202Z'),
+    user: {
+      name: '',
+      id: '1000',
+    },
     process: {
       pid: 3535,
-      pgid: 3535,
-      user: {
-        name: 'vagrant',
-        id: '1000',
-      },
+      exit_code: 137,
       executable: '/usr/bin/vi',
+      command_line: 'bash',
       interactive: true,
       entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3728',
+      tty: {
+        descriptor: 0,
+        type: 'char_device',
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
       parent: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
@@ -187,15 +323,23 @@ export const mockEvents = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:05.202Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      session: {
+      session_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -203,15 +347,23 @@ export const mockEvents = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:05.202Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      entry: {
+      entry_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -219,6 +371,38 @@ export const mockEvents = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:05.202Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
+      },
+      group_leader: {
+        pid: 2442,
+        user: {
+          name: '',
+          id: '1000',
+        },
+        executable: '/usr/bin/bash',
+        command_line: 'bash',
+        interactive: true,
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        name: '',
+        args: [],
+        args_count: 0,
+        working_directory: '/home/vagrant',
+        start: new Date('2021-11-23T15:25:05.202Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
       start: new Date('2021-11-23T15:25:05.202Z'),
       name: '',
@@ -227,9 +411,25 @@ export const mockEvents = [
       working_directory: '/home/vagrant',
     },
     event: {
-      action: EventAction.exit,
+      action: EventAction.end,
       category: 'process',
       kind: EventKind.event,
+    },
+    host: {
+      architecture: 'x86_64',
+      hostname: 'james-fleet-714-2',
+      id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
+      ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
+      mac: '42:01:0a:84:00:32',
+      name: 'james-fleet-714-2',
+      os: {
+        family: 'centos',
+        full: 'CentOS 7.9.2009',
+        kernel: '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021',
+        name: 'Linux',
+        platform: 'centos',
+        version: '7.9.2009',
+      },
     },
   },
 ] as ProcessEvent[];
@@ -260,24 +460,24 @@ export const mockAlerts: ProcessEvent[] = [
       },
     },
     '@timestamp': new Date('2021-11-23T15:26:34.859Z'),
+    user: {
+      name: 'vagrant',
+      id: '1000',
+    },
     process: {
       pid: 3535,
-      pgid: 3535,
-      user: {
-        name: 'vagrant',
-        id: '1000',
-      },
       executable: '/usr/bin/vi',
+      command_line: 'bash',
       interactive: true,
       entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
       parent: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -285,15 +485,23 @@ export const mockAlerts: ProcessEvent[] = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:26:34.859Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      session: {
+      session_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -301,15 +509,23 @@ export const mockAlerts: ProcessEvent[] = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:26:34.859Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      entry: {
+      entry_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -317,17 +533,73 @@ export const mockAlerts: ProcessEvent[] = [
         args_count: 0,
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:26:34.859Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
+      },
+      group_leader: {
+        pid: 2442,
+        user: {
+          name: '',
+          id: '1000',
+        },
+        executable: '/usr/bin/bash',
+        command_line: 'bash',
+        interactive: true,
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        name: '',
+        args: [],
+        args_count: 0,
+        working_directory: '/home/vagrant',
+        start: new Date('2021-11-23T15:26:34.859Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
       name: '',
       args_count: 2,
       args: ['vi', 'cmd/config.ini'],
       working_directory: '/home/vagrant',
       start: new Date('2021-11-23T15:26:34.859Z'),
+      tty: {
+        descriptor: 0,
+        type: 'char_device',
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
     },
     event: {
       action: EventAction.exec,
       category: 'process',
       kind: EventKind.signal,
+    },
+    host: {
+      architecture: 'x86_64',
+      hostname: 'james-fleet-714-2',
+      id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
+      ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
+      mac: '42:01:0a:84:00:32',
+      name: 'james-fleet-714-2',
+      os: {
+        family: 'centos',
+        full: 'CentOS 7.9.2009',
+        kernel: '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021',
+        name: 'Linux',
+        platform: 'centos',
+        version: '7.9.2009',
+      },
     },
   },
   {
@@ -355,24 +627,25 @@ export const mockAlerts: ProcessEvent[] = [
       },
     },
     '@timestamp': new Date('2021-11-23T15:26:34.860Z'),
+    user: {
+      name: 'vagrant',
+      id: '1000',
+    },
     process: {
       pid: 3535,
-      pgid: 3535,
-      user: {
-        name: 'vagrant',
-        id: '1000',
-      },
+      exit_code: 137,
       executable: '/usr/bin/vi',
+      command_line: 'bash',
       interactive: true,
       entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
       parent: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -380,15 +653,23 @@ export const mockAlerts: ProcessEvent[] = [
         args: ['vi', 'cmd/config.ini'],
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:26:34.860Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      session: {
+      session_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -396,15 +677,23 @@ export const mockAlerts: ProcessEvent[] = [
         args: ['vi', 'cmd/config.ini'],
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:26:34.860Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
-      entry: {
+      entry_leader: {
         pid: 2442,
-        pgid: 2442,
         user: {
           name: '',
           id: '1000',
         },
         executable: '/usr/bin/bash',
+        command_line: 'bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
         name: '',
@@ -412,17 +701,73 @@ export const mockAlerts: ProcessEvent[] = [
         args: ['vi', 'cmd/config.ini'],
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:26:34.860Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
+      },
+      group_leader: {
+        pid: 2442,
+        user: {
+          name: '',
+          id: '1000',
+        },
+        executable: '/usr/bin/bash',
+        command_line: 'bash',
+        interactive: true,
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        name: '',
+        args_count: 2,
+        args: ['vi', 'cmd/config.ini'],
+        working_directory: '/home/vagrant',
+        start: new Date('2021-11-23T15:26:34.860Z'),
+        tty: {
+          descriptor: 0,
+          type: 'char_device',
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
       },
       name: '',
       args_count: 2,
       args: ['vi', 'cmd/config.ini'],
       working_directory: '/home/vagrant',
       start: new Date('2021-11-23T15:26:34.860Z'),
+      tty: {
+        descriptor: 0,
+        type: 'char_device',
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
     },
     event: {
-      action: EventAction.exit,
+      action: EventAction.end,
       category: 'process',
       kind: EventKind.signal,
+    },
+    host: {
+      architecture: 'x86_64',
+      hostname: 'james-fleet-714-2',
+      id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
+      ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
+      mac: '42:01:0a:84:00:32',
+      name: 'james-fleet-714-2',
+      os: {
+        family: 'centos',
+        full: 'CentOS 7.9.2009',
+        kernel: '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021',
+        name: 'Linux',
+        platform: 'centos',
+        version: '7.9.2009',
+      },
     },
   },
 ];
@@ -456,6 +801,26 @@ export const childProcessMock: Process = {
         category: 'process',
         action: EventAction.exec,
       },
+      host: {
+        architecture: 'x86_64',
+        hostname: 'james-fleet-714-2',
+        id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
+        ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
+        mac: '42:01:0a:84:00:32',
+        name: 'james-fleet-714-2',
+        os: {
+          family: 'centos',
+          full: 'CentOS 7.9.2009',
+          kernel: '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021',
+          name: 'Linux',
+          platform: 'centos',
+          version: '7.9.2009',
+        },
+      },
+      user: {
+        id: '1',
+        name: 'vagrant',
+      },
       process: {
         args: ['ls', '-l'],
         args_count: 2,
@@ -466,11 +831,6 @@ export const childProcessMock: Process = {
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:05.210Z'),
         pid: 2,
-        pgid: 1,
-        user: {
-          id: '1',
-          name: 'vagrant',
-        },
         parent: {
           args: ['bash'],
           args_count: 1,
@@ -481,14 +841,14 @@ export const childProcessMock: Process = {
           working_directory: '/home/vagrant',
           start: new Date('2021-11-23T15:25:04.210Z'),
           pid: 1,
-          pgid: 1,
           user: {
             id: '1',
             name: 'vagrant',
           },
         },
-        session: {} as ProcessFields,
-        entry: {} as ProcessFields,
+        session_leader: {} as ProcessFields,
+        entry_leader: {} as ProcessFields,
+        group_leader: {} as ProcessFields,
       },
     } as ProcessEvent),
   isUserEntered: () => false,
@@ -496,7 +856,7 @@ export const childProcessMock: Process = {
 };
 
 export const processMock: Process = {
-  id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+  id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
   events: [],
   children: [],
   autoExpand: false,
@@ -517,24 +877,41 @@ export const processMock: Process = {
         category: 'process',
         action: EventAction.exec,
       },
+      host: {
+        architecture: 'x86_64',
+        hostname: 'james-fleet-714-2',
+        id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
+        ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
+        mac: '42:01:0a:84:00:32',
+        name: 'james-fleet-714-2',
+        os: {
+          family: 'centos',
+          full: 'CentOS 7.9.2009',
+          kernel: '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021',
+          name: 'Linux',
+          platform: 'centos',
+          version: '7.9.2009',
+        },
+      },
+      user: {
+        id: '1',
+        name: 'vagrant',
+      },
       process: {
         args: ['bash'],
         args_count: 1,
-        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
         executable: '/bin/bash',
+        exit_code: 137,
         interactive: false,
         name: '',
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:04.210Z'),
         pid: 1,
-        pgid: 1,
-        user: {
-          id: '1',
-          name: 'vagrant',
-        },
         parent: {} as ProcessFields,
-        session: {} as ProcessFields,
-        entry: {} as ProcessFields,
+        session_leader: {} as ProcessFields,
+        entry_leader: {} as ProcessFields,
+        group_leader: {} as ProcessFields,
       },
     } as ProcessEvent),
   isUserEntered: () => false,

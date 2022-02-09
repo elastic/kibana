@@ -93,7 +93,9 @@ describe('SessionView component', () => {
         await waitForApiCall();
 
         userEvent.click(renderResult.getByTestId('sessionViewDetailPanelToggle'));
-        expect(renderResult.getByTestId('sessionViewDetailPanel')).toBeTruthy();
+        expect(renderResult.getByText('Process')).toBeTruthy();
+        expect(renderResult.getByText('Host')).toBeTruthy();
+        expect(renderResult.getByText('Alerts')).toBeTruthy();
       });
     });
   });

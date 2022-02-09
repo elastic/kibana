@@ -193,7 +193,8 @@ export function ProcessTreeNode({
   };
 
   const renderSessionLeader = () => {
-    const { name, args, user } = process.getDetails().process;
+    const { user, process: processDetail } = process.getDetails();
+    const { name, args } = processDetail;
     const sessionIcon = !!tty ? 'consoleApp' : 'compute';
 
     return (
@@ -257,7 +258,8 @@ export function ProcessTreeNode({
   };
 
   const renderRootEscalation = () => {
-    const { user, parent } = processDetails.process;
+    const { user } = processDetails;
+    const { parent } = processDetails.process;
 
     if (user.name === 'root' && user.id !== parent.user.id) {
       return (

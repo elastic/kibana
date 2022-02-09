@@ -77,6 +77,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         ),
       },
     ];
+    // Only include entry_meta.type for entry leader
     if (idx === 0) {
       listItems.push({
         title: <DetailPanelListItem>entry_meta.type</DetailPanelListItem>,
@@ -117,6 +118,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         },
       ]
     );
+    // Only include entry_meta.source.ip for entry leader
     if (idx === 0) {
       listItems.push({
         title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
@@ -171,7 +173,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processDetail.exit_code.toString()}>
+              <DetailPanelCopy textToCopy={processDetail.exit_code}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                   {dataOrDash(processDetail.exit_code)}
                 </EuiTextColor>
@@ -206,10 +208,10 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
                   .join(', ')}
                 display="block"
               >
-                {processDetail.executable.map((execTuple) => {
+                {processDetail.executable.map((execTuple, idx) => {
                   const [executable, eventAction] = execTuple;
                   return (
-                    <div css={styles.description}>
+                    <div key={`executable-${idx}`} css={styles.description}>
                       <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                         {executable}
                       </EuiTextColor>
@@ -236,6 +238,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       />
       {leaderListItems.map((leader) => (
         <DetailPanelAccordion
+          key={leader.id}
           id={leader.id}
           title={leader.title}
           tooltipContent={leader.tooltipContent}
