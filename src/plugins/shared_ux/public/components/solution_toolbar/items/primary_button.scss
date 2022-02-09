@@ -6,20 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
-
-/**
- * Creates the Shared UX plugin.
- */
-export function plugin() {
-  return new SharedUXPlugin();
+// Temporary fix for lensApp icon not support ghost color
+.solutionToolbar__primaryButton--dark {
+  .euiIcon path {
+    fill: $euiColorInk;
+  }
 }
 
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export {
-  ExitFullScreenButton,
-  LazyExitFullScreenButton,
-  ToolbarButton,
-  LazyToolbarButton,
-  SolutionToolbar,
-} from './components';
+.solutionToolbar__primaryButton--light {
+  .euiIcon path {
+    fill: $euiColorGhost;
+  }
+}

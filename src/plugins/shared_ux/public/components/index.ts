@@ -23,3 +23,4 @@ export const LazyToolbarButton = React.lazy(() => import('./toolbar_button'));
  */
 export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
 export const ToolbarButton = withSuspense(LazyToolbarButton);
+export { SolutionToolbar } from './solution_toolbar';
