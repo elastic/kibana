@@ -117,7 +117,7 @@ The dashboard with the `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` ID that belongs to
 Be sure you have a snapshot before you delete the corrupt document. If you are unable to restore from a snapshot, it is recommended to also delete the `temp` and `target` indices the migration creates before you restart {kib} and retry the snapshot restore.
 
 [float]
-===== User defined index templates that causes new `.kibana*` indices to have incompatible settings or mappings
+===== User defined index templates that cause new `.kibana*` indices to have incompatible settings or mappings
 Matching index templates that specify `settings.refresh_interval` or `mappings` are known to interfere with {kib} upgrades.
 
 To make sure the index templates won't apply to new `.kibana*` indices, narrow down the {data-sources} of any user-defined index templates.
