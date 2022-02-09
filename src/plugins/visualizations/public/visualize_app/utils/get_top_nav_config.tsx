@@ -72,6 +72,7 @@ export interface TopNavConfigParams {
   editInLensConfig?: NavigateToLensContext | null;
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
+  setNavigateToLens: (flag: boolean) => void;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -101,6 +102,7 @@ export const getTopNavConfig = (
     editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
+    setNavigateToLens,
   }: TopNavConfigParams,
   {
     data,
@@ -308,6 +310,7 @@ export const getTopNavConfig = (
               };
               if (editInLensConfig) {
                 hideLensBadge();
+                setNavigateToLens(true);
                 getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithMeta);
               }
             },

@@ -64,6 +64,7 @@ const TopNav = ({
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [editInLensConfig, setEditInLensConfig] = useState<NavigateToLensContext | null>();
+  const [navigateToLens, setNavigateToLens] = useState(false);
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
@@ -125,6 +126,7 @@ const TopNav = ({
           editInLensConfig,
           displayEditInLensItem,
           hideLensBadge,
+          setNavigateToLens,
         },
         services
       );
@@ -146,6 +148,7 @@ const TopNav = ({
     editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
+    setNavigateToLens,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
@@ -172,10 +175,12 @@ const TopNav = ({
     onAppLeave((actions) => {
       // Confirm when the user has made any changes to an existing visualizations
       // or when the user has configured something without saving
+      // the warning won't appear if you navigate from the Viz editor to Lens
       if (
         originatingApp &&
         (hasUnappliedChanges || hasUnsavedChanges) &&
-        !services.stateTransferService.isTransferInProgress
+        !services.stateTransferService.isTransferInProgress &&
+        !navigateToLens
       ) {
         return actions.confirm(
           i18n.translate('visualizations.confirmModal.confirmTextDescription', {
@@ -199,6 +204,7 @@ const TopNav = ({
     hasUnappliedChanges,
     visualizeCapabilities.save,
     services.stateTransferService.isTransferInProgress,
+    navigateToLens,
   ]);
 
   useEffect(() => {
