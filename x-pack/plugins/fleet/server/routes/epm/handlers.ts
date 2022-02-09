@@ -43,7 +43,7 @@ import {
   getCategories,
   getPackages,
   getFile,
-  getPackageInfo,
+  getPackageInfoFromRegistry,
   isBulkInstallError,
   installPackage,
   removeInstallation,
@@ -199,7 +199,7 @@ export const getInfoHandler: FleetRequestHandler<
     if (pkgVersion && !semverValid(pkgVersion)) {
       throw new IngestManagerError('Package version is not a valid semver');
     }
-    const res = await getPackageInfo({
+    const res = await getPackageInfoFromRegistry({
       savedObjectsClient,
       pkgName,
       pkgVersion: pkgVersion || '',
