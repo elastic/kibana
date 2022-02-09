@@ -110,11 +110,29 @@ describe('successful migrations', () => {
   });
 
   describe('8.2.0', () => {
-    test('resets attempts and status of the failed alerting tasks without schedule interval', () => {
+    test('resets attempts and status of a "failed" alerting tasks without schedule interval', () => {
       const migration820 = getMigrations()['8.2.0'];
       const taskInstance = getMockData({
         taskType: 'alerting:123',
         status: 'failed',
+        schedule: undefined,
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          attempts: 0,
+          status: 'idle',
+        },
+      });
+    });
+
+    test('resets attempts and status of a "running" alerting tasks without schedule interval', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'running',
         schedule: undefined,
       });
 

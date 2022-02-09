@@ -152,7 +152,10 @@ function resetAttemptsAndStatusForTheTasksWithoutSchedule(
   doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
 ): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
-    if (!doc.attributes.schedule?.interval && doc.attributes.status === TaskStatus.Failed) {
+    if (
+      !doc.attributes.schedule?.interval &&
+      (doc.attributes.status === TaskStatus.Failed || doc.attributes.status === TaskStatus.Running)
+    ) {
       return {
         ...doc,
         attributes: {
