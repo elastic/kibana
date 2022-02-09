@@ -29,6 +29,7 @@ import { useArtifactGetItem } from '../hooks/use_artifact_get_item';
 import { ArtifactListPageUrlParams } from '../types';
 import { ManagementPageLoader } from '../../management_page_loader';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
+import { useToasts } from '../../../../common/lib/kibana';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -65,6 +66,11 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
         'Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies.',
     }
   ),
+  flyoutEditItemLoadFailure: (errorMessage: string) =>
+    i18n.translate('xpack.securitySolution.flyoutEditItemLoadFailure', {
+      defaultMessage: 'Failed to retrieve item for edit. Reason: {errorMessage}',
+      values: { errorMessage },
+    }),
 });
 
 interface ArtifactFormComponentProps {
@@ -79,7 +85,6 @@ interface ArtifactFormComponentProps {
 export interface ArtifactFlyoutProps {
   apiClient: ExceptionsListApiClient;
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
-  onCancel(): void;
   onSuccess(): void;
   /**
    * If the artifact data is provided and it matches the id in the URL, then it will not be
@@ -101,16 +106,14 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     apiClient,
     item,
     FormComponent,
+    onSuccess,
     labels: _labels = {},
     showExpiredLicenseBanner = false, // FIXME:PT can can calculate this in here, right, rather than have a prop
     'data-test-subj': dataTestSubj,
     size = 'm',
   }) => {
-    // FIXME:PT should handle cases where we find the `id` to be invalid (show toast, close flyout ?)
-    // FIXME:PT should the flyout be made `reusable` for use cases where it gets opened in other areas of security (like Event filters)
-    // FIXME:PT handle cases where the "create" does not call the actual create api (ex. upload) (maybe defer from first iteration
-
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const toasts = useToasts();
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
     const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
@@ -158,7 +161,17 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
       }
     }, [error, fetchItemForEdit, isEditFlow, isInitializing, isLoadingItemForEdit, itemForEdit]);
 
-    if (!isFlyoutOpened) {
+    // If we got an error while trying ot retrieve the item for edit, then show a toast message
+    useEffect(() => {
+      if (isEditFlow && error) {
+        toasts.addWarning(labels.flyoutEditItemLoadFailure(error?.body?.message || error.message));
+
+        // Blank out the url params for id and show (will close out the flyout)
+        setUrlParams({ id: undefined, show: undefined });
+      }
+    }, [error, isEditFlow, labels, setUrlParams, toasts, urlParams.itemId]);
+
+    if (!isFlyoutOpened || error) {
       return null;
     }
 
@@ -186,12 +199,12 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         <EuiFlyoutBody>
           {isInitializing && <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />}
 
-          {!isInitializing && (
+          {!isInitializing && itemForEdit && (
             <FormComponent
               onChange={() => {}} // FIXME:PT implement onchange callback
               disabled={false}
-              item={{}} // FIXME:PT pass along the item
-              mode={(urlParams.show ?? 'create') as ArtifactFormComponentProps['mode']}
+              item={itemForEdit}
+              mode={(isEditFlow ? 'edit' : 'create') as ArtifactFormComponentProps['mode']}
             />
           )}
         </EuiFlyoutBody>

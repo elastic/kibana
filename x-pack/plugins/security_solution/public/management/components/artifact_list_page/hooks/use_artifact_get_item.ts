@@ -6,6 +6,8 @@
  */
 
 import { useQuery } from 'react-query';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { HttpFetchError } from 'kibana/public';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 export const useArtifactGetItem = (
@@ -13,9 +15,14 @@ export const useArtifactGetItem = (
   itemId: string,
   enabled: boolean = true
 ) => {
-  return useQuery(['item', apiClient, itemId], () => apiClient.get(itemId), {
-    enabled,
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
+  return useQuery<ExceptionListItemSchema, HttpFetchError>(
+    ['item', apiClient, itemId],
+    () => apiClient.get(itemId),
+    {
+      enabled,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      retry: false,
+    }
+  );
 };
