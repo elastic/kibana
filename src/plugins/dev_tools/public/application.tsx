@@ -15,7 +15,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { ApplicationStart, ChromeStart, ScopedHistory, CoreTheme, CoreStart } from 'src/core/public';
+import {
+  ApplicationStart,
+  ChromeStart,
+  ScopedHistory,
+  CoreTheme,
+  CoreStart,
+} from 'src/core/public';
 import { KibanaThemeProvider } from '../../kibana_react/public';
 import type { DocTitleService, BreadcrumbService } from './services';
 
@@ -68,7 +74,7 @@ function DevToolsWrapper({
   appServices.executionContext.set({
     type: 'application',
     page: activeDevTool,
-  })
+  });
 
   return (
     <main className="devApp">

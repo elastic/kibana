@@ -29,5 +29,4 @@ export type KibanaExecutionContext = {
   readonly url?: string;
   /** an inner context spawned from the current context. */
   child?: KibanaExecutionContext;
-
 };

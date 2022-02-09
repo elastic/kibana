@@ -21,6 +21,7 @@ import agent from 'elastic-apm-node';
 import type { Duration } from 'moment';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import apm from 'elastic-apm-node';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import type { InternalExecutionContextSetup } from '../execution_context';
@@ -46,7 +47,6 @@ import { AuthHeadersStorage, IAuthHeadersStorage } from './auth_headers_storage'
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
-import apm from 'elastic-apm-node';
 
 /** @internal */
 export interface HttpServerSetup {
@@ -350,7 +350,6 @@ export class HttpServer {
         apm.addLabels(apmContext);
         executionContext?.set(parentContext);
       }
-      
 
       executionContext?.setRequestId(requestId);
 

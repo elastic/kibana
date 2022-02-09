@@ -46,6 +46,9 @@ describe('ContextApp test', () => {
     toastNotifications: { addDanger: () => {} },
     navigation: mockNavigationPlugin,
     core: {
+      executionContext: {
+        set: jest.fn(),
+      },
       notifications: { toasts: [] },
       theme: { theme$: themeServiceMock.createStartContract().theme$ },
     },

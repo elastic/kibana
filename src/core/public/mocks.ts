@@ -46,7 +46,7 @@ export { themeServiceMock } from './theme/theme_service.mock';
 function createCoreSetupMock({
   basePath = '',
   pluginStartDeps = {},
-  pluginStartContract, 
+  pluginStartContract,
 }: {
   basePath?: string;
   pluginStartDeps?: object;
