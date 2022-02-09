@@ -84,13 +84,15 @@ export const setupOptionsListSuggestionsRoute = (
 
     const { fieldName, searchString, selectedOptions, filters, fieldSpec } = request;
     const body = getOptionsListBody(fieldName, fieldSpec, searchString, selectedOptions, filters);
+
     const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
 
     // parse raw ES response into OptionsListSuggestionResponse
     const totalCardinality = get(rawEsResult.body, 'aggregations.unique_terms.value');
 
     const suggestions = get(rawEsResult.body, 'aggregations.suggestions.buckets')?.map(
-      (suggestion: { key: string }) => suggestion.key
+      (suggestion: { key: string; key_as_string: string }) =>
+        fieldSpec?.type === 'string' ? suggestion.key : suggestion.key_as_string
     );
 
     const rawInvalidSuggestions = get(rawEsResult.body, 'aggregations.validation.buckets') as {
@@ -129,7 +131,10 @@ export const setupOptionsListSuggestionsRoute = (
     const suggestionsAgg = {
       terms: {
         field: fieldName,
-        include: `${getEscapedQuery(searchString ?? '')}.*`,
+        // terms on boolean fields don't support include
+        ...(fieldSpec?.type !== 'boolean' && {
+          include: `${getEscapedQuery(searchString ?? '')}.*`,
+        }),
         execution_hint: executionHint,
         shard_size: shardSize,
       },

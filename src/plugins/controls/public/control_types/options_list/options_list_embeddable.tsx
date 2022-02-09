@@ -21,7 +21,7 @@ import { Embeddable, IContainer } from '../../../../embeddable/public';
 import { runOptionsListRequest } from './options_list_service';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
-import { DataView } from '../../../../data_views/public';
+import { DataView, DataViewField } from '../../../../data_views/public';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
 import {
@@ -54,9 +54,6 @@ interface OptionsListDataFetchProps {
   filters?: ControlInput['filters'];
 }
 
-const fieldMissingError = (fieldName: string) =>
-  new Error(`field ${fieldName} not found in index pattern`);
-
 export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput, ControlOutput> {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
@@ -71,6 +68,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private typeaheadSubject: Subject<string> = new Subject<string>();
   private abortController?: AbortController;
   private dataView?: DataView;
+  private field?: DataViewField;
   private searchString = '';
 
   // State to be passed down to component
@@ -175,15 +173,30 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     );
   };
 
-  private getCurrentDataView = async (): Promise<DataView> => {
-    const { dataViewId } = this.getInput();
-    if (this.dataView && this.dataView.id === dataViewId) return this.dataView;
-    this.dataView = await this.dataViewsService.get(dataViewId);
-    if (this.dataView === undefined) {
-      this.onFatalError(new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId)));
+  private getCurrentDataViewAndField = async (): Promise<{
+    dataView: DataView;
+    field: DataViewField;
+  }> => {
+    const { dataViewId, fieldName } = this.getInput();
+    if (!this.dataView || this.dataView.id !== dataViewId) {
+      this.dataView = await this.dataViewsService.get(dataViewId);
+      if (this.dataView === undefined) {
+        this.onFatalError(
+          new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId))
+        );
+      }
+      this.updateOutput({ dataViews: [this.dataView] });
     }
-    this.updateOutput({ dataViews: [this.dataView] });
-    return this.dataView;
+
+    if (!this.field || this.field.name !== fieldName) {
+      this.field = this.dataView.getFieldByName(fieldName);
+      if (this.field === undefined) {
+        this.onFatalError(new Error(OptionsListStrings.errors.getDataViewNotFoundError(fieldName)));
+      }
+      this.updateComponentState({ field: this.field });
+    }
+
+    return { dataView: this.dataView, field: this.field! };
   };
 
   private updateComponentState(changes: Partial<OptionsListComponentState>) {
@@ -196,11 +209,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private runOptionsListQuery = async () => {
     this.updateComponentState({ loading: true });
-    const dataView = await this.getCurrentDataView();
-    const { ignoreParentSettings, filters, fieldName, query, selectedOptions, timeRange } =
-      this.getInput();
-    const field = dataView.getFieldByName(fieldName);
-    if (!field) throw fieldMissingError(fieldName);
+    const { dataView, field } = await this.getCurrentDataViewAndField();
+    const { ignoreParentSettings, filters, query, selectedOptions, timeRange } = this.getInput();
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
@@ -248,16 +258,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   private buildFilter = async () => {
-    const { fieldName } = this.getInput();
     const { validSelections } = this.componentState;
     if (!validSelections || isEmpty(validSelections)) {
       this.updateOutput({ filters: [] });
       return;
     }
-    const dataView = await this.getCurrentDataView();
-    const field = dataView.getFieldByName(this.getInput().fieldName);
-
-    if (!field) throw fieldMissingError(fieldName);
+    const { dataView, field } = await this.getCurrentDataViewAndField();
 
     let newFilter: Filter;
     if (validSelections.length === 1) {

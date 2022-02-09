@@ -89,7 +89,7 @@ export const OptionsListStrings = {
     getInvalidSelectionsTooltip: (selectedOptions: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsTooltip', {
         defaultMessage:
-          '{selectedOptions} selected options are ignored because they are no longer in the data.',
+          '{selectedOptions} selected {selectedOptions, plural, one {option} other {options}} {selectedOptions, plural, one {is} other {are}} ignored because {selectedOptions, plural, one {it is} other {they are}} no longer in the data.',
         values: { selectedOptions },
       }),
   },
@@ -98,6 +98,11 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.errors.dataViewNotFound', {
         defaultMessage: 'Could not locate data view: {dataViewId}',
         values: { dataViewId },
+      }),
+    getfieldNotFoundError: (fieldId: string) =>
+      i18n.translate('controls.optionsList.errors.fieldNotFound', {
+        defaultMessage: 'Could not locate field: {fieldId}',
+        values: { fieldId },
       }),
   },
 };
