@@ -93,11 +93,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add comma after previous non empty line on autocomplete', async () => {
-      const LINE_NUMBER = 4;
+      const LINE_NUMBER = 2;
 
       await PageObjects.console.dismissTutorial();
       await PageObjects.console.clearTextArea();
-      await PageObjects.console.enterRequest();
 
       await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
       await PageObjects.console.pressEnter();
@@ -110,7 +109,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
         log.debug(textOfPreviousNonEmptyLine);
         const lastChar = textOfPreviousNonEmptyLine.charAt(textOfPreviousNonEmptyLine.length - 1);
-        expect(lastChar).to.be.equal(',');
+        const request = await PageObjects.console.getRequest();
+        expect(request.trim()).to.eql(
+          `
+        {
+            "query": {
+                  "match": {},
+
+                  "bool": {}
+            }
+        }
+        `.trim()
+        );
+        expect(lastChar).to.eql(',');
       });
     });
 
