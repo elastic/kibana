@@ -19,7 +19,7 @@ export const logViewOriginRT = rt.keyof({
 // Kibana data views
 export const logDataViewReferenceRT = rt.type({
   type: rt.literal('data_view'),
-  indexPatternId: rt.string,
+  dataViewId: rt.string,
 });
 
 export type LogDataViewReference = rt.TypeOf<typeof logDataViewReferenceRT>;

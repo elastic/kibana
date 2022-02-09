@@ -36,11 +36,16 @@ export class LogViewsService {
   }
 
   public start({ infraSources, savedObjects }: LogViewsServiceStartDeps): LogViewsServiceStart {
-    const { logger } = this;
+    const { internalLogViews, logger } = this;
 
     return {
       getScopedClient(request: KibanaRequest) {
-        return new LogViewsClient(logger, savedObjects.getScopedClient(request), infraSources);
+        return new LogViewsClient(
+          logger,
+          savedObjects.getScopedClient(request),
+          infraSources,
+          internalLogViews
+        );
       },
     };
   }
