@@ -10,6 +10,7 @@ import { PluginSetupContract as AlertsPluginSetup } from '../../alerting/server'
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute } from './routes/health';
+import { createConfig, ConfigType } from './config';
 
 const BASE_ROUTE = '/api/triggers_actions_ui';
 export interface PluginStartContract {
@@ -24,13 +25,17 @@ interface PluginsSetup {
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
   private readonly logger: Logger;
   private readonly data: PluginStartContract['data'];
+  private config: ConfigType;
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
     this.data = getService();
+    this.config = createConfig(ctx);
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): void {
+    const experimentalFeatures = this.config.experimentalFeatures;
+
     const router = core.http.createRouter();
     registerDataService({
       logger: this.logger,

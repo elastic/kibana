@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect } from 'react';
+import React, { lazy, useEffect, useMemo } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
@@ -19,11 +19,16 @@ import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { useExperimentalFeatures } from '../common/use_experimental_features';
 
 const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
+
 const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
+const RulesListDatagrid = lazy(
+  () => import('./sections/alerts_list/components/rules_list_datagrid')
+);
 
 export interface MatchParams {
   section: Section;
@@ -41,6 +46,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     setBreadcrumbs,
     docLinks,
   } = useKibana().services;
+  const { rulesListDatagrid } = useExperimentalFeatures();
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{
@@ -76,6 +82,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     setBreadcrumbs([getAlertingSectionBreadcrumb(section || 'home')]);
     chrome.docTitle.change(getCurrentDocTitle(section || 'home'));
   }, [section, chrome, setBreadcrumbs]);
+
+  const AlertsListComponent = useMemo(
+    () => (rulesListDatagrid ? RulesListDatagrid : AlertsList),
+    [rulesListDatagrid]
+  );
 
   return (
     <>
@@ -132,7 +143,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             <Route
               exact
               path={routeToRules}
-              component={suspendedComponentWithProps(AlertsList, 'xl')}
+              component={suspendedComponentWithProps(AlertsListComponent, 'xl')}
             />
           </Switch>
         </HealthCheck>
