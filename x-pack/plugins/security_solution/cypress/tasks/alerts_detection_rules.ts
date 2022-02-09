@@ -8,6 +8,7 @@
 import { duplicatedRuleName } from '../objects/rule';
 import {
   BULK_ACTIONS_BTN,
+  BULK_ACTIONS_PROGRESS_BTN,
   COLLAPSED_ACTION_BTN,
   CREATE_NEW_RULE_BTN,
   CUSTOM_RULES_BTN,
@@ -45,6 +46,18 @@ import {
   TOASTER,
   RULE_IMPORT_OVERWRITE_CHECKBOX,
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
+  MODAL_CONFIRMATION_TITLE,
+  INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  TAGS_RULE_BULK_MENU_ITEM,
+  ADD_TAGS_RULE_BULK_MENU_ITEM,
+  DELETE_TAGS_RULE_BULK_MENU_ITEM,
+  RULES_BULK_EDIT_FORM_TITLE,
+  RULES_BULK_EDIT_INDEX_PATTERNS,
+  RULES_BULK_EDIT_TAGS,
+  RULES_BULK_EDIT_FORM_CONFIRM_BTN,
+  TOASTER_BODY,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -291,79 +304,65 @@ export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(INPUT_FILE).should('not.exist');
 };
 
-export const openBulkActionsMenu = () => {
-  cy.get('[data-test-subj="bulkActions-popover"]').click();
-};
-
 export const clickAddIndexPatternsMenuItem = () => {
-  openBulkActionsMenu();
-  cy.get('[data-test-subj="indexPatternsBulkEditRule"]').click();
-  cy.get('[data-test-subj="addIndexPatternsBulkEditRule"]').click();
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
+  cy.get(ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
 };
 
 export const openBulkEditAddIndexPatternsForm = () => {
-  openBulkActionsMenu();
-  cy.get('[data-test-subj="indexPatternsBulkEditRule"]').click();
-  cy.get('[data-test-subj="addIndexPatternsBulkEditRule"]').click();
+  clickAddIndexPatternsMenuItem();
 
-  cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Add index patterns');
+  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add index patterns');
 };
 
 export const openBulkEditDeleteIndexPatternsForm = () => {
-  openBulkActionsMenu();
-  cy.get('[data-test-subj="indexPatternsBulkEditRule"]').click();
-  cy.get('[data-test-subj="deleteIndexPatternsBulkEditRule"]').click();
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
+  cy.get(DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
 
-  cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Delete index patterns');
+  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete index patterns');
 };
 
 export const openBulkEditAddTagsForm = () => {
-  openBulkActionsMenu();
-  cy.get('[data-test-subj="tagsBulkEditRule"]').click();
-  cy.get('[data-test-subj="addTagsBulkEditRule"]').click();
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
+  cy.get(ADD_TAGS_RULE_BULK_MENU_ITEM).click();
 
-  cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Add tags');
+  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add tags');
 };
 
 export const openBulkEditDeleteTagsForm = () => {
-  openBulkActionsMenu();
-  cy.get('[data-test-subj="tagsBulkEditRule"]').click();
-  cy.get('[data-test-subj="deleteTagsBulkEditRule"]').click();
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
+  cy.get(DELETE_TAGS_RULE_BULK_MENU_ITEM).click();
 
-  cy.get('[data-test-subj="bulkEditFormTitle"]').should('have.text', 'Delete tags');
+  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete tags');
 };
 
 export const typeIndexPatterns = (indices: string[]) => {
-  cy.get('[data-test-subj="detectionEngineBulkEditIndexPatterns"]')
-    .find('[data-test-subj="input"]')
-    .type(indices.join('{enter}'));
+  cy.get(RULES_BULK_EDIT_INDEX_PATTERNS).find('input').type(indices.join('{enter}'));
 };
 
 export const typeTags = (tags: string[]) => {
-  cy.get('[data-test-subj="detectionEngineBulkEditTags"]')
-    .find('[data-test-subj="input"]')
-    .type(tags.join('{enter}'));
+  cy.get(RULES_BULK_EDIT_TAGS).find('input').type(tags.join('{enter}'));
 };
-export const getOverwriteTagsCheckbox = () =>
-  cy.get('[data-test-subj="detectionEngineBulkEditOverwriteTags"]');
 
-export const getOverwriteCheckbox = () =>
-  cy.get('[data-test-subj="detectionEngineBulkEditOverwriteIndexPatterns"]');
-
-export const confirmBulkEditForm = () => cy.get('[data-test-subj="bulkEditFormSaveBtn"]').click();
+export const confirmBulkEditForm = () => cy.get(RULES_BULK_EDIT_FORM_CONFIRM_BTN).click();
 
 export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: number }) => {
-  cy.get('[data-test-subj="bulkActions-popover"]').should('not.exist');
-  cy.get('[data-test-subj="bulkActions-progress"]').find('button').should('be.disabled');
-  cy.get('[data-test-subj="globalToastList"]').contains(
-    `You’ve successfully updated ${rulesCount} rule`
-  );
+  cy.get(BULK_ACTIONS_PROGRESS_BTN).should('be.disabled');
+  cy.contains(TOASTER_BODY, `You’ve successfully updated ${rulesCount} rule`);
 };
 
 export const waitForElasticRulesBulkEditModal = (rulesCount: number) => {
-  cy.get('[data-test-subj="confirmModalTitleText"]').should(
+  cy.get(MODAL_CONFIRMATION_TITLE).should(
     'have.text',
     `${rulesCount} Elastic rules cannot be edited`
+  );
+
+  cy.contains(
+    'Elastic rules are not modifiable. The update action will only be applied to Custom rules.'
   );
 };
 
@@ -371,7 +370,7 @@ export const waitForMixedRulesBulkEditModal = (
   elasticRulesCount: number,
   customRulesCount: number
 ) => {
-  cy.get('[data-test-subj="confirmModalTitleText"]').should(
+  cy.get(MODAL_CONFIRMATION_TITLE).should(
     'have.text',
     `${elasticRulesCount} Elastic rules cannot be edited`
   );

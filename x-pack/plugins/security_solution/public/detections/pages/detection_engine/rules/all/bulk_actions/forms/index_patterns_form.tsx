@@ -79,7 +79,7 @@ interface IndexPatternsFormProps {
   editAction: IndexPatternsEditActions;
   rulesCount: number;
   onClose: () => void;
-  onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
+  onConfirm: (bulkActionEditPayload: BulkActionEditPayload) => void;
 }
 
 const IndexPatternsFormComponent = ({
@@ -119,8 +119,8 @@ const IndexPatternsFormComponent = ({
         path="index"
         config={{ ...schema.index, label: indexLabel, helpText: indexHelpText }}
         componentProps={{
-          idAria: 'detectionEngineBulkEditIndexPatterns',
-          'data-test-subj': 'detectionEngineBulkEditIndexPatterns',
+          idAria: 'detectionEngineBulkEditRulesIndexPatterns',
+          'data-test-subj': 'detectionEngineBulkEditRulesIndexPatterns',
           euiFieldProps: {
             fullWidth: true,
             placeholder: '',
@@ -133,8 +133,8 @@ const IndexPatternsFormComponent = ({
         <CommonUseField
           path="overwrite"
           componentProps={{
-            idAria: 'detectionEngineBulkEditOverwriteIndexPatterns',
-            'data-test-subj': 'detectionEngineBulkEditOverwriteIndexPatterns',
+            idAria: 'detectionEngineBulkEditRulesOverwriteIndexPatterns',
+            'data-test-subj': 'detectionEngineBulkEditRulesOverwriteIndexPatterns',
           }}
         />
       )}

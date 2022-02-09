@@ -7,6 +7,8 @@
 
 export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
 
+export const BULK_ACTIONS_PROGRESS_BTN = '[data-test-subj="bulkActions-progress"]';
+
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
@@ -38,6 +40,8 @@ export const FIRST_RULE = 0;
 export const FOURTH_RULE = 3;
 
 export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
+
+export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';
 
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
@@ -88,6 +92,8 @@ export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteC
 
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
+export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"]';
+
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
 
 export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
@@ -104,7 +110,38 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
+export const TOASTER_BODY = '[data-test-subj="globalToastList"] .euiToastBody';
+
 export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
 
 export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
   '[id="import-data-modal-exceptions-checkbox-label"]';
+
+export const INDEX_PATTERNS_RULE_BULK_MENU_ITEM = '[data-test-subj="indexPatternsBulkEditRule"]';
+
+export const ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="indexPatternsBulkEditRule"]';
+
+export const DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="indexPatternsBulkEditRule"]';
+
+export const TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="tagsBulkEditRule"]';
+
+export const ADD_TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="addTagsBulkEditRule"]';
+
+export const DELETE_TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="deleteTagsBulkEditRule"]';
+
+export const RULES_BULK_EDIT_FORM_TITLE = '[data-test-subj="rulesBulkEditFormTitle"]';
+
+export const RULES_BULK_EDIT_FORM_CONFIRM_BTN = '[data-test-subj="rulesBulkEditFormSaveBtn"]';
+
+export const RULES_BULK_EDIT_INDEX_PATTERNS =
+  '[data-test-subj="detectionEngineBulkEditIndexPatterns"]';
+
+export const RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX =
+  '[data-test-subj="detectionEngineBulkEditRulesOverwriteIndexPatterns"]';
+
+export const RULES_BULK_EDIT_TAGS = '[data-test-subj="detectionEngineBulkEditRulesTags"]';
+
+export const RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX =
+  '[data-test-subj="detectionEngineBulkEditRulesOverwriteTags"]';

@@ -75,7 +75,7 @@ interface TagsFormProps {
   editAction: TagsEditActions;
   rulesCount: number;
   onClose: () => void;
-  onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
+  onConfirm: (bulkActionEditPayload: BulkActionEditPayload) => void;
   tags: string[];
 }
 
@@ -109,8 +109,8 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm, tags }:
         path="tags"
         config={{ ...schema.tags, label: tagsLabel, helpText: tagsHelpText }}
         componentProps={{
-          idAria: 'detectionEngineBulkEditTags',
-          'data-test-subj': 'detectionEngineBulkEditTags',
+          idAria: 'detectionEngineBulkEditRulesTags',
+          'data-test-subj': 'detectionEngineBulkEditRulesTags',
           euiFieldProps: {
             fullWidth: true,
             placeholder: '',
@@ -123,8 +123,8 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm, tags }:
         <CommonUseField
           path="overwrite"
           componentProps={{
-            idAria: 'detectionEngineBulkEditOverwriteTags',
-            'data-test-subj': 'detectionEngineBulkEditOverwriteTags',
+            idAria: 'detectionEngineBulkEditRulesOverwriteTags',
+            'data-test-subj': 'detectionEngineBulkEditRulesOverwriteTags',
           }}
         />
       ) : null}
