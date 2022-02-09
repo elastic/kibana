@@ -347,6 +347,8 @@ export const EditPackagePolicyForm = memo<{
         : false;
       if (!hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
