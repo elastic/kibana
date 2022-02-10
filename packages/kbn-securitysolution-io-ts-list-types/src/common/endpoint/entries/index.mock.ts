@@ -10,11 +10,11 @@ import { EndpointEntriesArray } from '.';
 import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
 import { getEndpointEntryMatchAnyMock } from '../entry_match_any/index.mock';
 import { getEndpointEntryNestedMock } from '../entry_nested/index.mock';
-import { getEndpointEntryMatchWildcard } from '../entry_match_wildcard/index.mock';
+import { getEndpointEntryMatchWildcardMock } from '../entry_match_wildcard/index.mock';
 
 export const getEndpointEntriesArrayMock = (): EndpointEntriesArray => [
   getEndpointEntryMatchMock(),
   getEndpointEntryMatchAnyMock(),
   getEndpointEntryNestedMock(),
-  getEndpointEntryMatchWildcard(),
+  getEndpointEntryMatchWildcardMock(),
 ];
