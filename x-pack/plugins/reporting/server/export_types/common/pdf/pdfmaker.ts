@@ -8,7 +8,7 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import _ from 'lodash';
 import path from 'path';
-import { Worker } from 'worker_threads';
+import { MessageChannel, MessagePort } from 'worker_threads';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import type { Layout } from '../../../../../screenshotting/server';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
@@ -23,7 +23,8 @@ import {
 } from './constants';
 import { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
 
-import type { PdfWorkerData } from './worker';
+import type { GeneratePdfRequest } from './worker';
+import { getWorkerInstance } from './worker_singleton';
 
 export class PdfMaker {
   _layout: Layout;
@@ -31,7 +32,7 @@ export class PdfMaker {
   private _title: string;
   private _content: Content[];
 
-  private worker?: Worker;
+  private workerPort?: MessagePort;
 
   protected workerModulePath = path.resolve(__dirname, './worker.js');
 
@@ -142,7 +143,7 @@ export class PdfMaker {
     this._title = title;
   }
 
-  private getWorkerData(): PdfWorkerData {
+  private getWorkerData(): GeneratePdfRequest['data'] {
     return {
       layout: {
         hasFooter: this._layout.hasFooter,
@@ -165,41 +166,43 @@ export class PdfMaker {
   }
 
   public async generate(): Promise<Uint8Array> {
-    if (this.worker) throw new Error('PDF generation already in progress!');
+    if (this.workerPort) throw new Error('PDF generation already in progress!');
+    const { port1, port2 } = new MessageChannel();
+    this.workerPort = port1;
+
+    const workerInstance = getWorkerInstance({
+      modulePath: this.workerModulePath,
+      maxYoungHeapSizeMb: this.workerMaxYoungHeapSizeMb,
+      maxOldHeapSizeMb: this.workerMaxOldHeapSizeMb,
+    });
 
     return await new Promise<Uint8Array>((resolve, reject) => {
-      let buffer: undefined | Uint8Array;
-      this.worker = new Worker(this.workerModulePath, {
-        resourceLimits: {
-          maxYoungGenerationSizeMb: this.workerMaxYoungHeapSizeMb,
-          maxOldGenerationSizeMb: this.workerMaxOldHeapSizeMb,
-        },
-        workerData: this.getWorkerData(),
-      });
-      this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
+      const workerErrorHandler = (workerError: NodeJS.ErrnoException) => {
         if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
           reject(new PdfWorkerOutOfMemoryError(workerError.message));
         } else {
           reject(workerError);
         }
-      });
+      };
+      const generatePdfRequest: GeneratePdfRequest = {
+        port: port2,
+        data: this.getWorkerData(),
+      };
+      workerInstance.on('error', workerErrorHandler);
+      workerInstance.postMessage(generatePdfRequest, [port2]);
 
       // We expect one message from the work container the PDF buffer.
-      this.worker.on('message', (pdfBuffer: Uint8Array) => (buffer = pdfBuffer));
-
-      this.worker.on('exit', (code) => {
-        if (code !== 0) {
-          reject(new Error(`Worker exited with code ${code}`));
+      this.workerPort!.on('message', (pdfBuffer: Uint8Array) => {
+        workerInstance.off('error', workerErrorHandler);
+        if (!pdfBuffer) {
+          reject(new Error(`Worker did not generate a PDF!`));
           return;
         }
-        if (buffer) {
-          resolve(buffer);
-          return;
-        }
-        reject(new Error('Worker exited without generating a PDF'));
+        resolve(pdfBuffer);
       });
     }).finally(() => {
-      this.worker = undefined;
+      this.workerPort?.close();
+      this.workerPort = undefined;
     });
   }
 }

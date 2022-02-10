@@ -7,7 +7,7 @@
 
 import { Ensure, SerializableRecord } from '@kbn/utility-types';
 
-import { workerData, parentPort, isMainThread } from 'worker_threads';
+import { parentPort, isMainThread, MessagePort } from 'worker_threads';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import path from 'path';
@@ -28,11 +28,16 @@ export type PdfWorkerData = Ensure<
   SerializableRecord
 >;
 
-if (!isMainThread) {
-  execute();
+export interface GeneratePdfRequest {
+  port: MessagePort;
+  data: PdfWorkerData;
 }
 
-async function execute() {
+if (!isMainThread) {
+  parentPort!.on('message', execute);
+}
+
+async function execute({ data: { layout, logo, title, content }, port }: GeneratePdfRequest) {
   const tableBorderWidth = 1;
 
   const fontPath = (filename: string) => path.resolve(assetPath, 'fonts', filename);
@@ -54,8 +59,6 @@ async function execute() {
   };
 
   const printer = new Printer(fonts);
-
-  const { layout, logo, title, content } = workerData as PdfWorkerData;
 
   const docDefinition = _.assign(getTemplate(layout, logo, title, tableBorderWidth, assetPath), {
     content,
@@ -98,5 +101,5 @@ async function execute() {
     pdfDoc.end();
   });
 
-  parentPort!.postMessage(buffer, [buffer.buffer /* Transfer buffer instead of copying */]);
+  port.postMessage(buffer, [buffer.buffer /* Transfer buffer instead of copying */]);
 }
