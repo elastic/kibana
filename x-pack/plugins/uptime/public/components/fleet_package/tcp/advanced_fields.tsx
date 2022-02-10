@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiCheckbox,
@@ -18,15 +18,19 @@ import {
 
 import { useTCPAdvancedFieldsContext } from '../contexts';
 
-import { ConfigKeys } from '../types';
+import { ConfigKey } from '../types';
 
 import { OptionalLabel } from '../optional_label';
 
-export const TCPAdvancedFields = () => {
+interface Props {
+  children?: React.ReactNode;
+}
+
+export const TCPAdvancedFields = memo<Props>(({ children }) => {
   const { fields, setFields } = useTCPAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
-    ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
     [setFields]
@@ -72,21 +76,21 @@ export const TCPAdvancedFields = () => {
           }
         >
           <EuiFieldText
-            value={fields[ConfigKeys.PROXY_URL]}
+            value={fields[ConfigKey.PROXY_URL]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
-                configKey: ConfigKeys.PROXY_URL,
+                configKey: ConfigKey.PROXY_URL,
               })
             }
             data-test-subj="syntheticsProxyUrl"
           />
         </EuiFormRow>
-        {!!fields[ConfigKeys.PROXY_URL] && (
+        {!!fields[ConfigKey.PROXY_URL] && (
           <EuiFormRow data-test-subj="syntheticsUseLocalResolver">
             <EuiCheckbox
               id={'uptimeFleetUseLocalResolverCheckbox'}
-              checked={fields[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]}
+              checked={fields[ConfigKey.PROXY_USE_LOCAL_RESOLVER]}
               label={
                 <FormattedMessage
                   id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.resolveHostnamesLocally"
@@ -96,7 +100,7 @@ export const TCPAdvancedFields = () => {
               onChange={(event) =>
                 handleInputChange({
                   value: event.target.checked,
-                  configKey: ConfigKeys.PROXY_USE_LOCAL_RESOLVER,
+                  configKey: ConfigKey.PROXY_USE_LOCAL_RESOLVER,
                 })
               }
             />
@@ -118,12 +122,12 @@ export const TCPAdvancedFields = () => {
           }
         >
           <EuiFieldText
-            value={fields[ConfigKeys.REQUEST_SEND_CHECK]}
+            value={fields[ConfigKey.REQUEST_SEND_CHECK]}
             onChange={useCallback(
               (event) =>
                 handleInputChange({
                   value: event.target.value,
-                  configKey: ConfigKeys.REQUEST_SEND_CHECK,
+                  configKey: ConfigKey.REQUEST_SEND_CHECK,
                 }),
               [handleInputChange]
             )}
@@ -163,12 +167,12 @@ export const TCPAdvancedFields = () => {
           }
         >
           <EuiFieldText
-            value={fields[ConfigKeys.RESPONSE_RECEIVE_CHECK]}
+            value={fields[ConfigKey.RESPONSE_RECEIVE_CHECK]}
             onChange={useCallback(
               (event) =>
                 handleInputChange({
                   value: event.target.value,
-                  configKey: ConfigKeys.RESPONSE_RECEIVE_CHECK,
+                  configKey: ConfigKey.RESPONSE_RECEIVE_CHECK,
                 }),
               [handleInputChange]
             )}
@@ -176,6 +180,7 @@ export const TCPAdvancedFields = () => {
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      {children}
     </EuiAccordion>
   );
-};
+});

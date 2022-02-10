@@ -10,6 +10,7 @@ import { isRefResult, isFullScreenshot } from '../../../common/runtime_types/pin
 import { UMServerLibs } from '../../lib/lib';
 import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
 
 function getSharedHeaders(stepName: string, totalSteps: number) {
   return {
@@ -21,7 +22,7 @@ function getSharedHeaders(stepName: string, totalSteps: number) {
 
 export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/journey/screenshot/{checkGroup}/{stepIndex}',
+  path: API_URLS.JOURNEY_SCREENSHOT,
   validate: {
     params: schema.object({
       checkGroup: schema.string(),

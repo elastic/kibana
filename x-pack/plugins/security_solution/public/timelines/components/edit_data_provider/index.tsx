@@ -13,7 +13,6 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFocusTrap,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
@@ -181,7 +180,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
 
     useEffect(() => {
       disableScrolling();
-      focusInput();
       return () => {
         enableScrolling();
       };
@@ -189,94 +187,92 @@ export const StatefulEditDataProvider = React.memo<Props>(
 
     return (
       <EuiPanel paddingSize="s">
-        <EuiFocusTrap data-test-subj="focusTrap">
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label={i18n.FIELD}>
-                    <EuiComboBox
-                      data-test-subj="field"
-                      isClearable={false}
-                      onChange={onFieldSelected}
-                      options={getCategorizedFieldNames(browserFields)}
-                      placeholder={i18n.FIELD_PLACEHOLDER}
-                      selectedOptions={updatedField}
-                      singleSelection={{ asPlainText: true }}
-                      style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label={i18n.OPERATOR}>
-                    <EuiComboBox
-                      data-test-subj="operator"
-                      isClearable={false}
-                      onChange={onOperatorSelected}
-                      options={operatorLabels}
-                      placeholder={i18n.SELECT_AN_OPERATOR}
-                      selectedOptions={updatedOperator}
-                      singleSelection={{ asPlainText: true }}
-                      style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
-
-            {type !== DataProviderType.template &&
-            updatedOperator.length > 0 &&
-            updatedOperator[0].label !== i18n.EXISTS &&
-            updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiFormRow label={i18n.VALUE_LABEL}>
-                  <EuiFieldText
-                    className={VALUE_INPUT_CLASS_NAME}
-                    data-test-subj="value"
-                    onChange={onValueChange}
-                    placeholder={i18n.VALUE}
-                    value={sanatizeValue(updatedValue)}
-                    isInvalid={isValueFieldInvalid}
+                <EuiFormRow label={i18n.FIELD}>
+                  <EuiComboBox
+                    autoFocus
+                    data-test-subj="field"
+                    isClearable={false}
+                    onChange={onFieldSelected}
+                    options={getCategorizedFieldNames(browserFields)}
+                    placeholder={i18n.FIELD_PLACEHOLDER}
+                    selectedOptions={updatedField}
+                    singleSelection={{ asPlainText: true }}
+                    style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-            ) : null}
 
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow label={i18n.OPERATOR}>
+                  <EuiComboBox
+                    data-test-subj="operator"
+                    isClearable={false}
+                    onChange={onOperatorSelected}
+                    options={operatorLabels}
+                    placeholder={i18n.SELECT_AN_OPERATOR}
+                    selectedOptions={updatedOperator}
+                    singleSelection={{ asPlainText: true }}
+                    style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
 
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+
+          {type !== DataProviderType.template &&
+          updatedOperator.length > 0 &&
+          updatedOperator[0].label !== i18n.EXISTS &&
+          updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    autoFocus
-                    className={SAVE_CLASS_NAME}
-                    color="primary"
-                    data-test-subj="save"
-                    fill={true}
-                    isDisabled={
-                      !selectionsAreValid({
-                        browserFields,
-                        selectedField: updatedField,
-                        selectedOperator: updatedOperator,
-                      }) || isValueFieldInvalid
-                    }
-                    onClick={handleSave}
-                    size="m"
-                  >
-                    {i18n.SAVE}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiFormRow label={i18n.VALUE_LABEL}>
+                <EuiFieldText
+                  className={VALUE_INPUT_CLASS_NAME}
+                  data-test-subj="value"
+                  onChange={onValueChange}
+                  placeholder={i18n.VALUE}
+                  value={sanatizeValue(updatedValue)}
+                  isInvalid={isValueFieldInvalid}
+                />
+              </EuiFormRow>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFocusTrap>
+          ) : null}
+
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  className={SAVE_CLASS_NAME}
+                  color="primary"
+                  data-test-subj="save"
+                  fill={true}
+                  isDisabled={
+                    !selectionsAreValid({
+                      browserFields,
+                      selectedField: updatedField,
+                      selectedOperator: updatedOperator,
+                    }) || isValueFieldInvalid
+                  }
+                  onClick={handleSave}
+                  size="m"
+                >
+                  {i18n.SAVE}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     );
   }

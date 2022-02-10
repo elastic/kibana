@@ -7,22 +7,13 @@
  */
 
 import React, { Component } from 'react';
-import {
-  EuiLoadingSpinner,
-  EuiText,
-  EuiTitle,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLoadingSpinner, EuiText, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '../../http';
 import { NotificationsSetup } from '../../notifications';
 import { loadStatus, ProcessedServerResponse } from './lib';
-import { MetricTiles, StatusTable, ServerStatus } from './components';
+import { MetricTiles, ServerStatus, StatusSection, VersionHeader } from './components';
 
 interface StatusAppProps {
   http: HttpSetup;
@@ -74,69 +65,36 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
       );
     }
 
-    // Extract the items needed to render each component
-    const { metrics, statuses, serverState, name, version } = data!;
-    const { build_hash: buildHash, build_number: buildNumber } = version;
+    const { metrics, coreStatus, pluginStatus, serverState, name, version } = data!;
 
     return (
       <EuiPage className="stsPage" data-test-subj="statusPageRoot">
         <EuiPageBody restrictWidth>
           <ServerStatus name={name} serverState={serverState} />
+          <EuiSpacer />
 
+          <VersionHeader version={version} />
           <EuiSpacer />
 
           <MetricTiles metrics={metrics} />
-
           <EuiSpacer />
 
-          <EuiPageContent grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h2>
-                    <FormattedMessage
-                      id="core.statusPage.statusApp.statusTitle"
-                      defaultMessage="Plugin status"
-                    />
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <p data-test-subj="statusBuildNumber">
-                        <FormattedMessage
-                          id="core.statusPage.statusApp.statusActions.buildText"
-                          defaultMessage="BUILD {buildNum}"
-                          values={{
-                            buildNum: <strong>{buildNumber}</strong>,
-                          }}
-                        />
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <p data-test-subj="statusBuildHash">
-                        <FormattedMessage
-                          id="core.statusPage.statusApp.statusActions.commitText"
-                          defaultMessage="COMMIT {buildSha}"
-                          values={{
-                            buildSha: <strong>{buildHash}</strong>,
-                          }}
-                        />
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <StatusSection
+            id="core"
+            title={i18n.translate('core.statusPage.coreStatus.sectionTitle', {
+              defaultMessage: 'Core status',
+            })}
+            statuses={coreStatus}
+          />
+          <EuiSpacer />
 
-            <EuiSpacer />
-
-            <StatusTable statuses={statuses} />
-          </EuiPageContent>
+          <StatusSection
+            id="plugins"
+            title={i18n.translate('core.statusPage.statusApp.statusTitle', {
+              defaultMessage: 'Plugin status',
+            })}
+            statuses={pluginStatus}
+          />
         </EuiPageBody>
       </EuiPage>
     );

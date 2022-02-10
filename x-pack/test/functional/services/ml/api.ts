@@ -681,9 +681,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Datafeed stopped.');
     },
 
-    async createAndRunAnomalyDetectionLookbackJob(jobConfig: Job, datafeedConfig: Datafeed) {
-      await this.createAnomalyDetectionJob(jobConfig);
-      await this.createDatafeed(datafeedConfig);
+    async createAndRunAnomalyDetectionLookbackJob(
+      jobConfig: Job,
+      datafeedConfig: Datafeed,
+      space?: string
+    ) {
+      await this.createAnomalyDetectionJob(jobConfig, space);
+      await this.createDatafeed(datafeedConfig, space);
       await this.openAnomalyDetectionJob(jobConfig.job_id);
       await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${Date.now()}` });
       await this.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
@@ -936,11 +940,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> DFA job started.');
     },
 
-    async createAndRunDFAJob(dfaConfig: DataFrameAnalyticsConfig) {
+    async createAndRunDFAJob(dfaConfig: DataFrameAnalyticsConfig, timeout?: number) {
       await this.createDataFrameAnalyticsJob(dfaConfig);
       await this.runDFAJob(dfaConfig.id);
       await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
-      await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED);
+      await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED, timeout);
     },
 
     async updateJobSpaces(

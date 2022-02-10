@@ -51,7 +51,7 @@ export const AuditIcon = React.memo(AuditIconComponent);
 
 const JobStatusBadgeComponent: React.FC<{ job: MlSummaryJob }> = ({ job }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
-  const color = isStarted ? 'secondary' : 'danger';
+  const color = isStarted ? 'success' : 'danger';
   const text = isStarted ? ML_JOB_STARTED : ML_JOB_STOPPED;
 
   return (

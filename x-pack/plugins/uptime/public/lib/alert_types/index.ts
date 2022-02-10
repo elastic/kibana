@@ -7,7 +7,7 @@
 
 import { CoreStart } from 'kibana/public';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
 import { initTlsLegacyAlertType } from './tls_legacy';
@@ -25,6 +25,6 @@ export const alertTypeInitializers: AlertTypeInitializer[] = [
   initDurationAnomalyAlertType,
 ];
 
-export const legacyAlertTypeInitializers: Array<AlertTypeInitializer<AlertTypeModel>> = [
+export const legacyAlertTypeInitializers: Array<AlertTypeInitializer<RuleTypeModel>> = [
   initTlsLegacyAlertType,
 ];

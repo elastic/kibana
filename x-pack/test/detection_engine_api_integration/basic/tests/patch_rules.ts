@@ -24,20 +24,21 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('patch_rules', () => {
     describe('patch rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should patch a single rule property of name using a rule_id', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
         const { body } = await supertest
@@ -54,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's type to machine learning
         const { body } = await supertest
@@ -73,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
         // create a simple rule
         const rule = getSimpleRule('rule-1');
         delete rule.rule_id;
-        const createRuleBody = await createRule(supertest, rule);
+        const createRuleBody = await createRule(supertest, log, rule);
 
         // patch a simple rule's name
         const { body } = await supertest
@@ -90,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch a single rule property of name using the auto-generated id', async () => {
-        const createdBody = await createRule(supertest, getSimpleRule('rule-1'));
+        const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
         const { body } = await supertest
@@ -107,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not change the version of a rule when it patches only enabled', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
         const { body } = await supertest
@@ -124,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change the version of a rule when it patches enabled and another property', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
         const { body } = await supertest
@@ -143,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not change other properties when it does patches', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's timeline_title
         await supertest

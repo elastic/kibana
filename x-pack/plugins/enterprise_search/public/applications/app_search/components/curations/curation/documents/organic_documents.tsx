@@ -11,7 +11,7 @@ import { useValues, useActions } from 'kea';
 
 import { EuiLoadingContent, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LeafIcon } from '../../../../../shared/icons';
 

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');

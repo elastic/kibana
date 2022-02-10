@@ -43,10 +43,12 @@ type ModuleFactory = (data: RequestData, callback: Callback<BundleRefModule>) =>
 export class BundleRefsPlugin {
   private readonly resolvedRefEntryCache = new Map<BundleRef, Promise<string>>();
   private readonly resolvedRequestCache = new Map<string, Promise<string | undefined>>();
-  private readonly ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
+  private readonly ignorePrefix: string;
   private allowedBundleIds = new Set<string>();
 
-  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {}
+  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {
+    this.ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
+  }
 
   /**
    * Called by webpack when the plugin is passed in the webpack config

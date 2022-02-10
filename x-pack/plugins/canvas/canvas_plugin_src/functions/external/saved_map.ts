@@ -30,7 +30,7 @@ const defaultTimeRange = {
   to: 'now',
 };
 
-type Output = EmbeddableExpression<MapEmbeddableInput>;
+type Output = EmbeddableExpression<MapEmbeddableInput & { savedObjectId: string }>;
 
 export function savedMap(): ExpressionFunctionDefinition<
   'savedMap',
@@ -85,8 +85,9 @@ export function savedMap(): ExpressionFunctionDefinition<
       return {
         type: EmbeddableExpressionType,
         input: {
-          attributes: { title: '' },
           id: args.id,
+          attributes: { title: '' },
+          savedObjectId: args.id,
           filters: getQueryFilters(filters),
           timeRange: args.timerange || defaultTimeRange,
           refreshConfig: {

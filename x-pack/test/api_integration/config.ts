@@ -35,6 +35,10 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
+        '--xpack.uptime.service.enabled=true',
+        '--xpack.uptime.service.password=test',
+        '--xpack.uptime.service.manifestUrl=http://test.com',
+        '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
       ],
     },
@@ -43,7 +47,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         'node.attr.name=apiIntegrationTestNode',
-        'path.repo=/tmp/repo,/tmp/repo_1,/tmp/repo_2',
+        'path.repo=/tmp/repo,/tmp/repo_1,/tmp/repo_2,/tmp/cloud-snapshots/',
       ],
     },
   };

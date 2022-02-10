@@ -7,26 +7,24 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ElasticsearchOutputWriteTargets } from '../../lib/output/to_elasticsearch_output';
-import { Logger } from './logger';
+import { Logger } from './create_logger';
 
 export async function cleanWriteTargets({
-  writeTargets,
+  targets,
   client,
   logger,
 }: {
-  writeTargets: ElasticsearchOutputWriteTargets;
+  targets: string[];
   client: Client;
   logger: Logger;
 }) {
-  const targets = Object.values(writeTargets);
-
   logger.info(`Cleaning indices: ${targets.join(', ')}`);
 
   const response = await client.deleteByQuery({
     index: targets,
     allow_no_indices: true,
     conflicts: 'proceed',
+    refresh: true,
     body: {
       query: {
         match_all: {},

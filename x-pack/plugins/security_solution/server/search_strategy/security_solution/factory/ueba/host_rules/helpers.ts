@@ -6,7 +6,11 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { HostRulesHit, HostRulesEdges, HostRulesFields } from '../../../../../../common';
+import {
+  HostRulesHit,
+  HostRulesEdges,
+  HostRulesFields,
+} from '../../../../../../common/search_strategy';
 
 export const formatHostRulesData = (buckets: HostRulesHit[]): HostRulesEdges[] =>
   buckets.map((bucket) => ({

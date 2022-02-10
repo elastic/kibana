@@ -104,7 +104,7 @@ describe.each([
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: 'kibana.alert.rule.description',
           searchable: null,
         },
         {

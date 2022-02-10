@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import expect from '@kbn/expect';
 
@@ -19,7 +19,7 @@ export async function hasKibanaBooted(context: FtrProviderContext) {
   // Run 30 consecutive requests with 1.5s delay to check if Kibana is up and running.
   let kibanaHasBooted = false;
   for (const counter of [...Array(30).keys()]) {
-    await delay(1500);
+    await setTimeoutAsync(1500);
 
     try {
       expect((await supertest.get('/api/status').expect(200)).body).to.have.keys([

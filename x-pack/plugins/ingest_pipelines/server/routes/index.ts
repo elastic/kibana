@@ -15,6 +15,7 @@ import {
   registerDeleteRoute,
   registerSimulateRoute,
   registerDocumentsRoute,
+  registerParseCsvRoute,
 } from './api';
 
 export class ApiRoutes {
@@ -26,5 +27,6 @@ export class ApiRoutes {
     registerDeleteRoute(dependencies);
     registerSimulateRoute(dependencies);
     registerDocumentsRoute(dependencies);
+    registerParseCsvRoute(dependencies);
   }
 }

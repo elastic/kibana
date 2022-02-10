@@ -9,7 +9,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
-import { getType } from '@kbn/interpreter/common';
+import { getType } from '@kbn/interpreter';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
 import { SimpleMathFunction } from './simple_math_function';
@@ -28,7 +28,9 @@ const getMathValue = (argValue, columns) => {
     const matchedCol = columns.find(({ name }) => argValue === name);
     const val = matchedCol ? maybeQuoteValue(matchedCol.name) : argValue;
     const mathValue = getFormObject(val);
-    return { ...mathValue, column: mathValue.column || '' };
+
+    const validColumn = columns.some(({ name }) => mathValue.column === name);
+    return { ...mathValue, column: validColumn ? mathValue.column : '' };
   } catch (e) {
     return { error: e.message };
   }
@@ -37,7 +39,7 @@ const getMathValue = (argValue, columns) => {
 // TODO: Garbage, we could make a much nicer math form that can handle way more.
 const DatacolumnArgInput = ({
   onValueChange,
-  columns,
+  resolved: { columns },
   argValue,
   renderError,
   argId,
@@ -121,7 +123,9 @@ const DatacolumnArgInput = ({
 };
 
 DatacolumnArgInput.propTypes = {
-  columns: PropTypes.array.isRequired,
+  resolved: PropTypes.shape({
+    columns: PropTypes.array.isRequired,
+  }).isRequired,
   onValueChange: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
   renderError: PropTypes.func.isRequired,

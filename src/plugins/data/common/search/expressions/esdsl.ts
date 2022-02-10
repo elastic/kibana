@@ -34,8 +34,7 @@ export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<
   Output
 >;
 
-/** @internal */
-export interface EsdslStartDependencies {
+interface EsdslStartDependencies {
   search: ISearchGeneric;
   uiSettingsClient: UiSettingsCommon;
 }

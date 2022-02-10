@@ -16,12 +16,12 @@ deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOpti
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  namespace | <code>string</code> |  |
-|  options | <code>SavedObjectsDeleteByNamespaceOptions</code> |  |
+|  namespace | string |  |
+|  options | SavedObjectsDeleteByNamespaceOptions |  |
 
 <b>Returns:</b>
 
-`Promise<any>`
+Promise&lt;any&gt;
 
 {<!-- -->promise<!-- -->} - { took, timed\_out, total, deleted, batches, version\_conflicts, noops, retries, failures }
 

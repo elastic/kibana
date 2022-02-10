@@ -21,15 +21,17 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
 
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   PieVisualizationState,
+  TermsIndexPatternColumn,
 } from '../../../lens/public';
-import { FilterStateStore, IndexPattern } from '../../../../../src/plugins/data/common';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '../../../lens/common/constants';
+import { FilterStateStore, DataView } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
@@ -88,9 +90,9 @@ function getLensAttributes(
           },
           orderDirection: 'desc',
         },
-      },
+      } as TermsIndexPatternColumn,
       'ed999e9d-204c-465b-897f-fe1a125b39ed': {
-        sourceField: 'Records',
+        sourceField: RECORDS_FIELD,
         isBucketed: false,
         dataType: 'number',
         scale: 'ratio',
@@ -156,7 +158,7 @@ function getLensAttributes(
         {
           $state: { store: FilterStateStore.APP_STATE },
           meta: {
-            indexRefName: 'filter-index-pattern-0',
+            index: 'filter-index-pattern-0',
             negate: false,
             alias: null,
             disabled: false,
@@ -179,7 +181,7 @@ function getLensAttributes(
                 meta: {
                   alias: 'agent IDs',
                   disabled: false,
-                  indexRefName: 'filter-index-pattern-0',
+                  index: 'filter-index-pattern-0',
                   key: 'query',
                   negate: false,
                   type: 'custom',
@@ -377,7 +379,7 @@ interface ScheduledQueryLastResultsProps {
   actionId: string;
   queryId: string;
   interval: number;
-  logsIndexPattern: IndexPattern | undefined;
+  logsDataView: DataView | undefined;
   toggleErrors: (payload: { queryId: string; interval: number }) => void;
   expanded: boolean;
 }
@@ -386,20 +388,20 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   actionId,
   queryId,
   interval,
-  logsIndexPattern,
+  logsDataView,
   toggleErrors,
   expanded,
 }) => {
-  const { data: lastResultsData, isFetched } = usePackQueryLastResults({
+  const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
-    logsIndexPattern,
+    logsDataView,
   });
 
-  const { data: errorsData, isFetched: errorsFetched } = usePackQueryErrors({
+  const { data: errorsData, isLoading: errorsLoading } = usePackQueryErrors({
     actionId,
     interval,
-    logsIndexPattern,
+    logsDataView,
   });
 
   const handleErrorsToggle = useCallback(
@@ -407,7 +409,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     [queryId, interval, toggleErrors]
   );
 
-  if (!isFetched || !errorsFetched) {
+  if (isLoading || errorsLoading) {
     return <EuiLoadingSpinner />;
   }
 
@@ -512,14 +514,14 @@ interface PackViewInActionProps {
     id: string;
     interval: number;
   };
-  logsIndexPattern: IndexPattern | undefined;
+  logsDataView: DataView | undefined;
   packName: string;
   agentIds?: string[];
 }
 
 const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   item,
-  logsIndexPattern,
+  logsDataView,
   packName,
   agentIds,
 }) => {
@@ -528,7 +530,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
-    logsIndexPattern,
+    logsDataView,
   });
 
   const startDate = lastResultsData?.['@timestamp']
@@ -554,7 +556,7 @@ const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
 const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   item,
-  logsIndexPattern,
+  logsDataView,
   packName,
   agentIds,
 }) => {
@@ -563,7 +565,7 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
-    logsIndexPattern,
+    logsDataView,
   });
 
   const startDate = lastResultsData?.['@timestamp']
@@ -602,17 +604,17 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
   >({});
 
-  const indexPatterns = useKibana().services.data.indexPatterns;
-  const [logsIndexPattern, setLogsIndexPattern] = useState<IndexPattern | undefined>(undefined);
+  const dataViews = useKibana().services.data.dataViews;
+  const [logsDataView, setLogsDataView] = useState<DataView | undefined>(undefined);
 
   useEffect(() => {
-    const fetchLogsIndexPattern = async () => {
-      const indexPattern = await indexPatterns.find('logs-*');
+    const fetchLogsDataView = async () => {
+      const dataView = await dataViews.find('logs-*');
 
-      setLogsIndexPattern(indexPattern[0]);
+      setLogsDataView(dataView[0]);
     };
-    fetchLogsIndexPattern();
-  }, [indexPatterns]);
+    fetchLogsDataView();
+  }, [dataViews]);
 
   const renderQueryColumn = useCallback(
     (query: string) => (
@@ -645,7 +647,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderLastResultsColumn = useCallback(
     (item) => (
       <ScheduledQueryLastResults
-        logsIndexPattern={logsIndexPattern}
+        logsDataView={logsDataView}
         queryId={item.id}
         actionId={getPackActionId(item.id, packName)}
         interval={item.interval}
@@ -653,7 +655,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         expanded={!!itemIdToExpandedRowMap[item.id]}
       />
     ),
-    [itemIdToExpandedRowMap, packName, toggleErrors, logsIndexPattern]
+    [itemIdToExpandedRowMap, packName, toggleErrors, logsDataView]
   );
 
   const renderDiscoverResultsAction = useCallback(
@@ -661,11 +663,11 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       <PackViewInDiscoverAction
         item={item}
         agentIds={agentIds}
-        logsIndexPattern={logsIndexPattern}
+        logsDataView={logsDataView}
         packName={packName}
       />
     ),
-    [agentIds, logsIndexPattern, packName]
+    [agentIds, logsDataView, packName]
   );
 
   const renderLensResultsAction = useCallback(
@@ -673,11 +675,11 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       <PackViewInLensAction
         item={item}
         agentIds={agentIds}
-        logsIndexPattern={logsIndexPattern}
+        logsDataView={logsDataView}
         packName={packName}
       />
     ),
-    [agentIds, logsIndexPattern, packName]
+    [agentIds, logsDataView, packName]
   );
 
   const getItemId = useCallback(

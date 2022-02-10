@@ -1,0 +1,18 @@
+{
+  "include": [
+    "./x-pack/plugins/apm/**/*",
+    "./x-pack/plugins/observability/**/*",
+    "./typings/**/*"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*",
+    "./x-pack/plugins/apm/ftr_e2e",
+    "./x-pack/plugins/apm/e2e",
+    "**/target/**",
+    "**/node_modules/**"
+  ],
+  "compilerOptions": {
+    "noErrorTruncation": true,
+    "assumeChangesOnlyAffectDirectDependencies": true
+  }
+}

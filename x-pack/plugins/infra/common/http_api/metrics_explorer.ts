@@ -41,7 +41,6 @@ export const metricsExplorerMetricRT = rt.intersection([
 ]);
 
 export const timeRangeRT = rt.type({
-  field: rt.string,
   from: rt.number,
   to: rt.number,
   interval: rt.string,

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { EuiFlexItem } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
@@ -75,6 +76,20 @@ describe('LoginPage', () => {
   });
 
   describe('disabled form states', () => {
+    const originalNavigator = window.navigator;
+    const originalTop = window.top;
+
+    afterEach(function () {
+      Object.defineProperty(window, 'navigator', {
+        value: originalNavigator,
+        writable: true,
+      });
+      Object.defineProperty(window, 'top', {
+        value: originalTop,
+        writable: true,
+      });
+    });
+
     it('renders as expected when secure connection is required but not present', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ requiresSecureConnection: true }));
@@ -166,6 +181,94 @@ describe('LoginPage', () => {
       httpMock.get.mockResolvedValue(
         createLoginState({ selector: { enabled: false, providers: [] } })
       );
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+    });
+
+    it('renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      Object.defineProperty(window, 'navigator', {
+        value: { cookieEnabled: false },
+        writable: true,
+      });
+      Object.defineProperty(window, 'top', {
+        value: {},
+        writable: true,
+      });
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          sameSiteCookies="Lax"
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(EuiFlexItem).children()).toMatchSnapshot();
+    });
+
+    it('renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      Object.defineProperty(window, 'navigator', {
+        value: { cookieEnabled: false },
+        writable: true,
+      });
+      Object.defineProperty(window, 'top', {
+        value: {},
+        writable: true,
+      });
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          sameSiteCookies="None"
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(EuiFlexItem).children()).toMatchSnapshot();
+    });
+
+    it('renders warning when cookies are disabled and document is not embedded inside iframe', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      Object.defineProperty(window, 'navigator', {
+        value: { cookieEnabled: false },
+        writable: true,
+      });
 
       const wrapper = shallow(
         <LoginPage

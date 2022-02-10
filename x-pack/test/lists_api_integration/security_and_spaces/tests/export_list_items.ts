@@ -18,15 +18,16 @@ import { createListsIndex, deleteListsIndex, binaryToString } from '../../utils'
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('export_list_items', () => {
     describe('exporting lists', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
+        await deleteListsIndex(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {

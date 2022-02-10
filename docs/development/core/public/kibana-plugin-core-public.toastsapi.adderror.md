@@ -16,12 +16,12 @@ addError(error: Error, options: ErrorToastOptions): Toast;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  error | <code>Error</code> | an <code>Error</code> instance. |
-|  options | <code>ErrorToastOptions</code> | [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) |
+|  error | Error | an <code>Error</code> instance. |
+|  options | ErrorToastOptions | [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) |
 
 <b>Returns:</b>
 
-`Toast`
+Toast
 
 a [Toast](./kibana-plugin-core-public.toast.md)
 

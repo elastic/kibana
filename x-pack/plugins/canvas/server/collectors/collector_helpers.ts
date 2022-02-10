@@ -10,19 +10,13 @@
  * @param cb: callback to do something with a function that has been found
  */
 
-import {
-  ExpressionAstExpression,
-  ExpressionAstNode,
-} from '../../../../../src/plugins/expressions/common';
-
-function isExpression(
-  maybeExpression: ExpressionAstNode
-): maybeExpression is ExpressionAstExpression {
-  return typeof maybeExpression === 'object' && maybeExpression.type === 'expression';
-}
+import { isAst } from '@kbn/interpreter';
+import { ExpressionAstNode } from '../../../../../src/plugins/expressions/common';
 
 export function collectFns(ast: ExpressionAstNode, cb: (functionName: string) => void) {
-  if (!isExpression(ast)) return;
+  if (!isAst(ast)) {
+    return;
+  }
 
   ast.chain.forEach(({ function: cFunction, arguments: cArguments }) => {
     cb(cFunction);

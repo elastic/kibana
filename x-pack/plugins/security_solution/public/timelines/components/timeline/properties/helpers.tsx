@@ -116,6 +116,7 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
         data-test-subj="timeline-notes-button-small"
         iconType="editorComment"
         onClick={toggleShowNotes}
+        size="s"
         isDisabled={isTemplate}
       />
     );

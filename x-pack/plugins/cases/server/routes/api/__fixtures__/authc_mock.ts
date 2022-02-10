@@ -7,7 +7,7 @@
 
 import { AuthenticatedUser } from '../../../../../security/server';
 import { securityMock } from '../../../../../security/server/mocks';
-import { nullUser } from '../../../common';
+import { nullUser } from '../../../common/utils';
 
 function createAuthenticationMock({
   currentUser,

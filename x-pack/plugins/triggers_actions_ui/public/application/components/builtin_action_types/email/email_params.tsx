@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
@@ -21,6 +21,9 @@ export const EmailParamsFields = ({
   errors,
   messageVariables,
   defaultMessage,
+  isLoading,
+  isDisabled,
+  showEmailSubjectAndMessage = true,
 }: ActionParamsProps<EmailActionParams>) => {
   const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
@@ -65,7 +68,7 @@ export const EmailParamsFields = ({
         labelAppend={
           <>
             <span>
-              {!addCC ? (
+              {!addCC && (!cc || cc?.length === 0) ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
                   <FormattedMessage
                     defaultMessage="Cc"
@@ -73,7 +76,7 @@ export const EmailParamsFields = ({
                   />
                 </EuiButtonEmpty>
               ) : null}
-              {!addBCC ? (
+              {!addBCC && (!bcc || bcc?.length === 0) ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
                   <FormattedMessage
                     defaultMessage="Bcc"
@@ -88,6 +91,8 @@ export const EmailParamsFields = ({
         <EuiComboBox
           noSuggestions
           isInvalid={isToInvalid}
+          isLoading={isLoading}
+          isDisabled={isDisabled}
           fullWidth
           data-test-subj="toEmailAddressInput"
           selectedOptions={toOptions}
@@ -113,11 +118,12 @@ export const EmailParamsFields = ({
           }}
         />
       </EuiFormRow>
-      {addCC ? (
+      {addCC || (cc && cc?.length > 0) ? (
         <EuiFormRow
           fullWidth
           error={errors.cc}
           isInvalid={isCCInvalid}
+          isDisabled={isDisabled}
           label={i18n.translate(
             'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
             {
@@ -128,6 +134,7 @@ export const EmailParamsFields = ({
           <EuiComboBox
             noSuggestions
             isInvalid={isCCInvalid}
+            isLoading={isLoading}
             fullWidth
             data-test-subj="ccEmailAddressInput"
             selectedOptions={ccOptions}
@@ -154,7 +161,7 @@ export const EmailParamsFields = ({
           />
         </EuiFormRow>
       ) : null}
-      {addBCC ? (
+      {addBCC || (bcc && bcc?.length > 0) ? (
         <EuiFormRow
           fullWidth
           error={errors.bcc}
@@ -169,6 +176,8 @@ export const EmailParamsFields = ({
           <EuiComboBox
             noSuggestions
             isInvalid={isBCCInvalid}
+            isDisabled={isDisabled}
+            isLoading={isLoading}
             fullWidth
             data-test-subj="bccEmailAddressInput"
             selectedOptions={bccOptions}
@@ -195,40 +204,44 @@ export const EmailParamsFields = ({
           />
         </EuiFormRow>
       ) : null}
-      <EuiFormRow
-        fullWidth
-        error={errors.subject}
-        isInvalid={isSubjectInvalid}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
-          {
-            defaultMessage: 'Subject',
-          }
-        )}
-      >
-        <TextFieldWithMessageVariables
+      {showEmailSubjectAndMessage && (
+        <EuiFormRow
+          fullWidth
+          error={errors.subject}
+          isInvalid={isSubjectInvalid}
+          label={i18n.translate(
+            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
+            {
+              defaultMessage: 'Subject',
+            }
+          )}
+        >
+          <TextFieldWithMessageVariables
+            index={index}
+            editAction={editAction}
+            messageVariables={messageVariables}
+            paramsProperty={'subject'}
+            inputTargetValue={subject}
+            errors={(errors.subject ?? []) as string[]}
+          />
+        </EuiFormRow>
+      )}
+      {showEmailSubjectAndMessage && (
+        <TextAreaWithMessageVariables
           index={index}
           editAction={editAction}
           messageVariables={messageVariables}
-          paramsProperty={'subject'}
-          inputTargetValue={subject}
-          errors={(errors.subject ?? []) as string[]}
+          paramsProperty={'message'}
+          inputTargetValue={message}
+          label={i18n.translate(
+            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
+            {
+              defaultMessage: 'Message',
+            }
+          )}
+          errors={(errors.message ?? []) as string[]}
         />
-      </EuiFormRow>
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editAction}
-        messageVariables={messageVariables}
-        paramsProperty={'message'}
-        inputTargetValue={message}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
-          {
-            defaultMessage: 'Message',
-          }
-        )}
-        errors={(errors.message ?? []) as string[]}
-      />
+      )}
     </>
   );
 };

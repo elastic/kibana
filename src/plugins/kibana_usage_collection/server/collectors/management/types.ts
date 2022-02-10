@@ -23,11 +23,13 @@ export interface UsageStats {
   /**
    * non-sensitive settings
    */
+  'bfetch:disable': boolean;
   'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
   'visualization:visualize:legacyPieChartsLibrary': boolean;
+  'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
@@ -37,6 +39,8 @@ export interface UsageStats {
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
   'observability:maxSuggestions': number;
+  'observability:enableComparisonByDefault': boolean;
+  'observability:enableInfrastructureView': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -121,6 +125,7 @@ export interface UsageStats {
   'banners:textColor': string;
   'banners:backgroundColor': string;
   'labs:canvas:enable_ui': boolean;
+  'labs:canvas:byValueEmbeddable': boolean;
   'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
   'labs:dashboard:enable_ui': boolean;

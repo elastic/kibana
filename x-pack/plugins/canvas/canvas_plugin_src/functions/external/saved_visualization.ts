@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { VisualizeInput } from 'src/plugins/visualizations/public';
 import {
@@ -25,7 +26,7 @@ interface Arguments {
   title: string | null;
 }
 
-type Output = EmbeddableExpression<VisualizeInput>;
+type Output = EmbeddableExpression<VisualizeInput & { savedObjectId: string }>;
 
 const defaultTimeRange = {
   from: 'now-15m',
@@ -94,8 +95,9 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
+          savedObjectId: id,
           disableTriggers: true,
-          timeRange: timerange || defaultTimeRange,
+          timeRange: timerange ? omit(timerange, 'type') : defaultTimeRange,
           filters: getQueryFilters(filters),
           vis: visOptions,
           title: title === null ? undefined : title,

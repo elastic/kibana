@@ -50,6 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('ignore_fields', () => {
     const supertest = getService('supertest');
     const esArchiver = getService('esArchiver');
+    const log = getService('log');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ignore_fields');
@@ -60,21 +61,21 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
     });
 
     it('should ignore the field of "testing_ignored"', async () => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
-      const { id } = await createRule(supertest, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      const { id } = await createRule(supertest, log, rule);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits
         .map((hit) => (hit._source as Ignore).testing_ignored)
         .sort();
@@ -86,10 +87,10 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should ignore the field of "testing_regex"', async () => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
-      const { id } = await createRule(supertest, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      const { id } = await createRule(supertest, log, rule);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).testing_regex).sort();
 
       // Value should be "undefined for all records"
@@ -99,10 +100,10 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should have the field of "normal_constant"', async () => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
-      const { id } = await createRule(supertest, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      const { id } = await createRule(supertest, log, rule);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits
         .map((hit) => (hit._source as Ignore).normal_constant)
         .sort();
@@ -115,10 +116,10 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should ignore the field of "_ignored" when using EQL and index the data', async () => {
       const rule = getEqlRuleForSignalTesting(['ignore_fields']);
 
-      const { id } = await createRule(supertest, rule);
-      await waitForRuleSuccessOrStatus(supertest, id);
-      await waitForSignalsToBePresent(supertest, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, id);
+      const { id } = await createRule(supertest, log, rule);
+      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForSignalsToBePresent(supertest, log, 4, [id]);
+      const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).small_field).sort();
 
       // We just test a constant value to ensure this did not blow up on us and did index data.

@@ -10,7 +10,7 @@ import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterItemContainer, BytesUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,

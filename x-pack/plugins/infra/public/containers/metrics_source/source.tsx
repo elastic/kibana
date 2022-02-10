@@ -100,10 +100,10 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [fetchService, sourceId]
   );
 
-  const createDerivedIndexPattern = (type: 'metrics') => {
+  const createDerivedIndexPattern = () => {
     return {
       fields: source?.status ? source.status.indexFields : [],
-      title: pickIndexPattern(source, type),
+      title: pickIndexPattern(source, 'metrics'),
     };
   };
 

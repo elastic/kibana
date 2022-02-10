@@ -9,10 +9,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
-import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
+import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import type { IndexPatternState } from '../hooks/use_app_index_pattern';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import type { AppDataType } from '../types';
 
 const Embeddable = React.lazy(() => import('./embeddable'));
 
@@ -36,18 +37,26 @@ export function getExploratoryViewEmbeddable(
 
     const isDarkMode = core.uiSettings.get('theme:darkMode');
 
-    const loadIndexPattern = useCallback(async ({ dataType }) => {
-      setLoading(true);
-      try {
-        const obsvIndexP = new ObservabilityIndexPatterns(plugins.data);
-        const indPattern = await obsvIndexP.getIndexPattern(dataType, 'heartbeat-*');
-        setIndexPatterns((prevState) => ({ ...(prevState ?? {}), [dataType]: indPattern }));
+    const loadIndexPattern = useCallback(
+      async ({ dataType }: { dataType: AppDataType }) => {
+        const dataTypesIndexPatterns = props.dataTypesIndexPatterns;
 
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-      }
-    }, []);
+        setLoading(true);
+        try {
+          const obsvIndexP = new ObservabilityDataViews(plugins.data);
+          const indPattern = await obsvIndexP.getDataView(
+            dataType,
+            dataTypesIndexPatterns?.[dataType]
+          );
+          setIndexPatterns((prevState) => ({ ...(prevState ?? {}), [dataType]: indPattern }));
+
+          setLoading(false);
+        } catch (e) {
+          setLoading(false);
+        }
+      },
+      [props.dataTypesIndexPatterns]
+    );
 
     useEffect(() => {
       loadIndexPattern({ dataType: series.dataType });

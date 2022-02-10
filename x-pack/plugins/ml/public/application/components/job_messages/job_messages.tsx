@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 
 import { JobMessage } from '../../../../common/types/audit_message';
 import { JobIcon } from '../job_message_icon';

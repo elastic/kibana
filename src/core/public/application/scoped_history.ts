@@ -57,7 +57,10 @@ export class ScopedHistory<HistoryLocationState = unknown>
    */
   private blockUnregisterCallbacks: Set<UnregisterCallback> = new Set();
 
-  constructor(private readonly parentHistory: History, private readonly basePath: string) {
+  constructor(
+    private readonly parentHistory: History<HistoryLocationState>,
+    private readonly basePath: string
+  ) {
     const parentPath = this.parentHistory.location.pathname;
     if (!parentPath.startsWith(basePath)) {
       throw new Error(
@@ -75,10 +78,8 @@ export class ScopedHistory<HistoryLocationState = unknown>
    *
    * @param basePath the URL path scope for the sub history
    */
-  public createSubHistory = <SubHistoryLocationState = unknown>(
-    basePath: string
-  ): ScopedHistory<SubHistoryLocationState> => {
-    return new ScopedHistory<SubHistoryLocationState>(this, basePath);
+  public createSubHistory = (basePath: string) => {
+    return new ScopedHistory<HistoryLocationState>(this, basePath);
   };
 
   /**

@@ -12,13 +12,17 @@ import {
   DynamicSettingsType,
   DynamicSettings,
 } from '../../../../../plugins/uptime/common/runtime_types';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../plugins/uptime/common/constants';
+import {
+  DYNAMIC_SETTINGS_DEFAULTS,
+  API_URLS,
+} from '../../../../../plugins/uptime/common/constants';
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('dynamic settings', () => {
     it('returns the defaults when no user settings have been saved', async () => {
-      const apiResponse = await supertest.get(`/api/uptime/dynamic_settings`);
+      const apiResponse = await supertest.get(API_URLS.DYNAMIC_SETTINGS);
       expect(apiResponse.body).to.eql(DYNAMIC_SETTINGS_DEFAULTS);
       expect(isRight(DynamicSettingsType.decode(apiResponse.body))).to.be.ok();
     });
@@ -31,14 +35,14 @@ export default function ({ getService }: FtrProviderContext) {
         defaultConnectors: [],
       };
       const postResponse = await supertest
-        .post(`/api/uptime/dynamic_settings`)
+        .post(API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send(newSettings);
 
       expect(postResponse.body).to.eql({ success: true });
       expect(postResponse.status).to.eql(200);
 
-      const getResponse = await supertest.get(`/api/uptime/dynamic_settings`);
+      const getResponse = await supertest.get(API_URLS.DYNAMIC_SETTINGS);
       expect(getResponse.body).to.eql(newSettings);
       expect(isRight(DynamicSettingsType.decode(getResponse.body))).to.be.ok();
     });

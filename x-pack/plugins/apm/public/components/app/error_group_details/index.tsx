@@ -26,8 +26,9 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { DetailView } from './detail_view';
-import { ErrorDistribution } from './Distribution';
+import { ErrorDistribution } from './distribution';
 
 const Titles = euiStyled.div`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
@@ -49,6 +50,15 @@ const Message = euiStyled.div`
 const Culprit = euiStyled.div`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
+
+type ErrorDistributionAPIResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
+
+const emptyState: ErrorDistributionAPIResponse = {
+  currentPeriod: [],
+  previousPeriod: [],
+  bucketSize: 0,
+};
 
 function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
@@ -126,21 +136,23 @@ export function ErrorGroupDetails() {
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
-          params: {
-            path: {
-              serviceName,
-              groupId,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/{groupId}',
+          {
+            params: {
+              path: {
+                serviceName,
+                groupId,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [environment, kuery, serviceName, start, end, groupId]
@@ -210,7 +222,7 @@ export function ErrorGroupDetails() {
         )}
         <ErrorDistribution
           fetchStatus={status}
-          distribution={errorDistributionData}
+          distribution={showDetails ? errorDistributionData : emptyState}
           title={i18n.translate(
             'xpack.apm.errorGroupDetails.occurrencesChartLabel',
             {

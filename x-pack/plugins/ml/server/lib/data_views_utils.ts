@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import type {
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+} from 'kibana/server';
 
 import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
 import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
@@ -15,12 +19,14 @@ export type GetDataViewsService = () => Promise<DataViewsService>;
 export function getDataViewsServiceFactory(
   getDataViews: () => DataViewsPluginStart | null,
   savedObjectClient: SavedObjectsClientContract,
-  scopedClient: IScopedClusterClient
+  scopedClient: IScopedClusterClient,
+  request: KibanaRequest
 ): GetDataViewsService {
   const dataViews = getDataViews();
   if (dataViews === null) {
     throw Error('data views service has not been initialized');
   }
 
-  return () => dataViews.dataViewsServiceFactory(savedObjectClient, scopedClient.asInternalUser);
+  return () =>
+    dataViews.dataViewsServiceFactory(savedObjectClient, scopedClient.asCurrentUser, request);
 }

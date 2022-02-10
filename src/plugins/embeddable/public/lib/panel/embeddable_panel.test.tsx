@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { Action, UiActionsStart } from '../../../../ui_actions/public';
 import { Trigger, ViewMode } from '../types';
@@ -31,7 +31,7 @@ import {
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
-import { applicationServiceMock } from '../../../../../core/public/mocks';
+import { applicationServiceMock, themeServiceMock } from '../../../../../core/public/mocks';
 
 const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();
@@ -44,6 +44,7 @@ const trigger: Trigger = {
 };
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 const applicationMock = applicationServiceMock.createStartContract();
+const theme = themeServiceMock.createStartContract();
 
 actionRegistry.set(editModeAction.id, editModeAction);
 triggerRegistry.set(trigger.id, trigger);
@@ -152,6 +153,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
         overlays={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -191,6 +193,7 @@ const renderInEditModeAndOpenContextMenu = async (
         application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -298,6 +301,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
         application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -360,6 +364,7 @@ test('Panel title customize link does not exist in view mode', async () => {
       application={applicationMock}
       inspector={inspector}
       SavedObjectFinder={() => null}
+      theme={theme}
     />
   );
 
@@ -395,6 +400,7 @@ test('Runs customize panel action on title click when in edit mode', async () =>
       application={applicationMock}
       inspector={inspector}
       SavedObjectFinder={() => null}
+      theme={theme}
     />
   );
 
@@ -443,6 +449,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
         application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -497,6 +504,7 @@ test('Check when hide header option is false', async () => {
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={false}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -535,6 +543,7 @@ test('Check when hide header option is true', async () => {
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={true}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -567,6 +576,7 @@ test('Should work in minimal way rendering only the inspector action', async () 
         getActions={() => Promise.resolve([])}
         inspector={inspector}
         hideHeader={false}
+        theme={theme}
       />
     </I18nProvider>
   );

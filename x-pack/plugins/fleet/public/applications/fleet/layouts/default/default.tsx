@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Section } from '../../sections';
 import { useLink, useConfig } from '../../hooks';
@@ -77,6 +77,17 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
           isSelected: section === 'data_streams',
           href: getHref('data_streams'),
           'data-test-subj': 'fleet-datastreams-tab',
+        },
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.appNavigation.settingsLinkText"
+              defaultMessage="Settings"
+            />
+          ),
+          isSelected: section === 'settings',
+          href: getHref('settings'),
+          'data-test-subj': 'fleet-settings-tab',
         },
       ]}
     >

@@ -14,7 +14,6 @@ import {
   isValidExperimentalValue,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
-import { UnderlyingLogClient } from './lib/detection_engine/rule_execution_log/types';
 
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
@@ -90,7 +89,7 @@ export const configSchema = schema.object({
    * @example
    * xpack.securitySolution.enableExperimental:
    *   - someCrazyFeature
-   *   - trustedAppsByPolicyEnabled
+   *   - someEvenCrazierFeature
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
@@ -104,25 +103,6 @@ export const configSchema = schema.object({
       }
     },
   }),
-
-  /**
-   * Rule Execution Log Configuration
-   */
-  ruleExecutionLog: schema.object({
-    underlyingClient: schema.oneOf(
-      [
-        schema.literal(UnderlyingLogClient.eventLog),
-        schema.literal(UnderlyingLogClient.savedObjects),
-      ],
-      { defaultValue: UnderlyingLogClient.eventLog }
-    ),
-  }),
-
-  /**
-   * Host Endpoint Configuration
-   */
-  endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
-  endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
 
   /**
    * Artifacts Configuration

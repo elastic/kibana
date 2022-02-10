@@ -3,23 +3,23 @@
 = {kib} alerts
 
 The {stack} {monitor-features} provide
-<<alerting-getting-started,{kib} alerting rules>> out-of-the box to notify you
+<<alerting-getting-started,Alerting rules>> out-of-the box to notify you
 of potential issues in the {stack}. These rules are preconfigured based on the
-best practices recommended by Elastic. However, you can tailor them to meet your 
+best practices recommended by Elastic. However, you can tailor them to meet your
 specific needs.
 
 [role="screenshot"]
 image::user/monitoring/images/monitoring-kibana-alerting-notification.png["{kib} alerting notifications in {stack-monitor-app}"]
 
-When you open *{stack-monitor-app}* for the first time, you will be asked to acknowledge the creation of these default rules. They are initially configured to detect and notify on various 
+When you open *{stack-monitor-app}* for the first time, you will be asked to acknowledge the creation of these default rules. They are initially configured to detect and notify on various
 conditions across your monitored clusters. You can view notifications for: *Cluster health*, *Resource utilization*, and *Errors and exceptions* for {es}
 in real time.
 
-NOTE: The default {watcher} based "cluster alerts" for {stack-monitor-app} have 
-been recreated as rules in {kib} {alert-features}. For this reason, the existing 
-{watcher} email action 
+NOTE: The default {watcher} based "cluster alerts" for {stack-monitor-app} have
+been recreated as rules in {kib} {alert-features}. For this reason, the existing
+{watcher} email action
 `monitoring.cluster_alerts.email_notifications.email_address` no longer works.
-The default action for all {stack-monitor-app} rules is to write to {kib} logs 
+The default action for all {stack-monitor-app} rules is to write to {kib} logs
 and display a notification in the UI.
 
 To review and modify existing *{stack-monitor-app}* rules, click *Enter setup mode* on the *Cluster overview* page.
@@ -47,21 +47,21 @@ checks on a schedule time of 1 minute with a re-notify interval of 1 day.
 
 This rule checks for {es} nodes that use a high amount of JVM memory. By
 default, the condition is set at 85% or more averaged over the last 5 minutes.
-The default rule checks on a schedule time of 1 minute with a re-notify interval of 1 day. 
+The default rule checks on a schedule time of 1 minute with a re-notify interval of 1 day.
 
 [discrete]
 [[kibana-alerts-missing-monitoring-data]]
 == Missing monitoring data
 
-This rule checks for {es} nodes that stop sending monitoring data. By default, 
+This rule checks for {es} nodes that stop sending monitoring data. By default,
 the condition is set to missing for 15 minutes looking back 1 day. The default rule checks on a schedule
-time of 1 minute with a re-notify interval of 6 hours. 
+time of 1 minute with a re-notify interval of 6 hours.
 
 [discrete]
 [[kibana-alerts-thread-pool-rejections]]
 == Thread pool rejections (search/write)
 
-This rule checks for {es} nodes that experience thread pool rejections. By 
+This rule checks for {es} nodes that experience thread pool rejections. By
 default, the condition is set at 300 or more over the last 5 minutes. The default rule
 checks on a schedule time of 1 minute with a re-notify interval of 1 day. Thresholds can be set
 independently for `search` and `write` type rejections.
@@ -72,14 +72,14 @@ independently for `search` and `write` type rejections.
 
 This rule checks for read exceptions on any of the replicated {es} clusters. The
 condition is met if 1 or more read exceptions are detected in the last hour. The
-default rule checks on a schedule time of 1 minute with a re-notify interval of 6 hours. 
+default rule checks on a schedule time of 1 minute with a re-notify interval of 6 hours.
 
 [discrete]
 [[kibana-alerts-large-shard-size]]
 == Large shard size
 
 This rule checks for a large average shard size (across associated primaries) on
-any of the specified index patterns in an {es} cluster. The condition is met if
+any of the specified data views in an {es} cluster. The condition is met if
 an index's average shard size is 55gb or higher in the last 5 minutes. The default rule
 matches the pattern of `-.*` by running checks on a schedule time of 1 minute with a re-notify interval of 12 hours.
 
@@ -124,8 +124,8 @@ valid for 30 days.
 == Alerts and rules
 [discrete]
 === Create default rules
-This option can be used to create default rules in this kibana space. This is 
-useful for scenarios when you didn't choose to create these default rules initially 
+This option can be used to create default rules in this Kibana space. This is
+useful for scenarios when you didn't choose to create these default rules initially
 or anytime later if the rules were accidentally deleted.
 
 NOTE: Some action types are subscription features, while others are free.

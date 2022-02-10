@@ -19,7 +19,7 @@ import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from
 
 import { EuiPageContent, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   RegisterManagementAppArgs,

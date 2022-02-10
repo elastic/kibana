@@ -12,7 +12,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { Dispatch, useCallback, useReducer, useState, useMemo } from 'react';
 import styled from 'styled-components';

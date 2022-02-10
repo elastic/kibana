@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { OrdinalLegend } from '../components/legend/ordinal_legend';
 import { makeMbClampedNumberExpression } from '../style_util';
 import {
-  HALF_LARGE_MAKI_ICON_SIZE,
-  LARGE_MAKI_ICON_SIZE,
-  SMALL_MAKI_ICON_SIZE,
+  HALF_MAKI_ICON_SIZE,
   // @ts-expect-error
 } from '../symbol_utils';
 import { FieldFormatter, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
@@ -56,16 +53,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
   }
 
-  getIconPixelSize() {
-    return this._options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
-      ? LARGE_MAKI_ICON_SIZE
-      : SMALL_MAKI_ICON_SIZE;
-  }
-
   syncIconSizeWithMb(symbolLayerId: string, mbMap: MbMap) {
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (this._isSizeDynamicConfigComplete() && rangeFieldMeta) {
-      const halfIconPixels = this.getIconPixelSize() / 2;
       const targetName = this.getMbFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
@@ -79,9 +69,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
           fieldName: targetName,
         }),
         rangeFieldMeta.min,
-        this._options.minSize / halfIconPixels,
+        this._options.minSize / HALF_MAKI_ICON_SIZE,
         rangeFieldMeta.max,
-        this._options.maxSize / halfIconPixels,
+        this._options.maxSize / HALF_MAKI_ICON_SIZE,
       ]);
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', null);
@@ -111,7 +101,11 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   getMbSizeExpression() {
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (!this._isSizeDynamicConfigComplete() || !rangeFieldMeta) {
-      return null;
+      // return min of size to avoid flashing
+      // returning minimum allows "growing" of the symbols when the meta comes in
+      // A grow effect us less visually jarring as shrinking.
+      // especially relevant when displaying fine-grained grids using mvt
+      return this._options.minSize >= 0 ? this._options.minSize : null;
     }
 
     return this._getMbDataDrivenSize({
@@ -156,8 +150,8 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     return (
       this._field &&
       this._field.isValid() &&
-      _.has(this._options, 'minSize') &&
-      _.has(this._options, 'maxSize')
+      this._options.minSize >= 0 &&
+      this._options.maxSize >= 0
     );
   }
 

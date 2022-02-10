@@ -14,9 +14,9 @@ static referencesFetchError(objects: SavedObject[]): SavedObjectsImportError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>SavedObject[]</code> |  |
+|  objects | SavedObject\[\] |  |
 
 <b>Returns:</b>
 
-`SavedObjectsImportError`
+SavedObjectsImportError
 

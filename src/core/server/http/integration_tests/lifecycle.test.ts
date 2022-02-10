@@ -259,7 +259,9 @@ describe('OnPreRouting', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -284,7 +286,9 @@ describe('OnPreRouting', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -403,7 +407,9 @@ describe('OnPreAuth', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -424,7 +430,9 @@ describe('OnPreAuth', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -570,7 +578,9 @@ describe('OnPostAuth', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -590,7 +600,9 @@ describe('OnPostAuth', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -808,7 +820,9 @@ describe('Auth', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -1100,7 +1114,9 @@ describe('Auth', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -1120,7 +1136,9 @@ describe('Auth', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -1296,7 +1314,9 @@ describe('OnPreResponse', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -1320,7 +1340,9 @@ describe('OnPreResponse', () => {
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
-    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(result.body.message).toBe(
+      'An internal server error occurred. Check Kibana server logs for details.'
+    );
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [

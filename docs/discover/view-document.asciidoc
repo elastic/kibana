@@ -27,7 +27,7 @@ you can create <<external-plugin-development, your own plugin>>.
 === View surrounding documents
 
 To inspect the documents that occurred immediately before and after a document,
-your index pattern must contain time-based events.
+your {data-source} must contain time-based events.
 
 . In the document table, click the expand icon (>).
 . In the expanded view, click **View surrounding documents**.

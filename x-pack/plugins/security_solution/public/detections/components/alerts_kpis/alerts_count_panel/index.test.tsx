@@ -9,11 +9,14 @@ import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 
 import { mount } from 'enzyme';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
-
 import { TestProviders } from '../../../../common/mock';
 
 import { AlertsCountPanel } from './index';
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
 
 describe('AlertsCountPanel', () => {
   const defaultProps = {
@@ -34,10 +37,11 @@ describe('AlertsCountPanel', () => {
 
   describe('Query', () => {
     it('it render with a illegal KQL', async () => {
-      const spyOnBuildEsQuery = jest.spyOn(esQuery, 'buildEsQuery');
-      spyOnBuildEsQuery.mockImplementation(() => {
-        throw new Error('Something went wrong');
-      });
+      jest.mock('@kbn/es-query', () => ({
+        buildEsQuery: jest.fn().mockImplementation(() => {
+          throw new Error('Something went wrong');
+        }),
+      }));
       const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
       const wrapper = mount(
         <TestProviders>

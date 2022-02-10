@@ -25,6 +25,7 @@
     "features",
     "inspector",
     "presentationUtil",
+    "visualizations",
     "uiActions",
     "share"
   ],
@@ -32,7 +33,6 @@
   "requiredBundles": [
     "discover",
     "home",
-    "kibanaLegacy",
     "kibanaReact",
     "kibanaUtils",
     "lens",

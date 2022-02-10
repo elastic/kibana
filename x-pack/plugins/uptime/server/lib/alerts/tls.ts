@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ALERT_REASON, ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState, generateAlertMessage } from './common';
 import { TLS } from '../../../common/constants/alerts';
@@ -17,7 +17,7 @@ import { TlsTranslations } from '../../../common/translations';
 
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 
-import { savedObjectsAdapter } from '../saved_objects';
+import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { createUptimeESClient } from '../lib';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
@@ -167,7 +167,6 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
             'tls.server.x509.not_after': cert.not_after,
             'tls.server.x509.not_before': cert.not_before,
             'tls.server.hash.sha256': cert.sha256,
-            [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING,
             [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
           },
         });

@@ -42,7 +42,6 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const esAsInternal = data.search.searchAsInternalUser;
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
-
   return {
     search: (request, options, deps) => {
       const securityAuditLogger = security?.audit.asScoped(deps.request);

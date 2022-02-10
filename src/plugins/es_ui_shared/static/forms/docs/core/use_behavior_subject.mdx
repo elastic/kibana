@@ -1,0 +1,26 @@
+---
+id: formLibCoreUseBehaviorSubject
+slug: /form-lib/utils/use-behavior-subject
+title: useBehaviorSubject()
+summary: Util to create a rxjs BehaviorSubject with a handler to change its value
+tags: ['forms', 'kibana', 'dev']
+date: 2021-08-20
+---
+
+**Returns:** `[Observable<T>, (nextValue: T|undefined) => void]`
+
+This hook creates for you a rxjs BehaviorSubject and a handler to update its value.  
+
+See an example on how to use this hook in the <DocLink id="formLibExampleValidation" section="asynchronous-dynamic-data-in-the-validator" text="asynchronous dynamic data in the validator" /> section.
+
+## Options
+
+### initialState
+
+**Type:** `any`  
+
+The initial value of the BehaviorSubject.
+
+```js
+const [indices$, nextIndices] = useBehaviorSubject([]);
+```

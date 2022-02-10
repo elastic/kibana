@@ -117,7 +117,10 @@ Object {
   "message": "trace message",
   "meta": undefined,
   "pid": Any<Number>,
+  "spanId": undefined,
   "timestamp": 2012-02-01T14:33:22.011Z,
+  "traceId": undefined,
+  "transactionId": undefined,
 }
 `;
 
@@ -133,6 +136,9 @@ Object {
     "some": "value",
   },
   "pid": Any<Number>,
+  "spanId": undefined,
   "timestamp": 2012-02-01T14:33:22.011Z,
+  "traceId": undefined,
+  "transactionId": undefined,
 }
 `;

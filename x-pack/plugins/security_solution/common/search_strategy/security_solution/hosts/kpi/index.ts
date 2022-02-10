@@ -9,6 +9,7 @@ export * from './authentications';
 export * from './common';
 export * from './hosts';
 export * from './unique_ips';
+export * from './risky_hosts';
 
 import { HostsKpiAuthenticationsStrategyResponse } from './authentications';
 import { HostsKpiHostsStrategyResponse } from './hosts';
@@ -20,6 +21,7 @@ export enum HostsKpiQueries {
   kpiHosts = 'hostsKpiHosts',
   kpiHostsEntities = 'hostsKpiHostsEntities',
   kpiUniqueIps = 'hostsKpiUniqueIps',
+  kpiRiskyHosts = 'hostsKpiRiskyHosts',
   kpiUniqueIpsEntities = 'hostsKpiUniqueIpsEntities',
 }
 

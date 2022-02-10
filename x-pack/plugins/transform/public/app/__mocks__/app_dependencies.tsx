@@ -9,7 +9,7 @@ import { useContext } from 'react';
 
 import type { ScopedHistory } from 'kibana/public';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { savedObjectsPluginMock } from '../../../../../../src/plugins/saved_objects/public/mocks';
 import { SharePluginStart } from '../../../../../../src/plugins/share/public';
@@ -39,6 +39,7 @@ const appDependencies: AppDependencies = {
   savedObjects: coreStart.savedObjects,
   storage: { get: jest.fn() } as unknown as Storage,
   overlays: coreStart.overlays,
+  theme: themeServiceMock.createStartContract(),
   http: coreSetup.http,
   history: {} as ScopedHistory,
   savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),

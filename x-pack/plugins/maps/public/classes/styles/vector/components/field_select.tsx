@@ -16,8 +16,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field';
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
-import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
 import { StyleField } from '../style_fields_helper';
 
 function renderOption(

@@ -35,7 +35,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
 
     return (
       <CardContainerPanel {...commonProps} data-test-subj={dataTestSubj}>
-        <CardSectionPanel>
+        <CardSectionPanel className="artifact-entry-collapsible-card">
           <CardCompressedHeader
             artifact={artifact}
             actions={actions}

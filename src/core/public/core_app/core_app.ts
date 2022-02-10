@@ -26,14 +26,14 @@ import {
 import { renderApp as renderStatusApp } from './status';
 import { DocLinksStart } from '../doc_links';
 
-interface SetupDeps {
+export interface SetupDeps {
   application: InternalApplicationSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
   notifications: NotificationsSetup;
 }
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;

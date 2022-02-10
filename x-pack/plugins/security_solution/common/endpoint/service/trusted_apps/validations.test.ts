@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPathValid } from './validations';
+import { isPathValid, hasSimpleExecutableName } from './validations';
 import { OperatingSystem, ConditionEntryField } from '../../types';
 
 describe('Unacceptable Windows wildcard paths', () => {
@@ -500,6 +500,61 @@ describe('Unacceptable Mac/Linux exact paths', () => {
         field: ConditionEntryField.PATH,
         type: 'match',
         value: '/opt/bin/file.d-mg',
+      })
+    ).toEqual(false);
+  });
+});
+
+describe('Executable filenames with wildcard PATHS', () => {
+  it('should return TRUE when MAC/LINUX wildcard paths have an executable name', () => {
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.LINUX,
+        type: 'wildcard',
+        value: '/opt/*/app',
+      })
+    ).toEqual(true);
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.MAC,
+        type: 'wildcard',
+        value: '/op*/**/app.dmg',
+      })
+    ).toEqual(true);
+  });
+
+  it('should return TRUE when WINDOWS wildcards paths have a executable name', () => {
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.WINDOWS,
+        type: 'wildcard',
+        value: 'c:\\**\\path.exe',
+      })
+    ).toEqual(true);
+  });
+
+  it('should return FALSE when MAC/LINUX wildcard paths have a wildcard in executable name', () => {
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.LINUX,
+        type: 'wildcard',
+        value: '/op/*/*pp',
+      })
+    ).toEqual(false);
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.MAC,
+        type: 'wildcard',
+        value: '/op*/b**/ap.m**',
+      })
+    ).toEqual(false);
+  });
+  it('should return FALSE when WINDOWS wildcards paths have a wildcard in executable name', () => {
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.WINDOWS,
+        type: 'wildcard',
+        value: 'c:\\**\\pa*h.exe',
       })
     ).toEqual(false);
   });

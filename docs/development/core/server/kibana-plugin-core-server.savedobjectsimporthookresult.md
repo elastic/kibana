@@ -16,5 +16,5 @@ export interface SavedObjectsImportHookResult
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [warnings](./kibana-plugin-core-server.savedobjectsimporthookresult.warnings.md) | <code>SavedObjectsImportWarning[]</code> | An optional list of warnings to display in the UI when the import succeeds. |
+|  [warnings?](./kibana-plugin-core-server.savedobjectsimporthookresult.warnings.md) | SavedObjectsImportWarning\[\] | <i>(Optional)</i> An optional list of warnings to display in the UI when the import succeeds. |
 

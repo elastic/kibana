@@ -15,17 +15,17 @@ import { Props } from '../components/param_details_form/expression';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
-export const Expression = ({ alertParams, config, setAlertParams, data }: Props) => {
+export const Expression = ({ ruleParams, config, setRuleParams, data }: Props) => {
   const { derivedIndexPattern } = useDerivedIndexPattern(data, config);
   const onFilterChange = useCallback(
     (filter: string) => {
-      setAlertParams('filterQueryText', filter);
-      setAlertParams(
+      setRuleParams('filterQueryText', filter);
+      setRuleParams(
         'filterQuery',
         convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
       );
     },
-    [setAlertParams, derivedIndexPattern]
+    [setRuleParams, derivedIndexPattern]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -44,7 +44,7 @@ export const Expression = ({ alertParams, config, setAlertParams, data }: Props)
         })}
       >
         <KueryBar
-          value={alertParams.filterQueryText}
+          value={ruleParams.filterQueryText}
           derivedIndexPattern={derivedIndexPattern}
           onSubmit={onFilterChange}
           onChange={debouncedOnFilterChange}
@@ -54,3 +54,7 @@ export const Expression = ({ alertParams, config, setAlertParams, data }: Props)
     </EuiForm>
   );
 };
+
+// for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default Expression;

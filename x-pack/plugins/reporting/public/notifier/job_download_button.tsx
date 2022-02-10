@@ -6,7 +6,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { JobId, JobSummary } from '../../common/types';
 

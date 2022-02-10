@@ -4,18 +4,41 @@
 git clone git@github.com:elastic/kibana.git
 cd kibana/
 yarn kbn bootstrap
-yarn start --no-base-path
+yarn start
 ```
 
 # Elasticsearch, APM Server and data generators
 
-To access an elasticsearch instance that has live data you have two options:
+To access an Elasticsearch instance that has live data you have three options:
 
-## A. Cloud-based ES Cluster (internal devs only)
+## 1. Using Synthtrace
+
+**Start Elasticsearch**
+```
+yarn es snapshot
+```
+
+**Create APM mappings**
+
+```
+node ./scripts/es_archiver load "x-pack/plugins/apm/ftr_e2e/cypress/fixtures/es_archiver/apm_mappings_only_8.0.0" --es-url=http://elastic:changeme@localhost:9200 --kibana-url=http://elastic:changeme@localhost:5601 --config=./test/functional/config.js
+```
+
+*Note: Elasticsearch must be available before running the above command*
+
+
+**Run Synthtrace**
+```
+node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://elastic:changeme@localhost:9200
+```
+
+Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/packages/elastic-apm-synthtrace/README.md)
+
+## 2. Cloud-based ES Cluster (internal devs only)
 
 Use the [oblt-cli](https://github.com/elastic/observability-test-environments/blob/master/tools/oblt_cli/README.md) to connect to a cloud-based ES cluster.
 
-## B. Local ES Cluster
+## 3. Local ES Cluster
 
 ### Start Elasticsearch and APM data generators
 _Docker Compose is required_
@@ -40,7 +63,7 @@ elasticsearch.password: changeme
 APM behaves differently depending on which the role and permissions a logged in user has. To create the users run:
 
 ```sh
-node x-pack/plugins/apm/scripts/create-apm-users-and-roles.js --username admin --password changeme --kibana-url http://localhost:5601 --role-suffix <github-username-or-something-unique>
+node x-pack/plugins/apm/scripts/create_apm_users_and_roles.js --username admin --password changeme --kibana-url http://localhost:5601 --role-suffix <github-username-or-something-unique>
 ```
 
 This will create:

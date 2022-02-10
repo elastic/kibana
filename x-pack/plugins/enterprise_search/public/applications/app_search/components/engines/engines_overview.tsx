@@ -66,7 +66,7 @@ export const EnginesOverview: React.FC = () => {
       pageChrome={[ENGINES_TITLE]}
       pageHeader={{ pageTitle: ENGINES_OVERVIEW_TITLE }}
       isLoading={dataLoading}
-      isEmptyState={!engines.length}
+      isEmptyState={!engines.length && !metaEngines.length}
       emptyState={<EmptyState />}
     >
       <DataPanel
@@ -77,7 +77,7 @@ export const EnginesOverview: React.FC = () => {
         action={
           canManageEngines && (
             <EuiButtonTo
-              color="secondary"
+              color="success"
               size="s"
               iconType="plusInCircle"
               data-test-subj="appSearchEnginesEngineCreationButton"
@@ -109,7 +109,7 @@ export const EnginesOverview: React.FC = () => {
           action={
             canManageMetaEngines && (
               <EuiButtonTo
-                color="secondary"
+                color="success"
                 size="s"
                 iconType="plusInCircle"
                 data-test-subj="appSearchEnginesMetaEngineCreationButton"

@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import {
+import type {
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '../../../../../../../src/core/server';
-import {
+import type {
   IEsSearchResponse,
   ISearchRequestParams,
 } from '../../../../../../../src/plugins/data/common';
-import {
+import type {
   FactoryQueryTypes,
   StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
-import { EndpointAppContext } from '../../../endpoint/types';
+import type { EndpointAppContext } from '../../../endpoint/types';
 
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
   buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
@@ -29,6 +30,8 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
       esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
+      request: KibanaRequest;
+      spaceId?: string;
     }
   ) => Promise<StrategyResponseType<T>>;
 }

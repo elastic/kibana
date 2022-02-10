@@ -13,7 +13,7 @@ import {
   EuiEmptyPrompt,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../types';
 import { Loading } from '../../../components';
@@ -106,7 +106,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
     ) : (
       <EuiEmptyPrompt
         iconType="checkInCircleFilled"
-        iconColor="secondary"
+        iconColor="success"
         body={
           <EuiText>
             <p>

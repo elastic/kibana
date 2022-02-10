@@ -38,4 +38,4 @@ export {
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
 } from './types';
-export type { ActionExecutionContext, ActionExecutionMeta } from './actions';
+export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';

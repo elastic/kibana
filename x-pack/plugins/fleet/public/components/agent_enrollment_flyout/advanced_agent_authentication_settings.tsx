@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiButton, EuiCallOut, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { SO_SEARCH_LIMIT } from '../../applications/fleet/constants';
@@ -103,13 +103,18 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
   onKeyChange,
 }) => {
   const { notifications } = useStartServices();
-  const [enrollmentAPIKeys, setEnrollmentAPIKeys] = useState<GetEnrollmentAPIKeysResponse['list']>(
+  const [enrollmentAPIKeys, setEnrollmentAPIKeys] = useState<GetEnrollmentAPIKeysResponse['items']>(
     []
   );
 
   const [isAuthenticationSettingsOpen, setIsAuthenticationSettingsOpen] = useState<boolean>(
     initialAuthenticationSettingsOpen
   );
+
+  useEffect(() => {
+    setIsAuthenticationSettingsOpen(initialAuthenticationSettingsOpen);
+  }, [initialAuthenticationSettingsOpen]);
+
   const [isLoadingEnrollmentApiKeys, setIsLoadingEnrollmentApiKeys] = useState(false);
 
   const onCreateEnrollmentApiKey = useCallback(
@@ -143,7 +148,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
             throw new Error('No data while fetching enrollment API keys');
           }
 
-          const enrollmentAPIKeysResponse = res.data.list.filter(
+          const enrollmentAPIKeysResponse = res.data.items.filter(
             (key) => key.policy_id === agentPolicyId && key.active === true
           );
 
@@ -213,12 +218,12 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
             />
           ) : isLoadingEnrollmentApiKeys ? (
             <Loading />
-          ) : (
+          ) : agentPolicyId ? (
             <NoEnrollmentKeysCallout
               agentPolicyId={agentPolicyId}
               onCreateEnrollmentApiKey={onCreateEnrollmentApiKey}
             />
-          )}
+          ) : null}
         </>
       )}
     </>

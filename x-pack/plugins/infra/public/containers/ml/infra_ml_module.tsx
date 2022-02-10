@@ -19,7 +19,7 @@ export const useInfraMLModule = <JobType extends string>({
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { spaceId, sourceId, timestampField } = sourceConfiguration;
+  const { spaceId, sourceId } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
   const [, fetchJobStatus] = useTrackedPromise(
@@ -64,7 +64,6 @@ export const useInfraMLModule = <JobType extends string>({
               indices: selectedIndices,
               sourceId,
               spaceId,
-              timestampField,
             },
             partitionField,
           },
@@ -91,7 +90,7 @@ export const useInfraMLModule = <JobType extends string>({
         dispatchModuleStatus({ type: 'failedSetup' });
       },
     },
-    [moduleDescriptor.setUpModule, spaceId, sourceId, timestampField]
+    [moduleDescriptor.setUpModule, spaceId, sourceId]
   );
 
   const [cleanUpModuleRequest, cleanUpModule] = useTrackedPromise(

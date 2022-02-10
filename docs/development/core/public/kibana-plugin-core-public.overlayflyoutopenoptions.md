@@ -15,13 +15,14 @@ export interface OverlayFlyoutOpenOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  ["aria-label"](./kibana-plugin-core-public.overlayflyoutopenoptions._aria-label_.md) | <code>string</code> |  |
-|  ["data-test-subj"](./kibana-plugin-core-public.overlayflyoutopenoptions._data-test-subj_.md) | <code>string</code> |  |
-|  [className](./kibana-plugin-core-public.overlayflyoutopenoptions.classname.md) | <code>string</code> |  |
-|  [closeButtonAriaLabel](./kibana-plugin-core-public.overlayflyoutopenoptions.closebuttonarialabel.md) | <code>string</code> |  |
-|  [hideCloseButton](./kibana-plugin-core-public.overlayflyoutopenoptions.hideclosebutton.md) | <code>boolean</code> |  |
-|  [maxWidth](./kibana-plugin-core-public.overlayflyoutopenoptions.maxwidth.md) | <code>boolean &#124; number &#124; string</code> |  |
-|  [onClose](./kibana-plugin-core-public.overlayflyoutopenoptions.onclose.md) | <code>(flyout: OverlayRef) =&gt; void</code> | EuiFlyout onClose handler. If provided the consumer is responsible for calling flyout.close() to close the flyout; |
-|  [ownFocus](./kibana-plugin-core-public.overlayflyoutopenoptions.ownfocus.md) | <code>boolean</code> |  |
-|  [size](./kibana-plugin-core-public.overlayflyoutopenoptions.size.md) | <code>EuiFlyoutSize</code> |  |
+|  ["aria-label"?](./kibana-plugin-core-public.overlayflyoutopenoptions._aria-label_.md) | string | <i>(Optional)</i> |
+|  ["data-test-subj"?](./kibana-plugin-core-public.overlayflyoutopenoptions._data-test-subj_.md) | string | <i>(Optional)</i> |
+|  [className?](./kibana-plugin-core-public.overlayflyoutopenoptions.classname.md) | string | <i>(Optional)</i> |
+|  [closeButtonAriaLabel?](./kibana-plugin-core-public.overlayflyoutopenoptions.closebuttonarialabel.md) | string | <i>(Optional)</i> |
+|  [hideCloseButton?](./kibana-plugin-core-public.overlayflyoutopenoptions.hideclosebutton.md) | boolean | <i>(Optional)</i> |
+|  [maskProps?](./kibana-plugin-core-public.overlayflyoutopenoptions.maskprops.md) | EuiOverlayMaskProps | <i>(Optional)</i> |
+|  [maxWidth?](./kibana-plugin-core-public.overlayflyoutopenoptions.maxwidth.md) | boolean \| number \| string | <i>(Optional)</i> |
+|  [onClose?](./kibana-plugin-core-public.overlayflyoutopenoptions.onclose.md) | (flyout: OverlayRef) =&gt; void | <i>(Optional)</i> EuiFlyout onClose handler. If provided the consumer is responsible for calling flyout.close() to close the flyout; |
+|  [ownFocus?](./kibana-plugin-core-public.overlayflyoutopenoptions.ownfocus.md) | boolean | <i>(Optional)</i> |
+|  [size?](./kibana-plugin-core-public.overlayflyoutopenoptions.size.md) | EuiFlyoutSize | <i>(Optional)</i> |
 

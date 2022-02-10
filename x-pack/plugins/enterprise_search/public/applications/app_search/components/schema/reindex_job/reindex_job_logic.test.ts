@@ -12,7 +12,7 @@ import {
 } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { ReindexJobLogic } from './reindex_job_logic';
 
@@ -25,13 +25,13 @@ describe('ReindexJobLogic', () => {
     fieldCoercionErrors: {
       some_erroring_field: [
         {
-          external_id: 'document-1',
+          id: 'document-1',
           error: "Value 'some text' cannot be parsed as a number",
         },
       ],
       another_erroring_field: [
         {
-          external_id: 'document-2',
+          id: 'document-2',
           error: "Value '123' cannot be parsed as a date",
         },
       ],

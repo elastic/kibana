@@ -6,22 +6,13 @@
  */
 
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
-import { createUninitialisedResourceState } from '../../../state';
 import { HostIsolationExceptionsPageState } from '../types';
 
 export const initialHostIsolationExceptionsPageState = (): HostIsolationExceptionsPageState => ({
-  entries: createUninitialisedResourceState(),
   location: {
     page_index: MANAGEMENT_DEFAULT_PAGE,
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     filter: '',
-  },
-  form: {
-    entry: undefined,
-    status: createUninitialisedResourceState(),
-  },
-  deletion: {
-    item: undefined,
-    status: createUninitialisedResourceState(),
+    included_policies: '',
   },
 });

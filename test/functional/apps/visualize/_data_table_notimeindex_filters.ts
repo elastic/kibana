@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         // hover and click on cell to filter
-        await PageObjects.visChart.filterOnTableCell(1, 2);
+        await PageObjects.visChart.filterOnTableCell(0, 1);
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();

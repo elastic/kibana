@@ -13,9 +13,11 @@ import {
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../shared/constants';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { CurationsLogic } from './';
 
@@ -130,14 +132,9 @@ describe('CurationsLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-
         CurationsLogic.actions.loadCurations();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 

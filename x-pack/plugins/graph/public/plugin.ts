@@ -20,7 +20,6 @@ import {
 } from '../../../../src/core/public';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
@@ -43,7 +42,6 @@ export interface GraphPluginStartDependencies {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
-  kibanaLegacy: KibanaLegacyStart;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
 }
@@ -99,7 +97,6 @@ export class GraphPlugin
           coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
-          kibanaLegacy: pluginsStart.kibanaLegacy,
           savedObjectsClient: coreStart.savedObjects.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,

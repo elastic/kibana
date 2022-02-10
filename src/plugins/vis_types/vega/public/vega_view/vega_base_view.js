@@ -89,6 +89,7 @@ export class VegaBaseView {
     this._initialized = false;
     this._externalUrl = opts.externalUrl;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._renderMode = opts.renderMode;
     this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
@@ -206,7 +207,7 @@ export class VegaBaseView {
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
     vegaLoader.sanitize = async (uri, options) => {
-      if (uri.bypassToken === bypassToken) {
+      if (uri.bypassToken === bypassToken || this._externalUrl.isInternalUrl(uri)) {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
         uri = uri.url;
@@ -238,7 +239,7 @@ export class VegaBaseView {
   }
 
   onWarn() {
-    if (!this._parser || !this._parser.hideWarnings) {
+    if (this._renderMode !== 'view' && (!this._parser || !this._parser.hideWarnings)) {
       this._addMessage('warn', Utils.formatWarningToStr(...arguments));
     }
   }
@@ -247,11 +248,16 @@ export class VegaBaseView {
     if (!this._$messages) {
       this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
     }
-    this._$messages.append(
-      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
-        $(`<pre class="vgaVis__messageCode">`).text(text)
-      )
-    );
+    const isMessageAlreadyDisplayed = this._$messages
+      .find(`pre.vgaVis__messageCode`)
+      .filter((index, element) => element.textContent === text).length;
+    if (!isMessageAlreadyDisplayed) {
+      this._$messages.append(
+        $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
+          $(`<pre class="vgaVis__messageCode">`).text(text)
+        )
+      );
+    }
   }
 
   resize() {
@@ -334,10 +340,11 @@ export class VegaBaseView {
   /**
    * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
    * @param {string} [index] as defined in Kibana, or default if missing
+   * @param {string} Elastic Query DSL's Custom label for kibanaAddFilter, as used in '+ Add Filter'
    */
-  async addFilterHandler(query, index) {
+  async addFilterHandler(query, index, alias) {
     const indexId = await this.findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const filter = esFilters.buildQueryFilter(query, indexId, alias);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }

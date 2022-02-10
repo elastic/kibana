@@ -12,7 +12,6 @@ import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
 } from '../../../plugins/security_solution/common/endpoint/constants';
-import { EndpointError } from '../../../plugins/security_solution/server';
 import {
   deleteIndexedHostsAndAlerts,
   IndexedHostsAndAlertsResponse,
@@ -22,6 +21,7 @@ import { TransformConfigUnion } from '../../../plugins/transform/common/types/tr
 import { GetTransformsResponseSchema } from '../../../plugins/transform/common/api_schemas/transforms';
 import { catchAndWrapError } from '../../../plugins/security_solution/server/endpoint/utils';
 import { installOrUpgradeEndpointFleetPackage } from '../../../plugins/security_solution/common/endpoint/data_loaders/setup_fleet_for_endpoint';
+import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');

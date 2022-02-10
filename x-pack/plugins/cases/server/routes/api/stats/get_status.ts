@@ -8,7 +8,8 @@
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
 
-import { CASE_STATUS_URL, CasesStatusRequest } from '../../../../common';
+import { CasesStatusRequest } from '../../../../common/api';
+import { CASE_STATUS_URL } from '../../../../common/constants';
 
 export function initGetCasesStatusApi({ router, logger }: RouteDeps) {
   router.get(
@@ -20,7 +21,7 @@ export function initGetCasesStatusApi({ router, logger }: RouteDeps) {
       try {
         const client = await context.cases.getCasesClient();
         return response.ok({
-          body: await client.stats.getStatusTotalsByType(request.query as CasesStatusRequest),
+          body: await client.metrics.getStatusTotalsByType(request.query as CasesStatusRequest),
         });
       } catch (error) {
         logger.error(`Failed to get status stats in route: ${error}`);

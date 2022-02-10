@@ -47,6 +47,7 @@ export default class Datasource extends TimelionFunction {
           fitFunctions: _.keys(fitFunctions).join(', '),
         },
       }),
+      hidden: Boolean(config.hideFitArg),
     });
 
     // Wrap the original function so we can modify inputs/outputs with offset & fit

@@ -5,34 +5,31 @@
  * 2.0.
  */
 
-import React, { FC, memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiButtonProps,
-  PropsForButton,
   EuiCallOut,
-  EuiSpacer,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
+import { AutoFocusButton } from '../../../../common/components/autofocus_button/autofocus_button';
 import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
-import { useTrustedAppsSelector } from './hooks';
+import { isPolicyEffectScope } from '../state/type_guards';
 import {
   getDeletionDialogEntry,
   isDeletionDialogOpen,
   isDeletionInProgress,
 } from '../store/selectors';
-import { isPolicyEffectScope } from '../state/type_guards';
+import { useTrustedAppsSelector } from './hooks';
 
 const CANCEL_SUBJ = 'trustedAppDeletionCancel';
 const CONFIRM_SUBJ = 'trustedAppDeletionConfirm';
@@ -82,21 +79,6 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
     />
   ),
 });
-
-const AutoFocusButton: FC<PropsForButton<EuiButtonProps>> = memo((props) => {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const button = <EuiButton buttonRef={buttonRef} {...props} />;
-
-  useEffect(() => {
-    if (buttonRef.current) {
-      buttonRef.current.focus();
-    }
-  }, []);
-
-  return button;
-});
-
-AutoFocusButton.displayName = 'AutoFocusButton';
 
 export const TrustedAppDeletionDialog = memo(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();

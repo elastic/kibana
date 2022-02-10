@@ -9,8 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
-import { hasField } from '../utils';
-import { IndexPatternColumn } from '../operations';
+import { hasField } from '../pure_utils';
+import { GenericIndexPatternColumn } from '../operations';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter((c) => c !== inner);
@@ -22,7 +22,7 @@ function nestColumn(columnOrder: string[], outer: string, inner: string) {
 }
 
 function getFieldName(
-  column: IndexPatternColumn,
+  column: GenericIndexPatternColumn,
   getFieldByName: (name: string) => IndexPatternField | undefined
 ) {
   return hasField(column)

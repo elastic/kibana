@@ -156,16 +156,16 @@ image::maps/images/asset-tracking-tutorial/logstash_output.png[]
 . Leave the terminal window open and Logstash running throughout this tutorial.
 
 [float]
-==== Step 3: Create a {kib} index pattern for the tri_met_tracks {es} index
+==== Step 3: Create a data view for the tri_met_tracks {es} index
 
-. In Kibana, open the main menu, and click *Stack Management > Index Patterns*.
-. Click *Create index pattern*.
-. Give the index pattern a name: *tri_met_tracks**.
+. In {kib}, open the main menu, and click *Stack Management > Data Views*.
+. Click *Create data view*.
+. Give the data view a name: *tri_met_tracks**.
 . Click *Next step*.
 . Set the *Time field* to *time*.
-. Click *Create index pattern*.
+. Click *Create data view*.
 
-{kib} shows the fields in your index pattern.
+{kib} shows the fields in your data view.
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/index_pattern.png[]
@@ -174,7 +174,7 @@ image::maps/images/asset-tracking-tutorial/index_pattern.png[]
 ==== Step 4: Explore the Portland bus data
 
 . Open the main menu, and click *Discover*.
-. Set the index pattern to *tri_met_tracks**.
+. Set the data view to *tri_met_tracks**.
 . Open the <<set-time-filter, time filter>>, and set the time range to the last 15 minutes.
 . Expand a document and explore some of the fields that you will use later in this tutorial: `bearing`, `in_congestion`, `location`, and `vehicle_id`.
 
@@ -202,7 +202,7 @@ Add a layer to show the bus routes for the last 15 minutes.
 
 . Click *Add layer*.
 . Click *Tracks*.
-. Select the *tri_met_tracks** index pattern.
+. Select the *tri_met_tracks** data view.
 . Define the tracks:
 .. Set *Entity* to *vehicle_id*.
 .. Set *Sort* to *time*.
@@ -225,7 +225,7 @@ image::maps/images/asset-tracking-tutorial/tracks_layer.png[]
 Add a layer that uses attributes in the data to set the style and orientation of the buses. You’ll see the direction buses are headed and what traffic is like.
 
 . Click *Add layer*, and then select *Top Hits per entity*.
-. Select the *tri_met_tracks** index pattern.
+. Select the *tri_met_tracks** data view.
 . To display the most recent location per bus:
 .. Set *Entity* to *vehicle_id*.
 .. Set *Documents per entity* to 1.

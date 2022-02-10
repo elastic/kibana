@@ -16,7 +16,7 @@ import {
 } from '.';
 import { getField } from '../../fields/index.mock';
 import { autocompleteStartMock } from '../../autocomplete/index.mock';
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 
 // Copied from "src/plugins/data/common/index_patterns/index_pattern.stub.ts"
 // TODO: Remove this in favor of the above if/when it is ported, https://github.com/elastic/kibana/issues/100715
@@ -153,7 +153,7 @@ describe('use_field_value_autocomplete', () => {
     const suggestionsMock = jest.fn().mockResolvedValue([]);
 
     await act(async () => {
-      const selectedField: IndexPatternFieldBase | undefined = getField('nestedField.child');
+      const selectedField: DataViewFieldBase | undefined = getField('nestedField.child');
       if (selectedField == null) {
         throw new TypeError('selectedField for this test should always be defined');
       }

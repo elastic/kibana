@@ -3,7 +3,21 @@
 exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
 Array [
   Array [
-    <I18nContext>
+    <CoreContextProvider
+      i18n={
+        Object {
+          "Context": [Function],
+        }
+      }
+      theme={
+        Object {
+          "theme$": Observable {
+            "_isScalar": false,
+            "_subscribe": [Function],
+          },
+        }
+      }
+    >
       <GlobalToastList
         dismissToast={[Function]}
         toasts$={
@@ -21,7 +35,7 @@ Array [
           }
         }
       />
-    </I18nContext>,
+    </CoreContextProvider>,
     <div
       test="target-dom-element"
     />,

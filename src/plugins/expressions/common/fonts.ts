@@ -92,6 +92,12 @@ export const hoeflerText = createFont({
   value: "'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif",
 });
 
+export const inter = createFont({
+  label: 'Inter',
+  value:
+    "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+});
+
 export const lucidaGrande = createFont({
   label: 'Lucida Grande',
   value: "'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif",
@@ -132,6 +138,7 @@ export const fonts = [
   gillSans,
   helveticaNeue,
   hoeflerText,
+  inter,
   lucidaGrande,
   myriad,
   openSans,

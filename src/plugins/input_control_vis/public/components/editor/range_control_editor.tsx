@@ -9,7 +9,7 @@
 import React, { Component, Fragment, ComponentType } from 'react';
 
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';

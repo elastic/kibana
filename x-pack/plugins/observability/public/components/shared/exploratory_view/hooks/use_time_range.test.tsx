@@ -12,7 +12,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useExpViewTimeRange } from './use_time_range';
 import { ReportTypes } from '../configurations/constants';
 import { createKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { TRANSACTION_DURATION } from '../configurations/constants/elasticsearch_fieldnames';
+import {
+  TRANSACTION_DURATION,
+  METRIC_SYSTEM_MEMORY_USAGE,
+} from '../configurations/constants/elasticsearch_fieldnames';
 
 const mockSingleSeries = [
   {
@@ -73,6 +76,31 @@ describe('useExpViewTimeRange', function () {
 
   it('should return expected result when there are multiple distribution series with relative dates', async function () {
     await storage.set(allSeriesKey, mockMultipleSeries);
+    await storage.set(reportTypeKey, ReportTypes.DISTRIBUTION);
+
+    const { result } = renderHook(() => useExpViewTimeRange(), {
+      wrapper: Wrapper,
+    });
+
+    expect(result.current).toEqual({
+      from: 'now-30m',
+      to: 'now',
+    });
+  });
+
+  it("should correctly parse dates when last series doesn't have a report definition", async function () {
+    const mockSeriesWithoutDefinitions = [
+      ...mockSingleSeries,
+      {
+        dataType: 'mobile',
+        name: 'mobile-series-1',
+        reportDefinitions: undefined,
+        selectedMetricField: METRIC_SYSTEM_MEMORY_USAGE,
+        time: { from: 'now-30m', to: 'now' },
+      },
+    ];
+
+    await storage.set(allSeriesKey, mockSeriesWithoutDefinitions);
     await storage.set(reportTypeKey, ReportTypes.DISTRIBUTION);
 
     const { result } = renderHook(() => useExpViewTimeRange(), {

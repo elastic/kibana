@@ -15,6 +15,7 @@ import { ApplicationService } from '../application_service';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
+import { themeServiceMock } from '../../theme/theme_service.mock';
 import { AppMountParameters } from '../types';
 import { Observable } from 'rxjs';
 import { MountPoint } from 'kibana/public';
@@ -43,7 +44,11 @@ describe('ApplicationService', () => {
       http,
       history: history as any,
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 

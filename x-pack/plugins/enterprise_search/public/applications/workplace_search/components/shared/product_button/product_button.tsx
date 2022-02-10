@@ -10,7 +10,7 @@ import React from 'react';
 import { useActions } from 'kea';
 
 import { EuiButton, EuiButtonProps, EuiLinkProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url';
 import { TelemetryLogic } from '../../../../shared/telemetry';

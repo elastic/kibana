@@ -30,6 +30,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('Rule exception operators for data type integer', () => {
     before(async () => {
@@ -45,31 +46,31 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
-      await createListsIndex(supertest);
+      await createSignalsIndex(supertest, log);
+      await createListsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
-      await deleteAllExceptions(supertest);
-      await deleteListsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
+      await deleteAllExceptions(supertest, log);
+      await deleteListsIndex(supertest, log);
     });
 
     describe('"is" operator', () => {
       it('should find all the integer from the data set when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['1', '2', '3', '4']);
       });
 
       it('should filter 1 single integer if it is set as an exception', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -79,16 +80,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['2', '3', '4']);
       });
 
       it('should filter 2 integer if both are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -106,16 +107,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['3', '4']);
       });
 
       it('should filter 3 integer if all 3 are as exceptions', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -141,16 +142,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['4']);
       });
 
       it('should filter 4 integer if all are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -184,8 +185,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql([]);
       });
@@ -194,7 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is not" operator', () => {
       it('will return 0 results if it cannot find what it is excluding', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -204,15 +205,15 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql([]);
       });
 
       it('will return just 1 result we excluded', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -222,16 +223,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['1']);
       });
 
       it('will return 0 results if we exclude two integer', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -249,8 +250,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql([]);
       });
@@ -259,7 +260,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is one of" operator', () => {
       it('should filter 1 single integer if it is set as an exception', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -269,16 +270,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 3, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['2', '3', '4']);
       });
 
       it('should filter 2 integer if both are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -288,16 +289,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['3', '4']);
       });
 
       it('should filter 3 integer if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -307,16 +308,16 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 1, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['4']);
       });
 
       it('should filter 4 integer if all are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -326,8 +327,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql([]);
       });
@@ -336,7 +337,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is not one of" operator', () => {
       it('will return 0 results if it cannot find what it is excluding', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -346,15 +347,15 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql([]);
       });
 
       it('will return just the result we excluded', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -364,9 +365,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 2, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['1', '4']);
       });
@@ -375,7 +376,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"exists" operator', () => {
       it('will return 0 results if matching against integer', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -384,8 +385,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql([]);
       });
@@ -394,7 +395,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"does not exist" operator', () => {
       it('will return 4 results if matching against integer', async () => {
         const rule = getRuleForSignalTesting(['integer']);
-        const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
           [
             {
               field: 'integer',
@@ -403,9 +404,9 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
         expect(hits).to.eql(['1', '2', '3', '4']);
       });
@@ -414,9 +415,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is in list" operator', () => {
       describe('working against integer values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 integer', async () => {
-          await importFile(supertest, 'integer', ['1'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -429,17 +430,17 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['2', '3', '4']);
         });
 
         it('will return 2 results if we have a list that includes 2 integer', async () => {
-          await importFile(supertest, 'integer', ['1', '3'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1', '3'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -452,17 +453,17 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['2', '4']);
         });
 
         it('will return 0 results if we have a list that includes all integer', async () => {
-          await importFile(supertest, 'integer', ['1', '2', '3', '4'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1', '2', '3', '4'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -475,8 +476,8 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql([]);
         });
@@ -484,9 +485,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 integer', async () => {
-          await importFile(supertest, 'integer', ['1'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer_as_string']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -499,17 +500,17 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['2', '3', '4']);
         });
 
         it('will return 2 results if we have a list that includes 2 integer', async () => {
-          await importFile(supertest, 'integer', ['1', '3'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1', '3'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer_as_string']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -522,17 +523,17 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['2', '4']);
         });
 
         it('will return 0 results if we have a list that includes all integer', async () => {
-          await importFile(supertest, 'integer', ['1', '2', '3', '4'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1', '2', '3', '4'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer_as_string']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -545,16 +546,16 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql([]);
         });
 
         it('will return 1 result if we have a list which contains the integer range of 1-3', async () => {
-          await importFile(supertest, 'integer_range', ['1-3'], 'list_items.txt', ['1', '2']);
+          await importFile(supertest, log, 'integer_range', ['1-3'], 'list_items.txt', ['1', '2']);
           const rule = getRuleForSignalTesting(['integer_as_string']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -567,9 +568,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['4']);
         });
@@ -579,9 +580,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"is not in list" operator', () => {
       describe('working against integer values in the data set', () => {
         it('will return 1 result if we have a list that excludes 1 integer', async () => {
-          await importFile(supertest, 'integer', ['1'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -594,17 +595,17 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['1']);
         });
 
         it('will return 2 results if we have a list that excludes 2 integer', async () => {
-          await importFile(supertest, 'integer', ['1', '3'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1', '3'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -617,17 +618,17 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['1', '3']);
         });
 
         it('will return 4 results if we have a list that excludes all integer', async () => {
-          await importFile(supertest, 'integer', ['1', '2', '3', '4'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1', '2', '3', '4'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -640,9 +641,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 4, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 4, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['1', '2', '3', '4']);
         });
@@ -650,9 +651,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('working against string values in the data set', () => {
         it('will return 1 result if we have a list that excludes 1 integer', async () => {
-          await importFile(supertest, 'integer', ['1'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer_as_string']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -665,17 +666,17 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['1']);
         });
 
         it('will return 2 results if we have a list that excludes 2 integer', async () => {
-          await importFile(supertest, 'integer', ['1', '3'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1', '3'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer_as_string']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -688,17 +689,17 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['1', '3']);
         });
 
         it('will return 4 results if we have a list that excludes all integer', async () => {
-          await importFile(supertest, 'integer', ['1', '2', '3', '4'], 'list_items.txt');
+          await importFile(supertest, log, 'integer', ['1', '2', '3', '4'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['integer_as_string']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -711,17 +712,21 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 4, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 4, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['1', '2', '3', '4']);
         });
 
         it('will return 3 results if we have a list which contains the integer range of 1-3', async () => {
-          await importFile(supertest, 'integer_range', ['1-3'], 'list_items.txt', ['1', '2', '3']);
+          await importFile(supertest, log, 'integer_range', ['1-3'], 'list_items.txt', [
+            '1',
+            '2',
+            '3',
+          ]);
           const rule = getRuleForSignalTesting(['integer_as_string']);
-          const { id } = await createRuleWithExceptionEntries(supertest, rule, [
+          const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'integer',
@@ -734,9 +739,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsOpen = await getSignalsById(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const signalsOpen = await getSignalsById(supertest, log, id);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.integer).sort();
           expect(hits).to.eql(['1', '2', '3']);
         });

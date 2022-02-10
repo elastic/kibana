@@ -16,7 +16,8 @@ interface IncludeOnCloseFn {
   onClose: () => void;
 }
 
-type Props = Pick<PanelPropsScreenCapture, 'getJobParams' | 'layoutOption'> & IncludeOnCloseFn;
+type Props = Pick<PanelPropsScreenCapture, 'getJobParams' | 'layoutOption' | 'objectId'> &
+  IncludeOnCloseFn;
 
 /*
  * As of 7.14, the only shared component is a PDF report that is suited for Canvas integration.
@@ -34,6 +35,7 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           apiClient={apiClient}
           toasts={core.notifications.toasts}
           uiSettings={core.uiSettings}
+          theme={core.theme}
           {...props}
         />
       );
@@ -47,6 +49,7 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           apiClient={apiClient}
           toasts={core.notifications.toasts}
           uiSettings={core.uiSettings}
+          theme={core.theme}
           {...props}
         />
       );
@@ -60,6 +63,7 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           apiClient={apiClient}
           toasts={core.notifications.toasts}
           uiSettings={core.uiSettings}
+          theme={core.theme}
           {...props}
         />
       );

@@ -292,6 +292,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickNewDashboard(continueEditing = false) {
+    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    if (!continueEditing && discardButtonExists) {
+      this.log.debug('found discard button');
+      await this.testSubjects.click('discardDashboardPromptButton');
+      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      if (confirmation) {
+        await this.common.clickConfirmOnModal();
+      }
+    }
     await this.listingTable.clickNewButton('createDashboardPromptButton');
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
@@ -305,6 +314,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickNewDashboardExpectWarning(continueEditing = false) {
+    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    if (!continueEditing && discardButtonExists) {
+      this.log.debug('found discard button');
+      await this.testSubjects.click('discardDashboardPromptButton');
+      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      if (confirmation) {
+        await this.common.clickConfirmOnModal();
+      }
+    }
     await this.listingTable.clickNewButton('createDashboardPromptButton');
     await this.testSubjects.existOrFail('dashboardCreateConfirm');
     if (continueEditing) {
@@ -514,6 +532,27 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('in getPanelTitles');
     const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle');
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
+  }
+
+  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  public async getVisibilityOfPanelTitles() {
+    this.log.debug('in getVisibilityOfPanels');
+    // only works if the dashboard is in view mode
+    const inViewMode = await this.getIsInViewMode();
+    if (!inViewMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+    const visibilities: boolean[] = [];
+    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
+    for (const titleObject of titleObjects) {
+      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+      visibilities.push(exists);
+    }
+    // return to edit mode if a switch to view mode above was necessary
+    if (!inViewMode) {
+      await this.switchToEditMode();
+    }
+    return visibilities;
   }
 
   public async getPanelDimensions() {

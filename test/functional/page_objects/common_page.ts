@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
@@ -214,7 +214,7 @@ export class CommonPageObject extends FtrService {
 
   async sleep(sleepMilliseconds: number) {
     this.log.debug(`... sleep(${sleepMilliseconds}) start`);
-    await delay(sleepMilliseconds);
+    await setTimeoutAsync(sleepMilliseconds);
     this.log.debug(`... sleep(${sleepMilliseconds}) end`);
   }
 
@@ -278,6 +278,9 @@ export class CommonPageObject extends FtrService {
           const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
           this.log.debug(msg);
           throw new Error(msg);
+        }
+        if (appName === 'discover') {
+          await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
         }
         return currentUrl;
       });

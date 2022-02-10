@@ -11,6 +11,8 @@ import {
   DETECTION_ENGINE_INDEX_URL,
 } from '../../../../plugins/security_solution/common/constants';
 
+import { SIGNALS_FIELD_ALIASES_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteSignalsIndex } from '../../utils';
 
@@ -19,10 +21,11 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const log = getService('log');
 
   describe('create_index', () => {
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     describe('elastic admin', () => {
@@ -80,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
           // Make sure that aliases_version has been updated on the existing index
           expect(mappings['.siem-signals-default-000001'].mappings?._meta?.aliases_version).to.eql(
-            1
+            SIGNALS_FIELD_ALIASES_VERSION
           );
         });
       });

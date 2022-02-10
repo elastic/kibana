@@ -155,7 +155,7 @@ export const MetaEngineCreation: React.FC = () => {
             isLoading={isLoading}
             type="submit"
             data-test-subj="NewMetaEngineSubmitButton"
-            color="secondary"
+            color="success"
             fill
           >
             {META_ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}

@@ -19,7 +19,7 @@ import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
 import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
@@ -240,31 +240,15 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData, model } = this.props;
+    const { visData } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
     const header = this.renderHeader();
-    let rows;
+    let rows = null;
 
     if (isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
-    } else {
-      const message = model.pivot_id ? (
-        <FormattedMessage
-          id="visTypeTimeseries.table.noResultsAvailableMessage"
-          defaultMessage="No results available."
-        />
-      ) : (
-        <FormattedMessage
-          id="visTypeTimeseries.table.noResultsAvailableWithDescriptionMessage"
-          defaultMessage="No results available. You must choose a group by field for this visualization."
-        />
-      );
-      rows = (
-        <tr>
-          <td colSpan={this.visibleSeries.length + 1}>{message}</td>
-        </tr>
-      );
     }
+
     return (
       <>
         <RedirectAppLinks

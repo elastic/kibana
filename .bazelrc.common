@@ -14,9 +14,18 @@ query --experimental_guard_against_concurrent_changes
 
 ## Cache action outputs on disk so they persist across output_base and bazel shutdown (eg. changing branches)
 build --disk_cache=~/.bazel-cache/disk-cache
+fetch --disk_cache=~/.bazel-cache/disk-cache
+query --disk_cache=~/.bazel-cache/disk-cache
+sync --disk_cache=~/.bazel-cache/disk-cache
+test --disk_cache=~/.bazel-cache/disk-cache
 
 ## Bazel repo cache settings
 build --repository_cache=~/.bazel-cache/repository-cache
+fetch --repository_cache=~/.bazel-cache/repository-cache
+query --repository_cache=~/.bazel-cache/repository-cache
+run --repository_cache=~/.bazel-cache/repository-cache
+sync --repository_cache=~/.bazel-cache/repository-cache
+test --repository_cache=~/.bazel-cache/repository-cache
 
 # Bazel will create symlinks from the workspace directory to output artifacts.
 # Build results will be placed in a directory called "bazel-bin"
@@ -122,6 +131,9 @@ coverage --instrument_test_targets
 
 # Metadata settings
 build --workspace_status_command="node ./src/dev/bazel_workspace_status.js"
+
+# Load remote cache settings, if they exist
+try-import %workspace%/.bazelrc.cache
 
 # Load any settings specific to the current user.
 # .bazelrc.user should appear in .gitignore so that settings are not shared with team members

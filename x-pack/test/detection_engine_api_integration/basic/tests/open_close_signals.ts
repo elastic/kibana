@@ -32,6 +32,7 @@ import { RACAlert } from '../../../../plugins/security_solution/server/lib/detec
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe.skip('open_close_signals', () => {
     describe('tests with auditbeat data', () => {
@@ -44,30 +45,30 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await deleteAllAlerts(supertest);
-        await createSignalsIndex(supertest);
+        await deleteAllAlerts(supertest, log);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should be able to execute and get 10 signals', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
       });
 
       it('should be have set the signals in an open state initially', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const everySignalOpen = signalsOpen.hits.hits.every(
           (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'open'
         );
@@ -76,10 +77,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able to get a count of 10 closed signals when closing 10', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
         // set all of the signals to the state of closed. There is no reason to use a waitUntil here
@@ -101,10 +102,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able close 10 signals immediately and they all should be closed', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
         // set all of the signals to the state of closed. There is no reason to use a waitUntil here

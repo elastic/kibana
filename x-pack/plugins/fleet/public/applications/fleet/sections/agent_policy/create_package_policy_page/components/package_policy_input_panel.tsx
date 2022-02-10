@@ -8,7 +8,7 @@
 import React, { useState, Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -83,7 +83,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     );
 
     // Errors state
-    const errorCount = countValidationErrors(inputValidationResults);
+    const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
     const hasErrors = forceShowErrors && errorCount;
 
     const hasInputStreams = useMemo(

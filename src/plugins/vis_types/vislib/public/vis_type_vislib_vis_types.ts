@@ -7,14 +7,12 @@
  */
 
 import { VisTypeDefinition } from 'src/plugins/visualizations/public';
-import { heatmapVisTypeDefinition } from './heatmap';
 import { gaugeVisTypeDefinition } from './gauge';
 import { goalVisTypeDefinition } from './goal';
 
 export { pieVisTypeDefinition } from './pie';
 
 export const visLibVisTypeDefinitions: Array<VisTypeDefinition<any>> = [
-  heatmapVisTypeDefinition,
   gaugeVisTypeDefinition,
   goalVisTypeDefinition,
 ];

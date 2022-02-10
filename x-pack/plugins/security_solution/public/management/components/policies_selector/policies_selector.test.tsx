@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

@@ -4,23 +4,42 @@ exports[`Storyshots renderers/DropdownFilter default 1`] = `
 <div
   className="canvasDropdownFilter"
 >
-  <select
-    className="canvasDropdownFilter__select"
-    data-test-subj="canvasDropdownFilter__select"
-    onChange={[Function]}
-    value=""
+  <div
+    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
   >
-    <option
-      aria-selected={false}
-      value="%%CANVAS_MATCH_ALL%%"
+    <div
+      className="euiFormControlLayout__childrenWrapper"
     >
-      -- ANY --
-    </option>
-  </select>
-  <span
-    className="canvasDropdownFilter__icon"
-    data-euiicon-type="arrowDown"
-  />
+      <select
+        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        data-test-subj="canvasDropdownFilter__select"
+        onChange={[Function]}
+        onMouseUp={[Function]}
+        value=""
+      >
+        <option
+          selected={false}
+          value="%%CANVAS_MATCH_ALL%%"
+        >
+          -- ANY --
+        </option>
+      </select>
+      <div
+        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          className="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            className="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+            size="s"
+          />
+        </span>
+      </div>
+    </div>
+  </div>
 </div>
 `;
 
@@ -28,41 +47,60 @@ exports[`Storyshots renderers/DropdownFilter with choices 1`] = `
 <div
   className="canvasDropdownFilter"
 >
-  <select
-    className="canvasDropdownFilter__select"
-    data-test-subj="canvasDropdownFilter__select"
-    onChange={[Function]}
-    value=""
+  <div
+    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
   >
-    <option
-      aria-selected={false}
-      value="%%CANVAS_MATCH_ALL%%"
+    <div
+      className="euiFormControlLayout__childrenWrapper"
     >
-      -- ANY --
-    </option>
-    <option
-      aria-selected={false}
-      value="1"
-    >
-      Item One
-    </option>
-    <option
-      aria-selected={false}
-      value="2"
-    >
-      Item Two
-    </option>
-    <option
-      aria-selected={false}
-      value="3"
-    >
-      Item Three
-    </option>
-  </select>
-  <span
-    className="canvasDropdownFilter__icon"
-    data-euiicon-type="arrowDown"
-  />
+      <select
+        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        data-test-subj="canvasDropdownFilter__select"
+        onChange={[Function]}
+        onMouseUp={[Function]}
+        value=""
+      >
+        <option
+          selected={false}
+          value="%%CANVAS_MATCH_ALL%%"
+        >
+          -- ANY --
+        </option>
+        <option
+          selected={false}
+          value="1"
+        >
+          Item One
+        </option>
+        <option
+          selected={false}
+          value="2"
+        >
+          Item Two
+        </option>
+        <option
+          selected={false}
+          value="3"
+        >
+          Item Three
+        </option>
+      </select>
+      <div
+        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          className="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            className="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+            size="s"
+          />
+        </span>
+      </div>
+    </div>
+  </div>
 </div>
 `;
 
@@ -70,41 +108,60 @@ exports[`Storyshots renderers/DropdownFilter with choices and new value 1`] = `
 <div
   className="canvasDropdownFilter"
 >
-  <select
-    className="canvasDropdownFilter__select"
-    data-test-subj="canvasDropdownFilter__select"
-    onChange={[Function]}
-    value="selectedValue"
+  <div
+    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
   >
-    <option
-      aria-selected={false}
-      value="%%CANVAS_MATCH_ALL%%"
+    <div
+      className="euiFormControlLayout__childrenWrapper"
     >
-      -- ANY --
-    </option>
-    <option
-      aria-selected={false}
-      value="1"
-    >
-      Item One
-    </option>
-    <option
-      aria-selected={false}
-      value="2"
-    >
-      Item Two
-    </option>
-    <option
-      aria-selected={false}
-      value="3"
-    >
-      Item Three
-    </option>
-  </select>
-  <span
-    className="canvasDropdownFilter__icon"
-    data-euiicon-type="arrowDown"
-  />
+      <select
+        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        data-test-subj="canvasDropdownFilter__select"
+        onChange={[Function]}
+        onMouseUp={[Function]}
+        value="selectedValue"
+      >
+        <option
+          selected={false}
+          value="%%CANVAS_MATCH_ALL%%"
+        >
+          -- ANY --
+        </option>
+        <option
+          selected={false}
+          value="1"
+        >
+          Item One
+        </option>
+        <option
+          selected={false}
+          value="2"
+        >
+          Item Two
+        </option>
+        <option
+          selected={false}
+          value="3"
+        >
+          Item Three
+        </option>
+      </select>
+      <div
+        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          className="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            className="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+            size="s"
+          />
+        </span>
+      </div>
+    </div>
+  </div>
 </div>
 `;
 
@@ -112,41 +169,60 @@ exports[`Storyshots renderers/DropdownFilter with choices and value 1`] = `
 <div
   className="canvasDropdownFilter"
 >
-  <select
-    className="canvasDropdownFilter__select"
-    data-test-subj="canvasDropdownFilter__select"
-    onChange={[Function]}
-    value="Item Two"
+  <div
+    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
   >
-    <option
-      aria-selected={false}
-      value="%%CANVAS_MATCH_ALL%%"
+    <div
+      className="euiFormControlLayout__childrenWrapper"
     >
-      -- ANY --
-    </option>
-    <option
-      aria-selected={false}
-      value="1"
-    >
-      Item One
-    </option>
-    <option
-      aria-selected={false}
-      value="2"
-    >
-      Item Two
-    </option>
-    <option
-      aria-selected={false}
-      value="3"
-    >
-      Item Three
-    </option>
-  </select>
-  <span
-    className="canvasDropdownFilter__icon"
-    data-euiicon-type="arrowDown"
-  />
+      <select
+        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        data-test-subj="canvasDropdownFilter__select"
+        onChange={[Function]}
+        onMouseUp={[Function]}
+        value="Item Two"
+      >
+        <option
+          selected={false}
+          value="%%CANVAS_MATCH_ALL%%"
+        >
+          -- ANY --
+        </option>
+        <option
+          selected={false}
+          value="1"
+        >
+          Item One
+        </option>
+        <option
+          selected={false}
+          value="2"
+        >
+          Item Two
+        </option>
+        <option
+          selected={false}
+          value="3"
+        >
+          Item Three
+        </option>
+      </select>
+      <div
+        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          className="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            className="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+            size="s"
+          />
+        </span>
+      </div>
+    </div>
+  </div>
 </div>
 `;
 
@@ -154,22 +230,41 @@ exports[`Storyshots renderers/DropdownFilter with new value 1`] = `
 <div
   className="canvasDropdownFilter"
 >
-  <select
-    className="canvasDropdownFilter__select"
-    data-test-subj="canvasDropdownFilter__select"
-    onChange={[Function]}
-    value="selectedValue"
+  <div
+    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
   >
-    <option
-      aria-selected={false}
-      value="%%CANVAS_MATCH_ALL%%"
+    <div
+      className="euiFormControlLayout__childrenWrapper"
     >
-      -- ANY --
-    </option>
-  </select>
-  <span
-    className="canvasDropdownFilter__icon"
-    data-euiicon-type="arrowDown"
-  />
+      <select
+        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        data-test-subj="canvasDropdownFilter__select"
+        onChange={[Function]}
+        onMouseUp={[Function]}
+        value="selectedValue"
+      >
+        <option
+          selected={false}
+          value="%%CANVAS_MATCH_ALL%%"
+        >
+          -- ANY --
+        </option>
+      </select>
+      <div
+        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          className="euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            className="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+            size="s"
+          />
+        </span>
+      </div>
+    </div>
+  </div>
 </div>
 `;

@@ -88,3 +88,55 @@ it('formats %s patterns and indents multi-line messages correctly', () => {
   const output = write.mock.calls.reduce((acc, chunk) => `${acc}${chunk}`, '');
   expect(output).toMatchSnapshot();
 });
+
+it('does not write messages from sources in ignoreSources', () => {
+  const write = jest.fn();
+  const writer = new ToolingLogTextWriter({
+    ignoreSources: ['myIgnoredSource'],
+    level: 'debug',
+    writeTo: {
+      write,
+    },
+  });
+
+  writer.write({
+    source: 'myIgnoredSource',
+    type: 'success',
+    indent: 10,
+    args: [
+      '%s\n%O\n\n%d',
+      'foo bar',
+      { foo: { bar: { 1: [1, 2, 3] } }, bar: { bar: { 1: [1, 2, 3] } } },
+      Infinity,
+    ],
+  });
+
+  const output = write.mock.calls.reduce((acc, chunk) => `${acc}${chunk}`, '');
+  expect(output).toEqual('');
+});
+
+it('never ignores write messages from the kibana elasticsearch.deprecation logger context', () => {
+  const write = jest.fn();
+  const writer = new ToolingLogTextWriter({
+    ignoreSources: ['myIgnoredSource'],
+    level: 'debug',
+    writeTo: {
+      write,
+    },
+  });
+
+  writer.write({
+    source: 'myIgnoredSource',
+    type: 'write',
+    indent: 10,
+    args: [
+      '%s\n%O\n\n%d',
+      '[elasticsearch.deprecation]',
+      { foo: { bar: { 1: [1, 2, 3] } }, bar: { bar: { 1: [1, 2, 3] } } },
+      Infinity,
+    ],
+  });
+
+  const output = write.mock.calls.reduce((acc, chunk) => `${acc}${chunk}`, '');
+  expect(output).toMatchSnapshot();
+});

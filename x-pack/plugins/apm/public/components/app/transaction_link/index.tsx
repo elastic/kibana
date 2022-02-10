@@ -10,7 +10,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { getRedirectToTransactionDetailPageUrl } from '../TraceLink/get_redirect_to_transaction_detail_page_url';
+import { getRedirectToTransactionDetailPageUrl } from '../trace_link/get_redirect_to_transaction_detail_page_url';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
 const CentralizedContainer = euiStyled.div`
@@ -27,8 +27,7 @@ export function TransactionLink() {
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {
       if (transactionId) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/transactions/{transactionId}',
+        return callApmApi('GET /internal/apm/transactions/{transactionId}', {
           params: {
             path: {
               transactionId,

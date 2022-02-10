@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { MgetHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   CORE_USAGE_STATS_ID,
   CORE_USAGE_STATS_TYPE,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '../../../core_usage_data';
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
@@ -140,6 +141,16 @@ export async function internalBulkResolve<T>(
         { ignore: [404] }
       )
     : undefined;
+  // exit early if a 404 isn't from elasticsearch
+  if (
+    bulkGetResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: bulkGetResponse.statusCode,
+      headers: bulkGetResponse.headers,
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
 
   let getResponseIndex = 0;
   let aliasTargetIndex = 0;
@@ -150,7 +161,7 @@ export async function internalBulkResolve<T>(
         return either.value;
       }
       const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
-      let aliasMatchDoc: MgetHit<SavedObjectsRawDocSource> | undefined;
+      let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
       const aliasTargetId = aliasTargetIds[aliasTargetIndex++];
       if (aliasTargetId !== undefined) {
         aliasMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
@@ -201,7 +212,7 @@ export async function internalBulkResolve<T>(
     }
   );
 
-  await incrementCounterInternal(
+  incrementCounterInternal(
     CORE_USAGE_STATS_TYPE,
     CORE_USAGE_STATS_ID,
     resolveCounter.getCounterFields(),

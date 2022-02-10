@@ -16,11 +16,11 @@ export interface OpsMetrics
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [collected\_at](./kibana-plugin-core-server.opsmetrics.collected_at.md) | <code>Date</code> | Time metrics were recorded at. |
-|  [concurrent\_connections](./kibana-plugin-core-server.opsmetrics.concurrent_connections.md) | <code>OpsServerMetrics['concurrent_connections']</code> | number of current concurrent connections to the server |
-|  [os](./kibana-plugin-core-server.opsmetrics.os.md) | <code>OpsOsMetrics</code> | OS related metrics |
-|  [process](./kibana-plugin-core-server.opsmetrics.process.md) | <code>OpsProcessMetrics</code> | Process related metrics. |
-|  [processes](./kibana-plugin-core-server.opsmetrics.processes.md) | <code>OpsProcessMetrics[]</code> | Process related metrics. Reports an array of objects for each kibana pid. |
-|  [requests](./kibana-plugin-core-server.opsmetrics.requests.md) | <code>OpsServerMetrics['requests']</code> | server requests stats |
-|  [response\_times](./kibana-plugin-core-server.opsmetrics.response_times.md) | <code>OpsServerMetrics['response_times']</code> | server response time stats |
+|  [collected\_at](./kibana-plugin-core-server.opsmetrics.collected_at.md) | Date | Time metrics were recorded at. |
+|  [concurrent\_connections](./kibana-plugin-core-server.opsmetrics.concurrent_connections.md) | OpsServerMetrics\['concurrent\_connections'\] | number of current concurrent connections to the server |
+|  [os](./kibana-plugin-core-server.opsmetrics.os.md) | OpsOsMetrics | OS related metrics |
+|  [process](./kibana-plugin-core-server.opsmetrics.process.md) | OpsProcessMetrics | Process related metrics. |
+|  [processes](./kibana-plugin-core-server.opsmetrics.processes.md) | OpsProcessMetrics\[\] | Process related metrics. Reports an array of objects for each kibana pid. |
+|  [requests](./kibana-plugin-core-server.opsmetrics.requests.md) | OpsServerMetrics\['requests'\] | server requests stats |
+|  [response\_times](./kibana-plugin-core-server.opsmetrics.response_times.md) | OpsServerMetrics\['response\_times'\] | server response time stats |
 

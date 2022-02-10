@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { ToastInput } from 'src/core/public';
 
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';

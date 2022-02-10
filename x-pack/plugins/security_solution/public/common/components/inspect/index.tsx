@@ -6,50 +6,34 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { getOr, omit } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import { omit } from 'lodash/fp';
+import React, { useMemo, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import styled, { css } from 'styled-components';
 
 import { inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { inputsActions } from '../../store/inputs';
+
+import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';
 import * as i18n from './translations';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
 
-export const InspectButtonContainer = styled.div<{ show?: boolean }>`
-  width: 100%;
-  display: flex;
-  flex-grow: 1;
+interface InspectButtonContainerProps {
+  show?: boolean;
+  children: React.ReactNode;
+}
 
-  > * {
-    max-width: 100%;
-  }
-
-  .${BUTTON_CLASS} {
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity ${(props) => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
-  }
-
-  ${({ show }) =>
-    show &&
-    css`
-      &:hover .${BUTTON_CLASS} {
-        pointer-events: auto;
-        opacity: 1;
-      }
-    `}
-`;
-
-InspectButtonContainer.displayName = 'InspectButtonContainer';
-
-InspectButtonContainer.defaultProps = {
-  show: true,
-};
+export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
+  children,
+  show = true,
+}) => (
+  <HoverVisibilityContainer show={show} targetClassNames={[BUTTON_CLASS]}>
+    {children}
+  </HoverVisibilityContainer>
+);
 
 interface OwnProps {
   compact?: boolean;
@@ -68,10 +52,10 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   compact = false,
   inputId = 'global',
   inspect,
+  inspectIndex = 0,
   isDisabled,
   isInspected,
   loading,
-  inspectIndex = 0,
   multiple = false, // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
   onCloseInspect,
   queryId = '',
@@ -79,7 +63,6 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   setIsInspected,
   title = '',
 }) => {
-  const isShowingModal = !loading && selectedInspectIndex === inspectIndex && isInspected;
   const handleClick = useCallback(() => {
     setIsInspected({
       id: queryId,
@@ -121,6 +104,16 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
     }
   }
 
+  const isShowingModal = useMemo(
+    () => !loading && selectedInspectIndex === inspectIndex && isInspected,
+    [inspectIndex, isInspected, loading, selectedInspectIndex]
+  );
+
+  const isButtonDisabled = useMemo(
+    () => loading || isDisabled || request == null || response == null,
+    [isDisabled, loading, request, response]
+  );
+
   return (
     <>
       {inputId === 'timeline' && !compact && (
@@ -131,7 +124,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           color="text"
           iconSide="left"
           iconType="inspect"
-          isDisabled={loading || isDisabled || false}
+          isDisabled={isButtonDisabled}
           isLoading={loading}
           onClick={handleClick}
         >
@@ -145,21 +138,23 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
-          isDisabled={loading || isDisabled || false}
+          isDisabled={isButtonDisabled}
           title={i18n.INSPECT}
           onClick={handleClick}
         />
       )}
-      <ModalInspectQuery
-        closeModal={handleCloseModal}
-        isShowing={isShowingModal}
-        request={request}
-        response={response}
-        additionalRequests={additionalRequests}
-        additionalResponses={additionalResponses}
-        title={title}
-        data-test-subj="inspect-modal"
-      />
+      {isShowingModal && request !== null && response !== null && (
+        <ModalInspectQuery
+          additionalRequests={additionalRequests}
+          additionalResponses={additionalResponses}
+          closeModal={handleCloseModal}
+          data-test-subj="inspect-modal"
+          inputId={inputId}
+          request={request}
+          response={response}
+          title={title}
+        />
+      )}
     </>
   );
 };

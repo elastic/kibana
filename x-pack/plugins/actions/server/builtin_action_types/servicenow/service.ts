@@ -74,7 +74,7 @@ export const createExternalService: ServiceFactory = (
       .slice(1)
       .reduce((acc, field) => `${acc}^ORelement=${field}`, `element=${fields[0]}`);
 
-    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}&sysparm_fields=label,value,dependent_value,element`;
+    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}^language=en&sysparm_fields=label,value,dependent_value,element`;
   };
 
   const checkInstance = (res: AxiosResponse) => {

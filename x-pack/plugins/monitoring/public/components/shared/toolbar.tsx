@@ -12,17 +12,41 @@ import {
   EuiTitle,
   OnRefreshChangeProps,
 } from '@elastic/eui';
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
 import { MonitoringTimeContainer } from '../../application/hooks/use_monitoring_time';
 import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { Legacy } from '../../legacy_shims';
-
+import { MonitoringStartServices } from '../../types';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 interface MonitoringToolbarProps {
   pageTitle?: string;
   onRefresh?: () => void;
 }
 
+interface TimePickerQuickRange {
+  from: string;
+  to: string;
+  display: string;
+}
+
 export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle, onRefresh }) => {
+  const { services } = useKibana<MonitoringStartServices>();
+
+  const timePickerQuickRanges = services.uiSettings.get<TimePickerQuickRange[]>(
+    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+  );
+
+  const commonlyUsedRanges = useMemo(
+    () =>
+      timePickerQuickRanges.map(({ from, to, display }) => ({
+        start: from,
+        end: to,
+        label: display,
+      })),
+    [timePickerQuickRanges]
+  );
+
   const {
     currentTimerange,
     handleTimeChange,
@@ -88,6 +112,7 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
             isPaused={isPaused}
             refreshInterval={refreshInterval}
             onRefreshChange={onRefreshChange}
+            commonlyUsedRanges={commonlyUsedRanges}
           />
         </div>
       </EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pickBy } from 'lodash';
+import { pickBy, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
@@ -45,12 +45,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       );
 
       const { agentSelection } = request.body as { agentSelection: AgentSelection };
-      const selectedAgents = await parseAgentSelection(
-        esClient,
-        soClient,
-        osqueryContext,
-        agentSelection
-      );
+      const selectedAgents = await parseAgentSelection(soClient, osqueryContext, agentSelection);
       incrementCount(internalSavedObjectsClient, 'live_query');
       if (!selectedAgents.length) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
@@ -69,12 +64,15 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           input_type: 'osquery',
           agents: selectedAgents,
           user_id: currentUser,
-          data: pickBy({
-            id: uuid.v4(),
-            query: request.body.query,
-            saved_query_id: request.body.saved_query_id,
-            ecs_mapping: request.body.ecs_mapping,
-          }),
+          data: pickBy(
+            {
+              id: uuid.v4(),
+              query: request.body.query,
+              saved_query_id: request.body.saved_query_id,
+              ecs_mapping: request.body.ecs_mapping,
+            },
+            (value) => !isEmpty(value)
+          ),
         };
         const actionResponse = await esClient.index<{}, {}>({
           index: '.fleet-actions',

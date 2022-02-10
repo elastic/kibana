@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
+import { EuiErrorBoundary } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -21,17 +21,20 @@ import {
   RedirectAppLinks,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { Chat } from '../../../../cloud/public';
 
-import { AgentPolicyContextProvider, useUrlModal } from './hooks';
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+
+import { AgentPolicyContextProvider } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
-
-import { SettingFlyout } from './components';
 
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
 import { PackageInstallProvider, UIExtensionsContext } from './hooks';
 import { IntegrationsHeader } from './components/header';
+
+const EmptyContext = () => <></>;
 
 /**
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
@@ -45,6 +48,7 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
 }> = memo(
@@ -56,8 +60,10 @@ export const IntegrationsAppContext: React.FC<{
     kibanaVersion,
     extensions,
     setHeaderActionMenu,
+    theme$,
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
       <RedirectAppLinks application={startServices.application}>
@@ -66,22 +72,30 @@ export const IntegrationsAppContext: React.FC<{
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <startServices.customIntegrations.ContextProvider>
-                          <Router history={history}>
-                            <AgentPolicyContextProvider>
-                              <PackageInstallProvider notifications={startServices.notifications}>
-                                <IntegrationsHeader {...{ setHeaderActionMenu }} />
-                                {children}
-                              </PackageInstallProvider>
-                            </AgentPolicyContextProvider>
-                          </Router>
-                        </startServices.customIntegrations.ContextProvider>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
+                  <KibanaThemeProvider theme$={theme$}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <UIExtensionsContext.Provider value={extensions}>
+                        <FleetStatusProvider>
+                          <startServices.customIntegrations.ContextProvider>
+                            <CloudContext>
+                              <Router history={history}>
+                                <AgentPolicyContextProvider>
+                                  <PackageInstallProvider
+                                    notifications={startServices.notifications}
+                                    theme$={theme$}
+                                  >
+                                    <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
+                                    {children}
+                                    <Chat />
+                                  </PackageInstallProvider>
+                                </AgentPolicyContextProvider>
+                              </Router>
+                            </CloudContext>
+                          </startServices.customIntegrations.ContextProvider>
+                        </FleetStatusProvider>
+                      </UIExtensionsContext.Provider>
+                    </EuiThemeProvider>
+                  </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
             </EuiErrorBoundary>
@@ -93,18 +107,8 @@ export const IntegrationsAppContext: React.FC<{
 );
 
 export const AppRoutes = memo(() => {
-  const { modal, setModal } = useUrlModal();
   return (
     <>
-      {modal === 'settings' && (
-        <EuiPortal>
-          <SettingFlyout
-            onClose={() => {
-              setModal(null);
-            }}
-          />
-        </EuiPortal>
-      )}
       <Switch>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
           <EPMApp />

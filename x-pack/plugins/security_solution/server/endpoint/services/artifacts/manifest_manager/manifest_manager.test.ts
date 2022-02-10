@@ -38,8 +38,8 @@ import {
 
 import { ManifestManager } from './manifest_manager';
 import { EndpointArtifactClientInterface } from '../artifact_client';
-import { EndpointError } from '../../../errors';
 import { InvalidInternalManifestError } from '../errors';
+import { EndpointError } from '../../../../../common/endpoint/errors';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());

@@ -7,7 +7,7 @@
 
 import React, { ReactText } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface InputFieldProps<
   Value extends string = string,

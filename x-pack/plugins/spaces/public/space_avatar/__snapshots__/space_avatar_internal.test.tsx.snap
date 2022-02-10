@@ -26,6 +26,7 @@ exports[`removes aria-label when instructed not to announce the space name 1`] =
       aria-label=""
       className="euiAvatar euiAvatar--m euiAvatar--space"
       data-test-subj="space-avatar-"
+      role="img"
       style={
         Object {
           "backgroundColor": "#DA8B45",

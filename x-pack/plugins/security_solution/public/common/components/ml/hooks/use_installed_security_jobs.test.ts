@@ -59,6 +59,7 @@ describe('useInstalledSecurityJobs', () => {
             latestTimestampMs: 1557434782207,
             memory_status: 'hard_limit',
             processed_record_count: 582251,
+            bucketSpanSeconds: 900,
           },
         ])
       );

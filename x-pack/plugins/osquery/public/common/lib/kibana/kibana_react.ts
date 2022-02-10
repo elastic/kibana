@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { FieldIcon } from '@kbn/react-field';
 import {
   KibanaContextProvider,
   KibanaReactContextValue,
@@ -15,7 +16,6 @@ import {
   useUiSetting$,
   withKibana,
   reactRouterNavigate,
-  FieldIcon,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../../types';
 

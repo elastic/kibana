@@ -15,13 +15,13 @@ export interface GetResponse<T>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [\_id](./kibana-plugin-core-server.getresponse._id.md) | <code>string</code> |  |
-|  [\_index](./kibana-plugin-core-server.getresponse._index.md) | <code>string</code> |  |
-|  [\_primary\_term](./kibana-plugin-core-server.getresponse._primary_term.md) | <code>number</code> |  |
-|  [\_routing](./kibana-plugin-core-server.getresponse._routing.md) | <code>string</code> |  |
-|  [\_seq\_no](./kibana-plugin-core-server.getresponse._seq_no.md) | <code>number</code> |  |
-|  [\_source](./kibana-plugin-core-server.getresponse._source.md) | <code>T</code> |  |
-|  [\_type](./kibana-plugin-core-server.getresponse._type.md) | <code>string</code> |  |
-|  [\_version](./kibana-plugin-core-server.getresponse._version.md) | <code>number</code> |  |
-|  [found](./kibana-plugin-core-server.getresponse.found.md) | <code>boolean</code> |  |
+|  [\_id](./kibana-plugin-core-server.getresponse._id.md) | string |  |
+|  [\_index](./kibana-plugin-core-server.getresponse._index.md) | string |  |
+|  [\_primary\_term](./kibana-plugin-core-server.getresponse._primary_term.md) | number |  |
+|  [\_routing?](./kibana-plugin-core-server.getresponse._routing.md) | string | <i>(Optional)</i> |
+|  [\_seq\_no](./kibana-plugin-core-server.getresponse._seq_no.md) | number |  |
+|  [\_source](./kibana-plugin-core-server.getresponse._source.md) | T |  |
+|  [\_type](./kibana-plugin-core-server.getresponse._type.md) | string |  |
+|  [\_version](./kibana-plugin-core-server.getresponse._version.md) | number |  |
+|  [found](./kibana-plugin-core-server.getresponse.found.md) | boolean |  |
 

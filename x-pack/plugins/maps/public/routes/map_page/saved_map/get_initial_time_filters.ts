@@ -7,19 +7,17 @@
 
 import { QueryState } from 'src/plugins/data/public';
 import { getUiSettings } from '../../../kibana_services';
+import { SerializedMapState } from './types';
 
 export function getInitialTimeFilters({
-  mapStateJSON,
+  serializedMapState,
   globalState,
 }: {
-  mapStateJSON?: string;
+  serializedMapState?: SerializedMapState;
   globalState: QueryState;
 }) {
-  if (mapStateJSON) {
-    const mapState = JSON.parse(mapStateJSON);
-    if (mapState.timeFilters) {
-      return mapState.timeFilters;
-    }
+  if (serializedMapState?.timeFilters) {
+    return serializedMapState.timeFilters;
   }
 
   const defaultTime = getUiSettings().get('timepicker:timeDefaults');

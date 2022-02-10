@@ -23,7 +23,6 @@ chrome.navControls.registerLeft({
     return () => ReactDOM.unmountComponentAtNode(targetDomElement);
   }
 })
-
 ```
 
 ## Methods

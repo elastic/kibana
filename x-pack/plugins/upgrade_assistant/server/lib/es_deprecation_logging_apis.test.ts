@@ -64,7 +64,7 @@ describe('setDeprecationLogging', () => {
 });
 
 describe('isDeprecationLoggingEnabled', () => {
-  ['default', 'persistent', 'transient'].forEach((tier) => {
+  ['defaults', 'persistent', 'transient'].forEach((tier) => {
     ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ALL'].forEach((level) => {
       it(`returns true when ${tier} is set to ${level}`, () => {
         expect(isDeprecationLoggingEnabled({ [tier]: { logger: { deprecation: level } } })).toBe(
@@ -74,7 +74,7 @@ describe('isDeprecationLoggingEnabled', () => {
     });
   });
 
-  ['default', 'persistent', 'transient'].forEach((tier) => {
+  ['defaults', 'persistent', 'transient'].forEach((tier) => {
     ['ERROR', 'FATAL'].forEach((level) => {
       it(`returns false when ${tier} is set to ${level}`, () => {
         expect(isDeprecationLoggingEnabled({ [tier]: { logger: { deprecation: level } } })).toBe(
@@ -87,7 +87,7 @@ describe('isDeprecationLoggingEnabled', () => {
   it('allows transient to override persistent and default', () => {
     expect(
       isDeprecationLoggingEnabled({
-        default: { logger: { deprecation: 'FATAL' } },
+        defaults: { logger: { deprecation: 'FATAL' } },
         persistent: { logger: { deprecation: 'FATAL' } },
         transient: { logger: { deprecation: 'WARN' } },
       })
@@ -97,7 +97,7 @@ describe('isDeprecationLoggingEnabled', () => {
   it('allows persistent to override default', () => {
     expect(
       isDeprecationLoggingEnabled({
-        default: { logger: { deprecation: 'FATAL' } },
+        defaults: { logger: { deprecation: 'FATAL' } },
         persistent: { logger: { deprecation: 'WARN' } },
       })
     ).toBe(true);
@@ -108,7 +108,7 @@ describe('isDeprecationLogIndexingEnabled', () => {
   it('allows transient to override persistent and default', () => {
     expect(
       isDeprecationLogIndexingEnabled({
-        default: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        defaults: { cluster: { deprecation_indexing: { enabled: 'false' } } },
         persistent: { cluster: { deprecation_indexing: { enabled: 'false' } } },
         transient: { cluster: { deprecation_indexing: { enabled: 'true' } } },
       })
@@ -118,7 +118,7 @@ describe('isDeprecationLogIndexingEnabled', () => {
   it('allows persistent to override default', () => {
     expect(
       isDeprecationLogIndexingEnabled({
-        default: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        defaults: { cluster: { deprecation_indexing: { enabled: 'false' } } },
         persistent: { cluster: { deprecation_indexing: { enabled: 'true' } } },
       })
     ).toBe(true);

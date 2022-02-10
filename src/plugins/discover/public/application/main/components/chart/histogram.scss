@@ -1,0 +1,29 @@
+.dscChart__loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 0 100%;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+}
+.dscHistogram__header--partial {
+  font-weight: $euiFontWeightRegular;
+  min-width: $euiSize * 12;
+}
+
+.dscHistogram__errorChartContainer {
+  padding: 0 $euiSizeS 0 $euiSizeS;
+}
+
+.dscHistogram__errorChart {
+  margin-left: $euiSizeXS !important;
+}
+
+.dscHistogram__errorChart__text {
+  margin-top: $euiSizeS;
+}
+
+.dscHistogram__errorChart__icon {
+  padding-top: .5 * $euiSizeXS;
+}

@@ -7,7 +7,7 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useLinkProps } from '../../../hooks/use_link_props';
 
 export const ManageAlertsContextMenuItem = () => {

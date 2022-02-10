@@ -29,7 +29,11 @@ export class GroupName extends React.PureComponent<Props, {}> {
         <Inner isChild={isChild}>
           <Name>
             <EuiToolTip position="top" content={group.name}>
-              <EuiLink style={linkStyle} onClickCapture={this.handleClick}>
+              <EuiLink
+                style={linkStyle}
+                onClickCapture={this.handleClick}
+                data-test-subj="groupNameLink"
+              >
                 {group.name}
               </EuiLink>
             </EuiToolTip>

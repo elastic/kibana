@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import 'jest-canvas-mock';
 import { TruncatedLabel } from './truncated_label';
 
 describe('truncated_label', () => {

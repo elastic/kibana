@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import type { IInterpreterRenderHandlers, RenderMode } from 'src/plugins/expressions';
 import { VegaParser } from './data_model/vega_parser';
 import { VegaVisualizationDependencies } from './plugin';
 import { getNotifications, getData } from './services';
@@ -19,10 +19,10 @@ type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandler
   destroy(): void;
 };
 
-export const createVegaVisualization = ({
-  core,
-  getServiceSettings,
-}: VegaVisualizationDependencies): VegaVisType =>
+export const createVegaVisualization = (
+  { core, getServiceSettings }: VegaVisualizationDependencies,
+  renderMode: RenderMode
+): VegaVisType =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
     private vegaView: InstanceType<typeof VegaView> | null = null;
@@ -82,6 +82,7 @@ export const createVegaVisualization = ({
           serviceSettings,
           filterManager,
           timefilter,
+          renderMode,
         };
 
         if (vegaParser.useMap) {

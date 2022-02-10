@@ -16,10 +16,10 @@ withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[])
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  context | <code>KibanaExecutionContext &#124; undefined</code> |  |
-|  fn | <code>(...args: any[]) =&gt; R</code> |  |
+|  context | KibanaExecutionContext \| undefined |  |
+|  fn | (...args: any\[\]) =&gt; R |  |
 
 <b>Returns:</b>
 
-`R`
+R
 

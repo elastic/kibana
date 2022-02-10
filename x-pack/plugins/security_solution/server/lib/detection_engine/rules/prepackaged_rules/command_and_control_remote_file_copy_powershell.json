@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Remote File Download via PowerShell",
-  "query": "sequence by host.id, process.entity_id with maxspan=30s\n  [network where process.name : \"powershell.exe\" and network.protocol == \"dns\" and\n   not dns.question.name : (\"localhost\", \"*.microsoft.com\", \"*.azureedge.net\", \"*.powershellgallery.com\", \"*.windowsupdate.com\", \"metadata.google.internal\") and \n   not user.domain : \"NT AUTHORITY\"]\n    [file where process.name : \"powershell.exe\" and event.type == \"creation\" and file.extension : (\"exe\", \"dll\", \"ps1\", \"bat\") and \n   not file.name : \"__PSScriptPolicy*.ps1\"]\n",
+  "query": "sequence by host.id, process.entity_id with maxspan=30s\n  [network where process.name : (\"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") and network.protocol == \"dns\" and\n   not dns.question.name : (\"localhost\", \"*.microsoft.com\", \"*.azureedge.net\", \"*.powershellgallery.com\", \"*.windowsupdate.com\", \"metadata.google.internal\") and \n   not user.domain : \"NT AUTHORITY\"]\n    [file where process.name : \"powershell.exe\" and event.type == \"creation\" and file.extension : (\"exe\", \"dll\", \"ps1\", \"bat\") and \n   not file.name : \"__PSScriptPolicy*.ps1\"]\n",
   "risk_score": 47,
   "rule_id": "33f306e8-417c-411b-965c-c2812d6d3f4d",
   "severity": "medium",
@@ -63,5 +63,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }

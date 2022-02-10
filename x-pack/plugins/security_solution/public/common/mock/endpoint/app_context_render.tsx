@@ -10,6 +10,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Action, Reducer, Store } from 'redux';
 import { AppDeepLink } from 'kibana/public';
+import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -28,6 +29,15 @@ import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageListHttpMock } from '../../../management/pages/mocks';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
+
+// hide react-query output in console
+setLogger({
+  error: () => {},
+  // eslint-disable-next-line no-console
+  log: console.log,
+  // eslint-disable-next-line no-console
+  warn: console.warn,
+});
 
 /**
  * Mocked app root context renderer
@@ -52,7 +62,7 @@ export interface AppContextTestRender {
   render: UiRender;
 
   /**
-   * Set experimental features on/off. Calling this method updates the Store with the new values
+   * Set technical preview features on/off. Calling this method updates the Store with the new values
    * for the given feature flags
    * @param flags
    */
@@ -60,7 +70,7 @@ export interface AppContextTestRender {
 }
 
 // Defined a private custom reducer that reacts to an action that enables us to updat the
-// store with new values for experimental features/flags. Because the `action.type` is a `Symbol`,
+// store with new values for technical preview features/flags. Because the `action.type` is a `Symbol`,
 // and its not exported the action can only be `dispatch`'d from this module
 const UpdateExperimentalFeaturesTestActionType = Symbol('updateExperimentalFeaturesTestAction');
 
@@ -112,10 +122,21 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     middlewareSpy.actionSpyMiddleware,
   ]);
 
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        // turns retries off
+        retry: false,
+        // prevent jest did not exit errors
+        cacheTime: Infinity,
+      },
+    },
+  });
+
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-        {children}
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </AppRootProvider>
     </KibanaContextProvider>
   );

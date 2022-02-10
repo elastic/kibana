@@ -17,7 +17,6 @@ import {
   userActions,
   commentAlert,
   commentAlertMultipleIds,
-  commentGeneratedAlert,
   isolateCommentActions,
   releaseCommentActions,
   isolateCommentActionsMultipleTargets,
@@ -31,8 +30,9 @@ import {
   transformers,
   transformFields,
 } from './utils';
-import { flattenCaseSavedObject } from '../../common';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { Actions } from '../../../common/api';
+import { flattenCaseSavedObject } from '../../common/utils';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 
 const formatComment = {
@@ -640,11 +640,7 @@ describe('utils', () => {
         actionsClient: actionsMock,
         theCase: {
           ...theCase,
-          comments: [
-            { ...commentObj, id: 'comment-user-1' },
-            commentAlertMultipleIds,
-            commentGeneratedAlert,
-          ],
+          comments: [{ ...commentObj, id: 'comment-user-1' }, commentAlertMultipleIds],
         },
         userActions,
         connector,
@@ -660,7 +656,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment: 'Elastic Alerts attached to the case: 4',
+          comment: 'Elastic Alerts attached to the case: 2',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -673,7 +669,7 @@ describe('utils', () => {
           ...theCase,
           comments: [
             { ...commentObj, id: 'comment-user-1', pushed_at: '2019-11-25T21:55:00.177Z' },
-            { ...commentGeneratedAlert, pushed_at: '2019-11-25T21:55:00.177Z' },
+            { ...commentAlertMultipleIds, pushed_at: '2019-11-25T21:55:00.177Z' },
           ],
         },
         userActions,
@@ -790,20 +786,30 @@ describe('utils', () => {
         const res = getLatestPushInfo('456', [
           ...userActions.slice(0, 3),
           {
-            action_field: ['pushed'],
-            action: 'push-to-service',
-            action_at: '2021-02-03T17:45:29.400Z',
-            action_by: {
+            type: 'pushed',
+            action: Actions.push_to_service,
+            created_at: '2021-02-03T17:45:29.400Z',
+            created_by: {
               email: 'elastic@elastic.co',
               full_name: 'Elastic',
               username: 'elastic',
             },
-            new_value:
-              // The connector id is 123
-              '{"pushed_at":"2021-02-03T17:45:29.400Z","pushed_by":{"username":"elastic","full_name":"Elastic","email":"elastic@elastic.co"},"connector_name":"ServiceNow SN","external_id":"external-id","external_title":"SIR0010037","external_url":"https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id"}',
-            new_val_connector_id: '123',
-            old_val_connector_id: null,
-            old_value: null,
+            payload: {
+              externalService: {
+                pushed_at: '2021-02-03T17:45:29.400Z',
+                pushed_by: {
+                  username: 'elastic',
+                  full_name: 'Elastic',
+                  email: 'elastic@elastic.co',
+                },
+                connector_id: '123',
+                connector_name: 'ServiceNow SN',
+                external_id: 'external-id',
+                external_title: 'SIR0010037',
+                external_url:
+                  'https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id',
+              },
+            },
             action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
             case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
             comment_id: null,

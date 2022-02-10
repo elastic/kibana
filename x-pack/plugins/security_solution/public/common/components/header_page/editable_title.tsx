@@ -77,7 +77,7 @@ const EditableTitleComponent: React.FC<Props> = ({
       <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiButton
-            color="secondary"
+            color="success"
             data-test-subj="editable-title-submit-btn"
             fill
             iconType="save"

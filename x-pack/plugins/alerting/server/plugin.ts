@@ -8,7 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -46,12 +46,12 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertsHealth,
-  AlertType,
+  RuleType,
   AlertTypeParams,
   AlertTypeState,
   Services,
 } from './types';
-import { registerAlertsUsageCollector } from './usage';
+import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
@@ -65,6 +65,7 @@ import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
+import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -74,6 +75,7 @@ export const EVENT_LOG_ACTIONS = {
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
+  executeTimeout: 'execute-timeout',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -89,7 +91,7 @@ export interface PluginSetupContract {
     ActionGroupIds extends string = never,
     RecoveryActionGroupId extends string = never
   >(
-    alertType: AlertType<
+    ruleType: RuleType<
       Params,
       ExtractedParams,
       State,
@@ -99,6 +101,7 @@ export interface PluginSetupContract {
       RecoveryActionGroupId
     >
   ): void;
+  getSecurityHealth: () => Promise<SecurityHealth>;
 }
 
 export interface PluginStartContract {
@@ -150,6 +153,7 @@ export class AlertingPlugin {
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private kibanaBaseUrl: string | undefined;
+  private usageCounter: UsageCounter | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
@@ -205,21 +209,22 @@ export class AlertingPlugin {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      registerAlertsUsageCollector(
+      registerAlertingUsageCollector(
         usageCollection,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
+      const eventLogIndex = this.eventLogService.getIndexPattern();
       initializeAlertingTelemetry(
         this.telemetryLogger,
         core,
         plugins.taskManager,
         kibanaIndex,
-        this.eventLogService
+        eventLogIndex
       );
     }
 
     // Usage counter for telemetry
-    const usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
 
     setupSavedObjects(
       core.savedObjects,
@@ -242,29 +247,6 @@ export class AlertingPlugin {
     });
     core.status.set(serviceStatus$);
 
-    // core.getStartServices().then(async ([coreStart, startPlugins]) => {
-    //   combineLatest([
-    //     core.status.derivedStatus$,
-    //     getHealthStatusStream(
-    //       startPlugins.taskManager,
-    //       this.logger,
-    //       coreStart.savedObjects,
-    //       this.config
-    //     ),
-    //   ])
-    //     .pipe(
-    //       map(([derivedStatus, healthStatus]) => {
-    //         if (healthStatus.level > derivedStatus.level) {
-    //           return healthStatus as ServiceStatus;
-    //         } else {
-    //           return derivedStatus;
-    //         }
-    //       }),
-    //       share()
-    //     )
-    //     .subscribe(serviceStatus$);
-    // });
-
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
@@ -278,7 +260,7 @@ export class AlertingPlugin {
     defineRoutes({
       router,
       licenseState: this.licenseState,
-      usageCounter,
+      usageCounter: this.usageCounter,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
     });
 
@@ -293,7 +275,7 @@ export class AlertingPlugin {
         ActionGroupIds extends string = never,
         RecoveryActionGroupId extends string = never
       >(
-        alertType: AlertType<
+        ruleType: RuleType<
           Params,
           ExtractedParams,
           State,
@@ -303,17 +285,26 @@ export class AlertingPlugin {
           RecoveryActionGroupId
         >
       ) {
-        if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
-          throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
+        if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
+          throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
-        if (!alertType.ruleTaskTimeout) {
-          alertingConfig.then((config) => {
-            alertType.ruleTaskTimeout = config.defaultRuleTaskTimeout;
-            ruleTypeRegistry.register(alertType);
-          });
-        } else {
-          ruleTypeRegistry.register(alertType);
-        }
+
+        alertingConfig.then((config) => {
+          ruleType.ruleTaskTimeout = ruleType.ruleTaskTimeout ?? config.defaultRuleTaskTimeout;
+          ruleType.cancelAlertsOnRuleTimeout =
+            ruleType.cancelAlertsOnRuleTimeout ?? config.cancelAlertsOnRuleTimeout;
+          ruleTypeRegistry.register(ruleType);
+        });
+      },
+      getSecurityHealth: async () => {
+        return await getSecurityHealth(
+          async () => (this.licenseState ? this.licenseState.getIsSecurityEnabled() : null),
+          async () => plugins.encryptedSavedObjects.canEncrypt,
+          async () => {
+            const [, { security }] = await core.getStartServices();
+            return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
+          }
+        );
       },
     };
   }
@@ -386,21 +377,25 @@ export class AlertingPlugin {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
-    taskRunnerFactory.initialize({
-      logger,
-      getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
-      getRulesClientWithRequest,
-      spaceIdToNamespace,
-      actionsPlugin: plugins.actions,
-      encryptedSavedObjectsClient,
-      basePathService: core.http.basePath,
-      eventLogger: this.eventLogger!,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
-      executionContext: core.executionContext,
-      ruleTypeRegistry: this.ruleTypeRegistry!,
-      kibanaBaseUrl: this.kibanaBaseUrl,
-      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
-      maxEphemeralActionsPerAlert: this.config.then((config) => config.maxEphemeralActionsPerAlert),
+    this.config.then((config) => {
+      taskRunnerFactory.initialize({
+        logger,
+        getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
+        getRulesClientWithRequest,
+        spaceIdToNamespace,
+        actionsPlugin: plugins.actions,
+        encryptedSavedObjectsClient,
+        basePathService: core.http.basePath,
+        eventLogger: this.eventLogger!,
+        internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+        executionContext: core.executionContext,
+        ruleTypeRegistry: this.ruleTypeRegistry!,
+        kibanaBaseUrl: this.kibanaBaseUrl,
+        supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
+        maxEphemeralActionsPerRule: config.maxEphemeralActionsPerAlert,
+        cancelAlertsOnRuleTimeout: config.cancelAlertsOnRuleTimeout,
+        usageCounter: this.usageCounter,
+      });
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
@@ -411,7 +406,9 @@ export class AlertingPlugin {
           : Promise.resolve([]);
     });
 
-    scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+    this.eventLogService!.isEsContextReady().then(() => {
+      scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+    });
 
     scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);

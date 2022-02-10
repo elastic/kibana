@@ -9,7 +9,7 @@
 const Fs = require('fs');
 const Path = require('path');
 
-const { REPO_ROOT: REPO_ROOT_FOLLOWING_SYMLINKS } = require('@kbn/dev-utils');
+const { REPO_ROOT: REPO_ROOT_FOLLOWING_SYMLINKS } = require('@kbn/utils');
 const BASE_REPO_ROOT = Path.resolve(
   Fs.realpathSync(Path.resolve(REPO_ROOT_FOLLOWING_SYMLINKS, 'package.json')),
   '..'
@@ -23,6 +23,7 @@ const transpileKbnPaths = [
   // TODO: should should probably remove this link back to the source
   'x-pack/plugins/task_manager/server/config.ts',
   'src/core/utils/default_app_categories.ts',
+  'src/plugins/field_formats/common',
 ].map((path) => Path.resolve(BASE_REPO_ROOT, path));
 
 // modifies all future calls to require() to automatically

@@ -20,6 +20,8 @@ export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
 export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 export type { PreIndexedShape } from '../common/elasticsearch_util';
 
+export { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './classes/layers/vector_layer/geojson_vector_layer/assign_feature_ids';
+
 export type {
   ITooltipProperty,
   RenderTooltipContentParams,
@@ -36,8 +38,8 @@ export type { ImmutableSourceProperty, SourceEditorArgs } from './classes/source
 export type { Attribution } from '../common/descriptor_types';
 export type {
   BoundsRequestMeta,
-  SourceTooltipConfig,
+  SourceStatus,
 } from './classes/sources/vector_source/vector_source';
 export type { IField } from './classes/fields/field';
-export type { LayerWizard, RenderWizardArguments } from './classes/layers/layer_wizard_registry';
+export type { LayerWizard, RenderWizardArguments } from './classes/layers';
 export type { DataRequest } from './classes/util/data_request';

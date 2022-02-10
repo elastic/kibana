@@ -18,11 +18,11 @@ exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("str
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>SavedObjectsExportByObjectOptions</code> |  |
+|  options | SavedObjectsExportByObjectOptions |  |
 
 <b>Returns:</b>
 
-`Promise<import("stream").Readable>`
+Promise&lt;import("stream").Readable&gt;
 
 ## Exceptions
 

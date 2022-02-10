@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { TutorialsCategory } from '../../../../../../src/plugins/home/server';
-import { getNewMapPath } from '../../../common/constants';
+import { getNewMapPath, APP_ID } from '../../../common/constants';
 
 export function emsBoundariesSpecProvider({
   emsLandingPageUrl,
@@ -75,9 +75,9 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
     }),
     euiIconType: 'emsApp',
     completionTimeMinutes: 1,
-    previewImagePath: '/plugins/maps/assets/boundaries_screenshot.png',
+    previewImagePath: `/plugins/${APP_ID}/assets/boundaries_screenshot.png`,
     onPrem: instructions,
     elasticCloud: instructions,
-    integrationBrowserCategories: ['upload_file'],
+    integrationBrowserCategories: ['upload_file', 'geo'],
   });
 }

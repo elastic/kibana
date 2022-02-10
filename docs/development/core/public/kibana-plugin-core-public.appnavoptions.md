@@ -16,8 +16,8 @@ export interface AppNavOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [euiIconType](./kibana-plugin-core-public.appnavoptions.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precedence over the <code>icon</code> property. |
-|  [icon](./kibana-plugin-core-public.appnavoptions.icon.md) | <code>string</code> | A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
-|  [order](./kibana-plugin-core-public.appnavoptions.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
-|  [tooltip](./kibana-plugin-core-public.appnavoptions.tooltip.md) | <code>string</code> | A tooltip shown when hovering over app link. |
+|  [euiIconType?](./kibana-plugin-core-public.appnavoptions.euiicontype.md) | string | <i>(Optional)</i> A EUI iconType that will be used for the app's icon. This icon takes precedence over the <code>icon</code> property. |
+|  [icon?](./kibana-plugin-core-public.appnavoptions.icon.md) | string | <i>(Optional)</i> A URL to an image file used as an icon. Used as a fallback if <code>euiIconType</code> is not provided. |
+|  [order?](./kibana-plugin-core-public.appnavoptions.order.md) | number | <i>(Optional)</i> An ordinal used to sort nav links relative to one another for display. |
+|  [tooltip?](./kibana-plugin-core-public.appnavoptions.tooltip.md) | string | <i>(Optional)</i> A tooltip shown when hovering over app link. |
 

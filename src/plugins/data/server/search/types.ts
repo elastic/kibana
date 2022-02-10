@@ -23,10 +23,11 @@ import {
   ISearchClient,
   IEsSearchResponse,
   IEsSearchRequest,
+  SearchSourceService,
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
-import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
+import type { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
   sessionService: ISearchSessionService;
@@ -63,6 +64,8 @@ export interface ISearchSetup {
    * @internal
    */
   __enhance: (enhancements: SearchEnhancements) => void;
+
+  searchSource: ReturnType<SearchSourceService['setup']>;
 }
 
 /**
@@ -123,9 +126,6 @@ export interface ISearchStart<
 
 export type SearchRequestHandlerContext = IScopedSearchClient;
 
-/**
- * @internal
- */
 export interface DataRequestHandlerContext extends RequestHandlerContext {
   search: SearchRequestHandlerContext;
 }

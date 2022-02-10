@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrService } from '../ftr_provider_context';
 
 export class LoginPageObject extends FtrService {
@@ -40,7 +40,7 @@ export class LoginPageObject extends FtrService {
 
   async sleep(sleepMilliseconds: number) {
     this.log.debug(`... sleep(${sleepMilliseconds}) start`);
-    await delay(sleepMilliseconds);
+    await setTimeoutAsync(sleepMilliseconds);
     this.log.debug(`... sleep(${sleepMilliseconds}) end`);
   }
 

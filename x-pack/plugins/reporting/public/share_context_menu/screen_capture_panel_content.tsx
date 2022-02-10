@@ -6,9 +6,9 @@
  */
 
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import { LayoutParams } from '../../common/types';
+import type { LayoutParams } from '../../../screenshotting/common';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
 export interface Props extends ReportingPanelProps {
@@ -103,7 +103,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     this.setState({ useCanvasLayout: evt.target.checked, usePrintLayout: false });
   };
 
-  private getLayout = (): Required<LayoutParams> => {
+  private getLayout = (): LayoutParams => {
     const { layout: outerLayout } = this.props.getJobParams();
 
     let dimensions = outerLayout?.dimensions;

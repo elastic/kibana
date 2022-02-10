@@ -9,14 +9,18 @@
     border-top: $euiBorderThin;
     background-color: $euiColorEmptyShade;
 
-    > .euiFlexGroup--directionRow.euiFlexGroup--gutterLarge {
+    > .euiFlexGroup {
       margin: 0;
+    }
+
+    > .euiFlexGroup:nth-child(2) > .euiFlexItem {
+      margin-top: 0;
     }
   }
 
   &Header {
-    > .euiFlexGroup--directionRow.euiFlexGroup--gutterLarge {
-      margin: -12px 0;
+    > .euiFlexGroup {
+      margin: ($euiSizeM * -1) 0;
     }
   }
 

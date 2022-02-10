@@ -34,10 +34,10 @@ export function fetchProvider(kibanaIndex: string, logger: Logger) {
 
       const aggs = esResponse.aggregations as Record<
         string,
-        estypes.AggregationsMultiBucketAggregate<SessionPersistedTermsBucket>
+        estypes.AggregationsMultiBucketAggregateBase<SessionPersistedTermsBucket>
       >;
 
-      const buckets = aggs.persisted.buckets;
+      const buckets = aggs.persisted.buckets as SessionPersistedTermsBucket[];
       if (!buckets.length) {
         return { transientCount: 0, persistedCount: 0, totalCount: 0 };
       }

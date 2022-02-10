@@ -12,7 +12,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { CASE_COMMENTS_URL, FindQueryParamsRt, throwErrors, excess } from '../../../../common';
+import { FindQueryParamsRt, throwErrors, excess } from '../../../../common/api';
+import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
 

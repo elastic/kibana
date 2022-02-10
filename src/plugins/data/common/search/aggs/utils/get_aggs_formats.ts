@@ -19,6 +19,7 @@ import {
 import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
+import { MultiFieldKey } from '../buckets/multi_field_key';
 
 type GetFieldFormat = (mapping: SerializedFieldFormat) => IFieldFormat;
 
@@ -125,6 +126,28 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         }
 
         return format.convert(val, type);
+      };
+      getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
+    },
+    class AggsMultiTermsFieldFormat extends FieldFormat {
+      static id = 'multi_terms';
+      static hidden = true;
+
+      convert = (val: unknown, type: FieldFormatsContentType) => {
+        const params = this._params;
+        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) =>
+          getFieldFormat({ id: fieldParams.id, params: fieldParams })
+        );
+
+        if (String(val) === '__other__') {
+          return params.otherBucketLabel;
+        }
+
+        const joinTemplate = params.separator ?? ' › ';
+
+        return (val as MultiFieldKey).keys
+          .map((valPart, i) => formats[i].convert(valPart, type))
+          .join(joinTemplate);
       };
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
     },

@@ -14,7 +14,7 @@ import { SearchSource } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
-  setPreferredSearchStrategyId: jest.fn(),
+  setOverwriteDataViewType: jest.fn(),
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
   removeField: jest.fn().mockReturnThis(),
@@ -40,6 +40,10 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
 export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceInstanceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceInstanceMock),
+  telemetry: jest.fn(),
+  getAllMigrations: jest.fn(),
+  inject: jest.fn(),
+  extract: jest.fn(),
 };
 
 export const createSearchSourceMock = (fields?: SearchSourceFields, response?: any) =>

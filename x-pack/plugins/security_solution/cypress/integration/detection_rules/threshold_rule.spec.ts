@@ -51,11 +51,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,
@@ -79,7 +75,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, threshold', () => {
   let rule = getNewThresholdRule();
@@ -94,15 +90,10 @@ describe('Detection rules, threshold', () => {
     createTimeline(getNewThresholdRule().timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
   });
 
-  it.skip('Creates and activates a new threshold rule', () => {
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+  it('Creates and activates a new threshold rule', () => {
     selectThresholdRuleType();
     fillDefineThresholdRuleAndContinue(rule);
     fillAboutRuleAndContinue(rule);
@@ -171,12 +162,10 @@ describe('Detection rules, threshold', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
-    cy.get(ALERT_GRID_CELL).eq(3).contains(rule.name);
-    cy.get(ALERT_GRID_CELL).eq(4).contains(rule.severity.toLowerCase());
-    cy.get(ALERT_GRID_CELL).eq(5).contains(rule.riskScore);
+    cy.get(ALERT_GRID_CELL).contains(rule.name);
   });
 
-  it('Preview results of keyword using "host.name"', () => {
+  it.skip('Preview results of keyword using "host.name"', () => {
     rule.index = [...rule.index, '.siem-signals*'];
 
     createCustomRuleActivated(getNewRule());
@@ -190,7 +179,7 @@ describe('Detection rules, threshold', () => {
     cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
   });
 
-  it('Preview results of "ip" using "source.ip"', () => {
+  it.skip('Preview results of "ip" using "source.ip"', () => {
     const previewRule: ThresholdRule = {
       ...rule,
       thresholdField: 'source.ip',

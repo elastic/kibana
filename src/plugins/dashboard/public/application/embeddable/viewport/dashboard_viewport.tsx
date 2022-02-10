@@ -8,16 +8,17 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, ViewMode } from '../../../services/embeddable';
+import { ViewMode } from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupContainer } from '../../../../../presentation_util/public';
+import { ControlGroupContainer } from '../../../../../controls/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
+  controlsEnabled?: boolean;
 }
 
 interface State {
@@ -26,13 +27,13 @@ interface State {
   useMargins: boolean;
   title: string;
   description?: string;
-  panels: { [key: string]: PanelState };
+  panelCount: number;
   isEmbeddedExternally?: boolean;
 }
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
-  public readonly context!: DashboardReactContextValue;
+  public declare readonly context: DashboardReactContextValue;
 
   private controlsRoot: React.RefObject<HTMLDivElement>;
 
@@ -48,7 +49,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     this.state = {
       controlGroupReady: !this.props.controlGroup,
       isFullScreenMode,
-      panels,
+      panelCount: Object.values(panels).length,
       useMargins,
       title,
       isEmbeddedExternally,
@@ -58,15 +59,16 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public componentDidMount() {
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
-      const { isFullScreenMode, useMargins, title, description, isEmbeddedExternally } =
+      const { isFullScreenMode, useMargins, title, description, isEmbeddedExternally, panels } =
         this.props.container.getInput();
       if (this.mounted) {
         this.setState({
+          panelCount: Object.values(panels).length,
+          isEmbeddedExternally,
           isFullScreenMode,
           description,
           useMargins,
           title,
-          isEmbeddedExternally,
         });
       }
     });
@@ -92,15 +94,17 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   public render() {
-    const { container } = this.props;
+    const { container, controlsEnabled } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
-    const { isEmbeddedExternally, isFullScreenMode, panels, title, description, useMargins } =
+    const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
       this.state;
     return (
       <>
-        <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
+        {controlsEnabled ? (
+          <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
+        ) : null}
         <div
-          data-shared-items-count={Object.values(panels).length}
+          data-shared-items-count={panelCount}
           data-shared-items-container
           data-title={title}
           data-description={description}

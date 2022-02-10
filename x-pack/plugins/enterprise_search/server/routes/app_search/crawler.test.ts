@@ -28,7 +28,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler',
+        path: '/api/as/v1/engines/:name/crawler',
       });
     });
 
@@ -61,7 +61,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests',
       });
     });
 
@@ -72,6 +72,44 @@ describe('crawler routes', () => {
 
     it('fails validation without name', () => {
       const request = { params: {} };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('GET /internal/app_search/engines/{name}/crawler/crawl_requests/{id}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_requests/{id}',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests/:id',
+      });
+    });
+
+    it('validates correctly with name and id', () => {
+      const request = { params: { name: 'some-engine', id: '12345' } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without name', () => {
+      const request = { params: { id: '12345' } };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without id', () => {
+      const request = { params: { name: 'some-engine' } };
       mockRouter.shouldThrow(request);
     });
   });
@@ -94,7 +132,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests',
       });
     });
 
@@ -103,7 +141,59 @@ describe('crawler routes', () => {
       mockRouter.shouldValidate(request);
     });
 
+    it('validates correctly with overrides', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { domain_allowlist: [] } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with empty overrides', () => {
+      const request = { params: { name: 'some-engine' }, body: { overrides: {} } };
+      mockRouter.shouldValidate(request);
+    });
+
     it('fails validation without name', () => {
+      const request = { params: {} };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('GET /internal/app_search/engines/{name}/crawler/domains', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/internal/app_search/engines/{name}/crawler/domains',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v1/engines/:name/crawler/domains',
+      });
+    });
+
+    it('validates correctly', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        query: {
+          'page[current]': 5,
+          'page[size]': 10,
+        },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without required params', () => {
       const request = { params: {} };
       mockRouter.shouldThrow(request);
     });
@@ -127,7 +217,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests/active/cancel',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests/active/cancel',
       });
     });
 
@@ -160,7 +250,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains',
+        path: '/api/as/v1/engines/:name/crawler/domains',
       });
     });
 
@@ -216,7 +306,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -262,7 +352,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -320,7 +410,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -358,7 +448,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/crawler/validate_url',
+        path: '/api/as/v1/crawler/validate_url',
       });
     });
 
@@ -395,7 +485,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/process_crawls',
+        path: '/api/as/v1/engines/:name/crawler/process_crawls',
       });
     });
 
@@ -442,7 +532,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
@@ -479,7 +569,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
@@ -534,7 +624,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 

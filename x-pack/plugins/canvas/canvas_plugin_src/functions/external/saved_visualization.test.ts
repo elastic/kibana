@@ -57,4 +57,15 @@ describe('savedVisualization', () => {
     const expression = fn(null, { ...args, title: '' }, {} as any);
     expect(expression.input.title).toEqual('');
   });
+
+  it('accepts time range', () => {
+    const expression = fn(
+      null,
+      { ...args, timerange: { type: 'timerange', from: '15m-now', to: 'now' } },
+      {} as any
+    );
+    expect(expression.input.timeRange).toHaveProperty('from', '15m-now');
+    expect(expression.input.timeRange).toHaveProperty('to', 'now');
+    expect(expression.input.timeRange).not.toHaveProperty('type');
+  });
 });

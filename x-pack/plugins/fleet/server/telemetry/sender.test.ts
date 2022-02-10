@@ -15,6 +15,8 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
+import { UpdateEventType } from '../services/upgrade_sender';
+
 import { TelemetryEventsSender } from './sender';
 
 jest.mock('axios', () => {
@@ -30,6 +32,15 @@ describe('TelemetryEventsSender', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     sender = new TelemetryEventsSender(logger);
+    sender['fetchClusterInfo'] = jest.fn(async () => {
+      return {
+        cluster_uuid: '1',
+        cluster_name: 'name',
+        version: {
+          number: '8.0.0',
+        },
+      } as InfoResponse;
+    });
     sender.start(undefined, {
       elasticsearch: { client: { asInternalUser: { info: jest.fn(async () => ({})) } } },
     } as any);
@@ -38,7 +49,13 @@ describe('TelemetryEventsSender', () => {
   describe('queueTelemetryEvents', () => {
     it('queues two events', () => {
       sender.queueTelemetryEvents('fleet-upgrades', [
-        { package_name: 'system', current_version: '0.3', new_version: '1.0', status: 'success' },
+        {
+          packageName: 'system',
+          currentVersion: '0.3',
+          newVersion: '1.0',
+          status: 'success',
+          eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
+        },
       ]);
       expect(sender['queuesPerChannel']['fleet-upgrades']).toBeDefined();
     });
@@ -54,7 +71,13 @@ describe('TelemetryEventsSender', () => {
       };
 
       sender.queueTelemetryEvents('fleet-upgrades', [
-        { package_name: 'apache', current_version: '0.3', new_version: '1.0', status: 'success' },
+        {
+          packageName: 'apache',
+          currentVersion: '0.3',
+          newVersion: '1.0',
+          status: 'success',
+          eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
+        },
       ]);
       sender['sendEvents'] = jest.fn();
 
@@ -62,7 +85,7 @@ describe('TelemetryEventsSender', () => {
 
       expect(sender['sendEvents']).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/fleet-upgrades',
-        undefined,
+        { cluster_name: 'name', cluster_uuid: '1', version: { number: '8.0.0' } },
         expect.anything()
       );
     });
@@ -74,7 +97,13 @@ describe('TelemetryEventsSender', () => {
       sender['telemetryStart'] = telemetryStart;
 
       sender.queueTelemetryEvents('fleet-upgrades', [
-        { package_name: 'system', current_version: '0.3', new_version: '1.0', status: 'success' },
+        {
+          packageName: 'system',
+          currentVersion: '0.3',
+          newVersion: '1.0',
+          status: 'success',
+          eventType: UpdateEventType.PACKAGE_POLICY_UPGRADE,
+        },
       ]);
       sender['sendEvents'] = jest.fn();
 
@@ -92,16 +121,6 @@ describe('TelemetryEventsSender', () => {
           async () => new URL('https://telemetry.elastic.co/v3/send/snapshot')
         ),
       };
-
-      sender['fetchClusterInfo'] = jest.fn(async () => {
-        return {
-          cluster_uuid: '1',
-          cluster_name: 'name',
-          version: {
-            number: '8.0.0',
-          },
-        } as InfoResponse;
-      });
 
       const myChannelEvents = [{ 'event.kind': '1' }, { 'event.kind': '2' }];
       // @ts-ignore

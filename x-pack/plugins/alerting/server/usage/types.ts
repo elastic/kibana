@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface AlertsUsage {
+export interface AlertingUsage {
   count_total: number;
   count_active_total: number;
   count_disabled_total: number;
@@ -17,14 +17,32 @@ export interface AlertsUsage {
   count_rules_executions_failured_per_day: number;
   count_rules_executions_failured_by_reason_per_day: Record<string, number>;
   count_rules_executions_failured_by_reason_by_type_per_day: Record<string, Record<string, number>>;
+  count_rules_executions_timeouts_per_day: number;
+  count_rules_executions_timeouts_by_type_per_day: Record<string, number>;
+  count_failed_and_unrecognized_rule_tasks_per_day: number;
+  count_failed_and_unrecognized_rule_tasks_by_status_per_day: Record<string, number>;
+  count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: Record<
+    string,
+    Record<string, number>
+  >;
   avg_execution_time_per_day: number;
   avg_execution_time_by_type_per_day: Record<string, number>;
   throttle_time: {
+    min: string;
+    avg: string;
+    max: string;
+  };
+  schedule_time: {
+    min: string;
+    avg: string;
+    max: string;
+  };
+  throttle_time_number_s: {
     min: number;
     avg: number;
     max: number;
   };
-  schedule_time: {
+  schedule_time_number_s: {
     min: number;
     avg: number;
     max: number;

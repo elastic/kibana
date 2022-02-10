@@ -27,7 +27,7 @@ import {
   OrdinalDataMappingPopover,
 } from '../components/data_mapping';
 import {
-  CategoryFieldMeta,
+  Category,
   FieldMetaOptions,
   PercentilesFieldMeta,
   RangeFieldMeta,
@@ -47,7 +47,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getMbFieldName(): string;
   getFieldOrigin(): FIELD_ORIGIN | null;
   getRangeFieldMeta(): RangeFieldMeta | null;
-  getCategoryFieldMeta(): CategoryFieldMeta | null;
+  getCategoryFieldMeta(): Category[];
   /*
    * Returns hash that signals style meta needs to be re-fetched when value changes
    */
@@ -57,11 +57,9 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown | null>;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
-  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
+  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): Category[];
   pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures: TileMetaFeature[]): RangeFieldMeta | null;
-  pluckCategoricalStyleMetaFromTileMetaFeatures(
-    features: TileMetaFeature[]
-  ): CategoryFieldMeta | null;
+  pluckCategoricalStyleMetaFromTileMetaFeatures(features: TileMetaFeature[]): Category[];
   getValueSuggestions(query: string): Promise<string[]>;
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
@@ -175,19 +173,19 @@ export class DynamicStyleProperty<T>
   _getCategoryFieldMetaFromStyleMetaRequest() {
     const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
     if (!dataRequestId) {
-      return null;
+      return [];
     }
 
     const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
-      return null;
+      return [];
     }
 
     const data = styleMetaDataRequest.getData() as StyleMetaData;
     return this._pluckCategoricalStyleMetaFromFieldMetaData(data);
   }
 
-  getCategoryFieldMeta(): CategoryFieldMeta | null {
+  getCategoryFieldMeta(): Category[] {
     const categoryFieldMetaFromLocalFeatures = this._getCategoryFieldMetaFromLocalFeatures();
 
     if (!this.isFieldMetaEnabled()) {
@@ -195,7 +193,7 @@ export class DynamicStyleProperty<T>
     }
 
     const categoricalFieldMetaFromServer = this._getCategoryFieldMetaFromStyleMetaRequest();
-    return categoricalFieldMetaFromServer
+    return categoricalFieldMetaFromServer.length
       ? categoricalFieldMetaFromServer
       : categoryFieldMetaFromLocalFeatures;
   }
@@ -297,7 +295,20 @@ export class DynamicStyleProperty<T>
   }
 
   getFieldMetaOptions() {
-    return _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+    const fieldMetaOptions = _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+
+    // In 8.0, UI changed to not allow setting isEnabled to false when fieldMeta from local not supported
+    // Saved objects created prior to 8.0 may have a configuration where
+    // fieldMetaOptions.isEnabled is false and the field does not support fieldMeta from local.
+    // In these cases, force isEnabled to true
+    // The exact case that spawned this fix is with ES_SEARCH sources and 8.0 where vector tiles switched
+    // from vector tiles generated via Kibana server to vector tiles generated via Elasticsearch.
+    // Kibana vector tiles supported fieldMeta from local while Elasticsearch vector tiles do not support fieldMeta from local.
+    if (this._field && !this._field.supportsFieldMetaFromLocalData()) {
+      fieldMetaOptions.isEnabled = true;
+    }
+
+    return fieldMetaOptions;
   }
 
   getDataMappingFunction() {
@@ -332,10 +343,8 @@ export class DynamicStyleProperty<T>
         };
   }
 
-  pluckCategoricalStyleMetaFromTileMetaFeatures(
-    metaFeatures: TileMetaFeature[]
-  ): CategoryFieldMeta | null {
-    return null;
+  pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures: TileMetaFeature[]): Category[] {
+    return [];
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null {
@@ -364,10 +373,10 @@ export class DynamicStyleProperty<T>
         };
   }
 
-  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null {
+  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): Category[] {
     const size = this.getNumberOfCategories();
     if (!this.isCategorical() || size <= 0) {
-      return null;
+      return [];
     }
 
     const counts = new Map();
@@ -384,7 +393,7 @@ export class DynamicStyleProperty<T>
       }
     }
 
-    const ordered = [];
+    const ordered: Category[] = [];
     for (const [key, value] of counts) {
       ordered.push({ key, count: value });
     }
@@ -392,10 +401,7 @@ export class DynamicStyleProperty<T>
     ordered.sort((a, b) => {
       return b.count - a.count;
     });
-    const truncated = ordered.slice(0, size);
-    return {
-      categories: truncated,
-    } as CategoryFieldMeta;
+    return ordered.slice(0, size);
   }
 
   _pluckOrdinalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): RangeFieldMeta | null {
@@ -422,26 +428,22 @@ export class DynamicStyleProperty<T>
     };
   }
 
-  _pluckCategoricalStyleMetaFromFieldMetaData(
-    styleMetaData: StyleMetaData
-  ): CategoryFieldMeta | null {
+  _pluckCategoricalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): Category[] {
     if (!this.isCategorical() || !this._field) {
-      return null;
+      return [];
     }
 
     const fieldMeta = styleMetaData[`${this._field.getRootName()}_terms`];
     if (!fieldMeta || !('buckets' in fieldMeta)) {
-      return null;
+      return [];
     }
 
-    return {
-      categories: fieldMeta.buckets.map((bucket) => {
-        return {
-          key: bucket.key,
-          count: bucket.doc_count,
-        };
-      }),
-    };
+    return fieldMeta.buckets.map((bucket) => {
+      return {
+        key: bucket.key,
+        count: bucket.doc_count,
+      };
+    });
   }
 
   formatField(value: RawValue): string | number {

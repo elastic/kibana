@@ -6,7 +6,7 @@
  */
 
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { HostOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 export const buildOverviewHostQuery = ({

@@ -35,6 +35,7 @@ export const SuggestedDocumentsCallout: React.FC = () => {
 
   return (
     <SuggestionsCallout
+      style={{ marginTop: '24px' }}
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curation.suggestedDocumentsCallout.title',
         { defaultMessage: 'New suggested documents for this query' }

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Loading } from '../../../components';
 import { useLocalSearch, searchIdField } from '../../../hooks';
@@ -205,7 +205,7 @@ function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnP
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
-                  defaultMessage="No packages found"
+                  defaultMessage="No integrations found"
                 />
               )}
             </p>
@@ -235,7 +235,7 @@ function MissingIntegrationContent({
       <p>
         <FormattedMessage
           id="xpack.fleet.integrations.missing"
-          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations using our {discussForumLink}."
+          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations in our {forumLink}."
           values={{
             customInputsLink: (
               <EuiLink onClick={handleCustomInputsLinkClick}>
@@ -245,11 +245,11 @@ function MissingIntegrationContent({
                 />
               </EuiLink>
             ),
-            discussForumLink: (
+            forumLink: (
               <EuiLink href="https://discuss.elastic.co/tag/integrations" external target="_blank">
                 <FormattedMessage
                   id="xpack.fleet.integrations.discussForumLink"
-                  defaultMessage="discuss forum"
+                  defaultMessage="forum"
                 />
               </EuiLink>
             ),

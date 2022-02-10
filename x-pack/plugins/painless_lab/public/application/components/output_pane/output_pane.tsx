@@ -34,7 +34,7 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
         ) : response && response.error ? (
           <EuiIcon type="alert" color="danger" />
         ) : (
-          <EuiIcon type="check" color="secondary" />
+          <EuiIcon type="check" color="success" />
         )}
       </EuiFlexItem>
 

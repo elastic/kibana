@@ -8,12 +8,14 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { encode } from '../../../common/lib/embeddable_dataurl';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
 import { State } from '../../../types';
+import { useLabsService } from '../../services';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
@@ -65,6 +67,9 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   availableEmbeddables,
   ...restProps
 }) => {
+  const labsService = useLabsService();
+  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
+
   const dispatch = useDispatch();
   const pageId = useSelector<State, string>((state) => getSelectedPage(state));
 
@@ -74,18 +79,27 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   );
 
   const onSelect = useCallback(
-    (id: string, type: string) => {
+    (id: string, type: string): void => {
       const partialElement = {
         expression: `markdown "Could not find embeddable for type ${type}" | render`,
       };
-      if (allowedEmbeddables[type]) {
+
+      // If by-value is enabled, we'll handle both by-reference and by-value embeddables
+      // with the new generic `embeddable` function.
+      // Otherwise we fallback to the embeddable type specific expressions.
+      if (isByValueEnabled) {
+        const config = encode({ savedObjectId: id });
+        partialElement.expression = `embeddable config="${config}" 
+  type="${type}" 
+| render`;
+      } else if (allowedEmbeddables[type]) {
         partialElement.expression = allowedEmbeddables[type](id);
       }
 
       addEmbeddable(pageId, partialElement);
       restProps.onClose();
     },
-    [addEmbeddable, pageId, restProps]
+    [addEmbeddable, pageId, restProps, isByValueEnabled]
   );
 
   return (
@@ -93,6 +107,7 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
       {...restProps}
       availableEmbeddables={availableEmbeddables || []}
       onSelect={onSelect}
+      isByValueEnabled={isByValueEnabled}
     />
   );
 };

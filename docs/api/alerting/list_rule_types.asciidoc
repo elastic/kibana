@@ -4,7 +4,7 @@
 <titleabbrev>List rule types</titleabbrev>
 ++++
 
-Retrieve a list of alerting rule types that the user is authorized to access.
+Retrieve a list of rule types that the user is authorized to access.
 
 Each rule type includes a list of consumer features. Within these features, users are authorized to perform either `read` or `all` operations on rules of that type. This helps determine which rule types users can read, but not create or modify.
 

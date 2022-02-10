@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { map as mapAsync } from 'bluebird';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -234,37 +233,69 @@ export class SettingsPageObject extends FtrService {
 
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getFieldTypes() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldType');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getScriptedFieldLangs() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > scriptedFieldLang');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
+  }
+
+  async clearFieldTypeFilter(type: string) {
+    await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
+    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async setFieldTypeFilter(type: string) {
-    await this.find.clickByCssSelector(
-      'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[value="' + type + '"]'
+    await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
+    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
+  async clearScriptedFieldLanguageFilter(type: string) {
+    await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    await this.testSubjects.existOrFail(
+      `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
     );
+    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${type}-checked`);
+    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${type}`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async setScriptedFieldLanguageFilter(language: string) {
-    await this.find.clickByCssSelector(
-      'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[value="' +
-        language +
-        '"]'
+    await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${language}`);
+    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${language}`);
+    await this.testSubjects.existOrFail(
+      `scriptedFieldLanguageFilterDropdown-option-${language}-checked`
     );
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async filterField(name: string) {
@@ -327,9 +358,11 @@ export class SettingsPageObject extends FtrService {
 
   async getAllIndexPatternNames() {
     const indexPatterns = await this.getIndexPatternList();
-    return await mapAsync(indexPatterns, async (index) => {
-      return await index.getVisibleText();
-    });
+    return await Promise.all(
+      indexPatterns.map(async (index) => {
+        return await index.getVisibleText();
+      })
+    );
   }
 
   async isIndexPatternListEmpty() {
@@ -437,7 +470,8 @@ export class SettingsPageObject extends FtrService {
   async setIndexPatternField(indexPatternName = 'logstash-*') {
     this.log.debug(`setIndexPatternField(${indexPatternName})`);
     const field = await this.getIndexPatternField();
-    await field.clearValue();
+    await field.clearValueWithKeyboard();
+
     if (
       indexPatternName.charAt(0) === '*' &&
       indexPatternName.charAt(indexPatternName.length - 1) === '*'
@@ -565,9 +599,11 @@ export class SettingsPageObject extends FtrService {
     const table = await this.find.byClassName('euiTable');
     await this.retry.waitFor('field filter to be added', async () => {
       const tableCells = await table.findAllByCssSelector('td');
-      const fieldNames = await mapAsync(tableCells, async (cell) => {
-        return (await cell.getVisibleText()).trim();
-      });
+      const fieldNames = await Promise.all(
+        tableCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
       return fieldNames.includes(name);
     });
   }
@@ -618,23 +654,9 @@ export class SettingsPageObject extends FtrService {
 
   async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
-    const valueRow = await this.toggleRow('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(script);
-  }
-
-  async changeFieldScript(script: string) {
-    this.log.debug('set script = ' + script);
-    const valueRow = await this.testSubjects.find('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(this.browser.keys.DELETE.repeat(30));
-    this.browser.pressKeys(script);
+    await this.toggleRow('valueRow');
+    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
   }
 
   async clickAddScriptedField() {

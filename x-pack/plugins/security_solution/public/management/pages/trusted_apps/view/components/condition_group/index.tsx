@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHideFor, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ConditionEntry, OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AndOrBadge } from '../../../../../../common/components/and_or_badge';
 import { ConditionEntryInput, ConditionEntryInputProps } from '../condition_entry_input';

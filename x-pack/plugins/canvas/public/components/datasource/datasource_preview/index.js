@@ -7,16 +7,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
-import { interpretAst } from '../../../lib/run_interpreter';
 import { Loading } from '../../loading';
+import { useExpressionsService } from '../../../services';
 import { DatasourcePreview as Component } from './datasource_preview';
 
 export const DatasourcePreview = (props) => {
   const [datatable, setDatatable] = useState();
+  const expressionsService = useExpressionsService();
 
   useEffect(() => {
-    interpretAst({ type: 'expression', chain: [props.function] }, {}).then(setDatatable);
-  }, [props.function, setDatatable]);
+    expressionsService
+      .interpretAst({ type: 'expression', chain: [props.function] }, {})
+      .then(setDatatable);
+  }, [expressionsService, props.function, setDatatable]);
 
   if (!datatable) {
     return <Loading {...props} />;

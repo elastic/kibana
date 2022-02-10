@@ -21,11 +21,17 @@ import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import type { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
-import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
+import type { BrowserFields } from '../../../../../common/search_strategy';
+import type { ColumnHeaderOptions, CreateFieldComponentType } from '../../../../../common/types';
+import {
+  isEscape,
+  isTab,
+  stopPropagationAndPreventDefault,
+} from '../../../../../common/utils/accessibility';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 import { Search } from './search';
+
 import {
   CATEGORY_PANE_WIDTH,
   CLOSE_BUTTON_CLASS_NAME,
@@ -53,6 +59,9 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> &
    * The current timeline column headers
    */
   columnHeaders: ColumnHeaderOptions[];
+
+  createFieldComponent?: CreateFieldComponentType;
+
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -99,6 +108,7 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> &
 const FieldsBrowserComponent: React.FC<Props> = ({
   columnHeaders,
   filteredBrowserFields,
+  createFieldComponent: CreateField,
   isSearching,
   onCategorySelected,
   onSearchInputChange,
@@ -126,7 +136,9 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   }, [onHide, restoreFocusTo]);
 
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
+  const { dataViewId, defaultColumns } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId)
+  );
 
   const onResetColumns = useCallback(() => {
     onUpdateColumns(defaultColumns);
@@ -187,14 +199,24 @@ const FieldsBrowserComponent: React.FC<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <Search
-            data-test-subj="header"
-            filteredBrowserFields={filteredBrowserFields}
-            isSearching={isSearching}
-            onSearchInputChange={onInputChange}
-            searchInput={searchInput}
-            timelineId={timelineId}
-          />
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem>
+              <Search
+                data-test-subj="header"
+                filteredBrowserFields={filteredBrowserFields}
+                isSearching={isSearching}
+                onSearchInputChange={onInputChange}
+                searchInput={searchInput}
+                timelineId={timelineId}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {CreateField && dataViewId != null && dataViewId.length > 0 && (
+                <CreateField onClick={onHide} />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           <EuiSpacer size="l" />
           <PanesFlexGroup alignItems="flexStart" gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>

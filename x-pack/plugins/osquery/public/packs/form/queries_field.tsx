@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { findIndex, forEach, pullAt, pullAllBy, pickBy } from 'lodash';
+import { isEmpty, findIndex, forEach, pullAt, pullAllBy, pickBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { OsqueryManagerPackagePolicyInputStream } from '../../../common/types';
 import { FieldHook } from '../../shared_imports';
@@ -133,13 +133,16 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, handleNameC
         produce((draft) => {
           forEach(parsedContent.queries, (newQuery, newQueryId) => {
             draft.push(
-              pickBy({
-                id: newQueryId,
-                interval: newQuery.interval ?? parsedContent.interval,
-                query: newQuery.query,
-                version: newQuery.version ?? parsedContent.version,
-                platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
-              })
+              pickBy(
+                {
+                  id: newQueryId,
+                  interval: newQuery.interval ?? parsedContent.interval,
+                  query: newQuery.query,
+                  version: newQuery.version ?? parsedContent.version,
+                  platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
+                },
+                (value) => !isEmpty(value)
+              )
             );
           });
 

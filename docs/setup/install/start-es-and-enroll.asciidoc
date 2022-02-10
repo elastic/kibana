@@ -1,0 +1,16 @@
+==== Start {es} and generate an enrollment token for {kib}
+++++
+<titleabbrev>Generate an enrollment token</titleabbrev>
+++++
+
+When you start {es} for the first time, the following security configuration
+occurs automatically:
+
+* {ref}/configuring-stack-security.html#stack-security-certificates[Certificates and keys] for TLS are
+generated for the transport and HTTP layers.
+* The TLS configuration settings are written to `elasticsearch.yml`.
+* A password is generated for the `elastic` user.
+* An enrollment token is generated for {kib}.
+
+You can then start {kib} and enter the enrollment token to securely connect 
+{kib} with {es}. The enrollment token is valid for 30 minutes.

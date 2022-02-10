@@ -57,7 +57,7 @@ export const ecsMapping = t.record(
   t.string,
   t.partial({
     field: t.string,
-    value: t.string,
+    value: t.union([t.string, t.array(t.string)]),
   })
 );
 export type ECSMapping = t.TypeOf<typeof ecsMapping>;

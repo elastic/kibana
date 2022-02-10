@@ -17,7 +17,7 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../common/containers/use_full_screen';
-import { TimelineId, TimelineTabs } from '../../../../../common';
+import { TimelineId, TimelineTabs } from '../../../../../common/types';
 import { ACTION_INVESTIGATE_IN_RESOLVER } from '../../../../timelines/components/timeline/body/translations';
 import { Ecs } from '../../../../../common/ecs';
 

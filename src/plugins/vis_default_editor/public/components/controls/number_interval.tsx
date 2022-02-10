@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UI_SETTINGS } from '../../../../data/public';
 
 import { AggParamEditorProps } from '../agg_param_props';

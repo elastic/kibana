@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ApmMetrics } from '../apm_metrics';
+import { Status } from './status';
 
 const title = i18n.translate('xpack.monitoring.apm.instance.panels.title', {
   defaultMessage: 'APM Server - Metrics',
@@ -29,5 +30,5 @@ export function ApmServerInstance(props) {
 
   const stats = props.summary;
   const metricProps = { ...props, title, seriesToShow, stats };
-  return <ApmMetrics {...metricProps} />;
+  return <ApmMetrics {...metricProps} StatusComponent={Status} />;
 }

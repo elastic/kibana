@@ -86,6 +86,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   const factories = embeddable
     ? Array.from(embeddable.getEmbeddableFactories()).filter(
         ({ type, isEditable, canCreateNew, isContainerType }) =>
+          // @ts-expect-error ts 4.5 upgrade
           isEditable() && !isContainerType && canCreateNew() && type !== 'visualization'
       )
     : [];
@@ -231,7 +232,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
     <SolutionToolbarPopover
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-        defaultMessage: 'All types',
+        defaultMessage: 'Select type',
       })}
       iconType="arrowDown"
       iconSide="right"

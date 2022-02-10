@@ -42,6 +42,10 @@ export function MachineLearningJobManagementProvider(
       );
     },
 
+    async assertEmptyStateVisible() {
+      await testSubjects.existOrFail('mlAnomalyDetectionEmptyState');
+    },
+
     async assertJobStatsBarExists() {
       await testSubjects.existOrFail('~mlJobStatsBar');
     },

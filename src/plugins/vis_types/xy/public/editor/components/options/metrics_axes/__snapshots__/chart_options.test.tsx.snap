@@ -54,7 +54,6 @@ exports[`ChartOptions component should init with the default set of props 1`] = 
     </EuiFlexItem>
     <EuiFlexItem>
       <SelectOption
-        disabled={false}
         id="seriesMode0"
         label="Mode"
         options={

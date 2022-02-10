@@ -89,7 +89,7 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
     };
 
     const getEntryOperator = (type: string, operator: string) => {
-      if (type === 'nested') return;
+      if (type === 'nested') return '';
       return operator === 'included'
         ? OPERATOR_TYPE_LABELS_INCLUDED[type as keyof typeof OPERATOR_TYPE_LABELS_INCLUDED] ?? type
         : OPERATOR_TYPE_LABELS_EXCLUDED[type as keyof typeof OPERATOR_TYPE_LABELS_EXCLUDED] ?? type;
@@ -146,15 +146,17 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
         {entries.map(({ field, type, value, operator, entries: nestedEntries = [] }) => {
           return (
             <div data-test-subj={getTestId('condition')} key={field + type + value}>
-              <EuiExpression
-                description={<StyledCondition>{CONDITION_AND}</StyledCondition>}
-                value={field}
-                color="subdued"
-              />
-              <EuiExpression
-                description={getEntryOperator(type, operator)}
-                value={getEntryValue(type, value)}
-              />
+              <div className="eui-xScroll">
+                <EuiExpression
+                  description={<StyledCondition>{CONDITION_AND}</StyledCondition>}
+                  value={field}
+                  color="subdued"
+                />
+                <EuiExpression
+                  description={getEntryOperator(type, operator)}
+                  value={getEntryValue(type, value)}
+                />
+              </div>
               {getNestedEntriesContent(type, nestedEntries)}
             </div>
           );

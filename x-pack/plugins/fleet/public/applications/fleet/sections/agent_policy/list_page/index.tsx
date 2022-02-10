@@ -19,13 +19,13 @@ import {
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
-  useCapabilities,
+  useAuthz,
   useGetAgentPolicies,
   usePagination,
   useSorting,
@@ -42,7 +42,8 @@ import { CreateAgentPolicyFlyout } from './components';
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
+
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -148,6 +149,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           packagePolicies ? packagePolicies.length : 0,
       },
       {
+        field: 'actions',
         name: i18n.translate('xpack.fleet.agentPolicyList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
@@ -177,7 +179,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
-        isDisabled={!hasWriteCapabilites}
+        isDisabled={!hasFleetAllPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
       >
         <FormattedMessage
@@ -186,7 +188,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [hasWriteCapabilites, setIsCreateAgentPolicyFlyoutOpen]
+    [hasFleetAllPrivileges, setIsCreateAgentPolicyFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(

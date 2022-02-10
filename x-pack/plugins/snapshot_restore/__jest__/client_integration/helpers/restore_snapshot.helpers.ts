@@ -6,11 +6,11 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
 import { WithAppDependencies } from './setup_environment';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: ['/add_policy'],
     componentRoutePath: '/add_policy',

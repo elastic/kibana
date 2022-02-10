@@ -21,10 +21,10 @@ import {
 
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import { defaultNewTrustedApp } from '../../store/builders';
-import { forceHTMLElementOffsetWidth } from './effected_policy_select/test_utils';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../../../common/hooks/use_license';
+import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -136,6 +136,7 @@ describe('When using the Trusted App Form', () => {
       trustedApp: latestUpdatedTrustedApp,
       isEditMode: false,
       isDirty: false,
+      wasByPolicy: false,
       onChange: jest.fn((updates) => {
         latestUpdatedTrustedApp = updates.item;
       }),
@@ -310,10 +311,7 @@ describe('When using the Trusted App Form', () => {
         policies: ['123'],
       };
       render();
-      expect(
-        renderResult.getByTestId(`${dataTestSubjForForm}-effectedPolicies-policiesSelectable`)
-          .textContent
-      ).toEqual('Loading options');
+      expect(renderResult.queryByTestId('loading-spinner')).not.toBeNull();
     });
   });
 
@@ -432,6 +430,18 @@ describe('When using the Trusted App Form', () => {
       rerenderWithLatestTrustedApp();
 
       expect(renderResult.getByText('[2] Field entry must have a value'));
+    });
+
+    it('should validate duplicated conditions', () => {
+      const andButton = getConditionBuilderAndButton();
+      reactTestingLibrary.act(() => {
+        fireEvent.click(andButton, { button: 1 });
+      });
+
+      setTextFieldValue(getConditionValue(getCondition()), '');
+      rerenderWithLatestTrustedApp();
+
+      expect(renderResult.getByText('Hash cannot be added more than once'));
     });
 
     it('should validate multiple errors in form', () => {

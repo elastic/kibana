@@ -89,6 +89,7 @@ export const schema = Joi.object()
       })
       .default(),
 
+    servicesRequiredForTestAnalysis: Joi.array().items(Joi.string()).default([]),
     services: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
 
     pageObjects: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
@@ -151,6 +152,7 @@ export const schema = Joi.object()
     mochaReporter: Joi.object()
       .keys({
         captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
 

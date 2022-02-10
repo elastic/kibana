@@ -8,7 +8,7 @@
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Role } from '../../../../common/model';
 import { isRoleReserved } from '../../../../common/model';

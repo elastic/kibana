@@ -20,6 +20,7 @@ export interface TimelionFunctionArgs {
   multi?: boolean;
   types: TimelionFunctionArgsTypes[];
   suggestions?: TimelionFunctionArgsSuggestion[];
+  hidden?: boolean;
 }
 
 export interface ITimelionFunction {

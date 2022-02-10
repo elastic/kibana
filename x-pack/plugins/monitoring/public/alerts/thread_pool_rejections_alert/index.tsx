@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { Expression, Props } from '../components/param_details_form/expression';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { CommonAlertParamDetails } from '../../../common/types/alerts';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import { RULE_REQUIRES_APP_CONTEXT } from '../../../common/constants';
-import { MonitoringConfig } from '../../types';
+import type { CommonAlertParamDetails } from '../../../common/types/alerts';
+import type { MonitoringConfig } from '../../types';
+import {
+  LazyExpression,
+  LazyExpressionProps,
+} from '../components/param_details_form/lazy_expression';
 
 interface ThreadPoolTypes {
   [key: string]: unknown;
@@ -29,7 +31,7 @@ export function createThreadPoolRejectionsAlertType(
   alertId: string,
   threadPoolAlertDetails: ThreadPoolRejectionAlertDetails,
   config: MonitoringConfig
-): AlertTypeModel {
+): RuleTypeModel {
   return {
     id: alertId,
     description: threadPoolAlertDetails.description,
@@ -37,10 +39,14 @@ export function createThreadPoolRejectionsAlertType(
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaThreadpoolRejections}`;
     },
-    alertParamsExpression: (props: Props) => (
+    ruleParamsExpression: (props: LazyExpressionProps) => (
       <>
         <EuiSpacer />
-        <Expression {...props} config={config} paramDetails={threadPoolAlertDetails.paramDetails} />
+        <LazyExpression
+          {...props}
+          config={config}
+          paramDetails={threadPoolAlertDetails.paramDetails}
+        />
       </>
     ),
     validate: (inputValues: ThreadPoolTypes) => {

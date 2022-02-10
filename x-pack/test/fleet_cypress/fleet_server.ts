@@ -7,36 +7,51 @@
 
 import { ChildProcess, spawn } from 'child_process';
 import { ToolingLog } from '@kbn/dev-utils';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { Manager } from './resource_manager';
 import { getLatestVersion } from './artifact_manager';
-
-export interface ElasticsearchConfig {
-  esHost: string;
-  user: string;
-  password: string;
-  port: string;
-}
+import { AgentManagerParams } from './agent';
 
 export class FleetManager extends Manager {
   private fleetProcess?: ChildProcess;
-  private esConfig: ElasticsearchConfig;
+  private config: AgentManagerParams;
   private log: ToolingLog;
-  constructor(esConfig: ElasticsearchConfig, log: ToolingLog) {
+  private requestOptions: AxiosRequestConfig;
+  constructor(config: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
     super();
-    this.esConfig = esConfig;
+    this.config = config;
     this.log = log;
+    this.requestOptions = requestOptions;
   }
   public async setup(): Promise<void> {
     this.log.info('Setting fleet up');
     return new Promise(async (res, rej) => {
       try {
         const response = await axios.post(
-          `${this.esConfig.esHost}/_security/service/elastic/fleet-server/credential/token`
+          `${this.config.kibanaUrl}/api/fleet/service_tokens`,
+          {},
+          this.requestOptions
         );
-        const serviceToken = response.data.token.value;
+        const serviceToken = response.data.value;
         const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
         this.log.info(artifact);
+
+        // default fleet server policy no longer created by default
+        const {
+          data: {
+            item: { id: policyId },
+          },
+        } = await axios.post(
+          `${this.config.kibanaUrl}/api/fleet/agent_policies`,
+          {
+            name: 'Fleet Server policy',
+            description: '',
+            namespace: 'default',
+            monitoring_enabled: [],
+            has_fleet_server: true,
+          },
+          this.requestOptions
+        );
 
         const host = 'host.docker.internal';
 
@@ -49,12 +64,15 @@ export class FleetManager extends Manager {
           '--env',
           'FLEET_SERVER_ENABLE=true',
           '--env',
-          `FLEET_SERVER_ELASTICSEARCH_HOST=http://${host}:${this.esConfig.port}`,
+          `FLEET_SERVER_ELASTICSEARCH_HOST=http://${host}:${this.config.esPort}`,
           '--env',
           `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
+          '--env',
+          `FLEET_SERVER_POLICY=${policyId}`,
           '--rm',
           artifact,
         ];
+        this.log.info('docker ' + args.join(' '));
         this.fleetProcess = spawn('docker', args, {
           stdio: 'inherit',
         });

@@ -16,9 +16,9 @@ isAnonymous(path: string): boolean;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  path | <code>string</code> |  |
+|  path | string |  |
 
 <b>Returns:</b>
 
-`boolean`
+boolean
 

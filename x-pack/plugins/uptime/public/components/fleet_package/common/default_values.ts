@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { ICommonFields, ConfigKeys, ScheduleUnit, DataStream } from '../types';
+import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
+import { CommonFields, ConfigKey, ScheduleUnit, DataStream } from '../types';
 
-export const defaultValues: ICommonFields = {
-  [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
-  [ConfigKeys.SCHEDULE]: {
+export const defaultValues: CommonFields = {
+  [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKey.LOCATIONS]: [],
+  [ConfigKey.ENABLED]: true,
+  [ConfigKey.SCHEDULE]: {
     number: '3',
     unit: ScheduleUnit.MINUTES,
   },
-  [ConfigKeys.APM_SERVICE_NAME]: '',
-  [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: '16',
+  [ConfigKey.APM_SERVICE_NAME]: '',
+  [ConfigKey.TAGS]: [],
+  [ConfigKey.TIMEOUT]: '16',
+  [ConfigKey.NAME]: '',
+  [ConfigKey.LOCATIONS]: [],
+  [ConfigKey.NAMESPACE]: DEFAULT_NAMESPACE_STRING,
 };

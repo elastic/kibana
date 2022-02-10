@@ -15,3 +15,4 @@ export const ERROR_KIBANA_CONFIG_FAILURE = 'kibana_config_failure';
 export const ERROR_ENROLL_FAILURE = 'enroll_failure';
 export const ERROR_CONFIGURE_FAILURE = 'configure_failure';
 export const ERROR_PING_FAILURE = 'ping_failure';
+export const ERROR_COMPATIBILITY_FAILURE = 'compatibility_failure';

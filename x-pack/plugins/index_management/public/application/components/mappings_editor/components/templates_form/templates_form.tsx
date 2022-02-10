@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useForm, Form, SerializerFunc, UseField, JsonEditorField } from '../../shared_imports';

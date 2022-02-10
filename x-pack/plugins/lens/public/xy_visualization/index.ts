@@ -30,7 +30,7 @@ export class XyVisualization {
       const { getXyChartRenderer, getXyVisualization } = await import('../async_services');
       const [, { charts, fieldFormats }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
-
+      const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
       expressions.registerRenderer(
         getXyChartRenderer({
           formatFactory,
@@ -38,10 +38,16 @@ export class XyVisualization {
           chartsActiveCursorService: charts.activeCursor,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
-          useLegacyTimeAxis: core.uiSettings.get(LEGACY_TIME_AXIS),
+          useLegacyTimeAxis,
+          kibanaTheme: core.theme,
         })
       );
-      return getXyVisualization({ paletteService: palettes, fieldFormats });
+      return getXyVisualization({
+        paletteService: palettes,
+        fieldFormats,
+        useLegacyTimeAxis,
+        kibanaTheme: core.theme,
+      });
     });
   }
 }

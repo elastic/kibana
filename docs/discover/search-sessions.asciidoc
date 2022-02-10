@@ -1,20 +1,19 @@
 [[search-sessions]]
 == Run a search session in the background
 
-Sometimes you might need to search through large amounts of data no matter
-how long the search takes. While this might not happen often,
-there are times that long-running queries are required.
+Sometimes you might need to search through large amounts of data, no matter
+how long the search takes.
 Consider a threat hunting scenario, where you need to search through years of data.
+You can save a long-running search, so {kib} processes your request in the
+background, and you can continue your work.
 
-If your query is running long, you can save your search session, which
-allows {kib} to continue processing your request in the
-background.  Save your search session from *Discover* or *Dashboard*,
+Save your search session from *Discover* or *Dashboard*,
 and when your session is complete, view and manage it in *Stack Management*.
+Search sessions are <<search-session-settings-kb,enabled by default>>.
 
 [role="screenshot"]
 image::images/search-session.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session ]
 
-Search sessions are <<search-session-settings-kb,enabled by default>>.
 
 [float]
 ==== Requirements
@@ -37,19 +36,24 @@ open your browser and pick up where you left off.
 
 . Load your dashboard.
 +
-Your search session begins automatically. The icon after the dashboard title
-displays the current state of the search session. A clock indicates the search session is in progress.
+Your search session begins automatically.
+The icon after the dashboard title displays the current state of the search session.
+A clock icon indicates the search session is in progress.
 A checkmark indicates that the search session is complete.
 
-. To instruct {kib} to continue a search in the background, click the clock icon,
-and then click *Save session*. Once you save a search session, you can start a new search,
-navigate to a different application, or close the browser.
+. To continue a search in the background, click the clock icon,
+and then click *Save session*.
 +
 [role="screenshot"]
 image::images/search-session-awhile.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session, width=75% ]
++
+Once you save a search session, you can start a new search,
+navigate to a different application, or close the browser.
 
 . To view your saved searches, open the main menu, and then click
-*Stack Management > Search Sessions*.  You can also open this view from the search sessions popup for a saved or completed session.
+*Stack Management > Search Sessions*.
+For a saved or completed session, you can also open this view from the search sessions popup.
+
 +
 [role="screenshot"]
 image::images/search-sessions-menu.png[Search Sessions management view with actions for inspecting, extending, and deleting a session. ]
@@ -72,12 +76,11 @@ behaves differently:
 [float]
 ==== Limitations
 
-Certain visualization features do not fully support background search sessions. If a dashboard
-using these features is restored,
-all panels using unsupported features won't load immediately, but instead send out additional
+Some visualization features do not fully support background search sessions. When
+you restore a dashboard, panels with unsupported features won't load immediately, but instead
+send out additional
 data requests, which can take a while to complete.
-The warning *Your search session is still running* is shown.
-
+The *Your search session is still running* warning appears.
 You can either wait for these additional requests to complete or come back to the dashboard later
 when all data requests have finished.
 
@@ -89,7 +92,7 @@ A panel on a dashboard can behave like this if one of the following features is 
 This is configurable in the *Advanced* section of the dimension.
 * An *intervals* dimension.
 
-**Aggregation based** visualizations
+**Aggregation-based** visualizations
 
 * A *terms* aggregation with an enabled *Group other values in separate bucket* setting.
 * A *histogram* aggregation.

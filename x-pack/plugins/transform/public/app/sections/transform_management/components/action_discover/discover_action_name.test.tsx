@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { render, waitFor, screen } from '@testing-library/react';
 

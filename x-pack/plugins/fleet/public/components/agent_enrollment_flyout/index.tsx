@@ -20,9 +20,9 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useGetSettings, useUrlModal, sendGetOneAgentPolicy, useFleetStatus } from '../../hooks';
+import { useGetSettings, sendGetOneAgentPolicy, useFleetStatus } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy } from '../../types';
 
@@ -39,6 +39,7 @@ export interface Props extends BaseProps {
 }
 
 export * from './agent_policy_selection';
+export * from './agent_policy_select_create';
 export * from './managed_instructions';
 export * from './standalone_instructions';
 export * from './steps';
@@ -52,18 +53,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const [mode, setMode] = useState<FlyoutMode>(defaultMode);
 
-  const { modal } = useUrlModal();
-  const [lastModal, setLastModal] = useState(modal);
   const settings = useGetSettings();
   const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
-
-  // Refresh settings when there is a modal/flyout change
-  useEffect(() => {
-    if (modal !== lastModal) {
-      settings.resendRequest();
-      setLastModal(modal);
-    }
-  }, [modal, lastModal, settings]);
 
   const fleetStatus = useFleetStatus();
   const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
@@ -137,7 +128,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutBody
         banner={
           fleetStatus.isReady &&
-          !isFleetServerPolicySelected &&
           !isLoadingInitialRequest &&
           fleetServerHosts.length === 0 &&
           mode === 'managed' ? (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
 import { HostRulesItem, HostRulesFields } from '../common';
 import { CursorType, Hit, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';

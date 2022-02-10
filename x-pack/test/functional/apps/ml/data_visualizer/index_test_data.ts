@@ -213,6 +213,7 @@ export const farequoteKQLFiltersSearchTestData: TestData = {
     { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
   ],
   expected: {
+    filters: [{ key: 'airline', value: 'ASA' }],
     totalDocCountFormatted: '5,674',
     metricFields: [
       {
@@ -408,6 +409,7 @@ export const farequoteLuceneFiltersSearchTestData: TestData = {
     { size: 5000, expected: { field: '@timestamp', docCountFormatted: '5000 (100%)' } },
   ],
   expected: {
+    filters: [{ key: 'airline', value: 'ASA' }],
     totalDocCountFormatted: '5,673',
     metricFields: [
       {

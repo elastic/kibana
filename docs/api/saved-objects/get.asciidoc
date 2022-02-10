@@ -35,7 +35,7 @@ experimental[] Retrieve a single {kib} saved object by ID.
 [[saved-objects-api-get-example]]
 ==== Example
 
-Retrieve the index pattern object with the `my-pattern` ID:
+Retrieve the {data-source} object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------

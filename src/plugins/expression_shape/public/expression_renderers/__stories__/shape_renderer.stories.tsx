@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { shapeRenderer as shape } from '../';
+import { getShapeRenderer } from '../';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { Shape } from '../../../common/types';
 
@@ -22,5 +22,5 @@ storiesOf('renderers/shape', module).add('default', () => {
     maintainAspect: true,
   };
 
-  return <Render renderer={shape} config={config} />;
+  return <Render renderer={getShapeRenderer()} config={config} />;
 });

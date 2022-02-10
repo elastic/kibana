@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
-import { getRandomString } from '@kbn/test/jest';
+import { getRandomString } from '@kbn/test-jest-helpers';
 
 import { getWatch } from '../../__fixtures__';
 import { defaultWatch } from '../../public/application/models/watch';
@@ -23,14 +23,6 @@ jest.mock('../../public/application/lib/api', () => {
 
   return {
     ...original,
-    loadIndexPatterns: async () => {
-      const INDEX_PATTERNS = [
-        { attributes: { title: 'index1' } },
-        { attributes: { title: 'index2' } },
-        { attributes: { title: 'index3' } },
-      ];
-      return await INDEX_PATTERNS;
-    },
     getHttpClient: () => mockHttpClient,
   };
 });

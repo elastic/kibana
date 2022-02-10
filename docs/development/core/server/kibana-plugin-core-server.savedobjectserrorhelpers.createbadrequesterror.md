@@ -14,9 +14,9 @@ static createBadRequestError(reason?: string): DecoratedError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  reason | <code>string</code> |  |
+|  reason | string |  |
 
 <b>Returns:</b>
 
-`DecoratedError`
+DecoratedError
 

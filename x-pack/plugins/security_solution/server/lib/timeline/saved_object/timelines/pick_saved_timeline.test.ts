@@ -38,6 +38,7 @@ describe('pickSavedTimeline', () => {
       { columnHeaderType: 'not-filtered', id: 'destination.ip' },
       { columnHeaderType: 'not-filtered', id: 'user.name' },
     ],
+    dataViewId: 'security-solution',
     indexNames: [
       'auditbeat-*',
       'endgame-*',

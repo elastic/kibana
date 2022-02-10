@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import {
   DragEffects,
   DraggableWrapper,
@@ -17,14 +18,14 @@ import { Provider } from '../../../timelines/components/timeline/data_providers/
 import { HostRulesColumns } from './';
 
 import * as i18n from './translations';
-import { HostRulesFields } from '../../../../common';
+import { HostRulesFields } from '../../../../common/search_strategy';
 
 export const getHostRulesColumns = (): HostRulesColumns => [
   {
     field: `node.${HostRulesFields.ruleName}`,
     name: i18n.NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (ruleName) => {
       if (ruleName != null && ruleName.length > 0) {
         const id = escapeDataProviderId(`ueba-table-ruleName-${ruleName}`);
@@ -63,7 +64,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
     field: `node.${HostRulesFields.ruleType}`,
     name: i18n.RULE_TYPE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (ruleType) => {
       if (ruleType != null && ruleType.length > 0) {
         const id = escapeDataProviderId(`ueba-table-ruleType-${ruleType}`);
@@ -102,7 +103,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
     field: `node.${HostRulesFields.riskScore}`,
     name: i18n.RISK_SCORE,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     render: (riskScore) => {
       if (riskScore != null) {
         const id = escapeDataProviderId(`ueba-table-riskScore-${riskScore}`);
@@ -117,7 +118,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               name: `${riskScore}`,
               kqlQuery: '',
               queryMatch: {
-                field: 'kibana.alert.rule.risk_score',
+                field: ALERT_RISK_SCORE,
                 value: riskScore,
                 operator: IS_OPERATOR,
               },
@@ -141,7 +142,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
     field: `node.${HostRulesFields.hits}`,
     name: i18n.HITS,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (hits) => {
       if (hits != null) {

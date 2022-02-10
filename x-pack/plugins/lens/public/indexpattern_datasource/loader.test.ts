@@ -26,6 +26,7 @@ import {
 } from './types';
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
+import { DateHistogramIndexPatternColumn } from './operations';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
@@ -88,6 +89,14 @@ const indexPattern1 = {
     {
       name: 'dest',
       displayName: 'dest',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      esTypes: ['keyword'],
+    },
+    {
+      name: 'geo.src',
+      displayName: 'geo.src',
       type: 'string',
       aggregatable: true,
       searchable: true,
@@ -512,7 +521,7 @@ describe('loader', () => {
                   interval: 'm',
                 },
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
               col2: {
                 dataType: 'number',
                 isBucketed: false,
@@ -563,7 +572,7 @@ describe('loader', () => {
                   interval: 'm',
                 },
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
               col2: {
                 dataType: 'number',
                 isBucketed: false,
@@ -650,7 +659,7 @@ describe('loader', () => {
                   interval: 'm',
                 },
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
               col2: {
                 dataType: 'number',
                 isBucketed: false,
@@ -870,7 +879,7 @@ describe('loader', () => {
                   interval: 'm',
                 },
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
             },
             indexPatternId: '1',
           },

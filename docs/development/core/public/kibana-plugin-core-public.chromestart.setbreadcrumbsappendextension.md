@@ -16,9 +16,9 @@ setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppe
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  breadcrumbsAppendExtension | <code>ChromeBreadcrumbsAppendExtension</code> |  |
+|  breadcrumbsAppendExtension | ChromeBreadcrumbsAppendExtension |  |
 
 <b>Returns:</b>
 
-`void`
+void
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import euiVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars as euiVars } from '@kbn/ui-theme';
 
 import { stringHash } from './string_utils';
 

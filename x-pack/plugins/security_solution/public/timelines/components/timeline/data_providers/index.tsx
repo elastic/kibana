@@ -12,7 +12,7 @@ import uuid from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
@@ -85,7 +85,7 @@ const getDroppableId = (id: string): string =>
  * the data pro section.
  */
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
-  const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { isLoading } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);

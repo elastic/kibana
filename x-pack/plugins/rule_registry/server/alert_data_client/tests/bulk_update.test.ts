@@ -17,15 +17,13 @@ import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
-import { AuditLogger } from '../../../../security/server';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { AlertingAuthorizationEntity } from '../../../../alerting/server';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
-const auditLogger = {
-  log: jest.fn(),
-} as jest.Mocked<AuditLogger>;
+const auditLogger = auditLoggerMock.create();
 
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
@@ -88,6 +86,7 @@ describe('bulkUpdate()', () => {
             body: {
               docs: [
                 {
+                  found: true,
                   _id: fakeAlertId,
                   _index: indexName,
                   _source: {
@@ -145,6 +144,7 @@ describe('bulkUpdate()', () => {
             body: {
               docs: [
                 {
+                  found: true,
                   _id: fakeAlertId,
                   _index: indexName,
                   _source: {
@@ -191,6 +191,7 @@ describe('bulkUpdate()', () => {
             body: {
               docs: [
                 {
+                  found: true,
                   _id: successfulAuthzHit,
                   _index: indexName,
                   _source: {
@@ -201,6 +202,7 @@ describe('bulkUpdate()', () => {
                   },
                 },
                 {
+                  found: true,
                   _id: unsuccessfulAuthzHit,
                   _index: indexName,
                   _source: {

@@ -7,7 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EndpointError, NotFoundError } from '../../errors';
+import { NotFoundError } from '../../errors';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 export class EndpointHostNotFoundError extends NotFoundError {}
 
@@ -16,3 +17,5 @@ export class EndpointHostUnEnrolledError extends EndpointError {}
 export class FleetAgentNotFoundError extends NotFoundError {}
 
 export class FleetAgentPolicyNotFoundError extends NotFoundError {}
+
+export class FleetEndpointPackagePolicyNotFoundError extends NotFoundError {}

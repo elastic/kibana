@@ -4,7 +4,7 @@
 <titleabbrev>Cancel reindex</titleabbrev>
 ++++
 
-experimental[] Cancel reindexes that are waiting for the {es} reindex task to complete. For example, `lastCompletedStep` set to `40`.
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
 
 Cancel reindexes that are waiting for the Elasticsearch reindex task to complete. For example, `lastCompletedStep` set to `40`.
 

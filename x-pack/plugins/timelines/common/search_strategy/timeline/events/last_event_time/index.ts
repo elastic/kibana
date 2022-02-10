@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestBasicOptions } from '../..';
 
@@ -26,6 +26,7 @@ export interface TimelineEventsLastEventTimeStrategyResponse extends IEsSearchRe
   lastSeen: Maybe<string>;
   inspect?: Maybe<Inspect>;
 }
+export type TimelineKpiStrategyRequest = Omit<TimelineRequestBasicOptions, 'runtimeMappings'>;
 
 export interface TimelineKpiStrategyResponse extends IEsSearchResponse {
   destinationIpCount: number;
@@ -37,7 +38,7 @@ export interface TimelineKpiStrategyResponse extends IEsSearchResponse {
 }
 
 export interface TimelineEventsLastEventTimeRequestOptions
-  extends Omit<TimelineRequestBasicOptions, 'filterQuery' | 'timerange'> {
+  extends Omit<TimelineRequestBasicOptions, 'filterQuery' | 'timerange' | 'runtimeMappings'> {
   indexKey: LastEventIndexKey;
   details: LastTimeDetails;
 }

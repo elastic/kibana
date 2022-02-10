@@ -7,9 +7,9 @@
 
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
 import { TestsSelectionControl } from './tests_selection_control';
 import { TransformSelectorControl } from './transform_selector_control';
@@ -19,11 +19,11 @@ import { GetTransformsResponseSchema } from '../../../common/api_schemas/transfo
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 
 export type TransformHealthRuleTriggerProps =
-  AlertTypeParamsExpressionProps<TransformHealthRuleParams>;
+  RuleTypeParamsExpressionProps<TransformHealthRuleParams>;
 
 const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
-  alertParams,
-  setAlertParams,
+  ruleParams,
+  setRuleParams,
   errors,
 }) => {
   const formErrors = Object.values(errors).flat();
@@ -36,9 +36,9 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
   const onAlertParamChange = useCallback(
     <T extends keyof TransformHealthRuleParams>(param: T) =>
       (update: TransformHealthRuleParams[T]) => {
-        setAlertParams(param, update);
+        setRuleParams(param, update);
       },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   useEffect(
@@ -71,11 +71,11 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
   );
 
   const excludeTransformOptions = useMemo(() => {
-    if (alertParams.includeTransforms?.some((v) => v === ALL_TRANSFORMS_SELECTION)) {
+    if (ruleParams.includeTransforms?.some((v) => v === ALL_TRANSFORMS_SELECTION)) {
       return transformOptions;
     }
     return null;
-  }, [transformOptions, alertParams.includeTransforms]);
+  }, [transformOptions, ruleParams.includeTransforms]);
 
   return (
     <EuiForm
@@ -92,7 +92,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
           />
         }
         options={transformOptions}
-        selectedOptions={alertParams.includeTransforms ?? []}
+        selectedOptions={ruleParams.includeTransforms ?? []}
         onChange={onAlertParamChange('includeTransforms')}
         allowSelectAll
         errors={errors.includeTransforms as string[]}
@@ -100,7 +100,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
 
       <EuiSpacer size="m" />
 
-      {!!excludeTransformOptions?.length || !!alertParams.excludeTransforms?.length ? (
+      {!!excludeTransformOptions?.length || !!ruleParams.excludeTransforms?.length ? (
         <>
           <TransformSelectorControl
             label={
@@ -110,7 +110,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
               />
             }
             options={excludeTransformOptions ?? []}
-            selectedOptions={alertParams.excludeTransforms ?? []}
+            selectedOptions={ruleParams.excludeTransforms ?? []}
             onChange={onAlertParamChange('excludeTransforms')}
           />
           <EuiSpacer size="m" />
@@ -118,7 +118,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
       ) : null}
 
       <TestsSelectionControl
-        config={alertParams.testsConfig}
+        config={ruleParams.testsConfig}
         onChange={onAlertParamChange('testsConfig')}
         errors={Array.isArray(errors.testsConfig) ? errors.testsConfig : []}
       />

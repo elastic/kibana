@@ -16,7 +16,7 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server/';
+} from '../../../../../../src/core/server';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectToExceptionList } from './utils';

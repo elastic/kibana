@@ -700,6 +700,7 @@ module.exports = {
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
+        '**/jest.config.js',
       ],
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
@@ -852,12 +853,13 @@ module.exports = {
     },
 
     /**
-     * APM and Observability overrides
+     * APM, UX and Observability overrides
      */
     {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -903,17 +905,6 @@ module.exports = {
     },
 
     /**
-     * Cases overrides
-     */
-    {
-      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
-      },
-    },
-
-    /**
      * Security Solution overrides. These rules below are maintained and owned by
      * the people within the security-solution-platform team. Please see ping them
      * or check with them if you are encountering issues, have suggestions, or would
@@ -928,6 +919,8 @@ module.exports = {
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -949,10 +942,12 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
+        'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
       excludedFiles: [
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'error',
@@ -963,6 +958,7 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
+        'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
@@ -985,6 +981,7 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1072,6 +1069,13 @@ module.exports = {
         'symbol-description': 'error',
         'vars-on-top': 'error',
         '@typescript-eslint/no-duplicate-imports': ['error'],
+      },
+    },
+    {
+      files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      rules: {
+        'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
     },
 
@@ -1569,7 +1573,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-flot-charts/lib/**/*.js'],
       env: {
         jquery: true,
       },

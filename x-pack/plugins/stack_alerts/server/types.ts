@@ -10,7 +10,7 @@ import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 
 export type {
   PluginSetupContract as AlertingSetup,
-  AlertType,
+  RuleType,
   RuleParamsAndRefs,
   AlertExecutorOptions,
 } from '../../alerting/server';

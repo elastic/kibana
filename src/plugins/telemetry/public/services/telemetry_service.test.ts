@@ -18,17 +18,20 @@ describe('TelemetryService', () => {
 
       await telemetryService.fetchTelemetry();
       expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
-        body: JSON.stringify({ unencrypted: false }),
+        body: JSON.stringify({ unencrypted: false, refreshCache: false }),
       });
     });
   });
 
   describe('fetchExample', () => {
-    it('calls fetchTelemetry with unencrupted: true', async () => {
+    it('calls fetchTelemetry with unencrypted: true, refreshCache: true', async () => {
       const telemetryService = mockTelemetryService();
       telemetryService.fetchTelemetry = jest.fn();
       await telemetryService.fetchExample();
-      expect(telemetryService.fetchTelemetry).toBeCalledWith({ unencrypted: true });
+      expect(telemetryService.fetchTelemetry).toBeCalledWith({
+        unencrypted: true,
+        refreshCache: true,
+      });
     });
   });
 
@@ -143,7 +146,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/v3/send/kibana-snapshot"`
+        `"https://telemetry-staging.elastic.co/xpack/v2/send"`
       );
     });
 
@@ -153,7 +156,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/v3/send/kibana-snapshot"`
+        `"https://telemetry.elastic.co/xpack/v2/send"`
       );
     });
   });
@@ -165,7 +168,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/v3/send/kibana-opt_in_status"`
+        `"https://telemetry-staging.elastic.co/opt_in_status/v2/send"`
       );
     });
 
@@ -175,7 +178,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/v3/send/kibana-opt_in_status"`
+        `"https://telemetry.elastic.co/opt_in_status/v2/send"`
       );
     });
   });

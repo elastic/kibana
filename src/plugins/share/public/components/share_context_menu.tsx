@@ -8,18 +8,18 @@
 
 import React, { Component } from 'react';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
-import { HttpStart } from 'kibana/public';
 import type { Capabilities } from 'src/core/public';
 
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
+import type { BrowserUrlService } from '../types';
 
-interface Props {
+export interface ShareContextMenuProps {
   allowEmbed: boolean;
   allowShortUrl: boolean;
   objectId?: string;
@@ -28,14 +28,13 @@ interface Props {
   shareMenuItems: ShareMenuItem[];
   sharingData: any;
   onClose: () => void;
-  basePath: string;
-  post: HttpStart['post'];
   embedUrlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
+  urlService: BrowserUrlService;
 }
 
-export class ShareContextMenu extends Component<Props> {
+export class ShareContextMenu extends Component<ShareContextMenuProps> {
   public render() {
     const { panels, initialPanelId } = this.getPanels();
     return (
@@ -63,11 +62,10 @@ export class ShareContextMenu extends Component<Props> {
           allowShortUrl={this.props.allowShortUrl}
           objectId={this.props.objectId}
           objectType={this.props.objectType}
-          basePath={this.props.basePath}
-          post={this.props.post}
           shareableUrl={this.props.shareableUrl}
           anonymousAccess={this.props.anonymousAccess}
           showPublicUrlSwitch={this.props.showPublicUrlSwitch}
+          urlService={this.props.urlService}
         />
       ),
     };
@@ -93,12 +91,11 @@ export class ShareContextMenu extends Component<Props> {
             isEmbedded
             objectId={this.props.objectId}
             objectType={this.props.objectType}
-            basePath={this.props.basePath}
-            post={this.props.post}
             shareableUrl={this.props.shareableUrl}
             urlParamExtensions={this.props.embedUrlParamExtensions}
             anonymousAccess={this.props.anonymousAccess}
             showPublicUrlSwitch={this.props.showPublicUrlSwitch}
+            urlService={this.props.urlService}
           />
         ),
       };

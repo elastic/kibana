@@ -18,11 +18,11 @@ asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsCli
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  savedObjectsClient | <code>SavedObjectsClientContract</code> |  |
+|  savedObjectsClient | SavedObjectsClientContract |  |
 
 <b>Returns:</b>
 
-`IUiSettingsClient`
+IUiSettingsClient
 
 ## Example
 
@@ -32,6 +32,5 @@ start(core: CoreStart) {
  const soClient = core.savedObjects.getScopedClient(arbitraryRequest);
  const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
 }
-
 ```
 

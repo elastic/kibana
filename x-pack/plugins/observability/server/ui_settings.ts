@@ -9,7 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '../../../../src/core/types';
 import { observabilityFeatureId } from '../common';
-import { enableInspectEsQueries, maxSuggestions } from '../common/ui_settings_keys';
+import {
+  enableComparisonByDefault,
+  enableInspectEsQueries,
+  maxSuggestions,
+  enableInfrastructureView,
+} from '../common/ui_settings_keys';
 
 /**
  * uiSettings definitions for Observability.
@@ -36,5 +41,27 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
       defaultMessage: 'Maximum number of suggestions fetched in autocomplete selection boxes.',
     }),
     schema: schema.number(),
+  },
+  [enableComparisonByDefault]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableComparisonByDefault', {
+      defaultMessage: 'Comparison feature',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
+      defaultMessage: 'Enable the comparison feature in APM app',
+    }),
+    schema: schema.boolean(),
+  },
+  [enableInfrastructureView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureView', {
+      defaultMessage: 'Infrastructure feature',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
+      defaultMessage: 'Enable the Infrastruture view feature in APM app',
+    }),
+    schema: schema.boolean(),
   },
 };

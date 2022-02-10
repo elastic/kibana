@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { OsqueryAppContext } from './osquery_app_context_services';
@@ -34,7 +34,6 @@ const aggregateResults = async (
 };
 
 export const parseAgentSelection = async (
-  esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   context: OsqueryAppContext,
   agentSelection: AgentSelection
@@ -42,7 +41,7 @@ export const parseAgentSelection = async (
   const selectedAgents: Set<string> = new Set();
   const addAgent = selectedAgents.add.bind(selectedAgents);
   const { allAgentsSelected, platformsSelected, policiesSelected, agents } = agentSelection;
-  const agentService = context.service.getAgentService();
+  const agentService = context.service.getAgentService()?.asInternalUser;
   const packagePolicyService = context.service.getPackagePolicyService();
   const kueryFragments = [];
 
@@ -59,7 +58,7 @@ export const parseAgentSelection = async (
     if (allAgentsSelected) {
       const kuery = kueryFragments.join(' and ');
       const fetchedAgents = await aggregateResults(async (page, perPage) => {
-        const res = await agentService.listAgents(esClient, {
+        const res = await agentService.listAgents({
           perPage,
           page,
           kuery,
@@ -80,7 +79,7 @@ export const parseAgentSelection = async (
         kueryFragments.push(`(${groupFragments.join(' or ')})`);
         const kuery = kueryFragments.join(' and ');
         const fetchedAgents = await aggregateResults(async (page, perPage) => {
-          const res = await agentService.listAgents(esClient, {
+          const res = await agentService.listAgents({
             perPage,
             page,
             kuery,

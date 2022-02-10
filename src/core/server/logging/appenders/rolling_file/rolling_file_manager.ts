@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createWriteStream, WriteStream } from 'fs';
+import { createWriteStream, WriteStream, mkdirSync } from 'fs';
+import { dirname } from 'path';
 import { RollingFileContext } from './rolling_file_context';
 
 /**
@@ -40,6 +41,7 @@ export class RollingFileManager {
 
   private ensureStreamOpen() {
     if (this.outputStream === undefined) {
+      this.ensureDirectory(this.filePath);
       this.outputStream = createWriteStream(this.filePath, {
         encoding: 'utf8',
         flags: 'a',
@@ -48,5 +50,9 @@ export class RollingFileManager {
       this.context.refreshFileInfo();
     }
     return this.outputStream!;
+  }
+
+  private ensureDirectory(path: string) {
+    mkdirSync(dirname(path), { recursive: true });
   }
 }

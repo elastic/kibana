@@ -218,6 +218,11 @@ describe('CoreUsageDataService', () => {
             },
           ],
         } as any);
+        elasticsearch.client.asInternalUser.count.mockResolvedValueOnce({
+          body: {
+            count: '15',
+          },
+        } as any);
         elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
             {
@@ -228,6 +233,11 @@ describe('CoreUsageDataService', () => {
               'pri.store.size': '4000',
             },
           ],
+        } as any);
+        elasticsearch.client.asInternalUser.count.mockResolvedValueOnce({
+          body: {
+            count: '10',
+          },
         } as any);
         elasticsearch.client.asInternalUser.search.mockResolvedValueOnce({
           body: {
@@ -384,6 +394,7 @@ describe('CoreUsageDataService', () => {
                     "docsCount": 10,
                     "docsDeleted": 10,
                     "primaryStoreSizeBytes": 2000,
+                    "savedObjectsDocsCount": "15",
                     "storeSizeBytes": 1000,
                   },
                   Object {
@@ -391,6 +402,7 @@ describe('CoreUsageDataService', () => {
                     "docsCount": 20,
                     "docsDeleted": 20,
                     "primaryStoreSizeBytes": 4000,
+                    "savedObjectsDocsCount": "10",
                     "storeSizeBytes": 2000,
                   },
                 ],
@@ -434,10 +446,6 @@ describe('CoreUsageDataService', () => {
             })
           );
         }
-
-        it('returns expected usage data for elastic.username "elastic"', async () => {
-          return doTest({ username: 'elastic', expectedPrincipal: 'elastic_user' });
-        });
 
         it('returns expected usage data for elastic.username "kibana"', async () => {
           return doTest({ username: 'kibana', expectedPrincipal: 'kibana_user' });

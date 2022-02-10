@@ -8,7 +8,7 @@
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
-import { EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
   handleSkipFocus,
   elementOrChildrenHasFocus,
@@ -25,7 +25,6 @@ import {
   EXISTS_OPERATOR,
 } from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
@@ -151,7 +150,7 @@ export const combineQueries = ({
 }: {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
@@ -223,8 +222,6 @@ export const combineQueries = ({
  * the `Timeline` and the `Events Viewer` widget
  */
 export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
-
-export const DEFAULT_ICON_BUTTON_WIDTH = 24;
 
 export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';

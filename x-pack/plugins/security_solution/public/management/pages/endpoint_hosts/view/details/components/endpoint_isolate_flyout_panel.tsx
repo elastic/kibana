@@ -9,10 +9,9 @@ import React, { memo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { EuiForm } from '@elastic/eui';
+import { EuiForm, EuiFlyoutBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../../common/endpoint/types';
-import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';
 import {
   EndpointIsolatedFormProps,
   EndpointIsolateForm,
@@ -20,7 +19,6 @@ import {
   EndpointUnisolateForm,
   ActionCompletionReturnButton,
 } from '../../../../../../common/components/endpoint/host_isolation';
-import { FlyoutBodyNoTopPadding } from './flyout_body_no_top_padding';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useEndpointSelector } from '../../hooks';
 import {
@@ -87,15 +85,13 @@ export const EndpointIsolationFlyoutPanel = memo<{
 
   return (
     <>
-      <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
-
       {wasSuccessful && (
         <EndpointIsolateSuccess
           hostName={hostMeta.host.name}
           isolateAction={isCurrentlyIsolated ? 'unisolateHost' : 'isolateHost'}
         />
       )}
-      <FlyoutBodyNoTopPadding>
+      <EuiFlyoutBody>
         {wasSuccessful ? (
           <ActionCompletionReturnButton
             onClick={handleCancel}
@@ -120,7 +116,7 @@ export const EndpointIsolationFlyoutPanel = memo<{
             />
           </EuiForm>
         )}
-      </FlyoutBodyNoTopPadding>
+      </EuiFlyoutBody>
     </>
   );
 });

@@ -19,7 +19,7 @@ import {
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeBadge } from '../../setup_mode/badge';

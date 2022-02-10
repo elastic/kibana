@@ -8,7 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { PDF_JOB_TYPE } from '../../../../common/constants';
+import { PDF_JOB_TYPE, REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
 import {
@@ -18,7 +18,7 @@ import {
   omitBlockedHeaders,
   getCustomLogo,
 } from '../../common';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { generatePdfObservable } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
@@ -28,11 +28,9 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
 
     return async function runTask(jobId, job, cancellationToken, stream) {
       const jobLogger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
-      const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
-      const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+      const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;
-
-      const generatePdfObservable = await generatePdfObservableFactory(reporting);
 
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
@@ -47,14 +45,17 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
           const { browserTimezone, layout, title } = job;
           apmGetAssets?.end();
 
-          apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
+          apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
           return generatePdfObservable(
+            reporting,
             jobLogger,
             title,
-            urls,
-            browserTimezone,
-            conditionalHeaders,
-            layout,
+            {
+              urls,
+              browserTimezone,
+              conditionalHeaders,
+              layout,
+            },
             logo
           );
         }),

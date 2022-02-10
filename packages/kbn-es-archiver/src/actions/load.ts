@@ -9,7 +9,8 @@
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
@@ -40,6 +41,7 @@ export async function loadAction({
   inputDir,
   skipExisting,
   useCreate,
+  docsOnly,
   client,
   log,
   kbnClient,
@@ -47,6 +49,7 @@ export async function loadAction({
   inputDir: string;
   skipExisting: boolean;
   useCreate: boolean;
+  docsOnly?: boolean;
   client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
@@ -76,22 +79,24 @@ export async function loadAction({
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log }),
+    createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
     createIndexDocRecordsStream(client, stats, progress, useCreate),
   ]);
 
   progress.deactivate();
   const result = stats.toJSON();
 
+  const indicesWithDocs: string[] = [];
   for (const [index, { docs }] of Object.entries(result)) {
     if (docs && docs.indexed > 0) {
       log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+      indicesWithDocs.push(index);
     }
   }
 
   await client.indices.refresh(
     {
-      index: '_all',
+      index: indicesWithDocs.join(','),
       allow_no_indices: true,
     },
     {

@@ -6,7 +6,7 @@
  */
 
 import { getQueryFilter, getAllFilters, buildEqlSearchRequest } from './get_query_filter';
-import { Filter } from 'src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 import { getExceptionListItemSchemaMock } from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 describe('get_filter', () => {

@@ -8,7 +8,7 @@
 import React, { FC, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useRefreshAnalyticsList } from '../../../../common';
 
 export const RefreshAnalyticsListButton: FC = () => {

@@ -37,11 +37,11 @@ const mockedResponse: StatusResponse = {
       },
     },
     plugins: {
-      '1': {
+      plugin1: {
         level: 'available',
         summary: 'Ready',
       },
-      '2': {
+      plugin2: {
         level: 'degraded',
         summary: 'Something is weird',
       },
@@ -165,39 +165,50 @@ describe('response processing', () => {
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
-  test('includes the plugin statuses', async () => {
+  test('includes core statuses', async () => {
     const data = await loadStatus({ http, notifications });
-    expect(data.statuses).toEqual([
+    expect(data.coreStatus).toEqual([
       {
-        id: 'core:elasticsearch',
+        id: 'elasticsearch',
         state: {
           id: 'available',
           title: 'Green',
           message: 'Elasticsearch is available',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
+        original: mockedResponse.status.core.elasticsearch,
       },
       {
-        id: 'core:savedObjects',
+        id: 'savedObjects',
         state: {
           id: 'available',
           title: 'Green',
           message: 'SavedObjects service has completed migrations and is available',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
+        original: mockedResponse.status.core.savedObjects,
+      },
+    ]);
+  });
+
+  test('includes the plugin statuses', async () => {
+    const data = await loadStatus({ http, notifications });
+
+    expect(data.pluginStatus).toEqual([
+      {
+        id: 'plugin1',
+        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'success' },
+        original: mockedResponse.status.plugins.plugin1,
       },
       {
-        id: 'plugin:1',
-        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'secondary' },
-      },
-      {
-        id: 'plugin:2',
+        id: 'plugin2',
         state: {
           id: 'degraded',
           title: 'Yellow',
           message: 'Something is weird',
           uiColor: 'warning',
         },
+        original: mockedResponse.status.plugins.plugin2,
       },
     ]);
   });
@@ -218,13 +229,23 @@ describe('response processing', () => {
     expect(names).toEqual([
       'Heap total',
       'Heap used',
-      'Load',
-      'Response time avg',
-      'Response time max',
       'Requests per second',
+      'Load',
+      'Delay',
+      'Response time avg',
     ]);
-
     const values = data.metrics.map((m) => m.value);
-    expect(values).toEqual([1000000, 100, [4.1, 2.1, 0.1], 4000, 8000, 400]);
+    expect(values).toEqual([1000000, 100, 400, [4.1, 2.1, 0.1], 1, 4000]);
+  });
+
+  test('adds meta details to Load, Delay and Response time', async () => {
+    const data = await loadStatus({ http, notifications });
+    const metricNames = data.metrics.filter((met) => met.meta);
+    expect(metricNames.map((item) => item.name)).toEqual(['Load', 'Delay', 'Response time avg']);
+    expect(metricNames.map((item) => item.meta!.description)).toEqual([
+      'Load interval',
+      'Percentiles',
+      'Response time max',
+    ]);
   });
 });

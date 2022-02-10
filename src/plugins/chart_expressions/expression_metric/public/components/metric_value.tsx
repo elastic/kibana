@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import classNames from 'classnames';
-
-import type { MetricOptions } from '../../common/types';
+import type { MetricOptions, MetricStyle } from '../../common/types';
 
 interface MetricVisValueProps {
   metric: MetricOptions;
-  fontSize: number;
-  onFilter?: (metric: MetricOptions) => void;
+  onFilter?: () => void;
   showLabel?: boolean;
+  style: MetricStyle;
 }
 
-export const MetricVisValue = ({ fontSize, metric, onFilter, showLabel }: MetricVisValueProps) => {
+export const MetricVisValue = ({ style, metric, onFilter, showLabel }: MetricVisValueProps) => {
   const containerClassName = classNames('mtrVis__container', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'mtrVis__container--light': metric.lightText,
@@ -31,8 +30,8 @@ export const MetricVisValue = ({ fontSize, metric, onFilter, showLabel }: Metric
       <div
         className="mtrVis__value"
         style={{
-          fontSize: `${fontSize}pt`,
-          color: metric.color,
+          ...(style.spec as CSSProperties),
+          ...(metric.color ? { color: metric.color } : {}),
         }}
         /*
          * Justification for dangerouslySetInnerHTML:
@@ -50,7 +49,7 @@ export const MetricVisValue = ({ fontSize, metric, onFilter, showLabel }: Metric
 
   if (onFilter) {
     return (
-      <button style={{ display: 'block' }} onClick={() => onFilter(metric)}>
+      <button style={{ display: 'block' }} onClick={() => onFilter()}>
         {metricComponent}
       </button>
     );

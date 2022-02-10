@@ -6,38 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { hasUserDataViewMock } from './overview.test.mocks';
+import { setTimeout as setTimeoutP } from 'timers/promises';
 import moment from 'moment';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 import { Overview } from './overview';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
-
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
-      data: { indexPatterns: {} },
-      share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
-      uiSettings: { get: jest.fn() },
-      docLinks: {
-        links: {
-          kibana: 'kibana_docs_url',
-        },
-      },
-    },
-  }),
-  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-  overviewPageActions: jest.fn().mockReturnValue([]),
-  OverviewPageFooter: jest.fn().mockReturnValue(<></>),
-  KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
-  KibanaPageTemplateSolutionNavAvatar: jest.fn().mockReturnValue(<></>),
-}));
-
-jest.mock('../../lib/ui_metric', () => ({
-  trackUiMetric: jest.fn(),
-}));
-
-afterAll(() => jest.clearAllMocks());
 
 const mockNewsFetchResult = {
   error: null,
@@ -148,27 +125,86 @@ const mockFeatures = [
   },
 ];
 
+const flushPromises = async () => await setTimeoutP(10);
+
+const updateComponent = async (component: ReactWrapper) => {
+  await act(async () => {
+    await flushPromises();
+    component.update();
+  });
+};
+
 describe('Overview', () => {
-  test('render', () => {
-    const component = shallowWithIntl(
+  beforeEach(() => {
+    hasUserDataViewMock.mockClear();
+    hasUserDataViewMock.mockResolvedValue(true);
+  });
+
+  afterAll(() => jest.clearAllMocks());
+
+  test('render', async () => {
+    const component = mountWithIntl(
       <Overview
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
         features={mockFeatures}
       />
     );
+
+    await updateComponent(component);
+
     expect(component).toMatchSnapshot();
   });
-  test('without solutions', () => {
-    const component = shallowWithIntl(
+
+  test('without solutions', async () => {
+    const component = mountWithIntl(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={[]} features={mockFeatures} />
     );
+
+    await updateComponent(component);
+
     expect(component).toMatchSnapshot();
   });
-  test('without features', () => {
-    const component = shallowWithIntl(
+
+  test('without features', async () => {
+    const component = mountWithIntl(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={mockSolutions} features={[]} />
     );
+
+    await updateComponent(component);
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('when there is no user data view', async () => {
+    hasUserDataViewMock.mockResolvedValue(false);
+
+    const component = mountWithIntl(
+      <Overview
+        newsFetchResult={mockNewsFetchResult}
+        solutions={mockSolutions}
+        features={mockFeatures}
+      />
+    );
+
+    await updateComponent(component);
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('during loading', async () => {
+    hasUserDataViewMock.mockImplementation(() => new Promise(() => {}));
+
+    const component = mountWithIntl(
+      <Overview
+        newsFetchResult={mockNewsFetchResult}
+        solutions={mockSolutions}
+        features={mockFeatures}
+      />
+    );
+
+    await updateComponent(component);
+
     expect(component).toMatchSnapshot();
   });
 });

@@ -7,15 +7,11 @@
 
 import { EuiButton } from '@elastic/eui';
 import React, { Fragment, useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import {
-  useCapabilities,
-  useGetPackageInstallStatus,
-  useInstallPackage,
-} from '../../../../../hooks';
+import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
 
 import { ConfirmPackageInstall } from './confirm_package_install';
 
@@ -30,7 +26,7 @@ type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> &
 };
 export function InstallButton(props: InstallationButtonProps) {
   const { name, numOfAssets, title, version } = props;
-  const hasWriteCapabilites = useCapabilities().write;
+  const canInstallPackages = useAuthz().integrations.installPackages;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
@@ -56,7 +52,7 @@ export function InstallButton(props: InstallationButtonProps) {
     />
   );
 
-  return hasWriteCapabilites ? (
+  return canInstallPackages ? (
     <Fragment>
       <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleInstallModal}>
         {isInstalling ? (

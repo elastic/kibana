@@ -31,14 +31,11 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
-      const packageService = osqueryContext.service.getPackageService();
+      const packageService = osqueryContext.service.getPackageService()?.asInternalUser;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-      const packageInfo = await osqueryContext.service.getPackageService()?.getInstallation({
-        savedObjectsClient: internalSavedObjectsClient,
-        pkgName: OSQUERY_INTEGRATION_NAME,
-      });
+      const packageInfo = await packageService?.getInstallation(OSQUERY_INTEGRATION_NAME);
 
       if (packageInfo?.install_version && satisfies(packageInfo?.install_version, '<0.6.0')) {
         try {
@@ -102,10 +99,52 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           );
 
           await packageService?.ensureInstalledPackage({
-            esClient,
-            savedObjectsClient: internalSavedObjectsClient,
             pkgName: OSQUERY_INTEGRATION_NAME,
           });
+
+          const agentPolicyIds = uniq(map(policyPackages?.items, 'policy_id'));
+          const agentPolicies = mapKeys(
+            await agentPolicyService?.getByIds(internalSavedObjectsClient, agentPolicyIds),
+            'id'
+          );
+
+          await Promise.all(
+            map(migrationObject.packs, async (packObject) => {
+              await internalSavedObjectsClient.create(
+                packSavedObjectType,
+                {
+                  // @ts-expect-error update types
+                  name: packObject.name,
+                  // @ts-expect-error update types
+                  description: packObject.description,
+                  // @ts-expect-error update types
+                  queries: convertPackQueriesToSO(packObject.queries),
+                  // @ts-expect-error update types
+                  enabled: packObject.enabled,
+                  created_at: new Date().toISOString(),
+                  created_by: 'system',
+                  updated_at: new Date().toISOString(),
+                  updated_by: 'system',
+                },
+                {
+                  // @ts-expect-error update types
+                  references: packObject.policy_ids.map((policyId: string) => ({
+                    id: policyId,
+                    name: agentPolicies[policyId].name,
+                    type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+                  })),
+                  refresh: 'wait_for',
+                }
+              );
+            })
+          );
+
+          // delete unnecessary package policies
+          await packagePolicyService?.delete(
+            internalSavedObjectsClient,
+            esClient,
+            migrationObject.packagePoliciesToDelete
+          );
 
           // updatePackagePolicies
           await Promise.all(
@@ -150,49 +189,6 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 );
               }
             })
-          );
-
-          const agentPolicyIds = uniq(map(policyPackages?.items, 'policy_id'));
-          const agentPolicies = mapKeys(
-            await agentPolicyService?.getByIds(internalSavedObjectsClient, agentPolicyIds),
-            'id'
-          );
-
-          await Promise.all(
-            map(migrationObject.packs, async (packObject) => {
-              await internalSavedObjectsClient.create(
-                packSavedObjectType,
-                {
-                  // @ts-expect-error update types
-                  name: packObject.name,
-                  // @ts-expect-error update types
-                  description: packObject.description,
-                  // @ts-expect-error update types
-                  queries: convertPackQueriesToSO(packObject.queries),
-                  // @ts-expect-error update types
-                  enabled: packObject.enabled,
-                  created_at: new Date().toISOString(),
-                  created_by: 'system',
-                  updated_at: new Date().toISOString(),
-                  updated_by: 'system',
-                },
-                {
-                  // @ts-expect-error update types
-                  references: packObject.policy_ids.map((policyId: string) => ({
-                    id: policyId,
-                    name: agentPolicies[policyId].name,
-                    type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-                  })),
-                  refresh: 'wait_for',
-                }
-              );
-            })
-          );
-
-          await packagePolicyService?.delete(
-            internalSavedObjectsClient,
-            esClient,
-            migrationObject.packagePoliciesToDelete
           );
           // eslint-disable-next-line no-empty
         } catch (e) {}

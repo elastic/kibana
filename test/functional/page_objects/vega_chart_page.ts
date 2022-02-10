@@ -19,6 +19,7 @@ export class VegaChartPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly browser = this.ctx.getService('browser');
   private readonly retry = this.ctx.getService('retry');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   public getEditor() {
     return this.testSubjects.find('vega-editor');
@@ -36,63 +37,31 @@ export class VegaChartPageObject extends FtrService {
     return this.find.byCssSelector('[aria-label^="Y-axis"]');
   }
 
-  public async getAceGutterContainer() {
-    const editor = await this.getEditor();
-    return editor.findByClassName('ace_gutter');
-  }
-
-  public async getRawSpec() {
-    // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
-    const editor = await this.getEditor();
-    const lines = await editor.findAllByClassName('ace_line_group');
-
-    return await Promise.all(
-      lines.map(async (line) => {
-        return await line.getVisibleText();
-      })
-    );
-  }
-
   public async getSpec() {
-    return (await this.getRawSpec()).join('\n');
-  }
-
-  public async focusEditor() {
-    const editor = await this.getEditor();
-    const textarea = await editor.findByClassName('ace_content');
-
-    await textarea.click();
+    return this.monacoEditor.getCodeEditorValue();
   }
 
   public async fillSpec(newSpec: string) {
     await this.retry.try(async () => {
       await this.cleanSpec();
-      await this.focusEditor();
-      await this.browser.pressKeys(newSpec);
+      await this.monacoEditor.setCodeEditorValue(newSpec);
 
       expect(compareSpecs(await this.getSpec(), newSpec)).to.be(true);
     });
   }
 
   public async typeInSpec(text: string) {
-    const aceGutter = await this.getAceGutterContainer();
+    const editor = await this.testSubjects.find('vega-editor');
+    const textarea = await editor.findByCssSelector('textarea');
 
-    await aceGutter.doubleClick();
+    await textarea.focus();
     await this.browser.pressKeys(this.browser.keys.RIGHT);
-    await this.browser.pressKeys(this.browser.keys.LEFT);
-    await this.browser.pressKeys(this.browser.keys.LEFT);
-    await this.browser.pressKeys(text);
+    await this.browser.pressKeys(this.browser.keys.RIGHT);
+    await textarea.type(text);
   }
 
   public async cleanSpec() {
-    const aceGutter = await this.getAceGutterContainer();
-
-    await this.retry.try(async () => {
-      await aceGutter.doubleClick();
-      await this.browser.pressKeys(this.browser.keys.BACK_SPACE);
-
-      expect(await this.getSpec()).to.be('');
-    });
+    await this.monacoEditor.setCodeEditorValue('');
   }
 
   public async getYAxisLabels() {

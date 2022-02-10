@@ -45,7 +45,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         page: parseInt(request.query.pageIndex ?? '0', 10) + 1,
         perPage: request.query.pageSize ?? 20,
         sortField: request.query.sortField ?? 'updated_at',
-        // @ts-expect-error update types
+        // @ts-expect-error sortOrder type must be union of ['asc', 'desc']
         sortOrder: request.query.sortOrder ?? 'desc',
       });
 

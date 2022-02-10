@@ -11,7 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { EntryItem } from './entry_item';
 import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
-import { IndexPattern } from 'src/plugins/data/public';
+import type { DataViewBase } from '@kbn/es-query';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -31,7 +31,7 @@ describe('EntryItem', () => {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         showLabel={true}
         onChange={jest.fn()}
@@ -40,7 +40,7 @@ describe('EntryItem', () => {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
       />
     );
@@ -64,14 +64,14 @@ describe('EntryItem', () => {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         threatIndexPatterns={
           {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         showLabel={false}
         onChange={mockOnChange}
@@ -111,14 +111,14 @@ describe('EntryItem', () => {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         threatIndexPatterns={
           {
             id: '1234',
             title: 'logstash-*',
             fields,
-          } as IndexPattern
+          } as DataViewBase
         }
         showLabel={false}
         onChange={mockOnChange}

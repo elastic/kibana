@@ -13,7 +13,7 @@ import { KQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, KueryParseOptions, KueryQueryOptions } from '../types';
 
 import { parse as parseKuery } from '../grammar';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 
 const fromExpression = (
   expression: string | estypes.QueryDslQueryContainer,
@@ -66,7 +66,7 @@ export const fromKueryExpression = (
  */
 export const toElasticsearchQuery = (
   node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context?: Record<string, any>
 ): JsonObject => {

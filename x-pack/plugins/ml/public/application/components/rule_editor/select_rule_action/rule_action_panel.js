@@ -21,7 +21,7 @@ import { DeleteRuleModal } from './delete_rule_modal';
 import { EditConditionLink } from './edit_condition_link';
 import { buildRuleDescription } from '../utils';
 import { ml } from '../../../services/ml_api_service';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class RuleActionPanel extends Component {
   constructor(props) {

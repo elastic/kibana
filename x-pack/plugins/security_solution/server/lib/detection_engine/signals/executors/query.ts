@@ -17,11 +17,12 @@ import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { CompleteRule, SavedQueryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 export const queryExecutor = async ({
   completeRule,
@@ -47,47 +48,49 @@ export const queryExecutor = async ({
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
-  const inputIndex = await getInputIndex({
-    experimentalFeatures,
-    services,
-    version,
-    index: ruleParams.index,
-  });
+  return withSecuritySpan('queryExecutor', async () => {
+    const inputIndex = await getInputIndex({
+      experimentalFeatures,
+      services,
+      version,
+      index: ruleParams.index,
+    });
 
-  const esFilter = await getFilter({
-    type: ruleParams.type,
-    filters: ruleParams.filters,
-    language: ruleParams.language,
-    query: ruleParams.query,
-    savedId: ruleParams.savedId,
-    services,
-    index: inputIndex,
-    lists: exceptionItems,
-  });
+    const esFilter = await getFilter({
+      type: ruleParams.type,
+      filters: ruleParams.filters,
+      language: ruleParams.language,
+      query: ruleParams.query,
+      savedId: ruleParams.savedId,
+      services,
+      index: inputIndex,
+      lists: exceptionItems,
+    });
 
-  return searchAfterAndBulkCreate({
-    tuple,
-    listClient,
-    exceptionsList: exceptionItems,
-    completeRule,
-    services,
-    logger,
-    eventsTelemetry,
-    id: completeRule.alertId,
-    inputIndexPattern: inputIndex,
-    signalsIndex: ruleParams.outputIndex,
-    filter: esFilter,
-    pageSize: searchAfterSize,
-    buildReasonMessage: buildReasonMessageForQueryAlert,
-    buildRuleMessage,
-    bulkCreate,
-    wrapHits,
+    return searchAfterAndBulkCreate({
+      tuple,
+      listClient,
+      exceptionsList: exceptionItems,
+      completeRule,
+      services,
+      logger,
+      eventsTelemetry,
+      id: completeRule.alertId,
+      inputIndexPattern: inputIndex,
+      signalsIndex: ruleParams.outputIndex,
+      filter: esFilter,
+      pageSize: searchAfterSize,
+      buildReasonMessage: buildReasonMessageForQueryAlert,
+      buildRuleMessage,
+      bulkCreate,
+      wrapHits,
+    });
   });
 };

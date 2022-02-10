@@ -35,6 +35,12 @@ export const COLUMNS_WITH_LINKS = [
   {
     columnId: SIGNAL_RULE_NAME_FIELD_NAME,
     label: i18n.VIEW_RULE_DETAILS,
+    linkField: 'kibana.alert.rule.uuid',
+  },
+  {
+    columnId: 'signal.rule.name',
+    label: i18n.VIEW_RULE_DETAILS,
+    linkField: 'signal.rule.id',
   },
   ...PORT_NAMES.map((p) => ({
     columnId: p,
@@ -58,8 +64,22 @@ export const COLUMNS_WITH_LINKS = [
   },
 ];
 
-export const getLink = (cId?: string, fieldType?: string, linkField?: string) =>
-  cId &&
-  COLUMNS_WITH_LINKS.find(
-    (c) => c.columnId === cId || (c.fieldType && fieldType === c.fieldType && linkField != null)
-  );
+export const getLinkColumnDefinition = (
+  columnIdToFind: string,
+  fieldType?: string,
+  linkField?: string
+) => {
+  return COLUMNS_WITH_LINKS.find((column) => {
+    if (column.columnId === columnIdToFind) {
+      return true;
+    } else if (
+      column.fieldType &&
+      fieldType === column.fieldType &&
+      (linkField !== undefined || column.linkField !== undefined)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+};

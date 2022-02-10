@@ -7,14 +7,13 @@
 
 import { of, throwError } from 'rxjs';
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { setupServer } from '../../../../../../src/core/server/test_utils';
 import { GlobalSearchResult, GlobalSearchBatchedResults } from '../../../common/types';
 import { GlobalSearchFindError } from '../../../common/errors';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalFindRoute } from '../find';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const pluginId = Symbol('globalSearch');
 
 const createResult = (id: string): GlobalSearchResult => ({
@@ -136,7 +135,7 @@ describe('POST /internal/global_search/find', () => {
 
     expect(response.body).toEqual(
       expect.objectContaining({
-        message: 'An internal server error occurred.',
+        message: 'An internal server error occurred. Check Kibana server logs for details.',
         statusCode: 500,
       })
     );

@@ -1,0 +1,101 @@
+{
+  "id": "transform",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "transform",
+        "id": "def-public.getTransformHealthRuleType",
+        "type": "Function",
+        "tags": [],
+        "label": "getTransformHealthRuleType",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleTypeModel",
+            "text": "RuleTypeModel"
+          },
+          "<",
+          "TransformHealthRuleParams",
+          ">"
+        ],
+        "path": "x-pack/plugins/transform/public/alerting/transform_health_rule_type/register_transform_health_rule.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "transform",
+        "id": "def-server.registerTransformHealthRuleType",
+        "type": "Function",
+        "tags": [],
+        "label": "registerTransformHealthRuleType",
+        "description": [],
+        "signature": [
+          "(params: RegisterParams) => void"
+        ],
+        "path": "x-pack/plugins/transform/server/lib/alerting/transform_health_rule_type/register_transform_health_rule_type.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "transform",
+            "id": "def-server.registerTransformHealthRuleType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "RegisterParams"
+            ],
+            "path": "x-pack/plugins/transform/server/lib/alerting/transform_health_rule_type/register_transform_health_rule_type.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "transform",
+        "id": "def-common.TRANSFORM_RULE_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "TRANSFORM_RULE_TYPE",
+        "description": [],
+        "signature": [
+          "{ readonly TRANSFORM_HEALTH: \"transform_health\"; }"
+        ],
+        "path": "x-pack/plugins/transform/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

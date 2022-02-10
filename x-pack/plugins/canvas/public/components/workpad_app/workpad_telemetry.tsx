@@ -6,20 +6,17 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
+import deepEqual from 'react-fast-compare';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { getElementCounts } from '../../state/selectors/workpad';
 import { getArgs } from '../../state/selectors/resolved_args';
+import { State } from '../../../types';
 
 const WorkpadLoadedMetric = 'workpad-loaded';
 const WorkpadLoadedWithErrorsMetric = 'workpad-loaded-with-errors';
 
 export { WorkpadLoadedMetric, WorkpadLoadedWithErrorsMetric };
-
-const mapStateToProps = (state: any) => ({
-  telemetryElementCounts: getElementCounts(state),
-  telemetryResolvedArgs: getArgs(state),
-});
 
 // TODO: Build out full workpad types
 /**
@@ -47,7 +44,7 @@ interface ResolvedArgs {
   [keys: string]: any;
 }
 
-export interface ElementsLoadedTelemetryProps extends PropsFromRedux {
+export interface ElementsLoadedTelemetryProps {
   workpad: Workpad;
 }
 
@@ -65,33 +62,32 @@ export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
   Component: React.ComponentType<P>,
   trackMetric = trackCanvasUiMetric
 ) =>
-  function ElementsLoadedTelemetry(props: ElementsLoadedTelemetryProps) {
-    const { telemetryElementCounts, workpad, telemetryResolvedArgs, ...other } = props;
-    const { error, pending } = telemetryElementCounts;
+  function ElementsLoadedTelemetry(props: P & ElementsLoadedTelemetryProps) {
+    const { workpad } = props;
 
     const [currentWorkpadId, setWorkpadId] = useState<string | undefined>(undefined);
     const [hasReported, setHasReported] = useState(false);
+    const telemetryElementCounts = useSelector(
+      (state: State) => getElementCounts(state),
+      shallowEqual
+    );
+
+    const telemetryResolvedArgs = useSelector((state: State) => getArgs(state), deepEqual);
+
+    const resolvedArgsAreForWorkpad = areAllElementsInResolvedArgs(workpad, telemetryResolvedArgs);
+    const { error, pending } = telemetryElementCounts;
+    const resolved = resolvedArgsAreForWorkpad && pending === 0;
 
     useEffect(() => {
-      const resolvedArgsAreForWorkpad = areAllElementsInResolvedArgs(
-        workpad,
-        telemetryResolvedArgs
-      );
-
       if (workpad.id !== currentWorkpadId) {
-        setWorkpadId(workpad.id);
-
         const workpadElementCount = workpad.pages.reduce(
           (reduction, page) => reduction + page.elements.length,
           0
         );
 
-        if (workpadElementCount === 0 || (resolvedArgsAreForWorkpad && pending === 0)) {
-          setHasReported(true);
-        } else {
-          setHasReported(false);
-        }
-      } else if (!hasReported && pending === 0 && resolvedArgsAreForWorkpad) {
+        setWorkpadId(workpad.id);
+        setHasReported(workpadElementCount === 0 || resolved);
+      } else if (!hasReported && resolved) {
         if (error > 0) {
           trackMetric(METRIC_TYPE.LOADED, [WorkpadLoadedMetric, WorkpadLoadedWithErrorsMetric]);
         } else {
@@ -99,16 +95,9 @@ export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
         }
         setHasReported(true);
       }
-    }, [currentWorkpadId, hasReported, error, pending, telemetryResolvedArgs, workpad]);
-
-    return <Component {...(other as P)} workpad={workpad} />;
+    }, [currentWorkpadId, hasReported, error, workpad.id, resolved, workpad.pages]);
+    return <Component {...props} />;
   };
 
-const connector = connect(mapStateToProps, {});
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const withElementsLoadedTelemetry = <P extends {}>(Component: React.ComponentType<P>) => {
-  const telemetry = withUnconnectedElementsLoadedTelemetry(Component);
-  return connector(telemetry);
-};
+export const withElementsLoadedTelemetry = <P extends {}>(Component: React.ComponentType<P>) =>
+  withUnconnectedElementsLoadedTelemetry(Component);

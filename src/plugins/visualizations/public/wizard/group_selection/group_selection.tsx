@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import {
@@ -110,7 +110,7 @@ function GroupSelection(props: GroupSelectionProps) {
                         'Use our classic visualize library to create charts based on aggregations.',
                     }
                   )}
-                  icon={<EuiIcon type="heatmap" size="xl" color="secondary" />}
+                  icon={<EuiIcon type="heatmap" size="xl" color="success" />}
                   className="visNewVisDialog__groupsCard"
                 >
                   <EuiLink
@@ -203,7 +203,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
           </>
         }
         layout="horizontal"
-        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="secondary" />}
+        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="success" />}
         className="visNewVisDialog__groupsCard"
       />
     </EuiFlexItem>
@@ -238,10 +238,10 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
                 iconType="beaker"
                 tooltipContent={i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
                   defaultMessage:
-                    'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
                 })}
                 label={i18n.translate('visualizations.newVisWizard.experimentalTitle', {
-                  defaultMessage: 'Experimental',
+                  defaultMessage: 'Technical preview',
                 })}
               />
             </EuiFlexItem>

@@ -42,7 +42,7 @@ const resources = [
 
 export function Resources() {
   return (
-    <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
+    <EuiFlexGroup direction="column" alignItems="flexStart">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h4>
@@ -52,7 +52,7 @@ export function Resources() {
           </h4>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiListGroup flush listItems={resources} data-test-subj="list-group" size="s" />
+      <EuiListGroup flush listItems={resources} data-test-subj="listGroup" size="s" />
     </EuiFlexGroup>
   );
 }

@@ -14,6 +14,7 @@ import { registerMappingRoute } from './api/mapping';
 import { registerSettingsRoutes } from './api/settings';
 import { registerStatsRoute } from './api/stats';
 import { registerComponentTemplateRoutes } from './api/component_templates';
+import { registerNodesRoute } from './api/nodes';
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
@@ -24,6 +25,7 @@ export class ApiRoutes {
     registerStatsRoute(dependencies);
     registerMappingRoute(dependencies);
     registerComponentTemplateRoutes(dependencies);
+    registerNodesRoute(dependencies);
   }
 
   start() {}

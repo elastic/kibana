@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiSpacer,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
@@ -26,6 +17,7 @@ import { IndicesForm } from '../components/settings/indices_form';
 import {
   CertificateExpirationForm,
   OnFieldChangeType,
+  PartialSettings,
 } from '../components/settings/certificate_form';
 import * as Translations from './translations';
 import {
@@ -33,12 +25,18 @@ import {
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
 import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
-import { BLANK_STR, SPACE_STR } from './translations';
+import { SettingsActionBarPortal } from '../components/settings/settings_bottom_bar';
+import { useSettingsErrors } from '../components/settings/use_settings_errors';
 
-interface SettingsPageFieldErrors {
+export interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
   expirationThresholdError?: string;
   ageThresholdError?: string;
+  invalidEmail?: {
+    to?: string;
+    cc?: string;
+    bcc?: string;
+  };
 }
 
 export interface SettingsFormProps {
@@ -61,35 +59,6 @@ export const isValidCertVal = (val?: number): string | undefined => {
   }
 };
 
-const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldErrors | null => {
-  if (formFields) {
-    const { certAgeThreshold, certExpirationThreshold, heartbeatIndices } = formFields;
-
-    const indErrorSpace = heartbeatIndices.includes(' ') ? SPACE_STR : '';
-
-    const indError = indErrorSpace || (heartbeatIndices.match(/^\S+$/) ? '' : BLANK_STR);
-
-    const expError = isValidCertVal(certExpirationThreshold);
-    const ageError = isValidCertVal(certAgeThreshold);
-
-    return {
-      heartbeatIndices: indError,
-      expirationThresholdError: expError,
-      ageThresholdError: ageError,
-    };
-  }
-  return null;
-};
-
-const isDirtyForm = (formFields: DynamicSettings | null, settings?: DynamicSettings) => {
-  return (
-    settings?.certAgeThreshold !== formFields?.certAgeThreshold ||
-    settings?.certExpirationThreshold !== formFields?.certExpirationThreshold ||
-    settings?.heartbeatIndices !== formFields?.heartbeatIndices ||
-    JSON.stringify(settings?.defaultConnectors) !== JSON.stringify(formFields?.defaultConnectors)
-  );
-};
-
 export const SettingsPage: React.FC = () => {
   const dss = useSelector(selectDynamicSettings);
 
@@ -101,7 +70,7 @@ export const SettingsPage: React.FC = () => {
     dispatch(getDynamicSettings());
   }, [dispatch]);
 
-  const [formFields, setFormFields] = useState<DynamicSettings | null>(
+  const [formFields, setFormFields] = useState<PartialSettings | null>(
     dss.settings ? { ...dss.settings } : null
   );
 
@@ -109,29 +78,30 @@ export const SettingsPage: React.FC = () => {
     setFormFields(Object.assign({}, { ...dss.settings }));
   }
 
-  const fieldErrors = getFieldErrors(formFields);
+  const { errors: fieldErrors, isFormDirty } = useSettingsErrors(formFields);
 
   const isFormValid = !(fieldErrors && Object.values(fieldErrors).find((v) => !!v));
 
-  const onChangeFormField: OnFieldChangeType = (changedField) => {
-    if (formFields) {
-      setFormFields({
-        ...formFields,
-        ...changedField,
-      });
-    }
-  };
+  const onChangeFormField: OnFieldChangeType = useCallback(
+    (changedField) => {
+      if (formFields) {
+        setFormFields({
+          ...formFields,
+          ...changedField,
+        });
+      }
+    },
+    [formFields]
+  );
 
   const onApply = (event: React.FormEvent) => {
     event.preventDefault();
     if (formFields) {
-      dispatch(setDynamicSettings(formFields));
+      dispatch(setDynamicSettings(formFields as DynamicSettings));
     }
   };
 
   const resetForm = () => setFormFields(dss.settings ? { ...dss.settings } : null);
-
-  const isFormDirty = isDirtyForm(formFields, dss.settings);
 
   const canEdit: boolean =
     !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
@@ -158,13 +128,13 @@ export const SettingsPage: React.FC = () => {
               <IndicesForm
                 loading={dss.loading}
                 onChange={onChangeFormField}
-                formFields={formFields}
+                formFields={formFields as DynamicSettings}
                 fieldErrors={fieldErrors}
                 isDisabled={isFormDisabled}
               />
               <AlertDefaultsForm
                 loading={dss.loading}
-                formFields={formFields}
+                formFields={formFields as DynamicSettings}
                 onChange={onChangeFormField}
                 fieldErrors={fieldErrors}
                 isDisabled={isFormDisabled}
@@ -172,46 +142,22 @@ export const SettingsPage: React.FC = () => {
               <CertificateExpirationForm
                 loading={dss.loading}
                 onChange={onChangeFormField}
-                formFields={formFields}
+                formFields={formFields as DynamicSettings}
                 fieldErrors={fieldErrors}
                 isDisabled={isFormDisabled}
               />
-
-              <EuiSpacer size="m" />
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="discardSettingsButton"
-                    isDisabled={!isFormDirty || isFormDisabled}
-                    onClick={() => {
-                      resetForm();
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
-                      defaultMessage="Cancel"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="apply-settings-button"
-                    onClick={onApply}
-                    color="primary"
-                    isDisabled={!isFormDirty || !isFormValid || isFormDisabled}
-                    fill
-                  >
-                    <FormattedMessage
-                      id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
-                      defaultMessage="Apply changes"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
             </EuiForm>
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <SettingsActionBarPortal
+        onApply={onApply}
+        isFormDirty={isFormDirty}
+        isFormDisabled={isFormDisabled}
+        isFormValid={isFormValid}
+        onCancel={resetForm}
+        errors={fieldErrors}
+      />
     </>
   );
 };

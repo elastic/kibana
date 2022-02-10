@@ -11,6 +11,7 @@ Methods for adding and removing global toast messages.
 ```typescript
 export declare class ToastsApi implements IToasts 
 ```
+<b>Implements:</b> IToasts
 
 ## Constructors
 

@@ -13,7 +13,8 @@ import Boom from '@hapi/boom';
 
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
-import { CASE_COMMENTS_URL, CommentPatchRequestRt, throwErrors } from '../../../../common';
+import { CommentPatchRequestRt, throwErrors } from '../../../../common/api';
+import { CASE_COMMENTS_URL } from '../../../../common/constants';
 
 export function initPatchCommentApi({ router, logger }: RouteDeps) {
   router.patch(
@@ -23,11 +24,6 @@ export function initPatchCommentApi({ router, logger }: RouteDeps) {
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
         body: escapeHatch,
       },
     },
@@ -43,13 +39,12 @@ export function initPatchCommentApi({ router, logger }: RouteDeps) {
         return response.ok({
           body: await client.attachments.update({
             caseID: request.params.case_id,
-            subCaseID: request.query?.subCaseId,
             updateRequest: query,
           }),
         });
       } catch (error) {
         logger.error(
-          `Failed to patch comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
+          `Failed to patch comment in route case id: ${request.params.case_id}: ${error}`
         );
         return response.customError(wrapError(error));
       }

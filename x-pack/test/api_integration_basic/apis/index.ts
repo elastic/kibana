@@ -11,7 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', function () {
     this.tags('ciGroup11');
 
-    loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./transform'));
     loadTestFile(require.resolve('./security_solution'));
   });

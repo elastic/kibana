@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { castProvider } from '@kbn/interpreter/common';
+import { castProvider } from '@kbn/interpreter';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';
 import { InitializeArguments } from '.';

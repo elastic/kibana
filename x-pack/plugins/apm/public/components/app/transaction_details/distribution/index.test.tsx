@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
@@ -21,7 +21,7 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcherModule from '../../../../hooks/use_fetcher';
-import { fromQuery } from '../../../shared/Links/url_helpers';
+import { fromQuery } from '../../../shared/links/url_helpers';
 
 import { getFormattedSelection, TransactionDistribution } from './index';
 

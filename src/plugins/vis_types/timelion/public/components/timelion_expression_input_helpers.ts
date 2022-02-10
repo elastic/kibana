@@ -42,7 +42,7 @@ function getArgumentsHelp(
 
   // ignore arguments that are already provided in function declaration
   const functionArgNames = functionArgs.map((arg) => arg.name);
-  return argsHelp.filter((arg) => !functionArgNames.includes(arg.name));
+  return argsHelp.filter((arg) => !arg.hidden && !functionArgNames.includes(arg.name));
 }
 
 async function extractSuggestionsFromParsedResult(

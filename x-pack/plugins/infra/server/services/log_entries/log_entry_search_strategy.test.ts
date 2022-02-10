@@ -111,7 +111,6 @@ describe('LogEntry search strategy', () => {
             {
               _id: 'HIT_ID',
               _index: 'HIT_INDEX',
-              _type: '_doc',
               _score: 0,
               _source: null,
               fields: {
@@ -244,12 +243,7 @@ const createSourceConfigurationMock = (): InfraSource => ({
     metricsExplorerDefaultView: 'DEFAULT_VIEW',
     logColumns: [],
     fields: {
-      pod: 'POD_FIELD',
-      host: 'HOST_FIELD',
-      container: 'CONTAINER_FIELD',
       message: ['MESSAGE_FIELD'],
-      timestamp: 'TIMESTAMP_FIELD',
-      tiebreaker: 'TIEBREAKER_FIELD',
     },
     anomalyThreshold: 20,
   },

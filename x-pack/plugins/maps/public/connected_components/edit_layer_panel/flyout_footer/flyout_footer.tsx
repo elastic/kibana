@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface Props {
   cancelLayerPanel: () => void;

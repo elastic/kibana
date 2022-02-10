@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -307,7 +307,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
             {policyName}{' '}
             <EuiButtonIcon
               iconType="refresh"
-              color="subdued"
+              color="text"
               aria-label={i18n.translate(
                 'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
                 { defaultMessage: 'Reload' }

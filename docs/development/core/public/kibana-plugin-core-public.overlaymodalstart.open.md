@@ -16,10 +16,10 @@ open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  mount | <code>MountPoint</code> |  |
-|  options | <code>OverlayModalOpenOptions</code> |  |
+|  mount | MountPoint | [MountPoint](./kibana-plugin-core-public.mountpoint.md) - Mounts the children inside the modal |
+|  options | OverlayModalOpenOptions | [OverlayModalOpenOptions](./kibana-plugin-core-public.overlaymodalopenoptions.md) - options for the modal  [OverlayRef](./kibana-plugin-core-public.overlayref.md) A reference to the opened modal. |
 
 <b>Returns:</b>
 
-`OverlayRef`
+OverlayRef
 

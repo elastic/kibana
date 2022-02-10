@@ -7,12 +7,34 @@
 
 import { SavedObjectsServiceStart } from 'kibana/server';
 import { EndpointMetadataService } from './endpoint_metadata_service';
-import { savedObjectsServiceMock } from '../../../../../../../src/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsServiceMock,
+} from '../../../../../../../src/core/server/mocks';
 import {
   createMockAgentPolicyService,
   createMockAgentService,
+  createMockPackageService,
+  createPackagePolicyServiceMock,
 } from '../../../../../fleet/server/mocks';
 import { AgentPolicyServiceInterface, AgentService } from '../../../../../fleet/server';
+import {
+  EndpointFleetServicesFactory,
+  EndpointInternalFleetServicesInterface,
+} from '../fleet/endpoint_fleet_services_factory';
+
+const createCustomizedPackagePolicyService = () => {
+  const service = createPackagePolicyServiceMock();
+  service.list.mockImplementation(async (_, options) => {
+    return {
+      items: [],
+      total: 0,
+      page: options.page ?? 1,
+      perPage: options.perPage ?? 10,
+    };
+  });
+  return service;
+};
 
 /**
  * Endpoint Metadata Service test context. Includes an instance of `EndpointMetadataService` along with the
@@ -22,24 +44,48 @@ export interface EndpointMetadataServiceTestContextMock {
   savedObjectsStart: jest.Mocked<SavedObjectsServiceStart>;
   agentService: jest.Mocked<AgentService>;
   agentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
+  packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
   endpointMetadataService: EndpointMetadataService;
+  fleetServices: EndpointInternalFleetServicesInterface;
+  logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
 }
 
 export const createEndpointMetadataServiceTestContextMock = (
   savedObjectsStart: jest.Mocked<SavedObjectsServiceStart> = savedObjectsServiceMock.createStartContract(),
   agentService: jest.Mocked<AgentService> = createMockAgentService(),
-  agentPolicyService: jest.Mocked<AgentPolicyServiceInterface> = createMockAgentPolicyService()
+  agentPolicyService: jest.Mocked<AgentPolicyServiceInterface> = createMockAgentPolicyService(),
+  packagePolicyService: ReturnType<
+    typeof createPackagePolicyServiceMock
+  > = createCustomizedPackagePolicyService(),
+  packageService: ReturnType<typeof createMockPackageService> = createMockPackageService(),
+  logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']> = loggingSystemMock
+    .create()
+    .get()
 ): EndpointMetadataServiceTestContextMock => {
+  const fleetServices = new EndpointFleetServicesFactory(
+    {
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
+    },
+    savedObjectsStart
+  ).asInternalUser();
+
   const endpointMetadataService = new EndpointMetadataService(
     savedObjectsStart,
-    agentService,
-    agentPolicyService
+    agentPolicyService,
+    packagePolicyService,
+    logger
   );
 
   return {
     savedObjectsStart,
     agentService,
     agentPolicyService,
+    packagePolicyService,
     endpointMetadataService,
+    fleetServices,
+    logger,
   };
 };

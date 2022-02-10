@@ -35,10 +35,11 @@ import type { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugi
 import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
-import { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
+  FormulaPublicApi,
 } from './indexpattern_datasource';
 import type {
   XyVisualization as XyVisualizationType,
@@ -57,6 +58,7 @@ import type {
   PieVisualizationPluginSetupPlugins,
 } from './pie_visualization';
 import type { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
+import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 import { AppNavLinkStatus } from '../../../../src/core/public';
@@ -68,7 +70,7 @@ import {
 } from '../../../../src/plugins/ui_actions/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
-import type { VisualizationType } from './types';
+import type { Visualization, VisualizationType, EditorFrameSetup } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 
@@ -109,10 +111,27 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
+}
+
+export interface LensPublicSetup {
+  /**
+   * Register 3rd party visualization type
+   * See `x-pack/examples/3rd_party_lens_vis` for exemplary usage.
+   *
+   * In case the visualization is a function returning a promise, it will only be called once Lens is actually requiring it.
+   * This can be used to lazy-load parts of the code to keep the initial bundle as small as possible.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  registerVisualization: <T>(
+    visualization: Visualization<T> | (() => Promise<Visualization<T>>)
+  ) => void;
 }
 
 export interface LensPublicStart {
@@ -159,16 +178,26 @@ export interface LensPublicStart {
    * Method which returns xy VisualizationTypes array keeping this async as to not impact page load bundle
    */
   getXyVisTypes: () => Promise<VisualizationType[]>;
+
+  /**
+   * API which returns state helpers keeping this async as to not impact page load bundle
+   */
+  stateHelperApi: () => Promise<{
+    formula: FormulaPublicApi;
+  }>;
 }
 
 export class LensPlugin {
   private datatableVisualization: DatatableVisualizationType | undefined;
   private editorFrameService: EditorFrameServiceType | undefined;
+  private editorFrameSetup: EditorFrameSetup | undefined;
+  private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
   private pieVisualization: PieVisualizationType | undefined;
   private heatmapVisualization: HeatmapVisualizationType | undefined;
+  private gaugeVisualization: GaugeVisualizationType | undefined;
 
   private stopReportManager?: () => void;
 
@@ -201,6 +230,8 @@ export class LensPlugin {
         plugins.fieldFormats.deserialize
       );
 
+      const visualizationMap = await this.editorFrameService!.loadVisualizations();
+
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
@@ -208,11 +239,14 @@ export class LensPlugin {
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
+        injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
+        visualizationMap,
         indexPatternService: plugins.data.indexPatterns,
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
         spaces: plugins.spaces,
+        theme: core.theme,
       };
     };
 
@@ -286,6 +320,17 @@ export class LensPlugin {
     }
 
     urlForwarding.forwardApp('lens', 'lens');
+
+    return {
+      registerVisualization: (vis: Visualization | (() => Promise<Visualization>)) => {
+        if (this.editorFrameSetup) {
+          this.editorFrameSetup.registerVisualization(vis);
+        } else {
+          // queue visualizations if editor frame is not yet ready as it's loaded async
+          this.queuedVisualizations.push(vis);
+        }
+      },
+    };
   }
 
   private async initParts(
@@ -304,6 +349,7 @@ export class LensPlugin {
       MetricVisualization,
       PieVisualization,
       HeatmapVisualization,
+      GaugeVisualization,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
@@ -312,6 +358,7 @@ export class LensPlugin {
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
     this.heatmapVisualization = new HeatmapVisualization();
+    this.gaugeVisualization = new GaugeVisualization();
 
     const editorFrameSetupInterface = this.editorFrameService.setup();
 
@@ -333,6 +380,12 @@ export class LensPlugin {
     this.metricVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
     this.heatmapVisualization.setup(core, dependencies);
+    this.gaugeVisualization.setup(core, dependencies);
+
+    this.queuedVisualizations.forEach((queuedVis) => {
+      editorFrameSetupInterface.registerVisualization(queuedVis);
+    });
+    this.editorFrameSetup = editorFrameSetupInterface;
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
@@ -376,6 +429,14 @@ export class LensPlugin {
       getXyVisTypes: async () => {
         const { visualizationTypes } = await import('./xy_visualization/types');
         return visualizationTypes;
+      },
+
+      stateHelperApi: async () => {
+        const { createFormulaPublicApi } = await import('./async_services');
+
+        return {
+          formula: createFormulaPublicApi(),
+        };
       },
     };
   }

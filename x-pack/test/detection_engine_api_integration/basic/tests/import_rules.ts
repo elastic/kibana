@@ -23,16 +23,17 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('import_rules', () => {
     describe('importing rules with an index', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -68,6 +69,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -135,6 +139,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 2,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -154,6 +161,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 10,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -207,6 +217,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -221,6 +234,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -249,6 +265,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 0,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -269,6 +288,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -326,6 +348,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 2,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -361,6 +386,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 

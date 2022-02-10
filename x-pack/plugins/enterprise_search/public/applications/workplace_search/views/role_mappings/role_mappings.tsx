@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiSpacer } from '@elastic/eui';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { docLinks } from '../../../shared/doc_links';
 import {
   RoleMappingsTable,
   RoleMappingsHeading,
@@ -22,7 +23,6 @@ import {
 } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
-import { SECURITY_DOCS_URL } from '../../routes';
 
 import { ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
@@ -43,7 +43,6 @@ export const RoleMappings: React.FC = () => {
     roleMappings,
     singleUserRoleMappings,
     dataLoading,
-    multipleAuthProvidersConfig,
     roleMappingFlyoutOpen,
     singleUserRoleMappingFlyoutOpen,
   } = useValues(RoleMappingsLogic);
@@ -57,7 +56,7 @@ export const RoleMappings: React.FC = () => {
   const rolesEmptyState = (
     <RolesEmptyPrompt
       productName={WORKPLACE_SEARCH_PLUGIN.NAME}
-      docsLink={SECURITY_DOCS_URL}
+      docsLink={docLinks.workplaceSearchSecurity}
       onEnable={enableRoleBasedAccess}
     />
   );
@@ -66,14 +65,13 @@ export const RoleMappings: React.FC = () => {
     <section>
       <RoleMappingsHeading
         productName={WORKPLACE_SEARCH_PLUGIN.NAME}
-        docsLink={SECURITY_DOCS_URL}
+        docsLink={docLinks.workplaceSearchSecurity}
         onClick={() => initializeRoleMapping()}
       />
       <RoleMappingsTable
         roleMappings={roleMappings}
         accessItemKey="groups"
         accessHeader={ROLE_MAPPINGS_TABLE_HEADER}
-        shouldShowAuthProvider={multipleAuthProvidersConfig}
         initializeRoleMapping={initializeRoleMapping}
         handleDeleteMapping={handleDeleteMapping}
       />

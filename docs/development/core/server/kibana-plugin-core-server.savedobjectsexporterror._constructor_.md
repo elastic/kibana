@@ -16,7 +16,7 @@ constructor(type: string, message: string, attributes?: Record<string, any> | un
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  message | <code>string</code> |  |
-|  attributes | <code>Record&lt;string, any&gt; &#124; undefined</code> |  |
+|  type | string |  |
+|  message | string |  |
+|  attributes | Record&lt;string, any&gt; \| undefined |  |
 

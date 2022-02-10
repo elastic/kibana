@@ -10,7 +10,7 @@ import 'jest-canvas-mock';
 // @ts-ignore
 import { compile } from 'vega-lite/build/vega-lite';
 
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { LEGEND_TYPES } from '../vega_chart/common';
 

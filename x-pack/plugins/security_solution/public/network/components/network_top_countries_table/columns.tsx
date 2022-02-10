@@ -8,8 +8,7 @@
 import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
-
+import type { DataViewBase } from '@kbn/es-query';
 import { CountryFlagAndName } from '../source_destination/country_flag';
 import {
   FlowTargetSourceDest,
@@ -47,7 +46,7 @@ export type NetworkTopCountriesColumnsNetworkDetails = [
 ];
 
 export const getNetworkTopCountriesColumns = (
-  indexPattern: IIndexPattern,
+  indexPattern: DataViewBase,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
@@ -161,7 +160,7 @@ export const getNetworkTopCountriesColumns = (
 ];
 
 export const getCountriesColumnsCurated = (
-  indexPattern: IIndexPattern,
+  indexPattern: DataViewBase,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string

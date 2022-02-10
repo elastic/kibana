@@ -8,7 +8,7 @@
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   isErrorResponse,
   isCompleteResponse,

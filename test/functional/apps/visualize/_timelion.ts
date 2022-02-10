@@ -171,7 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(firstAxesLabels).to.eql(['12.2GB', '12.21GB']);
       expect(secondAxesLabels).to.eql(['5.59KB', '5.6KB']);
       expect(thirdAxesLabels.toString()).to.be(
-        'BYTES_5721,BYTES_5722,BYTES_5723,BYTES_5724,BYTES_5725,BYTES_5726,BYTES_5727,BYTES_5728,BYTES_5729,BYTES_5730,BYTES_5731,BYTES_5732,BYTES_5733'
+        'BYTES_5722,BYTES_5723,BYTES_5724,BYTES_5725,BYTES_5726,BYTES_5727,BYTES_5728,BYTES_5729,BYTES_5730,BYTES_5731,BYTES_5732,BYTES_5733'
       );
     });
 
@@ -265,8 +265,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await monacoEditor.typeCodeEditorValue('.es(index=', 'timelionCodeEditor');
             // wait for index patterns will be loaded
             await common.sleep(500);
-            const suggestions = await timelion.getSuggestionItemsText();
-            expect(suggestions[0].includes('log')).to.eql(true);
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
+            await retry.try(async () => {
+              const suggestions = await timelion.getSuggestionItemsText();
+              expect(suggestions[0].includes('log')).to.eql(true);
+            });
           });
 
           it('should show field suggestions for timefield argument when index pattern set', async () => {
@@ -275,9 +278,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               '.es(index=logstash-*, timefield=',
               'timelionCodeEditor'
             );
-            const suggestions = await timelion.getSuggestionItemsText();
-            expect(suggestions.length).to.eql(4);
-            expect(suggestions[0].includes('@timestamp')).to.eql(true);
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
+            await retry.try(async () => {
+              const suggestions = await timelion.getSuggestionItemsText();
+              expect(suggestions.length).to.eql(4);
+              expect(suggestions[0].includes('@timestamp')).to.eql(true);
+            });
           });
 
           it('should show field suggestions for split argument when index pattern set', async () => {
@@ -288,9 +294,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             );
             // wait for split fields to load
             await common.sleep(300);
-            const suggestions = await timelion.getSuggestionItemsText();
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
+            await retry.try(async () => {
+              const suggestions = await timelion.getSuggestionItemsText();
 
-            expect(suggestions[0].includes('@message.raw')).to.eql(true);
+              expect(suggestions[0].includes('@message.raw')).to.eql(true);
+            });
           });
 
           it('should show field suggestions for metric argument when index pattern set', async () => {

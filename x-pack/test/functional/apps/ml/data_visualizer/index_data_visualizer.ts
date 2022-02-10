@@ -9,12 +9,15 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
   farequoteDataViewTestData,
+  farequoteKQLFiltersSearchTestData,
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data';
+import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getPageObject, getService }: FtrProviderContext) {
+  const headerPage = getPageObject('header');
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
@@ -41,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.clickUseFullDataButton(
         testData.expected.totalDocCountFormatted
       );
+      await headerPage.waitUntilLoadingHasFinished();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the doc count panel correctly`
@@ -76,6 +80,13 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
 
+      if (testData.expected.filters) {
+        await ml.testExecution.logTestStep('displays filters in filter bar correctly');
+        for (const filter of testData.expected.filters!) {
+          await ml.dataVisualizerIndexBased.assertFilterBarFilterContent(filter);
+        }
+      }
+
       await ml.testExecution.logTestStep(
         'displays details for metric fields and non-metric fields correctly'
       );
@@ -96,7 +107,9 @@ export default function ({ getService }: FtrProviderContext) {
           fieldRow.fieldName!,
           fieldRow.docCountFormatted,
           fieldRow.exampleCount,
-          fieldRow.viewableInLens
+          fieldRow.viewableInLens,
+          false,
+          fieldRow.exampleContent
         );
       }
 
@@ -150,9 +163,16 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
+    });
+
+    after(async () => {
+      await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
     });
 
     describe('with farequote', function () {
@@ -182,6 +202,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       runTests(farequoteLuceneSearchTestData);
+
+      it(`${farequoteKQLFiltersSearchTestData.suiteTitle} loads the data visualizer selector page`, async () => {
+        // Start navigation from the base of the ML app.
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToDataVisualizer();
+      });
+
+      runTests(farequoteKQLFiltersSearchTestData);
     });
 
     describe('with module_sample_logs ', function () {
@@ -192,6 +220,52 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToDataVisualizer();
       });
       runTests(sampleLogTestData);
+    });
+
+    describe('with view in lens action ', function () {
+      const testData = farequoteDataViewTestData;
+      // Run tests on full ft_module_sample_logs index.
+      it(`${testData.suiteTitle} loads the data visualizer selector page`, async () => {
+        // Start navigation from the base of the ML app.
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToDataVisualizer();
+      });
+
+      it(`${testData.suiteTitle} loads lens charts`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} loads the saved search selection page`
+        );
+        await ml.dataVisualizer.navigateToIndexPatternSelection();
+
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} loads the index data visualizer page`
+        );
+        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
+          testData.sourceIndexOrSavedSearch
+        );
+
+        await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
+        await ml.dataVisualizerIndexBased.clickUseFullDataButton(
+          testData.expected.totalDocCountFormatted
+        );
+        await headerPage.waitUntilLoadingHasFinished();
+
+        await ml.testExecution.logTestStep('navigate to Lens');
+        const lensMetricField = testData.expected.metricFields![0];
+
+        if (lensMetricField) {
+          await ml.dataVisualizerTable.assertLensActionShowChart(lensMetricField.fieldName);
+          await ml.navigation.browserBackTo('dataVisualizerTable');
+        }
+        const lensNonMetricField = testData.expected.nonMetricFields?.find(
+          (f) => f.type === ML_JOB_FIELD_TYPES.KEYWORD
+        );
+
+        if (lensNonMetricField) {
+          await ml.dataVisualizerTable.assertLensActionShowChart(lensNonMetricField.fieldName);
+          await ml.navigation.browserBackTo('dataVisualizerTable');
+        }
+      });
     });
   });
 }

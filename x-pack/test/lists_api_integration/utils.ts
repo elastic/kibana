@@ -14,12 +14,14 @@ import type {
   ExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionList,
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_URL,
   LIST_INDEX,
   LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
+import { ToolingLog } from '@kbn/dev-utils';
 import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
 import { countDownTest } from '../detection_engine_api_integration/utils';
 
@@ -29,12 +31,17 @@ import { countDownTest } from '../detection_engine_api_integration/utils';
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  return countDownTest(async () => {
-    await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'createListsIndex');
+  return countDownTest(
+    async () => {
+      await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'createListsIndex',
+    log
+  );
 };
 
 /**
@@ -42,12 +49,17 @@ export const createListsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  return countDownTest(async () => {
-    await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'deleteListsIndex');
+  return countDownTest(
+    async () => {
+      await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'deleteListsIndex',
+    log
+  );
 };
 
 /**
@@ -56,12 +68,17 @@ export const deleteListsIndex = async (
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
 ): Promise<void> => {
-  return countDownTest(async () => {
-    await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-    return true;
-  }, 'createListsIndex');
+  return countDownTest(
+    async () => {
+      await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
+      return true;
+    },
+    'createListsIndex',
+    log
+  );
 };
 
 /**
@@ -116,6 +133,7 @@ export const removeExceptionListServerGeneratedProperties = (
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
+  log: ToolingLog,
   maxTimeout: number = 800000,
   timeoutWait: number = 250
 ) => {
@@ -131,10 +149,7 @@ export const waitFor = async (
         if (itPasses) {
           found = true;
         } else {
-          // eslint-disable-next-line no-console
-          console.log(
-            `Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`
-          );
+          log.debug(`Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`);
           numberOfTries++;
         }
 
@@ -169,31 +184,49 @@ export const binaryToString = (res: any, callback: any): void => {
 };
 
 /**
- * Remove all exceptions
+ * Remove all exceptions from both the "single" and "agnostic" spaces.
  * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest handle
  */
 export const deleteAllExceptions = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
+): Promise<void> => {
+  await deleteAllExceptionsByType(supertest, log, 'single');
+  await deleteAllExceptionsByType(supertest, log, 'agnostic');
+};
+
+/**
+ * Remove all exceptions by a given type such as "agnostic" or "single".
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
+ * @param supertest The supertest handle
+ */
+export const deleteAllExceptionsByType = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
+  type: NamespaceType
 ): Promise<void> => {
   await countDownTest(
     async () => {
       const { body } = await supertest
-        .get(`${EXCEPTION_LIST_URL}/_find?per_page=9999`)
+        .get(`${EXCEPTION_LIST_URL}/_find?per_page=9999&namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
         .send();
-
       const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
       for await (const id of ids) {
-        await supertest.delete(`${EXCEPTION_LIST_URL}?id=${id}`).set('kbn-xsrf', 'true').send();
+        await supertest
+          .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
+          .set('kbn-xsrf', 'true')
+          .send();
       }
       const { body: finalCheck } = await supertest
-        .get(`${EXCEPTION_LIST_URL}/_find`)
+        .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
         .send();
       return finalCheck.data.length === 0;
     },
-    'deleteAllExceptions',
+    `deleteAllExceptions by type: "${type}"`,
+    log,
     50,
     1000
   );
@@ -210,6 +243,7 @@ export const deleteAllExceptions = async (
  */
 export const importFile = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   type: Type,
   contents: string[],
   fileName: string,
@@ -222,8 +256,7 @@ export const importFile = async (
     .expect('Content-Type', 'application/json; charset=utf-8');
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" When importing a file (importFile). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -233,7 +266,7 @@ export const importFile = async (
   // although we have pushed the list and its items, it is async so we
   // have to wait for the contents before continuing
   const testValuesOrContents = testValues ?? contents;
-  await waitForListItems(supertest, testValuesOrContents, fileName);
+  await waitForListItems(supertest, log, testValuesOrContents, fileName);
 };
 
 /**
@@ -247,6 +280,7 @@ export const importFile = async (
  */
 export const importTextFile = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   type: Type,
   contents: string[],
   fileName: string
@@ -258,8 +292,7 @@ export const importTextFile = async (
     .expect('Content-Type', 'application/json; charset=utf-8');
 
   if (response.status !== 200) {
-    // eslint-disable-next-line no-console
-    console.log(
+    log.error(
       `Did not get an expected 200 "ok" when importing a text file (importTextFile). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
@@ -268,7 +301,7 @@ export const importTextFile = async (
 
   // although we have pushed the list and its items, it is async so we
   // have to wait for the contents before continuing
-  await waitForTextListItems(supertest, contents, fileName);
+  await waitForTextListItems(supertest, log, contents, fileName);
 };
 
 /**
@@ -280,23 +313,27 @@ export const importTextFile = async (
  */
 export const waitForListItem = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   itemValue: string,
   fileName: string
 ): Promise<void> => {
-  await waitFor(async () => {
-    const { status, body } = await supertest
-      .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${itemValue}`)
-      .send();
-    if (status !== 200) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `Did not get an expected 200 "ok" when waiting for a list item (waitForListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
-          body
-        )}, status: ${JSON.stringify(status)}`
-      );
-    }
-    return status === 200;
-  }, `waitForListItem fileName: "${fileName}" itemValue: "${itemValue}"`);
+  await waitFor(
+    async () => {
+      const { status, body } = await supertest
+        .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${itemValue}`)
+        .send();
+      if (status !== 200) {
+        log.debug(
+          `Did not get an expected 200 "ok" when waiting for a list item (waitForListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
+            body
+          )}, status: ${JSON.stringify(status)}`
+        );
+      }
+      return status === 200;
+    },
+    `waitForListItem fileName: "${fileName}" itemValue: "${itemValue}"`,
+    log
+  );
 };
 
 /**
@@ -308,10 +345,11 @@ export const waitForListItem = async (
  */
 export const waitForListItems = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   itemValues: string[],
   fileName: string
 ): Promise<void> => {
-  await Promise.all(itemValues.map((item) => waitForListItem(supertest, item, fileName)));
+  await Promise.all(itemValues.map((item) => waitForListItem(supertest, log, item, fileName)));
 };
 
 /**
@@ -323,29 +361,33 @@ export const waitForListItems = async (
  */
 export const waitForTextListItem = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   itemValue: string,
   fileName: string
 ): Promise<void> => {
   const tokens = itemValue.split(' ');
-  await waitFor(async () => {
-    const promises = await Promise.all(
-      tokens.map(async (token) => {
-        const { status, body } = await supertest
-          .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${token}`)
-          .send();
-        if (status !== 200) {
-          // eslint-disable-next-line no-console
-          console.log(
-            `Did not get an expected 200 "ok" when waiting for a text list item (waitForTextListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
-              body
-            )}, status: ${JSON.stringify(status)}`
-          );
-        }
-        return status === 200;
-      })
-    );
-    return promises.every((one) => one);
-  }, `waitForTextListItem fileName: "${fileName}" itemValue: "${itemValue}"`);
+  await waitFor(
+    async () => {
+      const promises = await Promise.all(
+        tokens.map(async (token) => {
+          const { status, body } = await supertest
+            .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${token}`)
+            .send();
+          if (status !== 200) {
+            log.error(
+              `Did not get an expected 200 "ok" when waiting for a text list item (waitForTextListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
+                body
+              )}, status: ${JSON.stringify(status)}`
+            );
+          }
+          return status === 200;
+        })
+      );
+      return promises.every((one) => one);
+    },
+    `waitForTextListItem fileName: "${fileName}" itemValue: "${itemValue}"`,
+    log
+  );
 };
 
 /**
@@ -358,8 +400,9 @@ export const waitForTextListItem = async (
  */
 export const waitForTextListItems = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog,
   itemValues: string[],
   fileName: string
 ): Promise<void> => {
-  await Promise.all(itemValues.map((item) => waitForTextListItem(supertest, item, fileName)));
+  await Promise.all(itemValues.map((item) => waitForTextListItem(supertest, log, item, fileName)));
 };

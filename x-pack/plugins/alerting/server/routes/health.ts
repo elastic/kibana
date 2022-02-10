@@ -14,20 +14,28 @@ import {
   BASE_ALERTING_API_PATH,
   AlertingFrameworkHealth,
 } from '../types';
+import { getSecurityHealth } from '../lib/get_security_health';
 
 const rewriteBodyRes: RewriteResponseCase<AlertingFrameworkHealth> = ({
   isSufficientlySecure,
   hasPermanentEncryptionKey,
-  alertingFrameworkHeath,
+  alertingFrameworkHealth,
   ...rest
 }) => ({
   ...rest,
   is_sufficiently_secure: isSufficientlySecure,
   has_permanent_encryption_key: hasPermanentEncryptionKey,
+  alerting_framework_health: {
+    decryption_health: alertingFrameworkHealth.decryptionHealth,
+    execution_health: alertingFrameworkHealth.executionHealth,
+    read_health: alertingFrameworkHealth.readHealth,
+  },
   alerting_framework_heath: {
-    decryption_health: alertingFrameworkHeath.decryptionHealth,
-    execution_health: alertingFrameworkHeath.executionHealth,
-    read_health: alertingFrameworkHeath.readHealth,
+    // Legacy: pre-v8.0 typo
+    _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
+    decryption_health: alertingFrameworkHealth.decryptionHealth,
+    execution_health: alertingFrameworkHealth.executionHealth,
+    read_health: alertingFrameworkHealth.readHealth,
   },
 });
 
@@ -44,29 +52,30 @@ export const healthRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
-          const isEsSecurityEnabled: boolean | null = licenseState.getIsSecurityEnabled();
-          const areApiKeysEnabled = await context.alerting.areApiKeysEnabled();
-          const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
+          // Verify that user has access to at least one rule type
+          const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
+          if (ruleTypes.length > 0) {
+            const alertingFrameworkHealth = await context.alerting.getFrameworkHealth();
 
-          let isSufficientlySecure;
-          if (isEsSecurityEnabled === null) {
-            isSufficientlySecure = false;
+            const securityHealth = await getSecurityHealth(
+              async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
+              async () => encryptedSavedObjects.canEncrypt,
+              context.alerting.areApiKeysEnabled
+            );
+
+            const frameworkHealth: AlertingFrameworkHealth = {
+              ...securityHealth,
+              alertingFrameworkHealth,
+            };
+
+            return res.ok({
+              body: rewriteBodyRes(frameworkHealth),
+            });
           } else {
-            // if isEsSecurityEnabled = true, then areApiKeysEnabled must be true to enable alerting
-            // if isEsSecurityEnabled = false, then it does not matter what areApiKeysEnabled is
-            isSufficientlySecure =
-              !isEsSecurityEnabled || (isEsSecurityEnabled && areApiKeysEnabled);
+            return res.forbidden({
+              body: { message: `Unauthorized to access alerting framework health` },
+            });
           }
-
-          const frameworkHealth: AlertingFrameworkHealth = {
-            isSufficientlySecure,
-            hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
-            alertingFrameworkHeath,
-          };
-
-          return res.ok({
-            body: rewriteBodyRes(frameworkHealth),
-          });
         } catch (error) {
           return res.badRequest({ body: error });
         }

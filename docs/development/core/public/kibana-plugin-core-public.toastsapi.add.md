@@ -16,11 +16,11 @@ add(toastOrTitle: ToastInput): Toast;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  toastOrTitle | <code>ToastInput</code> | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
+|  toastOrTitle | ToastInput | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
 
 <b>Returns:</b>
 
-`Toast`
+Toast
 
 a [Toast](./kibana-plugin-core-public.toast.md)
 

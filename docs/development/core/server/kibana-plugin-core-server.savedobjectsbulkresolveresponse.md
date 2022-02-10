@@ -15,5 +15,5 @@ export interface SavedObjectsBulkResolveResponse<T = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [resolved\_objects](./kibana-plugin-core-server.savedobjectsbulkresolveresponse.resolved_objects.md) | <code>Array&lt;SavedObjectsResolveResponse&lt;T&gt;&gt;</code> |  |
+|  [resolved\_objects](./kibana-plugin-core-server.savedobjectsbulkresolveresponse.resolved_objects.md) | Array&lt;SavedObjectsResolveResponse&lt;T&gt;&gt; |  |
 

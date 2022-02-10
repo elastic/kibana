@@ -13,7 +13,6 @@ const keys = ['example-0'];
 
 const options: MetricsAPIRequest = {
   timerange: {
-    field: '@timestamp',
     from: moment('2020-01-01T00:00:00Z').valueOf(),
     to: moment('2020-01-01T00:00:00Z').add(5, 'minute').valueOf(),
     interval: '1m',

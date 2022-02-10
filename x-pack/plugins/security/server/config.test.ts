@@ -11,7 +11,7 @@ jest.mock('crypto', () => ({
 }));
 
 jest.mock('@kbn/utils', () => ({
-  getDataPath: () => '/mock/kibana/data/path',
+  getLogsPath: () => '/mock/kibana/logs/path',
 }));
 
 import { loggingSystemMock } from 'src/core/server/mocks';
@@ -1720,7 +1720,7 @@ describe('createConfig()', () => {
       ).audit.appender
     ).toMatchInlineSnapshot(`
       Object {
-        "fileName": "/mock/kibana/data/path/audit.log",
+        "fileName": "/mock/kibana/logs/path/audit.log",
         "layout": Object {
           "type": "json",
         },

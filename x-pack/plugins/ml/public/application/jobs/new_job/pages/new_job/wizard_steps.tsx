@@ -8,7 +8,7 @@
 import React, { Fragment, FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { WIZARD_STEPS } from '../components/step_types';

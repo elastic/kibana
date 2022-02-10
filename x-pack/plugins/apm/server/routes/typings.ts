@@ -17,9 +17,12 @@ import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
-import { APMPluginDependencies } from '../types';
+import {
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from '../types';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
-import { UxUIFilters } from '../../typings/ui_filters';
+import { UxUIFilters } from '../../common/ux_ui_filter';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
@@ -34,6 +37,7 @@ export interface APMRouteCreateOptions {
       | 'access:apm_write'
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
+      | 'access:ml:canCloseJob'
     >;
     body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
     disableTelemetry?: boolean;
@@ -62,11 +66,12 @@ export interface APMRouteHandlerResources {
     start: () => Promise<CoreStart>;
   };
   plugins: {
-    [key in keyof APMPluginDependencies]: {
-      setup: Required<APMPluginDependencies>[key]['setup'];
-      start: () => Promise<Required<APMPluginDependencies>[key]['start']>;
+    [key in keyof APMPluginSetupDependencies]: {
+      setup: Required<APMPluginSetupDependencies>[key];
+      start: () => Promise<Required<APMPluginStartDependencies>[key]>;
     };
   };
   ruleDataClient: IRuleDataClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
+  kibanaVersion: string;
 }

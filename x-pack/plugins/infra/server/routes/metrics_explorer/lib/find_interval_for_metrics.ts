@@ -44,7 +44,6 @@ export const findIntervalForMetrics = async (
     client,
     {
       indexPattern: options.indexPattern,
-      timestampField: options.timerange.field,
       timerange: options.timerange,
     },
     modules.filter(Boolean) as string[]

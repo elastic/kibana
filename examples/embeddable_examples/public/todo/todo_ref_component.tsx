@@ -45,7 +45,7 @@ export function TodoRefEmbeddableComponentInner({
   const title = savedAttributes?.title;
   const task = savedAttributes?.task;
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup data-render-complete="true">
       <EuiFlexItem grow={false}>
         {icon ? (
           <EuiIcon type={icon} size="l" />

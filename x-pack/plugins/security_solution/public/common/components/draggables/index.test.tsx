@@ -7,6 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
 
 import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../drag_and_drop/translations';
 import { TestProviders } from '../../mock';
@@ -325,6 +326,22 @@ describe('draggables', () => {
       );
 
       expect(wrapper.find('[data-test-subj="some-field-tooltip"]').first().exists()).toBe(false);
+    });
+
+    test('it uses the specified tooltipPosition', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <DraggableBadge
+            contextId="context-id"
+            eventId="event-id"
+            field="some-field"
+            value="some value"
+            tooltipPosition="top"
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(EuiToolTip).first().props().position).toEqual('top');
     });
   });
 });

@@ -23,6 +23,5 @@ Each route can have only one handler function, which is executed when the route 
 const router = createRouter();
 // handler is called when '/path' resource is requested with `GET` method
 router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
-
 ```
 

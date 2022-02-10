@@ -8,10 +8,10 @@
 import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../hooks';
-import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { AGENT_API_ROUTES, AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
 
 interface Props {
@@ -53,7 +53,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         query: {
           page: 1,
           perPage: 1,
-          kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id : ${agentPolicy.id}`,
+          kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicy.id}`,
         },
       });
       setAgentsCount(data?.total || 0);

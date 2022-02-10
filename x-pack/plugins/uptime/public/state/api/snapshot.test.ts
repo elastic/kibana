@@ -8,6 +8,7 @@
 import { HttpFetchError } from 'src/core/public';
 import { fetchSnapshotCount } from './snapshot';
 import { apiService } from './utils';
+import { API_URLS } from '../../../common/constants';
 
 describe('snapshot API', () => {
   let fetchMock: jest.SpyInstance<Partial<unknown>>;
@@ -36,7 +37,7 @@ describe('snapshot API', () => {
     });
     expect(fetchMock).toHaveBeenCalledWith({
       asResponse: false,
-      path: '/api/uptime/snapshot/count',
+      path: API_URLS.SNAPSHOT_COUNT,
       query: {
         dateRangeEnd: 'now',
         dateRangeStart: 'now-15m',

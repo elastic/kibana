@@ -124,9 +124,9 @@ describe('OauthApplication', () => {
       `);
     });
 
+    /* This href test should ultimately use the docLinkServiceMock */
     it('renders description', () => {
       const wrapper = shallow(<OauthApplication />);
-
       expect(wrapper.prop('pageHeader').description).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiText
@@ -137,7 +137,7 @@ describe('OauthApplication', () => {
           <EuiSpacer />
           <EuiLink
             external={true}
-            href="/license-management.html"
+            href=""
             target="_blank"
           >
             Explore Platinum features

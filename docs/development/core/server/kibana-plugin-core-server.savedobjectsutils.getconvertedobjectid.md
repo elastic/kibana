@@ -16,13 +16,13 @@ static getConvertedObjectId(namespace: string | undefined, type: string, id: str
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  namespace | <code>string &#124; undefined</code> |  |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
+|  namespace | string \| undefined | The namespace of the saved object before it is converted. |
+|  type | string | The type of the saved object before it is converted. |
+|  id | string | The ID of the saved object before it is converted. |
 
 <b>Returns:</b>
 
-`string`
+string
 
 {<!-- -->string<!-- -->} The ID of the saved object after it is converted.
 

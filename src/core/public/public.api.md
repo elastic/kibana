@@ -4,10 +4,14 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import { Action } from 'history';
 import Boom from '@hapi/boom';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
+import type { DocLinks } from '@kbn/doc-links';
 import { EnvironmentMode } from '@kbn/config';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -15,12 +19,13 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
-import { History } from 'history';
+import { EuiOverlayMaskProps } from '@elastic/eui';
+import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
-import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import { Location } from 'history';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
@@ -30,21 +35,23 @@ import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
-import React from 'react';
+import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Request } from '@hapi/hapi';
+import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { TransportRequestOptions } from '@elastic/elasticsearch';
-import { TransportRequestParams } from '@elastic/elasticsearch';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import { TransitionPromptHook } from 'history';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { TransportRequestParams } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
-import { URL } from 'url';
+import { URL as URL_2 } from 'url';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
@@ -166,6 +173,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     // @deprecated
     onAppLeave: (handler: AppLeaveHandler) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    theme$: Observable<CoreTheme>;
 }
 
 // @public
@@ -250,7 +258,7 @@ export type ChromeHelpExtensionLinkBase = Pick<EuiButtonEmptyProps, 'iconType' |
 
 // @public (undocumented)
 export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLinkBase {
-    content: React.ReactNode;
+    content: React_2.ReactNode;
     href: string;
     linkType: 'custom';
 }
@@ -403,6 +411,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
+    theme: ThemeServiceSetup;
+    // (undocumented)
     uiSettings: IUiSettingsClient;
 }
 
@@ -433,6 +443,8 @@ export interface CoreStart {
     // (undocumented)
     savedObjects: SavedObjectsStart;
     // (undocumented)
+    theme: ThemeServiceStart;
+    // (undocumented)
     uiSettings: IUiSettingsClient;
 }
 
@@ -450,7 +462,12 @@ export class CoreSystem {
     } | undefined>;
     // (undocumented)
     stop(): void;
-    }
+}
+
+// @public
+export interface CoreTheme {
+    readonly darkMode: boolean;
+}
 
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
@@ -474,261 +491,7 @@ export interface DocLinksStart {
     // (undocumented)
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
-    readonly links: {
-        readonly settings: string;
-        readonly elasticStackGetStarted: string;
-        readonly apm: {
-            readonly kibanaSettings: string;
-            readonly supportedServiceMaps: string;
-            readonly customLinks: string;
-            readonly droppedTransactionSpans: string;
-            readonly upgrading: string;
-            readonly metaData: string;
-        };
-        readonly canvas: {
-            readonly guide: string;
-        };
-        readonly dashboard: {
-            readonly guide: string;
-            readonly drilldowns: string;
-            readonly drilldownsTriggerPicker: string;
-            readonly urlDrilldownTemplateSyntax: string;
-            readonly urlDrilldownVariables: string;
-        };
-        readonly discover: Record<string, string>;
-        readonly filebeat: {
-            readonly base: string;
-            readonly installation: string;
-            readonly configuration: string;
-            readonly elasticsearchOutput: string;
-            readonly elasticsearchModule: string;
-            readonly startup: string;
-            readonly exportedFields: string;
-            readonly suricataModule: string;
-            readonly zeekModule: string;
-        };
-        readonly auditbeat: {
-            readonly base: string;
-            readonly auditdModule: string;
-            readonly systemModule: string;
-        };
-        readonly metricbeat: {
-            readonly base: string;
-            readonly configure: string;
-            readonly httpEndpoint: string;
-            readonly install: string;
-            readonly start: string;
-        };
-        readonly enterpriseSearch: {
-            readonly base: string;
-            readonly appSearchBase: string;
-            readonly workplaceSearchBase: string;
-        };
-        readonly heartbeat: {
-            readonly base: string;
-        };
-        readonly libbeat: {
-            readonly getStarted: string;
-        };
-        readonly logstash: {
-            readonly base: string;
-        };
-        readonly functionbeat: {
-            readonly base: string;
-        };
-        readonly winlogbeat: {
-            readonly base: string;
-        };
-        readonly aggs: {
-            readonly composite: string;
-            readonly composite_missing_bucket: string;
-            readonly date_histogram: string;
-            readonly date_range: string;
-            readonly date_format_pattern: string;
-            readonly filter: string;
-            readonly filters: string;
-            readonly geohash_grid: string;
-            readonly histogram: string;
-            readonly ip_range: string;
-            readonly range: string;
-            readonly significant_terms: string;
-            readonly terms: string;
-            readonly avg: string;
-            readonly avg_bucket: string;
-            readonly max_bucket: string;
-            readonly min_bucket: string;
-            readonly sum_bucket: string;
-            readonly cardinality: string;
-            readonly count: string;
-            readonly cumulative_sum: string;
-            readonly derivative: string;
-            readonly geo_bounds: string;
-            readonly geo_centroid: string;
-            readonly max: string;
-            readonly median: string;
-            readonly min: string;
-            readonly moving_avg: string;
-            readonly percentile_ranks: string;
-            readonly serial_diff: string;
-            readonly std_dev: string;
-            readonly sum: string;
-            readonly top_hits: string;
-        };
-        readonly runtimeFields: {
-            readonly overview: string;
-            readonly mapping: string;
-        };
-        readonly scriptedFields: {
-            readonly scriptFields: string;
-            readonly scriptAggs: string;
-            readonly painless: string;
-            readonly painlessApi: string;
-            readonly painlessLangSpec: string;
-            readonly painlessSyntax: string;
-            readonly painlessWalkthrough: string;
-            readonly luceneExpressions: string;
-        };
-        readonly search: {
-            readonly sessions: string;
-            readonly sessionLimits: string;
-        };
-        readonly indexPatterns: {
-            readonly introduction: string;
-            readonly fieldFormattersNumber: string;
-            readonly fieldFormattersString: string;
-            readonly runtimeFields: string;
-        };
-        readonly addData: string;
-        readonly kibana: string;
-        readonly upgradeAssistant: string;
-        readonly rollupJobs: string;
-        readonly elasticsearch: Record<string, string>;
-        readonly siem: {
-            readonly privileges: string;
-            readonly guide: string;
-            readonly gettingStarted: string;
-            readonly ml: string;
-            readonly ruleChangeLog: string;
-            readonly detectionsReq: string;
-            readonly networkMap: string;
-            readonly troubleshootGaps: string;
-        };
-        readonly securitySolution: {
-            readonly trustedApps: string;
-        };
-        readonly query: {
-            readonly eql: string;
-            readonly kueryQuerySyntax: string;
-            readonly luceneQuerySyntax: string;
-            readonly percolate: string;
-            readonly queryDsl: string;
-            readonly autocompleteChanges: string;
-        };
-        readonly date: {
-            readonly dateMath: string;
-            readonly dateMathIndexNames: string;
-        };
-        readonly management: Record<string, string>;
-        readonly ml: Record<string, string>;
-        readonly transforms: Record<string, string>;
-        readonly visualize: Record<string, string>;
-        readonly apis: Readonly<{
-            bulkIndexAlias: string;
-            byteSizeUnits: string;
-            createAutoFollowPattern: string;
-            createFollower: string;
-            createIndex: string;
-            createSnapshotLifecyclePolicy: string;
-            createRoleMapping: string;
-            createRoleMappingTemplates: string;
-            createRollupJobsRequest: string;
-            createApiKey: string;
-            createPipeline: string;
-            createTransformRequest: string;
-            cronExpressions: string;
-            executeWatchActionModes: string;
-            indexExists: string;
-            openIndex: string;
-            putComponentTemplate: string;
-            painlessExecute: string;
-            painlessExecuteAPIContexts: string;
-            putComponentTemplateMetadata: string;
-            putSnapshotLifecyclePolicy: string;
-            putIndexTemplateV1: string;
-            putWatch: string;
-            simulatePipeline: string;
-            timeUnits: string;
-            updateTransform: string;
-        }>;
-        readonly observability: Readonly<{
-            guide: string;
-            infrastructureThreshold: string;
-            logsThreshold: string;
-            metricsThreshold: string;
-            monitorStatus: string;
-            monitorUptime: string;
-            tlsCertificate: string;
-            uptimeDurationAnomaly: string;
-        }>;
-        readonly alerting: Record<string, string>;
-        readonly maps: Record<string, string>;
-        readonly monitoring: Record<string, string>;
-        readonly security: Readonly<{
-            apiKeyServiceSettings: string;
-            clusterPrivileges: string;
-            elasticsearchSettings: string;
-            elasticsearchEnableSecurity: string;
-            elasticsearchEnableApiKeys: string;
-            indicesPrivileges: string;
-            kibanaTLS: string;
-            kibanaPrivileges: string;
-            mappingRoles: string;
-            mappingRolesFieldRules: string;
-            runAsPrivilege: string;
-        }>;
-        readonly spaces: Readonly<{
-            kibanaLegacyUrlAliases: string;
-            kibanaDisableLegacyUrlAliasesApi: string;
-        }>;
-        readonly watcher: Record<string, string>;
-        readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
-        readonly snapshotRestore: Record<string, string>;
-        readonly ingest: Record<string, string>;
-        readonly fleet: Readonly<{
-            datastreamsILM: string;
-            beatsAgentComparison: string;
-            guide: string;
-            fleetServer: string;
-            fleetServerAddFleetServer: string;
-            settings: string;
-            settingsFleetServerHostSettings: string;
-            troubleshooting: string;
-            elasticAgent: string;
-            datastreams: string;
-            datastreamsNamingScheme: string;
-            installElasticAgent: string;
-            upgradeElasticAgent: string;
-            upgradeElasticAgent712lower: string;
-            learnMoreBlog: string;
-            apiKeysLearnMore: string;
-        }>;
-        readonly ecs: {
-            readonly guide: string;
-        };
-        readonly clients: {
-            readonly guide: string;
-            readonly goOverview: string;
-            readonly javaIndex: string;
-            readonly jsIntro: string;
-            readonly netGuide: string;
-            readonly perlGuide: string;
-            readonly phpGuide: string;
-            readonly pythonGuide: string;
-            readonly rubyOverview: string;
-            readonly rustGuide: string;
-        };
-    };
+    readonly links: DocLinks;
 }
 
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
@@ -899,7 +662,7 @@ export type HttpStart = HttpSetup;
 // @public
 export interface I18nStart {
     Context: ({ children }: {
-        children: React.ReactNode;
+        children: React_2.ReactNode;
     }) => JSX.Element;
 }
 
@@ -923,6 +686,7 @@ export interface IBasePath {
 
 // @public
 export interface IExternalUrl {
+    isInternalUrl(relativeOrAbsoluteUrl: string): boolean;
     validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 }
 
@@ -1048,6 +812,8 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     hideCloseButton?: boolean;
     // (undocumented)
+    maskProps?: EuiOverlayMaskProps;
+    // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
@@ -1121,7 +887,7 @@ export interface OverlayStart {
 export { PackageInfo }
 
 // @public
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
+interface Plugin_2<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
     setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
     // (undocumented)
@@ -1129,9 +895,10 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
     // (undocumented)
     stop?(): void;
 }
+export { Plugin_2 as Plugin }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin_2<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema extends object = object> {
@@ -1399,7 +1166,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SearchSortOrder;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -1592,23 +1359,23 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 }
 
 // @public
-export class ScopedHistory<HistoryLocationState = unknown> implements History<HistoryLocationState> {
-    constructor(parentHistory: History, basePath: string);
+export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
+    constructor(parentHistory: History_2<HistoryLocationState>, basePath: string);
     get action(): Action;
-    block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;
-    createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+    createSubHistory: (basePath: string) => ScopedHistory<HistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;
     goForward: () => void;
     get length(): number;
-    listen: (listener: (location: Location<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
-    get location(): Location<HistoryLocationState>;
+    listen: (listener: (location: Location_2<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
+    get location(): Location_2<HistoryLocationState>;
     push: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
     replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
-    }
+}
 
 // @public
 export class SimpleSavedObject<T = unknown> {
@@ -1644,6 +1411,18 @@ export class SimpleSavedObject<T = unknown> {
 
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+// @public (undocumented)
+export interface ThemeServiceSetup {
+    // (undocumented)
+    theme$: Observable<CoreTheme>;
+}
+
+// @public (undocumented)
+export interface ThemeServiceStart {
+    // (undocumented)
+    theme$: Observable<CoreTheme>;
+}
 
 // Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1684,7 +1463,7 @@ export class ToastsApi implements IToasts {
         overlays: OverlayStart;
         i18n: I18nStart;
     }): void;
-    }
+}
 
 // @public (undocumented)
 export type ToastsSetup = IToasts;
@@ -1739,9 +1518,8 @@ export interface UserProvidedValues<T = any> {
     userValue?: T;
 }
 
-
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:173:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

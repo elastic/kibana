@@ -48,7 +48,7 @@ export class DiscoverPageObject extends FtrService {
     await fieldSearch.clearValue();
   }
 
-  public async saveSearch(searchName: string) {
+  public async saveSearch(searchName: string, saveAsNew?: boolean) {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -59,6 +59,14 @@ export class DiscoverPageObject extends FtrService {
         return (await saveButton.getAttribute('disabled')) !== 'true';
       }
     );
+
+    if (saveAsNew !== undefined) {
+      await this.retry.waitFor(`save as new switch is set`, async () => {
+        await this.testSubjects.setEuiSwitch('saveAsNewCheckbox', saveAsNew ? 'check' : 'uncheck');
+        return (await this.testSubjects.isEuiSwitchChecked('saveAsNewCheckbox')) === saveAsNew;
+      });
+    }
+
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
     // LeeDr - this additional checking for the saved search name was an attempt
@@ -355,6 +363,13 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  public async clickCreateNewDataView() {
+    await this.retry.try(async () => {
+      await this.testSubjects.click('dataview-create-new');
+      await this.find.byClassName('indexPatternEditor__form');
+    });
+  }
+
   public async hasNoResults() {
     return await this.testSubjects.exists('discoverNoResults');
   }
@@ -589,5 +604,11 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
+  }
+
+  public async getCurrentlySelectedDataView() {
+    await this.testSubjects.existOrFail('discover-sidebar');
+    const button = await this.testSubjects.find('indexPattern-switch-link');
+    return button.getAttribute('title');
   }
 }

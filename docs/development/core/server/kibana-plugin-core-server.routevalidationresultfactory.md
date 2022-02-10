@@ -18,6 +18,6 @@ export interface RouteValidationResultFactory
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [badRequest](./kibana-plugin-core-server.routevalidationresultfactory.badrequest.md) | <code>(error: Error &#124; string, path?: string[]) =&gt; {</code><br/><code>        error: RouteValidationError;</code><br/><code>    }</code> |  |
-|  [ok](./kibana-plugin-core-server.routevalidationresultfactory.ok.md) | <code>&lt;T&gt;(value: T) =&gt; {</code><br/><code>        value: T;</code><br/><code>    }</code> |  |
+|  [badRequest](./kibana-plugin-core-server.routevalidationresultfactory.badrequest.md) | (error: Error \| string, path?: string\[\]) =&gt; { error: RouteValidationError; } |  |
+|  [ok](./kibana-plugin-core-server.routevalidationresultfactory.ok.md) | &lt;T&gt;(value: T) =&gt; { value: T; } |  |
 

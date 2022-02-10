@@ -400,14 +400,7 @@ describe('JiraParamsFields renders', () => {
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[1][1].comments.length).toEqual(1);
     });
-    test('An empty comment does not trigger editAction', () => {
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      const emptyComment = { target: { value: '' } };
-      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
-      expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
-      expect(comments.simulate('change', emptyComment));
-      expect(editAction.mock.calls.length).toEqual(1);
-    });
+
     test('Clears any left behind priority when issueType changes and hasPriority becomes false', () => {
       useGetFieldsByIssueTypeMock
         .mockReturnValueOnce(useGetFieldsByIssueTypeResponse)

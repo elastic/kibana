@@ -79,16 +79,12 @@ filters.geo_bounding_box = {
 filters.geo_distance = {
   __template: {
     distance: 100,
-    distance_unit: 'km',
     FIELD: {
       lat: 40.73,
       lon: -74.1,
     },
   },
   distance: 100,
-  distance_unit: {
-    __one_of: ['km', 'miles'],
-  },
   distance_type: {
     __one_of: ['arc', 'plane'],
   },

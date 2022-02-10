@@ -7,20 +7,20 @@
 
 import { apiService } from './utils';
 import { FetchJourneyStepsParams } from '../actions/journey';
+import { Ping, PingType } from '../../../common/runtime_types/ping/ping';
 import {
   FailedStepsApiResponse,
   FailedStepsApiResponseType,
-  JourneyStep,
-  JourneyStepType,
   ScreenshotBlockDoc,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
 } from '../../../common/runtime_types/ping/synthetics';
+import { API_URLS } from '../../../common/constants';
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
-  return apiService.post<ScreenshotBlockDoc[]>('/api/uptime/journey/screenshot/block', {
+  return apiService.post<ScreenshotBlockDoc[]>(API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
     hashes: params,
   });
 }
@@ -29,7 +29,7 @@ export async function fetchJourneySteps(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
   return apiService.get(
-    `/api/uptime/journey/${params.checkGroup}`,
+    `/internal/uptime/journey/${params.checkGroup}`,
     { syntheticEventTypes: params.syntheticEventTypes },
     SyntheticsJourneyApiResponseType
   );
@@ -40,14 +40,10 @@ export async function fetchJourneysFailedSteps({
 }: {
   checkGroups: string[];
 }): Promise<FailedStepsApiResponse> {
-  return apiService.get(
-    `/api/uptime/journeys/failed_steps`,
-    { checkGroups },
-    FailedStepsApiResponseType
-  );
+  return apiService.get(API_URLS.JOURNEY_FAILED_STEPS, { checkGroups }, FailedStepsApiResponseType);
 }
 
-export async function fetchLastSuccessfulStep({
+export async function fetchLastSuccessfulCheck({
   monitorId,
   timestamp,
   stepIndex,
@@ -57,16 +53,16 @@ export async function fetchLastSuccessfulStep({
   timestamp: string;
   stepIndex: number;
   location?: string;
-}): Promise<JourneyStep> {
+}): Promise<Ping> {
   return await apiService.get(
-    `/api/uptime/synthetics/step/success/`,
+    API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
     {
       monitorId,
       timestamp,
       stepIndex,
       location,
     },
-    JourneyStepType
+    PingType
   );
 }
 

@@ -6,16 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { ChartsPluginSetup } from '../../../charts/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { metricVisFunction } from '../common';
-import { setFormatService } from './format_service';
-import { metricVisRenderer } from './expression_renderers';
+import { setFormatService, setPaletteService } from './services';
+import { getMetricVisRenderer } from './expression_renderers';
 import { FieldFormatsStart } from '../../../field_formats/public';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
+  charts: ChartsPluginSetup;
 }
 
 /** @internal */
@@ -25,9 +27,12 @@ export interface ExpressionMetricPluginStart {
 
 /** @internal */
 export class ExpressionMetricPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup, { expressions }: ExpressionMetricPluginSetup) {
+  public setup(core: CoreSetup, { expressions, charts }: ExpressionMetricPluginSetup) {
     expressions.registerFunction(metricVisFunction);
-    expressions.registerRenderer(metricVisRenderer);
+    expressions.registerRenderer(getMetricVisRenderer(core.theme));
+    charts.palettes.getPalettes().then((palettes) => {
+      setPaletteService(palettes);
+    });
   }
 
   public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {

@@ -60,6 +60,7 @@ const displaySettingsSchema = schema.object({
 const sourceSettingsSchema = schema.object({
   content_source: schema.object({
     name: schema.maybe(schema.string()),
+    private_key: schema.maybe(schema.nullable(schema.string())),
     indexing: schema.maybe(
       schema.object({
         enabled: schema.maybe(schema.boolean()),
@@ -178,7 +179,7 @@ export function registerAccountCreateSourceRoute({
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
           organizations: schema.maybe(schema.arrayOf(schema.string())),
-          indexPermissions: schema.maybe(schema.boolean()),
+          index_permissions: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -522,7 +523,10 @@ export function registerOrgCreateSourceRoute({
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
           organizations: schema.maybe(schema.arrayOf(schema.string())),
-          indexPermissions: schema.maybe(schema.boolean()),
+          index_permissions: schema.maybe(schema.boolean()),
+          app_id: schema.maybe(schema.string()),
+          base_url: schema.maybe(schema.string()),
+          private_key: schema.nullable(schema.maybe(schema.string())),
         }),
       },
     },

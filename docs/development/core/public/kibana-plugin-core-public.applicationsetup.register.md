@@ -16,9 +16,9 @@ register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  app | <code>App&lt;HistoryLocationState&gt;</code> | an [App](./kibana-plugin-core-public.app.md) |
+|  app | App&lt;HistoryLocationState&gt; | an [App](./kibana-plugin-core-public.app.md) |
 
 <b>Returns:</b>
 
-`void`
+void
 

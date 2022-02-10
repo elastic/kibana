@@ -105,7 +105,7 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
 
       const toSearchResults = (
         coreStart: CoreStart,
-        packagesResponse: GetPackagesResponse['response']
+        packagesResponse: GetPackagesResponse['items']
       ): GlobalSearchProviderResult[] => {
         return packagesResponse
           .flatMap(

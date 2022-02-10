@@ -21,18 +21,18 @@ image::maps/images/inspector.png[]
 === Solutions to common problems
 
 [float]
-==== Index not listed when adding layer
+==== Data view not listed when adding layer
 
 * Verify your geospatial data is correctly mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
-  ** Run `GET myIndexPatternTitle/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myIndexPatternTitle` and `myGeoFieldName` with your index pattern title and geospatial field name.
+  ** Run `GET myIndexName/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myIndexName` and `myGeoFieldName` with your index and geospatial field name.
   ** Ensure response specifies `type` as `geo_point` or `geo_shape`.
-* Verify your geospatial data is correctly mapped in your <<managing-fields,index pattern>>.
-  ** Open your index pattern in <<management, Stack Management>>.
+* Verify your geospatial data is correctly mapped in your <<managing-fields, data view>>.
+  ** Open your data view in <<management, Stack Management>>.
   ** Ensure your geospatial field type is `geo_point` or `geo_shape`.
   ** Ensure your geospatial field is searchable and aggregatable.
   ** If your geospatial field type does not match your Elasticsearch mapping, click the *Refresh* button to refresh the field list from Elasticsearch.
-* Index patterns with thousands of fields can exceed the default maximum payload size.
-Increase <<settings, `server.maxPayload`>> for large index patterns.
+* Data views with thousands of fields can exceed the default maximum payload size.
+Increase <<settings, `server.maxPayload`>> for large data views.
 
 [float]
 ==== Features are not displayed

@@ -83,5 +83,11 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
   setAppActionMenu={[Function]}
   setAppLeaveHandler={[Function]}
   setIsMounting={[Function]}
+  theme$={
+    Observable {
+      "_isScalar": false,
+      "_subscribe": [Function],
+    }
+  }
 />
 `;

@@ -10,8 +10,8 @@ import { resolve, relative } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
-import { createListStream, createPromiseFromStreams } from '@kbn/utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { createListStream, createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
 
 import {
   createStats,
@@ -27,6 +27,7 @@ export async function saveAction({
   client,
   log,
   raw,
+  keepIndexNames,
   query,
 }: {
   outputDir: string;
@@ -34,6 +35,7 @@ export async function saveAction({
   client: Client;
   log: ToolingLog;
   raw: boolean;
+  keepIndexNames?: boolean;
   query?: Record<string, any>;
 }) {
   const name = relative(REPO_ROOT, outputDir);
@@ -50,7 +52,7 @@ export async function saveAction({
     // export and save the matching indices to mappings.json
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats, keepIndexNames }),
       ...createFormatArchiveStreams(),
       createWriteStream(resolve(outputDir, 'mappings.json')),
     ] as [Readable, ...Writable[]]),
@@ -58,7 +60,7 @@ export async function saveAction({
     // export all documents from matching indexes into data.json.gz
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateDocRecordsStream({ client, stats, progress, query }),
+      createGenerateDocRecordsStream({ client, stats, progress, keepIndexNames, query }),
       ...createFormatArchiveStreams({ gzip: !raw }),
       createWriteStream(resolve(outputDir, `data.json${raw ? '' : '.gz'}`)),
     ] as [Readable, ...Writable[]]),

@@ -16,11 +16,11 @@ getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificat
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  detailed | <code>boolean</code> | If true; the full chain with issuer property will be returned. |
+|  detailed | boolean | If true; the full chain with issuer property will be returned. |
 
 <b>Returns:</b>
 
-`PeerCertificate | DetailedPeerCertificate | null`
+PeerCertificate \| DetailedPeerCertificate \| null
 
 An object representing the peer's certificate.
 

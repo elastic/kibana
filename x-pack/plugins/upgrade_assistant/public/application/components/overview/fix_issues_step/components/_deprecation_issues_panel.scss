@@ -1,0 +1,24 @@
+/**
+ * Push <NoDeprecationIssues isPartial={false} /> success state to the bottom
+ * of the card, so it aligns with <NoDeprecationIssues isPartial={true} />,
+ * which is inside EuiStat.
+ */
+.upgDeprecationIssuesPanel .euiCard__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/**
+  * Ensure the stat is a consistent height, even when it contains
+  * <NoDeprecationIssues isPartial={true} />, which is shorter than the
+  * standard number value. We also push it to the bottom of the its
+  * container, to base-align it with the number value.
+  */
+.upgDeprecationIssuesPanel__stat {
+  height: 60px; // Derived from font measurements, not sizing vars
+  justify-content: space-between;
+  flex-grow: 1;
+  flex-direction: column;
+  display: flex;
+}

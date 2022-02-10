@@ -16,7 +16,6 @@ import { LogQueryFields } from '../../../services/log_queries/get_log_query_fiel
 
 export interface SourceOverrides {
   indexPattern: string;
-  timestamp: string;
 }
 
 const transformAndQueryData = async ({

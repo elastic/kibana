@@ -11,10 +11,11 @@ Similar to [HttpFetchOptions](./kibana-plugin-core-public.httpfetchoptions.md) b
 ```typescript
 export interface HttpFetchOptionsWithPath extends HttpFetchOptions 
 ```
+<b>Extends:</b> HttpFetchOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [path](./kibana-plugin-core-public.httpfetchoptionswithpath.path.md) | <code>string</code> |  |
+|  [path](./kibana-plugin-core-public.httpfetchoptionswithpath.path.md) | string |  |
 

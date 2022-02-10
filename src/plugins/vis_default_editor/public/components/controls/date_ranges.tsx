@@ -22,7 +22,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 import useMount from 'react-use/lib/useMount';

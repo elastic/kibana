@@ -16,6 +16,7 @@ import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
+  KibanaThemeProvider,
   RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
 import type { Space } from '../../common';
@@ -39,22 +40,20 @@ export const spacesManagementApp = Object.freeze({
       order: 2,
       title,
 
-      async mount({ element, setBreadcrumbs, history }) {
+      async mount({ element, theme$, setBreadcrumbs, history }) {
         const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
           await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
 
-        const spacesBreadcrumbs = [
-          {
-            text: title,
-            href: `/`,
-          },
-        ];
+        const spacesFirstBreadcrumb = {
+          text: title,
+          href: `/`,
+        };
         const { notifications, i18n: i18nStart, application, chrome } = coreStart;
 
         chrome.docTitle.change(title);
 
         const SpacesGridPageWithBreadcrumbs = () => {
-          setBreadcrumbs(spacesBreadcrumbs);
+          setBreadcrumbs([{ ...spacesFirstBreadcrumb, href: undefined }]);
           return (
             <SpacesGridPage
               capabilities={application.capabilities}
@@ -69,12 +68,11 @@ export const spacesManagementApp = Object.freeze({
 
         const CreateSpacePageWithBreadcrumbs = () => {
           setBreadcrumbs([
-            ...spacesBreadcrumbs,
+            spacesFirstBreadcrumb,
             {
               text: i18n.translate('xpack.spaces.management.createSpaceBreadcrumb', {
                 defaultMessage: 'Create',
               }),
-              href: '/create',
             },
           ]);
 
@@ -94,10 +92,9 @@ export const spacesManagementApp = Object.freeze({
 
           const onLoadSpace = (space: Space) => {
             setBreadcrumbs([
-              ...spacesBreadcrumbs,
+              spacesFirstBreadcrumb,
               {
                 text: space.name,
-                href: `/edit/${encodeURIComponent(space.id)}`,
               },
             ]);
           };
@@ -118,21 +115,23 @@ export const spacesManagementApp = Object.freeze({
         render(
           <KibanaContextProvider services={coreStart}>
             <i18nStart.Context>
-              <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
-                <Router history={history}>
-                  <Switch>
-                    <Route path={['', '/']} exact>
-                      <SpacesGridPageWithBreadcrumbs />
-                    </Route>
-                    <Route path="/create">
-                      <CreateSpacePageWithBreadcrumbs />
-                    </Route>
-                    <Route path="/edit/:spaceId">
-                      <EditSpacePageWithBreadcrumbs />
-                    </Route>
-                  </Switch>
-                </Router>
-              </RedirectAppLinks>
+              <KibanaThemeProvider theme$={theme$}>
+                <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
+                  <Router history={history}>
+                    <Switch>
+                      <Route path={['', '/']} exact>
+                        <SpacesGridPageWithBreadcrumbs />
+                      </Route>
+                      <Route path="/create">
+                        <CreateSpacePageWithBreadcrumbs />
+                      </Route>
+                      <Route path="/edit/:spaceId">
+                        <EditSpacePageWithBreadcrumbs />
+                      </Route>
+                    </Switch>
+                  </Router>
+                </RedirectAppLinks>
+              </KibanaThemeProvider>
             </i18nStart.Context>
           </KibanaContextProvider>,
           element

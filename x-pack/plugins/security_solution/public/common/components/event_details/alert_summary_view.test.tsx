@@ -14,6 +14,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
 import { TestProviders, TestProvidersComponent } from '../../mock';
+import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
 
 jest.mock('../../lib/kibana');
@@ -29,6 +30,8 @@ const props = {
   browserFields: mockBrowserFields,
   eventId: '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31',
   timelineId: 'detections-page',
+  title: '',
+  goToTable: jest.fn(),
 };
 
 describe('AlertSummaryView', () => {
@@ -49,6 +52,24 @@ describe('AlertSummaryView', () => {
     expect(getByTestId('summary-view')).toBeInTheDocument();
   });
 
+  test('it renders the action cell by default', () => {
+    const { getAllByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...props} />
+      </TestProviders>
+    );
+    expect(getAllByTestId('hover-actions-filter-for').length).toBeGreaterThan(0);
+  });
+
+  test('it does NOT render the action cell for the active timeline', () => {
+    const { queryAllByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...props} timelineId={TimelineId.active} />
+      </TestProviders>
+    );
+    expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+  });
+
   test("render no investigation guide if it doesn't exist", async () => {
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       rule: {
@@ -64,14 +85,44 @@ describe('AlertSummaryView', () => {
       expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
     });
   });
-  test.skip('Memory event code renders additional summary rows', () => {
+  test('Network event renders the correct summary rows', () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.category') {
+          return {
+            ...item,
+            values: ['network'],
+            originalValue: ['network'],
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    [
+      'host.name',
+      'user.name',
+      'destination.address',
+      'source.address',
+      'source.port',
+      'process.name',
+    ].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+  test('Memory event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
         if (item.category === 'event' && item.field === 'event.code') {
           return {
-            category: 'event',
-            field: 'event.code',
+            ...item,
             values: ['shellcode_thread'],
             originalValue: ['shellcode_thread'],
           };
@@ -79,34 +130,148 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { container } = render(
+    const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+    ['host.name', 'user.name', 'Target.process.executable'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
   });
-  test.skip('Behavior event code renders additional summary rows', () => {
+  test('Behavior event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
         if (item.category === 'event' && item.field === 'event.code') {
           return {
-            category: 'event',
-            field: 'event.code',
+            ...item,
             values: ['behavior'],
             originalValue: ['behavior'],
+          };
+        }
+        if (item.category === 'event' && item.field === 'event.category') {
+          return {
+            ...item,
+            values: ['malware', 'process', 'file'],
+            originalValue: ['malware', 'process', 'file'],
           };
         }
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { container } = render(
+    const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+    ['host.name', 'user.name', 'process.name'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Malware event category shows file fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.category') {
+          return {
+            ...item,
+            values: ['malware'],
+            originalValue: ['malware'],
+          };
+        }
+        return item;
+      }),
+      { category: 'file', field: 'file.name', values: ['malware.exe'] },
+      {
+        category: 'file',
+        field: 'file.hash.sha256',
+        values: ['3287rhf3847gb38fb3o984g9384g7b3b847gb'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['host.name', 'user.name', 'file.name', 'file.hash.sha256'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Ransomware event code resolves fields from the source event', () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.code') {
+          return {
+            ...item,
+            values: ['ransomware'],
+            originalValue: ['ransomware'],
+          };
+        }
+        if (item.category === 'event' && item.field === 'event.category') {
+          return {
+            ...item,
+            values: ['malware', 'process', 'file'],
+            originalValue: ['malware', 'process', 'file'],
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['host.name', 'user.name', 'process.name'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Threshold events have special fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.count',
+        values: [9001],
+        originalValue: [9001],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms',
+        values: ['{"field":"host.name","value":"Host-i120rdnmnw"}'],
+        originalValue: ['{"field":"host.name","value":"Host-i120rdnmnw"}'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    ['Threshold Count', 'host.name [threshold]'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
   });
 
   test("doesn't render empty fields", () => {

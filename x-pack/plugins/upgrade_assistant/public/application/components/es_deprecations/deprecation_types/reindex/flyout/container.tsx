@@ -5,73 +5,27 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { DocLinksStart } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiFlyoutHeader, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 
-import {
-  EnrichedDeprecationInfo,
-  ReindexAction,
-  ReindexStatus,
-} from '../../../../../../../common/types';
-import { useAppContext } from '../../../../../app_context';
+import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
 import type { ReindexStateContext } from '../context';
 import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
-
-enum ReindexFlyoutStep {
-  reindexWarnings,
-  checklist,
-}
+import { DeprecationBadge } from '../../../../shared';
+import {
+  UIM_REINDEX_START_CLICK,
+  UIM_REINDEX_STOP_CLICK,
+  uiMetricService,
+} from '../../../../../lib/ui_metric';
 
 export interface ReindexFlyoutProps extends ReindexStateContext {
   deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
 }
-
-const getOpenAndCloseIndexDocLink = (docLinks: DocLinksStart) => (
-  <EuiLink target="_blank" href={`${docLinks.links.apis.openIndex}`}>
-    {i18n.translate(
-      'xpack.upgradeAssistant.checkupTab.reindexing.flyout.openAndCloseDocumentation',
-      { defaultMessage: 'documentation' }
-    )}
-  </EuiLink>
-);
-
-const getIndexClosedCallout = (docLinks: DocLinksStart) => (
-  <>
-    <EuiCallOut
-      title={i18n.translate(
-        'xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutTitle',
-        { defaultMessage: 'Index closed' }
-      )}
-      color="warning"
-      iconType="alert"
-    >
-      <p>
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutDetails"
-          defaultMessage="This index is currently closed. The Upgrade Assistant will open, reindex and then close the index. {reindexingMayTakeLongerEmph}. Please see the {docs} for more information."
-          values={{
-            docs: getOpenAndCloseIndexDocLink(docLinks),
-            reindexingMayTakeLongerEmph: (
-              <b>
-                {i18n.translate(
-                  'xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutDetails.reindexingTakesLongerEmphasis',
-                  { defaultMessage: 'Reindexing may take longer than usual' }
-                )}
-              </b>
-            ),
-          }}
-        />
-      </p>
-    </EuiCallOut>
-    <EuiSpacer size="m" />
-  </>
-);
 
 export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   reindexState,
@@ -81,53 +35,61 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   deprecation,
 }) => {
   const { status, reindexWarnings } = reindexState;
-  const { index, correctiveAction } = deprecation;
-  const { docLinks } = useAppContext();
-  // If there are any warnings and we haven't started reindexing, show the warnings step first.
-  const [currentFlyoutStep, setCurrentFlyoutStep] = useState<ReindexFlyoutStep>(
-    reindexWarnings && reindexWarnings.length > 0 && status === undefined
-      ? ReindexFlyoutStep.reindexWarnings
-      : ReindexFlyoutStep.checklist
+  const { index } = deprecation;
+
+  const [showWarningsStep, setShowWarningsStep] = useState(false);
+
+  const onStartReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
+    startReindex();
+  }, [startReindex]);
+
+  const onStopReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_STOP_CLICK);
+    cancelReindex();
+  }, [cancelReindex]);
+
+  const startReindexWithWarnings = () => {
+    if (
+      reindexWarnings &&
+      reindexWarnings.length > 0 &&
+      status !== ReindexStatus.inProgress &&
+      status !== ReindexStatus.completed
+    ) {
+      setShowWarningsStep(true);
+    } else {
+      onStartReindex();
+    }
+  };
+  const flyoutContents = showWarningsStep ? (
+    <WarningsFlyoutStep
+      warnings={reindexState.reindexWarnings ?? []}
+      meta={reindexState.meta}
+      hideWarningsStep={() => setShowWarningsStep(false)}
+      continueReindex={() => {
+        setShowWarningsStep(false);
+        onStartReindex();
+      }}
+    />
+  ) : (
+    <ChecklistFlyoutStep
+      closeFlyout={closeFlyout}
+      startReindex={startReindexWithWarnings}
+      reindexState={reindexState}
+      cancelReindex={onStopReindex}
+    />
   );
-
-  let flyoutContents: React.ReactNode;
-
-  const globalCallout =
-    (correctiveAction as ReindexAction).blockerForReindexing === 'index-closed' &&
-    reindexState.status !== ReindexStatus.completed
-      ? getIndexClosedCallout(docLinks)
-      : undefined;
-  switch (currentFlyoutStep) {
-    case ReindexFlyoutStep.reindexWarnings:
-      flyoutContents = (
-        <WarningsFlyoutStep
-          renderGlobalCallouts={() => globalCallout}
-          closeFlyout={closeFlyout}
-          warnings={reindexState.reindexWarnings!}
-          advanceNextStep={() => setCurrentFlyoutStep(ReindexFlyoutStep.checklist)}
-        />
-      );
-      break;
-    case ReindexFlyoutStep.checklist:
-      flyoutContents = (
-        <ChecklistFlyoutStep
-          renderGlobalCallouts={() => globalCallout}
-          closeFlyout={closeFlyout}
-          reindexState={reindexState}
-          startReindex={startReindex}
-          cancelReindex={cancelReindex}
-        />
-      );
-      break;
-    default:
-      throw new Error(`Invalid flyout step: ${currentFlyoutStep}`);
-  }
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
+        <DeprecationBadge
+          isCritical={deprecation.isCritical}
+          isResolved={status === ReindexStatus.completed}
+        />
+        <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>
+          <h2 id="reindexDetailsFlyoutTitle">
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader"
               defaultMessage="Reindex {index}"
@@ -136,6 +98,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
+
       {flyoutContents}
     </>
   );

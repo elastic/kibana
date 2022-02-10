@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { RepositoryEdit } from '../../../public/application/sections/repository_edit';
 import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME } from './constant';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`/${REPOSITORY_NAME}`],
     componentRoutePath: '/:name',

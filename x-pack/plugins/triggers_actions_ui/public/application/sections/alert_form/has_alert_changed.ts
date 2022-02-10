@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
-import { AlertTypeParams } from '../../../types';
+import { RuleTypeParams } from '../../../types';
 import { InitialAlert } from './alert_reducer';
 
 const DEEP_COMPARE_FIELDS = ['tags', 'schedule', 'actions', 'notifyWhen'];
@@ -36,6 +36,6 @@ export function hasAlertChanged(a: InitialAlert, b: InitialAlert, compareParams:
   return !objectsAreEqual || !nonNullCompareFieldsAreEqual;
 }
 
-export function haveAlertParamsChanged(a: AlertTypeParams, b: AlertTypeParams) {
+export function haveAlertParamsChanged(a: RuleTypeParams, b: RuleTypeParams) {
   return !deepEqual(a, b);
 }

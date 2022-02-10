@@ -7,16 +7,17 @@
 
 import React, { memo } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ManagementEmptyStateWrapper } from '../../../../components/management_empty_state_wrapper';
 
 export const EmptyState = memo<{
   onAdd: () => void;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
-}>(({ onAdd, isAddDisabled = false }) => {
+  backComponent?: React.ReactNode;
+}>(({ onAdd, isAddDisabled = false, backComponent }) => {
   return (
-    <ManagementEmptyStateWraper>
+    <ManagementEmptyStateWrapper>
       <EuiEmptyPrompt
         data-test-subj="trustedAppEmptyState"
         iconType="plusInCircle"
@@ -31,10 +32,10 @@ export const EmptyState = memo<{
         body={
           <FormattedMessage
             id="xpack.securitySolution.trustedapps.listEmptyState.message"
-            defaultMessage="There are currently no trusted applications on your endpoint."
+            defaultMessage="Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts."
           />
         }
-        actions={
+        actions={[
           <EuiButton
             fill
             isDisabled={isAddDisabled}
@@ -45,10 +46,11 @@ export const EmptyState = memo<{
               id="xpack.securitySolution.trustedapps.list.addButton"
               defaultMessage="Add trusted application"
             />
-          </EuiButton>
-        }
+          </EuiButton>,
+          ...(backComponent ? [backComponent] : []),
+        ]}
       />
-    </ManagementEmptyStateWraper>
+    </ManagementEmptyStateWrapper>
   );
 });
 

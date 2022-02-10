@@ -11,7 +11,6 @@ import { MetricsAPIRequest } from '../../../../common/http_api';
 
 const options: MetricsAPIRequest = {
   timerange: {
-    field: '@timestamp',
     from: moment('2020-01-01T00:00:00Z').valueOf(),
     to: moment('2020-01-01T01:00:00Z').valueOf(),
     interval: '>=1m',

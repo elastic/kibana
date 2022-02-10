@@ -42,7 +42,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       id: 'watcher',
       title: pluginName,
       order: 3,
-      mount: async ({ element, setBreadcrumbs, history }) => {
+      mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
         const [coreStart] = await getStartServices();
         const {
           chrome: { docTitle },
@@ -73,6 +73,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
           history,
           getUrlForApp: application.getUrlForApp,
+          theme$,
         });
 
         return () => {

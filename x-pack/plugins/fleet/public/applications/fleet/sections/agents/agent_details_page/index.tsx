@@ -18,7 +18,7 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 
