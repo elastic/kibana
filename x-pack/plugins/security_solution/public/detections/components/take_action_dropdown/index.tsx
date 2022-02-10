@@ -24,6 +24,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
 import { ACTIVE_PANEL } from '../../../timelines/components/side_panel/event_details';
 import { useKibana } from '../../../common/lib/kibana';
+import { OsqueryActionItem } from './osqueryActionItem';
 
 interface ActionsData {
   alertStatus: Status;
@@ -166,8 +167,11 @@ export const TakeActionDropdown = React.memo(
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
-    const osqueryActionItem = osquery?.osqueryMenuItem({
+    const osqueryAvailable = osquery?.isOsqueryAvailable({
       agentId,
+      // onClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
+    });
+    const osqueryActionItem = OsqueryActionItem({
       onClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
     });
 
@@ -200,7 +204,7 @@ export const TakeActionDropdown = React.memo(
         ...(tGridEnabled ? addToCaseActionItems : []),
         ...alertsActionItems,
         ...hostIsolationActionItems,
-        ...(osqueryActionItem ? [osqueryActionItem] : []),
+        ...(osqueryAvailable ? [osqueryActionItem] : []),
         ...investigateInTimelineActionItems,
       ],
       [
@@ -208,6 +212,7 @@ export const TakeActionDropdown = React.memo(
         addToCaseActionItems,
         alertsActionItems,
         hostIsolationActionItems,
+        osqueryAvailable,
         osqueryActionItem,
         investigateInTimelineActionItems,
       ]

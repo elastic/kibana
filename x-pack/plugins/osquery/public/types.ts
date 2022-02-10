@@ -23,7 +23,7 @@ export interface OsqueryPluginSetup {}
 
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
-  osqueryMenuItem: (props: { agentId: string; onClick: () => void }) => React.ReactElement | null;
+  isOsqueryAvailable: (props: { agentId: string }) => boolean;
 }
 
 export interface AppPluginStartDependencies {

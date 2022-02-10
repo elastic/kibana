@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { useEffect, useState } from 'react';
 
 import { find } from 'lodash';
 import { useKibana } from '../../common/lib/kibana';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { AgentPolicy, FleetServerAgent, NewPackagePolicy } from '../../../../fleet/common';
 
-export const ACTION_OSQUERY = i18n.translate('xpack.osquery.alerts.osqueryAlertTitle', {
-  defaultMessage: 'Run Osquery',
-});
-
 interface IProps {
   agentId: string;
-  onClick: () => void;
 }
 
-export const useOsqueryMenuItem = ({ agentId, onClick }: IProps) => {
+export const useIsOsqueryAvailableSimple = ({ agentId }: IProps) => {
   const { http } = useKibana().services;
   const [isAvailable, setIsAvailable] = useState(false);
   useEffect(() => {
@@ -46,16 +39,5 @@ export const useOsqueryMenuItem = ({ agentId, onClick }: IProps) => {
     })();
   }, [agentId, http]);
 
-  if (!isAvailable) {
-    return null;
-  }
-  return (
-    <EuiContextMenuItem
-      key="osquery-action-item"
-      data-test-subj="osquery-action-item"
-      onClick={onClick}
-    >
-      {ACTION_OSQUERY}
-    </EuiContextMenuItem>
-  );
+  return isAvailable;
 };
