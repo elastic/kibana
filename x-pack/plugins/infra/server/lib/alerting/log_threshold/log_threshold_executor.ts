@@ -415,19 +415,15 @@ export const processGroupByRatioResults = (
       ratio !== undefined &&
       checkValueAgainstComparatorMap[count.comparator](ratio, count.value)
     ) {
-      const alert = alertFactory(
-        numeratorGroup.name,
-        getReasonMessageForGroupedRatioAlert(
-          ratio,
-          count.value,
-          count.comparator,
-          numeratorGroup.name,
-          timeSize,
-          timeUnit
-        ),
+      const reasonMessage = getReasonMessageForGroupedRatioAlert(
         ratio,
-        count.value
+        count.value,
+        count.comparator,
+        numeratorGroup.name,
+        timeSize,
+        timeUnit
       );
+      const alert = alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value);
       alertUpdater(alert, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -437,7 +433,7 @@ export const processGroupByRatioResults = (
             denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
             group: numeratorGroup.name,
             isRatio: true,
-            reason: 'this is mapped correctly',
+            reason: reasonMessage,
           },
         },
       ]);
