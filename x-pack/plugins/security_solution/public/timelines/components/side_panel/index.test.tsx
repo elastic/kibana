@@ -403,7 +403,6 @@ describe('Details Panel Component', () => {
                   isHostIsolationPanelOpen={false}
                   loadingEventDetails={true}
                   onAddIsolationStatusClick={[Function]}
-                  preventTakeActionDropdown={false}
                   timelineId="test"
                 >
                   <Memo()
@@ -422,7 +421,6 @@ describe('Details Panel Component', () => {
                     isHostIsolationPanelOpen={false}
                     loadingEventDetails={true}
                     onAddIsolationStatusClick={[Function]}
-                    preventTakeActionDropdown={false}
                     timelineId="test"
                     timelineQuery={
                       Object {
@@ -691,7 +689,6 @@ describe('Details Panel Component', () => {
                 isHostIsolationPanelOpen={false}
                 loadingEventDetails={true}
                 onAddIsolationStatusClick={[Function]}
-                preventTakeActionDropdown={false}
                 timelineId="test"
               >
                 <Memo()
@@ -710,7 +707,6 @@ describe('Details Panel Component', () => {
                   isHostIsolationPanelOpen={false}
                   loadingEventDetails={true}
                   onAddIsolationStatusClick={[Function]}
-                  preventTakeActionDropdown={false}
                   timelineId="test"
                   timelineQuery={
                     Object {
