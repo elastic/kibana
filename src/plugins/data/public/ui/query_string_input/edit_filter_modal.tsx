@@ -266,11 +266,11 @@ export function EditFilterModal({
           placeholder={
             selectedField
               ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                defaultMessage: 'Operator',
-              })
+                  defaultMessage: 'Operator',
+                })
               : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                defaultMessage: 'Waiting',
-              })
+                  defaultMessage: 'Waiting',
+                })
           }
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
@@ -461,8 +461,8 @@ export function EditFilterModal({
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                  ? 'kbnQueryBar__filterModalGroups'
-                  : '';
+                ? 'kbnQueryBar__filterModalGroups'
+                : '';
             return (
               <>
                 <div className={classNames(classes)}>
@@ -484,23 +484,28 @@ export function EditFilterModal({
                             </EuiFlexGroup>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-
                             <EuiFlexGroup responsive={false} justifyContent="center">
                               {subGroup.length < 2 && (
                                 <EuiFlexItem grow={false}>
                                   <EuiButtonIcon
                                     onClick={() => {
-                                      const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
+                                      const updatedLocalFilter = {
+                                        ...localfilter,
+                                        relationship: 'OR',
+                                      };
                                       const idx = localFilters.findIndex(
-                                        (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                                        (f) =>
+                                          f.id === localfilter.id && f.groupId === Number(groupId)
                                       );
                                       const subGroupId = (localfilter?.subGroupId ?? 0) + 1;
                                       if (subGroup.length < 2) {
                                         localFilters[idx] = updatedLocalFilter;
                                       }
-                                      const countOfFilterBeforeFilterEdit = multipleFilters.filter(
-                                        (f) => f.groupId === Number(groupId)
-                                      );
+                                      const newId =
+                                        Math.max(
+                                          multipleFilters?.length - 1,
+                                          localFilters[localFilters.length - 1].id
+                                        ) + 1;
                                       setLocalFilters([
                                         ...localFilters,
                                         {
@@ -509,7 +514,7 @@ export function EditFilterModal({
                                           value: undefined,
                                           relationship: undefined,
                                           groupId: localfilter.groupId,
-                                          id: Number(multipleFilters.length) - countOfFilterBeforeFilterEdit.length + localFilters.length,
+                                          id: newId,
                                           subGroupId,
                                         },
                                       ]);
@@ -537,12 +542,24 @@ export function EditFilterModal({
                                       subGroupId: filtersOnGroup.length > 1 ? subGroupId : 1,
                                     };
                                     const idx = localFilters.findIndex(
-                                      (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                                      (f) =>
+                                        f.id === localfilter.id && f.groupId === Number(groupId)
                                     );
                                     localFilters[idx] = updatedLocalFilter;
-                                    const countOfFilterBeforeFilterEdit = multipleFilters.filter(
-                                      (f) => f.groupId === Number(groupId)
+                                    const maxExistingGroupIdValue: number = Math.max.apply(
+                                      Math,
+                                      multipleFilters?.map((f) => f.groupId)
                                     );
+                                    const newGroupId =
+                                      Math.max(
+                                        maxExistingGroupIdValue,
+                                        localFilters[localFilters.length - 1].groupId
+                                      ) + 1;
+                                    const newId =
+                                      Math.max(
+                                        multipleFilters?.length - 1,
+                                        localFilters[localFilters.length - 1].id
+                                      ) + 1;
                                     setLocalFilters([
                                       ...localFilters,
                                       {
@@ -550,9 +567,12 @@ export function EditFilterModal({
                                         operator: undefined,
                                         value: undefined,
                                         relationship: undefined,
-                                        groupId: filtersOnGroup.length > 1 ? groupsCount : (Number(multipleFilters?.length) - countOfFilterBeforeFilterEdit.length + localFilters.length + 1),
+                                        groupId:
+                                          filtersOnGroup.length > 1
+                                            ? localFilters[localFilters.length - 1].groupId
+                                            : newGroupId,
+                                        id: newId,
                                         subGroupId,
-                                        id: Number(multipleFilters.length) - countOfFilterBeforeFilterEdit.length + localFilters.length,
                                       },
                                     ]);
                                     if (filtersOnGroup.length <= 1) {
