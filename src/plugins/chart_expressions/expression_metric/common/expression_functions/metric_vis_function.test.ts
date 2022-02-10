@@ -33,6 +33,7 @@ describe('interpreter/functions#metric', () => {
         range: 'number',
       },
     },
+    colorFullBackground: false,
     showLabels: true,
     font: { spec: { fontSize: '60px' }, type: 'style', css: '' },
     metric: [

@@ -59,6 +59,7 @@ const config: MetricVisRenderConfig = {
       metricColorMode: ColorMode.None,
       labels: { show: true },
       percentageMode: false,
+      colorFullBackground: false,
       style,
     },
     dimensions: {
