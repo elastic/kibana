@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../common/ecs';
 import { NoteResult } from '../../../../common/types/timeline/note';

@@ -119,6 +119,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           .set('Accept', 'application/json')
           .send({
             unencrypted: true,
+            refreshCache: true,
           })
           .expect(200)
           .then((res: any) => res.body);

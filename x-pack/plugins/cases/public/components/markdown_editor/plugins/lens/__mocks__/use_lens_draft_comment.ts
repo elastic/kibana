@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const useLensDraftComment = () => ({});
+export const useLensDraftComment = jest.fn().mockReturnValue({
+  draftComment: null,
+  hasIncomingLensState: false,
+  clearDraftComment: jest.fn(),
+  openLensModal: jest.fn(),
+});

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SearchBar, SearchBarProps } from './search_bar';
 import React, { Component, ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
@@ -13,7 +13,7 @@ import { act } from 'react-dom/test-utils';
 import { IndexPattern, QueryStringInput } from '../../../../../src/plugins/data/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { I18nProvider, InjectedIntl } from '@kbn/i18n/react';
+import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
 

@@ -43,7 +43,7 @@ export const getFleetServerUsage = async (
     .getSettings(soClient)
     .then((settings) => settings.fleet_server_hosts?.length ?? 0)
     .catch((err) => {
-      if (isBoom(error) && error.output.statusCode === 404) {
+      if (isBoom(err) && err.output.statusCode === 404) {
         return 0;
       }
 

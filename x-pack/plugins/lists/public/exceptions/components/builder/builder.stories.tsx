@@ -9,7 +9,7 @@ import { Story, addDecorator } from '@storybook/react';
 import React from 'react';
 import { HttpStart } from 'kibana/public';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
@@ -110,7 +110,7 @@ export default {
     },
     indexPatterns: {
       description:
-        '`IndexPatternBase` - index patterns used to populate field options and value autocomplete.',
+        '`DataViewBase` - index patterns used to populate field options and value autocomplete.',
       type: {
         required: true,
       },
@@ -192,7 +192,7 @@ export default {
     },
     listTypeSpecificIndexPatternFilter: {
       description:
-        '`(pattern: IndexPatternBase, type: ExceptionListType) => IndexPatternBase` - callback invoked when index patterns filtered. Optional to be used if you would only like certain fields displayed.',
+        '`(pattern: DataViewBase, type: ExceptionListType) => DataViewBase` - callback invoked when index patterns filtered. Optional to be used if you would only like certain fields displayed.',
       type: {
         required: false,
       },

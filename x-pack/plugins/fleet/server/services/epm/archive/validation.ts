@@ -61,7 +61,6 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'readme',
   'assets',
   'data_streams',
-  'internal',
   'license',
   'type',
   'categories',
@@ -210,9 +209,9 @@ export function parseAndVerifyDataStreams(
       streams: manifestStreams,
       ...restOfProps
     } = manifest;
-    if (!(dataStreamTitle && release && type)) {
+    if (!(dataStreamTitle && type)) {
       throw new PackageInvalidArchiveError(
-        `Invalid manifest for data stream '${dataStreamPath}': one or more fields missing of 'title', 'release', 'type'`
+        `Invalid manifest for data stream '${dataStreamPath}': one or more fields missing of 'title', 'type'`
       );
     }
     const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);

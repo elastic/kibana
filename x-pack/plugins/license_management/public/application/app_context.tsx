@@ -6,9 +6,9 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { ScopedHistory } from 'kibana/public';
+import { Observable } from 'rxjs';
 
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart, ScopedHistory, CoreTheme } from '../../../../../src/core/public';
 import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
 import { TelemetryPluginStart } from '../../../../../src/plugins/telemetry/public';
 import { ClientConfigType } from '../types';
@@ -33,6 +33,7 @@ export interface AppDependencies {
     initialLicense: ILicense;
   };
   config: ClientConfigType;
+  theme$: Observable<CoreTheme>;
 }
 
 export const AppContextProvider = ({

@@ -8,7 +8,7 @@
 jest.mock('./access_agreement_page');
 
 import type { AppMount } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { accessAgreementApp } from './access_agreement_app';
 
@@ -37,7 +37,6 @@ describe('accessAgreementApp', () => {
     const coreSetupMock = coreMock.createSetup();
     const coreStartMock = coreMock.createStart();
     coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
-    const containerMock = document.createElement('div');
 
     accessAgreementApp.create({
       application: coreSetupMock.application,
@@ -45,20 +44,26 @@ describe('accessAgreementApp', () => {
     });
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await (mount as AppMount)({
-      element: containerMock,
+    const appMountParams = {
+      element: document.createElement('div'),
       appBasePath: '',
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       history: scopedHistoryMock.create(),
-    });
+      theme$: themeServiceMock.createTheme$(),
+    };
+    await (mount as AppMount)(appMountParams);
 
     const mockRenderApp = jest.requireMock('./access_agreement_page').renderAccessAgreementPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
-    expect(mockRenderApp).toHaveBeenCalledWith(coreStartMock.i18n, containerMock, {
-      http: coreStartMock.http,
-      notifications: coreStartMock.notifications,
-      fatalErrors: coreStartMock.fatalErrors,
-    });
+    expect(mockRenderApp).toHaveBeenCalledWith(
+      coreStartMock.i18n,
+      { element: appMountParams.element, theme$: appMountParams.theme$ },
+      {
+        http: coreStartMock.http,
+        notifications: coreStartMock.notifications,
+        fatalErrors: coreStartMock.fatalErrors,
+      }
+    );
   });
 });

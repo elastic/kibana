@@ -16,7 +16,6 @@
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/index_pattern_management/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../license_management/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },

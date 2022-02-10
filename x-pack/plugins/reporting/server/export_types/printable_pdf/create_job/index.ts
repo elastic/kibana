@@ -7,26 +7,22 @@
 
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDF, JobParamsPDFLegacy, TaskPayloadPDF } from '../types';
-import { compatibilityShim } from './compatibility_shim';
+import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../types';
 
-/*
- * Incoming job params can be `JobParamsPDF` or `JobParamsPDFLegacy` depending
- * on the version that the POST URL was copied from.
- */
 export const createJobFnFactory: CreateJobFnFactory<
-  CreateJobFn<JobParamsPDF | JobParamsPDFLegacy, TaskPayloadPDF>
-> = function createJobFactoryFn(_reporting, logger) {
-  return compatibilityShim(async function createJobFn(
-    { relativeUrls, ...jobParams }: JobParamsPDF // relativeUrls does not belong in the payload of PDFV1
+  CreateJobFn<JobParamsPDFDeprecated, TaskPayloadPDF>
+> = function createJobFactoryFn() {
+  return async function createJobFn(
+    { relativeUrls, ...jobParams }: JobParamsPDFDeprecated // relativeUrls does not belong in the payload of PDFV1
   ) {
     validateUrls(relativeUrls);
 
     // return the payload
     return {
       ...jobParams,
+      isDeprecated: true,
       forceNow: new Date().toISOString(),
       objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
-  }, logger);
+  };
 };

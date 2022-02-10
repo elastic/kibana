@@ -7,12 +7,10 @@
 
 import { LoggerFactory } from 'kibana/server';
 
-import { TypeOf } from '@kbn/config-schema';
 import { ConfigType } from '../config';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import { HostMetadata } from '../../common/endpoint/types';
 import { ExperimentalFeatures } from '../../common/experimental_features';
-import { endpointFilters } from './routes/metadata';
 
 /**
  * The context for Endpoint apps.
@@ -36,12 +34,4 @@ export interface HostListQueryResult {
 export interface HostQueryResult {
   resultLength: number;
   result: HostMetadata | undefined;
-}
-
-// FIXME: when new Host Metadata list API is created (and existing one deprecated - 8.0?), move this type out of here and created it from Schema
-export interface GetHostMetadataListQuery {
-  /* page number 1 based - not an index */
-  page?: number;
-  pageSize?: number;
-  filters?: Partial<TypeOf<typeof endpointFilters>>;
 }

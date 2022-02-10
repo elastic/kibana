@@ -6,31 +6,36 @@
  */
 
 import { uniq } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Required } from '@kbn/utility-types';
 import { EuiText } from '@elastic/eui';
 import {
   Chart,
   Datum,
   LayerValue,
   Partition,
-  PartitionConfig,
   PartitionLayer,
-  PartitionLayout,
-  PartitionFillLabel,
-  RecursivePartial,
   Position,
   Settings,
   ElementClickListener,
+  PartialTheme,
 } from '@elastic/charts';
 import { RenderMode } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
-import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { PartitionChartsMeta } from './partition_charts_meta';
 import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
-import { getSliceValue, getFilterContext } from './render_helpers';
-import { EmptyPlaceholder } from '../shared_components';
+import {
+  getSliceValue,
+  getFilterContext,
+  isTreemapOrMosaicShape,
+  byDataColorPaletteMap,
+  extractUniqTermsMap,
+} from './render_helpers';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import './visualization.scss';
 import {
   ChartsPluginSetup,
@@ -76,10 +81,12 @@ export function PieComponent(
     legendPosition,
     nestedLegend,
     percentDecimals,
+    emptySizeRatio,
     legendMaxLines,
     truncateLegend,
     hideLabels,
     palette,
+    showValuesInLegend,
   } = props.args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -91,7 +98,7 @@ export function PieComponent(
     });
   }
 
-  const fillLabel: Partial<PartitionFillLabel> = {
+  const fillLabel: PartitionLayer['fillLabel'] = {
     valueFont: {
       fontWeight: 700,
     },
@@ -110,6 +117,22 @@ export function PieComponent(
     })
   ).length;
 
+  const shouldUseByDataPalette = !syncColors && ['mosaic'].includes(shape) && bucketColumns[1]?.id;
+  let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
+  if (shouldUseByDataPalette) {
+    byDataPalette = byDataColorPaletteMap(
+      firstTable,
+      bucketColumns[1].id,
+      paletteService.get(palette.name),
+      palette
+    );
+  }
+
+  let sortingMap: Record<string, number> = {};
+  if (shape === 'mosaic') {
+    sortingMap = extractUniqTermsMap(firstTable, bucketColumns[0].id);
+  }
+
   const layers: PartitionLayer[] = bucketColumns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
@@ -124,13 +147,19 @@ export function PieComponent(
         return String(d);
       },
       fillLabel,
+      sortPredicate: PartitionChartsMeta[shape].sortPredicate?.(bucketColumns, sortingMap),
       shape: {
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];
 
+          // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
+          // therefore change it for dask mode
+          const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
+
           // Color is determined by round-robin on the index of the innermost slice
           // This has to be done recursively until we get to the slice index
           let tempParent: typeof d | typeof d['parent'] = d;
+
           while (tempParent.parent && tempParent.depth > 0) {
             seriesLayers.unshift({
               name: String(tempParent.parent.children[tempParent.sortIndex][0]),
@@ -140,12 +169,14 @@ export function PieComponent(
             tempParent = tempParent.parent;
           }
 
-          if (shape === 'treemap') {
+          if (byDataPalette && seriesLayers[1]) {
+            return byDataPalette.getColor(seriesLayers[1].name) || defaultColor;
+          }
+
+          if (isTreemapOrMosaicShape(shape)) {
             // Only highlight the innermost color of the treemap, as it accurately represents area
             if (layerIndex < bucketColumns.length - 1) {
-              // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
-              // therefore change it for dask mode
-              return isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
+              return defaultColor;
             }
             // only use the top level series layer for coloring
             if (seriesLayers.length > 1) {
@@ -156,7 +187,7 @@ export function PieComponent(
           const outputColor = paletteService.get(palette.name).getCategoricalColor(
             seriesLayers,
             {
-              behindText: categoryDisplay !== 'hide',
+              behindText: categoryDisplay !== 'hide' || isTreemapOrMosaicShape(shape),
               maxDepth: bucketColumns.length,
               totalSeries: totalSeriesCount,
               syncColors,
@@ -164,46 +195,58 @@ export function PieComponent(
             palette.params
           );
 
-          return outputColor || 'rgba(0,0,0,0)';
+          return outputColor || defaultColor;
         },
       },
     };
   });
 
-  const config: RecursivePartial<PartitionConfig> = {
-    partitionLayout: shape === 'treemap' ? PartitionLayout.treemap : PartitionLayout.sunburst,
-    fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
-    outerSizeRatio: 1,
-    specialFirstInnermostSector: true,
-    minFontSize: 10,
-    maxFontSize: 16,
-    // Labels are added outside the outer ring when the slice is too small
-    linkLabel: {
-      maxCount: 5,
-      fontSize: 11,
-      // Dashboard background color is affected by dark mode, which we need
-      // to account for in outer labels
-      // This does not handle non-dashboard embeddables, which are allowed to
-      // have different backgrounds.
-      textColor: chartTheme.axes?.axisTitle?.fill,
+  const { legend, partitionType, label: chartType } = PartitionChartsMeta[shape];
+
+  const themeOverrides: Required<PartialTheme, 'partition'> = {
+    chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
+    background: {
+      color: undefined, // removes background for embeddables
     },
-    sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
-    sectorLineWidth: 1.5,
-    circlePadding: 4,
+    legend: {
+      labelOptions: { maxLines: truncateLegend ? legendMaxLines ?? 1 : 0 },
+    },
+    partition: {
+      fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
+      outerSizeRatio: 1,
+      minFontSize: 10,
+      maxFontSize: 16,
+      // Labels are added outside the outer ring when the slice is too small
+      linkLabel: {
+        maxCount: 5,
+        fontSize: 11,
+        // Dashboard background color is affected by dark mode, which we need
+        // to account for in outer labels
+        // This does not handle non-dashboard embeddables, which are allowed to
+        // have different backgrounds.
+        textColor: chartTheme.axes?.axisTitle?.fill,
+      },
+      sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
+      sectorLineWidth: 1.5,
+      circlePadding: 4,
+    },
   };
-  if (shape === 'treemap') {
+  if (isTreemapOrMosaicShape(shape)) {
     if (hideLabels || categoryDisplay === 'hide') {
-      config.fillLabel = { textColor: 'rgba(0,0,0,0)' };
+      themeOverrides.partition.fillLabel = { textColor: 'rgba(0,0,0,0)' };
     }
   } else {
-    config.emptySizeRatio = shape === 'donut' ? 0.3 : 0;
+    themeOverrides.partition.emptySizeRatio = shape === 'donut' ? emptySizeRatio : 0;
 
     if (hideLabels || categoryDisplay === 'hide') {
       // Force all labels to be linked, then prevent links from showing
-      config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
+      themeOverrides.partition.linkLabel = {
+        maxCount: 0,
+        maximumSection: Number.POSITIVE_INFINITY,
+      };
     } else if (categoryDisplay === 'inside') {
       // Prevent links from showing
-      config.linkLabel = { maxCount: 0 };
+      themeOverrides.partition.linkLabel = { maxCount: 0 };
     } else {
       // if it contains any slice below 2% reduce the ratio
       // first step: sum it up the overall sum
@@ -212,7 +255,7 @@ export function PieComponent(
       const smallSlices = slices.filter((value) => value < 0.02).length;
       if (smallSlices) {
         // shrink up to 20% to give some room for the linked values
-        config.outerSizeRatio = 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
+        themeOverrides.partition.outerSizeRatio = 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
       }
     }
   }
@@ -223,13 +266,6 @@ export function PieComponent(
       pattern: `0,0.[${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
     },
   });
-
-  const [isReady, setIsReady] = useState(false);
-  // It takes a cycle for the chart to render. This prevents
-  // reporting from printing a blank chart placeholder.
-  useEffect(() => {
-    setIsReady(true);
-  }, []);
 
   const hasNegative = firstTable.rows.some((row) => {
     const value = row[metricColumn.id];
@@ -247,11 +283,7 @@ export function PieComponent(
 
   if (isEmpty) {
     return (
-      <VisualizationContainer
-        reportTitle={props.args.title}
-        reportDescription={props.args.description}
-        className="lnsPieExpression__container"
-      >
+      <VisualizationContainer className="lnsPieExpression__container">
         <EmptyPlaceholder icon={LensIconChartDonut} />
       </VisualizationContainer>
     );
@@ -264,7 +296,7 @@ export function PieComponent(
           id="xpack.lens.pie.pieWithNegativeWarningLabel"
           defaultMessage="{chartType} charts can't render with negative values."
           values={{
-            chartType: CHART_NAMES[shape].label,
+            chartType,
           }}
         />
       </EuiText>
@@ -278,12 +310,7 @@ export function PieComponent(
   };
 
   return (
-    <VisualizationContainer
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-      className="lnsPieExpression__container"
-      isReady={isReady}
-    >
+    <VisualizationContainer className="lnsPieExpression__container">
       <Chart>
         <Settings
           tooltip={{ boundary: document.getElementById('app-fixed-viewport') ?? undefined }}
@@ -295,33 +322,30 @@ export function PieComponent(
           showLegend={
             !hideLabels &&
             (legendDisplay === 'show' ||
-              (legendDisplay === 'default' && bucketColumns.length > 1 && shape !== 'treemap'))
+              (legendDisplay === 'default' &&
+                (legend.getShowLegendDefault?.(bucketColumns) ?? false)))
           }
+          flatLegend={legend.flat}
+          showLegendExtra={showValuesInLegend}
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}
           legendAction={props.interactive ? getLegendAction(firstTable, onClickValue) : undefined}
-          theme={{
-            ...chartTheme,
-            background: {
-              ...chartTheme.background,
-              color: undefined, // removes background for embeddables
-            },
-            legend: {
-              labelOptions: { maxLines: truncateLegend ? legendMaxLines ?? 1 : 0 },
-            },
-          }}
+          theme={[themeOverrides, chartTheme]}
           baseTheme={chartBaseTheme}
+          ariaLabel={props.args.ariaLabel}
+          ariaUseDefaultSummary={!props.args.ariaLabel}
         />
         <Partition
           id={shape}
           data={firstTable.rows}
+          layout={partitionType}
+          specialFirstInnermostSector
           valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
           percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
           valueGetter={hideLabels || numberDisplay === 'value' ? undefined : 'percent'}
           valueFormatter={(d: number) => (hideLabels ? '' : formatters[metricColumn.id].convert(d))}
           layers={layers}
-          config={config}
           topGroove={hideLabels || categoryDisplay === 'hide' ? 0 : undefined}
         />
       </Chart>

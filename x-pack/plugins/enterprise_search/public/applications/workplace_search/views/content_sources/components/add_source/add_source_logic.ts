@@ -571,7 +571,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         login: loginValue || undefined,
         password: passwordValue || undefined,
         organizations: githubOrganizations.length > 0 ? githubOrganizations : undefined,
-        indexPermissions: indexPermissionsValue || undefined,
+        index_permissions: indexPermissionsValue || undefined,
       } as {
         [key: string]: string | string[] | undefined;
       };

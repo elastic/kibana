@@ -22,7 +22,7 @@
     "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_StartExportTask.html"
   ],
   "risk_score": 21,
-  "rule_id": "119c8877-8613-416d-a98a-96b6664ee73a5",
+  "rule_id": "119c8877-8613-416d-a98a-96b6664ee73a",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -45,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 1
 }

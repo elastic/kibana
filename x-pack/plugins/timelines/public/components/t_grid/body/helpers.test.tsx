@@ -7,17 +7,18 @@
 
 import { omit } from 'lodash/fp';
 
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 import { Ecs } from '../../../../common/ecs';
 import {
   allowSorting,
+  hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
   stringifyEvent,
   addBuildingBlockStyle,
 } from './helpers';
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { mockDnsEvent } from '../../../mock';
 
 describe('helpers', () => {
@@ -418,6 +419,22 @@ describe('helpers', () => {
       addBuildingBlockStyle(mockDnsEvent, THEME, mockedSetCellProps);
 
       expect(mockedSetCellProps).toBeCalledWith({ style: { backgroundColor: 'inherit' } });
+    });
+  });
+
+  describe('hasCellActions', () => {
+    const columnId = '@timestamp';
+
+    test('it returns false when the columnId is included in `disabledCellActions` ', () => {
+      const disabledCellActions = ['foo', '@timestamp', 'bar', 'baz']; // includes @timestamp
+
+      expect(hasCellActions({ columnId, disabledCellActions })).toBe(false);
+    });
+
+    test('it returns true when the columnId is NOT included in `disabledCellActions` ', () => {
+      const disabledCellActions = ['foo', 'bar', 'baz'];
+
+      expect(hasCellActions({ columnId, disabledCellActions })).toBe(true);
     });
   });
 });

@@ -118,6 +118,7 @@
     "MlInfo",
     "MlEsSearch",
     "MlIndexExists",
+    "MlSpecificIndexExists",
 
     "JobAuditMessages",
     "GetJobAuditMessages",
@@ -160,7 +161,6 @@
     "TrainedModels",
     "GetTrainedModel",
     "GetTrainedModelStats",
-    "GetTrainedModelDeploymentStats",
     "GetTrainedModelsNodesOverview",
     "GetTrainedModelPipelines",
     "StartTrainedModelDeployment",

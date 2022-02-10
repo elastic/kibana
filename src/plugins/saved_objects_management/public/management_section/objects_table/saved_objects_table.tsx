@@ -22,7 +22,7 @@ import {
 } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
-import { IndexPatternsContract } from '../../../../data/public';
+import { DataViewsContract } from '../../../../data_views/public';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import {
   parseQuery,
@@ -61,7 +61,7 @@ export interface SavedObjectsTableProps {
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
+  dataViews: DataViewsContract;
   taggingApi?: SavedObjectsTaggingApi;
   http: HttpStart;
   search: DataPublicPluginStart['search'];
@@ -149,7 +149,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   fetchCounts = async () => {
     const { taggingApi } = this.props;
-    const { queryText, visibleTypes, selectedTags } = parseQuery(this.state.activeQuery);
+    const { queryText, visibleTypes, selectedTags } = parseQuery(
+      this.state.activeQuery,
+      this.props.allowedTypes
+    );
 
     const allowedTypes = this.props.allowedTypes.map((type) => type.name);
 
@@ -210,7 +213,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   debouncedFindObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
     const { notifications, http, allowedTypes, taggingApi } = this.props;
-    const { queryText, visibleTypes, selectedTags } = parseQuery(query);
+    const { queryText, visibleTypes, selectedTags } = parseQuery(query, allowedTypes);
 
     const searchTypes = allowedTypes
       .map((type) => type.name)
@@ -386,8 +389,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
     } catch (e) {
       notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
-          defaultMessage: 'Unable to generate export',
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
+          defaultMessage: 'Unable to generate export: {error}',
+          values: {
+            error: e.body?.message ?? e,
+          },
         }),
       });
       throw e;
@@ -401,8 +407,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   onExportAll = async () => {
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
-    const { notifications, http, taggingApi } = this.props;
-    const { queryText, selectedTags } = parseQuery(activeQuery);
+    const { notifications, http, taggingApi, allowedTypes } = this.props;
+    const { queryText, selectedTags } = parseQuery(activeQuery, allowedTypes);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
         accum.push(id);
@@ -423,8 +429,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       });
     } catch (e) {
       notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
-          defaultMessage: 'Unable to generate export',
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
+          defaultMessage: 'Unable to generate export: {error}',
+          values: {
+            error: e.body?.message ?? e,
+          },
         }),
       });
       throw e;
@@ -504,7 +513,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const indexPatterns = selectedSavedObjects.filter((object) => object.type === 'index-pattern');
     if (indexPatterns.length) {
-      await this.props.indexPatterns.clearCache();
+      await this.props.dataViews.clearCache();
     }
 
     const deletes = selectedSavedObjects
@@ -548,7 +557,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.hideImportFlyout}
         done={this.finishImport}
         http={this.props.http}
-        indexPatterns={this.props.indexPatterns}
+        dataViews={this.props.dataViews}
         newIndexPatternUrl={newIndexPatternUrl}
         basePath={this.props.http.basePath}
         search={this.props.search}
@@ -652,8 +661,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
 
     const filterOptions = allowedTypes.map((type) => ({
-      value: type.name,
-      name: type.name,
+      value: type.displayName,
+      name: type.displayName,
       view: `${type.displayName} (${savedObjectCounts[type.name] || 0})`,
     }));
 

@@ -23,8 +23,8 @@ import {
   HostTacticsItem,
   HostTacticsSortField,
   HostTacticsFields,
-} from '../../../../common';
-import { Direction } from '../../../../common/search_strategy';
+  Direction,
+} from '../../../../common/search_strategy';
 import { HOST_TACTICS } from '../../pages/translations';
 import { rowItems } from '../utils';
 

@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { CoreStart } from '../../../../../src/core/public';
 
+export const mockGetCreateCaseFlyout = jest.fn();
 export const mockGetAllCasesSelectorModal = jest.fn();
 export const mockNavigateToApp = jest.fn();
 
@@ -26,6 +27,7 @@ export const createStartServicesMock = (): CoreStart => {
       getConfigureCases: jest.fn(),
       getCreateCase: jest.fn(),
       getRecentCases: jest.fn(),
+      getCreateCaseFlyout: mockGetCreateCaseFlyout,
       getAllCasesSelectorModal: mockGetAllCasesSelectorModal,
     },
     application: {

@@ -16,6 +16,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     datasourceId: id,
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
+    getVisualDefaults: jest.fn(),
   };
 
   return {
@@ -50,6 +51,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     checkIntegrity: jest.fn((_state) => []),
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
+    isEqual: jest.fn(),
   };
 }
 

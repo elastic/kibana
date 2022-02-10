@@ -8,10 +8,10 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { Alerts, AlertListItem, alertToListItem } from './alerts';
-import { Alert, AlertSummary, AlertStatus, AlertType } from '../../../../types';
+import { Rule, AlertSummary, AlertStatus, RuleType } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 
@@ -24,6 +24,8 @@ const mockAPIs = {
   muteAlertInstance: jest.fn(),
   unmuteAlertInstance: jest.fn(),
   requestRefresh: jest.fn(),
+  numberOfExecutions: 60,
+  onChangeDuration: jest.fn(),
 };
 
 beforeAll(() => {
@@ -303,7 +305,7 @@ describe('execution duration overview', () => {
     const rule = mockRule();
     const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
     const alertSummary = mockAlertSummary({
-      executionDuration: { average: 60284, values: [] },
+      executionDuration: { average: 60284, valuesWithTimestamp: {} },
     });
 
     const wrapper = mountWithIntl(
@@ -334,7 +336,7 @@ describe('execution duration overview', () => {
     const rule = mockRule();
     const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
     const alertSummary = mockAlertSummary({
-      executionDuration: { average: 60284345, values: [] },
+      executionDuration: { average: 60284345, valuesWithTimestamp: {} },
     });
 
     const wrapper = mountWithIntl(
@@ -382,7 +384,7 @@ describe('execution duration overview', () => {
   });
 });
 
-function mockRule(overloads: Partial<Alert> = {}): Alert {
+function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,
@@ -410,7 +412,7 @@ function mockRule(overloads: Partial<Alert> = {}): Alert {
   };
 }
 
-function mockRuleType(overloads: Partial<AlertType> = {}): AlertType {
+function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
   return {
     id: 'test.testRuleType',
     name: 'My Test Rule Type',
@@ -453,7 +455,7 @@ function mockAlertSummary(overloads: Partial<AlertSummary> = {}): AlertSummary {
     },
     executionDuration: {
       average: 0,
-      values: [],
+      valuesWithTimestamp: {},
     },
   };
   return { ...summary, ...overloads };

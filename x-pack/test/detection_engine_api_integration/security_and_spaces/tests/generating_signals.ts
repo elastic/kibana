@@ -8,14 +8,13 @@
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
+  ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_RISK_SCORE_MAPPING,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_RULE_ID,
   ALERT_RULE_RULE_NAME_OVERRIDE,
-  ALERT_RULE_SEVERITY,
-  ALERT_RULE_SEVERITY_MAPPING,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
@@ -24,6 +23,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
@@ -56,6 +56,7 @@ import {
   ALERT_GROUP_ID,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../plugins/security_solution/common/field_maps/field_names';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -941,6 +942,49 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     /**
+     * Here we test that 8.0.x alerts can be generated on legacy (pre-8.x) alerts.
+     */
+    describe('Signals generated from legacy signals', async () => {
+      beforeEach(async () => {
+        await deleteSignalsIndex(supertest, log);
+        await createSignalsIndex(supertest, log);
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
+        );
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
+        );
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
+
+      it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting([`.siem-signals-*`]),
+        };
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+
+      it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting([`.alerts-security.alerts-default`]),
+        };
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+    });
+
+    /**
      * Here we test the functionality of Severity and Risk Score overrides (also called "mappings"
      * in the code). If the rule specifies a mapping, then the final Severity or Risk Score
      * value of the signal will be taken from the mapped field of the source event.
@@ -977,11 +1021,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(signals.length).equal(4);
         signals.forEach((s) => {
-          expect(s?.[ALERT_RULE_SEVERITY]).equal('medium');
-          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([]);
+          expect(s?.[ALERT_SEVERITY]).equal('medium');
+          expect(s?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([]);
 
-          expect(s?.[ALERT_RULE_RISK_SCORE]).equal(75);
-          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([]);
+          expect(s?.[ALERT_RISK_SCORE]).equal(75);
+          expect(s?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([]);
         });
       });
 
@@ -999,7 +1043,7 @@ export default ({ getService }: FtrProviderContext) => {
         const signals = await executeRuleAndGetSignals(rule);
         const severities = signals.map((s) => ({
           id: (s?.[ALERT_ANCESTORS] as Ancestor[])[0].id,
-          value: s?.[ALERT_RULE_SEVERITY],
+          value: s?.[ALERT_SEVERITY],
         }));
 
         expect(signals.length).equal(4);
@@ -1011,9 +1055,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s?.[ALERT_RULE_RISK_SCORE]).equal(75);
-          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([]);
-          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([
+          expect(s?.[ALERT_RISK_SCORE]).equal(75);
+          expect(s?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([]);
+          expect(s?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([
             { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
             { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
           ]);
@@ -1033,7 +1077,7 @@ export default ({ getService }: FtrProviderContext) => {
         const signals = await executeRuleAndGetSignals(rule);
         const riskScores = signals.map((s) => ({
           id: (s?.[ALERT_ANCESTORS] as Ancestor[])[0].id,
-          value: s?.[ALERT_RULE_RISK_SCORE],
+          value: s?.[ALERT_RISK_SCORE],
         }));
 
         expect(signals.length).equal(4);
@@ -1045,9 +1089,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s?.[ALERT_RULE_SEVERITY]).equal('medium');
-          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([]);
-          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([
+          expect(s?.[ALERT_SEVERITY]).equal('medium');
+          expect(s?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([]);
+          expect(s?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
         });
@@ -1070,8 +1114,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signals = await executeRuleAndGetSignals(rule);
         const values = signals.map((s) => ({
           id: (s?.[ALERT_ANCESTORS] as Ancestor[])[0].id,
-          severity: s?.[ALERT_RULE_SEVERITY],
-          risk: s?.[ALERT_RULE_RISK_SCORE],
+          severity: s?.[ALERT_SEVERITY],
+          risk: s?.[ALERT_RISK_SCORE],
         }));
 
         expect(signals.length).equal(4);
@@ -1083,11 +1127,11 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([
+          expect(s?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([
             { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
             { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
           ]);
-          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([
+          expect(s?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
         });
@@ -1155,6 +1199,73 @@ export default ({ getService }: FtrProviderContext) => {
             origin: '/var/log/wtmp',
           }),
         });
+      });
+    });
+
+    describe.skip('Signal deduplication', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      beforeEach(async () => {
+        await deleteSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
+
+      it('should not generate duplicate signals', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+        };
+
+        const ruleResponse = await createRule(supertest, log, rule);
+
+        const signals = await getOpenSignals(supertest, log, es, ruleResponse);
+        expect(signals.hits.hits.length).to.eql(1);
+
+        const statusResponse = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .query({ id: ruleResponse.id });
+
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        const ruleStatusDate = statusResponse.body?.execution_summary?.last_execution.date;
+        const initialStatusDate = new Date(ruleStatusDate);
+
+        const initialSignal = signals.hits.hits[0];
+
+        // Disable the rule then re-enable to trigger another run
+        await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: ruleResponse.rule_id, enabled: false })
+          .expect(200);
+
+        await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: ruleResponse.rule_id, enabled: true })
+          .expect(200);
+
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          ruleResponse.id,
+          RuleExecutionStatus.succeeded,
+          initialStatusDate
+        );
+
+        const newSignals = await getOpenSignals(supertest, log, es, ruleResponse);
+        expect(newSignals.hits.hits.length).to.eql(1);
+        expect(newSignals.hits.hits[0]).to.eql(initialSignal);
       });
     });
   });

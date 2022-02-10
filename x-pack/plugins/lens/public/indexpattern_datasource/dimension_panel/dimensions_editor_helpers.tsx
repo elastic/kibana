@@ -16,7 +16,7 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText, EuiTabs, EuiTab, EuiCallOut } from '@elastic/eui';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import { operationDefinitionMap } from '../operations';
 import { useDebouncedValue } from '../../shared_components';
 
 export const formulaOperationName = 'formula';
@@ -33,11 +33,17 @@ export function isQuickFunction(operationType: string) {
 export const LabelInput = ({
   value,
   onChange,
+  defaultValue,
 }: {
   value: string;
   onChange: (value: string) => void;
+  defaultValue?: string;
 }) => {
-  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({ onChange, value });
+  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({
+    onChange,
+    value,
+    defaultValue,
+  });
 
   return (
     <EuiFormRow
@@ -161,7 +167,12 @@ export const DimensionEditorTabs = ({ tabs }: { tabs: DimensionEditorTab[] }) =>
     >
       {tabs.map(({ id, enabled, state, onClick, label }) => {
         return enabled ? (
-          <EuiTab isSelected={state} data-test-subj={`lens-dimensionTabs-${id}`} onClick={onClick}>
+          <EuiTab
+            key={id}
+            isSelected={state}
+            data-test-subj={`lens-dimensionTabs-${id}`}
+            onClick={onClick}
+          >
             {label}
           </EuiTab>
         ) : null;
@@ -169,26 +180,3 @@ export const DimensionEditorTabs = ({ tabs }: { tabs: DimensionEditorTab[] }) =>
     </EuiTabs>
   );
 };
-
-export function getErrorMessage(
-  selectedColumn: IndexPatternColumn | undefined,
-  incompleteOperation: boolean,
-  input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
-  fieldInvalid: boolean
-) {
-  if (selectedColumn && incompleteOperation) {
-    if (input === 'field') {
-      return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-        defaultMessage: 'This field does not work with the selected function.',
-      });
-    }
-    return i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {
-      defaultMessage: 'To use this function, select a field.',
-    });
-  }
-  if (fieldInvalid) {
-    return i18n.translate('xpack.lens.indexPattern.invalidFieldLabel', {
-      defaultMessage: 'Invalid field. Check your data view or pick another field.',
-    });
-  }
-}

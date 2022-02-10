@@ -8,7 +8,6 @@
     "devOnly": true
   },
   "main": "target_node/index.js",
-  "types": "target_types/index.d.ts",
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
   }

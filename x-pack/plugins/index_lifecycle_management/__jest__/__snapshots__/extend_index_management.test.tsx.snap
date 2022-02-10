@@ -100,8 +100,8 @@ exports[`extend index management ilm summary extension should return extension w
   index={
     Object {
       "aliases": "none",
-      "documents": "2",
-      "documents_deleted": "0",
+      "documents": 2,
+      "documents_deleted": 0,
       "health": "yellow",
       "hidden": false,
       "ilm": Object {
@@ -137,9 +137,9 @@ exports[`extend index management ilm summary extension should return extension w
       },
       "isFrozen": false,
       "name": "testy3",
-      "primary": "1",
+      "primary": 1,
       "primary_size": "6.5kb",
-      "replica": "1",
+      "replica": 1,
       "size": "6.5kb",
       "status": "open",
       "uuid": "XL11TLa3Tvq298_dMUzLHQ",
@@ -648,8 +648,8 @@ exports[`extend index management ilm summary extension should return extension w
   index={
     Object {
       "aliases": "none",
-      "documents": "2",
-      "documents_deleted": "0",
+      "documents": 2,
+      "documents_deleted": 0,
       "health": "yellow",
       "hidden": false,
       "ilm": Object {
@@ -666,9 +666,9 @@ exports[`extend index management ilm summary extension should return extension w
       },
       "isFrozen": false,
       "name": "testy3",
-      "primary": "1",
+      "primary": 1,
       "primary_size": "6.5kb",
-      "replica": "1",
+      "replica": 1,
       "size": "6.5kb",
       "status": "open",
       "uuid": "XL11TLa3Tvq298_dMUzLHQ",

@@ -924,6 +924,90 @@ Object {
 }
 `;
 
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_comment_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases-comments",
+    },
+  },
+  "message": "Failed attempt to access cases-comments [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_comment_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "Failed attempt to access a comments as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_comment_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases-comments",
+    },
+  },
+  "message": "User has accessed cases-comments [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getAttachmentMetrics" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_comment_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "User has accessed a comments as any owners",
+}
+`;
+
 exports[`audit_logger log function event structure creates the correct audit event for operation: "getCase" with an error and entity 1`] = `
 Object {
   "error": Object {
@@ -1089,6 +1173,90 @@ Object {
     ],
   },
   "message": "User has accessed a cases as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases",
+    },
+  },
+  "message": "Failed attempt to access cases [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "Failed attempt to access a case as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases",
+    },
+  },
+  "message": "User has accessed cases [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getCaseMetrics" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "User has accessed a case as any owners",
 }
 `;
 
@@ -1425,6 +1593,90 @@ Object {
     ],
   },
   "message": "User has accessed a case as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_user_action_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases-user-actions",
+    },
+  },
+  "message": "Failed attempt to access cases-user-actions [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_user_action_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "Failed attempt to access a user actions as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_user_action_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases-user-actions",
+    },
+  },
+  "message": "User has accessed cases-user-actions [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "getUserActionMetrics" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_user_action_get_metrics",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "User has accessed a user actions as any owners",
 }
 `;
 

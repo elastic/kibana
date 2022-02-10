@@ -50,7 +50,7 @@ export const PingStatusColumn = ({ pingStatus, item }: Props) => {
     <div data-test-subj={`xpack.uptime.pingList.ping-${item.docId}`}>
       <EuiBadge
         className="eui-textCenter"
-        color={pingStatus === STATUS.UP ? 'secondary' : dangerBehindText}
+        color={pingStatus === STATUS.UP ? 'success' : dangerBehindText}
       >
         {getPingStatusLabel(pingStatus, item)}
       </EuiBadge>

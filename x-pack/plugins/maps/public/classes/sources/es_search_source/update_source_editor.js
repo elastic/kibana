@@ -22,7 +22,7 @@ import {
 } from '../../../index_pattern_util';
 import { SortDirection, indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../fields/es_doc_field';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ScalingForm } from './util/scaling_form';
 

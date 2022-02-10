@@ -8,7 +8,7 @@
 
 import { spawnSync } from 'child_process';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 const INVALID_CONFIG_PATH = require.resolve('./__fixtures__/invalid_config.yml');
 

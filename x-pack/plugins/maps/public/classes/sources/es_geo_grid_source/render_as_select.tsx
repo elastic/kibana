@@ -6,18 +6,20 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RENDER_AS } from '../../../../common/constants';
 
 const options = [
   {
+    id: RENDER_AS.POINT,
     label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
       defaultMessage: 'clusters',
     }),
     value: RENDER_AS.POINT,
   },
   {
+    id: RENDER_AS.GRID,
     label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
       defaultMessage: 'grids',
     }),
@@ -30,21 +32,17 @@ export function RenderAsSelect(props: {
   onChange: (newValue: RENDER_AS) => void;
   isColumnCompressed?: boolean;
 }) {
+  const currentOption = options.find((option) => option.value === props.renderAs) || options[0];
+
   if (props.renderAs === RENDER_AS.HEATMAP) {
     return null;
   }
 
-  function onChange(selectedOptions: Array<EuiComboBoxOptionOption<RENDER_AS>>) {
-    if (!selectedOptions || !selectedOptions.length) {
-      return;
+  function onChange(id: string) {
+    const data = options.find((option) => option.id === id);
+    if (data) {
+      props.onChange(data.value as RENDER_AS);
     }
-    props.onChange(selectedOptions[0].value as RENDER_AS);
-  }
-
-  const selectedOptions = [];
-  const selectedOption = options.find((option) => option.value === props.renderAs);
-  if (selectedOption) {
-    selectedOptions.push(selectedOption);
   }
 
   return (
@@ -54,13 +52,16 @@ export function RenderAsSelect(props: {
       })}
       display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
     >
-      <EuiComboBox
-        singleSelection={{ asPlainText: true }}
+      <EuiButtonGroup
+        type="single"
+        legend={i18n.translate('xpack.maps.source.esGeoGrid.showAsSelector', {
+          defaultMessage: 'Choose the display method',
+        })}
         options={options}
-        selectedOptions={selectedOptions}
+        idSelected={currentOption.id}
         onChange={onChange}
-        isClearable={false}
-        compressed
+        isFullWidth={true}
+        buttonSize="compressed"
       />
     </EuiFormRow>
   );

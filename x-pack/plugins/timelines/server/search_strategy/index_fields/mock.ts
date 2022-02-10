@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldDescriptor } from '../../../../../../src/plugins/data/server';
+import type { FieldDescriptor } from '../../../../../../src/plugins/data/server';
 
 export const mockAuditbeatIndexField: FieldDescriptor[] = [
   {

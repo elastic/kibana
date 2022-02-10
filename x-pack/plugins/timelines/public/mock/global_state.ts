@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction } from '../../common';
+import { Direction } from '../../common/search_strategy';
 import { TimelineState } from '../types';
 import { defaultHeaders } from './header';
 
@@ -18,7 +18,7 @@ export const mockGlobalState: TimelineState = {
         end: '2020-07-08T08:20:18.966Z',
       },
       dataProviders: [],
-      dataViewId: '',
+      dataViewId: null,
       deletedEventIds: [],
       excludedRowRendererIds: [],
       expandedDetail: {},
@@ -53,6 +53,7 @@ export const mockGlobalState: TimelineState = {
       queryFields: [],
       selectAll: false,
       title: 'Events',
+      timelineType: 'default',
     },
   },
 };

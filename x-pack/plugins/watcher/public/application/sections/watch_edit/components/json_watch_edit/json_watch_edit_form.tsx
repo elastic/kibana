@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { XJsonMode } from '@kbn/ace';
 
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
@@ -197,7 +197,7 @@ export const JsonWatchEditForm = () => {
               <EuiButton
                 data-test-subj="saveWatchButton"
                 fill
-                color="secondary"
+                color="success"
                 type="submit"
                 iconType="check"
                 isLoading={isSaving}

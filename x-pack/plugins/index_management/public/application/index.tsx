@@ -17,6 +17,7 @@ import {
   createKibanaReactContext,
   GlobalFlyout,
   useKibana as useKibanaReactPlugin,
+  KibanaThemeProvider,
 } from '../shared_imports';
 
 import { AppContextProvider, AppDependencies } from './app_context';
@@ -36,7 +37,7 @@ export const renderApp = (
 
   const { i18n, docLinks, notifications, application } = core;
   const { Context: I18nContext } = i18n;
-  const { services, history, setBreadcrumbs, uiSettings, kibanaVersion } = dependencies;
+  const { services, history, setBreadcrumbs, uiSettings, kibanaVersion, theme$ } = dependencies;
 
   // uiSettings is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
@@ -59,19 +60,21 @@ export const renderApp = (
 
   render(
     <I18nContext>
-      <KibanaReactContextProvider>
-        <Provider store={indexManagementStore(services)}>
-          <AppContextProvider value={dependencies}>
-            <MappingsEditorProvider>
-              <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-                <GlobalFlyoutProvider>
-                  <App history={history} />
-                </GlobalFlyoutProvider>
-              </ComponentTemplatesProvider>
-            </MappingsEditorProvider>
-          </AppContextProvider>
-        </Provider>
-      </KibanaReactContextProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaReactContextProvider>
+          <Provider store={indexManagementStore(services)}>
+            <AppContextProvider value={dependencies}>
+              <MappingsEditorProvider>
+                <ComponentTemplatesProvider value={componentTemplateProviderValues}>
+                  <GlobalFlyoutProvider>
+                    <App history={history} />
+                  </GlobalFlyoutProvider>
+                </ComponentTemplatesProvider>
+              </MappingsEditorProvider>
+            </AppContextProvider>
+          </Provider>
+        </KibanaReactContextProvider>
+      </KibanaThemeProvider>
     </I18nContext>,
     elem
   );

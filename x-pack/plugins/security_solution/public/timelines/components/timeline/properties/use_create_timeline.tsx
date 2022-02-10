@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
@@ -19,10 +19,9 @@ import {
 } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
-import { sourcererActions } from '../../../../common/store/sourcerer';
+import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { appActions } from '../../../../common/store/app';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
 interface Props {
   timelineId?: string;
@@ -32,7 +31,9 @@ interface Props {
 
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
-  const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+  const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
+  const { id: dataViewId, patternList: selectedPatterns } =
+    useDeepEqualSelector(defaultDataViewSelector);
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);

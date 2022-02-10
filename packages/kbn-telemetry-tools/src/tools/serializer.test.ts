@@ -156,4 +156,14 @@ describe('getDescriptor', () => {
       prop2: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
     });
   });
+
+  it('serializes OmitIndexedAccessType', () => {
+    const usageInterface = usageInterfaces.get('OmitIndexedAccessType')!;
+    const descriptor = getDescriptor(usageInterface, tsProgram);
+    expect(descriptor).toEqual({
+      prop3: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
+      prop4: { kind: ts.SyntaxKind.StringLiteral, type: 'StringLiteral' },
+      prop5: { kind: ts.SyntaxKind.FirstLiteralToken, type: 'FirstLiteralToken' },
+    });
+  });
 });

@@ -33,6 +33,10 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       await testSubjects.existOrFail('mlDFAnalyticsExplorationTablePanel');
     },
 
+    async scrollRocCurveChartIntoView() {
+      await testSubjects.scrollIntoView('mlDFAnalyticsClassificationExplorationRocCurveChart');
+    },
+
     async assertClassificationEvaluatePanelElementsExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-ClassificationEvaluation');
       await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationConfusionMatrix');
@@ -125,11 +129,15 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       });
     },
 
-    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+    async assertScatterplotMatrixLoaded() {
       await testSubjects.existOrFail('mlDFExpandableSection-splom > mlScatterplotMatrix loaded', {
         timeout: 5000,
       });
-      await testSubjects.scrollIntoView('mlDFExpandableSection-splom > mlScatterplotMatrix loaded');
+    },
+
+    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+      await this.assertScatterplotMatrixLoaded();
+      await this.scrollScatterplotMatrixIntoView();
       await mlCommonUI.assertColorsInCanvasElement(
         'mlDFExpandableSection-splom',
         expectedValue,
@@ -241,6 +249,48 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 
     async scrollResultsIntoView() {
       await this.scrollContentSectionIntoView('results');
+    },
+
+    async expandContentSection(sectionId: string, shouldExpand: boolean) {
+      const contentSubj = `mlDFExpandableSection-${sectionId}-content`;
+      const expandableContentExists = await testSubjects.exists(contentSubj, { timeout: 1000 });
+
+      if (expandableContentExists !== shouldExpand) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(
+            `mlDFExpandableSection-${sectionId}-toggle-button`
+          );
+          if (shouldExpand) {
+            await testSubjects.existOrFail(contentSubj, { timeout: 1000 });
+          } else {
+            await testSubjects.missingOrFail(contentSubj, { timeout: 1000 });
+          }
+        });
+      }
+    },
+
+    async expandAnalysisSection(shouldExpand: boolean) {
+      await this.expandContentSection('analysis', shouldExpand);
+    },
+
+    async expandRegressionEvaluationSection(shouldExpand: boolean) {
+      await this.expandContentSection('RegressionEvaluation', shouldExpand);
+    },
+
+    async expandClassificationEvaluationSection(shouldExpand: boolean) {
+      await this.expandContentSection('ClassificationEvaluation', shouldExpand);
+    },
+
+    async expandFeatureImportanceSection(shouldExpand: boolean) {
+      await this.expandContentSection('FeatureImportanceSummary', shouldExpand);
+    },
+
+    async expandScatterplotMatrixSection(shouldExpand: boolean) {
+      await this.expandContentSection('splom', shouldExpand);
+    },
+
+    async expandResultsSection(shouldExpand: boolean) {
+      await this.expandContentSection('results', shouldExpand);
     },
   };
 }

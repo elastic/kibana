@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiCodeEditor } from '@elastic/eui';
+import { CodeEditor } from '../../../../src/plugins/kibana_react/public';
 
 interface Props {
   value: string;
@@ -16,19 +16,17 @@ interface Props {
 
 export function ExpressionEditor({ value, onChange }: Props) {
   return (
-    <EuiCodeEditor
-      mode="javascript"
-      theme="github"
+    <CodeEditor
+      languageId="javascript"
       width="100%"
+      height="250px"
       value={value}
       onChange={onChange}
-      setOptions={{
-        fontSize: '14px',
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: true,
+      options={{
+        fontSize: 14,
+        fontFamily: 'monospace',
+        quickSuggestions: true,
       }}
-      onBlur={() => {}}
       aria-label="Code Editor"
     />
   );

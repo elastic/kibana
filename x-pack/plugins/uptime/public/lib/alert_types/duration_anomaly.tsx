@@ -28,7 +28,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   documentationUrl(docLinks) {
     return `${docLinks.links.observability.uptimeDurationAnomaly}`;
   },
-  alertParamsExpression: (params: unknown) => (
+  ruleParamsExpression: (params: unknown) => (
     <DurationAnomalyAlert core={core} plugins={plugins} params={params} />
   ),
   description,

@@ -4,36 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { debounce } from 'lodash';
 import {
+  EuiButtonGroup,
+  EuiButtonIcon,
+  EuiComboBox,
   EuiExpression,
-  EuiPopover,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiComboBox,
-  EuiButtonGroup,
-  EuiSpacer,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSelect,
+  EuiSpacer,
   EuiText,
-  EuiFieldText,
 } from '@elastic/eui';
-import { IFieldType } from 'src/plugins/data/public';
-import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import { IErrorObject } from '../../../../../triggers_actions_ui/public';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 import {
+  SnapshotCustomAggregation,
+  SnapshotCustomAggregationRT,
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
-  SnapshotCustomAggregation,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
-  SnapshotCustomAggregationRT,
 } from '../../../../common/http_api/snapshot_api';
+import { DerivedIndexPattern } from '../../../containers/metrics_source';
 
 interface Props {
   metric?: { value: string; text: string };
@@ -42,7 +41,7 @@ interface Props {
   onChange: (metric?: string) => void;
   onChangeCustom: (customMetric?: SnapshotCustomMetricInput) => void;
   customMetric?: SnapshotCustomMetricInput;
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -186,7 +185,7 @@ export const MetricExpression = ({
           onClick={() => {
             setPopoverOpen(true);
           }}
-          color={errors.metric?.length ? 'danger' : 'secondary'}
+          color={errors.metric?.length ? 'danger' : 'success'}
         />
       }
       isOpen={popoverOpen}

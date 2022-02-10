@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
@@ -56,7 +56,8 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     )
   );
   const [selectedEntities, setSelectedEntities] = useState<EntityField[] | undefined>();
-  const [{ uiSettings }, { data: dataServices, share, uiActions }] = services;
+  const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
+    services;
   const { timefilter } = dataServices.query.timefilter;
 
   const mlLocator = useMemo(
@@ -183,6 +184,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
+              chartsService={chartsService}
             />
           )}
         </div>

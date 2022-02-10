@@ -7,7 +7,10 @@
 
 import { generatePath } from 'react-router-dom';
 
-import { docLinks } from '../shared/doc_links';
+import {
+  GITHUB_VIA_APP_SERVICE_TYPE,
+  GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+} from './constants';
 
 export const SETUP_GUIDE_PATH = '/setup_guide';
 
@@ -17,44 +20,14 @@ export const LOGOUT_ROUTE = '/logout';
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
-export const DOCS_PREFIX = docLinks.workplaceSearchBase;
-export const PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-permissions.html`;
-export const DOCUMENT_PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-sources-document-permissions.html`;
-export const DOCUMENT_PERMISSIONS_SYNC_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-synchronizing`;
-export const PRIVATE_SOURCES_DOCS_URL = `${PERMISSIONS_DOCS_URL}#organizational-sources-private-sources`;
-export const EXTERNAL_IDENTITIES_DOCS_URL = `${DOCS_PREFIX}/workplace-search-external-identities-api.html`;
-export const SECURITY_DOCS_URL = `${DOCS_PREFIX}/workplace-search-security.html`;
-export const SMTP_DOCS_URL = `${DOCS_PREFIX}/workplace-search-smtp-mailer.html`;
-export const BOX_DOCS_URL = `${DOCS_PREFIX}/workplace-search-box-connector.html`;
-export const CONFLUENCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-confluence-cloud-connector.html`;
-export const CONFLUENCE_SERVER_DOCS_URL = `${DOCS_PREFIX}/workplace-search-confluence-server-connector.html`;
-export const DROPBOX_DOCS_URL = `${DOCS_PREFIX}/workplace-search-dropbox-connector.html`;
-export const GITHUB_DOCS_URL = `${DOCS_PREFIX}/workplace-search-github-connector.html`;
-export const GITHUB_ENTERPRISE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-github-connector.html`;
-export const GMAIL_DOCS_URL = `${DOCS_PREFIX}/workplace-search-gmail-connector.html`;
-export const GOOGLE_DRIVE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-google-drive-connector.html`;
-export const JIRA_DOCS_URL = `${DOCS_PREFIX}/workplace-search-jira-cloud-connector.html`;
-export const JIRA_SERVER_DOCS_URL = `${DOCS_PREFIX}/workplace-search-jira-server-connector.html`;
-export const ONEDRIVE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-onedrive-connector.html`;
-export const SALESFORCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-salesforce-connector.html`;
-export const SERVICENOW_DOCS_URL = `${DOCS_PREFIX}/workplace-search-servicenow-connector.html`;
-export const SHAREPOINT_DOCS_URL = `${DOCS_PREFIX}/workplace-search-sharepoint-online-connector.html`;
-export const SLACK_DOCS_URL = `${DOCS_PREFIX}/workplace-search-slack-connector.html`;
-export const ZENDESK_DOCS_URL = `${DOCS_PREFIX}/workplace-search-zendesk-connector.html`;
-export const CUSTOM_SOURCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-api-sources.html`;
-export const CUSTOM_API_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-sources-api.html`;
-export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_URL}#custom-api-source-document-level-access-control`;
-export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/license-management.html`;
-export const SYNCHRONIZATION_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
-export const DIFFERENT_SYNC_TYPES_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#_indexing_schedule`;
-export const OBJECTS_AND_ASSETS_DOCS_URL = `${DOCS_PREFIX}}/workplace-search-customizing-indexing-rules.html#workplace-search-customizing-indexing-rules`;
-
 export const PERSONAL_PATH = '/p';
 
 export const OAUTH_AUTHORIZE_PATH = `${PERSONAL_PATH}/oauth/authorize`;
 export const SEARCH_AUTHORIZE_PATH = `${PERSONAL_PATH}/authorize_search`;
 
 export const USERS_AND_ROLES_PATH = '/users_and_roles';
+
+export const API_KEYS_PATH = '/api_keys';
 
 export const SECURITY_PATH = '/security';
 
@@ -73,6 +46,8 @@ export const ADD_CONFLUENCE_SERVER_PATH = `${SOURCES_PATH}/add/confluence_server
 export const ADD_DROPBOX_PATH = `${SOURCES_PATH}/add/dropbox`;
 export const ADD_GITHUB_ENTERPRISE_PATH = `${SOURCES_PATH}/add/github_enterprise_server`;
 export const ADD_GITHUB_PATH = `${SOURCES_PATH}/add/github`;
+export const ADD_GITHUB_VIA_APP_PATH = `${SOURCES_PATH}/add/${GITHUB_VIA_APP_SERVICE_TYPE}`;
+export const ADD_GITHUB_ENTERPRISE_SERVER_VIA_APP_PATH = `${SOURCES_PATH}/add/${GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE}`;
 export const ADD_GMAIL_PATH = `${SOURCES_PATH}/add/gmail`;
 export const ADD_GOOGLE_DRIVE_PATH = `${SOURCES_PATH}/add/google_drive`;
 export const ADD_JIRA_PATH = `${SOURCES_PATH}/add/jira_cloud`;

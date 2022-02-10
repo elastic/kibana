@@ -24,7 +24,7 @@ import {
 } from '../constants/elasticsearch_fieldnames';
 import {
   CPU_USAGE,
-  MEMORY_USAGE,
+  SYSTEM_MEMORY_USAGE,
   MOBILE_APP,
   RESPONSE_LATENCY,
   TRANSACTIONS_PER_MINUTE,
@@ -56,7 +56,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
       ...MobileFields,
       [TRANSACTION_DURATION]: RESPONSE_LATENCY,
       [SERVICE_NAME]: MOBILE_APP,
-      [METRIC_SYSTEM_MEMORY_USAGE]: MEMORY_USAGE,
+      [METRIC_SYSTEM_MEMORY_USAGE]: SYSTEM_MEMORY_USAGE,
       [METRIC_SYSTEM_CPU_USAGE]: CPU_USAGE,
     },
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
@@ -80,7 +80,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
         timeScale: 'm',
       },
       {
-        label: MEMORY_USAGE,
+        label: SYSTEM_MEMORY_USAGE,
         field: METRIC_SYSTEM_MEMORY_USAGE,
         id: METRIC_SYSTEM_MEMORY_USAGE,
         columnType: OPERATION_COLUMN,

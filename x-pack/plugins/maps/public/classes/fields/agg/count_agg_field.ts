@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data/common';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { IVectorSource } from '../../sources/vector_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
@@ -83,12 +83,16 @@ export class CountAggField implements IESAggField {
     );
   }
 
-  getValueAggDsl(indexPattern: IndexPattern): unknown | null {
+  getValueAggDsl(indexPattern: DataView): unknown | null {
     return null;
   }
 
   getBucketCount() {
     return 0;
+  }
+
+  isCount() {
+    return true;
   }
 
   canValueBeFormatted(): boolean {

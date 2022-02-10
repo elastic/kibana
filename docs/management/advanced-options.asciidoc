@@ -320,7 +320,9 @@ Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
 
 [[doctable-legacy]]`doc_table:legacy`::
-Controls the way the document table looks and works. Set this property to `true` to revert to the legacy implementation.
+Controls the way the document table looks and works.
+To use the new *Document Explorer* instead of the classic view, turn off this option.
+The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
 
 [float]
 [[kibana-ml-settings]]
@@ -387,7 +389,7 @@ A custom image to use in the footer of the PDF.
 ==== Rollup
 
 [horizontal]
-[[rollups-enabledataviews]]`rollups:enableDataViews`::
+[[rollups-enableindexpatterns]]`rollups:enableIndexPatterns`::
 Enables the creation of data views that capture rollup indices, which in
 turn enables visualizations based on rollup data. Refresh the page to apply the
 changes.
@@ -519,7 +521,10 @@ Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
 [[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
-The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use to the legacy charts library.
+The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use the legacy charts library.
+
+[[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
+Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
 
 [[visualize-enablelabs]]`visualize:enableLabs`::
 Enables users to create, view, and edit experimental visualizations. When disabled,

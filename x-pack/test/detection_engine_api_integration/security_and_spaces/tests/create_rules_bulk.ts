@@ -7,10 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_RULES_STATUS_URL,
-} from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -74,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
        When the api key is updated before / while the rule is executing, the alert
        executor no longer has access to a service to update the rule status
        saved object in Elasticsearch. Because of this, we cannot set the rule into
-       a 'failure' state, so the user ends up seeing 'going to run' as that is the
+       a 'failure' state, so the user ends up seeing 'running' as that is the
        last status set for the rule before it erupts in an error that cannot be
        recorded inside of the executor.
 
@@ -90,14 +87,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         await waitForRuleSuccessOrStatus(supertest, log, body[0].id);
-
-        const { body: statusBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [body[0].id] })
-          .expect(200);
-
-        expect(statusBody[body[0].id].current_status.status).to.eql('succeeded');
       });
 
       it('should create a single rule without a rule_id', async () => {

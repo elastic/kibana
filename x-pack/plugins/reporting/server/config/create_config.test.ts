@@ -77,13 +77,6 @@ describe('Reporting server createConfig$', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "capture": Object {
-          "browser": Object {
-            "chromium": Object {
-              "disableSandbox": true,
-            },
-          },
-        },
         "csv": Object {},
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
         "index": ".reporting",
@@ -103,47 +96,6 @@ describe('Reporting server createConfig$', () => {
         },
       }
     `);
-    expect(mockLogger.warn).not.toHaveBeenCalled();
-  });
-
-  it('uses user-provided disableSandbox: false', async () => {
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({
-        encryptionKey: '888888888888888888888888888888888',
-        capture: { browser: { chromium: { disableSandbox: false } } },
-      })
-    );
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
-    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: false });
-    expect(mockLogger.warn).not.toHaveBeenCalled();
-  });
-
-  it('uses user-provided disableSandbox: true', async () => {
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({
-        encryptionKey: '888888888888888888888888888888888',
-        capture: { browser: { chromium: { disableSandbox: true } } },
-      })
-    );
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
-    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: true });
-    expect(mockLogger.warn).not.toHaveBeenCalled();
-  });
-
-  it('provides a default for disableSandbox', async () => {
-    mockInitContext = coreMock.createPluginInitializerContext(
-      createMockConfigSchema({
-        encryptionKey: '888888888888888888888888888888888',
-      })
-    );
-    const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
-    expect(result.capture.browser.chromium).toMatchObject({ disableSandbox: expect.any(Boolean) });
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 

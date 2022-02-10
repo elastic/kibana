@@ -7,26 +7,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UnwrapPromise } from '@kbn/utility-types';
 import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
 import type { HttpSetup } from '../../../http';
 import type { NotificationsSetup } from '../../../notifications';
 import type { DataType } from '../lib';
 
+interface MetricMeta {
+  title: string;
+  description: string;
+  value?: number[];
+  type?: DataType;
+}
 export interface Metric {
   name: string;
   value: number | number[];
   type?: DataType;
+  meta?: MetricMeta;
 }
 
 export interface FormattedStatus {
   id: string;
-  state: {
-    id: ServiceStatusLevel;
-    title: string;
-    message: string;
-    uiColor: string;
-  };
+  state: StatusState;
+  original: ServiceStatus;
+}
+
+export interface StatusState {
+  id: ServiceStatusLevel;
+  title: string;
+  message: string;
+  uiColor: string;
 }
 
 interface StatusUIAttributes {
@@ -58,11 +67,46 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
       type: 'byte',
     },
     {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.requestsPerSecHeader', {
+        defaultMessage: 'Requests per second',
+      }),
+      value: (metrics.requests.total * 1000) / metrics.collection_interval_in_millis,
+      type: 'float',
+    },
+    {
       name: i18n.translate('core.statusPage.metricsTiles.columns.loadHeader', {
         defaultMessage: 'Load',
       }),
       value: [metrics.os.load['1m'], metrics.os.load['5m'], metrics.os.load['15m']],
       type: 'float',
+      meta: {
+        description: i18n.translate('core.statusPage.metricsTiles.columns.load.metaHeader', {
+          defaultMessage: 'Load interval',
+        }),
+        title: Object.keys(metrics.os.load).join('; '),
+      },
+    },
+    {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.processDelayHeader', {
+        defaultMessage: 'Delay',
+      }),
+      value: metrics.process.event_loop_delay,
+      type: 'time',
+      meta: {
+        description: i18n.translate(
+          'core.statusPage.metricsTiles.columns.processDelayDetailsHeader',
+          {
+            defaultMessage: 'Percentiles',
+          }
+        ),
+        title: '',
+        value: [
+          metrics.process.event_loop_delay_histogram?.percentiles['50'],
+          metrics.process.event_loop_delay_histogram?.percentiles['95'],
+          metrics.process.event_loop_delay_histogram?.percentiles['99'],
+        ],
+        type: 'time',
+      },
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeAvgHeader', {
@@ -70,20 +114,14 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
       }),
       value: metrics.response_times.avg_in_millis,
       type: 'time',
-    },
-    {
-      name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
-        defaultMessage: 'Response time max',
-      }),
-      value: metrics.response_times.max_in_millis,
-      type: 'time',
-    },
-    {
-      name: i18n.translate('core.statusPage.metricsTiles.columns.requestsPerSecHeader', {
-        defaultMessage: 'Requests per second',
-      }),
-      value: (metrics.requests.total * 1000) / metrics.collection_interval_in_millis,
-      type: 'float',
+      meta: {
+        description: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
+          defaultMessage: 'Response time max',
+        }),
+        title: '',
+        value: [metrics.response_times.max_in_millis],
+        type: 'time',
+      },
     },
   ];
 }
@@ -96,6 +134,7 @@ function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
 
   return {
     id,
+    original: status,
     state: {
       id: status.level,
       message: status.summary,
@@ -105,7 +144,7 @@ function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
   };
 }
 
-const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttributes> = {
+export const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttributes> = {
   critical: {
     title: i18n.translate('core.status.redTitle', {
       defaultMessage: 'Red',
@@ -128,7 +167,7 @@ const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttributes> = {
     title: i18n.translate('core.status.greenTitle', {
       defaultMessage: 'Green',
     }),
-    uiColor: 'secondary',
+    uiColor: 'success',
   },
 };
 
@@ -178,17 +217,16 @@ export async function loadStatus({
   return {
     name: response.name,
     version: response.version,
-    statuses: [
-      ...Object.entries(response.status.core).map(([serviceName, status]) =>
-        formatStatus(`core:${serviceName}`, status)
-      ),
-      ...Object.entries(response.status.plugins).map(([pluginName, status]) =>
-        formatStatus(`plugin:${pluginName}`, status)
-      ),
-    ],
+    coreStatus: Object.entries(response.status.core).map(([serviceName, status]) =>
+      formatStatus(serviceName, status)
+    ),
+    pluginStatus: Object.entries(response.status.plugins).map(([pluginName, status]) =>
+      formatStatus(pluginName, status)
+    ),
+
     serverState: formatStatus('overall', response.status.overall).state,
     metrics: formatMetrics(response),
   };
 }
 
-export type ProcessedServerResponse = UnwrapPromise<ReturnType<typeof loadStatus>>;
+export type ProcessedServerResponse = Awaited<ReturnType<typeof loadStatus>>;

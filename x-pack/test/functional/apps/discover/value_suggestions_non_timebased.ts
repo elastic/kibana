@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings', 'context', 'header']);
 
   describe('value suggestions non time based', function describeIndexTests() {
@@ -30,12 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('shows all autosuggest options for a filter in discover context app', async () => {
       await PageObjects.common.navigateToApp('discover');
       await queryBar.setQuery('type.keyword : ');
-
-      await retry.try(async () => {
-        const suggestions = await queryBar.getSuggestions();
-        expect(suggestions.length).to.be(1);
-        expect(suggestions).to.contain('"apache"');
-      });
+      await queryBar.expectSuggestions({ count: 1, contains: '"apache"' });
     });
   });
 }

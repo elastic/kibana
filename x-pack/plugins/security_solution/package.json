@@ -6,7 +6,7 @@
   "license": "Elastic-License",
   "scripts": {
     "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../scripts/eslint ./public/detections/mitre/mitre_tactics_techniques.ts --fix",
-    "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../scripts/eslint ./server/utils/beat_schema/fields.ts --fix",
+    "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../scripts/eslint ../timelines/server/utils/beat_schema/fields.ts --fix",
     "cypress": "../../../node_modules/.bin/cypress",
     "cypress:open": "yarn cypress open --config-file ./cypress/cypress.json",
     "cypress:open:ccs": "yarn cypress:open --config integrationFolder=./cypress/ccs_integration",
@@ -19,6 +19,7 @@
     "cypress:run-as-ci": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/security_solution_cypress/cli_config.ts",
     "cypress:run-as-ci:firefox": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/security_solution_cypress/config.firefox.ts",
     "cypress:run:upgrade": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/upgrade_integration",
+    "cypress:run:upgrade:old": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/upgrade_integration --spec ./cypress/upgrade_integration/threat_hunting/**/*.spec.ts,./cypress/upgrade_integration/detections/**/custom_query_rule.spec.ts; status=$?; yarn junit:merge && exit $status",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
     "test:generate": "node scripts/endpoint/resolver_generator"
   }

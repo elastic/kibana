@@ -24,9 +24,9 @@ import { convertKueryToElasticSearchQuery } from '../../../lib/kuery';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface Props {
-  alertParams: { [property: string]: any };
-  setAlertParams: (property: string, value: any) => void;
-  setAlertProperty: (property: string, value: any) => void;
+  ruleParams: { [property: string]: any };
+  setRuleParams: (property: string, value: any) => void;
+  setRuleProperty: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   paramDetails: CommonAlertParamDetails;
   data: DataPublicPluginStart;
@@ -34,13 +34,13 @@ export interface Props {
 }
 
 export const Expression: React.FC<Props> = (props) => {
-  const { alertParams, paramDetails, setAlertParams, errors, config, data } = props;
+  const { ruleParams, paramDetails, setRuleParams, errors, config, data } = props;
 
   const { derivedIndexPattern } = useDerivedIndexPattern(data, config);
 
   const alertParamsUi = Object.keys(paramDetails).map((alertParamName) => {
     const details = paramDetails[alertParamName];
-    const value = alertParams[alertParamName];
+    const value = ruleParams[alertParamName];
 
     switch (details?.type) {
       case AlertParamType.Duration:
@@ -51,7 +51,7 @@ export const Expression: React.FC<Props> = (props) => {
             duration={value}
             label={details?.label}
             errors={errors[alertParamName]}
-            setAlertParams={setAlertParams}
+            setRuleParams={setRuleParams}
           />
         );
       case AlertParamType.Percentage:
@@ -62,7 +62,7 @@ export const Expression: React.FC<Props> = (props) => {
             label={details?.label}
             percentage={value}
             errors={errors[alertParamName]}
-            setAlertParams={setAlertParams}
+            setRuleParams={setRuleParams}
           />
         );
       case AlertParamType.Number:
@@ -73,7 +73,7 @@ export const Expression: React.FC<Props> = (props) => {
             details={details}
             value={value}
             errors={errors[alertParamName]}
-            setAlertParams={setAlertParams}
+            setRuleParams={setRuleParams}
           />
         );
       case AlertParamType.TextField:
@@ -84,7 +84,7 @@ export const Expression: React.FC<Props> = (props) => {
             label={details?.label}
             value={value}
             errors={errors[alertParamName]}
-            setAlertParams={setAlertParams}
+            setRuleParams={setRuleParams}
           />
         );
     }
@@ -92,13 +92,13 @@ export const Expression: React.FC<Props> = (props) => {
 
   const onFilterChange = useCallback(
     (filter: string) => {
-      setAlertParams('filterQueryText', filter);
-      setAlertParams(
+      setRuleParams('filterQueryText', filter);
+      setRuleParams(
         'filterQuery',
         convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
       );
     },
-    [setAlertParams, derivedIndexPattern]
+    [setRuleParams, derivedIndexPattern]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -120,7 +120,7 @@ export const Expression: React.FC<Props> = (props) => {
           })}
         >
           <KueryBar
-            value={alertParams.filterQueryText}
+            value={ruleParams.filterQueryText}
             derivedIndexPattern={derivedIndexPattern}
             onSubmit={onFilterChange}
             onChange={debouncedOnFilterChange}

@@ -5,21 +5,34 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract } from 'kibana/server';
 import { UMKibanaRouteWrapper } from './types';
 import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaResponse } from '../../../../../src/core/server/http/router';
 import { enableInspectEsQueries } from '../../../observability/common';
+import { syntheticsServiceApiKey } from '../lib/saved_objects/service_api_key';
+import { API_URLS } from '../../common/constants';
 
-export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
+export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
   options: {
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
   },
   handler: async (context, request, response) => {
     const { client: esClient } = context.core.elasticsearch;
-    const { client: savedObjectsClient } = context.core.savedObjects;
+    let savedObjectsClient: SavedObjectsClientContract;
+    if (server.config?.ui?.monitorManagement?.enabled) {
+      savedObjectsClient = context.core.savedObjects.getClient({
+        includedHiddenTypes: [syntheticsServiceApiKey.name],
+      });
+    } else {
+      savedObjectsClient = context.core.savedObjects.client;
+    }
+
+    // specifically needed for the synthetics service api key generation
+    server.authSavedObjectsClient = savedObjectsClient;
 
     const isInspectorEnabled = await context.core.uiSettings.client.get<boolean>(
       enableInspectEsQueries
@@ -30,6 +43,9 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
       savedObjectsClient,
       esClient: esClient.asCurrentUser,
     });
+
+    server.uptimeEsClient = uptimeEsClient;
+
     if (isInspectorEnabled) {
       inspectableEsQueriesMap.set(request, []);
     }
@@ -40,6 +56,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
       context,
       request,
       response,
+      server,
     });
 
     if (res instanceof KibanaResponse) {
@@ -49,7 +66,9 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
     return response.ok({
       body: {
         ...res,
-        ...(isInspectorEnabled ? { _inspect: inspectableEsQueriesMap.get(request) } : {}),
+        ...(isInspectorEnabled && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
+          ? { _inspect: inspectableEsQueriesMap.get(request) }
+          : {}),
       },
     });
   },

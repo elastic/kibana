@@ -1,0 +1,14 @@
+{
+    "id": "visTypeHeatmap",
+    "version": "kibana",
+    "ui": true,
+    "server": true,
+    "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection", "fieldFormats"],
+    "requiredBundles": ["visDefaultEditor"],
+    "extraPublicDirs": ["common/index"],
+    "owner": {
+      "name": "Vis Editors",
+      "githubTeam": "kibana-vis-editors"
+    },
+    "description": "Contains the heatmap implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy heatmap charts library advanced setting."
+  }

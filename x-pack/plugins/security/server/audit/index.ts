@@ -10,6 +10,8 @@ export { AuditService } from './audit_service';
 export type { AuditEvent } from './audit_events';
 export {
   userLoginEvent,
+  userLogoutEvent,
+  sessionCleanupEvent,
   accessAgreementAcknowledgedEvent,
   httpRequestEvent,
   savedObjectEvent,

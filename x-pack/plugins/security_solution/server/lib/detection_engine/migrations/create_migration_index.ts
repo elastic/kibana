@@ -38,6 +38,7 @@ export const createMigrationIndex = async ({
       settings: {
         index: {
           lifecycle: {
+            // @ts-expect-error typings don't contain the property yet
             indexing_complete: true,
           },
         },

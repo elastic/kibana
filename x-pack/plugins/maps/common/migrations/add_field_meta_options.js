@@ -6,11 +6,12 @@
  */
 
 import _ from 'lodash';
-import { LAYER_TYPE, STYLE_TYPE } from '../constants';
+import { STYLE_TYPE } from '../constants';
 
 function isVectorLayer(layerDescriptor) {
   const layerType = _.get(layerDescriptor, 'type');
-  return layerType === LAYER_TYPE.VECTOR;
+  // can not use LAYER_TYPE because LAYER_TYPE.VECTOR does not exist >8.1
+  return layerType === 'VECTOR';
 }
 
 export function addFieldMetaOptions({ attributes }) {

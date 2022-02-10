@@ -38,7 +38,7 @@ export const ProgressInline = React.memo<ProgressInlineProps>(
       <dt className="siemProgressInline__title">{children}</dt>
 
       <dd className="siemProgressInline__bar">
-        <EuiProgress color="secondary" max={max} value={current} />
+        <EuiProgress color="success" max={max} value={current} />
       </dd>
 
       <dd className="siemProgressInline__ratio">

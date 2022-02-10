@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { HTTPFields, IHTTPSimpleFields, IHTTPAdvancedFields } from '../types';
+import { HTTPFields, HTTPSimpleFields, HTTPAdvancedFields } from '../types';
 import {
   HTTPSimpleFieldsContextProvider,
   HTTPAdvancedFieldsContextProvider,
@@ -21,18 +21,18 @@ interface HTTPContextProviderProps {
 }
 
 export const HTTPContextProvider = ({ defaultValues, children }: HTTPContextProviderProps) => {
-  const simpleKeys = Object.keys(defaultHTTPSimpleFields) as Array<keyof IHTTPSimpleFields>;
-  const advancedKeys = Object.keys(defaultHTTPAdvancedFields) as Array<keyof IHTTPAdvancedFields>;
-  const formattedDefaultHTTPSimpleFields = formatDefaultValues<IHTTPSimpleFields>(
+  const simpleKeys = Object.keys(defaultHTTPSimpleFields) as Array<keyof HTTPSimpleFields>;
+  const advancedKeys = Object.keys(defaultHTTPAdvancedFields) as Array<keyof HTTPAdvancedFields>;
+  const formattedDefaultHTTPSimpleFields = formatDefaultValues<HTTPSimpleFields>(
     simpleKeys,
     defaultValues || {}
   );
-  const formattedDefaultHTTPAdvancedFields = formatDefaultValues<IHTTPAdvancedFields>(
+  const formattedDefaultHTTPAdvancedFields = formatDefaultValues<HTTPAdvancedFields>(
     advancedKeys,
     defaultValues || {}
   );
   const httpAdvancedFields = defaultValues ? formattedDefaultHTTPAdvancedFields : undefined;
-  const httpSimpleFields: IHTTPSimpleFields | undefined = defaultValues
+  const httpSimpleFields: HTTPSimpleFields | undefined = defaultValues
     ? formattedDefaultHTTPSimpleFields
     : undefined;
   return (

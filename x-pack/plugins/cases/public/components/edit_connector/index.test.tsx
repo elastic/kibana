@@ -32,10 +32,6 @@ const caseServices = {
 const defaultProps: EditConnectorProps = {
   caseData: basicCase,
   caseServices,
-  configureCasesNavigation: {
-    href: 'blah',
-    onClick: jest.fn(),
-  },
   connectorName: connectorsMock[0].name,
   connectors: connectorsMock,
   hasDataToPush: true,

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiFlexItem, EuiCard, EuiButton, EuiLink, EuiConfirmModal, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
 
 export class RevertToBasic extends React.PureComponent {

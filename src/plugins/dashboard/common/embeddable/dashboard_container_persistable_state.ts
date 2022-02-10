@@ -17,7 +17,7 @@ import {
   DashboardContainerStateWithType,
   DashboardPanelState,
 } from '../types';
-import { CONTROL_GROUP_TYPE } from '../../../presentation_util/common/lib';
+import { CONTROL_GROUP_TYPE } from '../../../controls/common';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
 
@@ -135,10 +135,12 @@ export const createExtract = (
         });
 
         // We're going to prefix the names of the references so that we don't end up with dupes (from visualizations for instance)
-        const prefixedReferences = panelReferences.map((reference) => ({
-          ...reference,
-          name: `${prefix}${reference.name}`,
-        }));
+        const prefixedReferences = panelReferences
+          .filter((reference) => reference.type !== 'tag') // panel references should never contain tags. If they do, they must be removed
+          .map((reference) => ({
+            ...reference,
+            name: `${prefix}${reference.name}`,
+          }));
 
         references.push(...prefixedReferences);
 

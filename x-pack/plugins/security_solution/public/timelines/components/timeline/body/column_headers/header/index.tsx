@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 
-import { ColumnHeaderOptions } from '../../../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../../../common/types';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,

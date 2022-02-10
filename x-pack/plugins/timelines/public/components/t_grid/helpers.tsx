@@ -15,7 +15,7 @@ import {
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../common';
+} from '../../../common/utils/accessibility';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
 import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
@@ -240,8 +240,6 @@ export const getCombinedFilterQuery = ({
  * the `Timeline` and the `Events Viewer` widget
  */
 export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
-
-export const DEFAULT_ICON_BUTTON_WIDTH = 24;
 
 export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';

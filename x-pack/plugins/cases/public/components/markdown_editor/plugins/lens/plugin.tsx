@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -375,6 +375,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     </ModalContainer>
   );
 };
+LensEditorComponent.displayName = 'LensEditor';
 
 export const LensEditor = React.memo(LensEditorComponent);
 

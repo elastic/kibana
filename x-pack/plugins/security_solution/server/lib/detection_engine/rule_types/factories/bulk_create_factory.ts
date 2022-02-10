@@ -6,12 +6,12 @@
  */
 
 import { performance } from 'perf_hooks';
-import { countBy, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import { Logger } from 'kibana/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { BuildRuleMessage } from '../../signals/rule_messages';
-import { errorAggregator, makeFloatString } from '../../signals/utils';
+import { makeFloatString } from '../../signals/utils';
 import { RefreshTypes } from '../../types';
 import { PersistenceAlertService } from '../../../../../../rule_registry/server';
 
@@ -45,11 +45,11 @@ export const bulkCreateFactory =
 
     const start = performance.now();
 
-    const response = await alertWithPersistence(
+    const { createdAlerts, errors } = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
-        id: doc._id,
+        _id: doc._id,
         // `fields` should have already been merged into `doc._source`
-        fields: doc._source,
+        _source: doc._source,
       })),
       refreshForBulkCreate
     );
@@ -62,64 +62,24 @@ export const bulkCreateFactory =
       )
     );
 
-    if (response == null) {
-      return {
-        errors: [
-          'alertWithPersistence returned undefined response. Alerts as Data write flag may be disabled.',
-        ],
-        success: false,
-        bulkCreateDuration: makeFloatString(end - start),
-        createdItemsCount: 0,
-        createdItems: [],
-      };
-    }
-
-    logger.debug(
-      buildRuleMessage(`took property says bulk took: ${response.body.took} milliseconds`)
-    );
-
-    const createdItems = wrappedDocs
-      .map((doc, index) => {
-        const responseIndex = response.body.items[index].index;
-        return {
-          _id: responseIndex?._id ?? '',
-          _index: responseIndex?._index ?? '',
-          ...doc._source,
-        };
-      })
-      .filter((_, index) => response.body.items[index].index?.status === 201);
-    const createdItemsCount = createdItems.length;
-
-    const duplicateSignalsCount = countBy(response.body.items, 'create.status')['409'];
-    const errorCountByMessage = errorAggregator(response.body, [409]);
-
-    logger.debug(buildRuleMessage(`bulk created ${createdItemsCount} signals`));
-
-    if (duplicateSignalsCount > 0) {
-      logger.debug(buildRuleMessage(`ignored ${duplicateSignalsCount} duplicate signals`));
-    }
-
-    if (!isEmpty(errorCountByMessage)) {
-      logger.error(
-        buildRuleMessage(
-          `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
-        )
+    if (!isEmpty(errors)) {
+      logger.debug(
+        buildRuleMessage(`[-] bulkResponse had errors with responses of: ${JSON.stringify(errors)}`)
       );
-
       return {
-        errors: Object.keys(errorCountByMessage),
+        errors: Object.keys(errors),
         success: false,
         bulkCreateDuration: makeFloatString(end - start),
-        createdItemsCount: createdItems.length,
-        createdItems,
+        createdItemsCount: createdAlerts.length,
+        createdItems: createdAlerts,
       };
     } else {
       return {
         errors: [],
         success: true,
         bulkCreateDuration: makeFloatString(end - start),
-        createdItemsCount: createdItems.length,
-        createdItems,
+        createdItemsCount: createdAlerts.length,
+        createdItems: createdAlerts,
       };
     }
   };

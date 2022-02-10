@@ -28,7 +28,7 @@ export enum CONSTANTS {
 export type UrlStateType =
   | 'administration'
   | 'alerts'
-  | 'case'
+  | 'cases'
   | 'exceptions'
   | 'host'
   | 'network'

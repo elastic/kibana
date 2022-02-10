@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { ElasticsearchStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AlertsStatus } from '../../../alerts/status';
 

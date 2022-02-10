@@ -48,7 +48,7 @@ import {
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
-import { CustomIconAndTooltipContent, ILayer } from '../layer';
+import { LayerIcon, ILayer } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
@@ -58,7 +58,9 @@ import { IESSource } from '../../sources/es_source';
 import { ITermJoinSource } from '../../sources/term_join_source';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
-import { getVectorSourceBounds } from './geojson_vector_layer/utils';
+import { syncBoundsData } from './bounds_data';
+
+const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
 export function isVectorLayer(layer: ILayer) {
   return (layer as IVectorLayer).canShowTooltip !== undefined;
@@ -113,7 +115,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
-    layerDescriptor.type = LAYER_TYPE.VECTOR;
+    layerDescriptor.type = LAYER_TYPE.GEOJSON_VECTOR;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -242,7 +244,9 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   supportsFeatureEditing(): boolean {
-    return false;
+    const dataRequest = this.getDataRequest(SUPPORTS_FEATURE_EDITING_REQUEST_ID);
+    const data = dataRequest?.getData() as { supportsFeatureEditing: boolean } | undefined;
+    return data ? data.supportsFeatureEditing : false;
   }
 
   hasJoins() {
@@ -270,8 +274,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return true;
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
-    throw new Error('Should implement AbstractVectorLayer#getCustomIconAndTooltipContent');
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
+    throw new Error('Should implement AbstractVectorLayer#getLayerIcon');
   }
 
   getLayerTypeIconName() {
@@ -287,7 +291,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   async getBounds(syncContext: DataRequestContext) {
-    return getVectorSourceBounds({
+    return syncBoundsData({
       layerId: this.getId(),
       syncContext,
       source: this.getSource(),
@@ -516,6 +520,33 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       await Promise.all(promises);
 
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);
+    } catch (error) {
+      onLoadError(dataRequestId, requestToken, error.message);
+      throw error;
+    }
+  }
+
+  async _syncSupportsFeatureEditing({
+    syncContext,
+    source,
+  }: {
+    syncContext: DataRequestContext;
+    source: IVectorSource;
+  }) {
+    if (syncContext.dataFilters.isReadOnly) {
+      return;
+    }
+    const { startLoading, stopLoading, onLoadError } = syncContext;
+    const dataRequestId = SUPPORTS_FEATURE_EDITING_REQUEST_ID;
+    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
+    const prevDataRequest = this.getDataRequest(dataRequestId);
+    if (prevDataRequest) {
+      return;
+    }
+    try {
+      startLoading(dataRequestId, requestToken);
+      const supportsFeatureEditing = await source.supportsFeatureEditing();
+      stopLoading(dataRequestId, requestToken, { supportsFeatureEditing });
     } catch (error) {
       onLoadError(dataRequestId, requestToken, error.message);
       throw error;

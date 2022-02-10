@@ -7,16 +7,16 @@
 
 import uuid from 'uuid';
 import React, { FunctionComponent } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import AlertAdd from './alert_add';
 import { createAlert } from '../../lib/alert_api';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
-  Alert,
+  Rule,
   AlertAddProps,
   AlertFlyoutCloseReason,
   ConnectorValidationResult,
@@ -47,11 +47,6 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const delay = (wait: number = 1000) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, wait);
-  });
-
 export const TestExpression: FunctionComponent<any> = () => {
   return (
     <EuiFormLabel>
@@ -64,12 +59,11 @@ export const TestExpression: FunctionComponent<any> = () => {
   );
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/g
-describe.skip('alert_add', () => {
+describe('alert_add', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(
-    initialValues?: Partial<Alert>,
+    initialValues?: Partial<Rule>,
     onClose: AlertAddProps['onClose'] = jest.fn(),
     defaultScheduleInterval?: string
   ) {
@@ -122,7 +116,7 @@ describe.skip('alert_add', () => {
       hasPermanentEncryptionKey: true,
     });
 
-    const alertType = {
+    const ruleType = {
       id: 'my-alert-type',
       iconClass: 'test',
       description: 'test',
@@ -130,7 +124,7 @@ describe.skip('alert_add', () => {
       validate: (): ValidationResult => {
         return { errors: {} };
       },
-      alertParamsExpression: TestExpression,
+      ruleParamsExpression: TestExpression,
       requiresAppContext: false,
     };
 
@@ -149,8 +143,8 @@ describe.skip('alert_add', () => {
     });
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
-    ruleTypeRegistry.list.mockReturnValue([alertType]);
-    ruleTypeRegistry.get.mockReturnValue(alertType);
+    ruleTypeRegistry.list.mockReturnValue([ruleType]);
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
     ruleTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -179,7 +173,6 @@ describe.skip('alert_add', () => {
   it('renders alert add flyout', async () => {
     const onClose = jest.fn();
     await setup({}, onClose);
-    await delay(1000);
 
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
@@ -208,8 +201,6 @@ describe.skip('alert_add', () => {
       },
       onClose
     );
-
-    await delay(1000);
 
     expect(wrapper.find('input#alertName').props().value).toBe('Simple status alert');
 
@@ -249,7 +240,6 @@ describe.skip('alert_add', () => {
 
   it('should enforce any default inteval', async () => {
     await setup({ alertTypeId: 'my-alert-type' }, jest.fn(), '3h');
-    await delay(1000);
 
     // Wait for handlers to fire
     await act(async () => {
@@ -268,7 +258,7 @@ describe.skip('alert_add', () => {
   });
 });
 
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockAlert(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,

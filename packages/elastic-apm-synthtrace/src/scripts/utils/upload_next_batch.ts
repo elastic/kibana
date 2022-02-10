@@ -9,22 +9,39 @@
 // add this to workerExample.js file.
 import { Client } from '@elastic/elasticsearch';
 import { workerData } from 'worker_threads';
-import { ElasticsearchOutputWriteTargets } from '../../lib/output/to_elasticsearch_output';
 import { getScenario } from './get_scenario';
 import { createLogger, LogLevel } from '../../lib/utils/create_logger';
 import { uploadEvents } from './upload_events';
 
-const { bucketFrom, bucketTo, file, logLevel, target, writeTargets, clientWorkers, batchSize } =
-  workerData as {
-    bucketFrom: number;
-    bucketTo: number;
-    file: string;
-    logLevel: LogLevel;
-    target: string;
-    writeTargets: ElasticsearchOutputWriteTargets;
-    clientWorkers: number;
-    batchSize: number;
-  };
+export interface WorkerData {
+  bucketFrom: number;
+  bucketTo: number;
+  file: string;
+  scenarioOpts: Record<string, any> | undefined;
+  logLevel: LogLevel;
+  clientWorkers: number;
+  batchSize: number;
+  intervalInMs: number;
+  bucketSizeInMs: number;
+  target: string;
+  workers: number;
+  writeTarget?: string;
+}
+
+const {
+  bucketFrom,
+  bucketTo,
+  file,
+  logLevel,
+  clientWorkers,
+  batchSize,
+  intervalInMs,
+  bucketSizeInMs,
+  workers,
+  target,
+  writeTarget,
+  scenarioOpts,
+} = workerData as WorkerData;
 
 async function uploadNextBatch() {
   if (bucketFrom === bucketTo) {
@@ -38,8 +55,21 @@ async function uploadNextBatch() {
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
+  const { generate } = await scenario({
+    intervalInMs,
+    bucketSizeInMs,
+    logLevel,
+    file,
+    clientWorkers,
+    batchSize,
+    target,
+    workers,
+    writeTarget,
+    scenarioOpts,
+  });
+
   const events = logger.perf('execute_scenario', () =>
-    scenario({ from: bucketFrom, to: bucketTo })
+    generate({ from: bucketFrom, to: bucketTo })
   );
 
   return uploadEvents({
@@ -47,7 +77,6 @@ async function uploadNextBatch() {
     client,
     clientWorkers,
     batchSize,
-    writeTargets,
     logger,
   });
 }
@@ -56,6 +85,11 @@ uploadNextBatch()
   .then(() => {
     process.exit(0);
   })
-  .catch(() => {
-    process.exit(1);
+  .catch((error) => {
+    // eslint-disable-next-line
+    console.log(error);
+    // make sure error shows up in console before process is killed
+    setTimeout(() => {
+      process.exit(1);
+    }, 100);
   });

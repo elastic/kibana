@@ -40,7 +40,11 @@ describe('getRuleAlertSummaryRoute', () => {
     alerts: {},
     executionDuration: {
       average: 1,
-      values: [3, 5, 5],
+      valuesWithTimestamp: {
+        '17 Nov 2021 @ 19:19:17': 3,
+        '18 Nov 2021 @ 19:19:17': 5,
+        '19 Nov 2021 @ 19:19:17': 5,
+      },
     },
   };
 
@@ -75,6 +79,7 @@ describe('getRuleAlertSummaryRoute', () => {
         Object {
           "dateStart": undefined,
           "id": "1",
+          "numberOfExecutions": undefined,
         },
       ]
     `);
@@ -92,7 +97,7 @@ describe('getRuleAlertSummaryRoute', () => {
 
     rulesClient.getAlertSummary = jest
       .fn()
-      .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
+      .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -105,6 +110,8 @@ describe('getRuleAlertSummaryRoute', () => {
       ['notFound']
     );
 
-    expect(await handler(context, req, res)).toEqual(undefined);
+    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
+      `[Error: Saved object [alert/1] not found]`
+    );
   });
 });

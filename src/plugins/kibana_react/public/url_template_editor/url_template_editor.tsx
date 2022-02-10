@@ -26,6 +26,7 @@ export interface UrlTemplateEditorProps {
   variables?: UrlTemplateEditorVariable[];
   onChange: CodeEditorProps['onChange'];
   onEditor?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  placeholder?: string;
   Editor?: React.ComponentType<CodeEditorProps>;
 }
 
@@ -34,6 +35,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   value,
   variables,
   onChange,
+  placeholder,
   onEditor,
   Editor = CodeEditor,
 }) => {
@@ -129,6 +131,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
         value={value}
         onChange={onChange}
         editorDidMount={handleEditor}
+        placeholder={placeholder}
         options={{
           fontSize: 14,
           highlightActiveIndentGuide: false,

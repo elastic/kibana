@@ -31,7 +31,8 @@ export default function spaceSelectorFunctionalTests({
     );
 
     this.tags('includeFirefox');
-    describe('Space Selector', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/99581
+    describe.skip('Space Selector', () => {
       before(async () => {
         await PageObjects.security.forceLogout();
       });
@@ -62,37 +63,9 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    describe('Space Selector', () => {
-      before(async () => {
-        await PageObjects.security.forceLogout();
-      });
-
-      afterEach(async () => {
-        await PageObjects.security.forceLogout();
-      });
-
-      it('allows user to navigate to different spaces', async () => {
-        const spaceId = 'another-space';
-
-        await PageObjects.security.login(undefined, undefined, {
-          expectSpaceSelector: true,
-        });
-
-        await PageObjects.spaceSelector.clickSpaceCard(spaceId);
-
-        await PageObjects.spaceSelector.expectHomePage(spaceId);
-
-        await PageObjects.spaceSelector.openSpacesNav();
-
-        // change spaces
-
-        await PageObjects.spaceSelector.clickSpaceAvatar('default');
-
-        await PageObjects.spaceSelector.expectHomePage('default');
-      });
-    });
-
-    describe('Search spaces in popover', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/118356
+    // FLAKY: https://github.com/elastic/kibana/issues/118474
+    describe.skip('Search spaces in popover', () => {
       const spaceId = 'default';
       before(async () => {
         await PageObjects.security.forceLogout();

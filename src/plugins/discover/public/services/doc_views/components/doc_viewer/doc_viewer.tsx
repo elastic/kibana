@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './doc_viewer.scss';
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 import { getDocViewsRegistry } from '../../../../kibana_services';

@@ -8,9 +8,10 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-import { IUiSettingsClient } from 'kibana/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
 
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import type { PersistedState } from '../../../visualizations/public';
 import type { ExpressionRenderDefinition } from '../../../expressions/public';
@@ -32,7 +33,8 @@ function shouldShowNoResultsMessage(visData: any, visType: XyVisType): boolean {
 
 export const getXYVisRenderer: (deps: {
   uiSettings: IUiSettingsClient;
-}) => ExpressionRenderDefinition<RenderValue> = ({ uiSettings }) => ({
+  theme: ThemeServiceStart;
+}) => ExpressionRenderDefinition<RenderValue> = ({ uiSettings, theme }) => ({
   name: visName,
   displayName: 'XY visualization',
   reuseDomNode: true,
@@ -41,19 +43,21 @@ export const getXYVisRenderer: (deps: {
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
     render(
-      <I18nProvider>
-        <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-          <VisComponent
-            visParams={visConfig}
-            visData={visData}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-            uiState={handlers.uiState as PersistedState}
-            syncColors={syncColors}
-            useLegacyTimeAxis={uiSettings.get(LEGACY_TIME_AXIS, false)}
-          />
-        </VisualizationContainer>
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+            <VisComponent
+              visParams={visConfig}
+              visData={visData}
+              renderComplete={handlers.done}
+              fireEvent={handlers.event}
+              uiState={handlers.uiState as PersistedState}
+              syncColors={syncColors}
+              useLegacyTimeAxis={uiSettings.get(LEGACY_TIME_AXIS, false)}
+            />
+          </VisualizationContainer>
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode
     );
   },

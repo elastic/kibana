@@ -244,7 +244,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
               format: currentColumn.params.format,
               parentFormat,
             },
-          },
+          } as RangeIndexPatternColumn,
         },
       });
     };

@@ -6,7 +6,7 @@
  */
 import React, { FC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   ENTITY_FIELD_OPERATIONS,

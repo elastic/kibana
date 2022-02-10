@@ -10,7 +10,7 @@ import { Router } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { AnomalyResultsViewSelector } from './index';
 

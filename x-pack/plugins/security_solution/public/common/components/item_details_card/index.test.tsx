@@ -60,8 +60,8 @@ describe('item_details_card', () => {
           <ItemDetailsAction size="s" color="primary">
             {'primary'}
           </ItemDetailsAction>
-          <ItemDetailsAction size="s" color="secondary">
-            {'secondary'}
+          <ItemDetailsAction size="s" color="success">
+            {'success'}
           </ItemDetailsAction>
           <ItemDetailsAction size="s" color="danger">
             {'danger'}

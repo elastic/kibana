@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObject,
   SavedObjectReference,
 } from 'kibana/server';
-import { flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
-import { AlertInfo } from '.';
+import { flatMap, uniqWith, xorWith } from 'lodash';
+import { AlertInfo } from './types';
 import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
-  AssociationType,
   CaseAttributes,
-  CaseConnector,
+  CasePostRequest,
   CaseResponse,
-  CasesClientPostRequest,
   CasesFindResponse,
   CaseStatuses,
   CommentAttributes,
@@ -32,12 +29,8 @@ import {
   CommentsResponse,
   CommentType,
   ConnectorTypes,
-  ENABLE_CASE_CONNECTOR,
-  SubCaseAttributes,
-  SubCaseResponse,
-  SubCasesFindResponse,
   User,
-} from '../../common';
+} from '../../common/api';
 import { UpdateAlertRequest } from '../client/alerts/types';
 import {
   parseCommentString,
@@ -55,27 +48,17 @@ export const defaultSortField = 'created_at';
 export const nullUser: User = { username: null, full_name: null, email: null };
 
 export const transformNewCase = ({
-  connector,
-  createdDate,
-  email,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  full_name,
+  user,
   newCase,
-  username,
 }: {
-  connector: CaseConnector;
-  createdDate: string;
-  email?: string | null;
-  full_name?: string | null;
-  newCase: CasesClientPostRequest;
-  username?: string | null;
+  user: User;
+  newCase: CasePostRequest;
 }): CaseAttributes => ({
   ...newCase,
   closed_at: null,
   closed_by: null,
-  connector,
-  created_at: createdDate,
-  created_by: { email, full_name, username },
+  created_at: new Date().toISOString(),
+  created_by: user,
   external_service: null,
   status: CaseStatuses.open,
   updated_at: null,
@@ -108,69 +91,17 @@ export const transformCases = ({
   count_closed_cases: countClosedCases,
 });
 
-export const transformSubCases = ({
-  subCasesMap,
-  open,
-  inProgress,
-  closed,
-  page,
-  perPage,
-  total,
-}: {
-  subCasesMap: Map<string, SubCaseResponse[]>;
-  open: number;
-  inProgress: number;
-  closed: number;
-  page: number;
-  perPage: number;
-  total: number;
-}): SubCasesFindResponse => ({
-  page,
-  per_page: perPage,
-  total,
-  // Squish all the entries in the map together as one array
-  subCases: Array.from(subCasesMap.values()).flat(),
-  count_open_cases: open,
-  count_in_progress_cases: inProgress,
-  count_closed_cases: closed,
-});
-
 export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
   totalComment = comments.length,
   totalAlerts = 0,
-  subCases,
-  subCaseIds,
 }: {
   savedObject: SavedObject<CaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
-  subCases?: SubCaseResponse[];
-  subCaseIds?: string[];
 }): CaseResponse => ({
-  id: savedObject.id,
-  version: savedObject.version ?? '0',
-  comments: flattenCommentSavedObjects(comments),
-  totalComment,
-  totalAlerts,
-  ...savedObject.attributes,
-  subCases,
-  subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
-});
-
-export const flattenSubCaseSavedObject = ({
-  savedObject,
-  comments = [],
-  totalComment = comments.length,
-  totalAlerts = 0,
-}: {
-  savedObject: SavedObject<SubCaseAttributes>;
-  comments?: Array<SavedObject<CommentAttributes>>;
-  totalComment?: number;
-  totalAlerts?: number;
-}): SubCaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
@@ -221,7 +152,7 @@ export const getIDsAndIndicesAsArrays = (
  * To reformat the alert comment request requires a migration and a breaking API change.
  */
 const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[] => {
-  if (!isCommentRequestTypeAlertOrGenAlert(comment)) {
+  if (!isCommentRequestTypeAlert(comment)) {
     return [];
   }
 
@@ -245,7 +176,6 @@ export const getAlertInfoFromComments = (comments: CommentRequest[] = []): Alert
   }, []);
 
 type NewCommentArgs = CommentRequest & {
-  associationType: AssociationType;
   createdDate: string;
   owner: string;
   email?: string | null;
@@ -254,7 +184,6 @@ type NewCommentArgs = CommentRequest & {
 };
 
 export const transformNewComment = ({
-  associationType,
   createdDate,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -263,7 +192,6 @@ export const transformNewComment = ({
   ...comment
 }: NewCommentArgs): CommentAttributes => {
   return {
-    associationType,
     ...comment,
     created_at: createdDate,
     created_by: { email, full_name, username },
@@ -295,23 +223,10 @@ export const isCommentRequestTypeActions = (
 /**
  * A type narrowing function for alert comments. Exporting so integration tests can use it.
  */
-export const isCommentRequestTypeAlertOrGenAlert = (
+export const isCommentRequestTypeAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
-  return context.type === CommentType.alert || context.type === CommentType.generatedAlert;
-};
-
-/**
- * This is used to test if the posted comment is an generated alert. A generated alert will have one or many alerts.
- * An alert is essentially an object with a _id field. This differs from a regular attached alert because the _id is
- * passed directly in the request, it won't be in an object. Internally case will strip off the outer object and store
- * both a generated and user attached alert in the same structure but this function is useful to determine which
- * structure the new alert in the request has.
- */
-export const isCommentRequestTypeGenAlert = (
-  context: CommentRequest
-): context is CommentRequestAlertType => {
-  return context.type === CommentType.generatedAlert;
+  return context.type === CommentType.alert;
 };
 
 /**
@@ -332,10 +247,7 @@ export function createAlertUpdateRequest({
  */
 export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) => {
   let totalAlerts = 0;
-  if (
-    comment.attributes.type === CommentType.alert ||
-    comment.attributes.type === CommentType.generatedAlert
-  ) {
+  if (comment.attributes.type === CommentType.alert) {
     if (Array.isArray(comment.attributes.alertId)) {
       totalAlerts += comment.attributes.alertId.length;
     } else {
@@ -346,9 +258,7 @@ export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) 
 };
 
 /**
- * Count the number of alerts for each id in the alert's references. This will result
- * in a map with entries for both the collection and the individual sub cases. So the resulting
- * size of the map will not equal the total number of sub cases.
+ * Count the number of alerts for each id in the alert's references.
  */
 export const groupTotalAlertsByID = ({
   comments,
@@ -374,7 +284,7 @@ export const groupTotalAlertsByID = ({
 };
 
 /**
- * Counts the total alert IDs for a single case or sub case ID.
+ * Counts the total alert IDs for a single case.
  */
 export const countAlertsForID = ({
   comments,
@@ -385,17 +295,6 @@ export const countAlertsForID = ({
 }): number | undefined => {
   return groupTotalAlertsByID({ comments }).get(id);
 };
-
-/**
- * If subCaseID is defined and the case connector feature is disabled this throws an error.
- */
-export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) {
-  if (!ENABLE_CASE_CONNECTOR && subCaseID !== undefined) {
-    throw Boom.badRequest(
-      'The sub case parameters are not supported when the case connector feature is disabled'
-    );
-  }
-}
 
 /**
  * Returns a connector that indicates that no connector was set.
@@ -460,4 +359,12 @@ export const getOrUpdateLensReferences = (
   );
 
   return currentNonLensReferences.concat(newCommentLensReferences);
+};
+
+export const asArray = <T>(field?: T | T[] | null): T[] => {
+  if (field === undefined || field === null) {
+    return [];
+  }
+
+  return Array.isArray(field) ? field : [field];
 };

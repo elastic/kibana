@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LayoutParams } from '../layout';
+import type { LayoutParams } from '../../../../screenshotting/common';
 import type { BaseParams, BasePayload } from '../base';
 
 interface BaseParamsPNG {
@@ -15,7 +15,10 @@ interface BaseParamsPNG {
 }
 
 // Job params: structure of incoming user request data
-export type JobParamsPNG = BaseParamsPNG & BaseParams;
+/**
+ * @deprecated
+ */
+export type JobParamsPNGDeprecated = BaseParamsPNG & BaseParams;
 
 // Job payload: structure of stored job data provided by create_job
 export type TaskPayloadPNG = BaseParamsPNG & BasePayload;

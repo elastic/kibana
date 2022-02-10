@@ -127,7 +127,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for a
     position="top"
   >
     <EuiBadge
-      color="secondary"
+      color="success"
       href=""
       iconType="flag"
       onClickAriaLabel="Metricbeat monitoring"
@@ -150,7 +150,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for b
     position="top"
   >
     <EuiBadge
-      color="secondary"
+      color="success"
       href=""
       iconType="flag"
       onClickAriaLabel="Metricbeat monitoring"
@@ -173,7 +173,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for e
     position="top"
   >
     <EuiBadge
-      color="secondary"
+      color="success"
       href=""
       iconType="flag"
       onClickAriaLabel="Metricbeat monitoring"
@@ -196,7 +196,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for k
     position="top"
   >
     <EuiBadge
-      color="secondary"
+      color="success"
       href=""
       iconType="flag"
       onClickAriaLabel="Metricbeat monitoring"
@@ -219,7 +219,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for l
     position="top"
   >
     <EuiBadge
-      color="secondary"
+      color="success"
       href=""
       iconType="flag"
       onClickAriaLabel="Metricbeat monitoring"

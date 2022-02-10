@@ -17,7 +17,7 @@ import { createIndexPatternsStartMock } from '../data_views/mocks';
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { bfetchPluginMock } from '../../../bfetch/server/mocks';
 import { of } from 'rxjs';
-import {
+import type {
   IEsSearchRequest,
   IEsSearchResponse,
   IScopedSearchClient,
@@ -25,8 +25,8 @@ import {
   ISearchSessionService,
   ISearchStart,
   ISearchStrategy,
-  NoSearchIdInSessionError,
 } from '.';
+import { NoSearchIdInSessionError } from '.';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { expressionsPluginMock } from '../../../expressions/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';

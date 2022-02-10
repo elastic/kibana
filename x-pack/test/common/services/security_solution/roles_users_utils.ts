@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../plugins/security_solution/common';
+import { assertUnreachable } from '../../../../plugins/security_solution/common/utility_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   t1AnalystUser,

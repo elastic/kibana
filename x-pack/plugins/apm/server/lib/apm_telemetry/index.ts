@@ -24,7 +24,7 @@ import {
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 import {
   collectDataTelemetry,
   CollectTelemetryParams,

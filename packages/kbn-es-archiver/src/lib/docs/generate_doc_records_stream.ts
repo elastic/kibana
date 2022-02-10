@@ -38,7 +38,7 @@ export function createGenerateDocRecordsStream({
             index,
             scroll: SCROLL_TIMEOUT,
             size: SCROLL_SIZE,
-            _source: 'true',
+            _source: true,
             query,
             rest_total_hits_as_int: true,
           },
@@ -65,7 +65,6 @@ export function createGenerateDocRecordsStream({
                 // when it is loaded it can skip migration, if possible
                 index:
                   hit._index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : hit._index,
-                type: hit._type,
                 id: hit._id,
                 source: hit._source,
               },

@@ -1,36 +1,94 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 const { execSync } = require('child_process');
 
-const keys = execSync('buildkite-agent meta-data keys')
-  .toString()
-  .split('\n')
-  .filter((k) => k.startsWith('ftsr-suite/'));
-
-const overrideCount = parseInt(
-  execSync(`buildkite-agent meta-data get 'ftsr-override-count'`).toString().trim()
-);
-
 const concurrency = 25;
+const defaultCount = concurrency * 2;
 const initialJobs = 3;
 
-let totalJobs = initialJobs;
+function getTestSuitesFromMetadata() {
+  const keys = execSync('buildkite-agent meta-data keys')
+    .toString()
+    .split('\n')
+    .filter((k) => k.startsWith('ftsr-suite/'));
 
-const testSuites = [];
-for (const key of keys) {
-  if (!key) {
-    continue;
+  const overrideCount = execSync(`buildkite-agent meta-data get 'ftsr-override-count'`)
+    .toString()
+    .trim();
+
+  const testSuites = [];
+  for (const key of keys) {
+    if (!key) {
+      continue;
+    }
+
+    const value =
+      overrideCount && overrideCount !== '0'
+        ? overrideCount
+        : execSync(`buildkite-agent meta-data get '${key}'`).toString().trim();
+
+    const count = value === '' ? defaultCount : parseInt(value);
+    testSuites.push({
+      key: key.replace('ftsr-suite/', ''),
+      count: count,
+    });
   }
 
-  const value =
-    overrideCount || execSync(`buildkite-agent meta-data get '${key}'`).toString().trim();
-
-  const count = value === '' ? defaultCount : parseInt(value);
-  totalJobs += count;
-
-  testSuites.push({
-    key: key.replace('ftsr-suite/', ''),
-    count: count,
-  });
+  return testSuites;
 }
+
+function getTestSuitesFromJson(json) {
+  const fail = (errorMsg) => {
+    console.error('+++ Invalid test config provided');
+    console.error(`${errorMsg}: ${json}`);
+    process.exit(1);
+  };
+
+  let parsed;
+  try {
+    parsed = JSON.parse(json);
+  } catch (error) {
+    fail(`JSON test config did not parse correctly`);
+  }
+
+  if (!Array.isArray(parsed)) {
+    fail(`JSON test config must be an array`);
+  }
+
+  /** @type {Array<{ key: string, count: number }>} */
+  const testSuites = [];
+  for (const item of parsed) {
+    if (typeof item !== 'object' || item === null) {
+      fail(`testSuites must be objects`);
+    }
+    const key = item.key;
+    if (typeof key !== 'string') {
+      fail(`testSuite.key must be a string`);
+    }
+    const count = item.count;
+    if (typeof count !== 'number') {
+      fail(`testSuite.count must be a number`);
+    }
+    testSuites.push({
+      key,
+      count,
+    });
+  }
+
+  return testSuites;
+}
+
+const testSuites = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG
+  ? getTestSuitesFromJson(process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG)
+  : getTestSuitesFromMetadata();
+
+const totalJobs = testSuites.reduce((acc, t) => acc + t.count, initialJobs);
 
 if (totalJobs > 500) {
   console.error('+++ Too many tests');

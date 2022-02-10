@@ -13,7 +13,8 @@
     "navigation",
     "uiActions",
     "savedObjects",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor",
+    "dataViewEditor"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
   "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "dataViews"],

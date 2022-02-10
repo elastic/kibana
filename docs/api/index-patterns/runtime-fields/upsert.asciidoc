@@ -4,6 +4,8 @@
 <titleabbrev>Upsert runtime field</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-runtime-field-api-upsert>> instead.]
+
 experimental[] Create or update an existing runtime field
 
 [[index-patterns-runtime-field-upsert-request]]

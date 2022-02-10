@@ -21,7 +21,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { FormFlyout } from '../../../components/form_flyout';

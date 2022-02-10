@@ -3,7 +3,7 @@
 = {kib} alerts
 
 The {stack} {monitor-features} provide
-<<alerting-getting-started,{kib} alerting rules>> out-of-the box to notify you
+<<alerting-getting-started,Alerting rules>> out-of-the box to notify you
 of potential issues in the {stack}. These rules are preconfigured based on the
 best practices recommended by Elastic. However, you can tailor them to meet your
 specific needs.

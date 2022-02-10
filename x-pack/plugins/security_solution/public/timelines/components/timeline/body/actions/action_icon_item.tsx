@@ -9,7 +9,7 @@ import React, { MouseEvent } from 'react';
 import { EuiContextMenuItem, EuiButtonIcon, EuiToolTip, EuiText } from '@elastic/eui';
 
 import { EventsTdContent } from '../../styles';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 
 interface ActionIconItemProps {
   ariaLabel?: string;
@@ -24,7 +24,7 @@ interface ActionIconItemProps {
 }
 
 const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
-  width = DEFAULT_ICON_BUTTON_WIDTH,
+  width = DEFAULT_ACTION_BUTTON_WIDTH,
   dataTestSubj,
   content,
   ariaLabel,
@@ -46,6 +46,7 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
                 iconType={iconType}
                 isDisabled={isDisabled}
                 onClick={onClick}
+                size="s"
               />
             </EuiToolTip>
           )}

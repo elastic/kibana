@@ -18,6 +18,7 @@
     { "path": "../licensing/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
+    { "path": "../file_upload/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json"},
     { "path": "../../../src/plugins/kibana_react/tsconfig.json"},
     { "path": "../../../src/plugins/management/tsconfig.json"},

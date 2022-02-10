@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { useKibana, toMountPoint } from '../../services/kibana_react';
@@ -45,7 +45,8 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
                 }}
               />
             </p>
-          </EuiCallOut>
+          </EuiCallOut>,
+          { theme$: services.core.theme.theme$ }
         )
       );
 

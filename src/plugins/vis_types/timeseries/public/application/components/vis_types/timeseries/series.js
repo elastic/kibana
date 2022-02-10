@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {

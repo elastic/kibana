@@ -26,8 +26,6 @@ export interface CanvasSpecificRendererHandlers {
   onResize: GenericRendererCallback;
   /** Handler to invoke when an element should be resized. */
   resize: (size: { height: number; width: number }) => void;
-  /** Sets the value of the filter property on the element object persisted on the workpad */
-  setFilter: (filter: string) => void;
 }
 
 export type RendererHandlers = IInterpreterRenderHandlers & CanvasSpecificRendererHandlers;

@@ -22,7 +22,8 @@ import {
   fillEmptySeverityMappings,
 } from './helpers';
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
+
 import { Rule } from '../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
@@ -34,7 +35,8 @@ import {
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('rule helpers', () => {
-  // @ts-expect-error
+  // @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
+  // https://github.com/elastic/kibana/issues/120236
   moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
@@ -60,7 +62,7 @@ describe('rule helpers', () => {
           filters: [
             {
               $state: {
-                store: esFilters.FilterStateStore.GLOBAL_STATE,
+                store: FilterStateStore.GLOBAL_STATE,
               },
               meta: {
                 alias: null,

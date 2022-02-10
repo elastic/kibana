@@ -57,8 +57,8 @@ export function icingaLogsSpecProvider(context: TutorialContext): TutorialSchema
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/icinga_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }

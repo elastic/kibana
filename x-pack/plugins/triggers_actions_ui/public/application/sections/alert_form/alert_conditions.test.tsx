@@ -6,11 +6,11 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { AlertConditions, ActionGroupWithCondition } from './alert_conditions';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
   EuiDescriptionList,

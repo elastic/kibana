@@ -10,13 +10,13 @@ import './editor.test.mock';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import * as sinon from 'sinon';
 
 import { serviceContextMock } from '../../../../contexts/services_context.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import {
   ServicesContextProvider,
   EditorContextProvider,

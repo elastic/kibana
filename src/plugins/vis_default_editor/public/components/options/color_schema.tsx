@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ColorSchemaParams, ColorSchema } from 'src/plugins/charts/public';
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
@@ -51,6 +51,7 @@ function ColorSchemaOptions({
       <EuiLink
         onClick={() => {
           uiState.set('vis.colors', null);
+          uiState?.emit('reload');
           setIsCustomColors(false);
         }}
       >

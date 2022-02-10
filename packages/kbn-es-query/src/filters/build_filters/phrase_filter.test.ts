@@ -5,16 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { set } from 'lodash';
 import {
   buildInlineScriptForPhraseFilter,
   buildPhraseFilter,
   getPhraseFilterField,
   PhraseFilter,
+  isPhraseFilter,
+  isScriptedPhraseFilter,
 } from './phrase_filter';
 import { fields, getField } from '../stubs';
 import { DataViewBase } from '../../es_query';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Filter } from './types';
 
 describe('Phrase filter builder', () => {
   let indexPattern: DataViewBase;
@@ -162,5 +165,25 @@ describe('getPhraseFilterField', function () {
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
     const result = getPhraseFilterField(filter as PhraseFilter);
     expect(result).toBe('extension');
+  });
+});
+
+describe('isPhraseFilter', () => {
+  it('should return true if the filter is a phrases filter false otherwise', () => {
+    const filter: Filter = set({ meta: {} }, 'query.match_phrase', {}) as Filter;
+    const unknownFilter = {} as Filter;
+
+    expect(isPhraseFilter(filter)).toBe(true);
+    expect(isPhraseFilter(unknownFilter)).toBe(false);
+  });
+});
+
+describe('isScriptedPhraseFilter', () => {
+  it('should return true if the filter is a phrases filter false otherwise', () => {
+    const filter: Filter = set({ meta: {} }, 'query.script.script.params.value', {}) as Filter;
+    const unknownFilter = {} as Filter;
+
+    expect(isScriptedPhraseFilter(filter)).toBe(true);
+    expect(isPhraseFilter(unknownFilter)).toBe(false);
   });
 });

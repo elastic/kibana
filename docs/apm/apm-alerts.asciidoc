@@ -107,7 +107,7 @@ From this page, you can disable, mute, and delete APM alerts.
 [[apm-alert-more-info]]
 === More information
 
-See {kibana-ref}/alerting-getting-started.html[alerting and actions] for more information.
+See {kibana-ref}/alerting-getting-started.html[Alerting] for more information.
 
 NOTE: If you are using an **on-premise** Elastic Stack deployment with security,
 communication between Elasticsearch and Kibana must have TLS configured.

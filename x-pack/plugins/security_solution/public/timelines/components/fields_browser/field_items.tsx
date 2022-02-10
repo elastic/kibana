@@ -17,7 +17,7 @@ import type { BrowserFields } from '../../../common/containers/source';
 import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
 import type { OnUpdateColumns } from '../timeline/events';
 import { FieldName } from './field_name';
-import type { ColumnHeaderOptions } from '../../../../common';
+import type { ColumnHeaderOptions } from '../../../../common/types';
 import { useKibana } from '../../../common/lib/kibana';
 
 const DraggableFieldsBrowserFieldComponent = ({

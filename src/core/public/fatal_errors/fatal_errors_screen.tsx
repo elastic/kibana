@@ -20,7 +20,7 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FatalErrorInfo } from './get_error_info';
 

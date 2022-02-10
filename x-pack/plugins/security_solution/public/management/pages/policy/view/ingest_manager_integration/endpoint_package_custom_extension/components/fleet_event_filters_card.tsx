@@ -8,7 +8,7 @@
 import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   PackageCustomExtensionComponentProps,
   pagePathGetters,
@@ -72,7 +72,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
     return {
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.fleetCustomExtension.backButtonLabel',
-        { defaultMessage: 'Back to Endpoint Integration' }
+        { defaultMessage: 'Return to Endpoint Security integrations' }
       ),
       onBackButtonNavigateTo: [
         INTEGRATIONS_PLUGIN_ID,
@@ -95,7 +95,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
             <h4>
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersLabel"
-                defaultMessage="Event Filters"
+                defaultMessage="Event filters"
               />
             </h4>
           </EuiText>
@@ -115,7 +115,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.fleetCustomExtension.manageEventFiltersLinkLabel"
-                defaultMessage="Manage event filters"
+                defaultMessage="Manage"
               />
             </LinkWithIcon>
           </>

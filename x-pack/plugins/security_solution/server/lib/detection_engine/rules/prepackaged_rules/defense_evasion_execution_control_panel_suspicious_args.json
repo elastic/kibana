@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies unusual instances of Control Panel with suspicious keywords or paths in the process command line value. Adversaries may abuse Control.exe to proxy execution of malicious code.",
+  "description": "Identifies unusual instances of Control Panel with suspicious keywords or paths in the process command line value. Adversaries may abuse control.exe to proxy execution of malicious code.",
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
@@ -52,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

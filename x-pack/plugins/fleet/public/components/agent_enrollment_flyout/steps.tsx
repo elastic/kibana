@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
@@ -16,28 +16,41 @@ import semverPatch from 'semver/functions/patch';
 import type { AgentPolicy } from '../../types';
 import { useKibanaVersion } from '../../hooks';
 
-import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
-import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
+import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
 
-export const DownloadStep = () => {
+import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
+import { SelectCreateAgentPolicy } from './agent_policy_select_create';
+
+export const DownloadStep = (hasFleetServer: boolean) => {
   const kibanaVersion = useKibanaVersion();
   const kibanaVersionURLString = useMemo(
     () =>
       `${semverMajor(kibanaVersion)}-${semverMinor(kibanaVersion)}-${semverPatch(kibanaVersion)}`,
     [kibanaVersion]
   );
+  const title = hasFleetServer
+    ? i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentForFleetServerTitle', {
+        defaultMessage: 'Download the Fleet Server to a centralized host',
+      })
+    : i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentTitle', {
+        defaultMessage: 'Download the Elastic Agent to your host',
+      });
+  const downloadDescription = hasFleetServer ? (
+    <FormattedMessage
+      id="xpack.fleet.agentEnrollment.downloadDescriptionForFleetServer"
+      defaultMessage="Fleet Server runs on an Elastic Agent. Install this agent on a centralized host so that other hosts you wish to monitor can connect to it. In production, we recommend using one or more dedicated hosts. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.agentEnrollment.downloadDescription"
+      defaultMessage="Install the Elastic Agent on the hosts you wish to monitor. Do not install this agent policy on a host containing Fleet Server. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
+    />
+  );
   return {
-    title: i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentTitle', {
-      defaultMessage: 'Download the Elastic Agent to your host',
-    }),
+    title,
     children: (
       <>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.downloadDescription"
-            defaultMessage="Fleet Server runs on an Elastic Agent. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
-          />
-        </EuiText>
+        <EuiText>{downloadDescription}</EuiText>
         <EuiSpacer size="s" />
         <EuiText size="s">
           <FormattedMessage
@@ -75,37 +88,42 @@ export const AgentPolicySelectionStep = ({
   setSelectedAPIKeyId?: (key?: string) => void;
   excludeFleetServer?: boolean;
 }) => {
+  const [agentPolicyList, setAgentPolicyList] = useState<AgentPolicy[]>(agentPolicies || []);
+
   const regularAgentPolicies = useMemo(() => {
-    return Array.isArray(agentPolicies)
-      ? agentPolicies.filter(
-          (policy) =>
-            policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
-        )
-      : [];
-  }, [agentPolicies, excludeFleetServer]);
+    return agentPolicyList.filter(
+      (policy) =>
+        policy && !policy.is_managed && (!excludeFleetServer || !policyHasFleetServer(policy))
+    );
+  }, [agentPolicyList, excludeFleetServer]);
 
   const onAgentPolicyChange = useCallback(
-    async (policyId?: string) => {
+    async (key?: string, policy?: AgentPolicy) => {
+      if (policy) {
+        setAgentPolicyList([...agentPolicyList, policy]);
+      }
       if (setSelectedPolicyId) {
-        setSelectedPolicyId(policyId);
+        setSelectedPolicyId(key);
       }
     },
-    [setSelectedPolicyId]
+    [setSelectedPolicyId, setAgentPolicyList, agentPolicyList]
   );
 
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
-      defaultMessage: 'Choose an agent policy',
+      defaultMessage: 'What type of host are you adding?',
     }),
     children: (
-      <EnrollmentStepAgentPolicy
-        agentPolicies={regularAgentPolicies}
-        withKeySelection={setSelectedAPIKeyId ? true : false}
-        selectedApiKeyId={selectedApiKeyId}
-        onKeyChange={setSelectedAPIKeyId}
-        onAgentPolicyChange={onAgentPolicyChange}
-        excludeFleetServer={excludeFleetServer}
-      />
+      <>
+        <SelectCreateAgentPolicy
+          agentPolicies={regularAgentPolicies}
+          withKeySelection={setSelectedAPIKeyId ? true : false}
+          selectedApiKeyId={selectedApiKeyId}
+          onKeyChange={setSelectedAPIKeyId}
+          onAgentPolicyChange={onAgentPolicyChange}
+          excludeFleetServer={excludeFleetServer}
+        />
+      </>
     ),
   };
 };

@@ -9,6 +9,5 @@
   "include": ["public/**/*"],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_legacy/tsconfig.json" }
   ]
 }

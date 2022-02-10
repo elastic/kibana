@@ -16,7 +16,7 @@ import { EuiCheckbox, EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiText } from '@e
 
 import { ItemsGridPagination } from './items_grid_pagination';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ItemsGrid({
   numberColumns,

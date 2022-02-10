@@ -74,7 +74,7 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
 
   const items = seriesConfig.breakdownFields.map((breakdown) => ({
     id: breakdown,
-    label: seriesConfig.labels[breakdown],
+    label: seriesConfig.labels[breakdown] ?? breakdown,
   }));
 
   if (!hasUseBreakdownColumn) {

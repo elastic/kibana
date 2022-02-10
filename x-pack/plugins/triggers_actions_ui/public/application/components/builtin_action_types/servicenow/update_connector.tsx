@@ -20,7 +20,7 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionConnectorFieldsProps } from '../../../../../public/types';
 import { ServiceNowActionConnector } from './types';
 import { CredentialsApiUrl } from './credentials_api_url';

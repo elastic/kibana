@@ -241,6 +241,7 @@ async function executor(
   const config = execOptions.config;
   const secrets = execOptions.secrets;
   const params = execOptions.params;
+  const connectorTokenClient = execOptions.services.connectorTokenClient;
 
   const transport: Transport = {};
 
@@ -283,6 +284,7 @@ async function executor(
   });
 
   const sendEmailOptions: SendEmailOptions = {
+    connectorId: actionId,
     transport,
     routing: {
       from: config.from,
@@ -301,7 +303,7 @@ async function executor(
   let result;
 
   try {
-    result = await sendEmail(logger, sendEmailOptions);
+    result = await sendEmail(logger, sendEmailOptions, connectorTokenClient);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',

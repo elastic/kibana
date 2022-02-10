@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Chart, niceTimeFormatter, PointerEvent } from '@elastic/charts';
 import { EuiLoadingChart, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { first, last } from 'lodash';
 import { TabContent, TabProps } from '../shared';
 import { useSnapshot } from '../../../../hooks/use_snaphot';
 import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
@@ -73,7 +73,7 @@ const TabComponent = (props: TabProps) => {
   const { nodeType, accountId, region, customMetrics } = useWaffleOptionsContext();
   const { currentTime, node } = props;
   const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern('metrics'),
+    () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
   );
   let filter = `${findInventoryFields(nodeType).id}: "${node.id}"`;

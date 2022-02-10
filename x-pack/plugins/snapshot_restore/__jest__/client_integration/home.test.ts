@@ -22,23 +22,13 @@ import { REPOSITORY_NAME } from './helpers/constant';
 const { setup } = pageHelpers.home;
 
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
-jest.mock('@kbn/i18n/react', () => {
-  const original = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const original = jest.requireActual('@kbn/i18n-react');
 
   return {
     ...original,
     FormattedDate: () => '',
     FormattedTime: () => '',
-  };
-});
-
-jest.mock('../../common/constants', () => {
-  const original = jest.requireActual('../../common/constants');
-
-  return {
-    ...original,
-    // Mocking this value to a lower number in order to more easily trigger the max snapshots warning in the tests
-    SNAPSHOT_LIST_MAX_SIZE: 2,
   };
 });
 

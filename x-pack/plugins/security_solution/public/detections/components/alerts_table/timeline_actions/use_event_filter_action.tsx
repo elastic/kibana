@@ -11,8 +11,10 @@ import { ACTION_ADD_EVENT_FILTER } from '../translations';
 
 export const useEventFilterAction = ({
   onAddEventFilterClick,
+  disabled = false,
 }: {
   onAddEventFilterClick: () => void;
+  disabled?: boolean;
 }) => {
   const eventFilterActionItems = useMemo(
     () => [
@@ -20,11 +22,12 @@ export const useEventFilterAction = ({
         key="add-event-filter-menu-item"
         data-test-subj="add-event-filter-menu-item"
         onClick={onAddEventFilterClick}
+        disabled={disabled}
       >
         {ACTION_ADD_EVENT_FILTER}
       </EuiContextMenuItem>,
     ],
-    [onAddEventFilterClick]
+    [onAddEventFilterClick, disabled]
   );
   return { eventFilterActionItems };
 };

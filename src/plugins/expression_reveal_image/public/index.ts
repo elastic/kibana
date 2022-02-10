@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { ExpressionRevealImagePlugin } from './plugin';
 
 export type { ExpressionRevealImagePluginSetup, ExpressionRevealImagePluginStart } from './plugin';
@@ -17,4 +14,4 @@ export function plugin() {
   return new ExpressionRevealImagePlugin();
 }
 
-export * from './expression_renderers';
+export { revealImageRendererFactory, getRevealImageRenderer } from './expression_renderers';

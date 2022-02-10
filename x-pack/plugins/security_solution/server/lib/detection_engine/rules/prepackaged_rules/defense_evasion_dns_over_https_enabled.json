@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when a user enables DNS-over-HTTPS. This can be used to hide internet activity or the process of exfiltrating data. With this enabled, an organization will lose visibility into data such as query type, response, and originating IP, which are used to determine bad actors.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "DNS-over-HTTPS Enabled via Registry",
+  "query": "registry where event.type in (\"creation\", \"change\") and\n  (registry.path : \"*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Edge\\\\BuiltInDnsClientEnabled\" and\n  registry.data.strings : \"1\") or\n  (registry.path : \"*\\\\SOFTWARE\\\\Google\\\\Chrome\\\\DnsOverHttpsMode\" and\n  registry.data.strings : \"secure\") or\n  (registry.path : \"*\\\\SOFTWARE\\\\Policies\\\\Mozilla\\\\Firefox\\\\DNSOverHTTPS\" and\n  registry.data.strings : \"1\")\n",
+  "references": [
+    "https://www.tenforums.com/tutorials/151318-how-enable-disable-dns-over-https-doh-microsoft-edge.html",
+    "https://chromeenterprise.google/policies/?policy=DnsOverHttpsMode"
+  ],
+  "risk_score": 21,
+  "rule_id": "a22a09c2-2162-4df0-a356-9aacbeb56a04",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

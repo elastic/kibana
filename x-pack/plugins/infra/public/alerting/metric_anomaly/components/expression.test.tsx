@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import React from 'react';
@@ -40,20 +40,20 @@ jest.mock('../../../containers/ml/infra_ml_capabilities', () => ({
 
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
-    const alertParams = {
+    const ruleParams = {
       metric: undefined,
       nodeType: undefined,
       threshold: 50,
     };
     const wrapper = mountWithIntl(
       <Expression
-        alertInterval="1m"
-        alertThrottle="1m"
+        ruleInterval="1m"
+        ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        alertParams={alertParams as any}
+        ruleParams={ruleParams as any}
         errors={{}}
-        setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
-        setAlertProperty={() => {}}
+        setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
+        setRuleProperty={() => {}}
         metadata={currentOptions}
       />
     );
@@ -66,7 +66,7 @@ describe('Expression', () => {
 
     await update();
 
-    return { wrapper, update, alertParams };
+    return { wrapper, update, ruleParams };
   }
 
   it('should prefill the alert using the context metadata', async () => {
@@ -74,8 +74,8 @@ describe('Expression', () => {
       nodeType: 'pod',
       metric: { type: 'tx' },
     };
-    const { alertParams } = await setup(currentOptions as AlertContextMeta);
-    expect(alertParams.nodeType).toBe('k8s');
-    expect(alertParams.metric).toBe('network_out');
+    const { ruleParams } = await setup(currentOptions as AlertContextMeta);
+    expect(ruleParams.nodeType).toBe('k8s');
+    expect(ruleParams.metric).toBe('network_out');
   });
 });

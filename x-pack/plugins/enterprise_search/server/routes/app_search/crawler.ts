@@ -23,7 +23,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler',
+      path: '/api/as/v1/engines/:name/crawler',
     })
   );
 
@@ -37,7 +37,22 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+      path: '/api/as/v1/engines/:name/crawler/crawl_requests',
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/app_search/engines/{name}/crawler/crawl_requests/{id}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v1/engines/:name/crawler/crawl_requests/:id',
     })
   );
 
@@ -48,10 +63,17 @@ export function registerCrawlerRoutes({
         params: schema.object({
           name: schema.string(),
         }),
+        body: schema.object({
+          overrides: schema.maybe(
+            schema.object({
+              domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+            })
+          ),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+      path: '/api/as/v1/engines/:name/crawler/crawl_requests',
     })
   );
 
@@ -65,7 +87,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/crawl_requests/active/cancel',
+      path: '/api/as/v1/engines/:name/crawler/crawl_requests/active/cancel',
     })
   );
 
@@ -83,7 +105,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/domains',
+      path: '/api/as/v1/engines/:name/crawler/domains',
     })
   );
 
@@ -108,7 +130,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/domains',
+      path: '/api/as/v1/engines/:name/crawler/domains',
     })
   );
 
@@ -123,7 +145,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/domains/:id',
+      path: '/api/as/v1/engines/:name/crawler/domains/:id',
     })
   );
 
@@ -141,7 +163,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/domains/:id',
+      path: '/api/as/v1/engines/:name/crawler/domains/:id',
     })
   );
 
@@ -168,7 +190,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/domains/:id',
+      path: '/api/as/v1/engines/:name/crawler/domains/:id',
     })
   );
 
@@ -183,7 +205,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/crawler/validate_url',
+      path: '/api/as/v1/crawler/validate_url',
     })
   );
 
@@ -200,7 +222,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/process_crawls',
+      path: '/api/as/v1/engines/:name/crawler/process_crawls',
     })
   );
 
@@ -214,7 +236,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+      path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
     })
   );
 
@@ -232,7 +254,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+      path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
     })
   );
 
@@ -246,7 +268,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+      path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
     })
   );
 }

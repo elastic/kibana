@@ -31,11 +31,10 @@ import {
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
-import { TimelineNonEcsData } from '../../../../../common';
-import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostsRiskScore } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
+import { HostRisk } from '../../../../common/containers/hosts_risk/types';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -58,8 +57,6 @@ interface EventDetailsPanelProps {
   expandedEvent: {
     eventId: string;
     indexName: string;
-    ecsData?: Ecs;
-    nonEcsData?: TimelineNonEcsData[];
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
@@ -82,7 +79,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData, rawEventData] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData, ecsData] = useTimelineEventsDetails({
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
@@ -129,9 +126,26 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const hostRisk = useHostsRiskScore({
+  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
     hostName,
+    pagination: {
+      cursorStart: 0,
+      querySize: 1,
+    },
   });
+
+  const hostRisk: HostRisk | null = data
+    ? {
+        loading: hostRiskLoading,
+        isModuleEnabled,
+        result: data,
+      }
+    : null;
+
+  const timestamp = useMemo(
+    () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),
+    [detailsData]
+  );
 
   const backToAlertDetailsLink = useMemo(() => {
     return (
@@ -159,7 +173,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     setIsIsolateActionSuccessBannerVisible(true);
     // If a case details refresh ref is defined, then refresh actions and comments
     if (caseDetailsRefresh) {
-      caseDetailsRefresh.refreshUserActionsAndComments();
+      caseDetailsRefresh.refreshCase();
     }
   }, [caseDetailsRefresh]);
 
@@ -173,7 +187,12 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         {isHostIsolationPanelOpen ? (
           backToAlertDetailsLink
         ) : (
-          <ExpandableEventTitle isAlert={isAlert} loading={loading} ruleName={ruleName} />
+          <ExpandableEventTitle
+            isAlert={isAlert}
+            loading={loading}
+            ruleName={ruleName}
+            timestamp={timestamp}
+          />
         )}
       </EuiFlyoutHeader>
       {isIsolateActionSuccessBannerVisible && (
@@ -203,12 +222,14 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             timelineId={timelineId}
             timelineTabType="flyout"
             hostRisk={hostRisk}
+            handleOnEventClosed={handleOnEventClosed}
           />
         )}
       </StyledEuiFlyoutBody>
 
       <EventDetailsFooter
         detailsData={detailsData}
+        detailsEcsData={ecsData}
         expandedEvent={expandedEvent}
         handleOnEventClosed={handleOnEventClosed}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
@@ -237,6 +258,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         timelineId={timelineId}
         timelineTabType={tabType}
         hostRisk={hostRisk}
+        handleOnEventClosed={handleOnEventClosed}
       />
     </>
   );

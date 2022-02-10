@@ -14,16 +14,6 @@ export const plugin = (initContext: PluginInitializerContext<ReportingConfigType
 
 export { config } from './config';
 export type { ReportingConfig } from './config/config';
-
-export type {
-  JobParamsCSV,
-  JobParamsDownloadCSV,
-  JobParamsPNG,
-  JobParamsPNGV2,
-  JobParamsPDF,
-  JobParamsPDFV2,
-} from '../common/types';
-
 // internal imports
 export { ReportingCore } from './core';
 export type {

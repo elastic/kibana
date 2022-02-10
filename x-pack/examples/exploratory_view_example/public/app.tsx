@@ -40,7 +40,7 @@ export const App = (props: {
       reportDefinitions: {
         'monitor.id': ['ALL_VALUES'],
       },
-      breakdown: 'observer.geo.name',
+      breakdown: 'monitor.type',
       operationType: 'average',
       dataType: 'synthetics',
       seriesType: 'line',
@@ -80,6 +80,7 @@ export const App = (props: {
               attributes={seriesList}
               reportType="kpi-over-time"
               title={'Monitor response duration'}
+              withActions={['save', 'explore']}
             />
           </EuiPageContentBody>
         </EuiPageContent>

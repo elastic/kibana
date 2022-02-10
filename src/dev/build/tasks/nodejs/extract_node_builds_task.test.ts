@@ -43,6 +43,8 @@ async function setup() {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    dockerPush: false,
+    dockerTagQualifier: '',
   });
 
   return { config };

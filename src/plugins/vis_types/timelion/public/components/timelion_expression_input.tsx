@@ -8,7 +8,7 @@
 
 import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 
 import { CodeEditor, useKibana } from '../../../../kibana_react/public';

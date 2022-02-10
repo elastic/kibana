@@ -23,12 +23,13 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
-    it('should return a 403 if a user without the superuser role try to access the APU', async () => {
-      await supertestWithoutAuth
+    it.skip('should return a 200 if a user with the fleet all try to access the list', async () => {
+      await supertest
         .get(`/api/fleet/agents`)
-        .auth(testUsers.fleet_all.username, testUsers.fleet_all.password)
-        .expect(403);
+        .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+        .expect(200);
     });
+
     it('should not return the list of agents when requesting as a user without fleet permissions', async () => {
       await supertestWithoutAuth
         .get(`/api/fleet/agents`)
@@ -36,15 +37,16 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(403);
     });
 
-    it('should return the list of agents when requesting as a user with fleet write permissions', async () => {
+    it('should return the list of agents when requesting as admin', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
 
-      expect(apiResponse).to.have.keys('page', 'total', 'list');
+      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
       expect(apiResponse.total).to.eql(4);
     });
+
     it('should return the list of agents when requesting as a user with fleet read permissions', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
-      expect(apiResponse).to.have.keys('page', 'total', 'list');
+      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
       expect(apiResponse.total).to.eql(4);
     });
 
@@ -66,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(apiResponse.total).to.eql(1);
-      const agent = apiResponse.list[0];
+      const agent = apiResponse.items[0];
       expect(agent.access_api_key_id).to.eql('api-key-2');
     });
   });

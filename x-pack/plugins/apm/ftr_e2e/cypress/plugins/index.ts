@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Fs from 'fs';
-import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { SynthtraceEsClient } from '@elastic/apm-synthtrace';
-import { createLogger, LogLevel } from '@elastic/apm-synthtrace';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { apm, createLogger, LogLevel } from '@elastic/apm-synthtrace';
+import { createEsClientForTesting } from '@kbn/test';
 
 // ***********************************************************
 // This example plugins/index.ts can be used to load plugins
@@ -30,18 +27,13 @@ const plugin: Cypress.PluginConfig = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
 
-  const node = config.env.ES_NODE;
-  const requestTimeout = config.env.ES_REQUEST_TIMEOUT;
-  const isCloud = config.env.TEST_CLOUD;
-
-  const client = new Client({
-    node,
-    requestTimeout,
-    Connection: HttpConnection,
-    ...(isCloud ? { tls: { ca: Fs.readFileSync(CA_CERT_PATH, 'utf-8') } } : {}),
+  const client = createEsClientForTesting({
+    esUrl: config.env.ES_NODE,
+    requestTimeout: config.env.ES_REQUEST_TIMEOUT,
+    isCloud: !!config.env.TEST_CLOUD,
   });
 
-  const synthtraceEsClient = new SynthtraceEsClient(
+  const synthtraceEsClient = new apm.ApmSynthtraceEsClient(
     client,
     createLogger(LogLevel.info)
   );

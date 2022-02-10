@@ -165,12 +165,13 @@ function createRoot() {
           {
             name: 'root',
             appenders: ['file'],
+            level: 'info',
           },
         ],
       },
     },
     {
-      oss: true,
+      oss: false,
     }
   );
 }

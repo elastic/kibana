@@ -9,7 +9,8 @@ import { EuiSpacer, EuiPanel } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import { BrowserFields, ColumnHeaderOptions, RowRenderer } from '../../../../../../common';
+import { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import { BrowserFields } from '../../../../../../common/search_strategy';
 import { Ecs } from '../../../../../../common/ecs';
 import { eventRendererNames } from '../../../row_renderers_browser/catalog/constants';
 import { ColumnRenderer } from './column_renderer';

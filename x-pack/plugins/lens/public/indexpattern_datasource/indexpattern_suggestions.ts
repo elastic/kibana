@@ -16,14 +16,14 @@ import {
   getMetricOperationTypes,
   getOperationTypesForField,
   operationDefinitionMap,
-  IndexPatternColumn,
+  BaseIndexPatternColumn,
   OperationType,
   getExistingColumnGroups,
   isReferenced,
   getReferencedColumnIds,
   hasTermsWithManyBuckets,
 } from './operations';
-import { hasField } from './utils';
+import { hasField } from './pure_utils';
 import type {
   IndexPattern,
   IndexPatternPrivateState,
@@ -62,11 +62,11 @@ function buildSuggestion({
   // two match up.
   const layers = mapValues(updatedState.layers, (layer) => ({
     ...layer,
-    columns: pick(layer.columns, layer.columnOrder) as Record<string, IndexPatternColumn>,
+    columns: pick(layer.columns, layer.columnOrder) as Record<string, BaseIndexPatternColumn>,
   }));
 
   const columnOrder = layers[layerId].columnOrder;
-  const columnMap = layers[layerId].columns as Record<string, IndexPatternColumn>;
+  const columnMap = layers[layerId].columns as Record<string, BaseIndexPatternColumn>;
   const isMultiRow = Object.values(columnMap).some((column) => column.isBucketed);
 
   return {
@@ -221,7 +221,7 @@ function getExistingLayerSuggestionsForField(
         indexPattern,
         field,
         columnId: generateId(),
-        op: metricOperation.type,
+        op: metricOperation.type as OperationType,
         visualizationGroups: [],
       });
       if (layerWithNewMetric) {
@@ -243,7 +243,7 @@ function getExistingLayerSuggestionsForField(
           indexPattern,
           field,
           columnId: metrics[0],
-          op: metricOperation.type,
+          op: metricOperation.type as OperationType,
           visualizationGroups: [],
         });
         if (layerWithReplacedMetric) {
@@ -336,7 +336,7 @@ function createNewLayerWithMetricAggregation(
   return insertNewColumn({
     op: 'date_histogram',
     layer: insertNewColumn({
-      op: metricOperation.type,
+      op: metricOperation.type as OperationType,
       layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
       columnId: generateId(),
       field,
@@ -619,10 +619,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         noBuckets: false,
       };
 
-      if (availableBucketedColumns.length <= 1) {
-        // Don't simplify when dealing with single-bucket table.
-        return [];
-      } else if (topLevelMetricColumns.length > 1) {
+      if (bucketedColumns.length > 0 && topLevelMetricColumns.length > 1) {
         return [
           {
             ...layer,
@@ -634,9 +631,10 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
             noBuckets: false,
           },
         ];
-      } else {
+      } else if (availableBucketedColumns.length > 1) {
         return allMetricsSuggestion;
       }
+      return [];
     })
   )
     .concat(

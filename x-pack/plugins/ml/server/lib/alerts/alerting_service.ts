@@ -8,6 +8,8 @@
 import Boom from '@hapi/boom';
 import rison from 'rison-node';
 import { Duration } from 'moment/moment';
+import { memoize } from 'lodash';
+import type { MlDatafeed } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -30,6 +32,15 @@ import { isDefined } from '../../../common/types/guards';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
+import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import {
+  FIELD_FORMAT_IDS,
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '../../../../../../src/plugins/field_formats/common';
+import type { AwaitReturnType } from '../../../common/types/common';
+import { getTypicalAndActualValues } from '../../models/results_service/results_service';
+import type { GetDataViewsService } from '../data_views_utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -57,7 +68,58 @@ const resultTypeScoreMapping = {
  * @param mlClient
  * @param datafeedsService
  */
-export function alertingServiceProvider(mlClient: MlClient, datafeedsService: DatafeedsService) {
+export function alertingServiceProvider(
+  mlClient: MlClient,
+  datafeedsService: DatafeedsService,
+  getFieldsFormatRegistry: FieldFormatsRegistryProvider,
+  getDataViewsService: GetDataViewsService
+) {
+  type FieldFormatters = AwaitReturnType<ReturnType<typeof getFormatters>>;
+
+  /**
+   * Provides formatters based on the data view of the datafeed index pattern
+   * and set of default formatters for fallback.
+   */
+  const getFormatters = memoize(async (datafeed: MlDatafeed) => {
+    const fieldFormatsRegistry = await getFieldsFormatRegistry();
+    const numberFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.NUMBER });
+
+    const fieldFormatMap = await getFieldsFormatMap(datafeed.indices[0]);
+
+    const fieldFormatters = fieldFormatMap
+      ? Object.entries(fieldFormatMap).reduce((acc, [fieldName, config]) => {
+          const formatter = fieldFormatsRegistry.deserialize(config);
+          acc[fieldName] = formatter.convert.bind(formatter);
+          return acc;
+        }, {} as Record<string, IFieldFormat['convert']>)
+      : {};
+
+    return {
+      numberFormatter: numberFormatter.convert.bind(numberFormatter),
+      fieldFormatters,
+    };
+  });
+
+  /**
+   * Attempts to find a data view based on the index pattern
+   */
+  const getFieldsFormatMap = memoize(
+    async (indexPattern: string): Promise<Record<string, SerializedFieldFormat> | undefined> => {
+      try {
+        const dataViewsService = await getDataViewsService();
+
+        const dataViews = await dataViewsService.find(indexPattern);
+        const dataView = dataViews.find(({ title }) => title === indexPattern);
+
+        if (!dataView) return;
+
+        return dataView.fieldFormatMap;
+      } catch (e) {
+        return;
+      }
+    }
+  );
+
   const getAggResultsLabel = (resultType: AnomalyResultType) => {
     return {
       aggGroupLabel: `${resultType}_results` as PreviewResultsKeys,
@@ -142,6 +204,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                   'initial_record_score',
                   'is_interim',
                   'function',
+                  'function_description',
                   'field_name',
                   'by_field_name',
                   'by_field_value',
@@ -152,6 +215,9 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                   'job_id',
                   'detector_index',
                   'bucket_span',
+                  'typical',
+                  'actual',
+                  'causes',
                 ],
               },
               size: 3,
@@ -228,7 +294,11 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
    * to the alert context.
    * @param resultType
    */
-  const getResultsFormatter = (resultType: AnomalyResultType, useInitialScore: boolean = false) => {
+  const getResultsFormatter = (
+    resultType: AnomalyResultType,
+    useInitialScore: boolean = false,
+    formatters: FieldFormatters
+  ) => {
     const resultsLabel = getAggResultsLabel(resultType);
     return (v: AggResultsResponse): AlertExecutionResult | undefined => {
       const aggTypeResults = v[resultsLabel.aggGroupLabel];
@@ -260,8 +330,15 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
           end: new Date(timestamp + bucketSpanInSeconds * 1000 * TIME_RANGE_PADDING).toISOString(),
         },
         topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
+          const { actual, typical } = getTypicalAndActualValues(h._source);
+
+          const formatter =
+            formatters.fieldFormatters[h._source.field_name] ?? formatters.numberFormatter;
+
           return {
             ...h._source,
+            typical: typical?.map((t) => formatter(t)),
+            actual: actual?.map((a) => formatter(a)),
             score: Math.floor(
               h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),
@@ -328,6 +405,8 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
 
     const jobIds = jobsResponse.map((v) => v.job_id);
 
+    const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+
     const requestBody = {
       size: 0,
       query: {
@@ -387,7 +466,13 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const formatter = getResultsFormatter(params.resultType, !!previewTimeInterval);
+    const fieldsFormatters = await getFormatters(datafeeds![0]!);
+
+    const formatter = getResultsFormatter(
+      params.resultType,
+      !!previewTimeInterval,
+      fieldsFormatters
+    );
 
     return (
       previewTimeInterval
@@ -408,8 +493,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
             // Map response
             .map(formatter)
-        : // @ts-expect-error
-          [formatter(result as AggResultsResponse)]
+        : [formatter(result as unknown as AggResultsResponse)]
     ).filter(isDefined);
   };
 
@@ -543,7 +627,9 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
       prev.max_score.value > current.max_score.value ? prev : current
     );
 
-    return getResultsFormatter(params.resultType)(topResult);
+    const formatters = await getFormatters(datafeeds![0]);
+
+    return getResultsFormatter(params.resultType, false, formatters)(topResult);
   };
 
   /**

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
-export const LOG_DOCUMENT_COUNT_ALERT_TYPE_ID = 'logs.alert.document.count';
+export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 
 const ThresholdTypeRT = rt.keyof({
   count: null,
@@ -92,6 +92,37 @@ export const ComparatorToi18nMap = {
   ),
 };
 
+export const ComparatorToi18nSymbolsMap = {
+  [Comparator.GT]: '>',
+  [Comparator.GT_OR_EQ]: '≥',
+  [Comparator.LT]: '<',
+  [Comparator.LT_OR_EQ]: '≤',
+  [Comparator.EQ]: '=',
+  [Comparator.NOT_EQ]: '≠',
+  [`${Comparator.EQ}:number`]: '=',
+  [`${Comparator.NOT_EQ}:number`]: '≠',
+
+  // TODO: We could need to update the next messages to use symbols.
+  [Comparator.MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.match', {
+    defaultMessage: 'matches',
+  }),
+  [Comparator.NOT_MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.notMatch', {
+    defaultMessage: 'does not match',
+  }),
+  [Comparator.MATCH_PHRASE]: i18n.translate(
+    'xpack.infra.logs.alerting.comparator.symbol.matchPhrase',
+    {
+      defaultMessage: 'matches phrase',
+    }
+  ),
+  [Comparator.NOT_MATCH_PHRASE]: i18n.translate(
+    'xpack.infra.logs.alerting.comparator.symbol.notMatchPhrase',
+    {
+      defaultMessage: 'does not match phrase',
+    }
+  ),
+};
+
 // Alert parameters //
 export enum AlertStates {
   OK,
@@ -143,7 +174,7 @@ export type TimeUnit = rt.TypeOf<typeof timeUnitRT>;
 export const timeSizeRT = rt.number;
 export const groupByRT = rt.array(rt.string);
 
-const RequiredAlertParamsRT = rt.type({
+const RequiredRuleParamsRT = rt.type({
   // NOTE: "count" would be better named as "threshold", but this would require a
   // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
   count: ThresholdRT,
@@ -151,72 +182,69 @@ const RequiredAlertParamsRT = rt.type({
   timeSize: timeSizeRT,
 });
 
-const partialRequiredAlertParamsRT = rt.partial(RequiredAlertParamsRT.props);
-export type PartialRequiredAlertParams = rt.TypeOf<typeof partialRequiredAlertParamsRT>;
+const partialRequiredRuleParamsRT = rt.partial(RequiredRuleParamsRT.props);
+export type PartialRequiredRuleParams = rt.TypeOf<typeof partialRequiredRuleParamsRT>;
 
-const OptionalAlertParamsRT = rt.partial({
+const OptionalRuleParamsRT = rt.partial({
   groupBy: groupByRT,
 });
 
-export const countAlertParamsRT = rt.intersection([
+export const countRuleParamsRT = rt.intersection([
   rt.type({
     criteria: countCriteriaRT,
-    ...RequiredAlertParamsRT.props,
+    ...RequiredRuleParamsRT.props,
   }),
   rt.partial({
-    ...OptionalAlertParamsRT.props,
+    ...OptionalRuleParamsRT.props,
   }),
 ]);
-export type CountAlertParams = rt.TypeOf<typeof countAlertParamsRT>;
+export type CountRuleParams = rt.TypeOf<typeof countRuleParamsRT>;
 
-export const partialCountAlertParamsRT = rt.intersection([
+export const partialCountRuleParamsRT = rt.intersection([
   rt.type({
     criteria: partialCountCriteriaRT,
-    ...RequiredAlertParamsRT.props,
+    ...RequiredRuleParamsRT.props,
   }),
   rt.partial({
-    ...OptionalAlertParamsRT.props,
+    ...OptionalRuleParamsRT.props,
   }),
 ]);
-export type PartialCountAlertParams = rt.TypeOf<typeof partialCountAlertParamsRT>;
+export type PartialCountRuleParams = rt.TypeOf<typeof partialCountRuleParamsRT>;
 
-export const ratioAlertParamsRT = rt.intersection([
+export const ratioRuleParamsRT = rt.intersection([
   rt.type({
     criteria: ratioCriteriaRT,
-    ...RequiredAlertParamsRT.props,
+    ...RequiredRuleParamsRT.props,
   }),
   rt.partial({
-    ...OptionalAlertParamsRT.props,
+    ...OptionalRuleParamsRT.props,
   }),
 ]);
-export type RatioAlertParams = rt.TypeOf<typeof ratioAlertParamsRT>;
+export type RatioRuleParams = rt.TypeOf<typeof ratioRuleParamsRT>;
 
-export const partialRatioAlertParamsRT = rt.intersection([
+export const partialRatioRuleParamsRT = rt.intersection([
   rt.type({
     criteria: partialRatioCriteriaRT,
-    ...RequiredAlertParamsRT.props,
+    ...RequiredRuleParamsRT.props,
   }),
   rt.partial({
-    ...OptionalAlertParamsRT.props,
+    ...OptionalRuleParamsRT.props,
   }),
 ]);
-export type PartialRatioAlertParams = rt.TypeOf<typeof partialRatioAlertParamsRT>;
+export type PartialRatioRuleParams = rt.TypeOf<typeof partialRatioRuleParamsRT>;
 
-export const alertParamsRT = rt.union([countAlertParamsRT, ratioAlertParamsRT]);
-export type AlertParams = rt.TypeOf<typeof alertParamsRT>;
+export const ruleParamsRT = rt.union([countRuleParamsRT, ratioRuleParamsRT]);
+export type RuleParams = rt.TypeOf<typeof ruleParamsRT>;
 
-export const partialAlertParamsRT = rt.union([
-  partialCountAlertParamsRT,
-  partialRatioAlertParamsRT,
-]);
-export type PartialAlertParams = rt.TypeOf<typeof partialAlertParamsRT>;
+export const partialRuleParamsRT = rt.union([partialCountRuleParamsRT, partialRatioRuleParamsRT]);
+export type PartialRuleParams = rt.TypeOf<typeof partialRuleParamsRT>;
 
-export const isRatioAlert = (criteria: PartialCriteria): criteria is PartialRatioCriteria => {
+export const isRatioRule = (criteria: PartialCriteria): criteria is PartialRatioCriteria => {
   return criteria.length > 0 && Array.isArray(criteria[0]) ? true : false;
 };
 
-export const isRatioAlertParams = (params: AlertParams): params is RatioAlertParams => {
-  return isRatioAlert(params.criteria);
+export const isRatioRuleParams = (params: RuleParams): params is RatioRuleParams => {
+  return isRatioRule(params.criteria);
 };
 
 export const getNumerator = <C extends RatioCriteria | PartialRatioCriteria>(criteria: C): C[0] => {
@@ -229,8 +257,8 @@ export const getDenominator = <C extends RatioCriteria | PartialRatioCriteria>(
   return criteria[1];
 };
 
-export const hasGroupBy = (alertParams: AlertParams) => {
-  const { groupBy } = alertParams;
+export const hasGroupBy = (params: RuleParams) => {
+  const { groupBy } = params;
   return groupBy && groupBy.length > 0 ? true : false;
 };
 
@@ -339,8 +367,8 @@ export const isOptimizedGroupedSearchQueryResponse = (
 };
 
 export const isOptimizableGroupedThreshold = (
-  selectedComparator: AlertParams['count']['comparator'],
-  selectedValue?: AlertParams['count']['value']
+  selectedComparator: RuleParams['count']['comparator'],
+  selectedValue?: RuleParams['count']['value']
 ) => {
   if (selectedComparator === Comparator.GT) {
     return true;

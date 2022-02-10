@@ -131,7 +131,115 @@ describe('Events Details Helpers', () => {
       const result = getDataFromFieldsHits(whackFields);
       expect(result).toEqual(whackResultFields);
     });
+    it('flattens alert parameters', () => {
+      const ruleParameterFields = {
+        'kibana.alert.rule.parameters': [
+          {
+            nodeType: 'host',
+            criteria: [
+              {
+                metric: 'cpu',
+                comparator: '>',
+                threshold: [3],
+                timeSize: 1,
+                timeUnit: 'm',
+                customMetric: {
+                  type: 'custom',
+                  id: 'alert-custom-metric',
+                  field: '',
+                  aggregation: 'avg',
+                },
+              },
+            ],
+            sourceId: 'default',
+          },
+        ],
+      };
+      const ruleParametersResultFields = [
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.nodeType',
+          values: ['host'],
+          originalValue: ['host'],
+          isObjectArray: false,
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.metric',
+          isObjectArray: false,
+          originalValue: ['cpu'],
+          values: ['cpu'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.comparator',
+          values: ['>'],
+          originalValue: ['>'],
+          isObjectArray: false,
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.threshold',
+          isObjectArray: false,
+          originalValue: ['3'],
+          values: ['3'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.timeSize',
+          isObjectArray: false,
+          originalValue: ['1'],
+          values: ['1'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.timeUnit',
+          values: ['m'],
+          originalValue: ['m'],
+          isObjectArray: false,
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.customMetric.type',
+          isObjectArray: false,
+          originalValue: ['custom'],
+          values: ['custom'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.customMetric.id',
+          isObjectArray: false,
+          originalValue: ['alert-custom-metric'],
+          values: ['alert-custom-metric'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.customMetric.field',
+          isObjectArray: false,
+          originalValue: [''],
+          values: [''],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.customMetric.aggregation',
+          isObjectArray: false,
+          originalValue: ['avg'],
+          values: ['avg'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.sourceId',
+          isObjectArray: false,
+          originalValue: ['default'],
+          values: ['default'],
+        },
+      ];
+
+      const result = getDataFromFieldsHits(ruleParameterFields);
+      expect(result).toEqual(ruleParametersResultFields);
+    });
   });
+
   it('#getDataFromSourceHits', () => {
     const _source: EventSource = {
       '@timestamp': '2021-02-24T00:41:06.527Z',

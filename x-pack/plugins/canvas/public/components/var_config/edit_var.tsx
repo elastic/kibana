@@ -103,6 +103,8 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
   const [value, setValue] = useState(isNew ? '' : selectedVar!.value);
 
   const hasDupeName = checkDupeName(name, selectedVar && selectedVar.name, variables);
+  const hasEmptyValue = value.toString().trim() === '';
+  const hasEmptyName = !name;
 
   const typeOptions = [
     {
@@ -207,7 +209,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
-                color="secondary"
+                color="success"
                 size="s"
                 fill
                 onClick={() =>
@@ -217,7 +219,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
                     type,
                   })
                 }
-                disabled={hasDupeName || !name}
+                disabled={hasDupeName || hasEmptyValue || hasEmptyName}
                 iconType="save"
               >
                 {strings.getSaveButtonLabel()}

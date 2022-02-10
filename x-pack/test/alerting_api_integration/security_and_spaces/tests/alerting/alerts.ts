@@ -227,7 +227,7 @@ instanceStateValue: true
                 alertId,
                 ruleTypeId: 'test.always-firing',
                 outcome: 'success',
-                message: `alert executed: test.always-firing:${alertId}: 'abc'`,
+                message: `rule executed: test.always-firing:${alertId}: 'abc'`,
                 ruleObject: alertSearchResultWithoutDates,
               });
               break;
@@ -1330,6 +1330,8 @@ instanceStateValue: true
         type_id: ruleObject.alertInfo.ruleTypeId,
       },
     ]);
+
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions).to.be(1);
 
     expect(event?.rule).to.eql({
       id: alertId,

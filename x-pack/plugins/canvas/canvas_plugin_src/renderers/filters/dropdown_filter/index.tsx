@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { fromExpression, toExpression, Ast } from '@kbn/interpreter/common';
+import { fromExpression, toExpression, Ast } from '@kbn/interpreter';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { KibanaThemeProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererFactory } from '../../../../types';
+import { StartInitializer } from '../../../plugin';
 import { DropdownFilter } from './component';
 import { RendererStrings } from '../../../../i18n';
 
@@ -38,67 +40,70 @@ const getFilterValue = (filterExpression: string) => {
   return get(filterAST, 'chain[0].arguments.value[0]', MATCH_ALL) as string;
 };
 
-export const dropdownFilter: RendererFactory<Config> = () => ({
-  name: 'dropdown_filter',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  height: 50,
-  render(domNode, config, handlers) {
-    let filterExpression = handlers.getFilter();
+export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> =
+  (core, plugins) => () => ({
+    name: 'dropdown_filter',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    height: 50,
+    render(domNode, config, handlers) {
+      let filterExpression = handlers.getFilter();
 
-    if (
-      filterExpression !== '' &&
-      (filterExpression === undefined || !filterExpression.includes('exactly'))
-    ) {
-      filterExpression = '';
-      handlers.setFilter(filterExpression);
-    } else if (filterExpression !== '') {
-      // NOTE: setFilter() will cause a data refresh, avoid calling unless required
-      // compare expression and filter, update filter if needed
-      const { changed, newAst } = syncFilterExpression(config, filterExpression, ['filterGroup']);
+      if (
+        filterExpression !== '' &&
+        (filterExpression === undefined || !filterExpression.includes('exactly'))
+      ) {
+        filterExpression = '';
+        handlers.event({ name: 'applyFilterAction', data: filterExpression });
+      } else if (filterExpression !== '') {
+        // NOTE: setFilter() will cause a data refresh, avoid calling unless required
+        // compare expression and filter, update filter if needed
+        const { changed, newAst } = syncFilterExpression(config, filterExpression, ['filterGroup']);
 
-      if (changed) {
-        handlers.setFilter(toExpression(newAst));
+        if (changed) {
+          handlers.event({ name: 'applyFilterAction', data: toExpression(newAst) });
+        }
       }
-    }
-
-    const commit = (commitValue: string) => {
-      if (commitValue === '%%CANVAS_MATCH_ALL%%') {
-        handlers.setFilter('');
-      } else {
-        const newFilterAST: Ast = {
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'exactly',
-              arguments: {
-                value: [commitValue],
-                column: [config.column],
-                filterGroup: [config.filterGroup],
+      const commit = (commitValue: string) => {
+        if (commitValue === '%%CANVAS_MATCH_ALL%%') {
+          handlers.event({ name: 'applyFilterAction', data: '' });
+        } else {
+          const newFilterAST: Ast = {
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'exactly',
+                arguments: {
+                  value: [commitValue],
+                  column: [config.column],
+                  filterGroup: [config.filterGroup],
+                },
               },
-            },
-          ],
-        };
+            ],
+          };
 
-        const newFilter = toExpression(newFilterAST);
-        handlers.setFilter(newFilter);
-      }
-    };
+          const newFilter = toExpression(newFilterAST);
+          handlers.event({ name: 'applyFilterAction', data: newFilter });
+        }
+      };
+      const filter = (
+        <DropdownFilter
+          commit={commit}
+          choices={config.choices || []}
+          initialValue={getFilterValue(filterExpression)}
+        />
+      );
 
-    ReactDOM.render(
-      <DropdownFilter
-        commit={commit}
-        choices={config.choices || []}
-        initialValue={getFilterValue(filterExpression)}
-      />,
-      domNode,
-      () => handlers.done()
-    );
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>{filter}</KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
 
-    handlers.onDestroy(() => {
-      ReactDOM.unmountComponentAtNode(domNode);
-    });
-  },
-});
+      handlers.onDestroy(() => {
+        ReactDOM.unmountComponentAtNode(domNode);
+      });
+    },
+  });

@@ -52,13 +52,16 @@ jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
 
+const mockSearch = jest.fn();
+
+const mockAddWarning = jest.fn();
 jest.mock('../../lib/kibana', () => ({
-  useToasts: jest.fn().mockReturnValue({
+  useToasts: () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
-    addWarning: jest.fn(),
+    addWarning: mockAddWarning,
   }),
-  useKibana: jest.fn().mockReturnValue({
+  useKibana: () => ({
     services: {
       application: {
         capabilities: {
@@ -72,7 +75,7 @@ jest.mock('../../lib/kibana', () => ({
           getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
         },
         search: {
-          search: jest.fn().mockImplementation(() => ({
+          search: mockSearch.mockImplementation(() => ({
             subscribe: jest.fn().mockImplementation(() => ({
               error: jest.fn(),
               next: jest.fn(),
@@ -188,9 +191,43 @@ describe('Sourcerer Hooks', () => {
           type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
           payload: { loading: false },
         });
+        expect(mockDispatch).toHaveBeenCalledTimes(7);
+        expect(mockSearch).toHaveBeenCalledTimes(2);
       });
     });
   });
+
+  it('calls addWarning if defaultDataView has an error', async () => {
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          signalIndexName: null,
+          defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            error: true,
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+
+      await waitFor(() => {
+        expect(mockAddWarning).toHaveBeenNthCalledWith(1, {
+          text: 'Users with write permission need to access the Elastic Security app to initialize the app source data.',
+          title: 'Write role required to generate data',
+        });
+      });
+    });
+  });
+
   it('handles detections page', async () => {
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({
@@ -213,6 +250,48 @@ describe('Sourcerer Hooks', () => {
           selectedDataViewId: mockSourcererState.defaultDataView.id,
           selectedPatterns: [mockSourcererState.signalIndexName],
         },
+      });
+    });
+  });
+  it('index field search is not repeated when default and timeline have same dataViewId', async () => {
+    await act(async () => {
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitForNextUpdate();
+      rerender();
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+  it('index field search called twice when default and timeline have different dataViewId', async () => {
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+              selectedDataViewId: 'different-id',
+            },
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+      await waitForNextUpdate();
+      rerender();
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(2);
       });
     });
   });

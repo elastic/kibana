@@ -7,7 +7,7 @@
 
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
@@ -27,7 +27,7 @@ import {
   SectionLink,
   ActionMenuDivider,
 } from '../../../../../../../observability/public';
-import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../observability/public';
 
 interface Props {
   options: InfraWaffleMapOptions;

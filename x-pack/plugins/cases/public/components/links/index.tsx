@@ -10,10 +10,12 @@ import {
   EuiButtonProps,
   EuiLink,
   EuiLinkProps,
+  EuiToolTip,
   PropsForAnchor,
   PropsForButton,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useCaseViewNavigation, useConfigureCasesNavigation } from '../../common/navigation';
 import * as i18n from './translations';
 
 export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = null> {
@@ -24,42 +26,42 @@ export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = n
 }
 
 export const LinkButton: React.FC<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>> =
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
 
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
 export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
 
-export interface CaseDetailsHrefSchema {
-  detailName: string;
-  search?: string;
-  subCaseId?: string;
-}
-
-const CaseDetailsLinkComponent: React.FC<{
+export interface CaseDetailsLinkProps {
   children?: React.ReactNode;
   detailName: string;
-  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
-  subCaseId?: string;
   title?: string;
-}> = ({ caseDetailsNavigation, children, detailName, subCaseId, title }) => {
-  const { href: getHref, onClick } = caseDetailsNavigation;
-  const goToCaseDetails = useCallback(
-    (ev) => {
-      if (onClick) {
-        ev.preventDefault();
-        onClick({ detailName, subCaseId }, ev);
-      }
-    },
-    [detailName, onClick, subCaseId]
-  );
+}
 
-  const href = getHref({ detailName, subCaseId });
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
+const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
+  children,
+  detailName,
+  title,
+}) => {
+  const { getCaseViewUrl, navigateToCaseView } = useCaseViewNavigation();
+  const navigateToCaseViewClick = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToCaseView({ detailName });
+    },
+    [navigateToCaseView, detailName]
+  );
 
   return (
     <LinkAnchor
-      onClick={goToCaseDetails}
-      href={href}
+      onClick={navigateToCaseViewClick}
+      href={getCaseViewUrl({ detailName })}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >
@@ -69,3 +71,63 @@ const CaseDetailsLinkComponent: React.FC<{
 };
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
 CaseDetailsLink.displayName = 'CaseDetailsLink';
+
+export interface ConfigureCaseButtonProps {
+  isDisabled: boolean;
+  label: string;
+  msgTooltip: JSX.Element;
+  showToolTip: boolean;
+  titleTooltip: string;
+}
+
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
+const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
+  isDisabled,
+  label,
+  msgTooltip,
+  showToolTip,
+  titleTooltip,
+}: ConfigureCaseButtonProps) => {
+  const { getConfigureCasesUrl, navigateToConfigureCases } = useConfigureCasesNavigation();
+
+  const navigateToConfigureCasesClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      navigateToConfigureCases();
+    },
+    [navigateToConfigureCases]
+  );
+
+  const configureCaseButton = useMemo(
+    () => (
+      <LinkButton
+        onClick={navigateToConfigureCasesClick}
+        href={getConfigureCasesUrl()}
+        iconType="controlsHorizontal"
+        isDisabled={isDisabled}
+        aria-label={label}
+        data-test-subj="configure-case-button"
+      >
+        {label}
+      </LinkButton>
+    ),
+    [label, isDisabled, navigateToConfigureCasesClick, getConfigureCasesUrl]
+  );
+
+  return showToolTip ? (
+    <EuiToolTip
+      position="top"
+      title={titleTooltip}
+      content={<p>{msgTooltip}</p>}
+      data-test-subj="configure-case-tooltip"
+    >
+      {configureCaseButton}
+    </EuiToolTip>
+  ) : (
+    <>{configureCaseButton}</>
+  );
+};
+
+export const ConfigureCaseButton = React.memo(ConfigureCaseButtonComponent);
+ConfigureCaseButton.displayName = 'ConfigureCaseButton';

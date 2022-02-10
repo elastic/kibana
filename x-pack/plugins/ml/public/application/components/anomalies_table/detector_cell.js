@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 /*
  * Component for rendering a detector cell in the anomalies table, displaying the

@@ -71,7 +71,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
         isPointsOnly={true}
         label={
           <EuiTextColor
-            color="secondary"
+            color="success"
           >
             Other
           </EuiTextColor>

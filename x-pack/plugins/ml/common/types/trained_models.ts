@@ -17,6 +17,11 @@ export interface IngestStats {
   failed: number;
 }
 
+export interface TrainedModelModelSizeStats {
+  model_size_bytes: number;
+  required_native_memory_bytes: number;
+}
+
 export interface TrainedModelStat {
   model_id?: string;
   pipeline_count?: number;
@@ -46,6 +51,7 @@ export interface TrainedModelStat {
     >;
   };
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  model_size_stats?: TrainedModelModelSizeStats;
 }
 
 type TreeNode = object;
@@ -126,7 +132,6 @@ export interface InferenceConfigResponse {
 
 export interface TrainedModelDeploymentStatsResponse {
   model_id: string;
-  model_size_bytes: number;
   inference_threads: number;
   model_threads: number;
   state: DeploymentState;
@@ -151,6 +156,8 @@ export interface TrainedModelDeploymentStatsResponse {
     routing_state: { routing_state: string };
     average_inference_time_ms: number;
     last_access: number;
+    number_of_pending_requests: number;
+    start_time: number;
   }>;
 }
 
@@ -161,11 +168,19 @@ export interface AllocatedModel {
     state: string;
     allocation_count: number;
   };
-  model_id: string;
+  /**
+   * Not required for rendering in the Model stats
+   */
+  model_id?: string;
   state: string;
   model_threads: number;
   model_size_bytes: number;
+  required_native_memory_bytes: number;
   node: {
+    /**
+     * Not required for rendering in the Nodes overview
+     */
+    name?: string;
     average_inference_time_ms: number;
     inference_count: number;
     routing_state: {
@@ -173,13 +188,14 @@ export interface AllocatedModel {
       reason?: string;
     };
     last_access?: number;
+    number_of_pending_requests: number;
+    start_time: number;
   };
 }
 
 export interface NodeDeploymentStatsResponse {
   id: string;
   name: string;
-  transport_address: string;
   attributes: Record<string, string>;
   roles: string[];
   allocated_models: AllocatedModel[];

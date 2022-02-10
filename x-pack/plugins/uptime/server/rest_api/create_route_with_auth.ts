@@ -20,6 +20,7 @@ export const createRouteWithAuth = (
     request,
     response,
     savedObjectsClient,
+    server,
   }) => {
     const { statusCode, message } = libs.license(context.licensing.license);
     if (statusCode === 200) {
@@ -29,6 +30,7 @@ export const createRouteWithAuth = (
         request,
         response,
         savedObjectsClient,
+        server,
       });
     }
     switch (statusCode) {

@@ -114,7 +114,7 @@ Choose the type of visualization you want to create, then use the editor to conf
 
 . Add the <<aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*. 
 +
-NOTE: For the *Date Histogram* to use an *auto interval*, the date field must match the primary time field of the index pattern.
+NOTE: For the *Date Histogram* to use an *auto interval*, the date field must match the primary time field of the {data-source}.
 
 . To change the order, drag and drop the aggregations in the editor. 
 + 

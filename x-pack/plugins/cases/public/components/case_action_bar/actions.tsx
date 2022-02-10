@@ -11,24 +11,20 @@ import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
-import { Case } from '../../../common';
+import { Case } from '../../../common/ui/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
-import { CasesNavigation } from '../links';
+import { useAllCasesNavigation } from '../../common/navigation';
 
 interface CaseViewActions {
-  allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
 }
 
-const ActionsComponent: React.FC<CaseViewActions> = ({
-  allCasesNavigation,
-  caseData,
-  currentExternalIncident,
-}) => {
+const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternalIncident }) => {
   // Delete case
   const { handleToggleModal, handleOnDeleteConfirm, isDeleted, isDisplayConfirmDeleteModal } =
     useDeleteCases();
+  const { navigateToAllCases } = useAllCasesNavigation();
 
   const propertyActions = useMemo(
     () => [
@@ -51,7 +47,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   );
 
   if (isDeleted) {
-    allCasesNavigation.onClick(null);
+    navigateToAllCases();
     return null;
   }
   return (
@@ -61,12 +57,11 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
         caseTitle={caseData.title}
         isModalVisible={isDisplayConfirmDeleteModal}
         onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [
-          { id: caseData.id, title: caseData.title, type: caseData.type },
-        ])}
+        onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
       />
     </>
   );
 };
+ActionsComponent.displayName = 'Actions';
 
 export const Actions = React.memo(ActionsComponent);

@@ -9,6 +9,7 @@
 import {
   mockGetSavedObjectFromSource,
   mockRawDocExistsInNamespace,
+  mockIsNotFoundFromUnsupportedServer,
 } from './internal_bulk_resolve.test.mock';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
@@ -34,6 +35,8 @@ beforeEach(() => {
   );
   mockRawDocExistsInNamespace.mockReset();
   mockRawDocExistsInNamespace.mockReturnValue(true); // return true by default
+  mockIsNotFoundFromUnsupportedServer.mockReset();
+  mockIsNotFoundFromUnsupportedServer.mockReturnValue(false);
 });
 
 describe('internalBulkResolve', () => {
@@ -169,6 +172,24 @@ describe('internalBulkResolve', () => {
   function expectConflictResult(id: string, alias_target_id: string) {
     return { saved_object: `mock-obj-for-${id}`, outcome: 'conflict', alias_target_id };
   }
+
+  it('throws if mget call results in non-ES-originated 404 error', async () => {
+    const objects = [{ type: OBJ_TYPE, id: '1' }];
+    const params = setup(objects, { namespace: 'space-x' });
+    mockBulkResults(
+      { found: false } // fetch alias for obj 1
+    );
+    mockMgetResults(
+      { found: false } // fetch obj 1 (actual result body doesn't matter, just needs statusCode and headers)
+    );
+    mockIsNotFoundFromUnsupportedServer.mockReturnValue(true);
+
+    await expect(() => internalBulkResolve(params)).rejects.toThrow(
+      SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
+    );
+    expect(client.bulk).toHaveBeenCalledTimes(1);
+    expect(client.mget).toHaveBeenCalledTimes(1);
+  });
 
   it('returns an empty array if no object args are passed in', async () => {
     const params = setup([], { namespace: 'space-x' });

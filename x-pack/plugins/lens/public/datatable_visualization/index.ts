@@ -34,6 +34,7 @@ export class DatatableVisualization {
       expressions.registerRenderer(() =>
         getDatatableRenderer({
           formatFactory,
+          theme: core.theme,
           getType: core
             .getStartServices()
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
@@ -42,7 +43,7 @@ export class DatatableVisualization {
         })
       );
 
-      return getDatatableVisualization({ paletteService: palettes });
+      return getDatatableVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }

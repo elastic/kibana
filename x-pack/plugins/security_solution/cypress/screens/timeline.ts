@@ -24,7 +24,8 @@ export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
-export const CELL = '[data-test-subj="statefulCell"]';
+export const CORRELATION_EVENT_TABLE_CELL =
+  '[data-test-subj="eql-events-table"] [data-test-subj="statefulCell"]';
 
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
@@ -85,7 +86,7 @@ export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
 
 export const NOTES_TEXT = '.euiMarkdownFormat';
 
-export const NOTES_CODE_BLOCK = '.euiCodeBlock__code';
+export const NOTES_CODE_BLOCK = '.euiCode';
 
 export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
@@ -104,6 +105,9 @@ export const OPEN_TIMELINE_TEMPLATE_ICON =
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
+export const PINNED_EVENT_TABLE_CELL =
+  '[data-test-subj="pinned-events-table"] [data-test-subj="statefulCell"]';
+
 export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
 
 export const PROCESS_KPI = '[data-test-subj="siem-timeline-process-kpi"';
@@ -119,6 +123,9 @@ export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
 
 export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
+
+export const QUERY_EVENT_TABLE_CELL =
+  '[data-test-subj="query-events-table"] [data-test-subj="statefulCell"]';
 
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 

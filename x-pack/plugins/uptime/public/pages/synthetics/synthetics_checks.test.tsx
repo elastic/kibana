@@ -7,53 +7,95 @@
 
 import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
-import { spyOnUseFetcher } from '../../lib/helper/spy_use_fetcher';
 import {
   SyntheticsCheckSteps,
   SyntheticsCheckStepsPageHeader,
   SyntheticsCheckStepsPageRightSideItem,
 } from './synthetics_checks';
+import { fetchJourneySteps } from '../../state/api/journey';
+import { createMemoryHistory } from 'history';
+import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../common/constants';
+
+jest.mock('../../state/api/journey', () => ({
+  fetchJourneySteps: jest.fn(),
+}));
+
+// We must mock all other API calls because we're using the real store
+// in this test. Using the real store causes actions and effects to actually
+// run, which could trigger API calls.
+jest.mock('../../state/api/utils.ts', () => ({
+  apiService: { get: jest.fn().mockResolvedValue([]) },
+}));
+
+const getRelevantPageHistory = () => {
+  const history = createMemoryHistory();
+  const checkStepsHistoryFrame = SYNTHETIC_CHECK_STEPS_ROUTE.replace(
+    /:checkGroupId/g,
+    'my-check-group-id'
+  );
+
+  history.push(checkStepsHistoryFrame);
+
+  return history;
+};
 
 describe('SyntheticsCheckStepsPageHeader component', () => {
-  it('returns the monitor name', () => {
-    spyOnUseFetcher({
-      details: {
-        journey: {
-          monitor: {
-            name: 'test-name',
-            id: 'test-id',
-          },
-        },
-      },
-    });
-    const { getByText } = render(<SyntheticsCheckStepsPageHeader />);
-    expect(getByText('test-name'));
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 
-  it('returns the monitor ID when no name is provided', () => {
-    spyOnUseFetcher({
+  it('returns the monitor name', async () => {
+    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+      checkGroup: 'my-check-group-id',
       details: {
         journey: {
-          monitor: {
-            id: 'test-id',
-          },
+          monitor: { name: 'test-name' },
         },
       },
     });
-    const { getByText } = render(<SyntheticsCheckStepsPageHeader />);
-    expect(getByText('test-id'));
+
+    const { findByText } = render(<SyntheticsCheckStepsPageHeader />, {
+      history: getRelevantPageHistory(),
+      path: SYNTHETIC_CHECK_STEPS_ROUTE,
+      useRealStore: true,
+    });
+
+    expect(await findByText('test-name'));
+  });
+
+  it('returns the monitor ID when no name is provided', async () => {
+    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+      checkGroup: 'my-check-group-id',
+      details: {
+        journey: {
+          monitor: { name: 'test-id' },
+        },
+      },
+    });
+
+    const { findByText } = render(<SyntheticsCheckStepsPageHeader />, {
+      history: getRelevantPageHistory(),
+      path: SYNTHETIC_CHECK_STEPS_ROUTE,
+      useRealStore: true,
+    });
+    expect(await findByText('test-id'));
   });
 });
 
 describe('SyntheticsCheckStepsPageRightSideItem component', () => {
   it('returns null when there are no details', () => {
-    spyOnUseFetcher(null);
-    const { container } = render(<SyntheticsCheckStepsPageRightSideItem />);
+    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce(null);
+    const { container } = render(<SyntheticsCheckStepsPageRightSideItem />, {
+      history: getRelevantPageHistory(),
+      path: SYNTHETIC_CHECK_STEPS_ROUTE,
+      useRealStore: true,
+    });
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders navigation element if details exist', () => {
-    spyOnUseFetcher({
+  it('renders navigation element if details exist', async () => {
+    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+      checkGroup: 'my-check-group-id',
       details: {
         timestamp: '20031104',
         journey: {
@@ -64,22 +106,54 @@ describe('SyntheticsCheckStepsPageRightSideItem component', () => {
         },
       },
     });
-    const { getByText } = render(<SyntheticsCheckStepsPageRightSideItem />);
-    expect(getByText('Nov 4, 2003 12:00:00 AM'));
-    expect(getByText('Next check'));
-    expect(getByText('Previous check'));
+
+    const { findByText } = render(<SyntheticsCheckStepsPageRightSideItem />, {
+      history: getRelevantPageHistory(),
+      path: SYNTHETIC_CHECK_STEPS_ROUTE,
+      useRealStore: true,
+    });
+    expect(await findByText('Nov 4, 2003 12:00:00 AM'));
+    expect(await findByText('Next check'));
+    expect(await findByText('Previous check'));
   });
 });
 
 describe('SyntheticsCheckSteps component', () => {
-  it('renders empty steps list', () => {
-    const { getByText } = render(<SyntheticsCheckSteps />);
-    expect(getByText('0 Steps - all failed or skipped'));
-    expect(getByText('This journey did not contain any steps.'));
+  it('renders empty steps list', async () => {
+    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+      checkGroup: 'my-check-group-id',
+      details: {
+        timestamp: '20031104',
+        journey: {
+          monitor: {
+            name: 'test-name',
+            id: 'test-id',
+          },
+        },
+      },
+    });
+
+    const { findByText } = render(<SyntheticsCheckSteps />, {
+      history: getRelevantPageHistory(),
+      path: SYNTHETIC_CHECK_STEPS_ROUTE,
+      useRealStore: true,
+    });
+    expect(await findByText('0 Steps - all failed or skipped'));
+    expect(await findByText('This journey did not contain any steps.'));
   });
 
-  it('renders steps', () => {
-    spyOnUseFetcher({
+  it('renders steps', async () => {
+    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+      checkGroup: 'my-check-group-id',
+      details: {
+        timestamp: '20031104',
+        journey: {
+          monitor: {
+            name: 'test-name',
+            id: 'test-id',
+          },
+        },
+      },
       steps: [
         {
           _id: 'step-1',
@@ -94,7 +168,12 @@ describe('SyntheticsCheckSteps component', () => {
         },
       ],
     });
-    const { getByText } = render(<SyntheticsCheckSteps />);
-    expect(getByText('1 Steps - all failed or skipped'));
+
+    const { findByText } = render(<SyntheticsCheckSteps />, {
+      history: getRelevantPageHistory(),
+      path: SYNTHETIC_CHECK_STEPS_ROUTE,
+      useRealStore: true,
+    });
+    expect(await findByText('1 Steps - all failed or skipped'));
   });
 });

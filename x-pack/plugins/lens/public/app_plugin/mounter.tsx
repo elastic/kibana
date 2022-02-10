@@ -8,7 +8,7 @@
 import React, { FC, useCallback } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -19,7 +19,7 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
-import { EditorFrameStart } from '../types';
+import { EditorFrameStart, LensTopNavMenuEntryGenerator } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
@@ -31,7 +31,10 @@ import {
 import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../src/plugins/kibana_react/public';
 import {
   makeConfigureStore,
   navigateAway,
@@ -100,9 +103,15 @@ export async function mountApp(
     createEditorFrame: EditorFrameStart['createInstance'];
     attributeService: LensAttributeService;
     getPresentationUtilContext: () => FC;
+    topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   }
 ) {
-  const { createEditorFrame, attributeService, getPresentationUtilContext } = mountProps;
+  const {
+    createEditorFrame,
+    attributeService,
+    getPresentationUtilContext,
+    topNavMenuEntryGenerators,
+  } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
   const instance = await createEditorFrame();
   const historyLocationState = params.history.location.state as HistoryLocationState;
@@ -183,9 +192,8 @@ export async function mountApp(
     embeddableEditorIncomingState,
     initialContext,
   };
-  const emptyState = getPreloadedState(storeDeps) as LensAppState;
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-    lens: emptyState,
+    lens: getPreloadedState(storeDeps) as LensAppState,
   } as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
@@ -205,7 +213,7 @@ export async function mountApp(
       if (!initialContext) {
         data.query.filterManager.setAppFilters([]);
       }
-      lensStore.dispatch(setState(emptyState));
+      lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
       lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
 
       return (
@@ -221,6 +229,8 @@ export async function mountApp(
             history={props.history}
             datasourceMap={datasourceMap}
             visualizationMap={visualizationMap}
+            topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+            initialContext={initialContext}
           />
         </Provider>
       );
@@ -254,24 +264,26 @@ export async function mountApp(
   const PresentationUtilContext = getPresentationUtilContext();
 
   render(
-    <I18nProvider>
-      <KibanaContextProvider services={lensServices}>
-        <PresentationUtilContext>
-          <HashRouter>
-            <Switch>
-              <Route exact path="/edit/:id" component={EditorRoute} />
-              <Route
-                exact
-                path={`/${LENS_EDIT_BY_VALUE}`}
-                render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-              />
-              <Route exact path="/" component={EditorRoute} />
-              <Route path="/" component={NotFound} />
-            </Switch>
-          </HashRouter>
-        </PresentationUtilContext>
-      </KibanaContextProvider>
-    </I18nProvider>,
+    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+      <I18nProvider>
+        <KibanaContextProvider services={lensServices}>
+          <PresentationUtilContext>
+            <HashRouter>
+              <Switch>
+                <Route exact path="/edit/:id" component={EditorRoute} />
+                <Route
+                  exact
+                  path={`/${LENS_EDIT_BY_VALUE}`}
+                  render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
+                />
+                <Route exact path="/" component={EditorRoute} />
+                <Route path="/" component={NotFound} />
+              </Switch>
+            </HashRouter>
+          </PresentationUtilContext>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </KibanaThemeProvider>,
     params.element
   );
   return () => {

@@ -49,5 +49,5 @@ export function getTelemetryChannelEndpoint({
   const baseUrl = getBaseUrl(env);
   const channelPath = getChannel(channelName);
 
-  return `${baseUrl}${ENDPOINT_VERSION}/send/${channelPath}`;
+  return `${baseUrl}${channelPath}/${ENDPOINT_VERSION}/send`;
 }

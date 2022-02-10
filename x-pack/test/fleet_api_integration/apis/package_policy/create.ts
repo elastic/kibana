@@ -199,8 +199,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
-    // https://github.com/elastic/kibana/issues/118257
-    it.skip('should not allow multiple limited packages on the same agent policy', async function () {
+    it('should not allow multiple limited packages on the same agent policy', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -215,7 +214,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '0.13.0',
+            version: '1.3.0-dev.0',
           },
         })
         .expect(200);
@@ -233,7 +232,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '0.13.0',
+            version: '1.3.0-dev.0',
           },
         })
         .expect(400);
@@ -324,6 +323,81 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(400);
+    });
+
+    it('should return a 400 with required variables not provided', async function () {
+      const { body } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'pacakge-policy-required-variables-test-456',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [
+            {
+              enabled: true,
+              streams: [
+                {
+                  data_stream: {
+                    dataset: 'with_required_variables.log',
+                    type: 'logs',
+                  },
+                  enabled: true,
+                  vars: {},
+                },
+              ],
+              type: 'test_input',
+            },
+          ],
+          package: {
+            name: 'with_required_variables',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).contain('Package policy is invalid');
+    });
+
+    it('should work with required variables provided', async function () {
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'pacakge-policy-required-variables-test-123',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [
+            {
+              enabled: true,
+              streams: [
+                {
+                  data_stream: {
+                    dataset: 'with_required_variables.log',
+                    type: 'logs',
+                  },
+                  enabled: true,
+                  vars: {
+                    test_var_required: {
+                      value: 'I am required',
+                    },
+                  },
+                },
+              ],
+              type: 'test_input',
+            },
+          ],
+          package: {
+            name: 'with_required_variables',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
     });
   });
 }

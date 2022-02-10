@@ -7,7 +7,7 @@
  */
 
 import supertest from 'supertest';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { HttpService, InternalHttpServicePreboot, InternalHttpServiceSetup } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';

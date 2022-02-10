@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)`
   display: grid;
-  grid-template-columns: 25% 45% 30%;
+  grid-template-columns: 33% 45% 22%;
   grid-template-areas: 'title summary link';
 `;
 

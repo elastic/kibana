@@ -9,15 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import { ProductName } from '../types';
 
-export const ANY_AUTH_PROVIDER = '*';
-
-export const ANY_AUTH_PROVIDER_OPTION_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.anyDropDownOptionLabel',
-  {
-    defaultMessage: 'Any',
-  }
-);
-
 export const ADD_ROLE_MAPPING_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.addRoleMappingButtonLabel',
   {
@@ -69,13 +60,6 @@ export const GROUPS_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.g
 export const ENGINES_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.enginesLabel', {
   defaultMessage: 'Engines',
 });
-
-export const AUTH_PROVIDER_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.authProviderLabel',
-  {
-    defaultMessage: 'Auth provider',
-  }
-);
 
 export const EXTERNAL_ATTRIBUTE_LABEL = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.externalAttributeLabel',
@@ -239,6 +223,13 @@ export const ROLES_DISABLED_NOTE = i18n.translate(
   {
     defaultMessage:
       'Note: enabling role-based access restricts access for both App Search and Workplace Search. Once enabled, review access management for both products, if applicable.',
+  }
+);
+
+export const RBAC_BUTTON_DISABLED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.rbacButtonDisabledLabel',
+  {
+    defaultMessage: 'Enabling RBAC can be performed by a superuser.',
   }
 );
 
@@ -414,15 +405,6 @@ export const EXTERNAL_ATTRIBUTE_TOOLTIP = i18n.translate(
       'External attributes are defined by the identity provider, and varies from service to service.',
   }
 );
-
-export const AUTH_PROVIDER_TOOLTIP = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.authProviderTooltip',
-  {
-    defaultMessage:
-      'Provider-specific role mapping is still applied, but configuration is now deprecated.',
-  }
-);
-
 export const DEACTIVATED_USER_CALLOUT_LABEL = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.deactivatedUserCalloutLabel',
   {

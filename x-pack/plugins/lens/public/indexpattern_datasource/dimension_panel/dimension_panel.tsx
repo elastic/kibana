@@ -12,7 +12,7 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { IndexPatternColumn } from '../indexpattern';
+import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
@@ -49,14 +49,14 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
-  const { columnId, uniqueLabel, invalid, invalidMessage } = props;
+  const { columnId, uniqueLabel, invalid, invalidMessage, hideTooltip } = props;
 
   const currentColumnHasErrors = useMemo(
     () => invalid || isColumnInvalid(layer, columnId, currentIndexPattern),
     [layer, columnId, currentIndexPattern, invalid]
   );
 
-  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] ?? null;
+  const selectedColumn: GenericIndexPatternColumn | null = layer.columns[props.columnId] ?? null;
 
   if (!selectedColumn) {
     return null;
@@ -64,23 +64,23 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   const formattedLabel = wrapOnDot(uniqueLabel);
 
   if (currentColumnHasErrors) {
+    let tooltipContent;
+    if (!hideTooltip) {
+      tooltipContent = invalidMessage ?? (
+        <p>
+          {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+            defaultMessage: 'Invalid configuration.',
+          })}
+          <br />
+          {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+            defaultMessage: 'Click for more details.',
+          })}
+        </p>
+      );
+    }
+
     return (
-      <EuiToolTip
-        content={
-          invalidMessage ?? (
-            <p>
-              {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
-                defaultMessage: 'Invalid configuration.',
-              })}
-              <br />
-              {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
-                defaultMessage: 'Click for more details.',
-              })}
-            </p>
-          )
-        }
-        anchorClassName="eui-displayBlock"
-      >
+      <EuiToolTip content={tooltipContent} anchorClassName="eui-displayBlock">
         <EuiText
           size="s"
           color="danger"
@@ -126,7 +126,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   }
   const operationSupportMatrix = getOperationSupportMatrix(props);
 
-  const selectedColumn: IndexPatternColumn | null =
+  const selectedColumn: GenericIndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
   return (
     <DimensionEditor

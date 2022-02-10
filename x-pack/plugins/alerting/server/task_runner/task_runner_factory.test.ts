@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
@@ -17,13 +18,14 @@ import {
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
 
 const executionContext = executionContextServiceMock.createSetupContract();
-
-const alertType: UntypedNormalizedAlertType = {
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
@@ -83,8 +85,10 @@ describe('Task Runner Factory', () => {
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: true,
-    maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
+    maxEphemeralActionsPerRule: 10,
+    cancelAlertsOnRuleTimeout: true,
     executionContext,
+    usageCounter: mockUsageCounter,
   };
 
   beforeEach(() => {
@@ -95,7 +99,7 @@ describe('Task Runner Factory', () => {
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(alertType, { taskInstance: mockedTaskInstance })
+      factory.create(ruleType, { taskInstance: mockedTaskInstance })
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 

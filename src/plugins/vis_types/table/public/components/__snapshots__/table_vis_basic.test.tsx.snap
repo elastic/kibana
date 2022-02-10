@@ -105,9 +105,9 @@ exports[`TableVisBasic should render the toolbar 1`] = `
           rows={Array []}
         />,
         "showColumnSelector": false,
+        "showDisplaySelector": false,
         "showFullScreenSelector": false,
         "showSortSelector": false,
-        "showStyleSelector": false,
       }
     }
   />

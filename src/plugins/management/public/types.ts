@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import { ScopedHistory, Capabilities } from 'kibana/public';
 import type { LocatorPublic } from 'src/plugins/share/common';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
-import { ChromeBreadcrumb } from '../../../core/public/';
+import { ChromeBreadcrumb, CoreTheme } from '../../../core/public/';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {
@@ -63,6 +64,7 @@ export interface ManagementAppMountParams {
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
+  theme$: Observable<CoreTheme>;
 }
 
 export interface CreateManagementItemArgs {

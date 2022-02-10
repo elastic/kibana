@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   IndexPatternField,
   TimefilterContract,
-  SearchSourceFields,
+  SerializedSearchSourceFields,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
@@ -127,7 +127,7 @@ export class ListControl extends Control<PhraseFilterManager> {
 
     const fieldName = this.filterManager.fieldName;
     const settings = await this.getSettings();
-    const initialSearchSourceState: SearchSourceFields = {
+    const initialSearchSourceState: SerializedSearchSourceFields = {
       timeout: `${settings.autocompleteTimeout}ms`,
       terminate_after: Number(settings.autocompleteTerminateAfter),
     };

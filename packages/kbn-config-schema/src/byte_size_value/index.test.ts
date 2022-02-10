@@ -30,6 +30,11 @@ describe('parsing units', () => {
     expect(ByteSizeValue.parse('1gb').getValueInBytes()).toBe(1073741824);
   });
 
+  test('case insensitive units', () => {
+    expect(ByteSizeValue.parse('1KB').getValueInBytes()).toBe(1024);
+    expect(ByteSizeValue.parse('1Mb').getValueInBytes()).toBe(1024 * 1024);
+  });
+
   test('throws an error when unsupported unit specified', () => {
     expect(() => ByteSizeValue.parse('1tb')).toThrowErrorMatchingInlineSnapshot(
       `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`

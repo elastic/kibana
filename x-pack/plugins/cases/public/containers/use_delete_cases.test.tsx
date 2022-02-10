@@ -7,7 +7,6 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { CaseType } from '../../common';
 import { useDeleteCases, UseDeleteCase } from './use_delete_cases';
 import * as api from './api';
 
@@ -17,9 +16,9 @@ jest.mock('../common/lib/kibana');
 describe('useDeleteCases', () => {
   const abortCtrl = new AbortController();
   const deleteObj = [
-    { id: '1', type: CaseType.individual, title: 'case 1' },
-    { id: '2', type: CaseType.individual, title: 'case 2' },
-    { id: '3', type: CaseType.individual, title: 'case 3' },
+    { id: '1', title: 'case 1' },
+    { id: '2', title: 'case 2' },
+    { id: '3', title: 'case 3' },
   ];
   const deleteArr = ['1', '2', '3'];
   it('init', async () => {

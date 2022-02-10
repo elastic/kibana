@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 interface AutocompleteFieldProps {

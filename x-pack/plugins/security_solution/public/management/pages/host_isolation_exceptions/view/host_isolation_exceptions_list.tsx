@@ -5,63 +5,128 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, useCallback, useEffect, useState } from 'react';
-import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { Immutable, ListPageRouteState } from '../../../../../common/endpoint/types';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useToasts } from '../../../../common/lib/kibana';
 import {
-  getCurrentLocation,
-  getListFetchError,
-  getListIsLoading,
-  getListItems,
-  getListPagination,
-  getTotalListItems,
-} from '../store/selector';
-import {
-  useHostIsolationExceptionsNavigateCallback,
-  useHostIsolationExceptionsSelector,
-} from './hooks';
-import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { Immutable } from '../../../../../common/endpoint/types';
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+} from '../../../common/constants';
+import { getEndpointListPath } from '../../../common/routing';
+import { getLoadPoliciesError } from '../../../common/translations';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { SearchExceptions } from '../../../components/search_exceptions';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
-import { HostIsolationExceptionsEmptyState } from './components/empty';
+import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { ManagementPageLoader } from '../../../components/management_page_loader';
+import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
+import { SearchExceptions } from '../../../components/search_exceptions';
+import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+import { getCurrentLocation } from '../store/selector';
 import { HostIsolationExceptionDeleteModal } from './components/delete_modal';
+import { HostIsolationExceptionsEmptyState } from './components/empty';
 import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
 import {
   DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
 } from './components/translations';
-import { getEndpointListPath } from '../../../common/routing';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
-import { HostIsolationExceptionsPageAction } from '../store/action';
+import {
+  useFetchHostIsolationExceptionsList,
+  useHostIsolationExceptionsNavigateCallback,
+  useHostIsolationExceptionsSelector,
+} from './hooks';
+import { useMemoizedRouteState } from '../../../common/hooks';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
   typeof ExceptionItem
 >;
 
+const getPaginationObject = ({
+  total = 0,
+  perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
+  page = 1,
+}: {
+  total?: number;
+  perPage?: number;
+  page?: number;
+}) => ({
+  totalItemCount: total,
+  pageSize: perPage,
+  pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+  pageIndex: page - 1,
+});
+
 export const HostIsolationExceptionsList = () => {
-  const listItems = useHostIsolationExceptionsSelector(getListItems);
-  const totalCountListItems = useHostIsolationExceptionsSelector(getTotalListItems);
-  const pagination = useHostIsolationExceptionsSelector(getListPagination);
-  const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
-  const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
+  const history = useHistory();
+  const privileges = useUserPrivileges().endpointPrivileges;
+  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
+
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
-  const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
+
+  const memoizedRouteState = useMemoizedRouteState(routeState);
+
+  const backButtonEmptyComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+    }
+  }, [memoizedRouteState]);
+
+  const backButtonHeaderComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...memoizedRouteState} />;
+    }
+  }, [memoizedRouteState]);
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
-  const history = useHistory();
-  const privileges = useEndpointPrivileges();
+  const includedPoliciesParam = location.included_policies;
+
+  const { isLoading, isRefetching, data, error, refetch } = useFetchHostIsolationExceptionsList({
+    filter: location.filter,
+    page: location.page_index,
+    perPage: location.page_size,
+    policies:
+      includedPoliciesParam && includedPoliciesParam !== ''
+        ? includedPoliciesParam.split(',')
+        : undefined,
+  });
+
+  const { isLoading: isLoadingAll, data: allData } = useFetchHostIsolationExceptionsList({
+    page: 0,
+    perPage: 1,
+    enabled: data && !data.total,
+  });
+
+  const toasts = useToasts();
+
+  // load the list of policies>
+  const policiesRequest = useGetEndpointSpecificPolicies({
+    onError: (err) => {
+      toasts.addDanger(getLoadPoliciesError(err));
+    },
+  });
+
+  const pagination = getPaginationObject({
+    total: data?.total,
+    perPage: data?.per_page,
+    page: data?.page,
+  });
+
+  const listItems = data?.data || [];
+  const allListItems = allData?.data || [];
+
   const showFlyout = privileges.canIsolateHost && !!location.show;
-  const hasDataToShow = !!location.filter || listItems.length > 0;
+  const hasDataToShow = allListItems.length > 0 || listItems.length > 0;
 
   useEffect(() => {
     if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
@@ -70,11 +135,16 @@ export const HostIsolationExceptionsList = () => {
   }, [history, isLoading, listItems.length, privileges.canIsolateHost]);
 
   const handleOnSearch = useCallback(
-    (query: string) => {
-      navigateCallback({ filter: query });
+    (filter: string, includedPolicies: string) => {
+      navigateCallback({
+        filter,
+        included_policies: includedPolicies,
+      });
     },
     [navigateCallback]
   );
+
+  const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
 
   function handleItemComponentProps(element: ExceptionListItemSchema): ArtifactEntryCardProps {
     const editAction = {
@@ -100,6 +170,9 @@ export const HostIsolationExceptionsList = () => {
       item: element,
       'data-test-subj': `hostIsolationExceptionsCard`,
       actions: privileges.canIsolateHost ? [editAction, deleteAction] : [deleteAction],
+      policies: artifactCardPolicies,
+      hideDescription: !element.description,
+      hideComments: !element.comments.length,
     };
   }
 
@@ -125,15 +198,29 @@ export const HostIsolationExceptionsList = () => {
 
   const handleCloseDeleteDialog = (forceRefresh: boolean = false) => {
     if (forceRefresh) {
-      dispatch({
-        type: 'hostIsolationExceptionsRefreshList',
-      });
+      refetch();
     }
     setItemToDelete(null);
   };
 
+  const handleCloseFlyout = useCallback(
+    () =>
+      navigateCallback({
+        show: undefined,
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
+
+  const isSearchLoading = isLoading || isRefetching;
+
+  if ((isSearchLoading || isLoadingAll) && !hasDataToShow) {
+    return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLoader" />;
+  }
+
   return (
     <AdministrationListPage
+      headerBackComponent={backButtonHeaderComponent}
       title={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
@@ -143,7 +230,7 @@ export const HostIsolationExceptionsList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageSubTitle"
-          defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
+          defaultMessage="Add a host isolation exception to allow isolated hosts to communicate with specific IPs."
         />
       }
       actions={
@@ -157,7 +244,7 @@ export const HostIsolationExceptionsList = () => {
           >
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.list.addButton"
-              defaultMessage="Add Host isolation exception"
+              defaultMessage="Add host isolation exception"
             />
           </EuiButton>
         ) : (
@@ -166,7 +253,9 @@ export const HostIsolationExceptionsList = () => {
       }
       hideHeader={!hasDataToShow}
     >
-      {showFlyout && <HostIsolationExceptionsFormFlyout />}
+      {showFlyout && (
+        <HostIsolationExceptionsFormFlyout onCancel={handleCloseFlyout} id={location.id} />
+      )}
 
       {itemToDelete ? (
         <HostIsolationExceptionDeleteModal item={itemToDelete} onCancel={handleCloseDeleteDialog} />
@@ -177,10 +266,13 @@ export const HostIsolationExceptionsList = () => {
           <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
+            policyList={policiesRequest.data?.items}
+            hasPolicyFilter
+            defaultIncludedPolicies={location.included_policies}
             placeholder={i18n.translate(
               'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
               {
-                defaultMessage: 'Search on the fields below: name, description, ip',
+                defaultMessage: 'Search on the fields below: name, description, IP',
               }
             )}
           />
@@ -188,8 +280,8 @@ export const HostIsolationExceptionsList = () => {
           <EuiText color="subdued" size="xs" data-test-subj="hostIsolationExceptions-totalCount">
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.list.totalCount"
-              defaultMessage="Showing {total, plural, one {# exception} other {# exceptions}}"
-              values={{ total: totalCountListItems }}
+              defaultMessage="Showing {total, plural, one {# host isolation exception} other {# host isolation exceptions}}"
+              values={{ total: listItems.length }}
             />
           </EuiText>
           <EuiSpacer size="s" />
@@ -201,13 +293,18 @@ export const HostIsolationExceptionsList = () => {
         ItemComponent={ArtifactEntryCard}
         itemComponentProps={handleItemComponentProps}
         onChange={handlePaginatedContentChange}
-        error={fetchError?.message}
-        loading={isLoading}
+        error={error?.message}
+        loading={isSearchLoading}
         pagination={pagination}
         contentClassName="host-isolation-exceptions-container"
         data-test-subj="hostIsolationExceptionsContent"
         noItemsMessage={
-          !hasDataToShow && <HostIsolationExceptionsEmptyState onAdd={handleAddButtonClick} />
+          !hasDataToShow && (
+            <HostIsolationExceptionsEmptyState
+              onAdd={handleAddButtonClick}
+              backComponent={backButtonEmptyComponent}
+            />
+          )
         }
       />
     </AdministrationListPage>

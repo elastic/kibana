@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useKibana } from '../../../common/lib/kibana';
-import { ActionConnector } from '../../../../common';
+import { ActionConnector } from '../../../../common/api';
 import { choices } from '../mock';
 import { useGetChoices, UseGetChoices, UseGetChoicesProps } from './use_get_choices';
 import * as api from './api';

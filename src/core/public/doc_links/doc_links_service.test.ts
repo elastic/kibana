@@ -6,18 +6,73 @@
  * Side Public License, v 1.
  */
 
+import { getDocLinksMock, getDocLinksMetaMock } from './doc_links_service.test.mocks';
 import { DocLinksService } from './doc_links_service';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
-describe('DocLinksService#start()', () => {
-  it('templates the doc links with the branch information from injectedMetadata', () => {
-    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+describe('DocLinksService', () => {
+  let injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createStartContract>;
+  let service: DocLinksService;
+
+  beforeEach(() => {
+    injectedMetadata = injectedMetadataServiceMock.createStartContract();
     injectedMetadata.getKibanaBranch.mockReturnValue('test-branch');
-    const service = new DocLinksService();
-    const api = service.start({ injectedMetadata });
-    expect(api.DOC_LINK_VERSION).toEqual('test-branch');
-    expect(api.links.kibana).toEqual(
-      'https://www.elastic.co/guide/en/kibana/test-branch/index.html'
-    );
+
+    getDocLinksMetaMock.mockReturnValue({
+      version: 'test-version',
+      elasticWebsiteUrl: 'http://elastic.test.url',
+    });
+    getDocLinksMock.mockReturnValue({
+      settings: 'http://settings.test.url',
+    });
+
+    service = new DocLinksService();
+  });
+
+  afterEach(() => {
+    getDocLinksMock.mockReset();
+    getDocLinksMetaMock.mockReset();
+  });
+
+  describe('#start', () => {
+    it('calls `getDocLinksMeta` with the correct parameters', () => {
+      expect(getDocLinksMetaMock).not.toHaveBeenCalled();
+
+      service.start({ injectedMetadata });
+
+      expect(getDocLinksMetaMock).toHaveBeenCalledTimes(1);
+      expect(getDocLinksMetaMock).toHaveBeenCalledWith({
+        kibanaBranch: 'test-branch',
+      });
+    });
+
+    it('return the values from `getDocLinksMeta`', () => {
+      const start = service.start({ injectedMetadata });
+
+      expect(start).toEqual({
+        DOC_LINK_VERSION: 'test-version',
+        ELASTIC_WEBSITE_URL: 'http://elastic.test.url',
+        links: expect.any(Object),
+      });
+    });
+
+    it('calls `getDocLinks` with the correct parameters', () => {
+      expect(getDocLinksMock).not.toHaveBeenCalled();
+
+      service.start({ injectedMetadata });
+
+      expect(getDocLinksMock).toHaveBeenCalledTimes(1);
+      expect(getDocLinksMock).toHaveBeenCalledWith({
+        kibanaBranch: 'test-branch',
+      });
+    });
+
+    it('return the values from `getDocLinks`', () => {
+      const start = service.start({ injectedMetadata });
+
+      expect(start.links).toEqual({
+        settings: 'http://settings.test.url',
+      });
+    });
   });
 });

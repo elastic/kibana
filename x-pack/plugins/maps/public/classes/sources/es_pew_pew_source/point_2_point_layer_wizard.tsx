@@ -22,11 +22,12 @@ import {
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
-import { Point2PointLayerIcon } from '../../layers/icons/point_2_point_layer_icon';
+import { Point2PointLayerIcon } from '../../layers/wizards/icons/point_2_point_layer_icon';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.pewPewDescription', {
     defaultMessage: 'Aggregated data paths between the source and destination',

@@ -7,7 +7,8 @@
 
 import type { Query } from 'src/plugins/data/common';
 import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
-import { Filter, TimeRange } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { TimeRange } from 'src/plugins/data/public';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';
@@ -20,7 +21,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 
-export interface SourceTooltipConfig {
+export interface SourceStatus {
   tooltipContent: string | null;
   areResultsTrimmed: boolean;
   isDeprecated?: boolean;
@@ -74,7 +75,7 @@ export interface IVectorSource extends ISource {
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
   getDefaultFields(): Promise<Record<string, Record<string, string>>>;
@@ -171,7 +172,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 

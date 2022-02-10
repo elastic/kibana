@@ -24,7 +24,6 @@
     "kibanaUtils",
     "home",
     "alerting",
-    "kibanaReact",
-    "kibanaLegacy"
+    "kibanaReact"
   ]
 }

@@ -7,4 +7,8 @@
 
 export type { ElasticsearchRole } from '../../../../authorization';
 export { transformElasticsearchRoleToRole } from '../../../../authorization';
-export { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './put_payload';
+export {
+  getPutPayloadSchema,
+  transformPutPayloadToElasticsearchRole,
+  validateKibanaPrivileges,
+} from './put_payload';

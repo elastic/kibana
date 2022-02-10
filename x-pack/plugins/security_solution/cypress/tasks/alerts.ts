@@ -23,7 +23,7 @@ import {
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
 } from '../screens/alerts';
-import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
+import { REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
@@ -58,6 +58,10 @@ export const closeAlerts = () => {
   cy.get(CLOSE_SELECTED_ALERTS_BTN)
     .pipe(($el) => $el.trigger('click'))
     .should('not.be.visible');
+};
+
+export const expandFirstAlertActions = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
 };
 
 export const expandFirstAlert = () => {
@@ -98,8 +102,6 @@ export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
   cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
-  cy.get(LOADING_INDICATOR).should('exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
 };
 
 export const refreshAlerts = () => {
@@ -148,21 +150,6 @@ export const investigateFirstAlertInTimeline = () => {
 
 export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-};
-
-export const waitForAlertsIndexToBeCreated = () => {
-  cy.request({
-    url: '/api/detection_engine/index',
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status !== 200) {
-      cy.request({
-        method: 'POST',
-        url: `/api/detection_engine/index`,
-        headers: { 'kbn-xsrf': 'create-signals-index' },
-      });
-    }
-  });
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {

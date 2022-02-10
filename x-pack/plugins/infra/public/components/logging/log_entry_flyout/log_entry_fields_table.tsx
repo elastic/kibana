@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { Query } from '@kbn/es-query';
 import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
 import React, { useMemo } from 'react';
-import { Query } from '../../../../../../../src/plugins/data/public';
 import { LogEntryField } from '../../../../common/log_entry';
 import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 import { TimeKey } from '../../../../common/time';

@@ -42,11 +42,13 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<boolean>(true);
   const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
+  const [userCanDeleteDataView, setUserCanDeleteDataView] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const {
     data: { dataViews },
+    application: { capabilities },
   } = useMlKibana().services;
 
   const indexName = item?.config.dest.index ?? '';
@@ -55,7 +57,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const checkIndexPatternExists = async () => {
     try {
-      const dv = (await dataViews.find(indexName)).find(({ title }) => title === indexName);
+      const dv = (await dataViews.getIdsWithTitle()).find(({ title }) => title === indexName);
       if (dv !== undefined) {
         setIndexPatternExists(true);
       } else {
@@ -82,6 +84,14 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       const userCanDelete = await canDeleteIndex(indexName, toastNotificationService);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
+      }
+
+      const canDeleteDataView =
+        capabilities.savedObjectsManagement.delete === true ||
+        capabilities.indexPatterns.save === true;
+      setUserCanDeleteDataView(canDeleteDataView);
+      if (canDeleteDataView === false) {
+        setDeleteIndexPattern(false);
       }
     } catch (e) {
       const error = extractErrorMessage(e);
@@ -180,5 +190,6 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     toggleDeleteIndex,
     toggleDeleteIndexPattern,
     userCanDeleteIndex,
+    userCanDeleteDataView,
   };
 };

@@ -17,7 +17,7 @@ import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elasti
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
-import { CommentType } from '../../../common';
+import { CommentType } from '../../../common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';
@@ -26,7 +26,7 @@ import { Form, useForm, UseField, useFormData } from '../../common/shared_import
 import * as i18n from './translations';
 import { schema, AddCommentFormSchema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
-import { useOwnerContext } from '../owner_context/use_owner_context';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -52,7 +52,6 @@ export interface AddCommentProps {
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
-  subCaseId?: string;
 }
 
 export const AddComment = React.memo(
@@ -66,13 +65,12 @@ export const AddComment = React.memo(
         onCommentSaving,
         showLoading = true,
         statusActionButton,
-        subCaseId,
       },
       ref
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const owner = useOwnerContext();
+      const { owner } = useCasesContext();
       const { isLoading, postComment } = usePostComment();
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -118,11 +116,10 @@ export const AddComment = React.memo(
             caseId,
             data: { ...data, type: CommentType.user, owner: owner[0] },
             updateCase: onCommentPosted,
-            subCaseId,
           });
           reset();
         }
-      }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, subCaseId, reset]);
+      }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, reset]);
 
       /**
        * Focus on the text area when a quote has been added.

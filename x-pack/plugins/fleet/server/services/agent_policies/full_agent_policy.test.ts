@@ -12,7 +12,7 @@ import type { AgentPolicy, Output } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
 
-import { getFullAgentPolicy } from './full_agent_policy';
+import { getFullAgentPolicy, transformOutputToFullPolicyOutput } from './full_agent_policy';
 import { getMonitoringPermissions } from './monitoring_permissions';
 
 const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as jest.Mock<
@@ -303,5 +303,60 @@ describe('getFullAgentPolicy', () => {
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
 
     expect(agentPolicy?.outputs.default).toBeDefined();
+  });
+});
+
+describe('transformOutputToFullPolicyOutput', () => {
+  it('should works with only required field on a output', () => {
+    const policyOutput = transformOutputToFullPolicyOutput({
+      id: 'id123',
+      hosts: ['http://host.fr'],
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test output',
+      type: 'elasticsearch',
+      api_key: 'apikey123',
+    });
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "api_key": "apikey123",
+        "ca_sha256": undefined,
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "type": "elasticsearch",
+      }
+    `);
+  });
+  it('should support ca_trusted_fingerprint field on a output', () => {
+    const policyOutput = transformOutputToFullPolicyOutput({
+      id: 'id123',
+      hosts: ['http://host.fr'],
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test output',
+      type: 'elasticsearch',
+      api_key: 'apikey123',
+      ca_trusted_fingerprint: 'fingerprint123',
+      config_yaml: `
+test: 1234      
+ssl.test: 123
+      `,
+    });
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "api_key": "apikey123",
+        "ca_sha256": undefined,
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "ssl.ca_trusted_fingerprint": "fingerprint123",
+        "ssl.test": 123,
+        "test": 1234,
+        "type": "elasticsearch",
+      }
+    `);
   });
 });

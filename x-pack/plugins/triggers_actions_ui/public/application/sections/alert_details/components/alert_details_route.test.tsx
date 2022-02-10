@@ -8,12 +8,12 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from 'kibana/public';
 import { AlertDetailsRoute, getRuleData } from './alert_details_route';
-import { Alert } from '../../../../types';
+import { Rule } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { spacesPluginMock } from '../../../../../../spaces/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -452,7 +452,7 @@ function mockStateSetter() {
   };
 }
 
-function mockRouterProps(rule: Alert) {
+function mockRouterProps(rule: Rule) {
   return {
     match: {
       isExact: false,
@@ -464,7 +464,7 @@ function mockRouterProps(rule: Alert) {
     location: createLocation(`/rule/${rule.id}`),
   };
 }
-function mockRule(overloads: Partial<Alert> = {}): Alert {
+function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,

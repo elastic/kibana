@@ -10,11 +10,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { indexPatternMock as dataViewMock } from '../__mocks__/index_pattern';
 import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../__mocks__/services';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../common';
-
-jest.mock('../kibana_services', () => ({
-  getServices: () => jest.requireActual('../__mocks__/services').discoverServiceMock,
-}));
 
 describe('formatHit', () => {
   let hit: estypes.SearchHit;
@@ -39,7 +34,13 @@ describe('formatHit', () => {
   });
 
   it('formats a document as expected', () => {
-    const formatted = formatHit(hit, dataViewMock, ['message', 'extension', 'object.value']);
+    const formatted = formatHit(
+      hit,
+      dataViewMock,
+      ['message', 'extension', 'object.value'],
+      220,
+      discoverServiceMock.fieldFormats
+    );
     expect(formatted).toEqual([
       ['extension', 'formatted:png'],
       ['message', 'formatted:foobar'],
@@ -50,11 +51,13 @@ describe('formatHit', () => {
   });
 
   it('orders highlighted fields first', () => {
-    const formatted = formatHit({ ...hit, highlight: { message: ['%%'] } }, dataViewMock, [
-      'message',
-      'extension',
-      'object.value',
-    ]);
+    const formatted = formatHit(
+      { ...hit, highlight: { message: ['%%'] } },
+      dataViewMock,
+      ['message', 'extension', 'object.value'],
+      220,
+      discoverServiceMock.fieldFormats
+    );
     expect(formatted.map(([fieldName]) => fieldName)).toEqual([
       'message',
       'extension',
@@ -65,18 +68,28 @@ describe('formatHit', () => {
   });
 
   it('only limits count of pairs based on advanced setting', () => {
-    (discoverServiceMock.uiSettings.get as jest.Mock).mockImplementation(
-      (key) => key === MAX_DOC_FIELDS_DISPLAYED && 2
+    const formatted = formatHit(
+      hit,
+      dataViewMock,
+      ['message', 'extension', 'object.value'],
+      2,
+      discoverServiceMock.fieldFormats
     );
-    const formatted = formatHit(hit, dataViewMock, ['message', 'extension', 'object.value']);
     expect(formatted).toEqual([
       ['extension', 'formatted:png'],
       ['message', 'formatted:foobar'],
+      ['and 3 more fields', ''],
     ]);
   });
 
   it('should not include fields not mentioned in fieldsToShow', () => {
-    const formatted = formatHit(hit, dataViewMock, ['message', 'object.value']);
+    const formatted = formatHit(
+      hit,
+      dataViewMock,
+      ['message', 'object.value'],
+      220,
+      discoverServiceMock.fieldFormats
+    );
     expect(formatted).toEqual([
       ['message', 'formatted:foobar'],
       ['object.value', 'formatted:42,13'],
@@ -86,7 +99,13 @@ describe('formatHit', () => {
   });
 
   it('should filter fields based on their real name not displayName', () => {
-    const formatted = formatHit(hit, dataViewMock, ['bytes']);
+    const formatted = formatHit(
+      hit,
+      dataViewMock,
+      ['bytes'],
+      220,
+      discoverServiceMock.fieldFormats
+    );
     expect(formatted).toEqual([
       ['bytesDisplayName', 'formatted:123'],
       ['_index', 'formatted:logs'],

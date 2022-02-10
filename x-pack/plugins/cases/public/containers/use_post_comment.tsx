@@ -6,7 +6,7 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CommentRequest } from '../../common';
+import { CommentRequest } from '../../common/api';
 
 import { postComment } from './api';
 import * as i18n from './translations';
@@ -45,7 +45,6 @@ export interface PostComment {
   caseId: string;
   data: CommentRequest;
   updateCase?: (newCase: Case) => void;
-  subCaseId?: string;
 }
 export interface UsePostComment extends NewCommentState {
   postComment: (args: PostComment) => Promise<void>;
@@ -61,14 +60,14 @@ export const usePostComment = (): UsePostComment => {
   const abortCtrlRef = useRef(new AbortController());
 
   const postMyComment = useCallback(
-    async ({ caseId, data, updateCase, subCaseId }: PostComment) => {
+    async ({ caseId, data, updateCase }: PostComment) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
 
-        const response = await postComment(data, caseId, abortCtrlRef.current.signal, subCaseId);
+        const response = await postComment(data, caseId, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS' });

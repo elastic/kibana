@@ -57,7 +57,8 @@ export class DataSearchTestPlugin
         // to look it up on the fly and insert it into the request.
         const indexPatterns = await data.indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
-          clusterClient
+          clusterClient,
+          req
         );
         const ids = await indexPatterns.getIds();
         // @ts-expect-error Force overwriting the request

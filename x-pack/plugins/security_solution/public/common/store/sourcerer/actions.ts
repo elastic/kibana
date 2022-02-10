@@ -6,9 +6,8 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { SourcererDataView, SourcererScopeName } from './model';
+import { KibanaDataView, SelectedDataView, SourcererDataView, SourcererScopeName } from './model';
 import { SecurityDataView } from '../../containers/sourcerer/api';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
@@ -39,8 +38,12 @@ export const setSourcererScopeLoading = actionCreator<{
 
 export interface SelectedDataViewPayload {
   id: SourcererScopeName;
-  selectedDataViewId: string;
-  selectedPatterns: string[];
-  eventType?: TimelineEventsType;
+  selectedDataViewId: SelectedDataView['dataViewId'];
+  selectedPatterns: SelectedDataView['selectedPatterns'];
+  shouldValidateSelectedPatterns?: boolean;
 }
 export const setSelectedDataView = actionCreator<SelectedDataViewPayload>('SET_SELECTED_DATA_VIEW');
+
+export const updateSourcererDataViews = actionCreator<{
+  dataView: KibanaDataView;
+}>('UPDATE_SOURCERER_DATA_VIEWS');

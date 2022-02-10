@@ -9,9 +9,10 @@ import { Moment } from 'moment';
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { AlertExecutorOptions, AlertType } from '../../../../../alerting/server';
+import { AlertExecutorOptions, RuleType } from '../../../../../alerting/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -36,6 +37,9 @@ import {
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { IEventLogService } from '../../../../../event_log/server';
 import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
+import { ITelemetryEventsSender } from '../../telemetry/sender';
+import { RuleExecutionLogForExecutorsFactory } from '../rule_execution_log';
+import { commonParamsCamelToSnake } from '../schemas/rule_converters';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -55,7 +59,7 @@ export interface RunOpts<TParams extends RuleParams> {
   bulkCreate: BulkCreate;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
-  completeRule: CompleteRule<RuleParams>;
+  completeRule: CompleteRule<TParams>;
   searchAfterSize: number;
   tuple: {
     to: Moment;
@@ -72,7 +76,7 @@ export type SecurityAlertType<
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
-  AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
 > & {
   executor: (
@@ -89,26 +93,32 @@ export type SecurityAlertType<
   ) => Promise<SearchAfterAndBulkCreateReturnType & { state: TState }>;
 };
 
-export type CreateSecurityRuleTypeWrapper = (options: {
+export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   logger: Logger;
   config: ConfigType;
   ruleDataClient: IRuleDataClient;
   eventLogService: IEventLogService;
-}) => <
+  ruleExecutionLoggerFactory: RuleExecutionLogForExecutorsFactory;
+}
+
+export type CreateSecurityRuleTypeWrapper = (
+  options: CreateSecurityRuleTypeWrapperProps
+) => <
   TParams extends RuleParams,
   TState extends AlertTypeState,
   TInstanceContext extends AlertInstanceContext = {}
 >(
   type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
-) => AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
 
 export type RACAlertSignal = TypeOfFieldMap<AlertsFieldMap> & TypeOfFieldMap<RulesFieldMap>;
-export type RACAlert = Exclude<
+export type RACAlert = Omit<
   TypeOfFieldMap<TechnicalRuleFieldMap> & RACAlertSignal,
-  '@timestamp'
+  '@timestamp' | typeof ALERT_RULE_PARAMETERS
 > & {
   '@timestamp': string;
+  [ALERT_RULE_PARAMETERS]: ReturnType<typeof commonParamsCamelToSnake>;
 };
 
 export type RACSourceHit = SearchHit<RACAlert>;
@@ -118,5 +128,6 @@ export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
   ml?: SetupPlugins['ml'];
+  eventsTelemetry?: ITelemetryEventsSender | undefined;
   version: string;
 }

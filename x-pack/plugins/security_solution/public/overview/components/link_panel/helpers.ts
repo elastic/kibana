@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import { LinkPanelListItem } from '.';
-
-export const isLinkPanelListItem = (
-  item: LinkPanelListItem | Partial<LinkPanelListItem>
-): item is LinkPanelListItem =>
-  typeof item.title === 'string' && typeof item.path === 'string' && typeof item.count === 'number';
-
 export interface EventCounts {
   [key: string]: number;
 }

@@ -27,8 +27,8 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
   return {
@@ -88,7 +88,7 @@ describe('ExceptionListsTable', () => {
     ]);
   });
 
-  it('renders delete option disabled if list is "endpoint_list"', async () => {
+  it('does not render delete option disabled if list is "endpoint_list"', async () => {
     const wrapper = mount(
       <TestProviders>
         <ExceptionListsTable />
@@ -97,15 +97,13 @@ describe('ExceptionListsTable', () => {
     expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(0).text()).toEqual(
       'endpoint_list'
     );
-    expect(
-      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
-    ).toBeTruthy();
 
     expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(1).text()).toEqual(
       'not_endpoint_list'
     );
+    expect(wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button')).toHaveLength(1);
     expect(
-      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(1).prop('disabled')
+      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
     ).toBeFalsy();
   });
 });

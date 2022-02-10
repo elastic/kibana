@@ -10,7 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import {
   RulesClient,
   PartialAlert,
-  AlertType,
+  RuleType,
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
@@ -103,7 +103,7 @@ export type LegacyNotificationExecutorOptions = AlertExecutorOptions<
  */
 export const legacyIsNotificationAlertExecutor = (
   obj: LegacyNotificationAlertTypeDefinition
-): obj is AlertType<
+): obj is RuleType<
   LegacyRuleNotificationAlertTypeParams,
   LegacyRuleNotificationAlertTypeParams,
   AlertTypeState,
@@ -117,7 +117,7 @@ export const legacyIsNotificationAlertExecutor = (
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export type LegacyNotificationAlertTypeDefinition = Omit<
-  AlertType<
+  RuleType<
     LegacyRuleNotificationAlertTypeParams,
     LegacyRuleNotificationAlertTypeParams,
     AlertTypeState,

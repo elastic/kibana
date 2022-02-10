@@ -8,9 +8,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nStart } from 'kibana/public';
+import { CoreTheme, I18nStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
   EuiButton,
@@ -22,8 +22,11 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import './open_options_popover.scss';
+import { Observable } from 'rxjs';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { DiscoverServices } from '../../../../build_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
-import { getServices } from '../../../../kibana_services';
+import { KibanaContextProvider, KibanaThemeProvider } from '../../../../../../kibana_react/public';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -37,15 +40,15 @@ export function OptionsPopover(props: OptionsPopoverProps) {
   const {
     core: { uiSettings },
     addBasePath,
-  } = getServices();
+  } = useDiscoverServices();
   const isLegacy = uiSettings.get(DOC_TABLE_LEGACY);
 
   const mode = isLegacy
-    ? i18n.translate('discover.openOptionsPopover.legacyTableText', {
-        defaultMessage: 'Classic table',
+    ? i18n.translate('discover.openOptionsPopover.classicDiscoverText', {
+        defaultMessage: 'Classic',
       })
-    : i18n.translate('discover.openOptionsPopover.dataGridText', {
-        defaultMessage: 'New table',
+    : i18n.translate('discover.openOptionsPopover.documentExplorerText', {
+        defaultMessage: 'Document Explorer',
       });
 
   return (
@@ -60,8 +63,8 @@ export function OptionsPopover(props: OptionsPopoverProps) {
                 viewModeLabel: (
                   <strong>
                     <FormattedMessage
-                      id="discover.topNav.optionsPopover.currentViewModeLabel"
-                      defaultMessage="Current view mode"
+                      id="discover.topNav.optionsPopover.discoverViewModeLabel"
+                      defaultMessage="Discover view mode"
                     />
                   </strong>
                 ),
@@ -72,21 +75,33 @@ export function OptionsPopover(props: OptionsPopoverProps) {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
-          <FormattedMessage
-            id="discover.topNav.openOptionsPopover.description"
-            defaultMessage="Great news! Discover has better ways to sort data, drag and drop columns, and compare documents. Toggle 'Use classic table' in Advanced Settings to get started."
-          />
+          {isLegacy ? (
+            <FormattedMessage
+              id="discover.topNav.openOptionsPopover.documentExplorerDisabledHint"
+              defaultMessage="Did you know Discover has a new Document Explorer with better data sorting, resizable columns,
+                and a full screen view? You can change the view mode in Advanced Settings."
+            />
+          ) : (
+            <FormattedMessage
+              id="discover.topNav.openOptionsPopover.documentExplorerEnabledHint"
+              defaultMessage="You can switch back to the classic Discover view in Advanced Settings."
+            />
+          )}
         </EuiText>
-        <EuiSpacer />
-        <EuiButton
-          iconType="tableDensityNormal"
-          fullWidth
-          href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
-        >
-          {i18n.translate('discover.openOptionsPopover.goToAdvancedSettings', {
-            defaultMessage: 'Get started',
-          })}
-        </EuiButton>
+        {isLegacy && (
+          <>
+            <EuiSpacer />
+            <EuiButton
+              iconType="tableDensityNormal"
+              fullWidth
+              href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
+            >
+              {i18n.translate('discover.openOptionsPopover.tryDocumentExplorer', {
+                defaultMessage: 'Try Document Explorer',
+              })}
+            </EuiButton>
+          </>
+        )}
         <EuiHorizontalRule margin="s" />
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
@@ -94,8 +109,8 @@ export function OptionsPopover(props: OptionsPopoverProps) {
             size="s"
             href={addBasePath(`/app/management/kibana/settings?query=category:(discover)`)}
           >
-            {i18n.translate('discover.openOptionsPopover.gotToAllSettings', {
-              defaultMessage: 'All Discover options',
+            {i18n.translate('discover.openOptionsPopover.gotToSettings', {
+              defaultMessage: 'View Discover settings',
             })}
           </EuiButtonEmpty>
         </EuiTextAlign>
@@ -113,9 +128,13 @@ function onClose() {
 export function openOptionsPopover({
   I18nContext,
   anchorElement,
+  theme$,
+  services,
 }: {
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
+  theme$: Observable<CoreTheme>;
+  services: DiscoverServices;
 }) {
   if (isOpen) {
     onClose();
@@ -127,7 +146,11 @@ export function openOptionsPopover({
 
   const element = (
     <I18nContext>
-      <OptionsPopover onClose={onClose} anchorElement={anchorElement} />
+      <KibanaContextProvider services={services}>
+        <KibanaThemeProvider theme$={theme$}>
+          <OptionsPopover onClose={onClose} anchorElement={anchorElement} />
+        </KibanaThemeProvider>
+      </KibanaContextProvider>
     </I18nContext>
   );
   ReactDOM.render(element, container);

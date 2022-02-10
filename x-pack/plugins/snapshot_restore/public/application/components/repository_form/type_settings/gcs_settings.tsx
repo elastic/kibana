@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
 
 import { GCSRepository, Repository } from '../../../../../common/types';

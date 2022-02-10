@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
@@ -114,7 +114,7 @@ export class RequestSelector extends Component<RequestSelectorProps> {
               }
             >
               <EuiBadge
-                color={selectedRequest.status === RequestStatus.OK ? 'secondary' : 'danger'}
+                color={selectedRequest.status === RequestStatus.OK ? 'success' : 'danger'}
                 iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
               >
                 <FormattedMessage

@@ -8,12 +8,14 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Capabilities } from '../../../../src/core/public';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
+import { mockEcsDataWithAlert } from './common/mock';
+import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import {
   parseRoute,
-  getHostRiskIndex,
   isSubPluginAvailable,
   getSubPluginRoutesByCapabilities,
   RedirectRoute,
+  getField,
 } from './helpers';
 import { StartedSubPlugins } from './types';
 
@@ -62,12 +64,6 @@ describe('public helpers parseRoute', () => {
       path: `${nonHashLocation.search}`,
       search: nonHashLocation.search,
     });
-  });
-});
-
-describe('public helpers export getHostRiskIndex', () => {
-  it('should properly return index if space is specified', () => {
-    expect(getHostRiskIndex('testName')).toEqual('ml_host_risk_score_latest_testName');
   });
 });
 
@@ -272,5 +268,54 @@ describe('RedirectRoute', () => {
         to="/cases"
       />
     `);
+  });
+});
+
+describe('public helpers getField', () => {
+  it('should return the same value for signal.rule fields as for kibana.alert.rule fields', () => {
+    const signalRuleName = getField(mockEcsDataWithAlert, 'signal.rule.name');
+    const aadRuleName = getField(mockEcsDataWithAlert, ALERT_RULE_NAME);
+    const aadRuleId = getField(mockEcsDataWithAlert, ALERT_RULE_UUID);
+    const signalRuleId = getField(mockEcsDataWithAlert, 'signal.rule.id');
+    expect(signalRuleName).toEqual(aadRuleName);
+    expect(signalRuleId).toEqual(aadRuleId);
+  });
+
+  it('should handle flattened rule parameters correctly', () => {
+    const mockAlertWithParameters = {
+      ...mockEcsDataWithAlert,
+      'kibana.alert.rule.parameters': {
+        description: '24/7',
+        risk_score: '21',
+        severity: 'low',
+        timeline_id: '1234-2136-11ea-9864-ebc8cc1cb8c2',
+        timeline_title: 'Untitled timeline',
+        meta: {
+          from: '1000m',
+          kibana_siem_app_url: 'https://localhost:5601/app/security',
+        },
+        author: [],
+        false_positives: [],
+        from: 'now-300s',
+        rule_id: 'b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea',
+        max_signals: 100,
+        risk_score_mapping: [],
+        severity_mapping: [],
+        threat: [],
+        to: 'now',
+        references: ['www.test.co'],
+        version: '1',
+        exceptions_list: [],
+        immutable: false,
+        type: 'query',
+        language: 'kuery',
+        index: ['auditbeat-*'],
+        query: 'user.name: root or user.name: admin',
+        filters: [],
+      },
+    };
+    const signalQuery = getField(mockAlertWithParameters, 'signal.rule.query');
+    const aadQuery = getField(mockAlertWithParameters, `${ALERT_RULE_PARAMETERS}.query`);
+    expect(signalQuery).toEqual(aadQuery);
   });
 });

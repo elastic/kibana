@@ -23,7 +23,7 @@ import {
   BoundsRequestMeta,
   GeoJsonWithMeta,
   IVectorSource,
-  SourceTooltipConfig,
+  SourceStatus,
 } from '../vector_source';
 import { DataRequest } from '../../util/data_request';
 import { InlineField } from '../../fields/inline_field';
@@ -196,7 +196,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     throw new Error('TableSource cannot be used as a left-layer in a term join');
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
     throw new Error('must add tooltip content');
   }
 

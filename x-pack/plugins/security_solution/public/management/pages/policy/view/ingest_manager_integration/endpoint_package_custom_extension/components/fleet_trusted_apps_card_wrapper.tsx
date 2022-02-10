@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   PackageCustomExtensionComponentProps,
   pagePathGetters,
@@ -33,7 +33,7 @@ export const FleetTrustedAppsCardWrapper = memo<PackageCustomExtensionComponentP
       return {
         backButtonLabel: i18n.translate(
           'xpack.securitySolution.endpoint.fleetCustomExtension.backButtonLabel',
-          { defaultMessage: 'Back to Endpoint Integration' }
+          { defaultMessage: 'Return to Endpoint Security integrations' }
         ),
         onBackButtonNavigateTo: [
           INTEGRATIONS_PLUGIN_ID,
@@ -59,8 +59,8 @@ export const FleetTrustedAppsCardWrapper = memo<PackageCustomExtensionComponentP
           data-test-subj="linkToTrustedApps"
         >
           <FormattedMessage
-            id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppLinkLabel"
-            defaultMessage="Manage trusted applications"
+            id="xpack.securitySolution.endpoint.fleetCustomExtension.manageTrustedAppshortLinkLabel"
+            defaultMessage="Manage"
           />
         </LinkWithIcon>
       ),

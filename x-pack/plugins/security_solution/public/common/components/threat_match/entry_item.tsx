@@ -10,7 +10,7 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
 import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';

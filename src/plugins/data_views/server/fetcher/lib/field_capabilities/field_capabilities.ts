@@ -13,6 +13,15 @@ import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
 import { FieldDescriptor } from '../../index_patterns_fetcher';
+import { QueryDslQueryContainer } from '../../../../common/types';
+
+interface FieldCapabilitiesParams {
+  callCluster: ElasticsearchClient;
+  indices: string | string[];
+  metaFields: string[];
+  fieldCapsOptions?: { allow_no_indices: boolean };
+  filter?: QueryDslQueryContainer;
+}
 
 /**
  *  Get the field capabilities for field in `indices`, excluding
@@ -24,13 +33,9 @@ import { FieldDescriptor } from '../../index_patterns_fetcher';
  *  @param  {Object} fieldCapsOptions
  *  @return {Promise<Array<FieldDescriptor>>}
  */
-export async function getFieldCapabilities(
-  callCluster: ElasticsearchClient,
-  indices: string | string[] = [],
-  metaFields: string[] = [],
-  fieldCapsOptions?: { allow_no_indices: boolean }
-) {
-  const esFieldCaps = await callFieldCapsApi(callCluster, indices, fieldCapsOptions);
+export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
+  const { callCluster, indices = [], fieldCapsOptions, filter, metaFields = [] } = params;
+  const esFieldCaps = await callFieldCapsApi({ callCluster, indices, fieldCapsOptions, filter });
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)

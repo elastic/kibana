@@ -129,18 +129,3 @@ Array [
   },
 ]
 `;
-
-exports[`APM API tests trial apm_8.0.0 Transaction latency with a trial license when data is loaded with environment selected should return a non-empty anomaly series 1`] = `
-Array [
-  Object {
-    "x": 1627974000000,
-    "y": 85916.7945636914,
-    "y0": 24329.7607058434,
-  },
-  Object {
-    "x": 1627974900000,
-    "y": 88154.9755916935,
-    "y0": 23498.4070709888,
-  },
-]
-`;

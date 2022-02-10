@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
 import Semver from 'semver';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '../../../config/mocks';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
@@ -94,6 +94,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
             {
               name: 'root',
               appenders: ['file'],
+              level: 'info',
             },
           ],
         },

@@ -69,7 +69,7 @@ describe.each([
       await fireEvent.click(renderResult.getByTestId('testCard-collapse'));
     });
     expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
-      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three'
+      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS c:\\fol\\bin.exe'
     );
     expect(renderResult.getByTestId('testCard-collapse').textContent).toEqual('Hide details');
   });

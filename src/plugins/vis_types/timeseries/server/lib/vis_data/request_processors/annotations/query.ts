@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { getBucketSize, getTimerange, overwrite } from '../../helpers';
 import { validateField } from '../../../../../common/fields_utils';
-import { esQuery, UI_SETTINGS } from '../../../../../../../data/server';
+import { UI_SETTINGS } from '../../../../../../../data/server';
 
 import type { AnnotationsRequestProcessorsFunction } from './types';
 
@@ -33,14 +34,12 @@ export const query: AnnotationsRequestProcessorsFunction = ({
     const { bucketSize } = getBucketSize(req, 'auto', capabilities, barTargetUiSettings);
     const { from, to } = getTimerange(req);
 
-    doc.size = 0;
     const queries = !annotation.ignore_global_filters ? req.body.query : [];
     const filters = !annotation.ignore_global_filters ? req.body.filters : [];
+    const esQuery = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
 
-    doc.query = esQuery.buildEsQuery(indexPattern, queries, filters, esQueryConfig);
-
-    const boolFilters: unknown[] = [
-      {
+    if (timeField) {
+      esQuery.bool.must.push({
         range: {
           [timeField]: {
             gte: from.toISOString(),
@@ -48,27 +47,28 @@ export const query: AnnotationsRequestProcessorsFunction = ({
             format: 'strict_date_optional_time',
           },
         },
-      },
-    ];
+      });
+    }
 
     if (annotation.query_string) {
-      boolFilters.push(
-        esQuery.buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
+      esQuery.bool.must.push(
+        buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
       );
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
-      boolFilters.push(esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
+      esQuery.bool.must.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     if (annotation.fields) {
       const fields = annotation.fields.split(/[,\s]+/) || [];
       fields.forEach((field) => {
-        boolFilters.push({ exists: { field } });
+        esQuery.bool.must.push({ exists: { field } });
       });
     }
 
-    overwrite(doc, 'query.bool.must', boolFilters);
+    overwrite(doc, 'size', 0);
+    overwrite(doc, 'query', esQuery);
 
     return next(doc);
   };

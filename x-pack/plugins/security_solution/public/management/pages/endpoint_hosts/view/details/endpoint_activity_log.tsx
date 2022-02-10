@@ -71,6 +71,18 @@ export const EndpointActivityLog = memo(
       [hasActiveDateRange, isPagingDisabled, activityLogLoading, activityLogSize]
     );
 
+    const doesNotHaveDataAlsoOnRefetch = useMemo(
+      () => !activityLastLogData?.data.length && !activityLogData.length,
+      [activityLastLogData, activityLogData]
+    );
+
+    const showCallout = useMemo(
+      () =>
+        (!isPagingDisabled && activityLogLoaded && !activityLogData.length) ||
+        doesNotHaveDataAlsoOnRefetch,
+      [isPagingDisabled, activityLogLoaded, activityLogData, doesNotHaveDataAlsoOnRefetch]
+    );
+
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(
       (entries: IntersectionObserverEntry[]) => {
@@ -120,7 +132,7 @@ export const EndpointActivityLog = memo(
             <>
               <DateRangePicker />
               <EuiFlexItem grow={true}>
-                {!isPagingDisabled && activityLogLoaded && !activityLogData.length && (
+                {showCallout && (
                   <>
                     <EuiSpacer size="m" />
                     <EuiCallOut
@@ -142,10 +154,13 @@ export const EndpointActivityLog = memo(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
-                {(!activityLogLoading || !isPagingDisabled) && (
-                  <LoadMoreTrigger ref={loadMoreTrigger} />
+                {(!activityLogLoading || !isPagingDisabled) && !showCallout && (
+                  <LoadMoreTrigger
+                    data-test-subj="activityLogLoadMoreTrigger"
+                    ref={loadMoreTrigger}
+                  />
                 )}
-                {isPagingDisabled && !activityLogLoading && (
+                {isPagingDisabled && !activityLogLoading && !showCallout && (
                   <EuiText color="subdued" textAlign="center">
                     <p>{i18.ACTIVITY_LOG.LogEntry.endOfLog}</p>
                   </EuiText>

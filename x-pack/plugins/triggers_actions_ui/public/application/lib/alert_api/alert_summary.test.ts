@@ -30,7 +30,7 @@ describe('loadAlertSummary', () => {
       throttle: null,
       executionDuration: {
         average: 0,
-        values: [],
+        valuesWithTimestamp: {},
       },
     };
 
@@ -51,7 +51,7 @@ describe('loadAlertSummary', () => {
       throttle: null,
       execution_duration: {
         average: 0,
-        values: [],
+        valuesWithTimestamp: {},
       },
     });
 
@@ -60,6 +60,11 @@ describe('loadAlertSummary', () => {
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rule/te%2Fst/_alert_summary",
+        Object {
+          "query": Object {
+            "number_of_executions": undefined,
+          },
+        },
       ]
     `);
   });

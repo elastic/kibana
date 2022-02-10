@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-/** The minimum (fixed) width of the Actions column */
-export const MINIMUM_ACTIONS_COLUMN_WIDTH = 50; // px;
+import { euiThemeVars } from '@kbn/ui-theme';
+
+/**
+ * This is the effective width in pixels of an action button used with
+ * `EuiDataGrid` `leadingControlColumns`. (See Notes below for details)
+ *
+ * Notes:
+ * 1) This constant is necessary because `width` is a required property of
+ *    the `EuiDataGridControlColumn` interface, so it must be calculated before
+ *    content is rendered. (The width of a `EuiDataGridControlColumn` does not
+ *    automatically size itself to fit all the content.)
+ *
+ * 2) This is the *effective* width, because at the time of this writing,
+ *    `EuiButtonIcon` has a `margin-left: -4px`, which is subtracted from the
+ *    `width`
+ */
+export const DEFAULT_ACTION_BUTTON_WIDTH =
+  parseInt(euiThemeVars.euiSizeXL, 10) - parseInt(euiThemeVars.euiSizeXS, 10); // px
 
 /** Additional column width to include when checkboxes are shown **/
 export const SHOW_CHECK_BOXES_COLUMN_WIDTH = 24; // px;
-
-/** The (fixed) width of the Actions column */
-export const DEFAULT_ACTIONS_COLUMN_WIDTH = SHOW_CHECK_BOXES_COLUMN_WIDTH * 5; // px;
-/**
- * The (fixed) width of the Actions column when the timeline body is used as
- * an events viewer, which has fewer actions than a regular events viewer
- */
-export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = SHOW_CHECK_BOXES_COLUMN_WIDTH * 4; // px;
 
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px

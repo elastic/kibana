@@ -6,16 +6,17 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor } from '@elastic/eui';
 import { LearnMoreLink } from '../../learn_more_link';
 import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
-
+import { useKibana } from '../../../../../../shared_imports';
 interface Props {
   phase: 'hot' | 'warm' | 'cold';
 }
 
 export const ReadonlyField: React.FunctionComponent<Props> = ({ phase }) => {
+  const { docLinks } = useKibana().services;
   return (
     <ToggleFieldWithDescribedFormRow
       title={
@@ -32,7 +33,7 @@ export const ReadonlyField: React.FunctionComponent<Props> = ({ phase }) => {
             id="xpack.indexLifecycleMgmt.editPolicy.readonlyDescription"
             defaultMessage="Enable to make the index and index metadata read only, disable to allow writes and metadata changes."
           />{' '}
-          <LearnMoreLink docPath="ilm-readonly.html" />
+          <LearnMoreLink docPath={docLinks.links.elasticsearch.ilmReadOnly} />
         </EuiTextColor>
       }
       fullWidth

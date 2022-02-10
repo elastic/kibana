@@ -12,7 +12,7 @@ import { DataProviderType } from './data_providers/data_provider';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { EsQueryConfig, Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { EsQueryConfig, FilterStateStore, Filter } from '@kbn/es-query';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
@@ -269,7 +269,7 @@ describe('Combined Queries', () => {
         browserFields: mockBrowserFields,
         filters: [
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -281,7 +281,7 @@ describe('Combined Queries', () => {
             query: { match_phrase: { 'event.category': 'file' } },
           },
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -521,7 +521,7 @@ describe('Combined Queries', () => {
             },
           },
           $state: {
-            store: esFilters.FilterStateStore.APP_STATE,
+            store: FilterStateStore.APP_STATE,
           },
         } as Filter,
       ],
@@ -543,7 +543,7 @@ describe('Combined Queries', () => {
       browserFields: mockBrowserFields,
       filters: [
         {
-          $state: { store: esFilters.FilterStateStore.APP_STATE },
+          $state: { store: FilterStateStore.APP_STATE },
           meta: {
             alias: null,
             disabled: false,

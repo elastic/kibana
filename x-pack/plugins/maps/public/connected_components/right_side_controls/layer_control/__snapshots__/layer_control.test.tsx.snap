@@ -89,6 +89,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
+    data-test-subj="mapExpandLayerControlButton"
     iconType="menuLeft"
     onClick={[Function]}
   />
@@ -106,6 +107,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
+    data-test-subj="mapExpandLayerControlButton"
     iconType="alert"
     onClick={[Function]}
   />
@@ -123,6 +125,7 @@ exports[`LayerControl isLayerTOCOpen spinner icon Should not render expand butto
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
+    data-test-subj="mapExpandLayerControlButton"
     iconType="menuLeft"
     onClick={[Function]}
   />
@@ -139,6 +142,7 @@ exports[`LayerControl isLayerTOCOpen spinner icon Should render expand button wi
   <button
     aria-label="Expand layers panel"
     className="euiButtonIcon euiButtonIcon--text mapLayerControl__openLayerTOCButton"
+    data-test-subj="mapExpandLayerControlButton"
     onClick={[Function]}
     type="button"
   >

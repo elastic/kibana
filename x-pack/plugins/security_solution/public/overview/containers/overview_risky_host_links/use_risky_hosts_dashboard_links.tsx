@@ -14,40 +14,48 @@ export const useRiskyHostsDashboardLinks = (
   from: string,
   listItems: LinkPanelListItem[]
 ) => {
-  const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
+  const { dashboard } = useKibana().services;
+
   const dashboardId = useRiskyHostsDashboardId();
   const [listItemsWithLinks, setListItemsWithLinks] = useState<LinkPanelListItem[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     const createLinks = async () => {
-      if (createDashboardUrl && dashboardId) {
+      if (dashboard?.locator && dashboardId) {
         const dashboardUrls = await Promise.all(
-          listItems.map((listItem) =>
-            createDashboardUrl({
-              dashboardId,
-              timeRange: {
-                to,
-                from,
-              },
-              filters: [
-                {
-                  meta: {
-                    alias: null,
-                    disabled: false,
-                    negate: false,
-                  },
-                  query: { match_phrase: { 'host.name': listItem.title } },
-                },
-              ],
-            })
+          listItems.reduce(
+            (acc: Array<Promise<string>>, listItem) =>
+              dashboard && dashboard.locator
+                ? [
+                    ...acc,
+                    dashboard.locator.getUrl({
+                      dashboardId,
+                      timeRange: {
+                        to,
+                        from,
+                      },
+                      filters: [
+                        {
+                          meta: {
+                            alias: null,
+                            disabled: false,
+                            negate: false,
+                          },
+                          query: { match_phrase: { 'host.name': listItem.title } },
+                        },
+                      ],
+                    }),
+                  ]
+                : acc,
+            []
           )
         );
-        if (!cancelled) {
+        if (!cancelled && dashboardUrls.length) {
           setListItemsWithLinks(
             listItems.map((item, i) => ({
               ...item,
-              path: dashboardUrls[i] as unknown as string,
+              path: dashboardUrls[i],
             }))
           );
         }
@@ -59,7 +67,7 @@ export const useRiskyHostsDashboardLinks = (
     return () => {
       cancelled = true;
     };
-  }, [createDashboardUrl, dashboardId, from, listItems, to]);
+  }, [dashboard, dashboardId, from, listItems, to]);
 
   return { listItemsWithLinks };
 };

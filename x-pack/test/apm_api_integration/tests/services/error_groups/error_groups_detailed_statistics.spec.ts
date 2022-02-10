@@ -12,14 +12,14 @@ import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finit
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+} from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { config, generateData } from './generate_data';
 import { getErrorGroupIds } from './get_error_group_ids';
 
 type ErrorGroupsDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -32,18 +32,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi(
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics'>['params']
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>['params']
     >
   ) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics`,
+      endpoint: `GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics`,
       params: {
         path: { serviceName, ...overrides?.path },
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           numBuckets: 20,
-          transactionType: 'request',
           groupIds: JSON.stringify(['foo']),
           environment: 'ENVIRONMENT_ALL',
           kuery: '',

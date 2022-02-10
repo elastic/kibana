@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiCodeBlock, EuiLink, EuiText } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Legacy } from '../../../../legacy_shims';
 import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
 

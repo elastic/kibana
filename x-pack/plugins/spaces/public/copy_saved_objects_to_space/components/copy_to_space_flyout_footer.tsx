@@ -16,7 +16,7 @@ import {
 import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FailedImport, ProcessedImportResponse } from '../lib';
 import type { ImportRetry } from '../types';
@@ -173,7 +173,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
             data-test-subj={`cts-summary-success-count`}
             title={summarizedResults.successCount}
             titleSize="s"
-            titleColor={initialCopyFinished ? 'secondary' : 'subdued'}
+            titleColor={initialCopyFinished ? 'success' : 'subdued'}
             isLoading={!initialCopyFinished}
             textAlign="center"
             description={

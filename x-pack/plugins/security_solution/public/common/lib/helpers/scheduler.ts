@@ -7,35 +7,11 @@
 
 import { scaleLog } from 'd3-scale';
 
-// Types are from: https://github.com/Microsoft/TypeScript/issues/21309
-// TODO: Once this is no longer an experimental web API, remove these below
-// as they should be Typed by TypeScript
-type RequestIdleCallbackHandle = number;
-interface RequestIdleCallbackOptions {
-  timeout: number;
-}
-interface RequestIdleCallbackDeadline {
-  readonly didTimeout: boolean;
-  timeRemaining: () => number;
-}
-
-declare global {
-  interface Window {
-    requestIdleCallback: (
-      callback: (deadline: RequestIdleCallbackDeadline) => void,
-      opts?: RequestIdleCallbackOptions
-    ) => RequestIdleCallbackHandle;
-    cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
-  }
-}
-
 /**
  * Polyfill is from: https://developers.google.com/web/updates/2015/08/using-requestidlecallback
  * This is for Safari 12.1.2 and IE-11
  */
-export const polyFillRequestIdleCallback = (
-  callback: (deadline: RequestIdleCallbackDeadline) => void
-) => {
+export const polyFillRequestIdleCallback = (callback: IdleRequestCallback) => {
   const start = Date.now();
   return setTimeout(() => {
     callback({
@@ -59,8 +35,8 @@ export const polyFillRequestIdleCallback = (
  * this and all usages. Otherwise, just remove this note
  */
 export const requestIdleCallbackViaScheduler = (
-  callback: (deadline: RequestIdleCallbackDeadline) => void,
-  opts?: RequestIdleCallbackOptions
+  callback: IdleRequestCallback,
+  opts?: IdleRequestOptions
 ) => {
   if ('requestIdleCallback' in window) {
     window.requestIdleCallback(callback, opts);

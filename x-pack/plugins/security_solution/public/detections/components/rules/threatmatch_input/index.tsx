@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
 import { BrowserField } from '../../../../common/containers/source';

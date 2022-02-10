@@ -31,6 +31,7 @@ export interface MappingsConfiguration {
     excludes?: string[];
   };
   _meta?: string;
+  _size?: { enabled: boolean };
 }
 
 export interface MappingsTemplates {

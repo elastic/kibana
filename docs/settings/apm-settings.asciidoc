@@ -74,7 +74,7 @@ Changing these settings may disable features of the APM App.
   | Index name where Observability annotations are stored. Defaults to `observability-annotations`.
 
 | `xpack.apm.searchAggregatedTransactions` {ess-icon}
-  | experimental[] Enables Transaction histogram metrics. Defaults to `never` and aggregated transactions are not used. When set to `auto`, the UI will use metric indices over transaction indices for transactions if aggregated transactions are found. When set to `always`, additional configuration in APM Server is required.
+  | Enables Transaction histogram metrics. Defaults to `auto` so the UI will use metric indices over transaction indices for transactions if aggregated transactions are found. When set to `always`, additional configuration in APM Server is required. When set to `never` and aggregated transactions are not used.
     See {apm-guide-ref}/transaction-metrics.html[Configure transaction metrics] for more information.
 
 | `xpack.apm.metricsInterval` {ess-icon}
@@ -101,6 +101,8 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.indices.sourcemap` {ess-icon}
   | Matcher for all source map indices. Defaults to `apm-*`.
 
+| `xpack.apm.autoCreateApmDataView` {ess-icon}
+  | Set to `false` to disable the automatic creation of the APM data view when the APM app is opened. Defaults to `true`.
 |===
 
 // end::general-apm-settings[]

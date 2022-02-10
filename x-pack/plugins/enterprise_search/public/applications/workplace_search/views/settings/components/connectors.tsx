@@ -60,7 +60,7 @@ export const Connectors: React.FC = () => {
     const updateButtons = (
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmptyTo to={editPath} data-test-subj="UpdateButton">
+          <EuiButtonEmptyTo to={editPath as string} data-test-subj="UpdateButton">
             {UPDATE_BUTTON}
           </EuiButtonEmptyTo>
         </EuiFlexItem>

@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFormRow, EuiCallOut, EuiPanel } from '@elastic/eui';
 import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';

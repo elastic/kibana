@@ -52,7 +52,7 @@ export const ArgSimpleForm: React.FunctionComponent<Props> = ({
       {!required && (
         <EuiToolTip position="top" content={strings.getRemoveAriaLabel()}>
           <EuiButtonIcon
-            color="subdued"
+            color="text"
             onClick={onRemove}
             iconType="cross"
             iconSize="s"

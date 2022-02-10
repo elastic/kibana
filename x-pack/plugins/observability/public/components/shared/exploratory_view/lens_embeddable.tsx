@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, SetStateAction, useCallback } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { TypedLensByValueInput } from '../../../../../lens/public';
+import { LensEmbeddableInput, TypedLensByValueInput } from '../../../../../lens/public';
 import { useUiTracker } from '../../../hooks/use_track_metric';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
@@ -30,8 +30,11 @@ export function LensEmbeddable(props: Props) {
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const LensComponent = lens?.EmbeddableComponent;
+  const LensSaveModalComponent = lens?.SaveModalComponent;
 
   const { firstSeries, setSeries, reportType, lastRefresh } = useSeriesStorage();
+
+  const [isSaveOpen, setIsSaveOpen] = useState(false);
 
   const firstSeriesId = 0;
 
@@ -45,8 +48,8 @@ export function LensEmbeddable(props: Props) {
 
       setChartTimeRangeContext({
         lastUpdated: timeLoaded,
-        to: parseRelativeDate(timeRange?.to || '').valueOf(),
-        from: parseRelativeDate(timeRange?.from || '').valueOf(),
+        to: parseRelativeDate(timeRange?.to || '')?.valueOf(),
+        from: parseRelativeDate(timeRange?.from || '')?.valueOf(),
       });
 
       if (!isLoading) {
@@ -90,12 +93,41 @@ export function LensEmbeddable(props: Props) {
         onLoad={onLensLoad}
         onBrushEnd={onBrushEnd}
       />
+      {isSaveOpen && lensAttributes && (
+        <LensSaveModalComponent
+          initialInput={lensAttributes as unknown as LensEmbeddableInput}
+          onClose={() => setIsSaveOpen(false)}
+          // if we want to do anything after the viz is saved
+          // right now there is no action, so an empty function
+          onSave={() => {}}
+        />
+      )}
     </LensWrapper>
   );
 }
 
 const LensWrapper = styled.div`
   height: 100%;
+
+  .embPanel__optionsMenuPopover {
+    visibility: collapse;
+  }
+
+  &&&:hover {
+    .embPanel__optionsMenuPopover {
+      visibility: visible;
+    }
+  }
+
+  && .embPanel--editing {
+    border-style: initial !important;
+    :hover {
+      box-shadow: none;
+    }
+  }
+  .embPanel__title {
+    display: none;
+  }
 
   &&& > div {
     height: 100%;

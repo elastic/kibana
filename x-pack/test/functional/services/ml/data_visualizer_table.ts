@@ -295,7 +295,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public async setSampleSizeInputValue(
-      sampleSize: number,
+      sampleSize: number | 'all',
       fieldName: string,
       docCountFormatted: string
     ) {
@@ -563,6 +563,17 @@ export function MachineLearningDataVisualizerTableProvider(
       } else {
         await this.assertViewInLensActionNotExists(fieldName);
       }
+    }
+
+    public async assertLensActionShowChart(fieldName: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(
+          this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton')
+        );
+        await testSubjects.existOrFail('lnsVisualizationContainer', {
+          timeout: 15 * 1000,
+        });
+      });
     }
 
     public async ensureNumRowsPerPage(n: 10 | 25 | 50) {

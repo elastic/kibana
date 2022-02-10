@@ -38,6 +38,9 @@ jest.mock('../body/events/index', () => ({
 }));
 
 jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
+}));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -49,6 +52,9 @@ jest.mock('../../../../common/lib/kibana', () => {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
       services: {
+        theme: {
+          theme$: {},
+        },
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
@@ -108,7 +114,6 @@ describe('Timeline', () => {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
-      eventType: 'all',
       expandedDetail: {},
       filters: [],
       timelineId: TimelineId.test,
@@ -126,7 +131,6 @@ describe('Timeline', () => {
       start: startDate,
       status: TimelineStatus.active,
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.query,
       show: true,
     };
@@ -193,6 +197,7 @@ describe('Timeline', () => {
         loading: true,
         indexPattern: {},
         selectedPatterns: [],
+        missingPatterns: [],
       });
       const wrapper = mount(
         <TestProviders>

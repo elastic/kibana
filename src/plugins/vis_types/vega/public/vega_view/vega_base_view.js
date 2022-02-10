@@ -15,8 +15,8 @@ import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';
-import { esFilters } from '../../../../data/public';
 
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
@@ -89,6 +89,7 @@ export class VegaBaseView {
     this._initialized = false;
     this._externalUrl = opts.externalUrl;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._renderMode = opts.renderMode;
     this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
@@ -105,7 +106,7 @@ export class VegaBaseView {
       }
 
       if (this._parser.error) {
-        this._addMessage('err', this._parser.error);
+        this.onError(this._parser.error);
         return;
       }
 
@@ -206,7 +207,7 @@ export class VegaBaseView {
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
     vegaLoader.sanitize = async (uri, options) => {
-      if (uri.bypassToken === bypassToken) {
+      if (uri.bypassToken === bypassToken || this._externalUrl.isInternalUrl(uri)) {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
         uri = uri.url;
@@ -234,11 +235,13 @@ export class VegaBaseView {
   }
 
   onError() {
-    this._addMessage('err', Utils.formatErrorToStr(...arguments));
+    const error = Utils.formatErrorToStr(...arguments);
+    this._addMessage('err', error);
+    this._parser.searchAPI.inspectorAdapters?.vega.setError(error);
   }
 
   onWarn() {
-    if (!this._parser || !this._parser.hideWarnings) {
+    if (this._renderMode !== 'view' && (!this._parser || !this._parser.hideWarnings)) {
       this._addMessage('warn', Utils.formatWarningToStr(...arguments));
     }
   }
@@ -339,10 +342,11 @@ export class VegaBaseView {
   /**
    * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
    * @param {string} [index] as defined in Kibana, or default if missing
+   * @param {string} Elastic Query DSL's Custom label for kibanaAddFilter, as used in '+ Add Filter'
    */
-  async addFilterHandler(query, index) {
+  async addFilterHandler(query, index, alias) {
     const indexId = await this.findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const filter = buildQueryFilter(query, indexId, alias);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }
@@ -353,12 +357,10 @@ export class VegaBaseView {
    */
   async removeFilterHandler(query, index) {
     const indexId = await this.findIndex(index);
-    const filterToRemove = esFilters.buildQueryFilter(query, indexId);
+    const filterToRemove = buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
-    const existingFilter = currentFilters.find((filter) =>
-      esFilters.compareFilters(filter, filterToRemove)
-    );
+    const existingFilter = currentFilters.find((filter) => compareFilters(filter, filterToRemove));
 
     if (!existingFilter) return;
 

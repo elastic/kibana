@@ -13,7 +13,6 @@ describe('Class Report', () => {
       _index: '.reporting-test-index-12345',
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         headers: 'payload_test_field',
@@ -28,7 +27,6 @@ describe('Class Report', () => {
 
     expect(report.toReportSource()).toMatchObject({
       attempts: 0,
-      browser_type: 'browser_type_test_string',
       completed_at: undefined,
       created_by: 'created_by_test_string',
       jobtype: 'test-report',
@@ -49,7 +47,6 @@ describe('Class Report', () => {
     });
     expect(report.toApiJSON()).toMatchObject({
       attempts: 0,
-      browser_type: 'browser_type_test_string',
       created_by: 'created_by_test_string',
       index: '.reporting-test-index-12345',
       jobtype: 'test-report',
@@ -68,7 +65,6 @@ describe('Class Report', () => {
       _index: '.reporting-test-index-12345',
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         headers: 'payload_test_field',
@@ -91,7 +87,6 @@ describe('Class Report', () => {
 
     expect(report.toReportSource()).toMatchObject({
       attempts: 0,
-      browser_type: 'browser_type_test_string',
       completed_at: undefined,
       created_by: 'created_by_test_string',
       jobtype: 'test-report',
@@ -113,7 +108,6 @@ describe('Class Report', () => {
     });
     expect(report.toApiJSON()).toMatchObject({
       attempts: 0,
-      browser_type: 'browser_type_test_string',
       completed_at: undefined,
       created_by: 'created_by_test_string',
       id: '12342p9o387549o2345',

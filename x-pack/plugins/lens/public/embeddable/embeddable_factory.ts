@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { Capabilities, HttpSetup } from 'kibana/public';
+import type { Capabilities, HttpSetup, ThemeServiceStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { IndexPatternsContract, TimefilterContract } from '../../../../../src/plugins/data/public';
+import {
+  FilterManager,
+  IndexPatternsContract,
+  TimefilterContract,
+} from '../../../../../src/plugins/data/public';
 import { ReactExpressionRendererType } from '../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactoryDefinition,
@@ -40,8 +44,10 @@ export interface LensEmbeddableStartServices {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -87,6 +93,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       timefilter,
       expressionRenderer,
       documentToExpression,
+      injectFilterReferences,
       visualizationMap,
       uiActions,
       coreHttp,
@@ -94,6 +101,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       indexPatternService,
       capabilities,
       usageCollection,
+      theme,
       inspector,
       spaces,
     } = await this.getStartServices();
@@ -111,12 +119,14 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         getTrigger: uiActions?.getTrigger,
         getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
+        injectFilterReferences,
         visualizationMap,
         capabilities: {
           canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
           canSaveVisualizations: Boolean(capabilities.visualize.save),
         },
         usageCollection,
+        theme,
         spaces,
       },
       input,

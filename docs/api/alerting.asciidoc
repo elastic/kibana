@@ -1,7 +1,7 @@
 [[alerting-apis]]
 == Alerting APIs
 
-The following APIs are available for {kib} alerting.
+The following APIs are available for Alerting.
 
 * <<create-rule-api, Create rule API>> to create a rule
 

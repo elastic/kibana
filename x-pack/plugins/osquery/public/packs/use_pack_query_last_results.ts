@@ -30,9 +30,8 @@ export const usePackQueryLastResults = ({
     ['scheduledQueryLastResults', { actionId }],
     async () => {
       const lastResultsSearchSource = await data.search.searchSource.create({
-        index: logsDataView,
         size: 1,
-        sort: { '@timestamp': SortDirection.desc },
+        sort: [{ '@timestamp': SortDirection.desc }],
         query: {
           // @ts-expect-error update types
           bool: {
@@ -47,16 +46,14 @@ export const usePackQueryLastResults = ({
         },
       });
 
+      lastResultsSearchSource.setField('index', logsDataView);
+
       const lastResultsResponse = await lastResultsSearchSource.fetch$().toPromise();
       const timestamp = lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'][0];
 
       if (timestamp) {
         const aggsSearchSource = await data.search.searchSource.create({
-          index: logsDataView,
           size: 1,
-          aggs: {
-            unique_agents: { cardinality: { field: 'agent.id' } },
-          },
           query: {
             // @ts-expect-error update types
             bool: {
@@ -79,6 +76,10 @@ export const usePackQueryLastResults = ({
           },
         });
 
+        aggsSearchSource.setField('index', logsDataView);
+        aggsSearchSource.setField('aggs', {
+          unique_agents: { cardinality: { field: 'agent.id' } },
+        });
         const aggsResponse = await aggsSearchSource.fetch$().toPromise();
 
         return {

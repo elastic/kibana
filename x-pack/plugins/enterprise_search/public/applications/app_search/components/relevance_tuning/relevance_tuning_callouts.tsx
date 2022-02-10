@@ -11,10 +11,10 @@ import { useValues } from 'kea';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { DOCS_PREFIX, ENGINE_SCHEMA_PATH } from '../../routes';
+import { META_ENGINES_DOCS_URL, ENGINE_SCHEMA_PATH } from '../../routes';
 import { EngineLogic, generateEnginePath } from '../engine';
 
 import { RelevanceTuningLogic } from '.';
@@ -98,7 +98,7 @@ export const RelevanceTuningCallouts: React.FC = () => {
         values={{
           schemaFieldsWithConflictsCount,
           link: (
-            <EuiLink href={`${DOCS_PREFIX}/meta-engines-guide.html`} target="_blank">
+            <EuiLink href={META_ENGINES_DOCS_URL} target="_blank">
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.whatsThisLinkLabel',
                 {

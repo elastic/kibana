@@ -40,7 +40,7 @@ describe('Error details', () => {
     });
 
     describe('when error has no occurrences', () => {
-      it('shows empty an message', () => {
+      it('shows an empty message', () => {
         cy.visit(
           url.format({
             pathname:

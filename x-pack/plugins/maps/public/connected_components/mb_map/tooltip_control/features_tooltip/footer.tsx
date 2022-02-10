@@ -17,7 +17,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipFeature } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 

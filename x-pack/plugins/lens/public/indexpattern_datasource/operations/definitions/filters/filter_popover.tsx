@@ -7,7 +7,7 @@
 
 import './filter_popover.scss';
 
-import React, { MouseEventHandler, useEffect, useState } from 'react';
+import React from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
 import { IndexPattern } from '../../../types';
@@ -20,28 +20,40 @@ export const FilterPopover = ({
   setFilter,
   indexPattern,
   Button,
-  initiallyOpen,
+  isOpen,
+  triggerClose,
 }: {
   filter: FilterValue;
   setFilter: Function;
   indexPattern: IndexPattern;
-  Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  initiallyOpen: boolean;
+  Button: React.FunctionComponent;
+  isOpen: boolean;
+  triggerClose: () => void;
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>();
 
-  // set popover open on start to work around EUI bug
-  useEffect(() => {
-    setIsPopoverOpen(initiallyOpen);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // The following code is to prevent an <ESCAPE> keypress
+  // from propagating.
+  //
+  // TODO - It looks like EUI should be handling this
+  // (see https://github.com/elastic/eui/commit/ad97583b0d644690379f72c7a20879cfadb16e7a)
+  const popoverRef = React.useRef<EuiPopover>(null);
+  let panelElement: HTMLDivElement;
+  const panelRefCallback = (element: HTMLDivElement) => {
+    const listener = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        panelElement.removeEventListener('keydown', listener);
+        popoverRef.current?.closePopover();
+      }
+    };
 
-  const closePopover = () => {
-    if (isPopoverOpen) {
-      setIsPopoverOpen(false);
+    if (element) {
+      panelElement = element;
+      panelElement.addEventListener('keydown', listener);
     }
   };
+  // End <ESCAPE> handling code
 
   const setFilterLabel = (label: string) => setFilter({ ...filter, label });
   const setFilterQuery = (input: Query) => setFilter({ ...filter, input });
@@ -58,19 +70,15 @@ export const FilterPopover = ({
 
   return (
     <EuiPopover
+      ref={popoverRef}
+      panelRef={panelRefCallback}
       data-test-subj="indexPattern-filters-existingFilterContainer"
       anchorClassName="eui-fullWidth"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
-      isOpen={isPopoverOpen}
+      isOpen={isOpen}
       ownFocus
-      closePopover={() => closePopover()}
-      button={
-        <Button
-          onClick={() => {
-            setIsPopoverOpen((open) => !open);
-          }}
-        />
-      }
+      closePopover={() => triggerClose()}
+      button={<Button />}
     >
       <QueryInput
         isInvalid={!isQueryValid(filter.input, indexPattern)}
@@ -87,7 +95,7 @@ export const FilterPopover = ({
         onChange={setFilterLabel}
         placeholder={getPlaceholder(filter.input.query)}
         inputRef={inputRef}
-        onSubmit={() => closePopover()}
+        onSubmit={() => triggerClose()}
         dataTestSubj="indexPattern-filters-label"
       />
     </EuiPopover>

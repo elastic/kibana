@@ -11,8 +11,10 @@ import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AppDataType } from '../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
+import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { getDataHandler } from '../../../../data_handler';
+import { useExploratoryView } from '../contexts/exploratory_view_config';
+import { DataViewInsufficientAccessError } from '../../../../../../../../src/plugins/data_views/common';
 
 export interface IndexPatternContext {
   loading: boolean;
@@ -28,7 +30,7 @@ interface ProviderProps {
   children: JSX.Element;
 }
 
-type HasAppDataState = Record<AppDataType, boolean | null>;
+type HasAppDataState = Record<AppDataType, boolean | undefined>;
 export type IndexPatternState = Record<AppDataType, IndexPattern>;
 export type IndexPatternErrors = Record<AppDataType, HttpFetchError>;
 type LoadingState = Record<AppDataType, boolean>;
@@ -39,33 +41,37 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
   const [indexPatternErrors, setIndexPatternErrors] = useState<IndexPatternErrors>(
     {} as IndexPatternErrors
   );
-  const [hasAppData, setHasAppData] = useState<HasAppDataState>({
-    infra_metrics: null,
-    infra_logs: null,
-    synthetics: null,
-    ux: null,
-    apm: null,
-    mobile: null,
-  } as HasAppDataState);
+  const [hasAppData, setHasAppData] = useState<HasAppDataState>({} as HasAppDataState);
 
   const {
-    services: { data },
+    services: { dataViews },
   } = useKibana<ObservabilityPublicPluginsStart>();
+
+  const { indexPatterns: indexPatternsList } = useExploratoryView();
 
   const loadIndexPattern: IndexPatternContext['loadIndexPattern'] = useCallback(
     async ({ dataType }) => {
-      if (hasAppData[dataType] === null && !loading[dataType]) {
+      if (typeof hasAppData[dataType] === 'undefined' && !loading[dataType]) {
         setLoading((prevState) => ({ ...prevState, [dataType]: true }));
 
         try {
           let hasDataT = false;
           let indices: string | undefined = '';
+          if (indexPatternsList[dataType]) {
+            indices = indexPatternsList[dataType];
+            hasDataT = true;
+          }
           switch (dataType) {
             case 'ux':
             case 'synthetics':
               const resultUx = await getDataHandler(dataType)?.hasData();
               hasDataT = Boolean(resultUx?.hasData);
               indices = resultUx?.indices;
+              break;
+            case 'infra_metrics':
+              const resultMetrics = await getDataHandler(dataType)?.hasData();
+              hasDataT = Boolean(resultMetrics?.hasData);
+              indices = resultMetrics?.indices;
               break;
             case 'apm':
             case 'mobile':
@@ -77,21 +83,24 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
 
           if (hasDataT && indices) {
-            const obsvIndexP = new ObservabilityIndexPatterns(data);
-            const indPattern = await obsvIndexP.getIndexPattern(dataType, indices);
+            const obsvIndexP = new ObservabilityDataViews(dataViews);
+            const indPattern = await obsvIndexP.getDataView(dataType, indices);
 
             setIndexPatterns((prevState) => ({ ...prevState, [dataType]: indPattern }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         } catch (e) {
-          if ((e as HttpFetchError).body.error === 'Forbidden') {
+          if (
+            e instanceof DataViewInsufficientAccessError ||
+            (e as HttpFetchError).body === 'Forbidden'
+          ) {
             setIndexPatternErrors((prevState) => ({ ...prevState, [dataType]: e }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         }
       }
     },
-    [data, hasAppData, loading]
+    [dataViews, hasAppData, indexPatternsList, loading]
   );
 
   return (

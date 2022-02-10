@@ -30,7 +30,6 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
     },
     async (context, request, response) => {
       const soClient = context.core.savedObjects.client;
-      const esClient = context.core.elasticsearch.client.asInternalUser;
       const agentService = osqueryContext.service.getAgentService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
@@ -50,8 +49,8 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
         await pMap(
           agentPolicies,
           (agentPolicy: GetAgentPoliciesResponseItem) =>
-            agentService
-              ?.getAgentStatusForAgentPolicy(esClient, agentPolicy.id)
+            agentService?.asInternalUser
+              .getAgentStatusForAgentPolicy(agentPolicy.id)
               .then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
           { concurrency: 10 }
         );

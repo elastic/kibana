@@ -24,19 +24,20 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import type { DiscoverStart } from '../../../../src/plugins/discover/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
-import { CasesUiStart } from '../../cases/public';
+import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '../../cases/public';
 import type { LensPublicStart } from '../../lens/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { observabilityAppId, observabilityFeatureId } from '../common';
+import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
@@ -60,6 +61,7 @@ export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
 }
@@ -90,15 +92,23 @@ export class Plugin
       path: '/alerts',
       navLinkStatus: AppNavLinkStatus.hidden,
     },
-    {
-      id: 'cases',
-      title: i18n.translate('xpack.observability.casesLinkTitle', {
-        defaultMessage: 'Cases',
-      }),
-      order: 8002,
-      path: '/cases',
-      navLinkStatus: AppNavLinkStatus.hidden,
-    },
+    getCasesDeepLinks({
+      basePath: casesPath,
+      extend: {
+        [CasesDeepLinkId.cases]: {
+          order: 8002,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        },
+        [CasesDeepLinkId.casesCreate]: {
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: false,
+        },
+        [CasesDeepLinkId.casesConfigure]: {
+          navLinkStatus: AppNavLinkStatus.hidden,
+          searchable: false,
+        },
+      },
+    }),
   ];
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {

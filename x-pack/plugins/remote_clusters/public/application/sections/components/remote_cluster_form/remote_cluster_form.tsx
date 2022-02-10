@@ -8,7 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,7 +20,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
@@ -348,7 +348,7 @@ export class RemoteClusterForm extends Component<Props, State> {
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="remoteClusterFormSaveButton"
-                color="secondary"
+                color="success"
                 iconType="check"
                 onClick={this.save}
                 fill
@@ -391,7 +391,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     if (this.props.isSaving) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

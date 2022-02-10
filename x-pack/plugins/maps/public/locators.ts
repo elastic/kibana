@@ -9,14 +9,13 @@
 
 import rison from 'rison-node';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { type Filter, isFilterPinned } from '@kbn/es-query';
 import type {
   TimeRange,
-  Filter,
   Query,
   QueryState,
   RefreshInterval,
 } from '../../../../src/plugins/data/public';
-import { esFilters } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import type { LocatorDefinition, LocatorPublic } from '../../../../src/plugins/share/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
@@ -87,11 +86,9 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     const queryState: QueryState = {};
 
     if (query) appState.query = query;
-    if (filters && filters.length)
-      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
+    if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
     if (timeRange) queryState.time = timeRange;
-    if (filters && filters.length)
-      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+    if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let path = `/map#/${mapId || ''}`;

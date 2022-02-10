@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const nodes = getService('monitoringLogstashNodes');
   const logstashSummaryStatus = getService('monitoringLogstashSummaryStatus');
+  const retry = getService('retry');
 
   describe('Logstash nodes', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
@@ -41,8 +42,11 @@ export default function ({ getService, getPageObjects }) {
       });
     });
     it('should have a nodes table with the correct number of rows', async () => {
-      const rows = await nodes.getRows();
-      expect(rows.length).to.be(2);
+      // retry in case the table hasn't had time to re-render
+      await retry.try(async () => {
+        const rows = await nodes.getRows();
+        expect(rows.length).to.be(2);
+      });
     });
     it('should have a nodes table with the correct data', async () => {
       const nodesAll = await nodes.getNodesAll();
@@ -96,8 +100,13 @@ export default function ({ getService, getPageObjects }) {
 
     it('should filter for specific nodes', async () => {
       await nodes.setFilter('sha');
-      const rows = await nodes.getRows();
-      expect(rows.length).to.be(2);
+
+      // retry in case the table hasn't had time to re-render
+      await retry.try(async () => {
+        const rows = await nodes.getRows();
+        expect(rows.length).to.be(2);
+      });
+
       await nodes.clearFilter();
     });
   });

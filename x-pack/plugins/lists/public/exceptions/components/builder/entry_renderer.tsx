@@ -35,9 +35,9 @@ import {
   FieldComponent,
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { HttpStart } from '../../../../../../../src/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 
@@ -52,15 +52,15 @@ export interface EntryItemProps {
   autocompleteService: AutocompleteStart;
   entry: FormattedBuilderEntry;
   httpService: HttpStart;
-  indexPattern: IndexPatternBase;
+  indexPattern: DataViewBase;
   showLabel: boolean;
   osTypes?: OsTypeArray;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IndexPatternBase,
+    pattern: DataViewBase,
     type: ExceptionListType,
     osTypes?: OsTypeArray
-  ) => IndexPatternBase;
+  ) => DataViewBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: boolean) => void;
@@ -92,7 +92,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const handleFieldChange = useCallback(
-    ([newField]: IndexPatternFieldBase[]): void => {
+    ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
       onChange(updatedEntry, index);
     },

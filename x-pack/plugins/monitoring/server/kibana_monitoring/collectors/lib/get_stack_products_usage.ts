@@ -25,7 +25,7 @@ import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 export const getStackProductsUsage = async (
   config: MonitoringConfig,
   callCluster: ElasticsearchClient,
-  availableCcs: string[],
+  availableCcs: boolean,
   clusterUuid: string
 ): Promise<
   Pick<

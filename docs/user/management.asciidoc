@@ -45,7 +45,7 @@ through the hot, warm, cold, and delete phases.
 Such policies help you control operation costs
 because you can put data in different resource tiers.
 
-| <<snapshot-repositories, Snapshot and Restore>>
+| {ref}/snapshot-restore.html[Snapshot and Restore]
 |Define a policy that creates, schedules, and automatically deletes snapshots to ensure that you
 have backups of your cluster in case something goes wrong.
 
@@ -106,7 +106,7 @@ a| <<xpack-security, Users>>
 Add or delete users and assign roles that give users
 specific privileges.
 
-| <<xpack-kibana-role-management, Roles>>
+| <<kibana-role-management, Roles>>
 |View the roles that exist on your cluster. Customize
 the actions that a user with the role can perform, on a cluster, index, and space level.
 
@@ -167,10 +167,6 @@ set the timespan for notification messages, and much more.
 the full list of features that are included in your license,
 see the https://www.elastic.co/subscriptions[subscription page].
 
-| <<upgrade-assistant, Upgrade Assistant>>
-| Identify the issues that you need to address before upgrading to the
-next major version of {es}, and then reindex, if needed.
-
 |===
 
 
@@ -193,12 +189,8 @@ include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
 
 include::security/index.asciidoc[]
 
-include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
-
 include::{kib-repo-dir}/spaces/index.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
-
-include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
 
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]

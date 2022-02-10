@@ -8,7 +8,7 @@
 experimental[] Copy saved objects between spaces.
 
 It also allows you to automatically copy related objects, so when you copy a `dashboard`, this can automatically copy over the
-associated visualizations, index patterns, and saved searches, as required.
+associated visualizations, {data-sources}, and saved searches, as required.
 
 You can request to overwrite any objects that already exist in the target space if they share an ID, or you can use the
 <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>> to do this on a per-object basis.
@@ -125,7 +125,7 @@ refer to the <<spaces-api-copy-saved-objects-example,examples>>.
 ===== Successful copy (with `createNewCopies` enabled)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization, and that has a reference to an index pattern:
+the dashboard has a reference to a visualization, and that has a reference to {a-data-source}:
 
 [source,sh]
 ----
@@ -189,7 +189,7 @@ The result indicates a successful copy, and all three objects are created. Since
 ===== Successful copy (with `createNewCopies` disabled)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization, and that has a reference to an index pattern:
+the dashboard has a reference to a visualization, and that has a reference to {a-data-source}:
 
 [source,sh]
 ----
@@ -379,10 +379,10 @@ The API returns the following:
 }
 ----
 
-The result indicates a successful copy for the `marketing` space, and an unsuccessful copy for the `sales` space because the index pattern,
+The result indicates a successful copy for the `marketing` space, and an unsuccessful copy for the `sales` space because the {data-source},
 visualization, and *Canvas* workpad each resulted in a conflict error:
 
-* An index pattern with the same ID already exists, which resulted in a conflict error. To resolve the error, overwrite the existing object,
+* A {data-source} with the same ID already exists, which resulted in a conflict error. To resolve the error, overwrite the existing object,
 or skip the object.
 
 * A visualization with a different ID, but the same origin already exists, which resulted in a conflict error. The `destinationId` field
@@ -403,7 +403,7 @@ API>>.
 ===== Failed copy (with missing reference errors)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to an index pattern:
+the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to {a-data-source}:
 
 [source,sh]
 ----

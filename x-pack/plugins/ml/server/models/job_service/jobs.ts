@@ -11,6 +11,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
+  isJobWithGeoData,
 } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
@@ -52,6 +53,7 @@ import type { RulesClient } from '../../../../alerting/server';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 interface Results {
   [id: string]: {
@@ -219,6 +221,7 @@ export function jobsProvider(
       const tempJob: MlSummaryJob = {
         id: job.job_id,
         description: job.description || '',
+        customSettings: job.custom_settings,
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
         processed_record_count: job.data_counts?.processed_record_count,
         earliestStartTimestampMs: getEarliestDatafeedStartTime(
@@ -247,6 +250,7 @@ export function jobsProvider(
         awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
         alertingRules: job.alerting_rules,
         jobTags: job.custom_settings?.job_tags ?? {},
+        bucketSpanSeconds: parseInterval(job.analysis_config.bucket_span)!.asSeconds(),
       };
 
       if (jobIds.find((j) => j === tempJob.id)) {
@@ -267,6 +271,11 @@ export function jobsProvider(
     });
 
     return jobs;
+  }
+
+  async function getJobIdsWithGeo(): Promise<string[]> {
+    const { body } = await mlClient.getJobs<MlJobsResponse>();
+    return body.jobs.filter(isJobWithGeoData).map((job) => job.job_id);
   }
 
   async function jobsWithTimerange() {
@@ -317,10 +326,17 @@ export function jobsProvider(
     if (jobResults && jobResults.jobs) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
       if (job) {
+        removeUnClonableCustomSettings(job);
         result.job = job;
       }
     }
     return result;
+  }
+
+  function removeUnClonableCustomSettings(job: Job) {
+    if (isPopulatedObject(job.custom_settings)) {
+      delete job.custom_settings.managed;
+    }
   }
 
   async function createFullJobsList(jobIds: string[] = []) {
@@ -659,5 +675,6 @@ export function jobsProvider(
     getAllJobAndGroupIds,
     getLookBackProgress,
     bulkCreate,
+    getJobIdsWithGeo,
   };
 }

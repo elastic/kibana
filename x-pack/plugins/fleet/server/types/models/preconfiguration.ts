@@ -8,12 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
-import {
-  PRECONFIGURATION_LATEST_KEYWORD,
-  DEFAULT_AGENT_POLICY,
-  DEFAULT_FLEET_SERVER_AGENT_POLICY,
-  DEFAULT_PACKAGES,
-} from '../../constants';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
 import type { PreconfiguredOutput } from '../../../common';
 import { outputType } from '../../../common';
 
@@ -45,7 +40,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
     }),
   }),
   {
-    defaultValue: DEFAULT_PACKAGES,
+    defaultValue: [],
   }
 );
 
@@ -87,6 +82,7 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
     type: schema.oneOf([schema.literal(outputType.Elasticsearch)]),
     hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
     ca_sha256: schema.maybe(schema.string()),
+    ca_trusted_fingerprint: schema.maybe(schema.string()),
     config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   }),
   {
@@ -102,10 +98,12 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
     is_default: schema.maybe(schema.boolean()),
     is_default_fleet_server: schema.maybe(schema.boolean()),
+    has_fleet_server: schema.maybe(schema.boolean()),
     data_output_id: schema.maybe(schema.string()),
     monitoring_output_id: schema.maybe(schema.string()),
     package_policies: schema.arrayOf(
       schema.object({
+        id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
         name: schema.string(),
         package: schema.object({
           name: schema.string(),
@@ -139,6 +137,6 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     ),
   }),
   {
-    defaultValue: [DEFAULT_AGENT_POLICY, DEFAULT_FLEET_SERVER_AGENT_POLICY],
+    defaultValue: [],
   }
 );

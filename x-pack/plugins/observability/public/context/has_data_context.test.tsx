@@ -96,7 +96,7 @@ describe('HasDataContextProvider', () => {
           infra_logs: { hasData: undefined, status: 'success' },
           infra_metrics: { hasData: undefined, status: 'success' },
           ux: { hasData: undefined, status: 'success' },
-          alert: { hasData: [], status: 'success' },
+          alert: { hasData: false, status: 'success' },
         },
         hasAnyData: false,
         isAllRequestsComplete: true,
@@ -111,7 +111,7 @@ describe('HasDataContextProvider', () => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: false }) },
           { appName: 'infra_logs', hasData: async () => false },
-          { appName: 'infra_metrics', hasData: async () => false },
+          { appName: 'infra_metrics', hasData: async () => ({ hasData: false }) },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: false }),
@@ -152,7 +152,7 @@ describe('HasDataContextProvider', () => {
               hasData: false,
               status: 'success',
             },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: false,
           isAllRequestsComplete: true,
@@ -167,7 +167,10 @@ describe('HasDataContextProvider', () => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
           { appName: 'infra_logs', hasData: async () => false },
-          { appName: 'infra_metrics', hasData: async () => false },
+          {
+            appName: 'infra_metrics',
+            hasData: async () => ({ hasData: false, indices: 'metric-*' }),
+          },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: false, indices: 'heartbeat-*, synthetics-*' }),
@@ -204,13 +207,13 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             infra_logs: { hasData: false, status: 'success' },
-            infra_metrics: { hasData: false, status: 'success' },
+            infra_metrics: { hasData: false, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: false,
               indices: 'apm-*',
               status: 'success',
             },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: true,
           isAllRequestsComplete: true,
@@ -225,7 +228,10 @@ describe('HasDataContextProvider', () => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
           { appName: 'infra_logs', hasData: async () => true },
-          { appName: 'infra_metrics', hasData: async () => true },
+          {
+            appName: 'infra_metrics',
+            hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+          },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
@@ -265,14 +271,14 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             infra_logs: { hasData: true, status: 'success' },
-            infra_metrics: { hasData: true, status: 'success' },
+            infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,
               serviceName: 'ux',
               indices: 'apm-*',
               status: 'success',
             },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: true,
           isAllRequestsComplete: true,
@@ -315,7 +321,7 @@ describe('HasDataContextProvider', () => {
               infra_logs: { hasData: undefined, status: 'success' },
               infra_metrics: { hasData: undefined, status: 'success' },
               ux: { hasData: undefined, status: 'success' },
-              alert: { hasData: [], status: 'success' },
+              alert: { hasData: false, status: 'success' },
             },
             hasAnyData: true,
             isAllRequestsComplete: true,
@@ -364,7 +370,7 @@ describe('HasDataContextProvider', () => {
               infra_logs: { hasData: undefined, status: 'success' },
               infra_metrics: { hasData: undefined, status: 'success' },
               ux: { hasData: undefined, status: 'success' },
-              alert: { hasData: [], status: 'success' },
+              alert: { hasData: false, status: 'success' },
             },
             hasAnyData: false,
             isAllRequestsComplete: true,
@@ -385,7 +391,10 @@ describe('HasDataContextProvider', () => {
             },
           },
           { appName: 'infra_logs', hasData: async () => true },
-          { appName: 'infra_metrics', hasData: async () => true },
+          {
+            appName: 'infra_metrics',
+            hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+          },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
@@ -422,14 +431,14 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             infra_logs: { hasData: true, status: 'success' },
-            infra_metrics: { hasData: true, status: 'success' },
+            infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,
               serviceName: 'ux',
               indices: 'apm-*',
               status: 'success',
             },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: true,
           isAllRequestsComplete: true,
@@ -498,7 +507,7 @@ describe('HasDataContextProvider', () => {
             infra_logs: { hasData: undefined, status: 'failure' },
             infra_metrics: { hasData: undefined, status: 'failure' },
             ux: { hasData: undefined, status: 'failure' },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: false,
           isAllRequestsComplete: true,
@@ -527,7 +536,7 @@ describe('HasDataContextProvider', () => {
       } as PluginContextValue);
     });
 
-    it('returns all alerts available', async () => {
+    it('returns if alerts are available', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
         hasDataMap: {},
@@ -549,10 +558,7 @@ describe('HasDataContextProvider', () => {
           infra_metrics: { hasData: undefined, status: 'success' },
           ux: { hasData: undefined, status: 'success' },
           alert: {
-            hasData: [
-              { id: 2, consumer: 'apm' },
-              { id: 3, consumer: 'uptime' },
-            ],
+            hasData: true,
             status: 'success',
           },
         },

@@ -1,0 +1,13 @@
+{
+  "id": "dataViewEditor",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["data", "dataViews"],
+  "requiredBundles": ["kibanaReact", "esUiShared"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "This plugin provides the ability to create data views via a modal flyout from any kibana app"
+}

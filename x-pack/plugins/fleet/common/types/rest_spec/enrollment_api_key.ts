@@ -7,20 +7,16 @@
 
 import type { EnrollmentAPIKey } from '../models';
 
+import type { ListResult, ListWithKuery } from './common';
+
 export interface GetEnrollmentAPIKeysRequest {
-  query: {
-    page: number;
-    perPage: number;
-    kuery?: string;
-  };
+  query: ListWithKuery;
 }
 
-export interface GetEnrollmentAPIKeysResponse {
-  list: EnrollmentAPIKey[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+export type GetEnrollmentAPIKeysResponse = ListResult<EnrollmentAPIKey> & {
+  // deprecated in 8.x
+  list?: EnrollmentAPIKey[];
+};
 
 export interface GetOneEnrollmentAPIKeyRequest {
   params: {

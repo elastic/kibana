@@ -62,5 +62,5 @@ export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.
    */
-  management: managementReducer as ManagementPluginReducer['management'],
+  management: managementReducer as unknown as ManagementPluginReducer['management'],
 };

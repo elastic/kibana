@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }) {
           geometryFieldName: 'geometry',
           index: 'geo_shapes*',
           requestBody:
-            '(_source:!(geometry),docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))',
+            '(_source:!f,docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))',
         });
       });
 
@@ -121,7 +121,7 @@ export default function ({ getPageObjects, getService }) {
           ],
           layout: { visibility: 'visible' },
           paint: {
-            'line-color': '#fec514',
+            'line-color': '#9eb9d8',
             'line-width': 3,
             'line-dasharray': [2, 1],
             'line-opacity': 1,

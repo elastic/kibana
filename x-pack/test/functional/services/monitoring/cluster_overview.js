@@ -54,6 +54,12 @@ export function MonitoringClusterOverviewProvider({ getService }) {
   const SUBJ_BEATS_LISTING = `${SUBJ_BEATS_PANEL} > beatsListing`;
   const SUBJ_BEATS_TYPES_COUNTS = `${SUBJ_BEATS_PANEL} > beatTypeCount`;
 
+  const SUBJ_ENT_SEARCH_PANEL = `clusterItemContainerEnterprise Search`;
+  const SUBJ_ENT_SEARCH_TOTAL_NODES = `${SUBJ_ENT_SEARCH_PANEL} > entSearchTotalNodes`;
+  const SUBJ_ENT_SEARCH_OVERVIEW = `${SUBJ_ENT_SEARCH_PANEL} > entSearchOverview`;
+  const SUBJ_ENT_SEARCH_ENGINES = `${SUBJ_ENT_SEARCH_PANEL} > appSearchEngines`;
+  const SUBJ_ENT_SEARCH_ORG_SOURCES = `${SUBJ_ENT_SEARCH_PANEL} > workplaceSearchOrgSources`;
+
   return new (class ClusterOverview {
     async isOnClusterOverview() {
       await retry.try(async () => {
@@ -224,6 +230,19 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     }
     clickBeatsListing() {
       return testSubjects.click(SUBJ_BEATS_LISTING);
+    }
+
+    getEntSearchTotalNodes() {
+      return testSubjects.getVisibleText(SUBJ_ENT_SEARCH_TOTAL_NODES);
+    }
+    getEntSearchTotalEngines() {
+      return testSubjects.getVisibleText(SUBJ_ENT_SEARCH_ENGINES);
+    }
+    getEntSearchTotalOrgSources() {
+      return testSubjects.getVisibleText(SUBJ_ENT_SEARCH_ORG_SOURCES);
+    }
+    clickEntSearchOverview() {
+      return testSubjects.click(SUBJ_ENT_SEARCH_OVERVIEW);
     }
   })();
 }

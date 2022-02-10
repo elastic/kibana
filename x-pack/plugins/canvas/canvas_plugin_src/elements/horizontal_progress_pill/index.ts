@@ -15,7 +15,8 @@ export const horizontalProgressPill: ElementFactory = () => ({
   help: 'Displays progress as a portion of a horizontal pill',
   width: 400,
   height: 30,
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | math "mean(percent_uptime)"
 | progress shape="horizontalPill" label={formatnumber 0%} font={font size=24 family="${openSans.value}" color="#000000" align=center}
