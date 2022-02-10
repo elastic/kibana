@@ -63,7 +63,7 @@ export function monitorManagementPageProvider({
     },
 
     async editMonitor() {
-      await this.clickByTestSubj('monitorManagementEditMonitor');
+      await page.click(this.byTestId('monitorManagementEditMonitor'), { delay: 800 });
     },
 
     async findMonitorConfiguration(monitorConfig: Record<string, string>) {
