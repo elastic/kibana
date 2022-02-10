@@ -9,9 +9,7 @@
 import { isEqual } from 'lodash';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { CoreSetup } from '..';
 import { CoreService } from '../../types';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export type ExecutionContext = Record<string, any>;
 
@@ -29,16 +27,8 @@ export interface ExecutionContextSetup {
  */
 export type ExecutionContextStart = ExecutionContextSetup;
 
-export interface SetupDeps {
-  core: CoreSetup<ExecutionContextStartDependencies>;
-}
-
 export interface StartDeps {
   curApp$: Observable<string | undefined>;
-}
-
-export interface ExecutionContextStartDependencies {
-  spaces?: SpacesPluginStart;
 }
 
 /** @internal */
@@ -47,22 +37,10 @@ export class ExecutionContextService
 {
   private context$: BehaviorSubject<ExecutionContext> = new BehaviorSubject({});
   private appId?: string;
-  private space: string = '';
   private subscription: Subscription = new Subscription();
   private contract?: ExecutionContextSetup;
 
-  public setup({ core }: SetupDeps) {
-    // Track space changes
-    core.getStartServices().then(([_, pluginDeps]) => {
-      const spacesApi = pluginDeps.spaces;
-      if (spacesApi) {
-        this.subscription.add(
-          spacesApi.getActiveSpace$().subscribe((space) => {
-            this.space = space.id;
-          })
-        );
-      }
-    });
+  public setup() {
     this.contract = {
       context$: this.context$,
       clear: () => {
@@ -72,7 +50,6 @@ export class ExecutionContextService
         const newVal = {
           url: window.location.pathname,
           name: this.appId,
-          space: this.space,
           ...this.context$.value,
           ...c,
         };

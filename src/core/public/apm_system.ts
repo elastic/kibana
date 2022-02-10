@@ -70,7 +70,13 @@ export class ApmSystem {
     start.executionContext.context$.subscribe((c) => {
       // We're using labels because we want the context to be indexed
       // https://www.elastic.co/guide/en/apm/get-started/current/metadata.html
-      this.apm?.addLabels(c);
+      const apmContext = {
+        appId: c.name,
+        page: c.page,
+        id: c.id,
+      };
+
+      this.apm?.addLabels(apmContext);
     });
 
     // TODO: Start a new transaction every page change instead of every app change.

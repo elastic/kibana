@@ -342,7 +342,6 @@ export class HttpServer {
 
       if (parentContext) {
         const apmContext = {
-          space: parentContext.space,
           appId: parentContext.name,
           page: parentContext.page,
           id: parentContext.id,
