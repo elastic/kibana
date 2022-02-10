@@ -250,7 +250,7 @@ export const getXyVisualization = ({
       {
         type: layerTypes.REFERENCELINE,
         label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
-          defaultMessage: 'Reference',
+          defaultMessage: 'Reference lines',
         }),
         icon: LensIconChartBarReferenceLine,
         disabled:
