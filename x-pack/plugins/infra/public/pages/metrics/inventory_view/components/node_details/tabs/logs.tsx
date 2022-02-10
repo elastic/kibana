@@ -17,7 +17,7 @@ import { TabContent, TabProps } from './shared';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
 import { findInventoryFields } from '../../../../../../../common/inventory_models';
-import { useLinkProps } from '../../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../../observability/public';
 import { getNodeLogsUrl } from '../../../../../link_to';
 
 const TabComponent = (props: TabProps) => {
