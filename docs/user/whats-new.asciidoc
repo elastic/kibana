@@ -55,7 +55,7 @@ The *Field statistics* view
 is similar to the *Index Data Visualizer* in *{ml-app}*.
 
 [role="screenshot"]
-image::images/highlights-discover.gif[Fields statistics view in Discover]
+image::images/highlights-discover.png[Fields statistics view in Discover]
 
 [float]
 === Multi-layered time axis redesigned
@@ -93,11 +93,11 @@ Just like in *Dashboard*, you can promote favorites to the *Visualization Librar
 [float]
 === {ml-cap} model management
 
-You can now add more trained models to bring modern 
-{ml-docs}/ml-nlp-overview.html[{nlp} (NLP)] use cases to the {stack}. NLP models exist 
-alongside {dfanalytics} models. The **Model Management** page shows 
-approximations for memory usage on each {ml} node and displays high level stats 
-for {infer} rates for each deployed trained model. These details enable you to 
+You can now add more trained models to bring modern
+{ml-docs}/ml-nlp-overview.html[{nlp} (NLP)] use cases to the {stack}. NLP models exist
+alongside {dfanalytics} models. The **Model Management** page shows
+approximations for memory usage on each {ml} node and displays high level stats
+for {infer} rates for each deployed trained model. These details enable you to
 make node sizing decisions for {ml} nodes.
 
 [role="screenshot"]
