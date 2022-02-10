@@ -95,4 +95,3 @@ export const useUrlPagination = (): UrlPagination => {
     pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
   };
 };
-
