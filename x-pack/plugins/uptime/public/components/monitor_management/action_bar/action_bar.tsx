@@ -110,20 +110,22 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
                   },
                 })}
               </p>
-              <p>
-                {status
-                  ? i18n.translate('xpack.uptime.monitorManagement.service.error.status', {
-                      defaultMessage: 'Status: {status}. ',
-                      values: { status: responseStatus },
-                    })
-                  : null}
-                {reason
-                  ? i18n.translate('xpack.uptime.monitorManagement.service.error.reason', {
-                      defaultMessage: 'Reason: {reason}.',
-                      values: { reason },
-                    })
-                  : null}
-              </p>
+              {responseStatus || reason ? (
+                <p>
+                  {responseStatus
+                    ? i18n.translate('xpack.uptime.monitorManagement.service.error.status', {
+                        defaultMessage: 'Status: {status}. ',
+                        values: { status: responseStatus },
+                      })
+                    : null}
+                  {reason
+                    ? i18n.translate('xpack.uptime.monitorManagement.service.error.reason', {
+                        defaultMessage: 'Reason: {reason}.',
+                        values: { reason },
+                      })
+                    : null}
+                </p>
+              ) : null}
             </>
           ),
           toastLifeTimeMs: 30000,
