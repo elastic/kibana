@@ -52,7 +52,7 @@ describe('EcsLogAdapter', () => {
 
     expect(logger.debug).toBeCalledWith('hello duration', ['events'], {
       event: {
-        duration: 120000,
+        duration: 120000000000,
         end: '2021-04-12T16:02:00.000Z',
         provider: 'test-adapting',
         start: '2021-04-12T16:00:00.000Z',

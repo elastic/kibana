@@ -31,7 +31,7 @@ export class EcsLogAdapter implements IReportingEventLogger {
 
     let duration: number | undefined;
     if (this.end && this.start) {
-      duration = this.end.valueOf() - this.start.valueOf() * 1000000; // nanoseconds
+      duration = (this.end.valueOf() - this.start.valueOf()) * 1000000; // nanoseconds
     }
 
     // add the derived properties for timing between "start" and "complete" logging calls
