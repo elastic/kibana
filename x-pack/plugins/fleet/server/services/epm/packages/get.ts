@@ -21,7 +21,7 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { BundledPackageNotFoundError, IngestManagerError } from '../../../errors';
+import { IngestManagerError } from '../../../errors';
 import { appContextService } from '../../';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
