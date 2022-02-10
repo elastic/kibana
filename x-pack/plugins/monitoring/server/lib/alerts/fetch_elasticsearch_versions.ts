@@ -28,8 +28,10 @@ export async function fetchElasticsearchVersions(
     index: indexPatterns,
     filter_path: [
       'hits.hits._source.cluster_stats.nodes.versions',
+      'hits.hits._source.elasticsearch.cluster.stats.nodes.versions',
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
     ],
     body: {
       size: clusters.length,
@@ -49,7 +51,7 @@ export async function fetchElasticsearchVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {

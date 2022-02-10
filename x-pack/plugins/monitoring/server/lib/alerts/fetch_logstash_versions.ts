@@ -41,7 +41,7 @@ export async function fetchLogstashVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('logstash_stats', 'logstash.node_stats'),
+            createDatasetFilter('logstash_stats', 'node_stats', 'logstash.node_stats'),
             {
               range: {
                 timestamp: {

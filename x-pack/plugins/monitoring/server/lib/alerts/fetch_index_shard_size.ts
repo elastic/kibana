@@ -50,7 +50,7 @@ export async function fetchIndexShardSize(
       query: {
         bool: {
           filter: [
-            createDatasetFilter('index_stats', 'elasticsearch.index'),
+            createDatasetFilter('index_stats', 'index', 'elasticsearch.index'),
             {
               range: {
                 timestamp: {
@@ -90,6 +90,7 @@ export async function fetchIndexShardSize(
                         '_index',
                         'index_stats.shards.primaries',
                         'index_stats.primaries.store.size_in_bytes',
+                        'elasticsearch.index.primaries.store.size_in_bytes',
                       ],
                     },
                     size: 1,
