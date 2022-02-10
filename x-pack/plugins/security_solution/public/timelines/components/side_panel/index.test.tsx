@@ -231,6 +231,350 @@ describe('Details Panel Component', () => {
                   <div
                     className="euiFlyoutHeader"
                   >
+                    <Memo(EventDetailsFlyoutHeaderComponent)
+                      activePanel={null}
+                      isAlert={false}
+                      isolateAction="isolateHost"
+                      loading={true}
+                      ruleName=""
+                      showAlertDetails={[Function]}
+                      timestamp=""
+                    >
+                      <ExpandableEventTitle
+                        isAlert={false}
+                        loading={true}
+                        ruleName=""
+                        timestamp=""
+                      >
+                        <Styled(EuiFlexGroup)
+                          gutterSize="none"
+                          justifyContent="spaceBetween"
+                          wrap={true}
+                        >
+                          <EuiFlexGroup
+                            className="c0"
+                            gutterSize="none"
+                            justifyContent="spaceBetween"
+                            wrap={true}
+                          >
+                            <div
+                              className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
+                            >
+                              <EuiFlexItem
+                                grow={false}
+                              >
+                                <div
+                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                />
+                              </EuiFlexItem>
+                            </div>
+                          </EuiFlexGroup>
+                        </Styled(EuiFlexGroup)>
+                      </ExpandableEventTitle>
+                    </Memo(EventDetailsFlyoutHeaderComponent)>
+                  </div>
+                </EuiFlyoutHeader>
+                <Styled(EuiFlyoutBody)>
+                  <EuiFlyoutBody
+                    className="c1"
+                  >
+                    <div
+                      className="euiFlyoutBody c1"
+                    >
+                      <div
+                        className="euiFlyoutBody__overflow"
+                        tabIndex={0}
+                      >
+                        <div
+                          className="euiFlyoutBody__overflowContent"
+                        >
+                          <Memo(EventDetailsFlyoutBodyComponent)
+                            activePanel={null}
+                            browserFields={Object {}}
+                            detailsData={null}
+                            expandedEvent={
+                              Object {
+                                "eventId": "my-id",
+                                "indexName": "my-index",
+                              }
+                            }
+                            handleIsolationActionSuccess={[Function]}
+                            handleOnEventClosed={[Function]}
+                            hostRisk={null}
+                            isAlert={false}
+                            isDraggable={false}
+                            isolateAction="isolateHost"
+                            loading={true}
+                            showAlertDetails={[Function]}
+                            timelineId="test"
+                          >
+                            <ExpandableEvent
+                              browserFields={Object {}}
+                              detailsData={null}
+                              event={
+                                Object {
+                                  "eventId": "my-id",
+                                  "indexName": "my-index",
+                                }
+                              }
+                              handleOnEventClosed={[Function]}
+                              hostRisk={null}
+                              isAlert={false}
+                              isDraggable={false}
+                              loading={true}
+                              timelineId="test"
+                              timelineTabType="flyout"
+                            >
+                              <EuiLoadingContent
+                                lines={10}
+                              >
+                                <span
+                                  className="euiLoadingContent"
+                                >
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="0"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="1"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="2"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="3"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="4"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="5"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="6"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="7"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="8"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    className="euiLoadingContent__singleLine"
+                                    key="9"
+                                  >
+                                    <span
+                                      className="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                </span>
+                              </EuiLoadingContent>
+                            </ExpandableEvent>
+                          </Memo(EventDetailsFlyoutBodyComponent)>
+                        </div>
+                      </div>
+                    </div>
+                  </EuiFlyoutBody>
+                </Styled(EuiFlyoutBody)>
+                <Memo(EventDetailsFlyoutFooterComponent)
+                  activePanel={null}
+                  detailsData={null}
+                  ecsData={null}
+                  expandedEvent={
+                    Object {
+                      "eventId": "my-id",
+                      "indexName": "my-index",
+                    }
+                  }
+                  handleOnEventClosed={[Function]}
+                  loading={true}
+                  setActivePanel={[Function]}
+                  showAlertDetails={[Function]}
+                  showHostIsolationPanel={[Function]}
+                  timelineId="test"
+                >
+                  <Connect(Component)
+                    detailsData={null}
+                    detailsEcsData={null}
+                    expandedEvent={
+                      Object {
+                        "eventId": "my-id",
+                        "indexName": "my-index",
+                      }
+                    }
+                    handleOnEventClosed={[Function]}
+                    handlePanelChange={[Function]}
+                    isHostIsolationPanelOpen={false}
+                    loadingEventDetails={true}
+                    onAddIsolationStatusClick={[Function]}
+                    timelineId="test"
+                  >
+                    <Memo()
+                      detailsData={null}
+                      detailsEcsData={null}
+                      dispatch={[Function]}
+                      expandedEvent={
+                        Object {
+                          "eventId": "my-id",
+                          "indexName": "my-index",
+                        }
+                      }
+                      globalQuery={Array []}
+                      handleOnEventClosed={[Function]}
+                      handlePanelChange={[Function]}
+                      isHostIsolationPanelOpen={false}
+                      loadingEventDetails={true}
+                      onAddIsolationStatusClick={[Function]}
+                      timelineId="test"
+                      timelineQuery={
+                        Object {
+                          "id": "",
+                          "inspect": null,
+                          "isInspected": false,
+                          "loading": false,
+                          "refetch": null,
+                          "selectedInspectIndex": 0,
+                        }
+                      }
+                    >
+                      <EuiFlyoutFooter>
+                        <div
+                          className="euiFlyoutFooter"
+                        >
+                          <EuiFlexGroup
+                            justifyContent="flexEnd"
+                          >
+                            <div
+                              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            >
+                              <EuiFlexItem
+                                grow={false}
+                              >
+                                <div
+                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                />
+                              </EuiFlexItem>
+                            </div>
+                          </EuiFlexGroup>
+                        </div>
+                      </EuiFlyoutFooter>
+                    </Memo()>
+                  </Connect(Component)>
+                </Memo(EventDetailsFlyoutFooterComponent)>
+              </EventDetailsPanelComponent>
+            </div>
+          </EuiFlyout>,
+          .c0 {
+          -webkit-flex: 0 1 auto;
+          -ms-flex: 0 1 auto;
+          flex: 0 1 auto;
+          margin-top: 8px;
+        }
+
+        .c1 .euiFlyoutBody__overflow {
+          display: -webkit-box;
+          display: -webkit-flex;
+          display: -ms-flexbox;
+          display: flex;
+          -webkit-flex: 1;
+          -ms-flex: 1;
+          flex: 1;
+          overflow: hidden;
+        }
+
+        .c1 .euiFlyoutBody__overflow .euiFlyoutBody__overflowContent {
+          -webkit-flex: 1;
+          -ms-flex: 1;
+          flex: 1;
+          overflow: hidden;
+          padding: 0 16px 16px;
+        }
+
+        <div
+            data-eui="EuiFlyout"
+            data-test-subj="timeline:details-panel:flyout"
+            role="dialog"
+          >
+            <button
+              data-test-subj="euiFlyoutCloseButton"
+              onClick={[Function]}
+              type="button"
+            />
+            <EventDetailsPanelComponent
+              browserFields={Object {}}
+              docValueFields={Array []}
+              expandedEvent={
+                Object {
+                  "eventId": "my-id",
+                  "indexName": "my-index",
+                }
+              }
+              handleOnEventClosed={[Function]}
+              isDraggable={false}
+              isFlyoutView={true}
+              runtimeMappings={Object {}}
+              tabType="query"
+              timelineId="test"
+            >
+              <EuiFlyoutHeader
+                hasBorder={false}
+              >
+                <div
+                  className="euiFlyoutHeader"
+                >
+                  <Memo(EventDetailsFlyoutHeaderComponent)
+                    activePanel={null}
+                    isAlert={false}
+                    isolateAction="isolateHost"
+                    loading={true}
+                    ruleName=""
+                    showAlertDetails={[Function]}
+                    timestamp=""
+                  >
                     <ExpandableEventTitle
                       isAlert={false}
                       loading={true}
@@ -262,21 +606,42 @@ describe('Details Panel Component', () => {
                         </EuiFlexGroup>
                       </Styled(EuiFlexGroup)>
                     </ExpandableEventTitle>
-                  </div>
-                </EuiFlyoutHeader>
-                <Styled(EuiFlyoutBody)>
-                  <EuiFlyoutBody
-                    className="c1"
+                  </Memo(EventDetailsFlyoutHeaderComponent)>
+                </div>
+              </EuiFlyoutHeader>
+              <Styled(EuiFlyoutBody)>
+                <EuiFlyoutBody
+                  className="c1"
+                >
+                  <div
+                    className="euiFlyoutBody c1"
                   >
                     <div
-                      className="euiFlyoutBody c1"
+                      className="euiFlyoutBody__overflow"
+                      tabIndex={0}
                     >
                       <div
-                        className="euiFlyoutBody__overflow"
-                        tabIndex={0}
+                        className="euiFlyoutBody__overflowContent"
                       >
-                        <div
-                          className="euiFlyoutBody__overflowContent"
+                        <Memo(EventDetailsFlyoutBodyComponent)
+                          activePanel={null}
+                          browserFields={Object {}}
+                          detailsData={null}
+                          expandedEvent={
+                            Object {
+                              "eventId": "my-id",
+                              "indexName": "my-index",
+                            }
+                          }
+                          handleIsolationActionSuccess={[Function]}
+                          handleOnEventClosed={[Function]}
+                          hostRisk={null}
+                          isAlert={false}
+                          isDraggable={false}
+                          isolateAction="isolateHost"
+                          loading={true}
+                          showAlertDetails={[Function]}
+                          timelineId="test"
                         >
                           <ExpandableEvent
                             browserFields={Object {}}
@@ -384,11 +749,29 @@ describe('Details Panel Component', () => {
                               </span>
                             </EuiLoadingContent>
                           </ExpandableEvent>
-                        </div>
+                        </Memo(EventDetailsFlyoutBodyComponent)>
                       </div>
                     </div>
-                  </EuiFlyoutBody>
-                </Styled(EuiFlyoutBody)>
+                  </div>
+                </EuiFlyoutBody>
+              </Styled(EuiFlyoutBody)>
+              <Memo(EventDetailsFlyoutFooterComponent)
+                activePanel={null}
+                detailsData={null}
+                ecsData={null}
+                expandedEvent={
+                  Object {
+                    "eventId": "my-id",
+                    "indexName": "my-index",
+                  }
+                }
+                handleOnEventClosed={[Function]}
+                loading={true}
+                setActivePanel={[Function]}
+                showAlertDetails={[Function]}
+                showHostIsolationPanel={[Function]}
+                timelineId="test"
+              >
                 <Connect(Component)
                   detailsData={null}
                   detailsEcsData={null}
@@ -456,292 +839,7 @@ describe('Details Panel Component', () => {
                     </EuiFlyoutFooter>
                   </Memo()>
                 </Connect(Component)>
-              </EventDetailsPanelComponent>
-            </div>
-          </EuiFlyout>,
-          .c0 {
-          -webkit-flex: 0 1 auto;
-          -ms-flex: 0 1 auto;
-          flex: 0 1 auto;
-          margin-top: 8px;
-        }
-
-        .c1 .euiFlyoutBody__overflow {
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          -webkit-flex: 1;
-          -ms-flex: 1;
-          flex: 1;
-          overflow: hidden;
-        }
-
-        .c1 .euiFlyoutBody__overflow .euiFlyoutBody__overflowContent {
-          -webkit-flex: 1;
-          -ms-flex: 1;
-          flex: 1;
-          overflow: hidden;
-          padding: 0 16px 16px;
-        }
-
-        <div
-            data-eui="EuiFlyout"
-            data-test-subj="timeline:details-panel:flyout"
-            role="dialog"
-          >
-            <button
-              data-test-subj="euiFlyoutCloseButton"
-              onClick={[Function]}
-              type="button"
-            />
-            <EventDetailsPanelComponent
-              browserFields={Object {}}
-              docValueFields={Array []}
-              expandedEvent={
-                Object {
-                  "eventId": "my-id",
-                  "indexName": "my-index",
-                }
-              }
-              handleOnEventClosed={[Function]}
-              isDraggable={false}
-              isFlyoutView={true}
-              runtimeMappings={Object {}}
-              tabType="query"
-              timelineId="test"
-            >
-              <EuiFlyoutHeader
-                hasBorder={false}
-              >
-                <div
-                  className="euiFlyoutHeader"
-                >
-                  <ExpandableEventTitle
-                    isAlert={false}
-                    loading={true}
-                    ruleName=""
-                    timestamp=""
-                  >
-                    <Styled(EuiFlexGroup)
-                      gutterSize="none"
-                      justifyContent="spaceBetween"
-                      wrap={true}
-                    >
-                      <EuiFlexGroup
-                        className="c0"
-                        gutterSize="none"
-                        justifyContent="spaceBetween"
-                        wrap={true}
-                      >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap c0"
-                        >
-                          <EuiFlexItem
-                            grow={false}
-                          >
-                            <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            />
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
-                    </Styled(EuiFlexGroup)>
-                  </ExpandableEventTitle>
-                </div>
-              </EuiFlyoutHeader>
-              <Styled(EuiFlyoutBody)>
-                <EuiFlyoutBody
-                  className="c1"
-                >
-                  <div
-                    className="euiFlyoutBody c1"
-                  >
-                    <div
-                      className="euiFlyoutBody__overflow"
-                      tabIndex={0}
-                    >
-                      <div
-                        className="euiFlyoutBody__overflowContent"
-                      >
-                        <ExpandableEvent
-                          browserFields={Object {}}
-                          detailsData={null}
-                          event={
-                            Object {
-                              "eventId": "my-id",
-                              "indexName": "my-index",
-                            }
-                          }
-                          handleOnEventClosed={[Function]}
-                          hostRisk={null}
-                          isAlert={false}
-                          isDraggable={false}
-                          loading={true}
-                          timelineId="test"
-                          timelineTabType="flyout"
-                        >
-                          <EuiLoadingContent
-                            lines={10}
-                          >
-                            <span
-                              className="euiLoadingContent"
-                            >
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="0"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="1"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="2"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="3"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="4"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="5"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="6"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="7"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="8"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                              <span
-                                className="euiLoadingContent__singleLine"
-                                key="9"
-                              >
-                                <span
-                                  className="euiLoadingContent__singleLineBackground"
-                                />
-                              </span>
-                            </span>
-                          </EuiLoadingContent>
-                        </ExpandableEvent>
-                      </div>
-                    </div>
-                  </div>
-                </EuiFlyoutBody>
-              </Styled(EuiFlyoutBody)>
-              <Connect(Component)
-                detailsData={null}
-                detailsEcsData={null}
-                expandedEvent={
-                  Object {
-                    "eventId": "my-id",
-                    "indexName": "my-index",
-                  }
-                }
-                handleOnEventClosed={[Function]}
-                handlePanelChange={[Function]}
-                isHostIsolationPanelOpen={false}
-                loadingEventDetails={true}
-                onAddIsolationStatusClick={[Function]}
-                timelineId="test"
-              >
-                <Memo()
-                  detailsData={null}
-                  detailsEcsData={null}
-                  dispatch={[Function]}
-                  expandedEvent={
-                    Object {
-                      "eventId": "my-id",
-                      "indexName": "my-index",
-                    }
-                  }
-                  globalQuery={Array []}
-                  handleOnEventClosed={[Function]}
-                  handlePanelChange={[Function]}
-                  isHostIsolationPanelOpen={false}
-                  loadingEventDetails={true}
-                  onAddIsolationStatusClick={[Function]}
-                  timelineId="test"
-                  timelineQuery={
-                    Object {
-                      "id": "",
-                      "inspect": null,
-                      "isInspected": false,
-                      "loading": false,
-                      "refetch": null,
-                      "selectedInspectIndex": 0,
-                    }
-                  }
-                >
-                  <EuiFlyoutFooter>
-                    <div
-                      className="euiFlyoutFooter"
-                    >
-                      <EuiFlexGroup
-                        justifyContent="flexEnd"
-                      >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
-                        >
-                          <EuiFlexItem
-                            grow={false}
-                          >
-                            <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            />
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
-                    </div>
-                  </EuiFlyoutFooter>
-                </Memo()>
-              </Connect(Component)>
+              </Memo(EventDetailsFlyoutFooterComponent)>
             </EventDetailsPanelComponent>
           </div>,
         ]
