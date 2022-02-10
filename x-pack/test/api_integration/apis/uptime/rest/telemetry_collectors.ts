@@ -134,9 +134,6 @@ export default function ({ getService }: FtrProviderContext) {
           min_length: 0,
         },
         fleet_no_of_unique_monitors: 0,
-        synthetics_service_browser_steps: [],
-        synthetics_service_no_of_tests: 0,
-        synthetics_service_enabled: false,
       });
     });
 

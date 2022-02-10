@@ -37,9 +37,6 @@ Object {
       },
       "overview_page": 1,
       "settings_page": 1,
-      "synthetics_service_browser_steps": Array [],
-      "synthetics_service_enabled": false,
-      "synthetics_service_no_of_tests": undefined,
     },
   },
 }

@@ -45,8 +45,4 @@ export interface UptimeTelemetry {
   fleet_no_of_unique_monitors: number;
   fleet_monitor_frequency: number[];
   fleet_monitor_name_stats: Stats;
-
-  synthetics_service_enabled: boolean;
-  synthetics_service_no_of_tests: number;
-  synthetics_service_browser_steps: number[];
 }
