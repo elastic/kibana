@@ -17,10 +17,9 @@ export default ({ getService }: FtrProviderContext) => {
   const spacesService = getService('spaces');
 
   const forecastJobId = 'fq_single_forecast';
+  const forecastJobDatafeedId = `datafeed-${forecastJobId}`;
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
-  const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(forecastJobId);
-  const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(forecastJobId);
 
   async function runForecast(
     jobId: string,
@@ -46,6 +45,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
+
+      const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(forecastJobId);
+      const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(forecastJobId);
 
       await ml.api.createAnomalyDetectionJob(jobConfig, idSpace1);
       await ml.api.createDatafeed(datafeedConfig, idSpace1);
@@ -73,15 +75,19 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should run forecast for open job with valid job ID', async () => {
-      await ml.api.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${Date.now()}` });
-      await ml.api.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
-      await ml.api.waitForJobState(jobConfig.job_id, JOB_STATE.CLOSED);
+      await ml.api.startDatafeed(forecastJobDatafeedId, { start: '0', end: `${Date.now()}` });
+      await ml.api.waitForDatafeedState(forecastJobDatafeedId, DATAFEED_STATE.STOPPED);
+      await ml.api.waitForJobState(forecastJobId, JOB_STATE.CLOSED);
       await ml.api.openAnomalyDetectionJob(forecastJobId);
       await runForecast(forecastJobId, idSpace1, '1d', USER.ML_POWERUSER, 200);
+      await ml.testExecution.logTestStep(
+        `forecast results should exist for job '${forecastJobId}'`
+      );
+      await ml.api.assertForecastResultsExist(forecastJobId);
     });
 
     it('should not run forecast for open job with invalid duration', async () => {
-      await runForecast(forecastJobId, idSpace1, 3600000, USER.ML_VIEWER, 403);
+      await runForecast(forecastJobId, idSpace1, 3600000, USER.ML_POWERUSER, 400);
     });
 
     it('should not run forecast for open job with valid job ID as ML Viewer', async () => {
