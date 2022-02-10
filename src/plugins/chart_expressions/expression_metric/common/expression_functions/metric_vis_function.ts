@@ -37,6 +37,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Which part of metric to color',
       }),
     },
+    colorFullBackground: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionMetricVis.function.colorizeContainer.help', {
+        defaultMessage:
+          'Colorize full container with provided color from palette if color mode is background',
+      }),
+    },
     palette: {
       types: ['palette'],
       help: i18n.translate('expressionMetricVis.function.palette.help', {
@@ -77,6 +85,44 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       throw new Error('Palette must be provided when using percentageMode');
     }
 
+    // currently we can allow colorize full container only for one metric
+    if (args.colorFullBackground) {
+      if (args.bucket) {
+        throw new Error(
+          i18n.translate(
+            'expressionMetricVis.function.errors.splitByBucketAndColorFullBackgroundSpecified',
+            {
+              defaultMessage:
+                'A bucket and colorize full container are specified. Expression is supporting only one of them at once.',
+            }
+          )
+        );
+      }
+
+      if (args.metric.length > 1) {
+        throw new Error(
+          i18n.translate(
+            'expressionMetricVis.function.errors.severalMetricsAndColorFullBackgroundSpecified',
+            {
+              defaultMessage:
+                'A several metrics and colorize full container are specified. Expression is supporting only one of them at once.',
+            }
+          )
+        );
+      }
+    }
+
+    if (input.rows.length > 1) {
+      throw new Error(
+        i18n.translate(
+          'expressionMetricVis.function.errors.severalRowsAndColorFullBackgroundSpecified',
+          {
+            defaultMessage: 'Colorize full container can be applied only for one metric.',
+          }
+        )
+      );
+    }
+
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
         [
@@ -112,6 +158,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             labels: {
               show: args.showLabels,
             },
+            colorFullBackground: args.colorFullBackground,
             style: {
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,

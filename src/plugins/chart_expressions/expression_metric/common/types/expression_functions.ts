@@ -25,6 +25,7 @@ export interface MetricArguments {
   font: Style;
   metric: ExpressionValueVisDimension[];
   bucket?: ExpressionValueVisDimension;
+  colorFullBackground: boolean;
 }
 
 export type MetricInput = Datatable;

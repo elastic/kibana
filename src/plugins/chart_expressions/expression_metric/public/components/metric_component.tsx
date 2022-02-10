@@ -117,6 +117,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
           this.props.visParams.dimensions.bucket ? () => this.filterBucket(index) : undefined
         }
         showLabel={this.props.visParams.metric.labels.show}
+        colorFullBackground={this.props.visParams.metric.colorFullBackground}
       />
     );
   };

@@ -15,14 +15,23 @@ interface MetricVisValueProps {
   onFilter?: () => void;
   showLabel?: boolean;
   style: MetricStyle;
+  colorFullBackground: boolean;
 }
 
-export const MetricVisValue = ({ style, metric, onFilter, showLabel }: MetricVisValueProps) => {
+export const MetricVisValue = ({
+  style,
+  metric,
+  onFilter,
+  showLabel,
+  colorFullBackground,
+}: MetricVisValueProps) => {
   const containerClassName = classNames('mtrVis__container', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'mtrVis__container--light': metric.lightText,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     'mtrVis__container-isfilterable': onFilter,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    'mtrVis__container-isfull': colorFullBackground,
   });
 
   const metricComponent = (
