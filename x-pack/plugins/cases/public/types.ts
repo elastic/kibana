@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
 import type { LensPublicStart } from '../../lens/public';
 import type { SecurityPluginSetup } from '../../security/public';
@@ -23,6 +23,7 @@ import type {
   GetRecentCasesProps,
   CasesOwners,
 } from './methods';
+import { GetCasesContextProps } from './methods/get_cases_context';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -64,6 +65,9 @@ export interface CasesUiStart {
    * @return {ReactElement<GetCasesProps>}
    */
   getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
+  getCasesContext: () => (
+    props: GetCasesContextProps & { children: ReactNode }
+  ) => ReactElement<GetCasesContextProps>;
   /**
    * Modal to select a case in a list of all owner cases
    * @param props GetAllCasesSelectorModalProps
