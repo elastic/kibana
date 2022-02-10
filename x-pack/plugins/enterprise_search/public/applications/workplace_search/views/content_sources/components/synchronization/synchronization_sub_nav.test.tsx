@@ -25,7 +25,7 @@ describe('useSynchronizationSubNav', () => {
       },
       {
         id: 'sourceSynchronizationAssetsAndObjects',
-        name: 'Objects and assets',
+        name: 'Assets and objects',
         href: '/sources/1/synchronization/assets_and_objects',
       },
     ]);

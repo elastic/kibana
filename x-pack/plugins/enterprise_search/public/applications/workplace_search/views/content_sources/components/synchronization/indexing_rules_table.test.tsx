@@ -5,329 +5,247 @@
  * 2.0.
  */
 
-// import { mockFlashMessageHelpers, setMockActions } from '../../../../../__mocks__/kea_logic';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  setMockActions,
+  setMockValues,
+} from '../../../../../__mocks__/kea_logic';
+import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 
-// import React from 'react';
+import React from 'react';
 
-// import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-// import { EuiFieldText, EuiSelect } from '@elastic/eui';
+import { EuiFieldText, EuiSelect } from '@elastic/eui';
 
-// import { IndexingRulesTable } from './indexing_rules_table';
-// import { InlineEditableTable } from '../../../../../shared/tables/inline_editable_table';
+import { InlineEditableTable } from '../../../../../shared/tables/inline_editable_table';
 
-// describe('CrawlRulesTable', () => {
-//   const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;
-//   const indexingRules = [
-//     { id: 0, valueType: 'exclude', filterType: 'path_template', value: 'value' },
-//     { id: 1, valueType: 'include', filterType: 'file_extension', value: 'value' },
-//   ];
+import { SourceLogic } from '../../source_logic';
 
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//   });
+import { IndexingRulesTable } from './indexing_rules_table';
 
-//   it('renders', () => {
-//     const wrapper = shallow(
-//       <IndexingRulesTable/>
-//     );
+import { SynchronizationLogic } from './synchronization_logic';
 
-//     expect(wrapper.find(InlineEditableTable).exists()).toBe(true);
-//   });
+describe('IndexingRulesTable', () => {
+  const { clearFlashMessages } = mockFlashMessageHelpers;
+  const { mount: sourceMount } = new LogicMounter(SourceLogic);
+  const { mount: syncMount } = new LogicMounter(SynchronizationLogic);
 
-//   describe('columns', () => {
-//     const crawlRule = {
-//       id: 0,
-//       pattern: '*',
-//       policy: CrawlerPolicies.allow,
-//       rule: CrawlerRules.beginsWith,
-//     };
-//     let wrapper: ShallowWrapper;
+  const indexingRules = [
+    { id: 0, valueType: 'exclude', filterType: 'path_template', value: 'value' },
+    { id: 1, valueType: 'include', filterType: 'file_extension', value: 'value' },
+    { id: 2, valueType: 'include', filterType: 'object_type', value: 'value 2' },
+    { id: 3, valueType: 'broken', filterType: 'not allowed', value: 'value 2' },
+  ];
+  const contentSource = fullContentSources[0];
 
-//     beforeEach(() => {
-//       wrapper = shallow(
-//         <CrawlRulesTable
-//           domainId="6113e1407a2f2e6f42489794"
-//           engineName={engineName}
-//           crawlRules={crawlRules}
-//         />
-//       );
-//     });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sourceMount({}, {});
+    setMockValues({ contentSource });
+    syncMount({}, { contentSource });
+  });
 
-//     const renderColumn = (index: number) => {
-//       const columns = wrapper.find(GenericEndpointInlineEditableTable).prop('columns');
-//       return shallow(<div>{columns[index].render(crawlRule)}</div>);
-//     };
+  it('renders', () => {
+    const wrapper = shallow(<IndexingRulesTable />);
 
-//     const onChange = jest.fn();
-//     const renderColumnInEditingMode = (index: number) => {
-//       const columns = wrapper.find(GenericEndpointInlineEditableTable).prop('columns');
-//       return shallow(
-//         <div>
-//           {columns[index].editingRender(crawlRule, onChange, {
-//             isInvalid: false,
-//             isLoading: false,
-//           })}
-//         </div>
-//       );
-//     };
+    expect(wrapper.find(InlineEditableTable).exists()).toBe(true);
+  });
 
-//     describe('policy column', () => {
-//       it('shows the policy of a crawl rule', () => {
-//         expect(renderColumn(0).html()).toContain('Allow');
-//       });
+  describe('columns', () => {
+    let wrapper: ShallowWrapper;
 
-//       it('can show the policy of a crawl rule as editable', () => {
-//         const column = renderColumnInEditingMode(0);
+    beforeEach(() => {
+      wrapper = shallow(<IndexingRulesTable />);
+    });
 
-//         const selectField = column.find(EuiSelect);
-//         expect(selectField.props()).toEqual(
-//           expect.objectContaining({
-//             value: 'allow',
-//             disabled: false,
-//             isInvalid: false,
-//             options: [
-//               { text: 'Allow', value: 'allow' },
-//               { text: 'Disallow', value: 'deny' },
-//             ],
-//           })
-//         );
+    const renderColumn = (index: number, ruleIndex: number) => {
+      const columns = wrapper.find(InlineEditableTable).prop('columns');
+      return shallow(<div>{columns[index].render(indexingRules[ruleIndex])}</div>);
+    };
 
-//         selectField.simulate('change', { target: { value: 'deny' } });
-//         expect(onChange).toHaveBeenCalledWith('deny');
-//       });
-//     });
+    const onChange = jest.fn();
+    const renderColumnInEditingMode = (index: number, ruleIndex: number) => {
+      const columns = wrapper.find(InlineEditableTable).prop('columns');
+      return shallow(
+        <div>
+          {columns[index].editingRender(indexingRules[ruleIndex], onChange, {
+            isInvalid: false,
+            isLoading: false,
+          })}
+        </div>
+      );
+    };
 
-//     describe('rule column', () => {
-//       it('shows the rule of a crawl rule', () => {
-//         expect(renderColumn(1).html()).toContain('Begins with');
-//       });
+    describe(' column', () => {
+      it('shows the value type of an indexing rule', () => {
+        expect(renderColumn(0, 0).html()).toContain('Exclude');
+        expect(renderColumn(0, 1).html()).toContain('Include');
+        expect(renderColumn(0, 3).html()).toContain('');
+      });
 
-//       it('can show the rule of a crawl rule as editable', () => {
-//         const column = renderColumnInEditingMode(1);
+      it('can show the value type of an indexing rule as editable', () => {
+        const column = renderColumnInEditingMode(0, 0);
 
-//         const selectField = column.find(EuiSelect);
-//         expect(selectField.props()).toEqual(
-//           expect.objectContaining({
-//             value: 'begins',
-//             disabled: false,
-//             isInvalid: false,
-//             options: [
-//               { text: 'Begins with', value: 'begins' },
-//               { text: 'Ends with', value: 'ends' },
-//               { text: 'Contains', value: 'contains' },
-//               { text: 'Regex', value: 'regex' },
-//             ],
-//           })
-//         );
+        const selectField = column.find(EuiSelect);
+        expect(selectField.props()).toEqual(
+          expect.objectContaining({
+            value: 'exclude',
+            disabled: false,
+            isInvalid: false,
+            options: [
+              { text: 'Include', value: 'include' },
+              { text: 'Exclude', value: 'exclude' },
+            ],
+          })
+        );
 
-//         selectField.simulate('change', { target: { value: 'ends' } });
-//         expect(onChange).toHaveBeenCalledWith('ends');
-//       });
-//     });
+        selectField.simulate('change', { target: { value: 'include' } });
+        expect(onChange).toHaveBeenCalledWith('include');
+      });
+    });
 
-//     describe('pattern column', () => {
-//       it('shows the pattern of a crawl rule', () => {
-//         expect(renderColumn(2).html()).toContain('*');
-//       });
+    describe('filter type column', () => {
+      it('shows the filter type of an indexing rule', () => {
+        expect(renderColumn(1, 0).html()).toContain('Path');
+        expect(renderColumn(1, 1).html()).toContain('File');
+        expect(renderColumn(1, 2).html()).toContain('Item');
+        expect(renderColumn(1, 3).html()).toContain('');
+      });
 
-//       it('can show the pattern of a crawl rule as editable', () => {
-//         const column = renderColumnInEditingMode(2);
+      it('can show the filter type of an indexing rule as editable', () => {
+        const column = renderColumnInEditingMode(1, 0);
 
-//         const field = column.find(EuiFieldText);
-//         expect(field.props()).toEqual(
-//           expect.objectContaining({
-//             value: '*',
-//             disabled: false,
-//             isInvalid: false,
-//           })
-//         );
+        const selectField = column.find(EuiSelect);
+        expect(selectField.props()).toEqual(
+          expect.objectContaining({
+            value: 'path_template',
+            disabled: false,
+            isInvalid: false,
+            options: [
+              { text: 'Item', value: 'object_type' },
+              { text: 'Path', value: 'path_template' },
+              { text: 'File type', value: 'file_extension' },
+            ],
+          })
+        );
 
-//         field.simulate('change', { target: { value: 'foo' } });
-//         expect(onChange).toHaveBeenCalledWith('foo');
-//       });
-//     });
-//   });
+        selectField.simulate('change', { target: { value: 'object_type' } });
+        expect(onChange).toHaveBeenCalledWith('object_type');
+      });
+    });
 
-//   describe('routes', () => {
-//     it('can calculate an update and delete route correctly', () => {
-//       const wrapper = shallow(
-//         <CrawlRulesTable
-//           domainId="6113e1407a2f2e6f42489794"
-//           engineName={engineName}
-//           crawlRules={crawlRules}
-//         />
-//       );
+    describe('pattern column', () => {
+      it('shows the value of an indexing rule', () => {
+        expect(renderColumn(2, 0).html()).toContain('value');
+      });
 
-//       const table = wrapper.find(GenericEndpointInlineEditableTable);
+      it('can show the value of a indexing rule as editable', () => {
+        const column = renderColumnInEditingMode(2, 0);
 
-//       const crawlRule = {
-//         id: '1',
-//         pattern: '*',
-//         policy: CrawlerPolicies.allow,
-//         rule: CrawlerRules.beginsWith,
-//       };
-//       expect(table.prop('deleteRoute')(crawlRule)).toEqual(
-//         '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/crawl_rules/1'
-//       );
-//       expect(table.prop('updateRoute')(crawlRule)).toEqual(
-//         '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/crawl_rules/1'
-//       );
-//     });
-//   });
+        const field = column.find(EuiFieldText);
+        expect(field.props()).toEqual(
+          expect.objectContaining({
+            value: 'value',
+            disabled: false,
+            isInvalid: false,
+          })
+        );
 
-//   it('shows a custom description if one is provided', () => {
-//     const wrapper = shallow(
-//       <CrawlRulesTable
-//         domainId="6113e1407a2f2e6f42489794"
-//         description="I am a description"
-//         engineName={engineName}
-//         crawlRules={crawlRules}
-//       />
-//     );
+        field.simulate('change', { target: { value: 'foo' } });
+        expect(onChange).toHaveBeenCalledWith('foo');
+      });
+    });
+  });
 
-//     const table = wrapper.find(GenericEndpointInlineEditableTable);
-//     expect(table.prop('description')).toEqual('I am a description');
-//   });
+  describe('when an indexing rule is added', () => {
+    it('should update the indexing rules for the current domain, and clear flash messages', () => {
+      const initAddIndexingRule = jest.fn();
+      const done = jest.fn();
+      setMockActions({
+        initAddIndexingRule,
+      });
+      const wrapper = shallow(<IndexingRulesTable />);
+      const table = wrapper.find(InlineEditableTable);
 
-//   it('shows a default crawl rule as uneditable if one is provided', () => {
-//     const wrapper = shallow(
-//       <CrawlRulesTable
-//         domainId="6113e1407a2f2e6f42489794"
-//         engineName={engineName}
-//         crawlRules={crawlRules}
-//         defaultCrawlRule={crawlRules[0]}
-//       />
-//     );
+      const newIndexingRule = {
+        id: 2,
+        value: 'new value',
+        filterType: 'path_template',
+        valueType: 'include',
+      };
+      table.prop('onAdd')(newIndexingRule, done);
+      expect(initAddIndexingRule).toHaveBeenCalledWith(newIndexingRule, done);
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
+  });
 
-//     const table = wrapper.find(GenericEndpointInlineEditableTable);
-//     expect(table.prop('uneditableItems')).toEqual([crawlRules[0]]);
-//   });
+  describe('when an indexing rule is updated', () => {
+    it('should update the indexing rules for the current domain, and clear flash messages', () => {
+      const initSetIndexingRule = jest.fn();
+      const done = jest.fn();
+      setMockActions({
+        initSetIndexingRule,
+      });
+      const wrapper = shallow(<IndexingRulesTable />);
+      const table = wrapper.find(InlineEditableTable);
 
-//   describe('when a crawl rule is added', () => {
-//     it('should update the crawl rules for the current domain, and clear flash messages', () => {
-//       const updateCrawlRules = jest.fn();
-//       setMockActions({
-//         updateCrawlRules,
-//       });
-//       const wrapper = shallow(
-//         <CrawlRulesTable
-//           domainId="6113e1407a2f2e6f42489794"
-//           engineName={engineName}
-//           crawlRules={crawlRules}
-//           defaultCrawlRule={crawlRules[0]}
-//         />
-//       );
-//       const table = wrapper.find(GenericEndpointInlineEditableTable);
+      const newIndexingRule = {
+        id: 2,
+        value: 'new value',
+        filterType: 'path_template',
+        valueType: 'include',
+      };
+      table.prop('onUpdate')(newIndexingRule, done);
+      expect(initSetIndexingRule).toHaveBeenCalledWith(newIndexingRule, done);
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
+  });
 
-//       const crawlRulesThatWasAdded = {
-//         id: '2',
-//         pattern: '*',
-//         policy: CrawlerPolicies.deny,
-//         rule: CrawlerRules.endsWith,
-//       };
-//       const updatedCrawlRules = [
-//         { id: '1', pattern: '*', policy: CrawlerPolicies.allow, rule: CrawlerRules.beginsWith },
-//         { id: '2', pattern: '*', policy: CrawlerPolicies.deny, rule: CrawlerRules.endsWith },
-//       ];
-//       table.prop('onAdd')(crawlRulesThatWasAdded, updatedCrawlRules);
-//       expect(updateCrawlRules).toHaveBeenCalledWith(updatedCrawlRules);
-//       expect(clearFlashMessages).toHaveBeenCalled();
-//     });
-//   });
+  describe('when a indexing rule is deleted', () => {
+    it('should update the indexing rules for the current domain, and clear flash messages', () => {
+      const deleteIndexingRule = jest.fn();
+      const done = jest.fn();
+      setMockActions({
+        deleteIndexingRule,
+      });
+      const wrapper = shallow(<IndexingRulesTable />);
+      const table = wrapper.find(InlineEditableTable);
 
-//   describe('when a crawl rule is updated', () => {
-//     it('should update the crawl rules for the current domain, and clear flash messages', () => {
-//       const updateCrawlRules = jest.fn();
-//       setMockActions({
-//         updateCrawlRules,
-//       });
-//       const wrapper = shallow(
-//         <CrawlRulesTable
-//           domainId="6113e1407a2f2e6f42489794"
-//           engineName={engineName}
-//           crawlRules={crawlRules}
-//           defaultCrawlRule={crawlRules[0]}
-//         />
-//       );
-//       const table = wrapper.find(GenericEndpointInlineEditableTable);
+      const newIndexingRule = {
+        id: 2,
+        value: 'new value',
+        filterType: 'path_template',
+        valueType: 'include',
+      };
+      table.prop('onDelete')(newIndexingRule, done);
+      expect(deleteIndexingRule).toHaveBeenCalledWith(newIndexingRule);
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
+  });
 
-//       const crawlRulesThatWasUpdated = {
-//         id: '2',
-//         pattern: '*',
-//         policy: CrawlerPolicies.deny,
-//         rule: CrawlerRules.endsWith,
-//       };
-//       const updatedCrawlRules = [
-//         { id: '1', pattern: '*', policy: CrawlerPolicies.allow, rule: CrawlerRules.beginsWith },
-//         {
-//           id: '2',
-//           pattern: 'newPattern',
-//           policy: CrawlerPolicies.deny,
-//           rule: CrawlerRules.endsWith,
-//         },
-//       ];
-//       table.prop('onUpdate')(crawlRulesThatWasUpdated, updatedCrawlRules);
-//       expect(updateCrawlRules).toHaveBeenCalledWith(updatedCrawlRules);
-//       expect(clearFlashMessages).toHaveBeenCalled();
-//     });
-//   });
+  describe('when an indexing rule is reordered', () => {
+    it('should update the indexing rules for the current domain, and clear flash messages', () => {
+      const setIndexingRules = jest.fn();
+      const done = jest.fn();
+      setMockActions({
+        setIndexingRules,
+      });
+      const wrapper = shallow(<IndexingRulesTable />);
+      const table = wrapper.find(InlineEditableTable);
 
-//   describe('when a crawl rule is deleted', () => {
-//     it('should update the crawl rules for the current domain, clear flash messages, and show a success', () => {
-//       const updateCrawlRules = jest.fn();
-//       setMockActions({
-//         updateCrawlRules,
-//       });
-//       const wrapper = shallow(
-//         <CrawlRulesTable
-//           domainId="6113e1407a2f2e6f42489794"
-//           engineName={engineName}
-//           crawlRules={crawlRules}
-//           defaultCrawlRule={crawlRules[0]}
-//         />
-//       );
-//       const table = wrapper.find(GenericEndpointInlineEditableTable);
-
-//       const crawlRulesThatWasDeleted = {
-//         id: '2',
-//         pattern: '*',
-//         policy: CrawlerPolicies.deny,
-//         rule: CrawlerRules.endsWith,
-//       };
-//       const updatedCrawlRules = [
-//         { id: '1', pattern: '*', policy: CrawlerPolicies.allow, rule: CrawlerRules.beginsWith },
-//       ];
-//       table.prop('onDelete')(crawlRulesThatWasDeleted, updatedCrawlRules);
-//       expect(updateCrawlRules).toHaveBeenCalledWith(updatedCrawlRules);
-//       expect(clearFlashMessages).toHaveBeenCalled();
-//       expect(flashSuccessToast).toHaveBeenCalled();
-//     });
-//   });
-
-//   describe('when a crawl rule is reordered', () => {
-//     it('should update the crawl rules for the current domain and clear flash messages', () => {
-//       const updateCrawlRules = jest.fn();
-//       setMockActions({
-//         updateCrawlRules,
-//       });
-//       const wrapper = shallow(
-//         <CrawlRulesTable
-//           domainId="6113e1407a2f2e6f42489794"
-//           engineName={engineName}
-//           crawlRules={crawlRules}
-//           defaultCrawlRule={crawlRules[0]}
-//         />
-//       );
-//       const table = wrapper.find(GenericEndpointInlineEditableTable);
-
-//       const updatedCrawlRules = [
-//         { id: '2', pattern: '*', policy: CrawlerPolicies.deny, rule: CrawlerRules.endsWith },
-//         { id: '1', pattern: '*', policy: CrawlerPolicies.allow, rule: CrawlerRules.beginsWith },
-//       ];
-//       table.prop('onReorder')!(updatedCrawlRules);
-//       expect(updateCrawlRules).toHaveBeenCalledWith(updatedCrawlRules);
-//       expect(clearFlashMessages).toHaveBeenCalled();
-//     });
-//   });
-// });
+      const newIndexingRules = [
+        {
+          id: 2,
+          value: 'new value',
+          filterType: 'path_template',
+          valueType: 'include',
+        },
+      ];
+      table.prop('onReorder')!(newIndexingRules, indexingRules, done);
+      expect(setIndexingRules).toHaveBeenCalledWith(newIndexingRules);
+      expect(clearFlashMessages).toHaveBeenCalled();
+    });
+  });
+});

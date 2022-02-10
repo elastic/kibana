@@ -169,9 +169,9 @@ export interface BlockedWindow {
 }
 
 export interface IndexingRule {
-  filterType: 'object_type' | 'path_template' | 'file_extension',
-  exclude?: string,
-  include?: string,
+  filterType: 'object_type' | 'path_template' | 'file_extension';
+  exclude?: string;
+  include?: string;
 }
 
 export interface IndexingConfig {

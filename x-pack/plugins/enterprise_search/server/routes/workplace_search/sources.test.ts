@@ -338,9 +338,12 @@ describe('sources routes', () => {
       it('correctly', () => {
         const request = {
           body: {
-            content_source: {
-              name: 'foo',
-            },
+            rules: [
+              {
+                filter_type: 'path_template',
+                exclude: '',
+              },
+            ],
           },
         };
         mockRouter.shouldValidate(request);
@@ -874,7 +877,7 @@ describe('sources routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/sources/:id/validate_rules',
+        path: '/ws/org/sources/:id/validate_rules',
       });
     });
 

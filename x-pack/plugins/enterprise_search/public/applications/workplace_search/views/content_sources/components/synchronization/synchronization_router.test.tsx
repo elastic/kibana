@@ -14,8 +14,8 @@ import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { Frequency } from './frequency';
 import { AssetsAndObjects } from './assets_and_objects';
+import { Frequency } from './frequency';
 import { Synchronization } from './synchronization';
 import { SynchronizationRouter } from './synchronization_router';
 
