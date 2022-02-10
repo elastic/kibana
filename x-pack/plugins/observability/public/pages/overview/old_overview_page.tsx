@@ -157,10 +157,10 @@ function OverviewPage({ routeParams }: Props) {
   );
 }
 
-export function WrappedOldOverviewPage() {
+export function WrappedOldOverviewPage({ routeParams }: Props) {
   return (
     <Provider value={alertsPageStateContainer}>
-      <OverviewPage routeParams={{ query: {} }} />
+      <OverviewPage routeParams={routeParams} />
     </Provider>
   );
 }
