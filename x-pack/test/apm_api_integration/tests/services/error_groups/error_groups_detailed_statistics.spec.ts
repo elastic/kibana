@@ -43,7 +43,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           numBuckets: 20,
-          transactionType: 'request',
           groupIds: JSON.stringify(['foo']),
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
