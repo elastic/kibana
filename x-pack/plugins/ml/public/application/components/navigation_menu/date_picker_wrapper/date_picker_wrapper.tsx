@@ -124,11 +124,11 @@ export const DatePickerWrapper: FC = () => {
       displayWarningToast(
         {
           title: isResolvedFromUrlState
-            ? i18n.translate('xpack.ml.datePicker.shortRefreshIntervalWarningMessage', {
+            ? i18n.translate('xpack.ml.datePicker.shortRefreshIntervalURLWarningMessage', {
                 defaultMessage:
                   'The refresh interval in the URL is shorter than the minimum supported by Machine Learning.',
               })
-            : i18n.translate('xpack.ml.datePicker.shortRefreshIntervalWarningMessage', {
+            : i18n.translate('xpack.ml.datePicker.shortRefreshIntervalTimeFilterWarningMessage', {
                 defaultMessage:
                   'The refresh interval in Advanced Settings is shorter than the minimum supported by Machine Learning.',
               }),
