@@ -24,7 +24,8 @@ import {
   KibanaPageTemplateSolutionNavProps,
 } from './solution_nav/solution_nav';
 
-import { NoDataPage, NoDataPageProps, NO_DATA_PAGE_TEMPLATE_PROPS } from './no_data_page';
+import { EmptyStatePage } from '../empty_state_page';
+import { NoDataPageProps, NO_DATA_PAGE_TEMPLATE_PROPS } from './no_data_page';
 
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
@@ -132,20 +133,18 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
    */
   if (noDataConfig) {
     return (
-      <EuiPageTemplate
+      <EmptyStatePage
         data-test-subj={rest['data-test-subj']}
         template={template}
-        className={classes}
+        classes={classes}
         pageSideBar={pageSideBar}
         pageSideBarProps={{
           paddingSize: solutionNav ? 'none' : 'l',
           ...pageSideBarProps,
           className: classNames(sideBarClasses, pageSideBarProps?.className),
         }}
-        {...NO_DATA_PAGE_TEMPLATE_PROPS}
-      >
-        <NoDataPage {...noDataConfig} />
-      </EuiPageTemplate>
+        noDataConfig={noDataConfig}
+      />
     );
   }
 
