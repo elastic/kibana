@@ -72,6 +72,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -104,6 +105,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -141,6 +143,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -359,6 +362,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -391,6 +395,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -428,6 +433,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -587,6 +593,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -619,6 +626,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -656,6 +664,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -790,6 +799,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -822,6 +832,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -859,6 +870,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>

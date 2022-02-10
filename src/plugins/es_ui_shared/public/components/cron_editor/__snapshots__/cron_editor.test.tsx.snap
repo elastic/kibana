@@ -32,12 +32,14 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -589,12 +591,14 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Time"
@@ -1698,12 +1702,14 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -2154,12 +2160,14 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Minute"
@@ -2911,12 +2919,14 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -3127,12 +3137,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -3813,12 +3825,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Date"
@@ -4271,12 +4285,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Time"
@@ -5380,12 +5396,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -5970,12 +5988,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Day"
@@ -6188,12 +6208,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Time"
@@ -7297,12 +7319,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -8036,12 +8060,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Month"
@@ -8304,12 +8330,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Date"
@@ -8762,12 +8790,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Time"
