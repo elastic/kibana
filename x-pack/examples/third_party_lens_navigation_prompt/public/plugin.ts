@@ -5,53 +5,60 @@
  * 2.0.
  */
 
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { DiscoverSetup } from 'src/plugins/discover/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public';
 import { DataViewsPublicPluginStart, DataView } from '../../../../src/plugins/data_views/public';
-import { LensPublicSetup, LensPublicStart } from '../../../plugins/lens/public';
+import {
+  DateHistogramIndexPatternColumn,
+  IndexPatternPersistedState,
+  LensPublicSetup,
+  LensPublicStart,
+} from '../../../plugins/lens/public';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import { TypedLensByValueInput, PersistedIndexPatternLayer } from '../../../plugins/lens/public';
-import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
-import { getRotatingNumberVisualization } from './visualization';
-import { RotatingNumberState } from '../common/types';
 import image from './image.png';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
   lens: LensPublicSetup;
-  expressions: ExpressionsSetup;
+  discover: DiscoverSetup;
 }
 
 export interface StartDependencies {
   dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
   lens: LensPublicStart;
-  fieldFormats: FieldFormatsStart;
 }
 
 function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['attributes'] {
   const dataLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['col1'],
+    columnOrder: ['col1', 'col2'],
     columns: {
       col1: {
+        dataType: 'date',
+        isBucketed: true,
+        label: '@timestamp',
+        operationType: 'date_histogram',
+        params: { interval: 'auto' },
+        scale: 'interval',
+        sourceField: defaultDataView.timeFieldName!,
+      } as DateHistogramIndexPatternColumn,
+      col2: {
         dataType: 'number',
         isBucketed: false,
-        label: 'Count of records',
-        operationType: 'count',
+        label: 'Average',
+        operationType: 'average',
         scale: 'ratio',
-        sourceField: '___records___',
+        sourceField: defaultDataView.fields.find(
+          (field) => field.aggregatable && field.type === 'number'
+        )!.name,
       },
     },
   };
 
-  const rotatingNumberConfig: RotatingNumberState = {
-    accessor: 'col1',
-    color: '#ff0000',
-    layerId: 'layer1',
-  };
-
   return {
-    visualizationType: 'rotatingNumber',
+    visualizationType: 'lnsDatatable',
     title: 'Prefilled from example app',
     references: [
       {
@@ -75,7 +82,11 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
       },
       filters: [],
       query: { language: 'kuery', query: '' },
-      visualization: rotatingNumberConfig,
+      visualization: {
+        columns: [{ columnId: 'col1' }, { columnId: 'col2' }],
+        layerId: 'layer1',
+        layerType: 'data',
+      },
     },
   };
 }
@@ -85,11 +96,11 @@ export class EmbeddedLensExamplePlugin
 {
   public setup(
     core: CoreSetup<StartDependencies>,
-    { developerExamples, lens, expressions }: SetupDependencies
+    { developerExamples, lens, discover }: SetupDependencies
   ) {
     core.application.register({
-      id: 'third_party_lens_vis_example',
-      title: 'Third party Lens vis example',
+      id: 'third_party_lens_navigation_prompt',
+      title: 'Third party Lens navigation prompt',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: (params) => {
         (async () => {
@@ -109,14 +120,15 @@ export class EmbeddedLensExamplePlugin
     });
 
     developerExamples.register({
-      appId: 'third_party_lens_vis_example',
-      title: 'Third party Lens visualization',
-      description: 'Add custom visualization types to the Lens editor',
+      appId: 'third_party_lens_navigation_prompt',
+      title: 'Third party Lens navigation prompt',
+      description:
+        'Add custom menu entries to the Lens editor, like the "Go to discover" link in this example.',
       image,
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_vis_lens_example',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_lens_navigation_prompt',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
@@ -124,14 +136,33 @@ export class EmbeddedLensExamplePlugin
       ],
     });
 
-    expressions.registerRenderer(() =>
-      getRotatingNumberRenderer(
-        core.getStartServices().then(([, { fieldFormats }]) => fieldFormats.deserialize)
-      )
-    );
-    expressions.registerFunction(() => rotatingNumberFunction);
+    if (!discover.locator) return;
+    lens.registerTopNavMenuEntryGenerator(({ datasourceStates, query, filters }) => {
+      if (!datasourceStates.indexpattern.state) return;
 
-    lens.registerVisualization(async () => getRotatingNumberVisualization({ theme: core.theme }));
+      return {
+        label: 'Go to discover',
+        iconType: 'discoverApp',
+        run: async () => {
+          const [, { data }] = await core.getStartServices();
+          const firstLayer = Object.values(
+            (datasourceStates.indexpattern.state as IndexPatternPersistedState).layers
+          )[0] as PersistedIndexPatternLayer & { indexPatternId: string };
+          discover.locator!.navigate({
+            indexPatternId: firstLayer.indexPatternId,
+            timeRange: data.query.timefilter.timefilter.getTime(),
+            filters,
+            query,
+            columns: firstLayer.columnOrder
+              .map((columnId) => {
+                const column = firstLayer.columns[columnId];
+                if ('sourceField' in column) return column.sourceField;
+              })
+              .filter(Boolean) as string[],
+          });
+        },
+      };
+    });
   }
 
   public start() {}
