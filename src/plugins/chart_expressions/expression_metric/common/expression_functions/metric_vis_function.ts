@@ -110,17 +110,17 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           )
         );
       }
-    }
 
-    if (input.rows.length > 1) {
-      throw new Error(
-        i18n.translate(
-          'expressionMetricVis.function.errors.severalRowsAndColorFullBackgroundSpecified',
-          {
-            defaultMessage: 'Colorize full container can be applied only for one metric.',
-          }
-        )
-      );
+      if (input.rows.length > 1) {
+        throw new Error(
+          i18n.translate(
+            'expressionMetricVis.function.errors.severalRowsAndColorFullBackgroundSpecified',
+            {
+              defaultMessage: 'Colorize full container can be applied only for one metric.',
+            }
+          )
+        );
+      }
     }
 
     if (handlers?.inspectorAdapters?.tables) {
