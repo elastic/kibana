@@ -93,12 +93,12 @@ export function APMSection({ bucketSize }: Props) {
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.apm.title', {
-        defaultMessage: 'APM',
+        defaultMessage: 'Services',
       })}
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.apm.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Show service inventory',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}
