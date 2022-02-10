@@ -9,7 +9,10 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { find } from 'lodash';
 import { useKibana } from '../../common/lib/kibana';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { AgentPolicy, FleetServerAgent, NewPackagePolicy } from '../../../../fleet/common';
 
 export const ACTION_OSQUERY = i18n.translate('xpack.osquery.alerts.osqueryAlertTitle', {
   defaultMessage: 'Run Osquery',
@@ -26,10 +29,17 @@ export const useOsqueryMenuItem = ({ agentId, onClick }: IProps) => {
   useEffect(() => {
     (async () => {
       try {
-        const result: { item: boolean } = await http.get(
-          `/internal/osquery/fleet_wrapper/agents/${agentId}/available`
+        const { item: agentInfo }: { item: FleetServerAgent } = await http.get(
+          `/internal/osquery/fleet_wrapper/agents/${agentId}`
         );
-        setIsAvailable(result.item);
+        const { item: packageInfo }: { item: AgentPolicy } = await http.get(
+          `/internal/osquery/fleet_wrapper/agent_policies/${agentInfo.policy_id}/`
+        );
+        const osqueryPackageInstalled = find(packageInfo?.package_policies, [
+          'package.name',
+          OSQUERY_INTEGRATION_NAME,
+        ]) as NewPackagePolicy;
+        setIsAvailable(osqueryPackageInstalled.enabled);
       } catch (err) {
         return;
       }

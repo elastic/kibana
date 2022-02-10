@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { find, get, isEmpty } from 'lodash/fp';
+import { find } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
@@ -113,13 +113,6 @@ export const EventDetailsFooterComponent = React.memo(
     const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
       useEventFilterModal();
 
-    const { alertsEcsData } = useFetchEcsAlertsData({
-      alertIds: eventIds,
-      skip: expandedEvent?.eventId == null,
-    });
-
-    const ecsData = detailsEcsData ?? get(0, alertsEcsData);
-
     const renderFooterBody = useMemo(() => {
       if (preventTakeActionDropdown) {
         return (
@@ -148,7 +141,7 @@ export const EventDetailsFooterComponent = React.memo(
       );
     }, [
       detailsData,
-      ecsData,
+      detailsEcsData,
       expandedEvent.indexName,
       handleOnEventClosed,
       handlePanelChange,
