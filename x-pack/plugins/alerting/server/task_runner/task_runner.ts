@@ -433,23 +433,12 @@ export class TaskRunner<
 
     const recoveredAlerts = getRecoveredAlerts(alerts, originalAlertIds);
 
-    if (ruleType.doesSetRecoveryContext) {
-      for (const recoveredAlertId of Object.keys(recoveredAlerts)) {
-        if (!alerts[recoveredAlertId].hasContext()) {
-          this.logger.warn(`No recovery context specified for recovered alert ${recoveredAlertId}`);
-        } else if (alerts[recoveredAlertId].hasScheduledActions()) {
-          this.logger.info(
-            `Alert ${recoveredAlertId} but has scheduled actions. Something is wrong!`
-          );
-        }
-      }
-    }
-
     logActiveAndRecoveredAlerts({
       logger: this.logger,
       activeAlerts: alertsWithScheduledActions,
       recoveredAlerts,
       ruleLabel,
+      canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
     });
 
     trackAlertDurations({
@@ -1191,6 +1180,7 @@ interface LogActiveAndRecoveredAlertsParams<
   activeAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, ActionGroupIds>>;
   recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   ruleLabel: string;
+  canSetRecoveryContext: boolean;
 }
 
 function logActiveAndRecoveredAlerts<
@@ -1206,7 +1196,7 @@ function logActiveAndRecoveredAlerts<
     RecoveryActionGroupId
   >
 ) {
-  const { logger, activeAlerts, recoveredAlerts, ruleLabel } = params;
+  const { logger, activeAlerts, recoveredAlerts, ruleLabel, canSetRecoveryContext } = params;
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);
 
@@ -1233,6 +1223,14 @@ function logActiveAndRecoveredAlerts<
         recoveredAlertIds
       )}`
     );
+
+    if (canSetRecoveryContext) {
+      for (const id of recoveredAlertIds) {
+        if (!recoveredAlerts[id].hasContext()) {
+          logger.debug(`No recovery context specified for recovered alert ${id}`);
+        }
+      }
+    }
   }
 }
 
