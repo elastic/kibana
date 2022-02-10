@@ -7,10 +7,7 @@
 
 import expect from '@kbn/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-
-import { chunk } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
 
@@ -54,7 +51,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     resultsTableSelector(subSelector?: string) {
-      return `~mlExplorationDataGrid loaded > ~${subSelector}`;
+      return `~mlExplorationDataGrid > ${subSelector}`;
     },
 
     async assertResultsTableExists() {
@@ -79,19 +76,17 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       );
     },
 
-    async enableResultsTablePreviewHistogramCharts(expectedDefaultButtonState: boolean) {
+    async enableResultsTablePreviewHistogramCharts(expectedButtonState: boolean) {
       await retry.tryForTime(5000, async () => {
-        const actualCheckState =
+        const actualState =
           (await testSubjects.getAttribute(
             'mlExplorationDataGridHistogramButton',
             'aria-pressed'
           )) === 'true';
 
-        if (actualCheckState !== expectedDefaultButtonState) {
+        if (actualState !== expectedButtonState) {
           await testSubjects.click('mlExplorationDataGridHistogramButton');
-          await this.assertResultsTablePreviewHistogramChartButtonCheckState(
-            expectedDefaultButtonState
-          );
+          await this.assertResultsTablePreviewHistogramChartButtonCheckState(expectedButtonState);
         }
       });
     },
@@ -144,12 +139,13 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     async assertColumnSelectPopoverOpenState(expectedState: boolean) {
+      const popoverSelector = this.resultsTableSelector('dataGridColumnSelectorPopover');
       if (expectedState === true) {
-        await testSubjects.existOrFail('~mlExplorationDataGrid > dataGridColumnSelectorPopover', {
+        await testSubjects.existOrFail(popoverSelector, {
           timeout: 30 * 1000,
         });
       } else {
-        await testSubjects.missingOrFail('~mlExplorationDataGrid > dataGridColumnSelectorPopover', {
+        await testSubjects.missingOrFail(popoverSelector, {
           timeout: 30 * 1000,
         });
       }
@@ -158,10 +154,10 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     async toggleColumnSelectPopoverState(state: boolean) {
       await retry.tryForTime(15 * 1000, async () => {
         const popoverIsOpen = await testSubjects.exists(
-          '~mlExplorationDataGrid > ~dataGridColumnSelectorPopoverButton'
+          this.resultsTableSelector('~dataGridColumnSelectorPopoverButton')
         );
         if (popoverIsOpen !== state) {
-          await testSubjects.click('~mlExplorationDataGrid > ~dataGridColumnSelectorButton');
+          await testSubjects.click(this.resultsTableSelector('~dataGridColumnSelectorButton'));
         }
         await this.assertColumnSelectPopoverOpenState(state);
       });
@@ -182,12 +178,14 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     async assertColumnSortPopoverOpenState(expectedOpenState: boolean) {
+      const popoverSelector = this.resultsTableSelector('dataGridColumnSortingPopover');
+
       if (expectedOpenState === true) {
-        await testSubjects.existOrFail('~mlExplorationDataGrid > dataGridColumnSortingPopover', {
+        await testSubjects.existOrFail(popoverSelector, {
           timeout: 30 * 1000,
         });
       } else {
-        await testSubjects.missingOrFail('~mlExplorationDataGrid > dataGridColumnSortingPopover', {
+        await testSubjects.missingOrFail(popoverSelector, {
           timeout: 30 * 1000,
         });
       }
@@ -197,7 +195,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       await retry.tryForTime(15 * 1000, async () => {
         const popoverIsOpen = await testSubjects.exists('dataGridColumnSortingSelectionButton');
         if (popoverIsOpen !== expectedState) {
-          await testSubjects.click('~mlExplorationDataGrid > dataGridColumnSortingButton');
+          await testSubjects.click(this.resultsTableSelector('dataGridColumnSortingButton'));
         }
         await this.assertColumnSortPopoverOpenState(expectedState);
       });
@@ -221,39 +219,11 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       });
     },
 
-    async parseEuiDataGrid(tableSubj: string, maxColumnsToParse: number) {
-      const table = await testSubjects.find(`~${tableSubj}`);
-      const $ = await table.parseDomContent();
-
-      // Get the content of each cell and divide them up into rows.
-      // Virtualized cells outside the view area are not present in the DOM until they
-      // are scroilled into view, so we're limiting the number of parsed columns.
-      // To determine row and column of a cell, we're utilizing the screen reader
-      // help text, which enumerates the rows and columns 1-based.
-      const cells = $.findTestSubjects('dataGridRowCell')
-        .toArray()
-        .map((cell) => {
-          const cellText = $(cell).text();
-          const pattern = /^(.*)Row: (\d+); Column: (\d+)$/;
-          const matches = cellText.match(pattern);
-          expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
-          return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };
-        })
-        .filter((cell) => cell?.column <= maxColumnsToParse)
-        .sort(function (a, b) {
-          return a.row - b.row || a.column - b.column;
-        })
-        .map((cell) => cell.text);
-
-      const rows = chunk(cells, maxColumnsToParse);
-      return rows;
-    },
-
     async assertResultsTableColumnValues(column: number, expectedColumnValues: string[]) {
       await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse columns up to the one we want to assert
-        const rows = await this.parseEuiDataGrid('mlExplorationDataGrid', column + 1);
+        const rows = await mlCommonUI.parseEuiDataGrid('mlExplorationDataGrid', column + 1);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows

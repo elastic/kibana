@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           sortBy: {
             column: 'ml_heating_qc.is_training',
-            // asc is `True-False`
+            // desc is `True-False`
             sortDirection: 'desc',
           },
           expected: {
@@ -225,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           sortBy: {
             column: 'ml.is_training',
-            // asc is `True-False`
+            // desc is `True-False`
             sortDirection: 'desc',
           },
           expected: {

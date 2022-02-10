@@ -16,6 +16,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const ml = getService('ml');
 
   return new (class TransformTable {
     public async parseTransformTable() {
@@ -62,25 +63,6 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       return rows;
     }
 
-    async parseEuiDataGrid(tableSubj: string) {
-      const table = await testSubjects.find(`~${tableSubj}`);
-      const $ = await table.parseDomContent();
-      const rows = [];
-
-      // For each row, get the content of each cell and
-      // add its values as an array to each row.
-      for (const tr of $.findTestSubjects(`~dataGridRow`).toArray()) {
-        rows.push(
-          $(tr)
-            .find('.euiDataGridRowCell__truncate')
-            .toArray()
-            .map((cell) => $(cell).text().trim())
-        );
-      }
-
-      return rows;
-    }
-
     async assertEuiDataGridColumnValues(
       tableSubj: string,
       column: number,
@@ -88,7 +70,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     ) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await this.parseEuiDataGrid(tableSubj);
+        const rows = await ml.commonUI.parseEuiDataGrid(tableSubj);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
