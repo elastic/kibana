@@ -42,16 +42,7 @@ jest.mock('../../../util/url_state', () => {
   };
 });
 
-jest.mock('../../../contexts/kibana/use_timefilter', () => {
-  return {
-    useRefreshIntervalUpdates: jest.fn(() => {
-      return {
-        pause: false,
-        value: 0,
-      };
-    }),
-  };
-});
+jest.mock('../../../contexts/kibana/use_timefilter');
 
 jest.mock('../../../services/toast_notification_service');
 
@@ -99,6 +90,9 @@ jest.mock('../../../contexts/kibana', () => ({
             getLoadingCount$: of(0),
           },
         },
+        theme: {
+          theme$: of(),
+        },
       },
     };
   },
@@ -144,10 +138,10 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     expect(displayWarningSpy).not.toHaveBeenCalled();
     const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
     expect(calledWith.isPaused).toBe(true);
-    expect(calledWith.refreshInterval).toBe(10000);
+    expect(calledWith.refreshInterval).toBe(0);
   });
 
-  test('should fallback to default interval when configured interval is too short', () => {
+  test('should show a warning when configured interval is too short', () => {
     // arrange
     (useUrlState as jest.Mock).mockReturnValue([{ refreshInterval: { pause: false, value: 10 } }]);
 
@@ -164,6 +158,6 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     expect(displayWarningSpy).toHaveBeenCalled();
     const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
     expect(calledWith.isPaused).toBe(false);
-    expect(calledWith.refreshInterval).toBe(10000);
+    expect(calledWith.refreshInterval).toBe(10);
   });
 });
