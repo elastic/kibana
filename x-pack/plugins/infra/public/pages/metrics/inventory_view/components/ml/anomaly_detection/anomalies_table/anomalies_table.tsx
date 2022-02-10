@@ -30,7 +30,7 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { withTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
-import { useLinkProps } from '../../../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../../../observability/public';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
 import { useMetricsHostsAnomaliesResults } from '../../../../hooks/use_metrics_hosts_anomalies';

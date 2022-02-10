@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Router } from 'react-router-dom';
 import { encode } from 'rison-node';
 import { coreMock } from 'src/core/public/mocks';
@@ -29,13 +29,13 @@ const history = createMemoryHistory();
 history.push(`${PREFIX}${INTERNAL_APP}`);
 const scopedHistory = new ScopedHistory(history, `${PREFIX}${INTERNAL_APP}`);
 
-const ProviderWrapper: React.FC = ({ children }) => {
+function ProviderWrapper({ children }: PropsWithChildren<{}>) {
   return (
     <Router history={scopedHistory}>
       <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
     </Router>
   );
-};
+}
 
 const renderUseLinkPropsHook = (props?: Partial<LinkDescriptor>) => {
   return renderHook(() => useLinkProps({ app: INTERNAL_APP, ...props }), {
