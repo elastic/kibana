@@ -60,7 +60,7 @@ import {
   selectActiveData,
   selectDatasourceStates,
   selectChangesApplied,
-  applyWorkingState,
+  applyChanges,
 } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -353,12 +353,7 @@ export function SuggestionPanel({
             />
           </h3>
           <EuiSpacer size="s" />
-          <EuiButton
-            fill
-            iconType="play"
-            size="s"
-            onClick={() => dispatchLens(applyWorkingState())}
-          >
+          <EuiButton fill iconType="play" size="s" onClick={() => dispatchLens(applyChanges())}>
             <FormattedMessage
               id="xpack.lens.suggestions.applyChangesLabel"
               defaultMessage="Apply"

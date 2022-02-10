@@ -22,7 +22,7 @@ export const {
   setState,
   enableAutoApply,
   disableAutoApply,
-  applyWorkingState,
+  applyChanges,
   setSaveable,
   onActiveDataChange,
   updateState,

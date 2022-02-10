@@ -32,14 +32,14 @@ import {
   DispatchSetState,
   selectSavedObjectFormat,
   enableAutoApply,
-  applyWorkingState,
+  applyChanges,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
 import { disableAutoApply } from '../state_management/lens_slice';
-import { readFromStorage, writeToStorage } from '../settings_storage';
+import { writeToStorage } from '../settings_storage';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -324,7 +324,7 @@ export function App({
           lensInspector={lensInspector}
           autoApplyEnabled={autoApplyEnabled}
           onToggleAutoApply={toggleAutoApply}
-          onApplyChanges={() => dispatch(applyWorkingState())}
+          onApplyChanges={() => dispatch(applyChanges())}
         />
 
         {getLegacyUrlConflictCallout()}

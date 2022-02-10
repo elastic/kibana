@@ -88,7 +88,7 @@ export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
 // this action is only relevant when auto-apply is disabled
-export const applyWorkingState = createAction<void>('lens/applyWorkingState');
+export const applyChanges = createAction<void>('lens/applyChanges');
 export const updateState = createAction<{
   updater: (prevState: LensAppState) => LensAppState;
 }>('lens/updateState');
@@ -170,7 +170,7 @@ export const lensActions = {
   setSaveable,
   enableAutoApply,
   disableAutoApply,
-  applyWorkingState,
+  applyChanges,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -220,7 +220,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         datasourceStates: cloneDeep(state.datasourceStates),
       };
     },
-    [applyWorkingState.type]: (state) => {
+    [applyChanges.type]: (state) => {
       state.appliedState = {
         visualization: cloneDeep(state.visualization),
         datasourceStates: cloneDeep(state.datasourceStates),
