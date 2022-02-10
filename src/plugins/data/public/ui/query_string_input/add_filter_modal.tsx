@@ -118,8 +118,19 @@ export function AddFilterModal({
       field: undefined,
       operator: undefined,
       value: undefined,
-      groupId: multipleFilters?.length ? multipleFilters?.length + 1 : 1,
-      id: multipleFilters?.length ? multipleFilters?.length : 0,
+      // find the max groupId and id and start from + 1
+      groupId: multipleFilters?.length
+        ? Math.max.apply(
+            Math,
+            multipleFilters.map((f) => f.groupId)
+          ) + 1
+        : 1,
+      id: multipleFilters?.length
+        ? Math.max.apply(
+            Math,
+            multipleFilters.map((f) => f.id)
+          ) + 1
+        : 0,
       subGroupId: 1,
       relationship: undefined,
     },
@@ -504,7 +515,7 @@ export function AddFilterModal({
                                     const subGroupId =
                                       filtersOnGroup.length > 2
                                         ? localfilter?.subGroupId ?? 0
-                                        : localfilter?.subGroupId ?? 0;
+                                        : (localfilter?.subGroupId ?? 0) + 1;
                                     const updatedLocalFilter = {
                                       ...localfilter,
                                       relationship: 'AND',
@@ -524,10 +535,8 @@ export function AddFilterModal({
                                         relationship: undefined,
                                         groupId:
                                           filtersOnGroup.length > 1
-                                            ? groupsCount
-                                            : Number(multipleFilters?.length) +
-                                              localFilters.length +
-                                              1,
+                                            ? localFilters[localFilters.length - 1].groupId
+                                            : localFilters[localFilters.length - 1].groupId + 1,
                                         subGroupId,
                                         id: Number(multipleFilters?.length) + localFilters.length,
                                       },
