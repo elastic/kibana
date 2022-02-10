@@ -26,7 +26,7 @@ import {
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { LoadingPrompt } from '../../../../../../components/loading_page';
-import { useLinkProps } from '../../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../../observability/public';
 import { AnomaliesTable } from './anomalies_table/anomalies_table';
 
 interface Props {

@@ -3195,6 +3195,13 @@
     js-yaml "^3.13.1"
     resolve-from "^5.0.0"
 
+"@istanbuljs/nyc-config-typescript@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@istanbuljs/nyc-config-typescript/-/nyc-config-typescript-1.0.2.tgz#1f5235b28540a07219ae0dd42014912a0b19cf89"
+  integrity sha512-iKGIyMoyJuFnJRSVTZ78POIRvNnwZaWIf8vG4ZS3rQq58MMDrqEX2nnzx0R28V2X8JvmKYiqY9FP2hlJsm8A0w==
+  dependencies:
+    "@istanbuljs/schema" "^0.1.2"
+
 "@istanbuljs/schema@^0.1.2":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.2.tgz#26520bf09abe4a5644cd5414e37125a8954241dd"
@@ -3823,6 +3830,10 @@
   uid ""
 
 "@kbn/io-ts-utils@link:bazel-bin/packages/kbn-io-ts-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/logging-mocks@link:bazel-bin/packages/kbn-logging-mocks":
   version "0.0.0"
   uid ""
 
@@ -6798,6 +6809,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__logging-mocks@link:bazel-bin/packages/kbn-logging-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__logging@link:bazel-bin/packages/kbn-logging/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6907,6 +6926,10 @@
   uid ""
 
 "@types/kbn__test@link:bazel-bin/packages/kbn-test/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__typed-react-router-config@link:bazel-bin/packages/kbn-typed-react-router-config/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -11534,10 +11557,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.20.3, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.20.3"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.20.3.tgz#c710d0a676e684522f3db4ee84e5e18a9d11d69a"
-  integrity sha512-vVl8j8ph6tRS3B8qir40H7yw7voy17xL0piAjlbBUsH7WIfzoedL/ZOr1OV9FyZQLWXsayOJyV4tnRyXR85/ag==
+core-js@^3.0.4, core-js@^3.21.0, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.21.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.21.0.tgz#f479dbfc3dffb035a0827602dd056839a774aa71"
+  integrity sha512-YUdI3fFu4TF/2WykQ2xzSiTQdldLB4KVuL9WeAy5XONZYt5Cun/fpQvctoKbCgvPhmzADeesTk/j2Rdx77AcKQ==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -13520,10 +13543,10 @@ ejs@^3.1.6:
   dependencies:
     jake "^10.6.1"
 
-elastic-apm-http-client@^10.3.0:
-  version "10.3.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-10.3.0.tgz#12b95dc190a755cd1a8ce2c296cd28ef50f16aa4"
-  integrity sha512-BAqB7k5JA/x09L8BVj04WRoknRptmW2rLAoHQVrPvPhUm/IgNz63wPfiBuhWVE//Hl7xEpURO5pMV6az0UArkA==
+elastic-apm-http-client@^10.4.0:
+  version "10.4.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-10.4.0.tgz#e466aaf04ef8beda22d9922fbf3543158f1ffb8a"
+  integrity sha512-mH3Cn61ICbj/rxhILAQ0NHQNmzD+kLBGyXklC0wSqIaiJs56yhCNgtXQZ3ajYxzrYW9Ox1QI4NVg3Gezg7nTCg==
   dependencies:
     breadth-filter "^2.0.0"
     container-info "^1.0.1"
@@ -13532,12 +13555,13 @@ elastic-apm-http-client@^10.3.0:
     fast-stream-to-buffer "^1.0.0"
     object-filter-sequence "^1.0.0"
     readable-stream "^3.4.0"
+    semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.27.0:
-  version "3.27.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.27.0.tgz#0de441e36519e7384e66f6d420ec9a00a2669a1a"
-  integrity sha512-x8rWjGBgwKYcYN9IQWUv3dzq88RxEVnVIC6KMXQpFkRBG6XtWG4FeMvLaDSeTdXVnDBKTDVGCF9np5HdGhYbBw==
+elastic-apm-node@^3.28.0:
+  version "3.28.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.28.0.tgz#74bb0278a711549a45bd8c8b561c23e02e5865e3"
+  integrity sha512-6P6IAiozEIUDCZGMQ/Lul1c7a10p5uSIIYISxXd7ms+470fvTOL2pKDfE8ygeXyCvvzwjbvuTQC4y4PWKhj8rg==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
@@ -13546,7 +13570,7 @@ elastic-apm-node@^3.27.0:
     basic-auth "^2.0.1"
     cookie "^0.4.0"
     core-util-is "^1.0.2"
-    elastic-apm-http-client "^10.3.0"
+    elastic-apm-http-client "^10.4.0"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"
