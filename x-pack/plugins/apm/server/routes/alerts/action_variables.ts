@@ -56,4 +56,13 @@ export const apmActionVariables = {
     ),
     name: 'interval' as const,
   },
+  reason: {
+    description: i18n.translate(
+      'xpack.apm.alerts.action_variables.reasonMessage',
+      {
+        defaultMessage: 'A concise description of the reason for the alert',
+      }
+    ),
+    name: 'reason' as const,
+  },
 };

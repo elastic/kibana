@@ -86,6 +86,7 @@ export function registerTransactionDurationAlertType({
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
         apmActionVariables.interval,
+        apmActionVariables.reason,
       ],
     },
     producer: APM_SERVER_FEATURE_ID,

@@ -85,6 +85,7 @@ export function registerTransactionDurationAnomalyAlertType({
           apmActionVariables.environment,
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
+          apmActionVariables.reason,
         ],
       },
       producer: 'apm',
