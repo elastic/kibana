@@ -319,16 +319,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
-    // TODO: Will need to address this when we switch over to
-    // using PIT, don't want it to get lost
-    // https://github.com/elastic/kibana/issues/103944
     const results = await this.exceptionListClient.findExceptionListItem({
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page: 1,
       perPage: 10_000,
       filter: undefined,
-      pit: undefined,
-      searchAfter: undefined,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -350,16 +345,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createEndpointList();
 
-    // TODO: Will need to address this when we switch over to
-    // using PIT, don't want it to get lost
-    // https://github.com/elastic/kibana/issues/103944
     const results = await this.exceptionListClient.findExceptionListItem({
       listId,
       page: 1,
       perPage: this.max_records,
       filter: undefined,
-      pit: undefined,
-      searchAfter: undefined,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -433,16 +423,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
-    // TODO: Will need to address this when we switch over to
-    // using PIT, don't want it to get lost
-    // https://github.com/elastic/kibana/issues/103944
     const results = await this.exceptionListClient?.findExceptionListsItem({
       listId: [listId],
       filter: [],
       perPage: this.max_records,
-      pit: undefined,
       page: 1,
-      searchAfter: undefined,
       sortField: 'exception-list.created_at',
       sortOrder: 'desc',
       namespaceType: ['single'],

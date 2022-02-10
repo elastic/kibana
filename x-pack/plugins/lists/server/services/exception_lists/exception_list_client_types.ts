@@ -40,7 +40,7 @@ import type {
   OsTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
-  Pit,
+  PitId,
   PitOrUndefined,
   SearchAfterOrUndefined,
   SortFieldOrUndefined,
@@ -201,8 +201,8 @@ export interface FindExceptionListItemOptions {
   namespaceType: NamespaceType;
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
-  pit: PitOrUndefined;
-  searchAfter: SearchAfterOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
@@ -211,8 +211,8 @@ export interface FindExceptionListItemOptions {
 export interface FindEndpointListItemOptions {
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
-  pit: PitOrUndefined;
-  searchAfter: SearchAfterOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
@@ -223,8 +223,8 @@ export interface FindExceptionListsItemOptions {
   namespaceType: NamespaceTypeArray;
   filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
-  pit: PitOrUndefined;
-  searchAfter: SearchAfterOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
@@ -233,8 +233,8 @@ export interface FindExceptionListsItemOptions {
 export interface FindValueListExceptionListsItems {
   valueListId: Id;
   perPage: PerPageOrUndefined;
-  pit: PitOrUndefined;
-  searchAfter: SearchAfterOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
@@ -245,8 +245,8 @@ export interface FindExceptionListOptions {
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
-  pit: PitOrUndefined;
-  searchAfter: SearchAfterOrUndefined;
+  pit?: PitOrUndefined;
+  searchAfter?: SearchAfterOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
 }
@@ -280,5 +280,5 @@ export interface OpenPointInTimeOptions {
 }
 
 export interface ClosePointInTimeOptions {
-  pit: Pit['id'];
+  pit: PitId;
 }

@@ -83,8 +83,6 @@ export async function getFilteredEndpointExceptionList(
       listId,
       namespaceType: 'agnostic',
       filter,
-      pit: undefined,
-      searchAfter: undefined,
       perPage: 100,
       page,
       sortField: 'created_at',

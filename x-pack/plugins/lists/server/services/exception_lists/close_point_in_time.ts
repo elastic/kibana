@@ -9,10 +9,10 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeResponse,
 } from 'kibana/server';
-import type { Pit } from '@kbn/securitysolution-io-ts-list-types';
+import type { PitId } from '@kbn/securitysolution-io-ts-list-types';
 
 interface ClosePointInTimeOptions {
-  pit: Pit['id'];
+  pit: PitId;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
