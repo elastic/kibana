@@ -97,6 +97,11 @@ export function createTestConfig(config: ApmFtrConfig) {
               security,
               ApmUser.apmReadUserWithoutMlAccess
             ),
+            manageOwnAgentKeysUser: await getApmApiClient(
+              servers.kibana,
+              security,
+              ApmUser.apmManageOwnAgentKeys
+            ),
           };
         },
         ml: MachineLearningAPIProvider,

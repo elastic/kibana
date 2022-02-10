@@ -15,6 +15,7 @@ export enum ApmUser {
   apmWriteUser = 'apm_write_user',
   apmAnnotationsWriteUser = 'apm_annotations_write_user',
   apmReadUserWithoutMlAccess = 'apm_read_user_without_ml_access',
+  apmManageOwnAgentKeys = 'apm_manage_own_agent_keys',
 }
 
 // TODO: Going forward we want to use the built-in roles `viewer` and `editor`. However ML privileges are not included in the built-in roles
@@ -75,6 +76,11 @@ const roles = {
       ],
     },
   },
+  [ApmUser.apmManageOwnAgentKeys]: {
+    elasticsearch: {
+      cluster: ['manage_own_api_key'],
+    },
+  },
 };
 
 const users = {
@@ -92,6 +98,9 @@ const users = {
   },
   [ApmUser.apmAnnotationsWriteUser]: {
     roles: ['editor', ApmUser.apmWriteUser, ApmUser.apmAnnotationsWriteUser],
+  },
+  [ApmUser.apmManageOwnAgentKeys]: {
+    roles: ['editor', ApmUser.apmManageOwnAgentKeys],
   },
 };
 
