@@ -39,6 +39,7 @@ export interface ExploratoryEmbeddableProps {
   metricIconColor?: string;
   metricPostfix?: string;
   onBrushEnd?: () => void;
+  owner: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
   showCalculationMethod?: boolean;
@@ -76,6 +77,7 @@ export default function Embeddable({
   showCalculationMethod = false,
   title,
   withActions = true,
+  owner,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -98,7 +100,8 @@ export default function Embeddable({
 
   let lensAttributes;
   try {
-    lensAttributes = new LensAttributes(layerConfigs, reportType);
+    lensAttributes = new LensAttributes(layerConfigs);
+    // eslint-disable-next-line no-empty
   } catch (error) {}
 
   const attributesJSON = customLensAttrs ?? lensAttributes?.getJSON();
@@ -198,6 +201,7 @@ export default function Embeddable({
           autoOpen={isAddToCaseOpen}
           setAutoOpen={setAddToCaseOpen}
           appId={appId}
+          owner={owner}
         />
       </LensWrapper>
     </Wrapper>
