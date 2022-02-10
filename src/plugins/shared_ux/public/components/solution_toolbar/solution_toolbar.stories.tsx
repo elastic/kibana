@@ -14,6 +14,7 @@ import { EuiContextMenu } from '@elastic/eui';
 import { SolutionToolbar } from './solution_toolbar';
 import { SolutionToolbarPopover } from './items';
 import { AddFromLibraryButton, PrimaryActionButton, QuickButtonGroup } from './items';
+import mdx from './toolbar_button.mdx';
 
 const quickButtons = [
   {
@@ -150,13 +151,8 @@ export default {
       },
     },
   },
-  // https://github.com/storybookjs/storybook/issues/11543#issuecomment-684130442
   parameters: {
-    docs: {
-      source: {
-        type: 'code',
-      },
-    },
+    docs: { page: mdx },
   },
 };
 
