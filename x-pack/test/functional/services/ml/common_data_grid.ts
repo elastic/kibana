@@ -21,8 +21,13 @@ export type MlCommonDataGrid = ProvidedType<typeof MachineLearningCommonDataGrid
 export function MachineLearningCommonDataGridProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return {
+    dataGridSelector(tableSubj: string, subSelector?: string) {
+      return `~${tableSubj} > ${subSelector}`;
+    },
+
     async parseEuiDataGrid(tableSubj: string, maxColumnsToParse?: number) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
@@ -53,7 +58,27 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
       return rows;
     },
 
-    async assertDataGridColumnValues(
+    async getDataGridRows(tableSubj: string) {
+      return (await testSubjects.find(tableSubj)).findAllByTestSubject('dataGridRowCell');
+    },
+
+    async assertEuiDataGridNotEmpty(tableSubj: string) {
+      const dataGridRows = await this.getDataGridRows(tableSubj);
+      expect(dataGridRows.length).to.be.greaterThan(
+        0,
+        `EuiDataGrid '${tableSubj}' should have at least one row (got '${dataGridRows.length}')`
+      );
+    },
+
+    async assertEuiDataGridEmpty(tableSubj: string) {
+      const dataGridRows = await this.getDataGridRows(tableSubj);
+      expect(dataGridRows.length).to.eql(
+        0,
+        `EuiDataGrid '${tableSubj}' should be empty (got '${dataGridRows.length} rows')`
+      );
+    },
+
+    async assertEuiDataGridColumnValues(
       tableSubj: string,
       column: number,
       expectedColumnValues: string[]
@@ -73,8 +98,111 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
         // check if the returned unique value matches the supplied filter value
         expect(uniqueColumnValues).to.eql(
           expectedColumnValues,
-          `Unique EuiDataGrid column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
+          `Unique EuiDataGrid '${tableSubj}' column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
         );
+      });
+    },
+
+    async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
+      await retry.tryForTime(20 * 1000, async () => {
+        // get a 2D array of rows and cell values
+        // only parse columns up to the one we want to assert
+        const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
+
+        // reduce the rows data to an array of unique values in the specified column
+        const uniqueColumnValues = rows
+          .map((row) => row[column])
+          .flat()
+          .filter((v, i, a) => a.indexOf(v) === i);
+
+        uniqueColumnValues.forEach((value) => {
+          // check if the returned unique value is not empty
+          expect(value).to.not.eql('');
+        });
+      });
+    },
+
+    async assertColumnSelectPopoverOpenState(tableSubj: string, expectedState: boolean) {
+      const popoverSelector = this.dataGridSelector(tableSubj, 'dataGridColumnSelectorPopover');
+
+      if (expectedState === true) {
+        await testSubjects.existOrFail(popoverSelector, {
+          timeout: 30 * 1000,
+        });
+      } else {
+        await testSubjects.missingOrFail(popoverSelector, {
+          timeout: 30 * 1000,
+        });
+      }
+    },
+
+    async toggleColumnSelectPopoverState(tableSubj: string, state: boolean) {
+      await retry.tryForTime(15 * 1000, async () => {
+        const popoverIsOpen = await testSubjects.exists(
+          this.dataGridSelector(tableSubj, '~dataGridColumnSelectorPopoverButton')
+        );
+        if (popoverIsOpen !== state) {
+          await testSubjects.click(
+            this.dataGridSelector(tableSubj, '~dataGridColumnSelectorButton')
+          );
+        }
+        await this.assertColumnSelectPopoverOpenState(tableSubj, state);
+      });
+    },
+
+    async hideAllColumns(tableSubj: string) {
+      await this.toggleColumnSelectPopoverState(tableSubj, true);
+      await testSubjects.click('dataGridColumnSelectorHideAllButton');
+      await browser.pressKeys(browser.keys.ESCAPE);
+      // @todo: some validation
+    },
+
+    async showAllColumns(tableSubj: string) {
+      await this.toggleColumnSelectPopoverState(tableSubj, true);
+      await testSubjects.click('dataGridColumnSelectorShowAllButton');
+      await browser.pressKeys(browser.keys.ESCAPE);
+      // @todo: some validation
+    },
+
+    async assertColumnSortPopoverOpenState(tableSubj: string, expectedOpenState: boolean) {
+      const popoverSelector = this.dataGridSelector(tableSubj, 'dataGridColumnSortingPopover');
+
+      if (expectedOpenState === true) {
+        await testSubjects.existOrFail(popoverSelector, {
+          timeout: 30 * 1000,
+        });
+      } else {
+        await testSubjects.missingOrFail(popoverSelector, {
+          timeout: 30 * 1000,
+        });
+      }
+    },
+
+    async toggleColumnSortPopoverState(tableSubj: string, expectedState: boolean) {
+      await retry.tryForTime(15 * 1000, async () => {
+        const popoverIsOpen = await testSubjects.exists('dataGridColumnSortingSelectionButton');
+        if (popoverIsOpen !== expectedState) {
+          await testSubjects.click(this.dataGridSelector(tableSubj, 'dataGridColumnSortingButton'));
+        }
+        await this.assertColumnSortPopoverOpenState(tableSubj, expectedState);
+      });
+    },
+
+    async setColumnToSortBy(tableSubj: string, columnId: string, sortDirection: 'asc' | 'desc') {
+      await this.toggleColumnSortPopoverState(tableSubj, true);
+      await retry.tryForTime(15 * 1000, async () => {
+        // Pick fields to sort by
+        await testSubjects.existOrFail('dataGridColumnSortingSelectionButton');
+        await testSubjects.click('dataGridColumnSortingSelectionButton');
+        await testSubjects.existOrFail(`dataGridColumnSortingPopoverColumnSelection-${columnId}`);
+        await testSubjects.click(`dataGridColumnSortingPopoverColumnSelection-${columnId}`);
+        await testSubjects.existOrFail(`euiDataGridColumnSorting-sortColumn-${columnId}`);
+        // Click sorting direction
+        await testSubjects.click(
+          `euiDataGridColumnSorting-sortColumn-${columnId}-${sortDirection}`
+        );
+        // Close popover
+        await browser.pressKeys(browser.keys.ESCAPE);
       });
     },
   };

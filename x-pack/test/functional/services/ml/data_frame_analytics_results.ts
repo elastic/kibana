@@ -19,7 +19,6 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
 
   return {
     async assertRegressionEvaluatePanelElementsExists() {
@@ -50,10 +49,6 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 
     async assertOutlierTablePanelExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-results');
-    },
-
-    resultsTableSelector(subSelector?: string) {
-      return `~mlExplorationDataGrid > ${subSelector}`;
     },
 
     async assertResultsTableExists() {
@@ -141,114 +136,55 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     async assertColumnSelectPopoverOpenState(expectedState: boolean) {
-      const popoverSelector = this.resultsTableSelector('dataGridColumnSelectorPopover');
-      if (expectedState === true) {
-        await testSubjects.existOrFail(popoverSelector, {
-          timeout: 30 * 1000,
-        });
-      } else {
-        await testSubjects.missingOrFail(popoverSelector, {
-          timeout: 30 * 1000,
-        });
-      }
+      await commonDataGrid.assertColumnSelectPopoverOpenState(
+        'mlExplorationDataGrid',
+        expectedState
+      );
     },
 
     async toggleColumnSelectPopoverState(state: boolean) {
-      await retry.tryForTime(15 * 1000, async () => {
-        const popoverIsOpen = await testSubjects.exists(
-          this.resultsTableSelector('~dataGridColumnSelectorPopoverButton')
-        );
-        if (popoverIsOpen !== state) {
-          await testSubjects.click(this.resultsTableSelector('~dataGridColumnSelectorButton'));
-        }
-        await this.assertColumnSelectPopoverOpenState(state);
-      });
+      await commonDataGrid.toggleColumnSelectPopoverState('mlExplorationDataGrid', state);
     },
 
     async hideAllResultsTableColumns() {
-      await this.toggleColumnSelectPopoverState(true);
-      await testSubjects.click('dataGridColumnSelectorHideAllButton');
-      await browser.pressKeys(browser.keys.ESCAPE);
+      await commonDataGrid.hideAllColumns('mlExplorationDataGrid');
       await this.assertResultsTableEmpty();
     },
 
     async showAllResultsTableColumns() {
-      await this.toggleColumnSelectPopoverState(true);
-      await testSubjects.click('dataGridColumnSelectorShowAllButton');
-      await browser.pressKeys(browser.keys.ESCAPE);
+      await commonDataGrid.showAllColumns('mlExplorationDataGrid');
       await this.assertResultsTableNotEmpty();
     },
 
     async assertColumnSortPopoverOpenState(expectedOpenState: boolean) {
-      const popoverSelector = this.resultsTableSelector('dataGridColumnSortingPopover');
-
-      if (expectedOpenState === true) {
-        await testSubjects.existOrFail(popoverSelector, {
-          timeout: 30 * 1000,
-        });
-      } else {
-        await testSubjects.missingOrFail(popoverSelector, {
-          timeout: 30 * 1000,
-        });
-      }
+      await commonDataGrid.assertColumnSortPopoverOpenState(
+        'mlExplorationDataGrid',
+        expectedOpenState
+      );
     },
 
     async toggleColumnSortPopoverState(expectedState: boolean) {
-      await retry.tryForTime(15 * 1000, async () => {
-        const popoverIsOpen = await testSubjects.exists('dataGridColumnSortingSelectionButton');
-        if (popoverIsOpen !== expectedState) {
-          await testSubjects.click(this.resultsTableSelector('dataGridColumnSortingButton'));
-        }
-        await this.assertColumnSortPopoverOpenState(expectedState);
-      });
+      await commonDataGrid.toggleColumnSortPopoverState('mlExplorationDataGrid', expectedState);
     },
 
     async setColumnToSortBy(columnId: string, sortDirection: 'asc' | 'desc') {
-      await this.toggleColumnSortPopoverState(true);
-      await retry.tryForTime(15 * 1000, async () => {
-        // Pick fields to sort by
-        await testSubjects.existOrFail('dataGridColumnSortingSelectionButton');
-        await testSubjects.click('dataGridColumnSortingSelectionButton');
-        await testSubjects.existOrFail(`dataGridColumnSortingPopoverColumnSelection-${columnId}`);
-        await testSubjects.click(`dataGridColumnSortingPopoverColumnSelection-${columnId}`);
-        await testSubjects.existOrFail(`euiDataGridColumnSorting-sortColumn-${columnId}`);
-        // Click sorting direction
-        await testSubjects.click(
-          `euiDataGridColumnSorting-sortColumn-${columnId}-${sortDirection}`
-        );
-        // Close popover
-        await browser.pressKeys(browser.keys.ESCAPE);
-      });
+      await commonDataGrid.setColumnToSortBy('mlExplorationDataGrid', columnId, sortDirection);
     },
 
     async assertResultsTableColumnValues(column: number, expectedColumnValues: string[]) {
-      await commonDataGrid.assertDataGridColumnValues(
+      await commonDataGrid.assertEuiDataGridColumnValues(
         'mlExplorationDataGrid',
         column,
         expectedColumnValues
       );
     },
 
-    async getResultTableRows() {
-      return (await testSubjects.find('mlExplorationDataGrid loaded')).findAllByTestSubject(
-        'dataGridRowCell'
-      );
-    },
-
     async assertResultsTableNotEmpty() {
-      const resultTableRows = await this.getResultTableRows();
-      expect(resultTableRows.length).to.be.greaterThan(
-        0,
-        `DFA results table should have at least one row (got '${resultTableRows.length}')`
-      );
+      await commonDataGrid.assertEuiDataGridNotEmpty('mlExplorationDataGrid loaded');
     },
 
     async assertResultsTableEmpty() {
-      const resultTableRows = await this.getResultTableRows();
-      expect(resultTableRows.length).to.eql(
-        0,
-        `DFA results table should be empty (got '${resultTableRows.length} rows')`
-      );
+      await commonDataGrid.assertEuiDataGridEmpty('mlExplorationDataGrid loaded');
     },
 
     async assertTotalFeatureImportanceEvaluatePanelExists() {

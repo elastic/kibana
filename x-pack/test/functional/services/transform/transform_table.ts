@@ -63,31 +63,6 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       return rows;
     }
 
-    async assertEuiDataGridColumnValues(
-      tableSubj: string,
-      column: number,
-      expectedColumnValues: string[]
-    ) {
-      await retry.tryForTime(2000, async () => {
-        // get a 2D array of rows and cell values
-        const rows = await ml.commonDataGrid.parseEuiDataGrid(tableSubj);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
-
-        uniqueColumnValues.sort();
-
-        // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues).to.eql(
-          expectedColumnValues,
-          `Expected '${tableSubj}' column values to be '${expectedColumnValues}' (got '${uniqueColumnValues}')`
-        );
-      });
-    }
-
     public async waitForRefreshButtonLoaded() {
       await testSubjects.existOrFail('~transformRefreshTransformListButton', {
         timeout: 10 * 1000,
@@ -366,7 +341,11 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
       await this.waitForTransformsExpandedRowPreviewTabToLoad();
-      await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
+      await ml.commonDataGrid.assertEuiDataGridColumnValues(
+        'transformPivotPreview',
+        column,
+        values
+      );
     }
 
     public async assertTransformDeleteModalExists() {

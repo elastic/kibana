@@ -286,7 +286,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertTotalFeatureImportanceEvaluatePanelExists();
         });
 
-        it('should display the feature importance decision path in the data grid', async () => {
+        it('should display the feature importance decision path', async () => {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
@@ -309,16 +309,12 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it('should display the results table content', async () => {
+        it('should sort and hide/show columns correctly', async () => {
           await ml.testExecution.logTestStep('sorts table');
           await ml.dataFrameAnalyticsResults.toggleColumnSortPopoverState(true);
           await ml.dataFrameAnalyticsResults.setColumnToSortBy(
             testData.sortBy.column,
             testData.sortBy.sortDirection
-          );
-          await ml.dataFrameAnalyticsResults.assertResultsTableColumnValues(
-            testData.expected.sortBy.columnIndex,
-            testData.expected.sortBy.expectedValues
           );
 
           await ml.testExecution.logTestStep('shows all and hides all columns');

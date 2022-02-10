@@ -122,25 +122,6 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       });
     },
 
-    async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
-      await retry.tryForTime(20 * 1000, async () => {
-        // get a 2D array of rows and cell values
-        // only parse columns up to the one we want to assert
-        const rows = await ml.commonDataGrid.parseEuiDataGrid(tableSubj, column + 1);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
-
-        uniqueColumnValues.forEach((value) => {
-          // check if the returned unique value is not empty
-          expect(value).to.not.eql('');
-        });
-      });
-    },
-
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
       await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
@@ -164,19 +145,33 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiDataGridColumnValues('transformIndexPreview', column, values);
+      await ml.commonDataGrid.assertEuiDataGridColumnValues(
+        'transformIndexPreview',
+        column,
+        values
+      );
     },
 
     async assertIndexPreviewColumnValuesNotEmpty(column: number) {
-      await this.assertEuiDataGridColumnValuesNotEmpty('transformIndexPreview', column);
+      await ml.commonDataGrid.assertEuiDataGridColumnValuesNotEmpty(
+        'transformIndexPreview',
+        column
+      );
     },
 
     async assertPivotPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
+      await ml.commonDataGrid.assertEuiDataGridColumnValues(
+        'transformPivotPreview',
+        column,
+        values
+      );
     },
 
     async assertPivotPreviewColumnValuesNotEmpty(column: number) {
-      await this.assertEuiDataGridColumnValuesNotEmpty('transformPivotPreview', column);
+      await ml.commonDataGrid.assertEuiDataGridColumnValuesNotEmpty(
+        'transformPivotPreview',
+        column
+      );
     },
 
     async assertPivotPreviewLoaded() {
