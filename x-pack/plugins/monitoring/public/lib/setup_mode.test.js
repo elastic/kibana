@@ -9,14 +9,9 @@ let toggleSetupMode;
 let initSetupModeState;
 let getSetupModeState;
 let updateSetupModeData;
-let setSetupModeMenuItem;
 
 const handleErrorsMock = jest.fn();
 const callbackMock = jest.fn();
-
-jest.mock('react-dom', () => ({
-  render: jest.fn(),
-}));
 
 jest.mock('../legacy_shims', () => {
   return {
@@ -39,7 +34,6 @@ function setModulesAndMocks() {
   initSetupModeState = setupMode.initSetupModeState;
   getSetupModeState = setupMode.getSetupModeState;
   updateSetupModeData = setupMode.updateSetupModeData;
-  setSetupModeMenuItem = setupMode.setSetupModeMenuItem;
 }
 
 function waitForSetupModeData() {
@@ -79,24 +73,6 @@ describe('setup_mode', () => {
       await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       toggleSetupMode(false);
       expect(globalState.inSetupMode).toBe(false);
-    });
-
-    it('should set top nav config', async () => {
-      const globalState = {
-        inSetupMode: false,
-        save: jest.fn(),
-      };
-      const httpServiceMock = {
-        post: jest.fn(),
-      };
-
-      const render = require('react-dom').render;
-
-      await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
-      setSetupModeMenuItem();
-      toggleSetupMode(true);
-
-      expect(render.mock.calls.length).toBe(2);
     });
   });
 
