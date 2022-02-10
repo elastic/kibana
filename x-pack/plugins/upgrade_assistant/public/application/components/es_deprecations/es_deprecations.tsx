@@ -60,7 +60,7 @@ const i18nTexts = {
   getRemoteClustersDetectedDescription: (remoteClustersCount: number) =>
     i18n.translate('xpack.upgradeAssistant.esDeprecations.remoteClustersDetectedDescription', {
       defaultMessage:
-        'You have {remoteClustersCount} {remoteClustersCount, plural, one {remote cluster} other {remote clusters}} configured. If you use cross-cluster search, note that 8.x can only search remote clusters 7.17 or later. If you use cross-cluster replication, a cluster that contains follower indices must run the same or newer version as the remote cluster.',
+        'You have {remoteClustersCount} {remoteClustersCount, plural, one {remote cluster} other {remote clusters}} configured. If you use cross-cluster search, note that 8.x can only search remote clusters running the previous minor version or later. If you use cross-cluster replication, a cluster that contains follower indices must run the same or newer version as the remote cluster.',
       values: {
         remoteClustersCount,
       },
