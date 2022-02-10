@@ -21,8 +21,6 @@ Review important information about the {kib} 8.0.0 releases.
 [[release-notes-8.0.0]]
 == {kib} 8.0.0
 
-coming::[8.0.0]
-
 Review the {kib} 8.0.0 changes, then use the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant] to complete the upgrade.
 
 [float]
