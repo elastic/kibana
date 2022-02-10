@@ -544,7 +544,7 @@ describe('SearchInterceptor', () => {
           .catch(() => {});
         expect(fetchMock.mock.calls[0][0]).toEqual(
           expect.objectContaining({
-            options: { sessionId, isStored: true, isRestore: true, strategy: 'ese' },
+            options: { executionContext: {}, sessionId, isStored: true, isRestore: true, strategy: 'ese' },
           })
         );
 
