@@ -104,15 +104,6 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
     return findTestSubject(rows[index].reactWrapper, 'dataStreamLink').exists();
   };
 
-  const clickModalConfirm = async () => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('confirmModalConfirmButton').simulate('click');
-    });
-    component.update();
-  };
-
   const findDataStreamDetailPanel = () => {
     const { find } = testBed;
     return find('dataStreamDetailPanel');
