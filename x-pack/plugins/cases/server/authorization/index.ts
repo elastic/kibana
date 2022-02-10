@@ -58,6 +58,7 @@ const EVENT_TYPES: Record<string, EcsEventType> = {
 const DELETE_COMMENT_OPERATION = 'deleteComment';
 const ACCESS_COMMENT_OPERATION = 'getComment';
 const ACCESS_CASE_OPERATION = 'getCase';
+const ACCESS_USER_ACTION_OPERATION = 'getUserActions';
 
 /**
  * Database constant for ECS category for use for audit logging.
@@ -293,7 +294,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [ReadOperations.GetUserActions]: {
     ecsType: EVENT_TYPES.access,
-    name: ReadOperations.GetUserActions,
+    name: ACCESS_USER_ACTION_OPERATION,
     action: 'case_user_actions_get',
     verbs: accessVerbs,
     docType: 'user actions',
@@ -301,7 +302,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   },
   [ReadOperations.GetUserActionMetrics]: {
     ecsType: EVENT_TYPES.access,
-    name: ReadOperations.GetUserActionMetrics,
+    name: ACCESS_USER_ACTION_OPERATION,
     action: 'case_user_action_get_metrics',
     verbs: accessVerbs,
     docType: 'user actions',
