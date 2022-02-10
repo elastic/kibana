@@ -82,6 +82,10 @@ $controlMinWidth: $euiSize * 14;
   }
 }
 
+.controlFrame__labelToolTip {
+  max-width: 50%;
+}
+
 .controlFrameWrapper {
   flex-basis: auto;
   position: relative;
@@ -93,7 +97,7 @@ $controlMinWidth: $euiSize * 14;
 
     &Label {
       @include euiTextTruncate;
-      max-width: 50%;
+      padding-left: 0;
       border-radius: $euiBorderRadius;
     }
 

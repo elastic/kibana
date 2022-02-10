@@ -22,6 +22,10 @@
   border-color: darken($euiColorLightestShade, 2%);
 }
 
+.optionsList--filterBtnWrapper {
+  height: 100%;
+}
+
 .optionsList--filterBtn {
   .euiFilterButton__text-hasNotification {
     flex-grow: 1;
