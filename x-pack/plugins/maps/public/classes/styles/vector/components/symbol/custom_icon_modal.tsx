@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -24,6 +25,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
@@ -45,38 +47,71 @@ const strings = {
         numberOfRemainingCharacter,
       },
     }),
-  getCutoffRangeLabel: () =>
-    i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
-      defaultMessage: 'Alpha Threshold',
-    }),
+  getCutoffRangeLabel: () => (
+    <EuiToolTip
+      content={i18n.translate('xpack.maps.customIconModal.cutoffRangeTooltip', {
+        defaultMessage:
+          'Adjusts the balance of the signed distance function between the inside (approaching 1) and outside (approaching 0) of the icon.',
+      })}
+    >
+      <>
+        {i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
+          defaultMessage: 'Alpha threshold',
+        })}{' '}
+        <EuiIcon color="subdued" type="questionInCircle" />
+      </>
+    </EuiToolTip>
+  ),
   getDeleteButtonLabel: () =>
     i18n.translate('xpack.maps.customIconModal.deleteButtonLabel', {
       defaultMessage: 'Delete',
     }),
-  getIconPreviewTitle: () =>
-    i18n.translate('xpack.maps.customIconModal.elementPreviewTitle', {
-      defaultMessage: 'Icon preview',
-    }),
+  getIconPreviewTitle: () => (
+    <EuiToolTip
+      content={i18n.translate('xpack.maps.customIconModal.elementPreviewTooltip', {
+        defaultMessage:
+          'Dynamic styling requires rendering SVG icons using a signed distance function. As a result, sharp corners and intricate details may not render correctly. You may be able to tweak the Alpha threshold and Radius for better results.',
+      })}
+    >
+      <>
+        {i18n.translate('xpack.maps.customIconModal.elementPreviewTitle', {
+          defaultMessage: 'Icon preview',
+        })}{' '}
+        <EuiIcon color="subdued" type="questionInCircle" />
+      </>
+    </EuiToolTip>
+  ),
   getImageFilePickerPlaceholder: () =>
     i18n.translate('xpack.maps.customIconModal.imageFilePickerPlaceholder', {
-      defaultMessage: 'Select or drag and drop an image',
+      defaultMessage: 'Select or drag and drop an SVG icon',
     }),
   getImageInputDescription: () =>
     i18n.translate('xpack.maps.customIconModal.imageInputDescription', {
-      defaultMessage: 'Upload your SVG icon here and preview it on the right.',
+      defaultMessage: 'Upload your SVG icon here and preview the rendering on the right.',
     }),
   getImageInputLabel: () =>
     i18n.translate('xpack.maps.customIconModal.imageInputLabel', {
-      defaultMessage: 'SVG Icon',
+      defaultMessage: 'SVG icon',
     }),
   getNameInputLabel: () =>
     i18n.translate('xpack.maps.customIconModal.nameInputLabel', {
       defaultMessage: 'Name',
     }),
-  getRadiusRangeLabel: () =>
-    i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
-      defaultMessage: 'Radius',
-    }),
+  getRadiusRangeLabel: () => (
+    <EuiToolTip
+      content={i18n.translate('xpack.maps.customIconModal.raduisRangeTooltip', {
+        defaultMessage:
+          'Adjusts the size of the signed distance function around the Alpha threshold as a percent of icon size.',
+      })}
+    >
+      <>
+        {i18n.translate('xpack.maps.customIconModal.radiusRangeLabel', {
+          defaultMessage: 'Radius',
+        })}{' '}
+        <EuiIcon color="subdued" type="questionInCircle" />
+      </>
+    </EuiToolTip>
+  ),
   getSaveButtonLabel: () =>
     i18n.translate('xpack.maps.customIconModal.saveButtonLabel', {
       defaultMessage: 'Save',
@@ -226,7 +261,7 @@ export class CustomIconModal extends PureComponent<Props, State> {
                   initialPromptText={strings.getImageFilePickerPlaceholder()}
                   onChange={this._handleUpload}
                   className="mapsImageUpload"
-                  accept="image/*"
+                  accept=".svg"
                 />
               </EuiFormRow>
               <EuiText className="mapsCustomIconForm__thumbnailHelp" size="xs">

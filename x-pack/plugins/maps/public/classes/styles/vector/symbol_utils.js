@@ -27,12 +27,12 @@ export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
 });
 
 /**
- * Converts a SVG icon to a monochrome image using a signed distance function.
+ * Converts a SVG icon to a PNG image using a signed distance function (SDF).
  *
  * @param {string} svgString - SVG icon as string
- * @param {number} [cutoff=0.25] - balance between SDF inside 1 and outside 0 of glyph
+ * @param {number} [cutoff=0.25] - balance between SDF inside 1 and outside 0 of icon
  * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
- * @return {ImageData} Monochrome image that can be added to a MapLibre map
+ * @return {ImageData} image that can be added to a MapLibre map with option `{ sdf: true }`
  */
 export async function createSdfIcon({ svg, cutoff = 0.25, radius = 0.25 }) {
   const buffer = 3;
