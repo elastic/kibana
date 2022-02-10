@@ -29,6 +29,7 @@ export interface ExploratoryEmbeddableProps {
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   legendIsVisible?: boolean;
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
+  owner: string;
   reportConfigMap?: ReportConfigMap;
   withActions?: boolean | ActionTypes[];
   appId?: 'security' | 'observability';
@@ -53,6 +54,7 @@ export default function Embeddable({
   withActions = true,
   reportConfigMap = {},
   showCalculationMethod = false,
+  owner,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -143,6 +145,7 @@ export default function Embeddable({
         autoOpen={isAddToCaseOpen}
         setAutoOpen={setAddToCaseOpen}
         appId={appId}
+        owner={owner}
       />
     </Wrapper>
   );

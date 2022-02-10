@@ -12,6 +12,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new CasesUiPlugin(initializerContext);
 }
 
+export { DRAFT_COMMENT_STORAGE_ID } from './components/markdown_editor/plugins/lens/constants';
+
 export type { CasesUiPlugin };
 export type { CasesUiStart } from './types';
 export type { GetCasesProps } from './methods/get_cases';
