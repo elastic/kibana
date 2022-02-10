@@ -75,5 +75,3 @@ export const THREAT_INTEL_TAB = '[data-test-subj="threatIntelTab"]';
 export const TITLE = '.euiTitle';
 
 export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-button"]';
-
-export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
