@@ -956,7 +956,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove })
         .expect(200);
 
-      expect(body).to.eql({ [jobId]: { success: true } });
+      expect(body).to.eql({ [jobId]: { success: true, type: 'ml-job' } });
     },
 
     async assertJobSpaces(jobId: string, jobType: JobType, expectedSpaces: string[]) {
