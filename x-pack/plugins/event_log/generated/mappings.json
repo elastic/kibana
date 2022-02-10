@@ -309,19 +309,6 @@
                         }
                     }
                 },
-                "reporting": {
-                    "properties": {
-                        "id": {
-                            "type": "keyword"
-                        },
-                        "jobType": {
-                            "type": "keyword"
-                        },
-                        "byteSize": {
-                            "type": "long"
-                        }
-                    }
-                },
                 "saved_objects": {
                     "type": "nested",
                     "properties": {
