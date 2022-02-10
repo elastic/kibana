@@ -1,33 +1,30 @@
 [[upgrade]]
 == Upgrade {kib}
 
-To upgrade from 7.16 or earlier to {version}, 
-**you must first upgrade to {prev-major-last}**.
-This enables you to use the Upgrade Assistant to
-{stack-ref}/upgrading-elastic-stack.html#prepare-to-upgrade[prepare to upgrade].
-You must resolve all critical issues identified by the Upgrade Assistant
-before proceeding with the upgrade. 
+To upgrade from 7.16.0 or earlier to {version}, 
+**you must first upgrade to {prev-major-last}**, which enables you to use the *Upgrade Assistant* to
+{stack-ref}/upgrading-elastic-stack.html#prepare-to-upgrade[prepare for the upgrade].
+Before you upgrade, you must resolve all critical issues identified by the *Upgrade Assistant*. 
 
-{kib} does not support rolling upgrades. 
-You must shut down all {kib} instances, install the new software, and restart {kib}.
+Rolling upgrades are unsupported in {kib}. To upgrade,  
+you must shut down all {kib} instances, install the new software, and restart {kib}.
 Upgrading while older {kib} instances are running can cause data loss or upgrade failures.
 
 [WARNING]
 ====
-{kib} automatically runs <<saved-object-migrations, saved object migrations>> 
-when required. 
+When required, {kib} automatically migrates <<saved-object-migrations, saved objects>>. 
 In case of an upgrade failure, you can roll back to an
 earlier version of {kib}. To roll back, you **must** have a
 {ref}/snapshot-restore.html[backup snapshot] that includes the `kibana` feature
-state. Snapshots include this feature state by default.
+state. By default, snapshots include the `kibana` feature state.
 ====
 
 For more information about upgrading, 
 refer to {stack-ref}/upgrading-elastic-stack.html[Upgrading to Elastic {version}.]
 
 IMPORTANT: You can upgrade to pre-release versions for testing, 
-but upgrading from a pre-release to the General Available version is not supported.
-Pre-releases should only be used for testing in a temporary environment.
+but upgrading from a pre-release to the General Available version is unsupported.
+You should use pre-release versions only for testing in a temporary environment.
 
 include::upgrade/upgrade-migrations.asciidoc[leveloffset=-1]
 
