@@ -675,23 +675,68 @@ function getDefaultState(state, results, capabilities) {
   };
 }
 
+function byteLength(name) {
+  return encodeURI(name).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1 > 255;
+}
+
+const listOfErrors = {
+  longName: (
+    <FormattedMessage
+      id="xpack.dataVisualizer.file.importView.longName"
+      defaultMessage="Index name can't be greater than 255 bytes"
+    />
+  ),
+  lowercaseName: (
+    <FormattedMessage
+      id="xpack.dataVisualizer.file.importView.lowercaseName"
+      defaultMessage="Index name should be lowercase"
+    />
+  ),
+  noDots: (
+    <FormattedMessage
+      id="xpack.dataVisualizer.file.importView.noDots"
+      defaultMessage="Index name can't be . or .."
+    />
+  ),
+  noCharsAtStart: (
+    <FormattedMessage
+      id="xpack.dataVisualizer.file.importView.noCharsAtStart"
+      defaultMessage="Index name can't start with these chars: - _ +"
+    />
+  ),
+  noSpecificChars: (
+    <FormattedMessage
+      id="xpack.dataVisualizer.file.importView.noSpecificChars"
+      defaultMessage="Index name can't contain spaces or these chars: \ / * ? < > | , #"
+    />
+  ),
+};
+
 function isIndexNameValid(name) {
   const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
-  if (
-    name !== name.toLowerCase() || // name should be lowercase
-    name === '.' ||
-    name === '..' || // name can't be . or ..
-    name.match(/^[-_+]/) !== null || // name can't start with these chars
-    name.match(reg) !== null // name can't contain these chars
-  ) {
-    return (
-      <FormattedMessage
-        id="xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage"
-        defaultMessage="Index name contains illegal characters"
-      />
-    );
+  let error = '';
+
+  if (byteLength(name)) {
+    error = listOfErrors.longName;
   }
-  return '';
+
+  if (name !== name.toLowerCase()) {
+    error = listOfErrors.lowercaseName;
+  }
+
+  if (name === '.' || name === '..') {
+    error = listOfErrors.noDots;
+  }
+
+  if (name.match(/^[-_+]/) !== null) {
+    error = listOfErrors.noCharsAtStart;
+  }
+
+  if (name.match(reg) !== null) {
+    error = listOfErrors.noSpecificChars;
+  }
+
+  return error;
 }
 
 function isDataViewNameValid(name, dataViewNames, index) {
