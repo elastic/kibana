@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
     ];
 
     for (const jobConfig of mockJobConfigs) {
-      await ml.api.createDataFrameAnalyticsJob(jobConfig as DataFrameAnalyticsConfig);
+      await ml.api.createAndRunDFAJob(jobConfig as DataFrameAnalyticsConfig);
     }
   }
 
@@ -247,7 +247,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.have.keys('elements', 'details', 'error');
         // Index node, 2 job nodes (with same source index), and 2 edge nodes to connect them
-        expect(body.elements.length).to.eql(5);
+        expect(body.elements.length).to.eql(9);
 
         for (const detailsId in body.details) {
           if (detailsId.includes('analytics')) {
@@ -276,52 +276,33 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('GetDataFrameAnalyticsMessages', () => {
       it('should fetch single analytics job messages by id', async () => {
-        const resp = await supertest
-          .get(`/api/ml/data_frame/analytics/${jobId}/messages`)
+        const { body } = await supertest
+          .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS)
           .expect(200);
-        // expect(body.count).to.eql(1);
-        // expect(body.data_frame_analytics.length).to.eql(1);
-        // expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
-        // expect(body.data_frame_analytics[0]).to.have.keys(
-        //   'id',
-        //   'state',
-        //   'progress',
-        //   'data_counts',
-        //   'memory_usage'
-        // );
-        console.log('------- BODY --------', JSON.stringify(resp, null, 2)); // remove
+
+          expect(body.length).to.eql(12);
+          expect(body[0].job_id).to.eql(`${jobId}_1`);
+          expect(body[0]).to.have.keys(
+            'job_id',
+            'message',
+            'level',
+            'timestamp',
+            'node_name',
+            'job_type'
+        );
       });
 
-      // it('should fetch multiple analytics jobs stats based on provided ids', async () => {
-      //   const { body } = await supertest
-      //     .get(`/api/ml/data_frame/analytics/${jobId}_1,${jobId}_2/_stats`)
-      //     .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-      //     .set(COMMON_REQUEST_HEADERS)
-      //     .expect(200);
-      //   expect(body.count).to.eql(2);
-      //   expect(body.data_frame_analytics.length).to.eql(2);
-      //   expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
-      //   expect(body.data_frame_analytics[0]).to.have.keys(
-      //     'id',
-      //     'state',
-      //     'progress',
-      //     'data_counts',
-      //     'memory_usage'
-      //   );
-      //   expect(body.data_frame_analytics[1].id).to.eql(`${jobId}_2`);
-      // });
-
-      // it('should not allow to retrieve a job stats for the user without required permissions', async () => {
-      //   const { body } = await supertest
-      //     .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
-      //     .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-      //     .set(COMMON_REQUEST_HEADERS)
-      //     .expect(403);
-      //   expect(body.error).to.eql('Forbidden');
-      //   expect(body.message).to.eql('Forbidden');
-      // });
+      it('should not allow to retrieve a job stats for the user without required permissions', async () => {
+        const { body } = await supertest
+          .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
+          .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(403);
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
+      });
     });
   });
 };
