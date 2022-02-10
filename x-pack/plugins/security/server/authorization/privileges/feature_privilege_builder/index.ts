@@ -20,6 +20,7 @@ import { FeaturePrivilegeNavlinkBuilder } from './navlink';
 import { FeaturePrivilegeSavedObjectBuilder } from './saved_object';
 import { FeaturePrivilegeUIBuilder } from './ui';
 
+export type { CasesSupportedOperations } from './cases';
 export type { FeaturePrivilegeBuilder };
 
 export const featurePrivilegeBuilderFactory = (actions: Actions): FeaturePrivilegeBuilder => {
