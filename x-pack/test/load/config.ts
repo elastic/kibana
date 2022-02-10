@@ -47,7 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_BREAKDOWN_METRICS: false,
         ELASTIC_APM_CAPTURE_SPAN_STACK_TRACES: false,
         ELASTIC_APM_METRICS_INTERVAL: '120s',
-        // ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
+        ELASTIC_APM_MAX_QUEUE_SIZE: 20480,
         ELASTIC_SANITIZE_FIELD_NAMES:
           'password,passwd,pwd,secret,*key,*token*,*session*,*credit*,*card*,*auth*,set-cookie,pw,pass,connect.sid',
         ELASTIC_APM_ENVIRONMENT: process.env.CI ? 'ci' : 'development',
