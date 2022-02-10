@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH } from '../../../common';
 import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
@@ -100,6 +100,18 @@ describe('<IndexManagementHome />', () => {
           name: 'data-stream-index',
           data_stream: 'dataStream1',
         },
+        {
+          health: '',
+          status: '',
+          primary: '',
+          replica: '',
+          documents: '',
+          documents_deleted: '',
+          size: '',
+          primary_size: '',
+          name: 'no-data-stream-index',
+          data_stream: null,
+        },
       ]);
 
       // The detail panel should still appear even if there are no data streams.
@@ -125,13 +137,22 @@ describe('<IndexManagementHome />', () => {
       const {
         findDataStreamDetailPanel,
         findDataStreamDetailPanelTitle,
-        actions: { clickDataStreamAt },
+        actions: { clickDataStreamAt, dataStreamLinkExistsAt },
       } = testBed;
 
+      expect(dataStreamLinkExistsAt(0)).toBeTruthy();
       await clickDataStreamAt(0);
 
       expect(findDataStreamDetailPanel().length).toBe(1);
       expect(findDataStreamDetailPanelTitle()).toBe('dataStream1');
+    });
+
+    test(`doesn't show data stream link if the index doesn't have a data stream`, () => {
+      const {
+        actions: { dataStreamLinkExistsAt },
+      } = testBed;
+
+      expect(dataStreamLinkExistsAt(1)).toBeFalsy();
     });
   });
 

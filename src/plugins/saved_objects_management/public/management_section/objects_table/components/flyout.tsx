@@ -149,11 +149,18 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   import = async () => {
     const { http } = this.props;
     const { file, importMode } = this.state;
+    if (file === undefined) {
+      this.setState({
+        status: 'error',
+        error: 'missing_file',
+      });
+      return;
+    }
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, importMode);
+      const response = await importFile(http, file, importMode);
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -489,7 +496,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderFooter() {
-    const { status } = this.state;
+    const { status, file } = this.state;
     const { done, close } = this.props;
 
     let confirmButton;
@@ -524,6 +531,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           onClick={this.import}
           size="s"
           fill
+          isDisabled={file === undefined}
           isLoading={status === 'loading'}
           data-test-subj="importSavedObjectsImportBtn"
         >

@@ -28,6 +28,7 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
+    dataStreamLinkExistsAt: (index: number) => boolean;
     clickManageContextMenuButton: () => void;
     clickContextMenuOption: (optionDataTestSubject: string) => void;
   };
@@ -97,6 +98,12 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
     component.update();
   };
 
+  const dataStreamLinkExistsAt = (index: number) => {
+    const { table } = testBed;
+    const { rows } = table.getMetaData('indexTable');
+    return findTestSubject(rows[index].reactWrapper, 'dataStreamLink').exists();
+  };
+
   const findDataStreamDetailPanel = () => {
     const { find } = testBed;
     return find('dataStreamDetailPanel');
@@ -114,6 +121,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
       getIncludeHiddenIndicesToggleStatus,
       clickIncludeHiddenIndicesToggle,
       clickDataStreamAt,
+      dataStreamLinkExistsAt,
       clickManageContextMenuButton,
       clickContextMenuOption,
     },
