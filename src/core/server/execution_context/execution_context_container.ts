@@ -56,8 +56,8 @@ function stringify(ctx: KibanaExecutionContext): string {
 
 export class ExecutionContextContainer implements IExecutionContextContainer {
   readonly #context: Readonly<KibanaExecutionContext>;
-  constructor(context: KibanaExecutionContext, child?: IExecutionContextContainer) {
-    this.#context = { child: child?.toJSON(), ...context };
+  constructor(context: KibanaExecutionContext, parent?: IExecutionContextContainer) {
+    this.#context = parent ? { ...parent.toJSON(), child: context } : context;
   }
   toString(): string {
     return enforceMaxLength(stringify(this.#context));

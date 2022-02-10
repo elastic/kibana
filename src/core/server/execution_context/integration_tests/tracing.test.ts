@@ -604,9 +604,7 @@ describe('trace', () => {
           .expect(200);
 
         const header = response.body['x-opaque-id'];
-        expect(header).toContain(
-          'de16b1df-510a-43e2-bf83-b658af27f168;kibana:new-type:new-name:41;test-type:test-name:42'
-        );
+        expect(header).toContain('kibana:test-type:test-name:42;new-type:new-name:41');
       });
     });
   });
