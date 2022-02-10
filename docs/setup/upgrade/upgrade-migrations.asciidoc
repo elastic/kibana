@@ -4,8 +4,8 @@
 
 Each time you upgrade {kib}, an upgrade migration is performed to ensure that all <<managing-saved-objects,saved objects>> are compatible with the new version.
 
-NOTE: To help you prepare for the upgrade to 7.0.0, 6.7.0 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[*Upgrade Assistant*]. 
-To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
+NOTE: To help you prepare for the upgrade to 8.0.0, 7.17.0 includes an https://www.elastic.co/guide/en/kibana/7.17/upgrade-assistant.html[*Upgrade Assistant*]. 
+To access the assistant, go to *Stack Management > Upgrade Assistant*.
 
 WARNING: {kib} 7.12.0 and later uses a new migration process and index naming scheme. Before you upgrade, read the documentation for your version of {kib}.
 
@@ -32,7 +32,6 @@ adds a write block to the outdated index. Table 1 lists the saved objects indice
 [options="header"]
 |=======================
 |Upgrading from version | Outdated index (alias)
-| 6.0.0 through 6.4.x    | `.kibana`
 
 `.kibana_task_manager_7.12.0_001` (`.kibana_task_manager` alias)
 | 6.5.0 through 7.3.x    | `.kibana_N` (`.kibana` alias)
@@ -57,6 +56,28 @@ complete the upgrade migration before bringing up the remaining instances.
 [[preventing-migration-failures]]
 ==== Preventing migration failures
 Review the common causes of {kib} upgrade failures and how to prevent them.
+
+[float]
+====== Documents found for unknown saved object types
+Migrations will fail if saved objects belong to an unknown
+saved object type. Unknown saved objects are typically caused by
+to the {es} index, or by disabling a plugin that had previously
+created a saved object.
+
+We recommend using the https://www.elastic.co/guide/en/kibana/7.17/upgrade-assistant.html[Upgrade Assistant] 
+to discover and remedy any unknown saved object types. {kib} version 7.17.0 deployments containing unknown saved
+object types will also log the following warning message:
+
+[source,sh]
+--------------------------------------------
+CHECK_UNKNOWN_DOCUMENTS Upgrades will fail for 8.0+ because documents were found for unknown saved object types. To ensure that upgrades will succeed in the future, either re-enable plugins or delete these documents from the ".kibana_7.17.0_001" index after the current upgrade completes.
+--------------------------------------------
+
+If you fail to remedy this, your upgrade to 8.0+ will fail with a message like:
+[source,sh]
+--------------------------------------------
+Unable to complete saved object migrations for the [.kibana] index: Migration failed because documents were found for unknown saved object types. To proceed with the migration, please delete these documents from the ".kibana_7.17.0_001" index.
+--------------------------------------------
 
 [float]
 ===== timeout_exception or receive_timeout_transport_exception
@@ -121,9 +142,6 @@ Be sure you have a snapshot before you delete the corrupt document. If you are u
 Matching index templates that specify `settings.refresh_interval` or `mappings` are known to interfere with {kib} upgrades.
 
 To make sure the index templates won't apply to new `.kibana*` indices, narrow down the {data-sources} of any user-defined index templates.
-
-NOTE: In {kib} 6.5.0 and earlier, {kib} creates a `kibana_index_template:.kibana` index template
-and uses a `.kibana` index pattern. You do not need to change or remove the index template.
 
 [float]
 ===== An unhealthy {es} cluster
