@@ -7,7 +7,6 @@
 /// <reference types="node" />
 
 import { Action } from 'history';
-import { BehaviorSubject } from 'rxjs';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ConfigPath } from '@kbn/config';
@@ -470,12 +469,7 @@ export class CoreSystem {
     // (undocumented)
     start(): Promise<{
         application: InternalApplicationStart;
-        executionContext: {
-            context$: BehaviorSubject<ExecutionContext>;
-            clear: () => void;
-            set: (c: ExecutionContext) => void;
-            getAll: () => ExecutionContext;
-        };
+        executionContext: ExecutionContextSetup;
     } | undefined>;
     // (undocumented)
     stop(): void;
@@ -769,6 +763,7 @@ export type KibanaExecutionContext = {
     readonly type?: string;
     readonly name?: string;
     readonly page?: string;
+    readonly space?: string;
     readonly id?: string;
     readonly description?: string;
     readonly url?: string;
@@ -1539,6 +1534,5 @@ export interface UserProvidedValues<T = any> {
 // Warnings were encountered during analysis:
 //
 // src/core/public/core_system.ts:183:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
-// src/core/public/core_system.ts:186:24 - (ae-forgotten-export) The symbol "ExecutionContext" needs to be exported by the entry point index.d.ts
 
 ```

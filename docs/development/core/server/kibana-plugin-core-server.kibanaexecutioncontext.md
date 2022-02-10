@@ -13,6 +13,7 @@ export declare type KibanaExecutionContext = {
     readonly type?: string;
     readonly name?: string;
     readonly page?: string;
+    readonly space?: string;
     readonly id?: string;
     readonly description?: string;
     readonly url?: string;
