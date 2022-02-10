@@ -40,16 +40,16 @@
       },
       "meta": {
         "disabled": false,
-        "key": "event.dataset",
+        "key": "event.module",
         "negate": false,
         "params": {
-          "query": "ti_*"
+          "query": "threatintel"
         },
         "type": "phrase"
       },
       "query": {
         "match_phrase": {
-          "event.dataset": "ti_*"
+          "event.module": "threatintel"
         }
       }
     },
@@ -190,9 +190,9 @@
       ]
     }
   ],
-  "threat_query": "@timestamp >= \"now-30d\" and event.dataset:ti_* and (threat.indicator.file.hash.*:* or threat.indicator.file.pe.imphash:* or threat.indicator.ip:* or threat.indicator.registry.path:* or threat.indicator.url.full:*)",
+  "threat_query": "@timestamp >= \"now-30d\" and event.module:threatintel and (threat.indicator.file.hash.*:* or threat.indicator.file.pe.imphash:* or threat.indicator.ip:* or threat.indicator.registry.path:* or threat.indicator.url.full:*)",
   "timeline_id": "495ad7a7-316e-4544-8a0f-9c098daee76e",
   "timeline_title": "Generic Threat Match Timeline",
   "type": "threat_match",
-  "version": 1
+  "version": 2
 }
