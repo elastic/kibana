@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOr, find, isEmpty, uniqBy } from 'lodash/fp';
+import { find, isEmpty, uniqBy } from 'lodash/fp';
 import {
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_TYPE,
@@ -24,7 +24,7 @@ import {
 import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { getEnrichedFieldInfo, SummaryRow } from './helpers';
-import { EventSummaryField } from './types';
+import { EnrichedFieldInfo, EventSummaryField } from './types';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
@@ -217,12 +217,14 @@ function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCat
 export const getSummaryRows = ({
   data,
   browserFields,
+  rawEventData,
   timelineId,
   eventId,
   isDraggable = false,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
+  rawEventData: unknown;
   timelineId: string;
   eventId: string;
   isDraggable?: boolean;
@@ -271,43 +273,24 @@ export const getSummaryRows = ({
         if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
           return acc;
         }
-
-        if (field.id === `${ALERT_THRESHOLD_RESULT}.terms`) {
-          try {
-            const terms = getOr(null, 'originalValue', item);
-            const parsedValue = terms.map((term: string) => JSON.parse(term));
-            const thresholdTerms = (parsedValue ?? []).map(
-              (entry: { field: string; value: string }) => {
-                return {
-                  title: `${entry.field} [threshold]`,
-                  description: {
-                    ...description,
-                    values: [entry.value],
-                  },
-                };
-              }
-            );
-            return [...acc, ...thresholdTerms];
-          } catch (err) {
-            return [...acc];
-          }
+        if (field.id === `${ALERT_THRESHOLD_RESULT}.terms` && hasThresholdResult(rawEventData)) {
+          return [
+            ...acc,
+            ...enrichThresholdTerms(rawEventData._source[ALERT_THRESHOLD_RESULT], description),
+          ];
         }
 
-        if (field.id === `${ALERT_THRESHOLD_RESULT}.cardinality`) {
-          try {
-            const value = getOr(null, 'originalValue.0', field);
-            const parsedValue = JSON.parse(value);
-            return [
-              ...acc,
-              {
-                title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
-                description: {
-                  ...description,
-                  values: [`count(${parsedValue.field}) == ${parsedValue.value}`],
-                },
-              },
-            ];
-          } catch (err) {
+        if (
+          field.id === `${ALERT_THRESHOLD_RESULT}.cardinality` &&
+          hasThresholdResult(rawEventData)
+        ) {
+          const enrichedCardinality = enrichThresholdCardinality(
+            rawEventData._source[ALERT_THRESHOLD_RESULT],
+            description
+          );
+          if (enrichedCardinality) {
+            return [...acc, enrichedCardinality];
+          } else {
             return acc;
           }
         }
@@ -322,3 +305,64 @@ export const getSummaryRows = ({
       }, [])
     : [];
 };
+
+/**
+ * Enriches the summary data for threshold terms.
+ * For any given threshold term, it generates a row with the term's name and the associated value.
+ */
+function enrichThresholdTerms(
+  { terms }: ThresholdResult,
+  baseDescription: EnrichedFieldInfo
+): SummaryRow[] {
+  return (terms || []).map(({ field, value }) => {
+    return {
+      title: `${field} [threshold]`,
+      description: {
+        ...baseDescription,
+        values: [value],
+      },
+    };
+  });
+}
+
+/**
+ * Enriches the summary data for threshold cardinality.
+ * Reads out the cardinality field and the value and interpolates them into a combined string value.
+ */
+function enrichThresholdCardinality(
+  { cardinality }: ThresholdResult,
+  baseDescription: EnrichedFieldInfo
+): SummaryRow | undefined {
+  // Only return a summary row if we actually have the correct field and value
+  if (cardinality && cardinality.length > 0) {
+    const { field, value } = cardinality[0];
+    return {
+      title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
+      description: {
+        ...baseDescription,
+        values: [`count(${field}) >= ${value}`],
+      },
+    };
+  } else {
+    return undefined;
+  }
+}
+
+type SourceFieldsData = Record<string, unknown>;
+function hasSourceData(rawEventData: unknown): rawEventData is { _source: SourceFieldsData } {
+  return !!rawEventData && typeof rawEventData === 'object' && '_source' in rawEventData;
+}
+
+interface ThresholdData {
+  field: string;
+  value: string;
+}
+interface ThresholdResult {
+  terms?: ThresholdData[];
+  cardinality?: ThresholdData[];
+}
+function hasThresholdResult(rawEventData: unknown): rawEventData is {
+  _source: { [ALERT_THRESHOLD_RESULT]: ThresholdResult };
+} {
+  return hasSourceData(rawEventData) && ALERT_THRESHOLD_RESULT in rawEventData._source;
+}

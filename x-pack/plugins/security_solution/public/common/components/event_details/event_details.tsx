@@ -180,6 +180,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     timelineId,
                     title: i18n.HIGHLIGHTES_FIELDS,
                   }}
+                  rawEventData={rawEventData}
                   goToTable={goToTableTab}
                 />
 
@@ -212,6 +213,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       isAlert,
       data,
       browserFields,
+      rawEventData,
       isDraggable,
       timelineId,
       enrichmentCount,

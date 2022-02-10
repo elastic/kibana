@@ -32,6 +32,7 @@ const props = {
   timelineId: 'detections-page',
   title: '',
   goToTable: jest.fn(),
+  rawEventData: {},
 };
 
 describe('AlertSummaryView', () => {
@@ -255,12 +256,39 @@ describe('AlertSummaryView', () => {
       {
         category: 'kibana',
         field: 'kibana.alert.threshold_result.terms',
-        values: ['{"field":"host.name","value":"Host-i120rdnmnw"}'],
-        originalValue: ['{"field":"host.name","value":"Host-i120rdnmnw"}'],
+        // value and originalValue don't matter here since the data comes from `_source` in the end
+        values: [''],
+        originalValue: [''],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality',
+        // value and originalValue don't matter here since the data comes from `_source` in the end
+        values: [''],
+        originalValue: [''],
       },
     ] as TimelineEventsDetailsItem[];
     const renderProps = {
       ...props,
+      rawEventData: {
+        _source: {
+          'kibana.alert.threshold_result': {
+            cardinality: [
+              {
+                field: 'host.name',
+                value: 20,
+              },
+            ],
+            terms: [
+              {
+                field: 'host.name',
+                value: 'Host-i120rdnmnw',
+              },
+              { field: 'host.id', value: 'werw0r4hrj349r3j49r0' },
+            ],
+          },
+        },
+      },
       data: enhancedData,
     };
     const { getByText } = render(
@@ -269,7 +297,12 @@ describe('AlertSummaryView', () => {
       </TestProvidersComponent>
     );
 
-    ['Threshold Count', 'host.name [threshold]'].forEach((fieldId) => {
+    [
+      'Threshold Count',
+      'host.name [threshold]',
+      'host.id [threshold]',
+      'count(host.name) >= 20',
+    ].forEach((fieldId) => {
       expect(getByText(fieldId));
     });
   });

@@ -58,15 +58,25 @@ const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns
 const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
+  rawEventData: object | undefined;
   eventId: string;
   isDraggable?: boolean;
   timelineId: string;
   title: string;
   goToTable: () => void;
-}> = ({ browserFields, data, eventId, isDraggable, timelineId, title, goToTable }) => {
+}> = ({
+  browserFields,
+  data,
+  rawEventData,
+  eventId,
+  isDraggable,
+  timelineId,
+  title,
+  goToTable,
+}) => {
   const summaryRows = useMemo(
-    () => getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId }),
-    [browserFields, data, eventId, isDraggable, timelineId]
+    () => getSummaryRows({ browserFields, data, rawEventData, eventId, isDraggable, timelineId }),
+    [browserFields, data, rawEventData, eventId, isDraggable, timelineId]
   );
 
   return (
