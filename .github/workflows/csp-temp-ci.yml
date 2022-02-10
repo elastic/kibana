@@ -32,3 +32,6 @@ jobs:
 
       - name: eslint
         run: node scripts/eslint  x-pack/plugins/cloud_security_posture --no-cache
+
+      - name: Tests (jest)
+        run: node_modules/.bin/jest --config x-pack/plugins/cloud_security_posture/jest.config.js
