@@ -57,6 +57,11 @@ Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensu
 When you perform an upgrade migration of different {kib} versions, the migration can fail.
 Ensure that all {kib} instances are running the same version, configuration, and plugins.
 
+[float]
+==== Back up your data
+Be sure to have a {ref}/snapshot-restore.html[snapshot] of all your data before attempting a migration.
+If something goes wrong during migration, you can restore from the snapshot and try again.
+
 Review the <<resolve-migrations-failures,common causes of {kib} upgrade failures>> and how to prevent them.
 
 

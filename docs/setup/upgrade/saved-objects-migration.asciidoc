@@ -12,7 +12,7 @@ WARNING: The following instructions assumes {kib} is using the default index nam
 
 [float]
 [[upgrade-migrations-process]]
-==== Background
+==== How saved objects migrations work
 
 Saved objects are stored in two indices:
 
