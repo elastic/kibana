@@ -868,7 +868,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_trampoline_detection',
       {
-        defaultMessage: 'Description here. Default: true',
+        defaultMessage: 'Enable trampoline-based shellcode injection detection as a part of memory protection. Default: true',
       }
     ),
   },
