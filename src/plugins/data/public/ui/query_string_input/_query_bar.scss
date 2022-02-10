@@ -28,11 +28,6 @@
   }
 }
 
-.kbnQueryBar--textareaIcon {
-  margin-left: 8px;
-  align-self: center;
-}
-
 .kbnQueryBar__textarea {
   z-index: $euiZContentMenu;
   resize: none !important; // When in the group, it will autosize
