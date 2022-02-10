@@ -64,10 +64,10 @@ saved object type. This could be caused by writing malformed documents directly
 to the Elasticsearch index, or by disabling a plugin that had previously
 created a saved object.
 
-We recommend using the <<upgrade-assistant,Upgrade Assistant>> to discover and
-remedy any unknown saved object types. In addition to the upgrade assistant, 
-{kib} version 7.17.0 deployments containing unknown saved object types will 
-also log the following warning message:
+We recommend using the https://www.elastic.co/guide/en/kibana/7.17/upgrade-assistant.html[Upgrade Assistant] 
+to discover and remedy any unknown saved object types. In addition to the 
+upgrade assistant, {kib} version 7.17.0 deployments containing unknown saved
+object types will also log the following warning message:
 
 [source,sh]
 --------------------------------------------
