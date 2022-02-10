@@ -34,7 +34,7 @@ const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   const [error, setError] = useState<string | undefined>();
 
   useEffect(() => {
-    const subscription = adapters.vega.getErrorSubscription().subscribe((data) => {
+    const subscription = adapters.vega.getErrorObservable().subscribe((data) => {
       setError(data);
     });
     return () => {
