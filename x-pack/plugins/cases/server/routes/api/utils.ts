@@ -7,7 +7,7 @@
 
 import { Boom, boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
+import type { CustomHttpResponseOptions, ResponseError, Headers, Logger } from 'kibana/server';
 import { CaseError, isCaseError, HTTPError, isHTTPError } from '../../common/error';
 
 /**
@@ -46,3 +46,20 @@ export const getWarningHeader = (
 ): { warning: string } => ({
   warning: `299 Kibana-${kibanaVersion} "${msg}"`,
 });
+
+/**
+ * Taken from
+ * https://github.com/elastic/kibana/blob/ec30f2aeeb10fb64b507935e558832d3ef5abfaa/x-pack/plugins/spaces/server/usage_stats/usage_stats_client.ts#L113-L118
+ */
+
+const getIsKibanaRequest = (headers?: Headers) => {
+  // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
+  // We can't be 100% certain, but this is a reasonable attempt.
+  return headers && headers['kbn-version'] && headers.referer;
+};
+
+export const logDeprecatedEndpoint = (logger: Logger, headers: Headers, msg: string) => {
+  if (!getIsKibanaRequest(headers)) {
+    logger.warn(msg);
+  }
+};

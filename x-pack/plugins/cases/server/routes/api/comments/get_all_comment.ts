@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../types';
-import { wrapError, getWarningHeader } from '../utils';
+import { wrapError, getWarningHeader, logDeprecatedEndpoint } from '../utils';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 
 /**
@@ -26,7 +26,12 @@ export function initGetAllCommentsApi({ router, logger, kibanaVersion }: RouteDe
     },
     async (context, request, response) => {
       try {
-        logger.warn(`The get all cases comments API '${CASE_COMMENTS_URL}' is deprecated.`);
+        logDeprecatedEndpoint(
+          logger,
+          request.headers,
+          `The get all cases comments API '${CASE_COMMENTS_URL}' is deprecated.`
+        );
+
         const client = await context.cases.getCasesClient();
 
         return response.ok({

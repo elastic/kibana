@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../types';
-import { getWarningHeader, wrapError } from '../utils';
+import { getWarningHeader, logDeprecatedEndpoint, wrapError } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
 
 export function initGetCaseApi({ router, logger, kibanaVersion }: RouteDeps) {
@@ -33,7 +33,9 @@ export function initGetCaseApi({ router, logger, kibanaVersion }: RouteDeps) {
           request.url.searchParams.has('includeComments');
 
         if (isIncludeCommentsParamProvidedByTheUser) {
-          logger.warn(
+          logDeprecatedEndpoint(
+            logger,
+            request.headers,
             `The query parameter 'includeComments' of the get case API '${CASE_DETAILS_URL}' is deprecated`
           );
         }
