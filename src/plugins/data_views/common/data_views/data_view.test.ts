@@ -16,7 +16,7 @@ import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../../field_formats/common/mocks';
 import { FieldFormat } from '../../../field_formats/common';
-import { RuntimeField } from '../types';
+import { RuntimeField, RuntimeTypeExceptComposite } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
@@ -223,6 +223,21 @@ describe('IndexPattern', () => {
       },
     };
 
+    const runtimeComposite = {
+      type: 'composite' as RuntimeField['type'],
+      script: {
+        source: "emit('hello world');",
+      },
+      fields: {
+        a: {
+          type: 'keyword' as RuntimeTypeExceptComposite,
+        },
+        b: {
+          type: 'long' as RuntimeTypeExceptComposite,
+        },
+      },
+    };
+
     beforeEach(() => {
       const formatter = {
         toJSON: () => ({ id: 'bytes' }),
@@ -251,7 +266,27 @@ describe('IndexPattern', () => {
         runtime_field: runtimeField.runtimeField,
         new_field: runtime,
       });
+      expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
       expect(indexPattern.toSpec()!.fields!.new_field.runtimeField).toEqual(runtime);
+
+      indexPattern.removeRuntimeField('new_field');
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+      });
+      expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
+    });
+
+    test('add and remove composite runtime field as new fields', () => {
+      const fieldCount = indexPattern.fields.length;
+      indexPattern.addRuntimeField('new_field', runtimeComposite);
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+        new_field: runtimeComposite,
+      });
+      expect(indexPattern.fields.length - fieldCount).toEqual(2);
+      expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
+      expect(indexPattern.toSpec()!.fields!['new_field.a']).toBeDefined();
+      expect(indexPattern.toSpec()!.fields!['new_field.b']).toBeDefined();
 
       indexPattern.removeRuntimeField('new_field');
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
