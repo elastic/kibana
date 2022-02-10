@@ -823,12 +823,7 @@ class PackagePolicyService {
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
     const inputsPromises = inputs.map(async (input) => {
-      const compiledInput = await _compilePackagePolicyInput(
-        installablePackage,
-        pkgInfo,
-        vars,
-        input
-      );
+      const compiledInput = await _compilePackagePolicyInput(pkgInfo, vars, input);
       const compiledStreams = await _compilePackageStreams(
         installablePackage,
         pkgInfo,
@@ -945,7 +940,6 @@ function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyI
 }
 
 async function _compilePackagePolicyInput(
-  installablePackage: InstallablePackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput
@@ -970,7 +964,7 @@ async function _compilePackagePolicyInput(
     return undefined;
   }
 
-  const [pkgInputTemplate] = await getAssetsData(installablePackage, (path: string) =>
+  const [pkgInputTemplate] = await getAssetsData(pkgInfo, (path: string) =>
     path.endsWith(`/agent/input/${packageInput.template_path!}`)
   );
 
@@ -992,7 +986,7 @@ async function _compilePackageStreams(
   input: PackagePolicyInput
 ) {
   const streamsPromises = input.streams.map((stream) =>
-    _compilePackageStream(installablePackage, pkgInfo, vars, input, stream)
+    _compilePackageStream(pkgInfo, vars, input, stream)
   );
 
   return await Promise.all(streamsPromises);
@@ -1035,7 +1029,6 @@ export function _applyIndexPrivileges(
 }
 
 async function _compilePackageStream(
-  installablePackage: InstallablePackage,
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
@@ -1078,7 +1071,7 @@ async function _compilePackageStream(
   const datasetPath = packageDataStream.path;
 
   const [pkgStreamTemplate] = await getAssetsData(
-    installablePackage,
+    pkgInfo,
     (path: string) => path.endsWith(streamFromPkg.template_path),
     datasetPath
   );

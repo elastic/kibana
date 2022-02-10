@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InstallablePackage } from '../../../types';
+import type { PackageInfo } from '../../../types';
 import { getArchiveFilelist, getAsset } from '../archive';
 import type { ArchiveEntry } from '../archive';
 
@@ -17,7 +17,7 @@ import type { ArchiveEntry } from '../archive';
 // and different package and version structure
 
 export function getAssets(
-  packageInfo: InstallablePackage,
+  packageInfo: PackageInfo,
   filter = (path: string): boolean => true,
   datasetName?: string
 ): string[] {
@@ -52,7 +52,7 @@ export function getAssets(
 // ASK: Does getAssetsData need an installSource now?
 // if so, should it be an Installation vs InstallablePackage or add another argument?
 export async function getAssetsData(
-  packageInfo: InstallablePackage,
+  packageInfo: PackageInfo,
   filter = (path: string): boolean => true,
   datasetName?: string
 ): Promise<ArchiveEntry[]> {

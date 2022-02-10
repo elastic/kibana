@@ -16,6 +16,7 @@ import type {
   RegistryElasticsearch,
   InstallablePackage,
   IndexTemplate,
+  PackageInfo,
 } from '../../../../types';
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
@@ -30,6 +31,8 @@ import {
 import type { ESAssetMetadata } from '../meta';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+
+import { getPackageInfo } from '../../packages';
 
 import {
   generateMappings,
@@ -62,10 +65,16 @@ export const installTemplates = async (
   const dataStreams = installablePackage.data_streams;
   if (!dataStreams) return [];
 
+  const packageInfo = await getPackageInfo({
+    savedObjectsClient,
+    pkgName: installablePackage.name,
+    pkgVersion: installablePackage.version,
+  });
+
   const installedTemplatesNested = await Promise.all(
     dataStreams.map((dataStream) =>
       installTemplateForDataStream({
-        pkg: installablePackage,
+        pkg: packageInfo,
         esClient,
         logger,
         dataStream,
@@ -177,7 +186,7 @@ export async function installTemplateForDataStream({
   logger,
   dataStream,
 }: {
-  pkg: InstallablePackage;
+  pkg: PackageInfo;
   esClient: ElasticsearchClient;
   logger: Logger;
   dataStream: RegistryDataStream;
