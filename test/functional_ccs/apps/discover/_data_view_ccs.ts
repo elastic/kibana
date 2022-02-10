@@ -30,9 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('saveIndexPatternButton');
   };
 
-  describe('discover integration with data view editor', function describeIndexTests() {
+  describe.only('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
-      esClient.cluster.putSettings({
+      await esClient.cluster.putSettings({
         persistent: {
           cluster: {
             remote: {
