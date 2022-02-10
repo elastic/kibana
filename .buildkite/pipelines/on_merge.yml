@@ -12,7 +12,7 @@ steps:
     label: Default Build and Metrics
     agents:
       queue: c2-8
-    timeout_in_minutes: 60
+    timeout_in_minutes: 90
 
   - command: .buildkite/scripts/steps/on_merge_ts_refs_api_docs.sh
     label: Build TS Refs and Check Public API Docs
