@@ -23,10 +23,13 @@ describe('SetupModeRenderer', () => {
   it('should render with setup mode disabled', () => {
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: false,
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -52,6 +55,7 @@ describe('SetupModeRenderer', () => {
   it('should render with setup mode enabled', () => {
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {},
@@ -60,6 +64,8 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -85,6 +91,7 @@ describe('SetupModeRenderer', () => {
   it('should render the flyout open', () => {
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {
@@ -95,6 +102,8 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -122,6 +131,7 @@ describe('SetupModeRenderer', () => {
   it('should handle a new node/instance scenario', () => {
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {
@@ -132,6 +142,8 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -162,6 +174,7 @@ describe('SetupModeRenderer', () => {
     jest.useFakeTimers();
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {
@@ -184,6 +197,8 @@ describe('SetupModeRenderer', () => {
         }, 500);
       },
       updateSetupModeData: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -217,6 +232,7 @@ describe('SetupModeRenderer', () => {
 
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {
@@ -239,6 +255,8 @@ describe('SetupModeRenderer', () => {
         }, 500);
       },
       updateSetupModeData: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
