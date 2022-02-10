@@ -20,6 +20,7 @@ import { EuiThemeProvider as StyledComponentsThemeProvider } from '../../../../s
 import { RenderAppProps } from './types';
 import { getCasesLazy } from './methods';
 import { APP_OWNER } from '../common/constants';
+import { useApplicationCapabilities } from './common/lib/kibana';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -34,6 +35,7 @@ export const renderApp = (deps: RenderAppProps) => {
 
 const CasesApp = () => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const userCapabilities = useApplicationCapabilities();
 
   return (
     <StyledComponentsThemeProvider darkMode={darkMode}>
@@ -42,7 +44,7 @@ const CasesApp = () => {
         {getCasesLazy({
           owner: [APP_OWNER],
           useFetchAlertData: () => [false, {}],
-          userCanCrud: true,
+          userCanCrud: userCapabilities.crud,
           basePath: '/',
         })}
       </div>
