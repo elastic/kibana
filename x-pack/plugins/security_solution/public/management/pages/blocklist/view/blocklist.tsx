@@ -19,7 +19,16 @@ export const Blocklist = memo(() => {
   return (
     <ArtifactListPage
       apiClient={eventFiltersApiClient}
-      ArtifactFormComponent={() => <h1>{'TODO: Form here'}</h1>} // FIXME: IMplement create/edit form
+      ArtifactFormComponent={(props) => {
+        // For Dev. Delete once we implement this component
+        if (!window._dev_artifact_form_props) {
+          window._dev_artifact_form_props = [];
+          window.console.log(window._dev_artifact_form_props);
+        }
+        window._dev_artifact_form_props.push(props);
+
+        return <h1>{'TODO: Form here'}</h1>;
+      }} // FIXME: Implement create/edit form
       labels={{
         pageTitle: 'Blocklist', // FIXME: Implement labels prop overrides for blocklist
       }}

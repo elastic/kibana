@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -26,10 +26,15 @@ import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useSetUrlParams } from '../hooks/use_set_url_params';
 import { useArtifactGetItem } from '../hooks/use_artifact_get_item';
-import { ArtifactListPageUrlParams } from '../types';
+import {
+  ArtifactFormComponentOnChangeCallbackProps,
+  ArtifactFormComponentProps,
+  ArtifactListPageUrlParams,
+} from '../types';
 import { ManagementPageLoader } from '../../management_page_loader';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useToasts } from '../../../../common/lib/kibana';
+import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -73,14 +78,15 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
     }),
 });
 
-interface ArtifactFormComponentProps {
-  item: object; // FIXME:PT should be a type? and optional?
-  mode: 'edit' | 'create';
-  /** signals that the form should be made disabled (ex. during update) */
-  disabled: boolean;
-  /** reports the state of the form data and the current updated item */
-  onChange(formStatus: { isValid: boolean; item: object }): void;
-}
+const createFormInitialState = (
+  listId: string,
+  item: ArtifactFormComponentOnChangeCallbackProps['item']
+): ArtifactFormComponentOnChangeCallbackProps => {
+  return {
+    isValid: false,
+    item: item ?? createExceptionListItemForCreate(listId),
+  };
+};
 
 export interface ArtifactFlyoutProps {
   apiClient: ExceptionsListApiClient;
@@ -129,18 +135,23 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     const {
       isLoading: isLoadingItemForEdit,
-      data,
       error,
       refetch: fetchItemForEdit,
     } = useArtifactGetItem(apiClient, urlParams.itemId ?? '', false);
 
-    const itemForEdit = useMemo<undefined | ExceptionListItemSchema>(() => {
-      return item || data;
-    }, [data, item]);
+    const [formState, setFormState] = useState<ArtifactFormComponentOnChangeCallbackProps>(
+      createFormInitialState.bind(apiClient.listId, item)
+    );
+
+    const hasItemDataForEdit = useMemo<boolean>(() => {
+      // `item_id` will not be defined for a `create` flow, so we use it below to determine if we
+      // are still attempting to load the item for edit from the api
+      return !!(item || formState.item.item_id);
+    }, [formState.item.item_id, item]);
 
     const isInitializing = useMemo(() => {
-      return isEditFlow && !itemForEdit;
-    }, [isEditFlow, itemForEdit]);
+      return isEditFlow && !hasItemDataForEdit;
+    }, [hasItemDataForEdit, isEditFlow]);
 
     const handleFlyoutClose = useCallback(() => {
       // FIXME:PT Question: Prevent closing it if update is underway?
@@ -149,17 +160,37 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
       setUrlParams({ id: undefined, show: undefined }, true);
     }, [setUrlParams]);
 
+    const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
+      ({ item: updatedItem, isValid }) => {
+        setFormState({
+          item: updatedItem,
+          isValid,
+        });
+      },
+      []
+    );
+
     const handleSubmitClick = useCallback(() => {
       // FIXME: implement submit
     }, []);
 
-    // If we don't have the actual Artifact data yet (in initialization phase - ex. came in with an
+    // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now
     useEffect(() => {
-      if (isEditFlow && !itemForEdit && !error && isInitializing && !isLoadingItemForEdit) {
-        fetchItemForEdit();
+      if (isEditFlow && !hasItemDataForEdit && !error && isInitializing && !isLoadingItemForEdit) {
+        fetchItemForEdit().then(({ data: editItemData }) => {
+          setFormState(createFormInitialState(apiClient.listId, editItemData));
+        });
       }
-    }, [error, fetchItemForEdit, isEditFlow, isInitializing, isLoadingItemForEdit, itemForEdit]);
+    }, [
+      apiClient.listId,
+      error,
+      fetchItemForEdit,
+      isEditFlow,
+      isInitializing,
+      isLoadingItemForEdit,
+      hasItemDataForEdit,
+    ]);
 
     // If we got an error while trying ot retrieve the item for edit, then show a toast message
     useEffect(() => {
@@ -185,9 +216,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
 
         {showExpiredLicenseBanner && (
           <EuiCallOut
-            title={i18n.translate('xpack.securitySolution.eventFilters.expiredLicenseTitle', {
-              defaultMessage: 'Expired License',
-            })}
+            title={labels.flyoutDowngradedLicenseTitle}
             color="warning"
             iconType="help"
             data-test-subj={getTestId('expiredLicenseCallout')}
@@ -199,11 +228,11 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         <EuiFlyoutBody>
           {isInitializing && <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />}
 
-          {!isInitializing && itemForEdit && (
+          {!isInitializing && (
             <FormComponent
-              onChange={() => {}} // FIXME:PT implement onchange callback
-              disabled={false}
-              item={itemForEdit}
+              onChange={handleFormComponentOnChange}
+              disabled={false} // FIXME:PT implement
+              item={formState.item}
               mode={(isEditFlow ? 'edit' : 'create') as ArtifactFormComponentProps['mode']}
             />
           )}
@@ -228,9 +257,9 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
                 <EuiButton
                   data-test-subj={getTestId('submitButton')}
                   fill
-                  disabled={false}
+                  disabled={!formState.isValid}
                   onClick={handleSubmitClick}
-                  isLoading={false}
+                  isLoading={false} // FIXME:PT implement loading indicator
                 >
                   {isEditFlow
                     ? labels.flyoutEditSubmitButtonLabel

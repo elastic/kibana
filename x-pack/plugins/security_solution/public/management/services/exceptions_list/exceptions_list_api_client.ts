@@ -30,7 +30,7 @@ export class ExceptionsListApiClient {
 
   constructor(
     private readonly http: HttpStart,
-    private readonly listId: ListId,
+    public readonly listId: ListId,
     private readonly listDefinition: CreateExceptionListSchema
   ) {
     this.ensureListExists = this.createExceptionList();
