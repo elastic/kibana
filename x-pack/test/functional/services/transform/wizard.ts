@@ -104,7 +104,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse columns up to the one we want to assert
-        const rows = await ml.commonUI.parseEuiDataGrid(tableSubj, column + 1);
+        const rows = await ml.commonDataGrid.parseEuiDataGrid(tableSubj, column + 1);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -126,7 +126,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse columns up to the one we want to assert
-        const rows = await ml.commonUI.parseEuiDataGrid(tableSubj, column + 1);
+        const rows = await ml.commonDataGrid.parseEuiDataGrid(tableSubj, column + 1);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -145,7 +145,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse the first column as this is sufficient to get assert the row count
-        const rowsData = await ml.commonUI.parseEuiDataGrid('transformIndexPreview', 1);
+        const rowsData = await ml.commonDataGrid.parseEuiDataGrid('transformIndexPreview', 1);
 
         expect(rowsData).to.length(
           expectedNumberOfRows,

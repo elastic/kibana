@@ -7,10 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-
-import { chunk } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
@@ -338,36 +335,6 @@ export function MachineLearningCommonUIProvider({
 
     async waitForDatePickerIndicatorLoaded() {
       await testSubjects.waitForEnabled('superDatePickerApplyTimeButton');
-    },
-
-    async parseEuiDataGrid(tableSubj: string, maxColumnsToParse?: number) {
-      const table = await testSubjects.find(`~${tableSubj}`);
-      const $ = await table.parseDomContent();
-
-      // Get the content of each cell and divide them up into rows.
-      // Virtualized cells outside the view area are not present in the DOM until they
-      // are scroilled into view, so we're limiting the number of parsed columns.
-      // To determine row and column of a cell, we're utilizing the screen reader
-      // help text, which enumerates the rows and columns 1-based.
-      const cells = $.findTestSubjects('dataGridRowCell')
-        .toArray()
-        .map((cell) => {
-          const cellText = $(cell).text();
-          const pattern = /^(.*)Row: (\d+); Column: (\d+)$/;
-          const matches = cellText.match(pattern);
-          expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
-          return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };
-        })
-        .filter((cell) =>
-          maxColumnsToParse !== undefined ? cell?.column <= maxColumnsToParse : false
-        )
-        .sort(function (a, b) {
-          return a.row - b.row || a.column - b.column;
-        })
-        .map((cell) => cell.text);
-
-      const rows = maxColumnsToParse !== undefined ? chunk(cells, maxColumnsToParse) : cells;
-      return rows;
     },
   };
 }

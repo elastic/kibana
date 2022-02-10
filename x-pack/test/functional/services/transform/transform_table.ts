@@ -70,7 +70,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     ) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await ml.commonUI.parseEuiDataGrid(tableSubj);
+        const rows = await ml.commonDataGrid.parseEuiDataGrid(tableSubj);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows

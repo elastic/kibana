@@ -10,10 +10,12 @@ import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrap
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
+import type { MlCommonDataGrid } from './common_data_grid';
 
 export function MachineLearningDataFrameAnalyticsResultsProvider(
   { getService }: FtrProviderContext,
-  mlCommonUI: MlCommonUI
+  mlCommonUI: MlCommonUI,
+  commonDataGrid: MlCommonDataGrid
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -220,24 +222,11 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     async assertResultsTableColumnValues(column: number, expectedColumnValues: string[]) {
-      await retry.tryForTime(20 * 1000, async () => {
-        // get a 2D array of rows and cell values
-        // only parse columns up to the one we want to assert
-        const rows = await mlCommonUI.parseEuiDataGrid('mlExplorationDataGrid', column + 1);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
-
-        uniqueColumnValues.sort();
-        // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues).to.eql(
-          expectedColumnValues,
-          `Unique EuiDataGrid column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
-        );
-      });
+      await commonDataGrid.assertDataGridColumnValues(
+        'mlExplorationDataGrid',
+        column,
+        expectedColumnValues
+      );
     },
 
     async getResultTableRows() {
