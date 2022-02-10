@@ -602,7 +602,11 @@ class AgentPolicyService {
     };
   }
 
-  public async deployPolicy(soClient: SavedObjectsClientContract, agentPolicyId: string) {
+  public async deployPolicy(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string,
+    useBundledPackages: boolean = false
+  ) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
@@ -612,7 +616,9 @@ class AgentPolicyService {
     }
 
     const policy = await agentPolicyService.get(soClient, agentPolicyId);
-    const fullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
+    const fullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
+      useBundledPackages,
+    });
     if (!policy || !fullPolicy || !fullPolicy.revision) {
       return;
     }
@@ -715,7 +721,7 @@ class AgentPolicyService {
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
-    options?: { standalone: boolean }
+    options: Partial<{ standalone: boolean; useBundledPackages: boolean }> = {}
   ): Promise<FullAgentPolicy | null> {
     return getFullAgentPolicy(soClient, id, options);
   }
@@ -733,12 +739,14 @@ export async function addPackageToAgentPolicy(
   packagePolicyId?: string | number,
   packagePolicyDescription?: string,
   transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy,
-  bumpAgentPolicyRevison = false
+  bumpAgentPolicyRevison = false,
+  useBundledPackages = false
 ) {
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
     pkgName: packageToInstall.name,
     pkgVersion: packageToInstall.version,
+    useBundledPackages,
   });
 
   const basePackagePolicy = packageToPackagePolicy(
@@ -767,5 +775,6 @@ export async function addPackageToAgentPolicy(
     skipUniqueNameVerification: true,
     overwrite: true,
     force: true, // To add package to managed policy we need the force flag
+    useBundledPackages,
   });
 }

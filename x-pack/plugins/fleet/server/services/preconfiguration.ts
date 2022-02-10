@@ -369,7 +369,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
     soClient,
     esClient,
-    allPackagePolicyIds.items
+    allPackagePolicyIds.items,
+    true
   );
 
   return {
@@ -424,10 +425,14 @@ async function addPreconfiguredPolicyPackages(
 ) {
   // Add packages synchronously to avoid overwriting
   for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
+    // Allow requests to the registry to fall back to bundled packages if no registry is reachable in the calls below
+    const useBundledPackages = true;
+
     const packageInfo = await getPackageInfo({
       savedObjectsClient: soClient,
       pkgName: installedPackage.name,
       pkgVersion: installedPackage.version,
+      useBundledPackages,
     });
 
     await addPackageToAgentPolicy(
@@ -440,7 +445,8 @@ async function addPreconfiguredPolicyPackages(
       id,
       description,
       (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
-      bumpAgentPolicyRevison
+      bumpAgentPolicyRevison,
+      useBundledPackages
     );
   }
 }

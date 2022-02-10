@@ -21,7 +21,7 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { IngestManagerError } from '../../../errors';
+import { BundledPackageNotFoundError, IngestManagerError } from '../../../errors';
 import { appContextService } from '../../';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -29,6 +29,7 @@ import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
 import { createInstallableFrom } from './index';
+import { getBundledPackages } from './get_bundled_packages';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
@@ -102,11 +103,36 @@ export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
+  useBundledPackages?: boolean;
 }): Promise<PackageInfo> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
+  const { savedObjectsClient, pkgName, pkgVersion, useBundledPackages = false } = options;
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackage(pkgName),
+    new Promise<{ name: string; version: string }>((resolve, reject) => {
+      if (!useBundledPackages) {
+        resolve(Registry.fetchFindLatestPackage(pkgName));
+      }
+
+      return Registry.fetchFindLatestPackage(pkgName).catch(async (error) => {
+        const bundledPackages = await getBundledPackages();
+        const bundledPackage = bundledPackages.find(
+          (b) => b.name === pkgName && b.version === pkgVersion
+        );
+
+        if (!bundledPackage) {
+          return reject(
+            new BundledPackageNotFoundError(
+              `No bundled package found with key ${pkgName}-${pkgVersion}`
+            )
+          );
+        }
+
+        resolve({
+          name: bundledPackage.name,
+          version: bundledPackage.version,
+        });
+      });
+    }),
   ]);
 
   // If no package version is provided, use the installed version in the response
