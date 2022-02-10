@@ -397,8 +397,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Row: {row}; Column: {col}',
         values: { row, col },
       }),
-    'euiDataGridCellButtons.expandButtonTitle': i18n.translate(
-      'core.euiDataGridCellButtons.expandButtonTitle',
+    'euiDataGridCellActions.expandButtonTitle': i18n.translate(
+      'core.euiDataGridCellActions.expandButtonTitle',
       {
         defaultMessage: 'Click or hit enter to interact with cell content',
       }
@@ -1118,6 +1118,29 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} is loading',
         values: { number },
       }),
+    'euiSuggest.stateSavedTooltip': i18n.translate('core.euiSuggest.stateSavedTooltip', {
+      defaultMessage: 'Saved.',
+    }),
+
+    'euiSuggest.stateUnsavedTooltip': i18n.translate('core.euiSuggest.stateUnsavedTooltip', {
+      defaultMessage:
+        'You can also utilize these additional syntax plugins to add rich content to your text.',
+    }),
+
+    'euiSuggest.stateLoading': i18n.translate('core.euiSuggest.stateLoading', {
+      defaultMessage: 'State: loading.',
+    }),
+
+    'euiSuggest.stateSaved': i18n.translate('core.euiSuggest.stateSaved', {
+      defaultMessage: 'State: saved.',
+    }),
+
+    'euiSuggest.stateUnsaved': i18n.translate('core.euiSuggest.stateUnsaved', {
+      defaultMessage: 'State: unsaved.',
+    }),
+    'euiSuggest.stateUnchanged': i18n.translate('core.euiSuggest.stateUnchanged', {
+      defaultMessage: 'State: unchanged.',
+    }),
     'euiSuperSelect.screenReaderAnnouncement': i18n.translate(
       'core.euiSuperSelect.screenReaderAnnouncement',
       {

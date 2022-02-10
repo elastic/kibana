@@ -958,7 +958,6 @@
     "core.euiDataGrid.ariaLabelledBy": "第 {page} 页，共 {pageCount} 页。",
     "core.euiDataGrid.screenReaderNotice": "单元格包含交互内容。",
     "core.euiDataGridCell.position": "行：{row}；列：{col}",
-    "core.euiDataGridCellButtons.expandButtonTitle": "单击或按 Enter 键以便与单元格内容进行交互",
     "core.euiDataGridHeaderCell.headerActions": "标题操作",
     "core.euiDataGridPagination.detailedPaginationLabel": "前面网格的分页：{label}",
     "core.euiDataGridPagination.paginationLabel": "前面网格的分页",
