@@ -17,6 +17,7 @@ import {
 } from '../../../plugins/lens/public';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import { TypedLensByValueInput, PersistedIndexPatternLayer } from '../../../plugins/lens/public';
+import image from './image.png';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
@@ -121,7 +122,9 @@ export class EmbeddedLensExamplePlugin
     developerExamples.register({
       appId: 'third_party_lens_navigation_prompt',
       title: 'Third party Lens navigation prompt',
-      description: 'Add custom menu entries to the Lens editor',
+      description:
+        'Add custom menu entries to the Lens editor, like the "Go to discover" link in this example.',
+      image,
       links: [
         {
           label: 'README',
