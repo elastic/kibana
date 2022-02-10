@@ -315,6 +315,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const updateSingleFieldPreview = useCallback(
     (fieldName: string, values: unknown[]) => {
+      console.log('SINGLE FIELD PREVIEW');
       const [value] = values;
       const formattedValue = valueFormatter(value);
 
@@ -328,6 +329,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const updateCompositeFieldPreview = useCallback(
     (compositeName: string | null, compositeValues: Record<string, unknown[]>) => {
+      console.log('COMPOSITE FIELD VALUE');
       if (typeof compositeValues !== 'object') {
         return;
       }
@@ -378,6 +380,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
     const currentApiCall = ++previewCount.current;
 
+    console.log('getFieldPreview');
     const response = await getFieldPreview({
       index: currentDocIndex!,
       document: document!,

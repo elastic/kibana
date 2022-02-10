@@ -220,6 +220,8 @@ const FieldEditorFlyoutContentComponent = ({
     };
   }, []);
 
+  console.log('renderfield editor');
+
   return (
     <>
       <FlyoutPanels.Group
