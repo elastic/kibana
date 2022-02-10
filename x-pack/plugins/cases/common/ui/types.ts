@@ -26,15 +26,6 @@ export interface CasesContextFeatures {
 
 export type CasesFeatures = Partial<CasesContextFeatures>;
 
-export interface CasesContextValue {
-  owner: string[];
-  appId: string;
-  appTitle: string;
-  userCanCrud: boolean;
-  basePath: string;
-  features: CasesContextFeatures;
-}
-
 export interface CasesUiConfigType {
   markdownPlugins: {
     lens: boolean;

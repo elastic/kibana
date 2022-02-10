@@ -16,6 +16,7 @@ import {
   canUseCases,
 } from './methods';
 import { CasesUiConfigType } from '../common/ui/types';
+import { getCasesContextLazy } from './methods/get_cases_context';
 
 /**
  * @public
@@ -35,6 +36,7 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
     return {
       canUseCases: canUseCases(core.application.capabilities),
       getCases: getCasesLazy,
+      getCasesContext: getCasesContextLazy,
       getRecentCases: getRecentCasesLazy,
       getCreateCaseFlyout: getCreateCaseFlyoutLazy,
       getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
