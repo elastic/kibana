@@ -21,7 +21,7 @@ import {
   EuiFieldText,
   prettyDuration,
   EuiIconProps,
-  EuiSuperUpdateButton,
+  EuiButtonIcon,
   OnRefreshProps,
 } from '@elastic/eui';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
@@ -36,9 +36,7 @@ import { shallowEqual } from '../../utils/shallow_equal';
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
-const SuperUpdateButton = React.memo(
-  EuiSuperUpdateButton as any
-) as unknown as typeof EuiSuperUpdateButton;
+const SuperUpdateButton = React.memo(EuiButtonIcon as any) as unknown as typeof EuiButtonIcon;
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
@@ -304,6 +302,7 @@ export const QueryBarTopRow = React.memo(
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
             className="kbnQueryBar__datePicker"
+            width="auto"
           />
         </EuiFlexItem>
       );
@@ -314,12 +313,14 @@ export const QueryBarTopRow = React.memo(
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <SuperUpdateButton
-          needsUpdate={props.isDirty}
+          display="fill"
+          iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
+          aria-label="Update"
           isDisabled={isDateRangeInvalid}
-          isLoading={props.isLoading}
-          onClick={onClickSubmitButton}
-          fill={props.fillSubmitButton}
           data-test-subj="querySubmitButton"
+          onClick={onClickSubmitButton}
+          size="m"
+          color={props.isDirty ? 'success' : 'primary'}
         />
       );
 

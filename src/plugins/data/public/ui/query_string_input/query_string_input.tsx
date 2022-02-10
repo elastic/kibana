@@ -718,7 +718,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('data.query.queryBar.searchInputPlaceholder', {
-                    defaultMessage: 'Search',
+                    defaultMessage: 'Start typing to search or filter...',
                   })
                 }
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
