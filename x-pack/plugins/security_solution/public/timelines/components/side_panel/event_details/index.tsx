@@ -6,14 +6,7 @@
  */
 
 import { some } from 'lodash/fp';
-import {
-  EuiButtonEmpty,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -26,17 +19,17 @@ import { HostIsolationPanel } from '../../../../detections/components/host_isola
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import {
   ISOLATE_HOST,
-  RUN_OSQUERY,
   UNISOLATE_HOST,
 } from '../../../../detections/components/host_isolation/translations';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
-import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
 import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
 import { HostRisk } from '../../../../common/containers/hosts_risk/types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { EventDetailsBackToAlertDetailsLink } from './backToAlertsDetailsLink';
+import { ACTION_OSQUERY } from '../../../../detections/components/take_action_dropdown/osqueryActionItem';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -101,7 +94,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const {
     services: { osquery },
   } = useKibana();
-  const [isActivePanel, setIsActivePanel] = useState<number | null>(null);
+  const [activePanel, setActivePanel] = useState<number | null>(null);
   const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
     'isolateHost'
   );
@@ -109,13 +102,13 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     useState(false);
 
   const showAlertDetails = useCallback(() => {
-    setIsActivePanel(null);
+    setActivePanel(null);
     setIsIsolateActionSuccessBannerVisible(false);
   }, []);
 
   const showHostIsolationPanel = useCallback((action) => {
     if (action === 'isolateHost' || action === 'unisolateHost') {
-      setIsActivePanel(ACTIVE_PANEL.HOST_ISOLATION);
+      setActivePanel(ACTIVE_PANEL.HOST_ISOLATION);
       setIsolateAction(action);
     }
   }, []);
@@ -167,27 +160,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const backToAlertDetailsLink = useCallback(
-    (primaryText) => {
-      return (
-        <>
-          <EuiButtonEmpty
-            iconType="arrowLeft"
-            iconSide="left"
-            flush="left"
-            onClick={() => showAlertDetails()}
-          >
-            <EuiText size="xs">
-              <p>{ALERT_DETAILS}</p>
-            </EuiText>
-          </EuiButtonEmpty>
-          <EuiTitle>{primaryText}</EuiTitle>
-        </>
-      );
-    },
-    [showAlertDetails]
-  );
-
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
 
   const handleIsolationActionSuccess = useCallback(() => {
@@ -199,14 +171,21 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   }, [caseDetailsRefresh]);
 
   const renderFlyoutHeader = useMemo(() => {
-    let text;
-    switch (isActivePanel) {
+    switch (activePanel) {
       case ACTIVE_PANEL.OSQUERY:
-        text = <h2>{RUN_OSQUERY}</h2>;
-        return backToAlertDetailsLink(text);
+        return (
+          <EventDetailsBackToAlertDetailsLink
+            primaryText={<h2>{ACTION_OSQUERY}</h2>}
+            onClick={showAlertDetails}
+          />
+        );
       case ACTIVE_PANEL.HOST_ISOLATION:
-        text = <h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>;
-        return backToAlertDetailsLink(text);
+        return (
+          <EventDetailsBackToAlertDetailsLink
+            primaryText={<h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>}
+            onClick={showAlertDetails}
+          />
+        );
       default:
         return (
           <ExpandableEventTitle
@@ -217,9 +196,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         );
     }
-  }, [backToAlertDetailsLink, isActivePanel, isAlert, isolateAction, loading, ruleName, timestamp]);
+  }, [activePanel, isAlert, isolateAction, loading, ruleName, showAlertDetails, timestamp]);
   const renderFlyoutBody = useMemo(() => {
-    switch (isActivePanel) {
+    switch (activePanel) {
       case ACTIVE_PANEL.OSQUERY:
         return (
           <OsqueryActionWrapper>
@@ -260,7 +239,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     handleIsolationActionSuccess,
     handleOnEventClosed,
     hostRisk,
-    isActivePanel,
+    activePanel,
     isAlert,
     isDraggable,
     isolateAction,
@@ -276,16 +255,16 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   }
 
   const handlePanelChange = (panelType: ACTIVE_PANEL | null) => {
-    if (isActivePanel === ACTIVE_PANEL.OSQUERY && panelType === null) {
+    if (activePanel === ACTIVE_PANEL.OSQUERY && panelType === null) {
       showAlertDetails();
     } else {
-      setIsActivePanel(panelType);
+      setActivePanel(panelType);
     }
   };
 
   return isFlyoutView ? (
     <>
-      <EuiFlyoutHeader hasBorder={isActivePanel != null}>{renderFlyoutHeader}</EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder={activePanel != null}>{renderFlyoutHeader}</EuiFlyoutHeader>
       {isIsolateActionSuccessBannerVisible && (
         <EndpointIsolateSuccess
           hostName={hostName}
@@ -300,12 +279,12 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         detailsEcsData={ecsData}
         expandedEvent={expandedEvent}
         handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={isActivePanel === ACTIVE_PANEL.HOST_ISOLATION}
+        isHostIsolationPanelOpen={activePanel === ACTIVE_PANEL.HOST_ISOLATION}
         loadingEventDetails={loading}
         onAddIsolationStatusClick={showHostIsolationPanel}
         timelineId={timelineId}
         handlePanelChange={handlePanelChange}
-        preventTakeActionDropdown={isActivePanel === ACTIVE_PANEL.OSQUERY}
+        preventTakeActionDropdown={activePanel === ACTIVE_PANEL.OSQUERY}
       />
     </>
   ) : (

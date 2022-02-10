@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 export const ACTION_OSQUERY = i18n.translate('xpack.osquery.alerts.osqueryAlertTitle', {
   defaultMessage: 'Run Osquery',
 });
+
 interface IProps {
   onClick: () => void;
 }

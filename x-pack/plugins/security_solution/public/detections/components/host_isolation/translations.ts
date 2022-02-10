@@ -35,7 +35,3 @@ export const RETURN_TO_ALERT_DETAILS = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.returnToAlertDetails',
   { defaultMessage: 'Return to alert details' }
 );
-
-export const RUN_OSQUERY = i18n.translate('xpack.securitySolution.endpoint.osquery.runOsquery', {
-  defaultMessage: 'Run Osquery',
-});
