@@ -16,10 +16,14 @@ import {
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendUpgradePackagePolicyDryRun,
+  sendUpdatePackagePolicy,
+  useStartServices,
 } from '../../../hooks';
 import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 
 import { EditPackagePolicyPage } from '.';
+
+type MockFn = jest.MockedFunction<any>;
 
 jest.mock('../../../hooks', () => {
   return {
@@ -94,6 +98,33 @@ jest.mock('../../../hooks', () => {
       })
     ),
     useUIExtension: jest.fn(),
+    useStartServices: jest.fn().mockReturnValue({
+      application: { navigateToApp: jest.fn(), navigateToUrl: jest.fn() },
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+          addSuccess: jest.fn(),
+        },
+      },
+      docLinks: {
+        links: {
+          fleet: {},
+        },
+      },
+      http: {
+        basePath: {
+          get: () => 'http://localhost:5620',
+          prepend: (url: string) => 'http://localhost:5620' + url,
+        },
+      },
+      chrome: {
+        docTitle: {
+          change: jest.fn(),
+        },
+        setBreadcrumbs: jest.fn(),
+      },
+    }),
+    useLink: jest.fn().mockReturnValue({ getHref: jest.fn().mockReturnValue('/navigate/path') }),
   };
 });
 
@@ -136,6 +167,7 @@ const mockPackagePolicy = {
           },
         },
       ],
+      vars: undefined,
     },
   ],
 };
@@ -161,29 +193,32 @@ describe('edit package policy page', () => {
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
 
-    (useGetOnePackagePolicy as jest.MockedFunction<any>).mockReturnValue({
+    (useGetOnePackagePolicy as MockFn).mockReturnValue({
       data: {
         item: mockPackagePolicy,
       },
     });
-    (sendGetOnePackagePolicy as jest.MockedFunction<any>).mockResolvedValue({
+    (sendGetOnePackagePolicy as MockFn).mockResolvedValue({
       data: {
         item: mockPackagePolicy,
       },
     });
-    (sendGetOneAgentPolicy as jest.MockedFunction<any>).mockResolvedValue({
+    (sendGetOneAgentPolicy as MockFn).mockResolvedValue({
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     });
-  });
-
-  it('should disable submit button on invalid form with empty package var', async () => {
-    (sendUpgradePackagePolicyDryRun as jest.MockedFunction<any>).mockResolvedValue({
+    (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
       data: [
         {
           diff: [mockPackagePolicy, mockPackagePolicy],
         },
       ],
     });
+    (sendUpdatePackagePolicy as MockFn).mockResolvedValue({});
+    (useStartServices().application.navigateToUrl as MockFn).mockReset();
+    (useStartServices().notifications.toasts.addError as MockFn).mockReset();
+  });
+
+  it('should disable submit button on invalid form with empty package var', async () => {
     render();
 
     await waitFor(() => {
@@ -206,14 +241,102 @@ describe('edit package policy page', () => {
       renderResult.getByText('Your integration policy has errors. Please fix them before saving.')
     ).toBeInTheDocument();
     expect(renderResult.getByText(/Save integration/).closest('button')!).toBeDisabled();
+
+    renderResult.getAllByRole('link', { name: 'Cancel' }).forEach((btn) => {
+      expect(btn).toHaveAttribute('href', '/navigate/path');
+    });
+  });
+
+  it('should navigate on submit', async () => {
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
+    });
+    act(() => {
+      fireEvent.click(renderResult.getByRole('switch'));
+    });
+
+    await act(async () => {
+      fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
+    });
+
+    const { id, ...restProps } = mockPackagePolicy;
+    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('nginx-1', {
+      ...restProps,
+      inputs: [
+        {
+          ...mockPackagePolicy.inputs[0],
+          enabled: false,
+          streams: [
+            {
+              ...mockPackagePolicy.inputs[0].streams[0],
+              enabled: false,
+            },
+          ],
+        },
+      ],
+    });
+    expect(useStartServices().application.navigateToUrl).toHaveBeenCalledWith('/navigate/path');
+  });
+
+  it('should show out of date error on 409 statusCode on submit', async () => {
+    (sendUpdatePackagePolicy as MockFn).mockResolvedValue({ error: { statusCode: 409 } });
+
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
+    });
+    act(() => {
+      fireEvent.click(renderResult.getByRole('switch'));
+    });
+
+    await act(async () => {
+      fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
+    });
+
+    expect(useStartServices().notifications.toasts.addError).toHaveBeenCalledWith(
+      { statusCode: 409 },
+      {
+        title: "Error updating 'nginx-1'",
+        toastMessage: 'Data is out of date. Refresh the page to get the latest policy.',
+      }
+    );
+
+    expect(useStartServices().application.navigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('should show generic error on other statusCode on submit', async () => {
+    (sendUpdatePackagePolicy as MockFn).mockResolvedValue({ error: { statusCode: 500 } });
+
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
+    });
+    act(() => {
+      fireEvent.click(renderResult.getByRole('switch'));
+    });
+
+    await act(async () => {
+      fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
+    });
+
+    expect(useStartServices().notifications.toasts.addError).toHaveBeenCalledWith(
+      { statusCode: 500 },
+      { title: "Error updating 'nginx-1'" }
+    );
+
+    expect(useStartServices().application.navigateToUrl).not.toHaveBeenCalled();
   });
 
   it('should show ready for upgrade if package useLatestPackageVersion and no conflicts', async () => {
-    (useUIExtension as jest.MockedFunction<any>).mockReturnValue({
+    (useUIExtension as MockFn).mockReturnValue({
       useLatestPackageVersion: true,
       Component: TestComponent,
     });
-    (sendUpgradePackagePolicyDryRun as jest.MockedFunction<any>).mockResolvedValue({
+    (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
       data: [
         {
           diff: [mockPackagePolicy, mockPackagePolicyNewVersion],
@@ -234,11 +357,11 @@ describe('edit package policy page', () => {
   });
 
   it('should show review field conflicts if package useLatestPackageVersion and has conflicts', async () => {
-    (useUIExtension as jest.MockedFunction<any>).mockReturnValue({
+    (useUIExtension as MockFn).mockReturnValue({
       useLatestPackageVersion: true,
       Component: TestComponent,
     });
-    (sendUpgradePackagePolicyDryRun as jest.MockedFunction<any>).mockResolvedValue({
+    (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
       data: [
         {
           hasErrors: true,
