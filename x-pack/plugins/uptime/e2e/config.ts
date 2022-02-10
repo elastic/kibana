@@ -47,7 +47,6 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.uptime.service.manifestUrl=${process.env.SYNTHETICS_SERVICE_MANIFEST}`,
         `--xpack.uptime.service.username=${process.env.SYNTHETICS_SERVICE_USERNAME}`,
         `--xpack.uptime.service.password=${process.env.SYNTHETICS_SERVICE_PASSWORD}`,
-        '--xpack.uptime.service.enabled=true',
         '--xpack.uptime.ui.monitorManagement.enabled=true',
       ],
     },
