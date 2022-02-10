@@ -5,8 +5,6 @@ Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-coming[8.0.0]
-
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
