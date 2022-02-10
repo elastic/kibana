@@ -450,21 +450,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should display correct annotations data for extension.raw field', async () => {
             const expectedAnnotationsData = [
               {
-                dataValue: 1442743200000,
+                dataValue: 1442707200000,
                 details: 'extension: css',
-                header: '2015-09-20 10:00',
+                header: '2015-09-20 00:00',
               },
               {
-                dataValue: 1442754000000,
+                dataValue: 1442750400000,
                 details: 'extension: jpg',
-                header: '2015-09-20 13:00',
+                header: '2015-09-20 12:00',
               },
               {
-                dataValue: 1442818800000,
+                dataValue: 1442793600000,
                 details: 'extension: jpg',
-                header: '2015-09-21 07:00',
+                header: '2015-09-21 00:00',
+              },
+              {
+                dataValue: 1442880000000,
+                details: 'extension: jpg',
+                header: '2015-09-22 00:00',
               },
             ];
+
             await visualBuilder.setAnnotationFilter('geo.dest : "AW" or geo.src : "AM"');
             await visualBuilder.setAnnotationFields('extension.raw');
             await visualBuilder.setAnnotationRowTemplate('extension: {{extension.raw}}');
