@@ -15,8 +15,8 @@ import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';
-import { esFilters } from '../../../../data/public';
 
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
@@ -343,7 +343,7 @@ export class VegaBaseView {
    */
   async addFilterHandler(query, index) {
     const indexId = await this.findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const filter = buildQueryFilter(query, indexId);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }
@@ -354,12 +354,10 @@ export class VegaBaseView {
    */
   async removeFilterHandler(query, index) {
     const indexId = await this.findIndex(index);
-    const filterToRemove = esFilters.buildQueryFilter(query, indexId);
+    const filterToRemove = buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
-    const existingFilter = currentFilters.find((filter) =>
-      esFilters.compareFilters(filter, filterToRemove)
-    );
+    const existingFilter = currentFilters.find((filter) => compareFilters(filter, filterToRemove));
 
     if (!existingFilter) return;
 
