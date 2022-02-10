@@ -58,7 +58,7 @@ export const kpiUserAuthenticationsMetricFailure = {
                   query: 'event.outcome : "failure" ',
                 },
                 isBucketed: false,
-                label: 'Records',
+                label: '',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: '___records___',

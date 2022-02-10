@@ -43,7 +43,7 @@ export const kpiHostArea = {
     filters: [],
     query: { language: 'kuery', query: '' },
     visualization: {
-      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: false },
       fittingFunction: 'None',
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       labelsOrientation: { x: 0, yLeft: 0, yRight: 0 },

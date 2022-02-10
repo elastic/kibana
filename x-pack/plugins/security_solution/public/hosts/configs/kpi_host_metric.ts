@@ -55,7 +55,4 @@ export const kpiHostMetric = {
       type: 'tag',
     },
   ],
-  type: 'lens',
-  updated_at: '2022-02-09T17:13:25.623Z',
-  version: 'WzI4OTk0NywzXQ==',
 };
