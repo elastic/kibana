@@ -84,6 +84,7 @@ export const FilterPopover = ({
         isInvalid={!isQueryValid(filter.input, indexPattern)}
         value={filter.input}
         indexPatternTitle={indexPattern.title}
+        disableAutoFocus
         onChange={setFilterQuery}
         onSubmit={() => {
           if (inputRef.current) inputRef.current.focus();
