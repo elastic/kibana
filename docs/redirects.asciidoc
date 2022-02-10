@@ -400,3 +400,8 @@ This content has moved. Refer to <<saved-object-migrations>>.
 == Upgrade Assistant
 
 This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant].
+
+[role="exclude",id="brew"]
+== Install {kib} on macOS with Homebrew
+
+This page has been deleted. Refer to <<install>>.
