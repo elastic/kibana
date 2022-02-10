@@ -49,14 +49,14 @@ export const createRuntimeField = async ({
     throw new Error(`Field [name = ${name}] already exists.`);
   }
 
-  dataView.addRuntimeField(name, runtimeField);
+  const createdRuntimeFields = dataView.addRuntimeField(name, runtimeField);
 
   const field = dataView.fields.getByName(name);
   if (!field) throw new Error(`Could not create a field [name = ${name}].`);
 
   await dataViewsService.updateSavedObject(dataView);
 
-  return { dataView, field };
+  return { dataView, fields: createdRuntimeFields };
 };
 
 const runtimeCreateFieldRouteFactory =
@@ -100,16 +100,16 @@ const runtimeCreateFieldRouteFactory =
         const id = req.params.id;
         const { name, runtimeField } = req.body;
 
-        const { dataView, field } = await createRuntimeField({
+        const { dataView, fields } = await createRuntimeField({
           dataViewsService,
           usageCollection,
           counterName: `${req.route.method} ${path}`,
           id,
           name,
-          runtimeField,
+          runtimeField: runtimeField as RuntimeField,
         });
 
-        return res.ok(responseFormatter({ serviceKey, dataView, field }));
+        return res.ok(responseFormatter({ serviceKey, dataView, fields }));
       })
     );
   };

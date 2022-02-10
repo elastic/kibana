@@ -10,7 +10,7 @@
 
 import { KbnFieldType, getKbnFieldType, castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { RuntimeField } from '../types';
+import type { RuntimeFieldSpec, RuntimeType } from '../types';
 import type { IFieldType } from './types';
 import { FieldSpec, DataView } from '..';
 import {
@@ -49,7 +49,7 @@ export class DataViewField implements IFieldType {
     return this.spec.runtimeField;
   }
 
-  public set runtimeField(runtimeField: RuntimeField | undefined) {
+  public set runtimeField(runtimeField: RuntimeFieldSpec | undefined) {
     this.spec.runtimeField = runtimeField;
   }
 
@@ -108,13 +108,29 @@ export class DataViewField implements IFieldType {
   }
 
   public get type() {
-    return this.runtimeField?.type
-      ? castEsToKbnFieldTypeName(this.runtimeField?.type)
-      : this.spec.type;
+    if (this.isRuntimeField) {
+      let type: RuntimeType = this.runtimeField?.type!;
+      if (this.isRuntimeCompositeSubField) {
+        const [, subFieldName] = this.name.split('.');
+        // We return the subField type (with fallback mechanism to "composite" type)
+        type = this.runtimeField?.fields![subFieldName]?.type ?? this.runtimeField?.type!;
+      }
+      return castEsToKbnFieldTypeName(type);
+    }
+
+    return this.spec.type;
   }
 
   public get esTypes() {
-    return this.runtimeField?.type ? [this.runtimeField?.type] : this.spec.esTypes;
+    if (this.isRuntimeField) {
+      if (this.isRuntimeCompositeSubField) {
+        const [, subFieldName] = this.name.split('.');
+        // We return the subField type (with fallback mechanism to "composite" type)
+        return [this.runtimeField?.fields![subFieldName]?.type ?? this.runtimeField?.type!];
+      }
+      return [this.runtimeField?.type!];
+    }
+    return this.spec.esTypes;
   }
 
   public get scripted() {
@@ -142,6 +158,10 @@ export class DataViewField implements IFieldType {
    */
   public get isMapped() {
     return this.spec.isMapped;
+  }
+
+  public get isRuntimeField() {
+    return !this.isMapped && this.runtimeField !== undefined;
   }
 
   // not writable, not serialized
@@ -227,6 +247,13 @@ export class DataViewField implements IFieldType {
       runtimeField: this.runtimeField,
       isMapped: this.isMapped,
     };
+  }
+
+  private get isRuntimeCompositeSubField(): boolean {
+    if (!this.isRuntimeField) {
+      return false;
+    }
+    return this.runtimeField!.type === 'composite';
   }
 }
 

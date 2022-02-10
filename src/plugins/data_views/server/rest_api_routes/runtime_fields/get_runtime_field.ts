@@ -7,7 +7,7 @@
  */
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { DataViewsService } from 'src/plugins/data_views/common';
+import { DataViewsService, DataViewField } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
@@ -43,17 +43,28 @@ export const getRuntimeField = async ({
   usageCollection?.incrementCounter({ counterName });
   const dataView = await dataViewsService.get(id);
 
-  const field = dataView.fields.getByName(name);
+  const field = dataView.getRuntimeField(name);
 
   if (!field) {
     throw new ErrorIndexPatternFieldNotFound(id, name);
   }
 
-  if (!field.runtimeField) {
-    throw new Error('Only runtime fields can be retrieved.');
+  // Access the data view fields created for the runtime field
+  let dataViewFields: DataViewField[];
+
+  if (field.type === 'composite') {
+    // For "composite" runtime fields we need to look at the "fields"
+    dataViewFields = Object.keys(field.fields!)
+      .map((subFieldName) => {
+        const fullName = `${name}.${subFieldName}`;
+        return dataView.fields.getByName(fullName);
+      })
+      .filter(Boolean) as DataViewField[];
+  } else {
+    dataViewFields = [dataView.fields.getByName(name)].filter(Boolean) as DataViewField[];
   }
 
-  return { dataView, field };
+  return { dataView, fields: dataViewFields };
 };
 
 const getRuntimeFieldRouteFactory =
@@ -95,7 +106,7 @@ const getRuntimeFieldRouteFactory =
         const id = req.params.id;
         const name = req.params.name;
 
-        const { dataView, field } = await getRuntimeField({
+        const { dataView, fields } = await getRuntimeField({
           dataViewsService,
           usageCollection,
           counterName: `${req.route.method} ${path}`,
@@ -103,7 +114,7 @@ const getRuntimeFieldRouteFactory =
           name,
         });
 
-        return res.ok(responseFormatter({ serviceKey, dataView, field }));
+        return res.ok(responseFormatter({ serviceKey, dataView, fields }));
       })
     );
   };

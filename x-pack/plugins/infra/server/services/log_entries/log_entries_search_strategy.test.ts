@@ -359,6 +359,14 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
           searchable: true,
         },
       ],
+      runtimeFields: {
+        runtime_field: {
+          type: 'keyword',
+          script: {
+            source: 'emit("runtime value")',
+          },
+        },
+      },
     }),
   ]),
 });

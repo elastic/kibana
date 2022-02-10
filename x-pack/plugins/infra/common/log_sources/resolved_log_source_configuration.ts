@@ -119,7 +119,7 @@ const resolveRuntimeMappings = (indexPattern: DataView): estypes.MappingRuntimeF
           ? {
               script: {
                 lang: 'painless', // required in the es types
-                source: runtimeFieldSpec.script.source,
+                source: (runtimeFieldSpec.script as estypes.InlineScript).source,
               },
             }
           : {}),

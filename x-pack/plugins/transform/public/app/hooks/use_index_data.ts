@@ -117,6 +117,7 @@ export const useIndexData = (
     if (combinedRuntimeMappings !== undefined) {
       result = Object.keys(combinedRuntimeMappings).map((fieldName) => {
         const field = combinedRuntimeMappings[fieldName];
+        // @ts-expect-error @elastic/elasticsearch does not support yet "composite" type for runtime fields
         const schema = getDataGridSchemaFromESFieldType(field.type);
         return { id: fieldName, schema };
       });
