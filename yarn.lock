@@ -9533,10 +9533,10 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-7.0.0.tgz#4eadfd5e7b7e0ae7b6d0fa951d51e7631cb4e320"
-  integrity sha512-jg+kGNyZTGrUdtY+YMJozw+yW3bALbB/VIpn5tChsiWEEd+H5c5/fCRo7BA7J9z1fEbnpW2oSpcrxpmkJlANWw==
+backport@7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-7.0.1.tgz#021f70db76b89699b2c7b826cb3040e9c1d991c9"
+  integrity sha512-f/7+NDzLFd307c85Tz60cfBzoRd4HlFlNOm3MYFynQwI4igMmKd4J9bFxLgc3KdToaVWDmZ37Gx9nRkYgMfUkA==
   dependencies:
     "@octokit/rest" "^18.12.0"
     axios "^0.25.0"
@@ -9544,6 +9544,7 @@ backport@7.0.0:
     del "^6.0.0"
     dotenv "^16.0.0"
     find-up "^5.0.0"
+    graphql "^16.3.0"
     graphql-tag "^2.12.6"
     inquirer "^8.2.0"
     lodash "^4.17.21"
@@ -16243,6 +16244,11 @@ graphql-tag@^2.12.6:
   integrity sha512-FdSNcu2QQcWnM2VNvSCCDCVS5PpPqpzgFT8+GXzqJuoDd0CBncxCY278u4mhRO7tMgo2JjgJA5aZ+nWSQ/Z+xg==
   dependencies:
     tslib "^2.1.0"
+
+graphql@^16.3.0:
+  version "16.3.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.3.0.tgz#a91e24d10babf9e60c706919bb182b53ccdffc05"
+  integrity sha512-xm+ANmA16BzCT5pLjuXySbQVFwH3oJctUVdy81w1sV0vBU0KgDdBGtxQOUd5zqOBk/JayAFeG8Dlmeq74rjm/A==
 
 grid-index@^1.1.0:
   version "1.1.0"
