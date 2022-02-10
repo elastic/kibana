@@ -15,8 +15,8 @@ import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';
-import { esFilters } from '../../../../data/public';
 
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
@@ -207,7 +207,7 @@ export class VegaBaseView {
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
     vegaLoader.sanitize = async (uri, options) => {
-      if (uri.bypassToken === bypassToken) {
+      if (uri.bypassToken === bypassToken || this._externalUrl.isInternalUrl(uri)) {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
         uri = uri.url;
@@ -344,7 +344,7 @@ export class VegaBaseView {
    */
   async addFilterHandler(query, index, alias) {
     const indexId = await this.findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId, alias);
+    const filter = buildQueryFilter(query, indexId, alias);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }
@@ -355,12 +355,10 @@ export class VegaBaseView {
    */
   async removeFilterHandler(query, index) {
     const indexId = await this.findIndex(index);
-    const filterToRemove = esFilters.buildQueryFilter(query, indexId);
+    const filterToRemove = buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
-    const existingFilter = currentFilters.find((filter) =>
-      esFilters.compareFilters(filter, filterToRemove)
-    );
+    const existingFilter = currentFilters.find((filter) => compareFilters(filter, filterToRemove));
 
     if (!existingFilter) return;
 
