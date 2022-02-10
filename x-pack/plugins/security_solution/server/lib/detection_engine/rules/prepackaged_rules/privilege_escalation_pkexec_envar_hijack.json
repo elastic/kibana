@@ -1,0 +1,70 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies attempt to exploit a local privilege escalation in polkit pkexec (CVE-2021-4034) via unsecure environment variable injection. Successful exploitation allows an unprivileged user to escalate to the root user.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential Privilege Escalation via PKEXEC",
+  "query": "file where file.path : \"/*GCONV_PATH*\"\n",
+  "references": [
+    "https://seclists.org/oss-sec/2022/q1/80",
+    "https://haxx.in/files/blasty-vs-pkexec.c"
+  ],
+  "risk_score": 73,
+  "rule_id": "8da41fc9-7735-4b24-9cc6-c78dfc9fc9c9",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1068",
+          "name": "Exploitation for Privilege Escalation",
+          "reference": "https://attack.mitre.org/techniques/T1068/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1574",
+          "name": "Hijack Execution Flow",
+          "reference": "https://attack.mitre.org/techniques/T1574/",
+          "subtechnique": [
+            {
+              "id": "T1574.007",
+              "name": "Path Interception by PATH Environment Variable",
+              "reference": "https://attack.mitre.org/techniques/T1574/007/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

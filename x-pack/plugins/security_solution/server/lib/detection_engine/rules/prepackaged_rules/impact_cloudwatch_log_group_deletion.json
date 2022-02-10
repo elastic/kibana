@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the deletion of a specified AWS CloudWatch log group. When a log group is deleted, all the archived log events associated with the log group are also permanently deleted.",
   "false_positives": [
-    "Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Log group deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Log group deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -73,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }
