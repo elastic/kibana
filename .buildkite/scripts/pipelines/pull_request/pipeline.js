@@ -65,13 +65,19 @@ const uploadPipeline = (pipelineContent) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/security_solution/,
+        /^src\/plugins\/data/,
+        /^x-pack\/plugins\/actions/,
+        /^x-pack\/plugins\/alerting/,
         /^x-pack\/plugins\/cases/,
+        /^x-pack\/plugins\/event_log/,
         /^x-pack\/plugins\/lists/,
+        /^x-pack\/plugins\/rule_registry/,
+        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/plugins\/task_manager/,
         /^x-pack\/plugins\/timelines/,
-        /^x-pack\/test\/security_solution_cypress/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
+        /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
