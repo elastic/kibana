@@ -30,7 +30,7 @@ describe('pitOrUndefined', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "foo" supplied to "(Array<string> | undefined)"',
+      'Invalid value "foo" supplied to "Array<string>"',
     ]);
     expect(message.schema).toEqual({});
   });
