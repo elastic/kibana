@@ -21,8 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
     { user: USER.ML_POWERUSER_SPACES, discoverAvailable: false },
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/124938
-  describe.skip('for user with full ML access', function () {
+  describe('for user with full ML access', function () {
     this.tags(['skipFirefox', 'mlqa']);
 
     describe('with no data loaded', function () {
@@ -197,6 +196,8 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should load the Overview page');
             await ml.navigation.navigateToMl();
             await ml.navigation.navigateToOverview();
+
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
 
             await ml.testExecution.logTestStep('should display ML Nodes panel');
             await ml.mlNodesPanel.assertNodeOverviewPanel();

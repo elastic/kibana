@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Observable, ReplaySubject, fromEventPattern, merge, timer } from 'rxjs';
+import { Observable, ReplaySubject, fromEventPattern, merge, timer, BehaviorSubject } from 'rxjs';
 import { map, switchMap, filter, debounce } from 'rxjs/operators';
 import type { View, Spec } from 'vega';
 import type { Assign } from '@kbn/utility-types';
@@ -81,6 +81,7 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
 
 export class VegaAdapter {
   private debugValuesSubject = new ReplaySubject<DebugValues>();
+  private error = new BehaviorSubject<string | undefined>(undefined);
 
   bindInspectValues(debugValues: DebugValues) {
     this.debugValuesSubject.next(debugValues);
@@ -158,5 +159,17 @@ export class VegaAdapter {
       filter((debugValues) => Boolean(debugValues)),
       map((debugValues) => JSON.stringify(debugValues.spec, null, 2))
     );
+  }
+
+  getErrorObservable() {
+    return this.error.asObservable();
+  }
+
+  setError(error: string) {
+    this.error.next(error);
+  }
+
+  clearError() {
+    this.error.next(undefined);
   }
 }
