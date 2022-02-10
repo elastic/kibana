@@ -15,22 +15,17 @@ import { BrowserFields, DocValueFields } from '../../../../common/containers/sou
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
-import {
-  ISOLATE_HOST,
-  UNISOLATE_HOST,
-} from '../../../../detections/components/host_isolation/translations';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
-import { EventDetailsFooter } from './footer';
-import { OsqueryEventDetailsFooter } from '../../osquery/footer';
 import { EntityType } from '../../../../../../timelines/common';
 import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
 import { HostRisk } from '../../../../common/containers/hosts_risk/types';
-import { useKibana } from '../../../../common/lib/kibana';
-import { EventDetailsBackToAlertDetailsLink } from './back_link';
-import { ACTION_OSQUERY } from '../../../../detections/components/take_action_dropdown/osqueryActionItem';
+import {
+  EventDetailsFlyoutBody,
+  EventDetailsFlyoutFooter,
+  EventDetailsFlyoutHeader,
+} from '../flyout';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -44,9 +39,6 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
       padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.m}`};
     }
   }
-`;
-const OsqueryActionWrapper = styled.div`
-  padding: 8px;
 `;
 
 interface EventDetailsPanelProps {
@@ -92,9 +84,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
-  const {
-    services: { osquery },
-  } = useKibana();
   const [activePanel, setActivePanel] = useState<number | null>(null);
   const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
     'isolateHost'
@@ -156,11 +145,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const agentId = useMemo(
-    () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
-    [detailsData]
-  );
-
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
 
   const handleIsolationActionSuccess = useCallback(() => {
@@ -171,131 +155,23 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     }
   }, [caseDetailsRefresh]);
 
-  const renderFlyoutHeader = useMemo(() => {
-    switch (activePanel) {
-      case ACTIVE_PANEL.OSQUERY:
-        return (
-          <EventDetailsBackToAlertDetailsLink
-            primaryText={<h2>{ACTION_OSQUERY}</h2>}
-            onClick={showAlertDetails}
-          />
-        );
-      case ACTIVE_PANEL.HOST_ISOLATION:
-        return (
-          <EventDetailsBackToAlertDetailsLink
-            primaryText={<h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>}
-            onClick={showAlertDetails}
-          />
-        );
-      default:
-        return (
-          <ExpandableEventTitle
-            isAlert={isAlert}
-            loading={loading}
-            ruleName={ruleName}
-            timestamp={timestamp}
-          />
-        );
-    }
-  }, [activePanel, isAlert, isolateAction, loading, ruleName, showAlertDetails, timestamp]);
-  const renderFlyoutBody = useMemo(() => {
-    switch (activePanel) {
-      case ACTIVE_PANEL.OSQUERY:
-        return (
-          <OsqueryActionWrapper>
-            {osquery?.OsqueryAction?.({ agentId, formType: 'steps' })}
-          </OsqueryActionWrapper>
-        );
-      case ACTIVE_PANEL.HOST_ISOLATION:
-        return (
-          <HostIsolationPanel
-            details={detailsData}
-            cancelCallback={showAlertDetails}
-            successCallback={handleIsolationActionSuccess}
-            isolateAction={isolateAction}
-          />
-        );
-      default:
-        return (
-          <ExpandableEvent
-            browserFields={browserFields}
-            detailsData={detailsData}
-            event={expandedEvent}
-            isAlert={isAlert}
-            isDraggable={isDraggable}
-            loading={loading}
-            rawEventData={rawEventData}
-            timelineId={timelineId}
-            timelineTabType="flyout"
-            hostRisk={hostRisk}
-            handleOnEventClosed={handleOnEventClosed}
-          />
-        );
-    }
-  }, [
-    agentId,
-    browserFields,
-    detailsData,
-    expandedEvent,
-    handleIsolationActionSuccess,
-    handleOnEventClosed,
-    hostRisk,
-    activePanel,
-    isAlert,
-    isDraggable,
-    isolateAction,
-    loading,
-    osquery,
-    rawEventData,
-    showAlertDetails,
-    timelineId,
-  ]);
-
-  const renderFooter = useMemo(() => {
-    const handlePanelChange = (panelType: ACTIVE_PANEL | null) => {
-      if (activePanel === ACTIVE_PANEL.OSQUERY && panelType === null) {
-        showAlertDetails();
-      } else {
-        setActivePanel(panelType);
-      }
-    };
-    switch (activePanel) {
-      case ACTIVE_PANEL.OSQUERY:
-        return <OsqueryEventDetailsFooter handlePanelChange={handlePanelChange} />;
-      default:
-        return (
-          <EventDetailsFooter
-            detailsData={detailsData}
-            detailsEcsData={ecsData}
-            expandedEvent={expandedEvent}
-            handleOnEventClosed={handleOnEventClosed}
-            isHostIsolationPanelOpen={activePanel === ACTIVE_PANEL.HOST_ISOLATION}
-            loadingEventDetails={loading}
-            onAddIsolationStatusClick={showHostIsolationPanel}
-            timelineId={timelineId}
-            handlePanelChange={handlePanelChange}
-          />
-        );
-    }
-  }, [
-    activePanel,
-    detailsData,
-    ecsData,
-    expandedEvent,
-    handleOnEventClosed,
-    loading,
-    showAlertDetails,
-    showHostIsolationPanel,
-    timelineId,
-  ]);
-
   if (!expandedEvent?.eventId) {
     return null;
   }
 
   return isFlyoutView ? (
     <>
-      <EuiFlyoutHeader hasBorder={activePanel != null}>{renderFlyoutHeader}</EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder={activePanel != null}>
+        <EventDetailsFlyoutHeader
+          activePanel={activePanel}
+          isAlert={isAlert}
+          isolateAction={isolateAction}
+          loading={loading}
+          ruleName={ruleName}
+          showAlertDetails={showAlertDetails}
+          timestamp={timestamp}
+        />
+      </EuiFlyoutHeader>
       {isIsolateActionSuccessBannerVisible && (
         <EndpointIsolateSuccess
           hostName={hostName}
@@ -303,9 +179,37 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           isolateAction={isolateAction}
         />
       )}
-      <StyledEuiFlyoutBody>{renderFlyoutBody}</StyledEuiFlyoutBody>
+      <StyledEuiFlyoutBody>
+        <EventDetailsFlyoutBody
+          browserFields={browserFields}
+          detailsData={detailsData}
+          expandedEvent={expandedEvent}
+          handleIsolationActionSuccess={handleIsolationActionSuccess}
+          handleOnEventClosed={handleOnEventClosed}
+          hostRisk={hostRisk}
+          activePanel={activePanel}
+          isAlert={isAlert}
+          isDraggable={isDraggable}
+          isolateAction={isolateAction}
+          loading={loading}
+          rawEventData={rawEventData}
+          showAlertDetails={showAlertDetails}
+          timelineId={timelineId}
+        />
+      </StyledEuiFlyoutBody>
 
-      {renderFooter}
+      <EventDetailsFlyoutFooter
+        activePanel={activePanel}
+        detailsData={detailsData}
+        ecsData={ecsData}
+        expandedEvent={expandedEvent}
+        handleOnEventClosed={handleOnEventClosed}
+        loading={loading}
+        showAlertDetails={showAlertDetails}
+        showHostIsolationPanel={showHostIsolationPanel}
+        timelineId={timelineId}
+        setActivePanel={setActivePanel}
+      />
     </>
   ) : (
     <>
