@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanel,
   EuiIcon,
   EuiPopoverTitle,
+  EuiContextMenu,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -85,7 +86,6 @@ export function AddLayerButton({
     <EuiPopover
       display="block"
       data-test-subj="lnsConfigPanel__addLayerPopover"
-      panelClassName="lnsChangeIndexPatternPopover"
       button={
         <EuiButton
           className="lnsConfigPanel__addLayerBtn"
@@ -106,32 +106,31 @@ export function AddLayerButton({
       }
       isOpen={showLayersChoice}
       closePopover={() => toggleLayersChoice(false)}
-      panelPaddingSize="s"
+      panelPaddingSize="none"
     >
-      <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.configPanel.selectLayerType', {
-          defaultMessage: 'Select layer type',
-        })}
-      </EuiPopoverTitle>
-      <EuiContextMenuPanel
-        size="s"
-        items={supportedLayers.map(({ type, label, icon, disabled, tooltipContent }) => {
-          return (
-            <EuiContextMenuItem
-              key={type}
-              data-test-subj={`lnsLayerAddButton-${type}`}
-              onClick={() => {
-                onAddLayerClick(type);
-                toggleLayersChoice(false);
-              }}
-              icon={icon && <EuiIcon size="m" type={icon} />}
-              disabled={disabled}
-              toolTipContent={tooltipContent}
-            >
-              {label}
-            </EuiContextMenuItem>
-          );
-        })}
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: i18n.translate('xpack.lens.configPanel.selectLayerType', {
+              defaultMessage: 'Select layer type',
+            }),
+            items: supportedLayers.map(({ type, label, icon, disabled, tooltipContent }) => {
+              return {
+                tooltipContent,
+                disabled,
+                name: label,
+                icon: icon && <EuiIcon size="m" type={icon} />,
+                ['data-test-subj']: `lnsLayerAddButton-${type}`,
+                onClick: () => {
+                  onAddLayerClick(type);
+                  toggleLayersChoice(false);
+                },
+              };
+            }),
+          },
+        ]}
       />
     </EuiPopover>
   );
