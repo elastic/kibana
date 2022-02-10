@@ -47,3 +47,12 @@ export const useRefreshIntervalUpdates = () => {
     timefilter.getRefreshInterval()
   );
 };
+
+export const useTimeRangeUpdates = () => {
+  const timefilter = useTimefilter();
+
+  return useObservable(
+    timefilter.getTimeUpdate$().pipe(map(timefilter.getTime)),
+    timefilter.getTime()
+  );
+};

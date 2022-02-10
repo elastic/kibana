@@ -34,7 +34,6 @@ import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
-import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
@@ -117,22 +116,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
-  const refresh = useRefresh();
-  useEffect(() => {
-    if (refresh !== undefined && refresh.lastRefresh !== lastRefresh) {
-      setLastRefresh(refresh?.lastRefresh);
-
-      if (refresh.timeRange !== undefined) {
-        const { start, end } = refresh.timeRange;
-        setGlobalState('time', {
-          from: start,
-          to: end,
-          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
-        });
-      }
-    }
-  }, [refresh?.lastRefresh, lastRefresh, setGlobalState]);
-
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
   // So when globalState's `time` changes, we update the timefilter and use
@@ -143,10 +126,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       if (globalState.time.mode === 'invalid') {
         setInValidTimeRangeError(true);
       }
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
 
       const timefilterBounds = timefilter.getBounds();
       // Only if both min/max bounds are valid moment times set the bounds.
@@ -308,6 +287,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           if (earliest.isBefore(moment(boundsMinMs)) || latest.isAfter(moment(boundsMaxMs))) {
             const earliestMs = Math.min(earliest.valueOf(), boundsMinMs);
             const latestMs = Math.max(latest.valueOf(), boundsMaxMs);
+
+            // FIXME we should not update global state here
             setGlobalState('time', {
               from: moment(earliestMs).toISOString(),
               to: moment(latestMs).toISOString(),
