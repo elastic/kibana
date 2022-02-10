@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGrid, EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import React, { ReactElement } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPageProps } from '../no_data_page';
 import { KibanaPageTemplateSolutionNavAvatar } from '../../solution_nav';
+import { ActionCard, ActionCards } from '../actions';
 
 type NoDataPageBodyProps = {
-  actionCards: ReactElement[];
+  actionCards: Array<ReactElement<typeof ActionCard>>;
 } & Omit<NoDataPageProps, 'actions'>;
 
 export const NoDataPageBody = (props: NoDataPageBodyProps) => {
@@ -50,9 +51,7 @@ export const NoDataPageBody = (props: NoDataPageBodyProps) => {
       </EuiText>
       <EuiSpacer size="xxl" />
       <EuiSpacer size="l" />
-      <EuiFlexGrid columns={2} style={{ justifyContent: 'space-around' }}>
-        {actionCards}
-      </EuiFlexGrid>
+      <ActionCards actionCards={actionCards} />
     </React.Fragment>
   );
 };

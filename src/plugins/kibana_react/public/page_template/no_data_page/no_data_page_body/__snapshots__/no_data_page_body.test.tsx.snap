@@ -6,7 +6,7 @@ exports[`NoDataPageBody render 1`] = `
     textAlign="center"
   >
     <KibanaPageTemplateSolutionNavAvatar
-      iconType="logoElastic"
+      iconType="elastic"
       name="Elastic"
       size="xxl"
     />
@@ -42,24 +42,20 @@ exports[`NoDataPageBody render 1`] = `
   <EuiSpacer
     size="l"
   />
-  <EuiFlexGrid
-    columns={2}
-    style={
-      Object {
-        "justifyContent": "space-around",
-      }
+  <ActionCards
+    actionCards={
+      Array [
+        <ActionCard
+          child={
+            <NoDataCard
+              button="Button text"
+              onClick={[MockFunction]}
+              recommended={false}
+            />
+          }
+        />,
+      ]
     }
-  >
-    <ActionCard
-      action={
-        Object {
-          "button": "Button text",
-          "onClick": [MockFunction],
-          "recommended": false,
-        }
-      }
-      key="action"
-    />
-  </EuiFlexGrid>
+  />
 </Fragment>
 `;

@@ -7,20 +7,19 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React from 'react';
-import { NoDataCard } from '../no_data_card';
-import { NoDataPageActions } from '../no_data_page';
+import React, { ReactElement } from 'react';
+import { ElasticAgentCard, NoDataCard } from '../no_data_card';
 
 interface ActionCardProps {
-  action: NoDataPageActions;
   key: string;
+  child: ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard>;
 }
 
 export const ActionCard = (props: ActionCardProps) => {
-  const { key, action } = props;
+  const { key, child } = props;
   return (
-    <EuiFlexItem key={`empty-page-${key}-action`} className="kbnNoDataPageContents__item">
-      <NoDataCard {...action} />
+    <EuiFlexItem key={key} className="kbnNoDataPageContents__item">
+      {child}
     </EuiFlexItem>
   );
 };

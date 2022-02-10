@@ -107,12 +107,17 @@ exports[`KibanaPageTemplate render default empty prompt 1`] = `
 `;
 
 exports[`KibanaPageTemplate render noDataContent 1`] = `
-<EuiPageTemplate
-  className="kbnPageTemplate kbnPageTemplate--centeredBody"
-  pageContentProps={
+<EmptyStatePage
+  classes="kbnPageTemplate kbnPageTemplate--centeredBody"
+  noDataConfig={
     Object {
-      "color": "transparent",
-      "hasShadow": false,
+      "actions": Object {
+        "beats": Object {},
+        "custom": Object {},
+        "elasticAgent": Object {},
+      },
+      "docsLink": "test",
+      "solution": "Elastic",
     }
   }
   pageSideBar={
@@ -169,21 +174,8 @@ exports[`KibanaPageTemplate render noDataContent 1`] = `
       "paddingSize": "none",
     }
   }
-  restrictWidth={950}
   template="centeredBody"
->
-  <NoDataPage
-    actions={
-      Object {
-        "beats": Object {},
-        "custom": Object {},
-        "elasticAgent": Object {},
-      }
-    }
-    docsLink="test"
-    solution="Elastic"
-  />
-</EuiPageTemplate>
+/>
 `;
 
 exports[`KibanaPageTemplate render solutionNav 1`] = `

@@ -7,3 +7,4 @@
  */
 
 export { ActionCard } from './action_card';
+export { ActionCards } from './action_cards';
