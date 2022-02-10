@@ -26,7 +26,12 @@ import { getBucketSize } from '../../utils/get_bucket_size';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { DataSections } from './data_sections';
 import { LoadingObservability } from './loading_observability';
-
+import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
+import {
+  Provider,
+  alertsPageStateContainer,
+  useAlertsPageStateContainer,
+} from '../alerts/containers/state_container';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -37,7 +42,7 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
   }
 }
 
-export function OverviewPage({ routeParams }: Props) {
+function OverviewPage({ routeParams }: Props) {
   useTrackPageview({ app: 'observability-overview', path: 'overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
   useBreadcrumbs([
@@ -47,6 +52,7 @@ export function OverviewPage({ routeParams }: Props) {
       }),
     },
   ]);
+  const { rangeFrom, rangeTo, kuery } = useAlertsPageStateContainer();
 
   const { core, ObservabilityPageTemplate } = usePluginContext();
 
@@ -106,6 +112,18 @@ export function OverviewPage({ routeParams }: Props) {
                 {hasDataMap?.alert?.hasData && (
                   <EuiFlexItem>
                     <EuiPanel color="subdued">
+                      <AlertsTableTGrid
+                        setRefetch={() => {}}
+                        kuery={kuery}
+                        rangeFrom={rangeFrom}
+                        rangeTo={rangeTo}
+                        indexNames={[
+                          '.alerts-observability.apm.alerts-default',
+                          '.alerts-observability.logs.alerts-default',
+                          '.alerts-observability.metrics.alerts-default',
+                          '.alerts-observability.uptime.alerts-default',
+                        ]}
+                      />
                       <AlertsSection />
                     </EuiPanel>
                   </EuiFlexItem>
@@ -136,6 +154,14 @@ export function OverviewPage({ routeParams }: Props) {
         </>
       )}
     </ObservabilityPageTemplate>
+  );
+}
+
+export function WrappedOldOverviewPage() {
+  return (
+    <Provider value={alertsPageStateContainer}>
+      <OverviewPage routeParams={{ query: {} }} />
+    </Provider>
   );
 }
 

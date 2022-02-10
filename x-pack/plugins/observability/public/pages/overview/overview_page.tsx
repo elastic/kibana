@@ -17,7 +17,8 @@ import { RouteParams } from '../../routes';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
 import { ObservabilityStatus } from '../../components/app/observability_status';
-
+import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
+import { useAlertsPageStateContainer } from '../alerts/containers/state_container';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -32,6 +33,7 @@ export function OverviewPage({ routeParams }: Props) {
       }),
     },
   ]);
+  const { rangeFrom, rangeTo, kuery } = useAlertsPageStateContainer();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const { core, ObservabilityPageTemplate } = usePluginContext();
@@ -75,6 +77,18 @@ export function OverviewPage({ routeParams }: Props) {
           : undefined
       }
     >
+      <AlertsTableTGrid
+        setRefetch={() => {}}
+        kuery={kuery}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        indexNames={[
+          '.alerts-observability.apm.alerts-default',
+          '.alerts-observability.logs.alerts-default',
+          '.alerts-observability.metrics.alerts-default',
+          '.alerts-observability.uptime.alerts-default',
+        ]}
+      />
       {hasData && (
         <>
           <EuiButton onClick={() => setIsFlyoutVisible(true)}>Show observability status</EuiButton>
