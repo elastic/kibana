@@ -138,7 +138,7 @@ export const useWithArtifactListData = (
       listData &&
       listData.total === 0 &&
       String(page) === '1' &&
-      !filter &&
+      !kuery &&
       doesDataExist
     ) {
       checkIfDataExists();
@@ -147,8 +147,10 @@ export const useWithArtifactListData = (
     checkIfDataExists,
     doesDataExist,
     filter,
+    includedPolicies,
     isLoadingListData,
     isMounted,
+    kuery,
     listData,
     listDataError,
     page,

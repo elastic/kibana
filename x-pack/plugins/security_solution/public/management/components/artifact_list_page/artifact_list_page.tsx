@@ -10,6 +10,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
+import { useLocation } from 'react-router-dom';
 import { AdministrationListPage } from '../administration_list_page';
 
 import { PaginatedContent, PaginatedContentProps } from '../paginated_content';
@@ -32,9 +33,15 @@ import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { ArtifactListPageUrlParams } from './types';
 import { useUrlParams } from './hooks/use_url_params';
-import { MaybeImmutable } from '../../../../common/endpoint/types';
+import { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
+import { useGetEndpointSpecificPolicies } from '../../services/policies/hooks';
+import { getLoadPoliciesError } from '../../common/translations';
+import { useToasts } from '../../../common/lib/kibana';
+import { useMemoizedRouteState } from '../../common/hooks';
+import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
+import { BackToExternalAppButton } from '../back_to_external_app_button';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -63,7 +70,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     labels: _labels = {},
     'data-test-subj': dataTestSubj,
   }) => {
+    const { state: routeState } = useLocation<ListPageRouteState | undefined>();
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const toasts = useToasts();
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
     const {
@@ -123,6 +132,26 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       dataTestSubj: getTestId('card'),
     });
 
+    const policiesRequest = useGetEndpointSpecificPolicies({
+      onError: (err) => {
+        toasts.addWarning(getLoadPoliciesError(err));
+      },
+    });
+
+    const memoizedRouteState = useMemoizedRouteState(routeState);
+
+    const backButtonEmptyComponent = useMemo(() => {
+      if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+        return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+      }
+    }, [memoizedRouteState]);
+
+    const backButtonHeaderComponent = useMemo(() => {
+      if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+        return <BackToExternalAppButton {...memoizedRouteState} />;
+      }
+    }, [memoizedRouteState]);
+
     const handleOpenCreateFlyoutClick = useCallback(() => {
       setUrlParams({ show: 'create' });
     }, [setUrlParams]);
@@ -144,7 +173,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         setUrlParams({
           // `undefined` will drop the param from the url
           filter: filterValue.trim() === '' ? undefined : filterValue,
-          included_policies: selectedPolicies.trim() === '' ? undefined : selectedPolicies,
+          includedPolicies: selectedPolicies.trim() === '' ? undefined : selectedPolicies,
         });
 
         if (doHardRefresh) {
@@ -173,8 +202,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     return (
       <AdministrationListPage
-        // FIXME: header back component
-        // headerBackComponent={backButtonHeaderComponent}
+        headerBackComponent={backButtonHeaderComponent}
         hideHeader={!doesDataExist}
         title={labels.pageTitle}
         subtitle={labels.pageAboutInfo}
@@ -192,7 +220,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           )
         }
       >
-        {/* FIXME:PT implement callbacks */}
         {/* Flyout component is driven by URL params and may or may not be displayed based on those */}
         <MaybeArtifactFlyout
           apiClient={apiClient}
@@ -220,8 +247,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             titleLabel={labels.emptyStateTitle}
             aboutInfo={labels.emptyStateInfo}
             primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
-            // FIXME:PT implement back component
-            // backComponent={}
+            backComponent={backButtonEmptyComponent}
           />
         )}
 
@@ -232,7 +258,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               onSearch={handleOnSearch}
               placeholder={labels.searchPlaceholderInfo}
               hasPolicyFilter
-              policyList={[]} // FIXME:PT provide list of policies
+              policyList={policiesRequest.data?.items}
               defaultIncludedPolicies={includedPolicies}
             />
 
