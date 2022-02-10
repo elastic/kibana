@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { LoggerFactory } from 'src/core/server';
+import { LoggerFactory, LogMeta } from 'src/core/server';
 
 const trimStr = (toTrim: string) => {
   return typeof toTrim === 'string' ? toTrim.trim() : toTrim;
 };
 
 export interface GenericLevelLogger {
-  debug: (msg: string) => void;
+  debug: <T extends LogMeta>(msg: string, tags: string[], meta: T) => void;
   info: (msg: string) => void;
   warning: (msg: string) => void;
   error: (msg: Error) => void;
@@ -46,8 +46,9 @@ export class LevelLogger implements GenericLevelLogger {
     this.getLogger(tags).warn(msg);
   }
 
-  public debug(msg: string, tags: string[] = []) {
-    this.getLogger(tags).debug(msg);
+  // only "debug" logging supports the LogMeta for now...
+  public debug<T extends LogMeta>(msg: string, tags: string[] = [], meta?: T) {
+    this.getLogger(tags).debug<T>(msg, meta);
   }
 
   public trace(msg: string, tags: string[] = []) {

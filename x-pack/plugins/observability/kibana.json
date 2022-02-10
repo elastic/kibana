@@ -23,6 +23,7 @@
     "alerting",
     "cases",
     "data",
+    "dataViews",
     "features",
     "inspector",
     "ruleRegistry",
