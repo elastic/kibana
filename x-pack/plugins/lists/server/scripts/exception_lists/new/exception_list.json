@@ -2,6 +2,6 @@
   "list_id": "simple_list",
   "tags": ["user added string for a tag", "malware"],
   "type": "detection",
-  "description": "This is a sample endpoint type exception",
-  "name": "Sample Endpoint Exception List"
+  "description": "This is a sample detection type exception",
+  "name": "Sample Detection Exception List"
 }
