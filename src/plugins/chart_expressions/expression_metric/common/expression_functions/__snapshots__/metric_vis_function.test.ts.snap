@@ -41,7 +41,15 @@ Object {
       },
       "metric": Object {
         "labels": Object {
+          "position": "bottom",
           "show": true,
+          "style": Object {
+            "css": "",
+            "spec": Object {
+              "fontSize": "24px",
+            },
+            "type": "style",
+          },
         },
         "metricColorMode": "None",
         "palette": Object {

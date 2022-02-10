@@ -23,6 +23,8 @@ export interface MetricArguments {
   showLabels: boolean;
   palette?: PaletteOutput<CustomPaletteState>;
   font: Style;
+  labelFont: Style;
+  labelPosition: 'bottom' | 'top';
   metric: ExpressionValueVisDimension[];
   bucket?: ExpressionValueVisDimension;
 }

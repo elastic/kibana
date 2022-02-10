@@ -35,6 +35,8 @@ describe('interpreter/functions#metric', () => {
     },
     showLabels: true,
     font: { spec: { fontSize: '60px' }, type: 'style', css: '' },
+    labelFont: { spec: { fontSize: '24px' }, type: 'style', css: '' },
+    labelPosition: 'bottom',
     metric: [
       {
         type: 'vis_dimension',

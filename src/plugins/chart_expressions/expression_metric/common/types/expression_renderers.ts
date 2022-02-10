@@ -28,7 +28,7 @@ export interface MetricVisParam {
   percentageFormatPattern?: string;
   metricColorMode: ColorMode;
   palette?: CustomPaletteState;
-  labels: Labels;
+  labels: Labels & { style: Style; position: 'bottom' | 'top' };
   style: MetricStyle;
 }
 

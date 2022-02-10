@@ -57,6 +57,21 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
       default: `{font size=60 align="center"}`,
     },
+    labelFont: {
+      types: ['style'],
+      help: i18n.translate('expressionMetricVis.function.labelFont.help', {
+        defaultMessage: 'Label font settings.',
+      }),
+      default: `{font size=24 align="center"}`,
+    },
+    labelPosition: {
+      types: ['string'],
+      options: ['bottom', 'top'],
+      help: i18n.translate('expressionMetricVis.function.labelPosition.help', {
+        defaultMessage: 'Label position',
+      }),
+      default: `bottom`,
+    },
     metric: {
       types: ['vis_dimension'],
       help: i18n.translate('expressionMetricVis.function.metric.help', {
@@ -111,6 +126,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             metricColorMode: args.colorMode,
             labels: {
               show: args.showLabels,
+              position: args.labelPosition,
+              style: {
+                ...args.labelFont,
+              },
             },
             style: {
               bgColor: args.colorMode === ColorMode.Background,

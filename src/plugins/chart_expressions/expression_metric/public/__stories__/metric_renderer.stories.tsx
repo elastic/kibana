@@ -57,7 +57,7 @@ const config: MetricVisRenderConfig = {
   visConfig: {
     metric: {
       metricColorMode: ColorMode.None,
-      labels: { show: true },
+      labels: { show: true, style: { spec: {}, type: 'style', css: '' }, position: 'bottom' },
       percentageMode: false,
       style,
     },
@@ -132,7 +132,14 @@ storiesOf('renderers/visMetric', module)
           ...config,
           visConfig: {
             ...config.visConfig,
-            metric: { ...config.visConfig.metric, labels: { show: false } },
+            metric: {
+              ...config.visConfig.metric,
+              labels: {
+                show: false,
+                style: { spec: {}, type: 'style', css: '' },
+                position: 'bottom',
+              },
+            },
           },
         }}
         {...containerSize}

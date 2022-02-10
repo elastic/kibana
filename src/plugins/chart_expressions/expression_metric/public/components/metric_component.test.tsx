@@ -54,6 +54,8 @@ describe('MetricVisComponent', function () {
       },
       labels: {
         show: true,
+        style: { spec: {}, type: 'style', css: '' },
+        position: 'bottom',
       },
     },
     dimensions: {
