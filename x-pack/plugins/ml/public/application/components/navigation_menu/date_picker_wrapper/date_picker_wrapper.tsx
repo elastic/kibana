@@ -85,6 +85,30 @@ export const DatePickerWrapper: FC = () => {
   const timeFilterRefreshInterval = useRefreshIntervalUpdates();
   const time = useTimeRangeUpdates();
 
+  useEffect(
+    function syncTimRangeFromUrlState() {
+      if (globalState?.time !== undefined) {
+        timefilter.setTime({
+          from: globalState.time.from,
+          to: globalState.time.to,
+        });
+      }
+    },
+    [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]
+  );
+
+  useEffect(
+    function syncRefreshIntervalFromUrlState() {
+      if (globalState?.refreshInterval !== undefined) {
+        timefilter.setRefreshInterval({
+          pause: !!globalState?.refreshInterval?.pause,
+          value: globalState?.refreshInterval?.value,
+        });
+      }
+    },
+    [globalState?.refreshInterval]
+  );
+
   const setRefreshInterval = useCallback(
     debounce((refreshIntervalUpdate: RefreshInterval) => {
       setGlobalState('refreshInterval', refreshIntervalUpdate, true);
@@ -200,18 +224,6 @@ export const DatePickerWrapper: FC = () => {
       subscriptions.unsubscribe();
     };
   }, []);
-
-  useEffect(
-    function syncTimRangeFromUrlState() {
-      if (globalState?.time !== undefined) {
-        timefilter.setTime({
-          from: globalState.time.from,
-          to: globalState.time.to,
-        });
-      }
-    },
-    [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]
-  );
 
   const updateTimeFilter = useCallback(
     ({ start, end }: OnTimeChangeProps) => {
