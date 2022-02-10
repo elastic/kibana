@@ -28,13 +28,8 @@ export const mathColumn: ExpressionFunctionDefinition<
   inputTypes: ['datatable'],
   help: i18n.translate('expressions.functions.mathColumnHelpText', {
     defaultMessage:
-      'Adds a column calculated as the result of other columns. ' +
-      'Changes are made only when you provide arguments.' +
-      'See also {alterColumnFn} and {staticColumnFn}.',
-    values: {
-      alterColumnFn: '`alterColumn`',
-      staticColumnFn: '`staticColumn`',
-    },
+      'Adds a column by evaluating TinyMath on each row. ' +
+      'This function is optimized for math, so it performs better than the mapColumn with a math',
   }),
   args: {
     ...math.args,

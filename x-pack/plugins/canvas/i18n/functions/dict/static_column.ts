@@ -13,10 +13,11 @@ import { FunctionFactory } from '../../../types';
 export const help: FunctionHelp<FunctionFactory<typeof staticColumn>> = {
   help: i18n.translate('xpack.canvas.functions.staticColumnHelpText', {
     defaultMessage:
-      'Adds a column with the same static value in every row. See also {alterColumnFn} and {mapColumnFn}.',
+      'Adds a column with the same static value in every row. See also {alterColumnFn}, {mapColumnFn}, and {mathColumnFn}',
     values: {
       alterColumnFn: '`alterColumn`',
       mapColumnFn: '`mapColumn`',
+      mathColumnFn: '`mathColumn`',
     },
   }),
   args: {
