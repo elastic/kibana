@@ -14,7 +14,7 @@ import { EuiContextMenu } from '@elastic/eui';
 import { SolutionToolbar } from './solution_toolbar';
 import { SolutionToolbarPopover } from './items';
 import { AddFromLibraryButton, PrimaryActionButton, QuickButtonGroup } from './items';
-import mdx from './toolbar_button.mdx';
+import mdx from './solution_toolbar.mdx';
 
 const quickButtons = [
   {
