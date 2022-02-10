@@ -51,7 +51,6 @@ import {
   ingestErrorToResponseOptions,
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
-  PackageCacheError,
 } from '../errors';
 import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -105,7 +104,6 @@ class PackagePolicyService {
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
-      useBundledPackages?: boolean;
     }
   ): Promise<PackagePolicy> {
     if (!options?.skipUniqueNameVerification) {
@@ -135,7 +133,6 @@ class PackagePolicyService {
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
-        useBundledPackages: options?.useBundledPackages,
       });
 
       let pkgInfo: PackageInfo;
@@ -171,18 +168,16 @@ class PackagePolicyService {
         pkgInfo.name,
         pkgInfo.version
       ).catch(async (error) => {
-        if (!options?.useBundledPackages) {
-          throw error;
-        }
-
-        // If we're using bundled packages, try to pull the package info from ES instead
+        // Attempt to get an ArchivePackage object from the package info cache if the registry
+        // is not reachable. This will pull a bundled package if it was previously installed.
         const archivePackage = await getArchivePackage({
           name: pkgInfo.name,
           version: pkgInfo.version,
         });
 
+        // If we don't find a package in the cache, throw the original error
         if (!archivePackage) {
-          throw new PackageCacheError('Unable to find bundled package in cache');
+          throw error;
         }
 
         return archivePackage?.packageInfo;

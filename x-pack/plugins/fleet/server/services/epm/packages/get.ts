@@ -103,28 +103,20 @@ export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
-  useBundledPackages?: boolean;
 }): Promise<PackageInfo> {
-  const { savedObjectsClient, pkgName, pkgVersion, useBundledPackages = false } = options;
+  const { savedObjectsClient, pkgName, pkgVersion } = options;
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     new Promise<{ name: string; version: string }>((resolve, reject) => {
-      if (!useBundledPackages) {
-        resolve(Registry.fetchFindLatestPackage(pkgName));
-      }
-
       return Registry.fetchFindLatestPackage(pkgName).catch(async (error) => {
         const bundledPackages = await getBundledPackages();
         const bundledPackage = bundledPackages.find(
           (b) => b.name === pkgName && b.version === pkgVersion
         );
 
+        // If we don't find a bundled package, reject with the original error
         if (!bundledPackage) {
-          return reject(
-            new BundledPackageNotFoundError(
-              `No bundled package found with key ${pkgName}-${pkgVersion}`
-            )
-          );
+          return reject(error);
         }
 
         resolve({

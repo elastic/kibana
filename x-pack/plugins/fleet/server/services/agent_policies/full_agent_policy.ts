@@ -31,11 +31,10 @@ import { getMonitoringPermissions } from './monitoring_permissions';
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options: Partial<{ standalone: boolean; useBundledPackages: boolean }> = {}
+  options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
   let agentPolicy;
-  const standalone = options.standalone ?? false;
-  const useBundledPackages = options.useBundledPackages ?? false;
+  const standalone = options?.standalone ?? false;
 
   try {
     agentPolicy = await agentPolicyService.get(soClient, id);
@@ -112,9 +111,7 @@ export async function getFullAgentPolicy(
   };
 
   const dataPermissions =
-    (await storedPackagePoliciesToAgentPermissions(soClient, agentPolicy.package_policies, {
-      useBundledPackages,
-    })) || {};
+    (await storedPackagePoliciesToAgentPermissions(soClient, agentPolicy.package_policies)) || {};
 
   dataPermissions._elastic_agent_checks = {
     cluster: DEFAULT_CLUSTER_PERMISSIONS,

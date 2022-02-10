@@ -31,8 +31,7 @@ export interface UpgradeManagedPackagePoliciesResult {
 export const upgradeManagedPackagePolicies = async (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  packagePolicyIds: string[],
-  useBundledPackages = false
+  packagePolicyIds: string[]
 ): Promise<UpgradeManagedPackagePoliciesResult[]> => {
   const results: UpgradeManagedPackagePoliciesResult[] = [];
 
@@ -47,7 +46,6 @@ export const upgradeManagedPackagePolicies = async (
       savedObjectsClient: soClient,
       pkgName: packagePolicy.package.name,
       pkgVersion: packagePolicy.package.version,
-      useBundledPackages,
     });
 
     const installedPackage = await getInstallation({

@@ -15,8 +15,7 @@ export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
 export async function storedPackagePoliciesToAgentPermissions(
   soClient: SavedObjectsClientContract,
-  packagePolicies: string[] | PackagePolicy[],
-  options?: { useBundledPackages?: boolean }
+  packagePolicies: string[] | PackagePolicy[]
 ): Promise<FullAgentPolicyOutputPermissions | undefined> {
   if (packagePolicies.length === 0) {
     return;
@@ -39,7 +38,6 @@ export async function storedPackagePoliciesToAgentPermissions(
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
-        useBundledPackages: options?.useBundledPackages ?? false,
       });
 
       if (!pkg.data_streams || pkg.data_streams.length === 0) {
