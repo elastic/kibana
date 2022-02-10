@@ -51,9 +51,6 @@ export const createRuntimeField = async ({
 
   const createdRuntimeFields = dataView.addRuntimeField(name, runtimeField);
 
-  const field = dataView.fields.getByName(name);
-  if (!field) throw new Error(`Could not create a field [name = ${name}].`);
-
   await dataViewsService.updateSavedObject(dataView);
 
   return { dataView, fields: createdRuntimeFields };

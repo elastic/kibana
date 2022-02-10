@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { DataView } from 'src/plugins/data_views/public';
 import { IndexedFieldItem } from '../../types';
-import { Table, renderFieldName, getConflictModalContent } from './table';
+import { Table, renderFieldName, getConflictModalContent, showDelete } from './table';
 import { overlayServiceMock, themeServiceMock } from 'src/core/public/mocks';
 
 const theme = themeServiceMock.createStartContract();
@@ -197,5 +197,43 @@ describe('Table', () => {
         conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
       })
     ).toMatchSnapshot();
+  });
+
+  test('showDelete', () => {
+    const runtimeFields = [
+      {
+        name: 'customer',
+        info: [],
+        excluded: false,
+        kbnType: 'string',
+        type: 'keyword',
+        isMapped: false,
+        isUserEditable: true,
+        hasRuntime: true,
+        runtimeField: {
+          type: 'keyword',
+        },
+      },
+      {
+        name: 'thing',
+        info: [],
+        excluded: false,
+        kbnType: 'string',
+        type: 'keyword',
+        isMapped: false,
+        isUserEditable: true,
+        hasRuntime: true,
+        runtimeField: {
+          type: 'composite',
+        },
+      },
+    ] as IndexedFieldItem[];
+
+    // indexed field
+    expect(showDelete(items[0])).toBe(false);
+    // runtime field - primitive type
+    expect(showDelete(runtimeFields[0])).toBe(true);
+    // runtime field - composite type
+    expect(showDelete(runtimeFields[1])).toBe(false);
   });
 });
