@@ -273,5 +273,55 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.have.keys('elements', 'details', 'error');
       });
     });
+
+    describe('GetDataFrameAnalyticsMessages', () => {
+      it('should fetch single analytics job messages by id', async () => {
+        const resp = await supertest
+          .get(`/api/ml/data_frame/analytics/${jobId}/messages`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+        // expect(body.count).to.eql(1);
+        // expect(body.data_frame_analytics.length).to.eql(1);
+        // expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
+        // expect(body.data_frame_analytics[0]).to.have.keys(
+        //   'id',
+        //   'state',
+        //   'progress',
+        //   'data_counts',
+        //   'memory_usage'
+        // );
+        console.log('------- BODY --------', JSON.stringify(resp, null, 2)); // remove
+      });
+
+      // it('should fetch multiple analytics jobs stats based on provided ids', async () => {
+      //   const { body } = await supertest
+      //     .get(`/api/ml/data_frame/analytics/${jobId}_1,${jobId}_2/_stats`)
+      //     .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+      //     .set(COMMON_REQUEST_HEADERS)
+      //     .expect(200);
+      //   expect(body.count).to.eql(2);
+      //   expect(body.data_frame_analytics.length).to.eql(2);
+      //   expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
+      //   expect(body.data_frame_analytics[0]).to.have.keys(
+      //     'id',
+      //     'state',
+      //     'progress',
+      //     'data_counts',
+      //     'memory_usage'
+      //   );
+      //   expect(body.data_frame_analytics[1].id).to.eql(`${jobId}_2`);
+      // });
+
+      // it('should not allow to retrieve a job stats for the user without required permissions', async () => {
+      //   const { body } = await supertest
+      //     .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
+      //     .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+      //     .set(COMMON_REQUEST_HEADERS)
+      //     .expect(403);
+      //   expect(body.error).to.eql('Forbidden');
+      //   expect(body.message).to.eql('Forbidden');
+      // });
+    });
   });
 };
