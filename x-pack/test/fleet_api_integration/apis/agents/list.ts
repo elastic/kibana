@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(403);
     });
 
-    it('should return the list of agents when requesting as a superuser', async () => {
+    it('should return the list of agents when requesting as admin', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
 
       expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');

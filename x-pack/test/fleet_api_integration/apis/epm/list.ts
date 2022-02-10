@@ -75,6 +75,12 @@ export default function (providerContext: FtrProviderContext) {
           .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
           .expect(200);
       });
+      it('does not allow user with the correct permissions', async () => {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages')
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .expect(403);
+      });
     });
   });
 }

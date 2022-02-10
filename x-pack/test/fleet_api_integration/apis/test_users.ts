@@ -10,6 +10,28 @@ import type { SecurityService } from '../../../../test/common/services/security/
 export const testUsers: {
   [rollName: string]: { username: string; password: string; permissions?: any };
 } = {
+  fleet_all_int_all: {
+    permissions: {
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_all_int_all',
+    password: 'changeme',
+  },
+  setup: {
+    permissions: {
+      feature: {
+        fleetv2: ['all', 'setup'],
+        fleet: ['all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'setup',
+    password: 'changeme',
+  },
   fleet_no_access: {
     permissions: {
       feature: {
@@ -39,17 +61,6 @@ export const testUsers: {
       spaces: ['*'],
     },
     username: 'fleet_all_int_read',
-    password: 'changeme',
-  },
-  fleet_all_int_all: {
-    permissions: {
-      feature: {
-        fleetv2: ['all'],
-        fleet: ['all'],
-      },
-      spaces: ['*'],
-    },
-    username: 'fleet_all_int_all',
     password: 'changeme',
   },
   integr_all_only: {
