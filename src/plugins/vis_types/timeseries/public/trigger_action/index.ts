@@ -51,7 +51,16 @@ export const triggerTSVBtoLensConfiguration = async (
 
     const timeShift = layer.offset_time;
     // translate to Lens seriesType
-    const chartType = layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
+    const layerChartType =
+      layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
+    let chartType = layerChartType;
+
+    if (layer.stacked !== 'none' && layer.stacked !== 'percent') {
+      chartType = layerChartType !== 'line' ? `${layerChartType}_stacked` : 'line';
+    }
+    if (layer.stacked === 'percent') {
+      chartType = layerChartType !== 'line' ? `${layerChartType}_percentage_stacked` : 'line';
+    }
 
     // handle multiple metrics
     let metricsArray = getSeries(layer.metrics);
@@ -103,12 +112,7 @@ export const triggerTSVBtoLensConfiguration = async (
     const layerConfiguration: VisualizeEditorLayersContext = {
       indexPatternId,
       timeFieldName: timeField,
-      chartType:
-        layer.stacked === 'none'
-          ? chartType
-          : chartType !== 'line'
-          ? `${chartType}_stacked`
-          : 'line',
+      chartType,
       axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
       ...(layer.terms_field && { splitField: layer.terms_field }),
       splitWithDateHistogram,
