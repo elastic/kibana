@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-export const createDatasetFilter = (legacyType: string, dataset: string) => ({
+/**
+ * metricset and dataset should match but there are currently exceptions which could just be bugs
+ * @param  {string} type matches legacy data
+ * @param  {string} metricset matches standalone beats
+ * @param  {string} dataset matches agent integration data streams
+ */
+export const createDatasetFilter = (type: string, metricset: string, dataset: string) => ({
   bool: {
     should: [
       {
         term: {
-          type: legacyType,
+          type,
+        },
+      },
+      {
+        term: {
+          'metricset.name': metricset,
         },
       },
       {

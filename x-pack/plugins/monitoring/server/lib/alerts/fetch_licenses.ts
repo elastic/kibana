@@ -27,7 +27,9 @@ export async function fetchLicenses(
     index: indexPatterns,
     filter_path: [
       'hits.hits._source.license.*',
+      'hits.hits._source.elasticsearch.cluster.stats.license.*',
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._index',
     ],
     body: {
@@ -48,7 +50,7 @@ export async function fetchLicenses(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {

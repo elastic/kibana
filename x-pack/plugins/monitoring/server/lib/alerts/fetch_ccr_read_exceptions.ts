@@ -44,7 +44,7 @@ export async function fetchCCRReadExceptions(
                 },
               },
             },
-            createDatasetFilter('ccr_stats', 'elasticsearch.ccr'),
+            createDatasetFilter('ccr_stats', 'ccr', 'elasticsearch.ccr'),
             {
               range: {
                 timestamp: {
