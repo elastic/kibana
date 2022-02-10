@@ -198,7 +198,18 @@ export default function (providerContext: FtrProviderContext) {
       const buf = fs.readFileSync(testPkgArchiveTgz);
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
-        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/gzip')
+        .send(buf)
+        .expect(403);
+    });
+
+    it('should not allow non superusers', async () => {
+      const buf = fs.readFileSync(testPkgArchiveTgz);
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
         .set('kbn-xsrf', 'xxxx')
         .type('application/gzip')
         .send(buf)

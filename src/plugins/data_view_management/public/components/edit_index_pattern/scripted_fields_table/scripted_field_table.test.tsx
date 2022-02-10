@@ -68,8 +68,9 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
       />
-    ).dive();
+    );
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -86,8 +87,9 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
       />
-    ).dive();
+    );
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -117,8 +119,9 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
       />
-    ).dive();
+    );
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -142,8 +145,9 @@ describe('ScriptedFieldsTable', () => {
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
       />
-    ).dive();
+    );
 
     // Allow the componentWillMount code to execute
     // https://github.com/airbnb/enzyme/issues/450
@@ -162,8 +166,9 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
       />
-    ).dive();
+    );
 
     await component.update(); // Fire `componentWillMount()`
     // @ts-expect-error lang is not valid
@@ -189,8 +194,9 @@ describe('ScriptedFieldsTable', () => {
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        userEditPermission={false}
       />
-    ).dive();
+    );
 
     await component.update(); // Fire `componentWillMount()`
     // @ts-expect-error
