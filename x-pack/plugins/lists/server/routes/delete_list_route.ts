@@ -47,10 +47,15 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
 
         // ignoreReferences=true maintains pre-7.11 behavior of deleting value list without performing any additional checks
         if (!ignoreReferences) {
+          // TODO: Will need to address this when we switch over to
+          // using PIT, don't want it to get lost
+          // https://github.com/elastic/kibana/issues/103944
           const referencedExceptionListItems = await exceptionLists.findValueListExceptionListItems(
             {
               page: 1,
               perPage: 10000,
+              pit: undefined,
+              searchAfter: undefined,
               sortField: undefined,
               sortOrder: undefined,
               valueListId: id,
@@ -149,11 +154,17 @@ const getReferencedExceptionLists = async (
         })}.attributes.list_id: "${escapeQuotes(item.list_id)}"`
     )
     .join(' OR ');
+
+  // TODO: Will need to address this when we switch over to
+  // using PIT, don't want it to get lost
+  // https://github.com/elastic/kibana/issues/103944
   return exceptionLists.findExceptionList({
     filter: `(${filter})`,
     namespaceType: ['agnostic', 'single'],
     page: 1,
     perPage: 10000,
+    pit: undefined,
+    searchAfter: undefined,
     sortField: undefined,
     sortOrder: undefined,
   });

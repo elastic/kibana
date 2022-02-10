@@ -12,6 +12,8 @@ import type {
   NamespaceTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
+  PitOrUndefined,
+  SearchAfterOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -38,9 +40,11 @@ interface FindExceptionListItemsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
+  pit: PitOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
+  searchAfter: SearchAfterOrUndefined;
 }
 
 export const findExceptionListsItem = async ({
@@ -49,7 +53,9 @@ export const findExceptionListsItem = async ({
   savedObjectsClient,
   filter,
   page,
+  pit,
   perPage,
+  searchAfter,
   sortField,
   sortOrder,
 }: FindExceptionListItemsOptions): Promise<FoundExceptionListItemSchema | null> => {
@@ -73,6 +79,8 @@ export const findExceptionListsItem = async ({
       filter: getExceptionListsItemFilter({ filter, listId, savedObjectType }),
       page,
       perPage,
+      pit,
+      searchAfter,
       sortField,
       sortOrder,
       type: savedObjectType,
@@ -109,7 +117,9 @@ interface FindValueListExceptionListsItems {
   valueListId: Id;
   savedObjectsClient: SavedObjectsClientContract;
   perPage: PerPageOrUndefined;
+  pit: PitOrUndefined;
   page: PageOrUndefined;
+  searchAfter: SearchAfterOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
 }
@@ -118,7 +128,9 @@ export const findValueListExceptionListItems = async ({
   valueListId,
   savedObjectsClient,
   page,
+  pit,
   perPage,
+  searchAfter,
   sortField,
   sortOrder,
 }: FindValueListExceptionListsItems): Promise<FoundExceptionListItemSchema | null> => {
@@ -127,6 +139,8 @@ export const findValueListExceptionListItems = async ({
     filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:"${escapedValueListId}") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:"${escapedValueListId}") `,
     page,
     perPage,
+    pit,
+    searchAfter,
     sortField,
     sortOrder,
     type: [exceptionListSavedObjectType, exceptionListAgnosticSavedObjectType],

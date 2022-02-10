@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectsClosePointInTimeResponse,
+  SavedObjectsOpenPointInTimeResponse,
+} from 'kibana/server';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -25,6 +30,7 @@ import type {
 } from '../extension_points';
 
 import {
+  ClosePointInTimeOptions,
   ConstructorOptions,
   CreateEndpointListItemOptions,
   CreateExceptionListItemOptions,
@@ -45,6 +51,7 @@ import {
   GetExceptionListSummaryOptions,
   ImportExceptionListAndItemsAsArrayOptions,
   ImportExceptionListAndItemsOptions,
+  OpenPointInTimeOptions,
   UpdateEndpointListItemOptions,
   UpdateExceptionListItemOptions,
   UpdateExceptionListOptions,
@@ -80,6 +87,8 @@ import {
   createExceptionsStreamFromNdjson,
   exceptionsChecksFromArray,
 } from './utils/import/create_exceptions_stream_logic';
+import { openPointInTime } from './open_point_in_time';
+import { closePointInTime } from './close_point_in_time';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -621,7 +630,9 @@ export class ExceptionListClient {
     listId,
     filter,
     perPage,
+    pit,
     page,
+    searchAfter,
     sortField,
     sortOrder,
     namespaceType,
@@ -637,6 +648,8 @@ export class ExceptionListClient {
           namespaceType,
           page,
           perPage,
+          pit,
+          searchAfter,
           sortField,
           sortOrder,
         },
@@ -650,7 +663,9 @@ export class ExceptionListClient {
       namespaceType,
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
     });
@@ -660,7 +675,9 @@ export class ExceptionListClient {
     listId,
     filter,
     perPage,
+    pit,
     page,
+    searchAfter,
     sortField,
     sortOrder,
     namespaceType,
@@ -676,6 +693,8 @@ export class ExceptionListClient {
           namespaceType,
           page,
           perPage,
+          pit,
+          searchAfter,
           sortField,
           sortOrder,
         },
@@ -689,7 +708,9 @@ export class ExceptionListClient {
       namespaceType,
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
     });
@@ -697,7 +718,9 @@ export class ExceptionListClient {
 
   public findValueListExceptionListItems = async ({
     perPage,
+    pit,
     page,
+    searchAfter,
     sortField,
     sortOrder,
     valueListId,
@@ -706,7 +729,9 @@ export class ExceptionListClient {
     return findValueListExceptionListItems({
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
       valueListId,
@@ -717,6 +742,8 @@ export class ExceptionListClient {
     filter,
     perPage,
     page,
+    pit,
+    searchAfter,
     sortField,
     sortOrder,
     namespaceType,
@@ -727,7 +754,9 @@ export class ExceptionListClient {
       namespaceType,
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
     });
@@ -745,6 +774,8 @@ export class ExceptionListClient {
     filter,
     perPage,
     page,
+    pit,
+    searchAfter,
     sortField,
     sortOrder,
   }: FindEndpointListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
@@ -756,7 +787,9 @@ export class ExceptionListClient {
       namespaceType: 'agnostic',
       page,
       perPage,
+      pit,
       savedObjectsClient,
+      searchAfter,
       sortField,
       sortOrder,
     });
@@ -863,6 +896,41 @@ export class ExceptionListClient {
       overwrite,
       savedObjectsClient,
       user,
+    });
+  };
+
+  /**
+   * Opens a point in time (PIT) for either exception lists or exception list items.
+   * See: https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
+   * @params namespaceType {string} "agnostic" or "single" depending on which namespace you are targeting
+   * @params options {Object} The saved object PIT options
+   * @return {SavedObjectsOpenPointInTimeResponse} The point in time (PIT)
+   */
+  public openPointInTime = async ({
+    namespaceType,
+    options,
+  }: OpenPointInTimeOptions): Promise<SavedObjectsOpenPointInTimeResponse> => {
+    const { savedObjectsClient } = this;
+    return openPointInTime({
+      namespaceType,
+      options,
+      savedObjectsClient,
+    });
+  };
+
+  /**
+   * Closes a point in time (PIT) for either exception lists or exception list items.
+   * See: https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
+   * @params pit {string} The point in time to close
+   * @return {SavedObjectsOpenPointInTimeResponse} The point in time (PIT)
+   */
+  public closePointInTime = async ({
+    pit,
+  }: ClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse> => {
+    const { savedObjectsClient } = this;
+    return closePointInTime({
+      pit,
+      savedObjectsClient,
     });
   };
 }

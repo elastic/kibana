@@ -43,7 +43,9 @@ export const getExceptionListItemIds = async ({
     namespaceType,
     page,
     perPage: PER_PAGE,
+    pit: undefined,
     savedObjectsClient,
+    searchAfter: undefined,
     sortField: 'tie_breaker_id',
     sortOrder: 'desc',
   });
@@ -59,7 +61,9 @@ export const getExceptionListItemIds = async ({
       namespaceType,
       page,
       perPage: PER_PAGE,
+      pit: undefined,
       savedObjectsClient,
+      searchAfter: undefined,
       sortField: 'tie_breaker_id',
       sortOrder: 'desc',
     });

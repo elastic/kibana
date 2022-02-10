@@ -54,7 +54,9 @@ export const exportExceptionListAndItems = async ({
       namespaceType: exceptionList.namespace_type,
       page: 1,
       perPage: 10000,
+      pit: undefined,
       savedObjectsClient,
+      searchAfter: undefined,
       sortField: 'exception-list.created_at',
       sortOrder: 'desc',
     });

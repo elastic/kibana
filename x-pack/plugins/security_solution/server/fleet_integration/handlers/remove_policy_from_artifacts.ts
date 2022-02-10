@@ -39,6 +39,8 @@ export const removePolicyFromArtifacts = async (
       namespaceType: ARTIFACT_LISTS_IDS_TO_REMOVE.map(() => 'agnostic'),
       page: currentPage,
       perPage: 50,
+      pit: undefined,
+      searchAfter: undefined,
       sortField: undefined,
       sortOrder: undefined,
     });

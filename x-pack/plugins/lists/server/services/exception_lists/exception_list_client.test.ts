@@ -212,6 +212,8 @@ describe('exception_list_client', () => {
             namespaceType: 'agnostic',
             page: 1,
             perPage: 1,
+            pit: undefined,
+            searchAfter: undefined,
             sortField: 'name',
             sortOrder: 'asc',
           });
@@ -229,6 +231,8 @@ describe('exception_list_client', () => {
             namespaceType: ['agnostic'],
             page: 1,
             perPage: 1,
+            pit: undefined,
+            searchAfter: undefined,
             sortField: 'name',
             sortOrder: 'asc',
           });

@@ -42,6 +42,8 @@ export * from './non_empty_nested_entries_array';
 export * from './os_type';
 export * from './page';
 export * from './per_page';
+export * from './pit';
+export * from './search_after';
 export * from './serializer';
 export * from './sort_field';
 export * from './sort_order';
