@@ -44,6 +44,10 @@ const getNavigationArguments = (
   path: string,
   deepLinkId: ICasesDeepLinkId
 ) => ({
+  /**
+   * TODO: Switch to deep links for the main application
+   * when https://github.com/elastic/kibana/issues/125235 is fixed
+   */
   ...(isMainApplication && { path }),
   ...(!isMainApplication && { deepLinkId }),
 });
