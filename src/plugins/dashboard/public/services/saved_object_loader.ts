@@ -12,9 +12,13 @@ import {
   SavedObjectsFindOptionsReference,
   SavedObjectReference,
 } from 'kibana/public';
-import { SavedObject } from '../types';
-import { StringUtils } from './helpers/string_utils';
+import { SavedObject } from '../../../saved_objects/public';
+import { upperFirst } from './string_utils';
 
+/**
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface SavedObjectLoaderFindOptions {
   size?: number;
   fields?: string[];
@@ -23,6 +27,8 @@ export interface SavedObjectLoaderFindOptions {
 
 /**
  * @deprecated
+ * @removeBy 8.0
+ *
  * The SavedObjectLoader class provides some convenience functions
  * to load and save one kind of saved objects (specified in the constructor).
  *
@@ -46,7 +52,7 @@ export class SavedObjectLoader {
 
     this.loaderProperties = {
       name: `${this.lowercaseType}s`,
-      noun: StringUtils.upperFirst(this.type),
+      noun: upperFirst(this.type),
       nouns: `${this.lowercaseType}s`,
     };
   }
