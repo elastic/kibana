@@ -29,7 +29,7 @@ import { EntityType } from '../../../../../../timelines/common';
 import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
 import { HostRisk } from '../../../../common/containers/hosts_risk/types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { EventDetailsBackToAlertDetailsLink } from './backToAlertsDetailsLink';
+import { EventDetailsBackToAlertDetailsLink } from './back_link';
 import { ACTION_OSQUERY } from '../../../../detections/components/take_action_dropdown/osqueryActionItem';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
