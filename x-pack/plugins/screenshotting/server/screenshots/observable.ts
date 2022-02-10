@@ -11,7 +11,7 @@ import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import type { Layout as ScreenshotModeLayout } from 'src/plugins/screenshot_mode/common';
 import type { ConditionalHeaders, HeadlessChromiumDriver } from '../browsers';
-import { getChromiumDisconnectedError } from '../browsers';
+import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
 import type { Layout } from '../layouts';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
@@ -107,12 +107,9 @@ interface PageSetupResults {
   error?: Error;
 }
 
-const DEFAULT_SCREENSHOT_CLIP_HEIGHT = 1200;
-const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
-
 const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
-  const height = dimensions?.height || DEFAULT_SCREENSHOT_CLIP_HEIGHT;
-  const width = dimensions?.width || DEFAULT_SCREENSHOT_CLIP_WIDTH;
+  const height = dimensions?.height || DEFAULT_VIEWPORT.height;
+  const width = dimensions?.width || DEFAULT_VIEWPORT.width;
 
   return [
     {
@@ -130,8 +127,7 @@ const getDefaultElementPosition = (dimensions: { height?: number; width?: number
  * provided by the browser.
  */
 const getDefaultViewPort = () => ({
-  height: DEFAULT_SCREENSHOT_CLIP_HEIGHT,
-  width: DEFAULT_SCREENSHOT_CLIP_WIDTH,
+  ...DEFAULT_VIEWPORT,
   zoom: 1,
 });
 
@@ -180,14 +176,14 @@ export class ScreenshotObservableHandler {
     const waitTimeout = this.options.timeouts.waitForElements;
 
     return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
-      mergeMap((itemsCount) => {
-        // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
+      mergeMap(async (itemsCount) => {
+        // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
         const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
 
-        return forkJoin([
-          driver.setViewport(viewport, this.logger),
-          waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout),
-        ]);
+        // Set the viewport allowing time for the browser to handle reflow and redraw
+        // before checking for readiness of visualizations.
+        await driver.setViewport(viewport, this.logger);
+        await waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout);
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
