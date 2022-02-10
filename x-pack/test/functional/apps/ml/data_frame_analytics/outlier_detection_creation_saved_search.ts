@@ -35,74 +35,74 @@ export default function ({ getService }: FtrProviderContext) {
 
         const dateNow = Date.now();
         const testDataList = [
-            {
-                suiteTitle: 'with filter',
-                jobType: 'outlier_detection',
-                jobId: `fq_saved_search_1_${dateNow}`,
-                jobDescription: "Outlier detection job based on a saved search with filter",
-                source: 'ft_farequote_filter',
-                get destinationIndex(): string {
-                    return `user-${this.jobId}`;
-                },
-                runtimeFields: {
-                    uppercase_airline: {
-                        type: 'keyword',
-                        script: 'emit(params._source.airline.toUpperCase())',
-                    },
-                },
-                modelMemory: '65mb',
-                createIndexPattern: true,
-                expected: {
-                    histogramCharts: [
-                        { chartAvailable: true, id: 'uppercase_airline', legend: '19 categories' },
-                        { chartAvailable: true, id: 'responsetime', legend: '4.25 - 10237.83' },
-                        { chartAvailable: true, id: 'airline', legend: '19 categories' },
-                    ],
-                    scatterplotMatrixColorsWizard: [
-                        // markers
-                        { color: '#52B398', percentage: 15 },
-                        // grey boilerplate
-                        { color: '#6A717D', percentage: 13 },
-                    ],
-                    scatterplotMatrixColorStatsResults: [
-                        // red markers
-                        { color: '#D98071', percentage: 1 },
-                        // tick/grid/axis, grey markers
-                        { color: '#6A717D', percentage: 12 },
-                        { color: '#D3DAE6', percentage: 8 },
-                        { color: '#98A1B3', percentage: 12 },
-                        // anti-aliasing
-                        { color: '#F5F7FA', percentage: 30 },
-                    ],
-                    runtimeFieldsEditorContent: [
-                        '{',
-                        '  "uppercase_airline": {',
-                        '    "type": "keyword",',
-                    ],
-                    row: {
-                        memoryStatus: 'ok',
-                        type: 'outlier_detection',
-                        status: 'stopped',
-                        progress: '100',
-                    },
-                    rowDetails: {
-                        jobDetails: [
-                            {
-                                section: 'state',
-                                expectedEntries: {
-                                    id: `fq_saved_search_1_${dateNow}`,
-                                    state: 'stopped',
-                                    data_counts:
-                                        '{"training_docs_count":1460,"test_docs_count":0,"skipped_docs_count":0}',
-                                    description:
-                                        'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
-                                },
-                            },
-                            { section: 'progress', expectedEntries: { Phase: '4/4' } },
-                        ],
-                    } as AnalyticsTableRowDetails,
-                },
-            },
+            // {
+            //     suiteTitle: 'with filter',
+            //     jobType: 'outlier_detection',
+            //     jobId: `fq_saved_search_1_${dateNow}`,
+            //     jobDescription: "Outlier detection job based on a saved search with filter",
+            //     source: 'ft_farequote_filter',
+            //     get destinationIndex(): string {
+            //         return `user-${this.jobId}`;
+            //     },
+            //     runtimeFields: {
+            //         uppercase_airline: {
+            //             type: 'keyword',
+            //             script: 'emit(params._source.airline.toUpperCase())',
+            //         },
+            //     },
+            //     modelMemory: '65mb',
+            //     createIndexPattern: true,
+            //     expected: {
+            //         histogramCharts: [
+            //             { chartAvailable: true, id: 'uppercase_airline', legend: '19 categories' },
+            //             { chartAvailable: true, id: 'responsetime', legend: '4.25 - 10237.83' },
+            //             { chartAvailable: true, id: 'airline', legend: '19 categories' },
+            //         ],
+            //         scatterplotMatrixColorsWizard: [
+            //             // markers
+            //             { color: '#52B398', percentage: 15 },
+            //             // grey boilerplate
+            //             { color: '#6A717D', percentage: 13 },
+            //         ],
+            //         scatterplotMatrixColorStatsResults: [
+            //             // red markers
+            //             { color: '#D98071', percentage: 1 },
+            //             // tick/grid/axis, grey markers
+            //             { color: '#6A717D', percentage: 12 },
+            //             { color: '#D3DAE6', percentage: 8 },
+            //             { color: '#98A1B3', percentage: 12 },
+            //             // anti-aliasing
+            //             { color: '#F5F7FA', percentage: 30 },
+            //         ],
+            //         runtimeFieldsEditorContent: [
+            //             '{',
+            //             '  "uppercase_airline": {',
+            //             '    "type": "keyword",',
+            //         ],
+            //         row: {
+            //             memoryStatus: 'ok',
+            //             type: 'outlier_detection',
+            //             status: 'stopped',
+            //             progress: '100',
+            //         },
+            //         rowDetails: {
+            //             jobDetails: [
+            //                 {
+            //                     section: 'state',
+            //                     expectedEntries: {
+            //                         id: `fq_saved_search_1_${dateNow}`,
+            //                         state: 'stopped',
+            //                         data_counts:
+            //                             '{"training_docs_count":1460,"test_docs_count":0,"skipped_docs_count":0}',
+            //                         description:
+            //                             'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
+            //                     },
+            //                 },
+            //                 { section: 'progress', expectedEntries: { Phase: '4/4' } },
+            //             ],
+            //         } as AnalyticsTableRowDetails,
+            //     },
+            // },
             {
                 suiteTitle: 'with lucene query',
                 jobType: 'outlier_detection',
