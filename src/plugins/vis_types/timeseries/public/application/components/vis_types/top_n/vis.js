@@ -86,7 +86,7 @@ function TopNVisualization(props) {
 
   if (model.drilldown_url) {
     params.onClick = (item) => {
-      const url = replaceVars(model.drilldown_url, {}, { key: item.label });
+      const url = replaceVars(model.drilldown_url, {}, { key: item.label }, { noEscape: true });
       const validatedUrl = coreStart.http.externalUrl.validateUrl(url);
       if (validatedUrl) {
         setAccessDeniedDrilldownUrl(null);
