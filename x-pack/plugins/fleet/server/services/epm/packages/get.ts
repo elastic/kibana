@@ -103,16 +103,14 @@ async function fetchRegistryPackageWithFallbackToBundledPackages(
   pkgName: string,
   pkgVersion: string
 ) {
-  try {
-    return Registry.fetchFindLatestPackage(pkgName);
-  } catch (error) {
+  return Registry.fetchFindLatestPackage(pkgName).catch(async (error) => {
     const bundledPackages = await getBundledPackages();
 
     const bundledPackage = bundledPackages.find(
       (b) => b.name === pkgName && b.version === pkgVersion
     );
 
-    // If we don't find a bundled package, reject with the original error
+    // If we don't find a bundled package, re-throw the original error
     if (!bundledPackage) {
       throw error;
     }
@@ -120,7 +118,7 @@ async function fetchRegistryPackageWithFallbackToBundledPackages(
       name: bundledPackage.name,
       version: bundledPackage.version,
     };
-  }
+  });
 }
 
 export async function getPackageInfo(options: {
