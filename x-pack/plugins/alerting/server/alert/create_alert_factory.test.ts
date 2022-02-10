@@ -8,19 +8,10 @@
 import sinon from 'sinon';
 import { Alert } from './alert';
 import { createAlertFactory } from './create_alert_factory';
+import { getRecoveredAlerts } from '../lib';
+
 jest.mock('../lib', () => ({
-  getRecoveredAlerts: jest.fn().mockReturnValue({
-    z: {
-      id: 'z',
-      state: { foo: true },
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-    },
-    y: {
-      id: 'y',
-      state: { foo: true },
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-    },
-  }),
+  getRecoveredAlerts: jest.fn(),
 }));
 
 let clock: sinon.SinonFakeTimers;
@@ -111,6 +102,18 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns recovery context functions when setsRecoveryContext is true', () => {
+    (getRecoveredAlerts as jest.Mock).mockReturnValueOnce({
+      z: {
+        id: 'z',
+        state: { foo: true },
+        meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+      },
+      y: {
+        id: 'y',
+        state: { foo: true },
+        meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+      },
+    });
     const alertFactory = createAlertFactory({
       alerts: {},
       canSetRecoveryContext: true,
@@ -124,11 +127,55 @@ describe('createAlertFactory()', () => {
       id: '1',
     });
 
-    const { getRecoveredAlerts } = alertFactory.done();
-    expect(getRecoveredAlerts).toBeDefined();
-    const recoveredAlerts = getRecoveredAlerts!();
+    const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
+    expect(getRecoveredAlertsFn).toBeDefined();
+    const recoveredAlerts = getRecoveredAlertsFn!();
     expect(Array.isArray(recoveredAlerts)).toBe(true);
     expect(recoveredAlerts.length).toEqual(2);
+  });
+
+  test('returns empty array if no recovered alerts', () => {
+    (getRecoveredAlerts as jest.Mock).mockReturnValueOnce({});
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      canSetRecoveryContext: true,
+    });
+    const result = alertFactory.create('1');
+    expect(result).toEqual({
+      meta: {},
+      state: {},
+      context: {},
+      scheduledExecutionOptions: undefined,
+      id: '1',
+    });
+
+    const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
+    expect(getRecoveredAlertsFn).toBeDefined();
+    const recoveredAlerts = getRecoveredAlertsFn!();
+    expect(Array.isArray(recoveredAlerts)).toBe(true);
+    expect(recoveredAlerts.length).toEqual(0);
+  });
+
+  test('returns empty array if getRecoveredAlerts returns null', () => {
+    (getRecoveredAlerts as jest.Mock).mockReturnValueOnce(null);
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      canSetRecoveryContext: true,
+    });
+    const result = alertFactory.create('1');
+    expect(result).toEqual({
+      meta: {},
+      state: {},
+      context: {},
+      scheduledExecutionOptions: undefined,
+      id: '1',
+    });
+
+    const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
+    expect(getRecoveredAlertsFn).toBeDefined();
+    const recoveredAlerts = getRecoveredAlertsFn!();
+    expect(Array.isArray(recoveredAlerts)).toBe(true);
+    expect(recoveredAlerts.length).toEqual(0);
   });
 
   test('returns undefined recovery context functions when setsRecoveryContext is false', () => {
@@ -145,7 +192,7 @@ describe('createAlertFactory()', () => {
       id: '1',
     });
 
-    const { getRecoveredAlerts } = alertFactory.done();
-    expect(getRecoveredAlerts).not.toBeDefined();
+    const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
+    expect(getRecoveredAlertsFn).not.toBeDefined();
   });
 });

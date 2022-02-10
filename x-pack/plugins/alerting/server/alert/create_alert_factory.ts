@@ -54,7 +54,7 @@ export function createAlertFactory<
         ? {
             getRecoveredAlerts: () => {
               const recoveredAlerts = getRecoveredAlerts(alerts, initialAlertIds);
-              return Object.keys(recoveredAlerts).map(
+              return Object.keys(recoveredAlerts ?? []).map(
                 (alertId: string) => recoveredAlerts[alertId]
               );
             },
