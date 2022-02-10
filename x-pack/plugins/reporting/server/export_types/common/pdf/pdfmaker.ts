@@ -23,7 +23,7 @@ import {
 } from './constants';
 import { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
 
-import type { GeneratePdfRequest } from './worker';
+import type { GeneratePdfRequest, GeneratePdfResponse } from './worker';
 import { getWorkerInstance } from './worker_singleton';
 
 export class PdfMaker {
@@ -192,13 +192,16 @@ export class PdfMaker {
       workerInstance.postMessage(generatePdfRequest, [port2]);
 
       // We expect one message from the work container the PDF buffer.
-      this.workerPort!.on('message', (pdfBuffer: Uint8Array) => {
+      this.workerPort!.on('message', ({ error, data }: GeneratePdfResponse) => {
         workerInstance.off('error', workerErrorHandler);
-        if (!pdfBuffer) {
+        if (error) {
+          reject(new Error(`PDF worker returned the following error: ${error}`));
+          return;
+        } else if (!data) {
           reject(new Error(`Worker did not generate a PDF!`));
           return;
         }
-        resolve(pdfBuffer);
+        resolve(data);
       });
     }).finally(() => {
       this.workerPort?.close();
