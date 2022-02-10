@@ -25,6 +25,6 @@ while read -r config; do
 
   ((i=i+1))
 # uses heredoc to avoid the while loop being in a sub-shell thus unable to overwrite exitCode
-done <<< "$(find src x-pack packages -name jest.config.js -not -path "*/__fixtures__/*" | sort)"
+done <<< "$(node .buildkite/scripts/steps/test/jest_sorted.js)"
 
 exit $exitCode
