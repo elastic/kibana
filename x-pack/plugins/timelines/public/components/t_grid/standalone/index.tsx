@@ -86,7 +86,7 @@ export interface TGridStandaloneProps {
   } | null;
   afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
-  dataViewId: string | null;
+  dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
