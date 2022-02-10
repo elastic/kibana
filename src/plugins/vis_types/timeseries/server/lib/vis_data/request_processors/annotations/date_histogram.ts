@@ -23,10 +23,13 @@ export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
   annotationIndex,
   capabilities,
   uiSettings,
+  getMetaParams,
 }) => {
   return (next) => async (doc) => {
+    const maxBarsUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const timeField = annotation.time_field || annotationIndex.indexPattern?.timeFieldName || '';
+    const { interval, maxBars } = await getMetaParams();
 
     if (panel.use_kibana_indexes) {
       validateField(timeField, annotationIndex);
@@ -34,9 +37,9 @@ export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
 
     const { bucketSize, intervalString } = getBucketSize(
       req,
-      'auto',
+      interval,
       capabilities,
-      barTargetUiSettings
+      maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
     );
     const { from, to } = getTimerange(req);
     const { timezone } = capabilities;
