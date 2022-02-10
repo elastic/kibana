@@ -16,12 +16,13 @@ export const Blocklist = memo(() => {
   // for now, just using Event Filters
   const eventFiltersApiClient = EventFiltersApiClient.getInstance(http);
 
-  // FIXME: Implement labels prop for ArtifactListPage for blocklist
-
   return (
     <ArtifactListPage
       apiClient={eventFiltersApiClient}
-      ArtifactFormComponent={() => <h1>{'TODO: Form here'}</h1>}
+      ArtifactFormComponent={() => <h1>{'TODO: Form here'}</h1>} // FIXME: IMplement create/edit form
+      labels={{
+        pageTitle: 'Blocklist', // FIXME: Implement labels prop overrides for blocklist
+      }}
     />
   );
 });
