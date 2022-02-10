@@ -15,7 +15,6 @@ import {
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
-  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -27,7 +26,6 @@ export async function getErrorGroupMainStatistics({
   serviceName,
   setup,
   environment,
-  transactionType,
   sortField,
   sortDirection = 'desc',
   start,
@@ -37,7 +35,6 @@ export async function getErrorGroupMainStatistics({
   serviceName: string;
   setup: Setup;
   environment: string;
-  transactionType: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
   start: number;
@@ -66,7 +63,6 @@ export async function getErrorGroupMainStatistics({
           bool: {
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -82,7 +78,6 @@ export async function getErrorGroupMainStatistics({
             },
             aggs: {
               sample: {
-                // change to top_metrics
                 top_hits: {
                   size: 1,
                   _source: [
