@@ -16,7 +16,7 @@ export type MlSavedObjectType =
   | typeof ML_MODULE_SAVED_OBJECT_TYPE;
 
 export interface SavedObjectResult {
-  [id: string]: { success: boolean; type: JobType | 'trained-models'; error?: ErrorType };
+  [id: string]: { success: boolean; type: JobType | 'trained-model'; error?: ErrorType };
 }
 
 export interface SyncSavedObjectResponse {

@@ -105,10 +105,10 @@ export function syncSavedObjectsFactory(
       }
     }
 
-    for (const model of status.jobs['trained-models']) {
+    for (const model of status.jobs['trained-model']) {
       if (model.checks.savedObjectExits === false) {
         const { modelId } = model;
-        const type = 'trained-models';
+        const type = 'trained-model';
         if (simulate === true) {
           results.savedObjectsCreated[modelId] = { success: true, type };
         } else {
@@ -193,10 +193,10 @@ export function syncSavedObjectsFactory(
       }
     }
 
-    for (const model of status.savedObjects['trained-models']) {
+    for (const model of status.savedObjects['trained-model']) {
       if (model.checks.trainedModelExists === false) {
         const { modelId, namespaces } = model;
-        const type = 'trained-models';
+        const type = 'trained-model';
         if (simulate === true) {
           results.savedObjectsDeleted[modelId] = { success: true, type };
         } else {
@@ -352,7 +352,7 @@ export function syncSavedObjectsFactory(
       }
     });
 
-    const models = status.jobs['trained-models'].filter(
+    const models = status.jobs['trained-model'].filter(
       ({ checks }) => checks.savedObjectExits === false
     );
     const modelObjects: TrainedModelObject[] = [];
@@ -420,13 +420,13 @@ export function syncSavedObjectsFactory(
     return results;
   }
 
-  async function isSyncNeeded(jobType?: JobType | 'trained-models') {
+  async function isSyncNeeded(jobType?: JobType | 'trained-model') {
     const { jobs, datafeeds, trainedModels } = await initSavedObjects(true);
     const missingJobs =
       jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));
 
     const missingModels =
-      trainedModels.length > 0 && (jobType === undefined || jobType === 'trained-models');
+      trainedModels.length > 0 && (jobType === undefined || jobType === 'trained-model');
 
     const missingDatafeeds = datafeeds.length > 0 && jobType !== 'data-frame-analytics';
 

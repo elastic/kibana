@@ -66,7 +66,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       query: { simulate },
     });
   },
-  syncCheck(jobType?: JobType | 'trained-models') {
+  syncCheck(jobType?: JobType | 'trained-model') {
     const body = JSON.stringify({ jobType });
     return httpService.http<SyncCheckResponse>({
       path: `${basePath()}/saved_objects/sync_check`,

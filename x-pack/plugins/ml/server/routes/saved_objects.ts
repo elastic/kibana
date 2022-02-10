@@ -148,7 +148,7 @@ export function savedObjectsRoutes(
       try {
         const { jobType } = request.body;
         const { isSyncNeeded } = syncSavedObjectsFactory(client, jobSavedObjectService);
-        const result = await isSyncNeeded(jobType as JobType | 'trained-models');
+        const result = await isSyncNeeded(jobType as JobType | 'trained-model');
 
         return response.ok({
           body: { result },
@@ -353,7 +353,7 @@ export function savedObjectsRoutes(
       try {
         const { checkStatus } = checksFactory(client, jobSavedObjectService);
         const savedObjects = (await checkStatus()).savedObjects;
-        const modelStatus = savedObjects['trained-models']
+        const modelStatus = savedObjects['trained-model']
           .filter((s) => s.checks.trainedModelExists)
           .reduce(
             (acc, cur) => {

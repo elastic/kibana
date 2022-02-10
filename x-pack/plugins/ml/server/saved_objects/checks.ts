@@ -56,12 +56,12 @@ export interface StatusResponse {
   savedObjects: {
     'anomaly-detector': JobSavedObjectStatus[];
     'data-frame-analytics': JobSavedObjectStatus[];
-    'trained-models': TrainedModelSavedObjectStatus[];
+    'trained-model': TrainedModelSavedObjectStatus[];
   };
   jobs: {
     'anomaly-detector': JobStatus[];
     'data-frame-analytics': JobStatus[];
-    'trained-models': TrainedModelStatus[];
+    'trained-model': TrainedModelStatus[];
   };
 }
 
@@ -253,12 +253,12 @@ export function checksFactory(
         'data-frame-analytics': jobSavedObjectsStatus.filter(
           ({ type }) => type === 'data-frame-analytics'
         ),
-        'trained-models': modelSavedObjectsStatus,
+        'trained-model': modelSavedObjectsStatus,
       },
       jobs: {
         'anomaly-detector': anomalyDetectorsStatus,
         'data-frame-analytics': dataFrameAnalyticsStatus,
-        'trained-models': modelsStatus,
+        'trained-model': modelsStatus,
       },
     };
   }

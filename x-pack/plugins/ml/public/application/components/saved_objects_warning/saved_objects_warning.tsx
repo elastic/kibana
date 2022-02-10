@@ -13,7 +13,7 @@ import { useMlApiContext } from '../../contexts/kibana';
 import { JobSpacesSyncFlyout } from '../../components/job_spaces_sync';
 import { checkPermission } from '../../capabilities/check_capabilities';
 
-type SOType = JobType | 'trained-models';
+type SOType = JobType | 'trained-model';
 
 interface Props {
   jobType?: SOType;

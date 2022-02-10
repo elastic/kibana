@@ -126,7 +126,7 @@ function useTabs(isMlEnabledInSpace: boolean, spacesApi: SpacesPluginStart | und
       },
       {
         'data-test-subj': 'mlStackManagementJobsListAnalyticsTab',
-        id: 'trained-models',
+        id: 'trained-model',
         name: i18n.translate('xpack.ml.management.jobsList.trainedModelsTab', {
           defaultMessage: 'Trained models',
         }),
@@ -170,7 +170,7 @@ export const JobsListPage: FC<{
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const tabs = useTabs(isMlEnabledInSpace, spacesApi);
-  const [currentTabId, setCurrentTabId] = useState<JobType | 'trained-models'>('anomaly-detector');
+  const [currentTabId, setCurrentTabId] = useState<JobType | 'trained-model'>('anomaly-detector');
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
 
@@ -311,7 +311,7 @@ export const JobsListPage: FC<{
                       <ExportJobsFlyout
                         isDisabled={false}
                         currentTab={
-                          currentTabId === 'trained-models' ? 'anomaly-detector' : currentTabId
+                          currentTabId === 'trained-model' ? 'anomaly-detector' : currentTabId
                         }
                       />
                     </EuiFlexItem>

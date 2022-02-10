@@ -755,7 +755,7 @@ export const ModelsList: FC<Props> = ({
       {isManagementTable ? null : (
         <>
           <SavedObjectsWarning
-            jobType="trained-models"
+            jobType="trained-model"
             onCloseFlyout={fetchModelsData}
             forceRefresh={isLoading}
           />
