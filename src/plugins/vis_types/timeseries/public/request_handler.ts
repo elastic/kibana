@@ -22,6 +22,7 @@ interface MetricsRequestHandlerParams {
   searchSessionId?: string;
   executionContext?: KibanaExecutionContext;
   inspectorAdapters?: Adapters;
+  expressionAbortSignal: AbortSignal;
 }
 
 export const metricsRequestHandler = async ({
@@ -31,10 +32,17 @@ export const metricsRequestHandler = async ({
   searchSessionId,
   executionContext,
   inspectorAdapters,
+  expressionAbortSignal,
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
   const config = getUISettings();
   const data = getDataStart();
   const theme = getCoreStart().theme;
+
+  const abortController = new AbortController();
+
+  expressionAbortSignal.onabort = function () {
+    abortController.abort();
+  };
 
   const timezone = getTimezone(config);
   const uiStateObj = uiState[visParams.type] ?? {};
@@ -45,9 +53,7 @@ export const metricsRequestHandler = async ({
     const untrackSearch =
       dataSearch.session.isCurrentSession(searchSessionId) &&
       dataSearch.session.trackSearch({
-        abort: () => {
-          // TODO: support search cancellations
-        },
+        abort: () => abortController.abort(),
       });
 
     try {
@@ -68,6 +74,7 @@ export const metricsRequestHandler = async ({
           }),
         }),
         context: executionContext,
+        signal: abortController.signal,
       });
 
       inspectorAdapters?.requests?.reset();

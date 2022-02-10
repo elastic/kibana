@@ -65,9 +65,16 @@ export const getTimelionVisualizationConfig = (
       required: false,
     },
   },
-  async fn(input, args, { getSearchSessionId, getExecutionContext, variables }) {
+  async fn(
+    input,
+    args,
+    { getSearchSessionId, getExecutionContext, variables, abortSignal: expressionAbortSignal }
+  ) {
     const { getTimelionRequestHandler } = await import('./async_services');
-    const timelionRequestHandler = getTimelionRequestHandler(dependencies);
+    const timelionRequestHandler = getTimelionRequestHandler({
+      ...dependencies,
+      expressionAbortSignal,
+    });
 
     const visParams = {
       expression: args.expression,
