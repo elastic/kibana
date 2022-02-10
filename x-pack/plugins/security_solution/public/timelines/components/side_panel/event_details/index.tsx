@@ -24,6 +24,7 @@ import {
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
+import { OsqueryEventDetailsFooter } from '../../osquery/footer';
 import { EntityType } from '../../../../../../timelines/common';
 import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
 import { HostRisk } from '../../../../common/containers/hosts_risk/types';
@@ -250,17 +251,47 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     timelineId,
   ]);
 
+  const renderFooter = useMemo(() => {
+    const handlePanelChange = (panelType: ACTIVE_PANEL | null) => {
+      if (activePanel === ACTIVE_PANEL.OSQUERY && panelType === null) {
+        showAlertDetails();
+      } else {
+        setActivePanel(panelType);
+      }
+    };
+    switch (activePanel) {
+      case ACTIVE_PANEL.OSQUERY:
+        return <OsqueryEventDetailsFooter handlePanelChange={handlePanelChange} />;
+      default:
+        return (
+          <EventDetailsFooter
+            detailsData={detailsData}
+            detailsEcsData={ecsData}
+            expandedEvent={expandedEvent}
+            handleOnEventClosed={handleOnEventClosed}
+            isHostIsolationPanelOpen={activePanel === ACTIVE_PANEL.HOST_ISOLATION}
+            loadingEventDetails={loading}
+            onAddIsolationStatusClick={showHostIsolationPanel}
+            timelineId={timelineId}
+            handlePanelChange={handlePanelChange}
+          />
+        );
+    }
+  }, [
+    activePanel,
+    detailsData,
+    ecsData,
+    expandedEvent,
+    handleOnEventClosed,
+    loading,
+    showAlertDetails,
+    showHostIsolationPanel,
+    timelineId,
+  ]);
+
   if (!expandedEvent?.eventId) {
     return null;
   }
-
-  const handlePanelChange = (panelType: ACTIVE_PANEL | null) => {
-    if (activePanel === ACTIVE_PANEL.OSQUERY && panelType === null) {
-      showAlertDetails();
-    } else {
-      setActivePanel(panelType);
-    }
-  };
 
   return isFlyoutView ? (
     <>
@@ -274,18 +305,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       )}
       <StyledEuiFlyoutBody>{renderFlyoutBody}</StyledEuiFlyoutBody>
 
-      <EventDetailsFooter
-        detailsData={detailsData}
-        detailsEcsData={ecsData}
-        expandedEvent={expandedEvent}
-        handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={activePanel === ACTIVE_PANEL.HOST_ISOLATION}
-        loadingEventDetails={loading}
-        onAddIsolationStatusClick={showHostIsolationPanel}
-        timelineId={timelineId}
-        handlePanelChange={handlePanelChange}
-        preventTakeActionDropdown={activePanel === ACTIVE_PANEL.OSQUERY}
-      />
+      {renderFooter}
     </>
   ) : (
     <>

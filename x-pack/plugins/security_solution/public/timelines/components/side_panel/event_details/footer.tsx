@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
@@ -37,7 +36,6 @@ interface EventDetailsFooterProps {
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   timelineId: string;
   handlePanelChange: (type: ACTIVE_PANEL | null) => void;
-  preventTakeActionDropdown: boolean;
 }
 
 interface AddExceptionModalWrapperData {
@@ -60,7 +58,6 @@ export const EventDetailsFooterComponent = React.memo(
     globalQuery,
     timelineQuery,
     handlePanelChange,
-    preventTakeActionDropdown,
   }: EventDetailsFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
       () =>
@@ -114,13 +111,6 @@ export const EventDetailsFooterComponent = React.memo(
       useEventFilterModal();
 
     const renderFooterBody = useMemo(() => {
-      if (preventTakeActionDropdown) {
-        return (
-          <EuiButtonEmpty onClick={() => handlePanelChange(null)}>
-            <FormattedMessage id="xpack.securitySolution.footer.cancel" defaultMessage="Cancel" />
-          </EuiButtonEmpty>
-        );
-      }
       return (
         detailsEcsData && (
           <TakeActionDropdown
@@ -150,7 +140,6 @@ export const EventDetailsFooterComponent = React.memo(
       onAddEventFilterClick,
       onAddExceptionTypeClick,
       onAddIsolationStatusClick,
-      preventTakeActionDropdown,
       refetchAll,
       timelineId,
     ]);

@@ -16,11 +16,13 @@ interface IProps {
 
 export const EventDetailsBackToAlertDetailsLink: React.FC<IProps> = ({ primaryText, onClick }) => {
   return (
+    <>
       <EuiButtonEmpty iconType="arrowLeft" iconSide="left" flush="left" onClick={onClick}>
         <EuiText size="xs">
           <p>{ALERT_DETAILS}</p>
         </EuiText>
       </EuiButtonEmpty>
       <EuiTitle>{primaryText}</EuiTitle>
+    </>
   );
 };
