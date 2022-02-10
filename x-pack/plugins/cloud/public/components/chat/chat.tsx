@@ -70,6 +70,7 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
     visibility: ${isReady ? 'visible' : 'hidden'};
     z-index: ${euiThemeVars.euiZMaskBelowHeader - 1};
 
+    &:focus [name='cloudChatHide'],
     &:hover [name='cloudChatHide'] {
       visibility: visible;
     }
