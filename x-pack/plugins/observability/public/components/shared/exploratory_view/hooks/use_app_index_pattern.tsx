@@ -44,7 +44,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
   const [hasAppData, setHasAppData] = useState<HasAppDataState>({} as HasAppDataState);
 
   const {
-    services: { data },
+    services: { dataViews },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const { indexPatterns: indexPatternsList } = useExploratoryView();
@@ -83,7 +83,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
 
           if (hasDataT && indices) {
-            const obsvIndexP = new ObservabilityDataViews(data);
+            const obsvIndexP = new ObservabilityDataViews(dataViews);
             const indPattern = await obsvIndexP.getDataView(dataType, indices);
 
             setIndexPatterns((prevState) => ({ ...prevState, [dataType]: indPattern }));
@@ -100,7 +100,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
         }
       }
     },
-    [data, hasAppData, indexPatternsList, loading]
+    [dataViews, hasAppData, indexPatternsList, loading]
   );
 
   return (
