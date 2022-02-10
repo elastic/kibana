@@ -23,7 +23,11 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { ActionConnector } from '../../../common/api';
+import {
+  ActionConnector,
+  CommentRequestUserType,
+  CommentRequestAlertType,
+} from '../../../common/api';
 import { Case } from '../../containers/types';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
@@ -51,6 +55,8 @@ const MySpinner = styled(EuiLoadingSpinner)`
   left: 50%;
   z-index: 99;
 `;
+export type SupportedCreateCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
+export type CreateCaseAttachment = SupportedCreateCaseAttachment[];
 
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
@@ -62,6 +68,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   onSuccess: (theCase: Case) => Promise<void>;
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
+  attachments?: CreateCaseAttachment;
 }
 
 const empty: ActionConnector[] = [];
@@ -157,9 +164,20 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
 CreateCaseFormFields.displayName = 'CreateCaseFormFields';
 
 export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
-  ({ withSteps = true, afterCaseCreated, onCancel, onSuccess, timelineIntegration }) => (
+  ({
+    withSteps = true,
+    afterCaseCreated,
+    onCancel,
+    onSuccess,
+    timelineIntegration,
+    attachments,
+  }) => (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-      <FormContext afterCaseCreated={afterCaseCreated} onSuccess={onSuccess}>
+      <FormContext
+        afterCaseCreated={afterCaseCreated}
+        onSuccess={onSuccess}
+        attachments={attachments}
+      >
         <CreateCaseFormFields
           connectors={empty}
           isLoadingConnectors={false}
