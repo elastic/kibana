@@ -24,7 +24,6 @@ import { InlineEditableTable } from '../../../../../shared/tables/inline_editabl
 import { SourceLogic } from '../../source_logic';
 
 import { IndexingRulesTable } from './indexing_rules_table';
-
 import { SynchronizationLogic } from './synchronization_logic';
 
 describe('IndexingRulesTable', () => {
