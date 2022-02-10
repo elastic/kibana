@@ -13,6 +13,15 @@ import {
 } from 'src/core/server';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import {
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  SIGNALS_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
 import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -265,6 +274,10 @@ export class TelemetryReceiver {
     };
   }
 
+  /**
+   * Gets the elastic rules which are the rules that have immutable set to true and are of a particular rule type
+   * @returns The elastic rules
+   */
   public async fetchDetectionRules() {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
@@ -278,15 +291,38 @@ export class TelemetryReceiver {
       body: {
         query: {
           bool: {
-            filter: [
-              { term: { 'alert.alertTypeId': 'siem.signals' } },
-              { term: { 'alert.params.immutable': true } },
+            must: [
+              {
+                bool: {
+                  filter: {
+                    terms: {
+                      'alert.alertTypeId': [
+                        SIGNALS_ID,
+                        EQL_RULE_TYPE_ID,
+                        ML_RULE_TYPE_ID,
+                        QUERY_RULE_TYPE_ID,
+                        SAVED_QUERY_RULE_TYPE_ID,
+                        INDICATOR_RULE_TYPE_ID,
+                        THRESHOLD_RULE_TYPE_ID,
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                bool: {
+                  filter: {
+                    terms: {
+                      'alert.params.immutable': ['true'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
       },
     };
-
     return this.esClient.search<RuleSearchResult>(query);
   }
 

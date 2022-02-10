@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
-import { MetricExpressionParams, Aggregators } from '../types';
-import { createPercentileAggregation } from './create_percentile_aggregation';
 import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
+import { createPercentileAggregation } from './create_percentile_aggregation';
 
 const COMPOSITE_RESULTS_PER_PAGE = 100;
 

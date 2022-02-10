@@ -50,12 +50,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
+  isUpdate?: boolean;
 }> = memo(
   ({
     agentPolicy,
     packageInfo,
     packagePolicy,
     integrationToEnable,
+    isUpdate,
     updatePackagePolicy,
     validationResults,
     submitAttempted,
@@ -88,7 +90,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Update package policy's package and agent policy info
     useEffect(() => {
-      if (isLoadingPackagePolicies) {
+      if (isUpdate || isLoadingPackagePolicies) {
         return;
       }
       const pkg = packagePolicy.package;
@@ -133,6 +135,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         });
       }
     }, [
+      isUpdate,
       packagePolicy,
       agentPolicy,
       packageInfo,

@@ -24,7 +24,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
-import { splitPkgKey } from '../../../../../../common';
+import { PLUGIN_ID, splitPkgKey } from '../../../../../../common';
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -174,17 +174,17 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       if (updatedAgentPolicy) {
         setAgentPolicy(updatedAgentPolicy);
         if (packageInfo) {
-          setFormState('VALID');
+          setHasAgentPolicyError(false);
         }
       } else {
-        setFormState('INVALID');
+        setHasAgentPolicyError(true);
         setAgentPolicy(undefined);
       }
 
       // eslint-disable-next-line no-console
       console.debug('Agent policy updated', updatedAgentPolicy);
     },
-    [packageInfo, setAgentPolicy, setFormState]
+    [packageInfo, setAgentPolicy]
   );
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
@@ -227,6 +227,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       const hasAgentPolicy = newPackagePolicy.policy_id && newPackagePolicy.policy_id !== '';
       if (hasPackage && hasAgentPolicy && !hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
@@ -315,7 +317,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             mappingOptions: routeState.onSaveQueryParams,
             paramsToApply,
           });
-          navigateToApp(appId, { ...options, path: pathWithQueryString });
+
+          // In the case of a new policy creation, we always navigate to the Fleet agent policy details page
+          // for the newly-created policy
+          if (wasNewAgentPolicyCreated) {
+            navigateToApp(PLUGIN_ID, { ...options, path: pathWithQueryString });
+          } else {
+            navigateToApp(appId, { ...options, path: pathWithQueryString });
+          }
         } else {
           navigateToApp(...routeState.onSaveNavigateTo);
         }
