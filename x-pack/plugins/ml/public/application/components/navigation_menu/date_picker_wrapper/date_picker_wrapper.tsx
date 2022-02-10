@@ -68,7 +68,7 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
   mlTimefilterRefresh$.next({ lastRefresh: Date.now(), ...(timeRange ? { timeRange } : {}) });
 }
 
-const DEFAULT_REFRESH_INTERVAL_MS = 10000;
+const DEFAULT_REFRESH_INTERVAL_MS = 5000;
 
 export const DatePickerWrapper: FC = () => {
   const { services } = useMlKibana();
@@ -142,7 +142,7 @@ export const DatePickerWrapper: FC = () => {
               >
                 <FormattedMessage
                   id="xpack.ml.pageRefreshResetButton"
-                  defaultMessage="Reset to {defaultInterval}"
+                  defaultMessage="Set to {defaultInterval}"
                   values={{
                     defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
                   }}
