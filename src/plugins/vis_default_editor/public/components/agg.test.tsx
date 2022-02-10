@@ -171,9 +171,9 @@ describe('DefaultEditorAgg component', () => {
 
     it('should not have actions', () => {
       const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
-      const actions = shallow(comp.prop('extraAction'));
+      const actions = comp.prop('extraAction');
 
-      expect(actions.children().exists()).toBeFalsy();
+      expect(actions).toBeNull();
     });
 
     it('should have disable and remove actions', () => {

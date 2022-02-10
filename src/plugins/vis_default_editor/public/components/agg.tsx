@@ -219,19 +219,23 @@ function DefaultEditorAgg({
         dataTestSubj: 'removeDimensionBtn',
       });
     }
-    return actionIcons.map((icon) => (
-      <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
-        <EuiButtonIcon
-          disabled={icon.disabled}
-          iconType={icon.type}
-          color={icon.color as EuiButtonIconProps['color']}
-          onClick={icon.onClick}
-          aria-label={icon.tooltip}
-          data-test-subj={icon.dataTestSubj}
-          {...(icon.id === 'dragHandle' ? dragHandleProps : {})}
-        />
-      </EuiToolTip>
-    ));
+    return actionIcons.length ? (
+      <>
+        {actionIcons.map((icon) => (
+          <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
+            <EuiButtonIcon
+              disabled={icon.disabled}
+              iconType={icon.type}
+              color={icon.color as EuiButtonIconProps['color']}
+              onClick={icon.onClick}
+              aria-label={icon.tooltip}
+              data-test-subj={icon.dataTestSubj}
+              {...(icon.id === 'dragHandle' ? dragHandleProps : {})}
+            />
+          </EuiToolTip>
+        ))}
+      </>
+    ) : null;
   };
 
   const buttonContent = (

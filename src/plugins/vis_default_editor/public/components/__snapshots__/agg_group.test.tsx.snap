@@ -23,6 +23,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
     >
       <EuiDraggable
         customDragHandle={true}
+        disableInteractiveElementBlocking={true}
         draggableId="agg_group_dnd_metrics_1"
         index={0}
         key="1"
@@ -31,6 +32,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
       </EuiDraggable>
       <EuiDraggable
         customDragHandle={true}
+        disableInteractiveElementBlocking={true}
         draggableId="agg_group_dnd_metrics_3"
         index={1}
         key="3"
