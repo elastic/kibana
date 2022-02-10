@@ -112,14 +112,12 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
       },
       [exceptionItem, onDeleteExceptionItem, exceptionItemIndex]
     );
-
-    const entries = useMemo(
-      (): FormattedBuilderEntry[] =>
-        indexPattern != null && exceptionItem.entries.length > 0
-          ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries)
-          : [],
-      [exceptionItem.entries, indexPattern]
-    );
+    const entries = useMemo((): FormattedBuilderEntry[] => {
+      const hasIndexPatternAndEntries = indexPattern != null && exceptionItem.entries.length > 0;
+      return hasIndexPatternAndEntries
+        ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries)
+        : [];
+    }, [exceptionItem.entries, indexPattern]);
 
     return (
       <EuiFlexItem>

@@ -120,3 +120,22 @@ The `onChange` handler is passed selected `string[]`.
   onChange={handleFieldMatchAnyValueChange}
 />
 ```
+
+## AutocompleteFieldWildcardComponent
+
+This component can be used to allow users to select a single value. It uses the autocomplete hook to display any autocomplete options based on the passed in `indexPattern`, but also allows a user to add their own value.
+
+The `onChange` handler is passed selected `string[]`.
+
+```js
+<AutocompleteFieldWildcardComponent
+  placeholder={i18n.FIELD_VALUE_PLACEHOLDER}
+  selectedField={selectedField}
+  selectedValue={values}
+  isDisabled={false}
+  isLoading={isLoading}
+  isClearable={false}
+  indexPattern={indexPattern}
+  onChange={handleFieldMatchAnyValueChange}
+/>
+```
