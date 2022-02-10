@@ -872,14 +872,4 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
-  {
-    key: 'windows.advanced.process_handle',
-    first_supported_version: '8.1',
-    documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.process_handle',
-      {
-        defaultMessage: 'Description here. Default: true',
-      }
-    ),
-  },
 ];
