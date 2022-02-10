@@ -11,6 +11,12 @@ import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../com
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
+export type CallbackTypes = {
+  onSuccess?: (foundExceptions: FoundExceptionListItemSchema) => void;
+  onError?: (error?: ServerApiError) => void;
+  onSettled?: () => void;
+};
+
 export function useListArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   searcheableFields: string[],
@@ -24,9 +30,13 @@ export function useListArtifact(
     page: MANAGEMENT_DEFAULT_PAGE,
     perPage: MANAGEMENT_DEFAULT_PAGE_SIZE,
     policies: [],
-  }
+  },
+  callbacks: CallbackTypes = {},
+  customQueryOptions = {}
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const { filter, page, perPage, policies } = options;
+
+  const { onSuccess = () => {}, onError = () => {}, onSettled = () => {} } = callbacks;
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['list', exceptionListApiClient, options],
@@ -45,6 +55,10 @@ export function useListArtifact(
       refetchOnWindowFocus: false,
       refetchOnMount: true,
       keepPreviousData: true,
+      onSuccess,
+      onError,
+      onSettled,
+      ...customQueryOptions,
     }
   );
 }

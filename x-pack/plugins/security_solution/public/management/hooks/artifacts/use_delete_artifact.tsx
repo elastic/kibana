@@ -9,31 +9,29 @@ import { useQueryClient, useMutation } from 'react-query';
 import { ServerApiError } from '../../../common/types';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
+export type CallbackTypes = {
+  onSuccess?: (updatedException: ExceptionListItemSchema) => void;
+  onError?: (error?: ServerApiError) => void;
+  onSettled?: () => void;
+};
+
 export function useDeleteArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  callbacks: {
-    onDeleteSuccess?: (deletedException: ExceptionListItemSchema) => void;
-    onDeleteError?: (error?: ServerApiError) => void;
-    onSettledCallback?: () => void;
-  } = {}
+  callbacks: CallbackTypes = {}
 ) {
   const queryClient = useQueryClient();
-  const {
-    onDeleteSuccess = () => {},
-    onDeleteError = () => {},
-    onSettledCallback = () => {},
-  } = callbacks;
+  const { onSuccess = () => {}, onError = () => {}, onSettled = () => {} } = callbacks;
 
   return useMutation<ExceptionListItemSchema, ServerApiError, string, () => void>(
     (id: string) => {
       return exceptionListApiClient.delete(id);
     },
     {
-      onSuccess: onDeleteSuccess,
-      onError: onDeleteError,
+      onSuccess,
+      onError,
       onSettled: () => {
         queryClient.invalidateQueries(['list', exceptionListApiClient]);
-        onSettledCallback();
+        onSettled();
       },
     }
   );
