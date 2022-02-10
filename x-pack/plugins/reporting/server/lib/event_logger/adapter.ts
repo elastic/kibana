@@ -29,10 +29,15 @@ export class EcsLogAdapter implements IReportingEventLogger {
       this.end = new Date(Date.now());
     }
 
+    let duration: number | undefined;
+    if (this.end && this.start) {
+      duration = this.end.valueOf() - this.start.valueOf() * 1000000; // nanoseconds
+    }
+
     // add the derived properties for timing between "start" and "complete" logging calls
     const newProperties: LogMeta = deepMerge(this.properties, {
       event: {
-        duration: this.end && this.start ? this.end.valueOf() - this.start.valueOf() : undefined,
+        duration,
         start: this.start?.toISOString(),
         end: this.end?.toISOString(),
       },
