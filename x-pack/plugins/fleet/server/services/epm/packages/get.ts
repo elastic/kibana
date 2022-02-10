@@ -99,32 +99,40 @@ export async function getPackageSavedObjects(
 
 export const getInstallations = getPackageSavedObjects;
 
+async function fetchRegistryPackageWithFallbackToBundledPackages(
+  pkgName: string,
+  pkgVersion: string
+) {
+  try {
+    return Registry.fetchFindLatestPackage(pkgName);
+  } catch (error) {
+    const bundledPackages = await getBundledPackages();
+
+    const bundledPackage = bundledPackages.find(
+      (b) => b.name === pkgName && b.version === pkgVersion
+    );
+
+    // If we don't find a bundled package, reject with the original error
+    if (!bundledPackage) {
+      throw error;
+    }
+    return {
+      name: bundledPackage.name,
+      version: bundledPackage.version,
+    };
+  }
+}
+
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
+
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    new Promise<{ name: string; version: string }>((resolve, reject) => {
-      return Registry.fetchFindLatestPackage(pkgName).catch(async (error) => {
-        const bundledPackages = await getBundledPackages();
-        const bundledPackage = bundledPackages.find(
-          (b) => b.name === pkgName && b.version === pkgVersion
-        );
-
-        // If we don't find a bundled package, reject with the original error
-        if (!bundledPackage) {
-          return reject(error);
-        }
-
-        resolve({
-          name: bundledPackage.name,
-          version: bundledPackage.version,
-        });
-      });
-    }),
+    fetchRegistryPackageWithFallbackToBundledPackages(pkgName, pkgVersion),
   ]);
 
   // If no package version is provided, use the installed version in the response
