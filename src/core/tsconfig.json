@@ -14,5 +14,8 @@
     "test_helpers/**/*",
     "utils/**/*",
     "index.ts"
+  ],
+  "references": [
+    { "path": "../../x-pack/plugins/spaces/tsconfig.json" }
   ]
 }
