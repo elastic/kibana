@@ -28,6 +28,7 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  selectChangesApplied,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
 
@@ -186,6 +187,7 @@ export const LensTopNavMenu = ({
     datasourceStates,
   } = useLensSelector((state) => state.lens);
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
+  const changesApplied = useLensSelector(selectChangesApplied);
 
   useEffect(() => {
     const activeDatasource =
@@ -460,7 +462,7 @@ export const LensTopNavMenu = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               // data-test-subj="visualizeEditorRenderButton"
-              disabled={autoApplyEnabled}
+              disabled={autoApplyEnabled || changesApplied}
               fill
               iconType="play"
               onClick={onApplyChanges}

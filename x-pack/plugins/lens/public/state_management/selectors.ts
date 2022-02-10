@@ -8,6 +8,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { SavedObjectReference } from 'kibana/server';
 import { FilterManager } from 'src/plugins/data/public';
+import { isEqual } from 'lodash';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, FramePublicAPI, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -25,6 +26,17 @@ export const selectActiveDatasourceId = (state: LensState) => state.lens.activeD
 export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
+
+// TODO - do we need to check datasourceLayers?
+export const selectChangesApplied = createSelector(
+  [selectAppliedState, selectVisualization, selectDatasourceStates],
+  (appliedState, visualization, datasourceStates) => {
+    if (!appliedState) return true; // auto-apply is enabled
+
+    const workingState = { visualization, datasourceStates };
+    return isEqual(appliedState, workingState);
+  }
+);
 
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],

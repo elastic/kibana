@@ -10,7 +10,6 @@ import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   createKbnUrlStateStorage,
   Storage,
