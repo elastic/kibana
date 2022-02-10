@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { parse, ParsedUrlQuery, ParsedUrlQueryInput, stringify } from 'querystring';
+import { parse, stringify, ParsedQuery } from 'query-string';
 import { useLocation } from 'react-router-dom';
 
 /**
@@ -16,8 +16,8 @@ import { useLocation } from 'react-router-dom';
  * Object will be recreated every time `search` changes.
  */
 export function useUrlParams(): {
-  urlParams: ParsedUrlQuery;
-  toUrlParams: (params: ParsedUrlQueryInput) => string;
+  urlParams: ParsedQuery<string>;
+  toUrlParams: (params: ParsedQuery<string | number>) => string;
 } {
   const { search } = useLocation();
   return useMemo(() => {

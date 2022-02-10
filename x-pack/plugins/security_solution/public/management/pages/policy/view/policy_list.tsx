@@ -20,7 +20,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { TextValueDisplay } from '../../../components/artifact_entry_card/components/text_value_display';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { PolicyData } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
@@ -76,7 +75,7 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'created-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <TextValueDisplay>{name}</TextValueDisplay>
+                <EuiText>{name}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -109,7 +108,7 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'updated-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <TextValueDisplay>{name}</TextValueDisplay>
+                <EuiText>{name}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -147,7 +146,7 @@ export const PolicyList = memo(() => {
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {
       setPagination({
-        currentPage: page.index + 1,
+        page: page.index + 1,
         pageSize: page.size,
       });
     },
@@ -156,12 +155,12 @@ export const PolicyList = memo(() => {
 
   const tablePagination = useMemo(() => {
     return {
-      pageIndex: pagination.currentPage - 1,
+      pageIndex: pagination.page - 1,
       pageSize: pagination.pageSize,
       totalItemCount,
       pageSizeOptions,
     };
-  }, [totalItemCount, pageSizeOptions, pagination.currentPage, pagination.pageSize]);
+  }, [totalItemCount, pageSizeOptions, pagination.page, pagination.pageSize]);
 
   return (
     <AdministrationListPage

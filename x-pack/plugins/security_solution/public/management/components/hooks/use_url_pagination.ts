@@ -10,8 +10,9 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { useUrlParams } from './use_url_params';
 
+// Page is not index-based, it is 1-based
 interface Pagination {
-  currentPage: number;
+  page: number;
   pageSize: number;
 }
 
@@ -27,14 +28,13 @@ type UrlPaginationParams = Partial<Pagination>;
 const paginationFromUrlParams = (urlParams: UrlPaginationParams): Pagination => {
   const pagination: Pagination = {
     pageSize: 20,
-    currentPage: 1,
+    page: 1,
   };
 
   // Search params can appear multiple times in the URL, in which case the value for them,
   // once parsed, would be an array. In these case, we take the last value defined
-  pagination.currentPage = Number(
-    (Array.isArray(urlParams.currentPage) ? urlParams.currentPage.pop() : urlParams.currentPage) ??
-      pagination.currentPage
+  pagination.page = Number(
+    (Array.isArray(urlParams.page) ? urlParams.page.pop() : urlParams.page) ?? pagination.page
   );
   pagination.pageSize =
     Number(
@@ -43,8 +43,8 @@ const paginationFromUrlParams = (urlParams: UrlPaginationParams): Pagination => 
     ) ?? pagination.pageSize;
 
   // If Current Page is not a valid positive integer, set it to 1
-  if (!Number.isFinite(pagination.currentPage) || pagination.currentPage < 1) {
-    pagination.currentPage = 1;
+  if (!Number.isFinite(pagination.page) || pagination.page < 1) {
+    pagination.page = 1;
   }
 
   // if pageSize is not one of the expected page sizes, reset it to 20 (default)
@@ -67,12 +67,12 @@ export const useUrlPagination = (): UrlPagination => {
   }, [urlParams]);
   const [pagination, setPagination] = useState<Pagination>(urlPaginationParams);
   const setUrlPagination = useCallback<SetUrlPagination>(
-    ({ pageSize, currentPage }) => {
+    ({ pageSize, page }) => {
       history.push({
         ...location,
         search: toUrlParams({
           ...urlParams,
-          currentPage,
+          page,
           pageSize,
         }),
       });

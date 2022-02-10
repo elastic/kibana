@@ -10,15 +10,17 @@ import { ServerApiError } from '../../../common/types';
 import { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 
-export function useGetEndpointSpecificPolicies({
-  onError,
-  page,
-  perPage,
-}: {
-  onError?: (error: ServerApiError) => void;
-  page?: number;
-  perPage?: number;
-} = {page: 1, perPage: 1000}): QueryObserverResult<GetPolicyListResponse> {
+export function useGetEndpointSpecificPolicies(
+  {
+    onError,
+    page,
+    perPage,
+  }: {
+    onError?: (error: ServerApiError) => void;
+    page?: number;
+    perPage?: number;
+  } = { page: 1, perPage: 1000 }
+): QueryObserverResult<GetPolicyListResponse> {
   const http = useHttp();
   return useQuery<GetPolicyListResponse, ServerApiError>(
     ['endpointSpecificPolicies'],
