@@ -396,6 +396,12 @@ This content has moved. Refer to <<logging-config-changes>>.
 
 This content has moved. Refer to <<saved-object-migrations>>.
 
+[role="exclude",id="upgrade-standard"]
+== Standard Upgrade
+
+This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
+
+
 [role="exclude",id="upgrade-assistant"]
 == Upgrade Assistant
 
