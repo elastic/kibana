@@ -33,6 +33,9 @@ export interface ExploratoryEmbeddableProps {
   reportConfigMap?: ReportConfigMap;
   withActions?: boolean | ActionTypes[];
   appId?: 'security' | 'observability';
+  customLensAttrs?: any;
+  customTimeRange: { from: string; to: string };
+  onBrushEnd?: () => void;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -54,6 +57,9 @@ export default function Embeddable({
   withActions = true,
   reportConfigMap = {},
   showCalculationMethod = false,
+  customLensAttrs,
+  customTimeRange,
+  onBrushEnd,
   owner,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
@@ -66,14 +72,6 @@ export default function Embeddable({
 
   const [operationType, setOperationType] = useState(series?.operationType);
   const theme = useTheme();
-  const actions = useActions({
-    withActions,
-    attributes,
-    reportType,
-    appId,
-    setIsSaveOpen,
-    setAddToCaseOpen,
-  });
 
   const layerConfigs: LayerConfig[] = getLayerConfigs(
     attributes,
@@ -83,22 +81,40 @@ export default function Embeddable({
     { ...reportConfigMap, ...obsvReportConfigMap }
   );
 
-  if (layerConfigs.length < 1) {
-    return null;
+  let lensAttributes;
+  try {
+    lensAttributes = new LensAttributes(layerConfigs);
+    // eslint-disable-next-line no-empty
+  } catch (error) {}
+
+  const attributesJSON = customLensAttrs ?? lensAttributes?.getJSON();
+
+  if (typeof axisTitlesVisibility !== 'undefined') {
+    (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
+      axisTitlesVisibility;
   }
-  const lensAttributes = new LensAttributes(layerConfigs);
-
-  if (!LensComponent) {
-    return <EuiText>No lens component</EuiText>;
-  }
-
-  const attributesJSON = lensAttributes.getJSON();
-
-  (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
-    axisTitlesVisibility;
 
   if (typeof legendIsVisible !== 'undefined') {
     (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
+  }
+
+  const actions = useActions({
+    withActions,
+    attributes,
+    reportType,
+    appId,
+    setIsSaveOpen,
+    setAddToCaseOpen,
+    lensAttributes: attributesJSON,
+    timeRange: customTimeRange ?? series?.time,
+  });
+
+  if (!attributesJSON && layerConfigs.length < 1) {
+    return null;
+  }
+
+  if (!LensComponent) {
+    return <EuiText>No lens component</EuiText>;
   }
 
   return (
@@ -124,9 +140,9 @@ export default function Embeddable({
       <LensComponent
         id="exploratoryView"
         style={{ height: '100%' }}
-        timeRange={series?.time}
+        timeRange={customTimeRange ?? series?.time}
         attributes={attributesJSON}
-        onBrushEnd={({ range }) => {}}
+        onBrushEnd={onBrushEnd}
         withDefaultActions={Boolean(withActions)}
         extraActions={actions}
       />
@@ -141,7 +157,7 @@ export default function Embeddable({
       )}
       <AddToCaseAction
         lensAttributes={attributesJSON}
-        timeRange={series?.time}
+        timeRange={customTimeRange ?? series?.time}
         autoOpen={isAddToCaseOpen}
         setAutoOpen={setAddToCaseOpen}
         appId={appId}
