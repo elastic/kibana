@@ -20,8 +20,8 @@ interface ActionBase<A extends ActionType> {
       jobType: string;
       byteSize?: number;
     };
-    user?: { name: string };
   } & { task?: { id?: string } };
+  user?: { name: string };
 }
 
 export interface ErrorAction {
