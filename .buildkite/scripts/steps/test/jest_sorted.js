@@ -8,21 +8,25 @@
 
 const { execSync } = require('child_process');
 
+const PARALLEL_COUNT = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+  ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
+  : 1;
+
 const slowSuites = {
-  'x-pack/plugins/enterprise_search/jest.config.js': 26,
-  'x-pack/plugins/triggers_actions_ui/jest.config.js': 6,
-  'x-pack/plugins/security/jest.config.js': 10,
-  'x-pack/plugins/security_solution/public/management/jest.config.js': 8,
+  'src/core/jest.config.js': 6,
   'src/plugins/data/jest.config.js': 6,
   'x-pack/plugins/apm/jest.config.js': 10,
-  'x-pack/plugins/uptime/jest.config.js': 12,
-  'x-pack/plugins/ml/jest.config.js': 6,
-  'src/core/jest.config.js': 6,
   'x-pack/plugins/cases/jest.config.js': 11,
+  'x-pack/plugins/enterprise_search/jest.config.js': 26,
   'x-pack/plugins/lens/jest.config.js': 7,
+  'x-pack/plugins/ml/jest.config.js': 6,
   'x-pack/plugins/security_solution/public/common/jest.config.js': 17,
-  'x-pack/plugins/security_solution/public/timelines/jest.config.js': 20,
   'x-pack/plugins/security_solution/public/detections/jest.config.js': 11,
+  'x-pack/plugins/security_solution/public/management/jest.config.js': 8,
+  'x-pack/plugins/security_solution/public/timelines/jest.config.js': 20,
+  'x-pack/plugins/security/jest.config.js': 10,
+  'x-pack/plugins/triggers_actions_ui/jest.config.js': 6,
+  'x-pack/plugins/uptime/jest.config.js': 12,
 };
 
 const configs = execSync(
@@ -44,6 +48,13 @@ configs.sort((a, b) => {
   return a.localeCompare(b);
 });
 
-for (const config of configs) {
+// After the first PARALLEL_COUNT, reverse the order of the next PARALLEL_COUNT, to pair the shortest suites with the longest ones
+const configsFinal = [
+  ...configs.slice(0, PARALLEL_COUNT),
+  ...configs.slice(PARALLEL_COUNT, PARALLEL_COUNT * 2).reverse(),
+  ...configs.slice(PARALLEL_COUNT * 2),
+];
+
+for (const config of configsFinal) {
   console.log(config);
 }
