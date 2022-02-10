@@ -35,6 +35,7 @@ import { ManagementPageLoader } from '../../management_page_loader';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useToasts } from '../../../../common/lib/kibana';
 import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
+import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -72,9 +73,15 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
     }
   ),
   flyoutEditItemLoadFailure: (errorMessage: string) =>
-    i18n.translate('xpack.securitySolution.flyoutEditItemLoadFailure', {
+    i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditItemLoadFailure', {
       defaultMessage: 'Failed to retrieve item for edit. Reason: {errorMessage}',
       values: { errorMessage },
+    }),
+
+  flyoutSubmitSuccess: (itemName: string) =>
+    i18n.translate('xpack.securitySolution.artifactListPage.flyoutSubmitSuccess', {
+      defaultMessage: '"{itemName}" has been added.',
+      values: { itemName },
     }),
 });
 
@@ -134,6 +141,12 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     const isEditFlow = urlParams.show === 'edit';
 
     const {
+      isLoading: isSubmittingData,
+      mutateAsync: submitData,
+      error: submitError,
+    } = useWithArtifactSubmitData(apiClient, isEditFlow ? 'edit' : 'create');
+
+    const {
       isLoading: isLoadingItemForEdit,
       error,
       refetch: fetchItemForEdit,
@@ -146,7 +159,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     const hasItemDataForEdit = useMemo<boolean>(() => {
       // `item_id` will not be defined for a `create` flow, so we use it below to determine if we
       // are still attempting to load the item for edit from the api
-      return !!(item || formState.item.item_id);
+      return !!item || !!formState.item.item_id;
     }, [formState.item.item_id, item]);
 
     const isInitializing = useMemo(() => {
@@ -154,11 +167,13 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [hasItemDataForEdit, isEditFlow]);
 
     const handleFlyoutClose = useCallback(() => {
-      // FIXME:PT Question: Prevent closing it if update is underway?
+      if (isSubmittingData) {
+        return;
+      }
 
       // `undefined` will cause params to be dropped from url
       setUrlParams({ id: undefined, show: undefined }, true);
-    }, [setUrlParams]);
+    }, [isSubmittingData, setUrlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
       ({ item: updatedItem, isValid }) => {
@@ -171,8 +186,14 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     );
 
     const handleSubmitClick = useCallback(() => {
-      // FIXME: implement submit
-    }, []);
+      submitData(formState.item).then((result) => {
+        toasts.addSuccess(labels.flyoutSubmitSuccess(result.name));
+
+        // Close the flyout
+        // `undefined` will cause params to be dropped from url
+        setUrlParams({ id: undefined, show: undefined }, true);
+      });
+    }, [formState.item, labels, setUrlParams, submitData, toasts]);
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now
@@ -231,8 +252,9 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
           {!isInitializing && (
             <FormComponent
               onChange={handleFormComponentOnChange}
-              disabled={false} // FIXME:PT implement
+              disabled={isSubmittingData}
               item={formState.item}
+              error={submitError ?? undefined}
               mode={(isEditFlow ? 'edit' : 'create') as ArtifactFormComponentProps['mode']}
             />
           )}
@@ -245,6 +267,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
                 <EuiButtonEmpty
                   data-test-subj={getTestId('cancelButton')}
                   onClick={handleFlyoutClose}
+                  disabled={isSubmittingData}
                 >
                   {labels.flyoutCancelButtonLabel}
                 </EuiButtonEmpty>
@@ -257,9 +280,9 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
                 <EuiButton
                   data-test-subj={getTestId('submitButton')}
                   fill
-                  disabled={!formState.isValid}
+                  disabled={!formState.isValid || isSubmittingData}
                   onClick={handleSubmitClick}
-                  isLoading={false} // FIXME:PT implement loading indicator
+                  isLoading={isSubmittingData}
                 >
                   {isEditFlow
                     ? labels.flyoutEditSubmitButtonLabel

@@ -8,7 +8,30 @@
 import React, { memo } from 'react';
 import { useHttp } from '../../../../common/lib/kibana';
 import { EventFiltersApiClient } from '../../event_filters/service/event_filters_api_client';
-import { ArtifactListPage } from '../../../components/artifact_list_page';
+import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
+
+// FIXME:PT delete this when real component is implemented
+const TempDevFormComponent: ArtifactListPageProps['ArtifactFormComponent'] = (props) => {
+  // For Dev. Delete once we implement this component
+  // @ts-ignore
+  if (!window._dev_artifact_form_props) {
+    // @ts-ignore
+    window._dev_artifact_form_props = [];
+    // @ts-ignore
+    window.console.log(window._dev_artifact_form_props);
+  }
+  // @ts-ignore
+  window._dev_artifact_form_props.push(props);
+
+  return (
+    <div>
+      <div style={{ margin: '3em 0' }}>
+        {props.error ? props.error?.body?.message || props.error : ''}
+      </div>
+      {'TODO: Form here'}
+    </div>
+  );
+};
 
 export const Blocklist = memo(() => {
   const http = useHttp();
@@ -19,16 +42,7 @@ export const Blocklist = memo(() => {
   return (
     <ArtifactListPage
       apiClient={eventFiltersApiClient}
-      ArtifactFormComponent={(props) => {
-        // For Dev. Delete once we implement this component
-        if (!window._dev_artifact_form_props) {
-          window._dev_artifact_form_props = [];
-          window.console.log(window._dev_artifact_form_props);
-        }
-        window._dev_artifact_form_props.push(props);
-
-        return <h1>{'TODO: Form here'}</h1>;
-      }} // FIXME: Implement create/edit form
+      ArtifactFormComponent={TempDevFormComponent} // FIXME: Implement create/edit form
       labels={{
         pageTitle: 'Blocklist', // FIXME: Implement labels prop overrides for blocklist
       }}
