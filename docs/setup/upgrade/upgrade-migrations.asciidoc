@@ -59,7 +59,7 @@ Review the common causes of {kib} upgrade failures and how to prevent them.
 
 [float]
 ====== Documents found for unknown saved object types
-Migrations will fail if saved objects were found which belong to an unknown
+Migrations will fail if saved objects belong to an unknown
 saved object type. Unknown saved objects are typically caused by
 to the {es} index, or by disabling a plugin that had previously
 created a saved object.
