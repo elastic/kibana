@@ -116,7 +116,12 @@ describe('Event Logger', () => {
     jest.spyOn(logger.completionLogger, 'stopTiming');
     logger.logExecutionStart();
 
-    const result = logger.logExecutionComplete({ byteSize: 444, csvRows: 440000 });
+    const result = logger.logExecutionComplete({
+      byteSize: 444,
+      cpu: 0.1,
+      csvRows: 440000,
+      memory: 1024,
+    });
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -125,9 +130,11 @@ describe('Event Logger', () => {
         Object {
           "actionType": "execute-complete",
           "byteSize": 444,
+          "cpu": 0.1,
           "csvRows": 440000,
           "id": "12348",
           "jobType": "csv",
+          "memory": 1024,
         },
         "completed csv execution",
       ]

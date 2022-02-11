@@ -27,7 +27,9 @@ import {
 /** @internal */
 export interface ExecutionCompleteMetrics {
   byteSize: number;
+  cpu?: number;
   csvRows?: number;
+  memory?: number;
 }
 
 export interface IReportingEventLogger {
@@ -102,13 +104,20 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       return event;
     }
 
-    logExecutionComplete({ byteSize, csvRows }: ExecutionCompleteMetrics): CompletedExecution {
+    logExecutionComplete({
+      byteSize,
+      cpu,
+      csvRows,
+      memory,
+    }: ExecutionCompleteMetrics): CompletedExecution {
       const message = `completed ${this.report.jobtype} execution`;
       this.completionLogger.stopTiming();
       const event = deepMerge(
         {
           message,
-          kibana: { reporting: { actionType: ActionType.EXECUTE_COMPLETE, byteSize, csvRows } },
+          kibana: {
+            reporting: { actionType: ActionType.EXECUTE_COMPLETE, byteSize, cpu, csvRows, memory },
+          },
         } as Partial<CompletedExecution>,
         this.eventObj
       );

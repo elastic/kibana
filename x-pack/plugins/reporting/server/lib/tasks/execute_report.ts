@@ -366,6 +366,7 @@ export class ExecuteReportTask implements ReportingTask {
             report._primary_term = stream.getPrimaryTerm()!;
 
             eventLog.logExecutionComplete({
+              ...(report.metrics ?? {}),
               byteSize: stream.bytesWritten,
               csvRows: output?.csv_rows,
             });
