@@ -8,26 +8,17 @@
 
 import { memoize } from 'lodash';
 import dateMath from '@elastic/datemath';
-import { buildEsQuery, Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 
 import { pluginServices } from '../../services';
 import { TimeRange } from '../../../../data/public';
-import { OptionsListRequestBody, OptionsListResponse } from './types';
-import { DataView, DataViewField } from '../../../../data_views/public';
-
-export type OptionsListRequest = Omit<
+import { ControlsOptionsListService, OptionsListRequest } from '../options_list';
+import {
   OptionsListRequestBody,
-  'filters' | 'fieldName' | 'fieldSpec'
-> & {
-  timeRange?: TimeRange;
-  field: DataViewField;
-  dataView: DataView;
-  filters?: Filter[];
-  query?: Query;
-};
-
-const { http, data } = pluginServices.getServices();
-const timeService = data.query.timefilter.timefilter;
+  OptionsListResponse,
+} from '../../control_types/options_list/types';
+import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
+import { ControlsPluginStartDeps } from '../../types';
 
 const getRoundedTimeRange = (timeRange: TimeRange) => ({
   from: dateMath.parse(timeRange.from)!.startOf('minute').toISOString(),
@@ -58,6 +49,7 @@ const optionsListCacheResolver = (request: OptionsListRequest) => {
 
 const cachedOptionsListRequest = memoize(
   async (request: OptionsListRequest, abortSignal: AbortSignal) => {
+    const { http } = pluginServices.getServices();
     const index = request.dataView.title;
     const requestBody = getRequestBody(request);
     return await http.fetch<OptionsListResponse>(`/api/kibana/controls/optionsList/${index}`, {
@@ -70,6 +62,8 @@ const cachedOptionsListRequest = memoize(
 );
 
 const getRequestBody = (request: OptionsListRequest): OptionsListRequestBody => {
+  const { data } = pluginServices.getServices();
+  const timeService = data.query.timefilter.timefilter;
   const { query, filters, dataView, timeRange, field, ...passThroughProps } = request;
   const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
   const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
@@ -82,15 +76,21 @@ const getRequestBody = (request: OptionsListRequest): OptionsListRequestBody => 
   };
 };
 
-export const runOptionsListRequest = async (
-  request: OptionsListRequest,
-  abortSignal: AbortSignal
-) => {
-  try {
-    return await cachedOptionsListRequest(request, abortSignal);
-  } catch (error) {
-    // Remove rejected results from memoize cache
-    cachedOptionsListRequest.cache.delete(optionsListCacheResolver(request));
-    return {} as OptionsListResponse;
-  }
+export type OptionsListServiceFactory = KibanaPluginServiceFactory<
+  ControlsOptionsListService,
+  ControlsPluginStartDeps
+>;
+
+export const optionsListServiceFactory: OptionsListServiceFactory = () => {
+  return {
+    runOptionsListRequest: async (request: OptionsListRequest, abortSignal: AbortSignal) => {
+      try {
+        return await cachedOptionsListRequest(request, abortSignal);
+      } catch (error) {
+        // Remove rejected results from memoize cache
+        cachedOptionsListRequest.cache.delete(optionsListCacheResolver(request));
+        return {} as OptionsListResponse;
+      }
+    },
+  };
 };

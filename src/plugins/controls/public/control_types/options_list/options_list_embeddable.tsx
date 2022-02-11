@@ -25,7 +25,6 @@ import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import { DataView, DataViewField } from '../../../../data_views/public';
 import { Embeddable, IContainer } from '../../../../embeddable/public';
 import { ControlsDataViewsService } from '../../services/data_views';
-import { runOptionsListRequest } from './options_list_service';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlInput, ControlOutput } from '../..';
@@ -35,6 +34,7 @@ import {
   LazyReduxEmbeddableWrapper,
   ReduxEmbeddableWrapperPropsWithChildren,
 } from '../../../../presentation_util/public';
+import { ControlsOptionsListService } from '../../services/options_list';
 
 const OptionsListReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<OptionsListEmbeddableInput>
@@ -69,6 +69,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   // Controls services
   private dataViewsService: ControlsDataViewsService;
+  private optionsListService: ControlsOptionsListService;
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
@@ -89,7 +90,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     super(input, output, parent); // get filters for initial output...
 
     // Destructure controls services
-    ({ dataViews: this.dataViewsService } = pluginServices.getServices());
+    ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
+      pluginServices.getServices());
 
     this.componentState = { loading: true };
     this.updateComponentState(this.componentState);
@@ -220,18 +222,19 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
-    const { suggestions, invalidSelections, totalCardinality } = await runOptionsListRequest(
-      {
-        field,
-        dataView,
-        selectedOptions,
-        searchString: this.searchString,
-        ...(ignoreParentSettings?.ignoreQuery ? {} : { query }),
-        ...(ignoreParentSettings?.ignoreFilters ? {} : { filters }),
-        ...(ignoreParentSettings?.ignoreTimerange ? {} : { timeRange }),
-      },
-      this.abortController.signal
-    );
+    const { suggestions, invalidSelections, totalCardinality } =
+      await this.optionsListService.runOptionsListRequest(
+        {
+          field,
+          dataView,
+          selectedOptions,
+          searchString: this.searchString,
+          ...(ignoreParentSettings?.ignoreQuery ? {} : { query }),
+          ...(ignoreParentSettings?.ignoreFilters ? {} : { filters }),
+          ...(ignoreParentSettings?.ignoreTimerange ? {} : { timeRange }),
+        },
+        this.abortController.signal
+      );
 
     if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
       this.updateComponentState({

@@ -20,6 +20,7 @@ import { controlsServiceFactory } from './controls';
 import { overlaysServiceFactory } from './overlays';
 import { dataServiceFactory } from './data';
 import { httpServiceFactory } from './http';
+import { optionsListServiceFactory } from './options_list';
 
 export const providers: PluginServiceProviders<
   ControlsServices,
@@ -28,8 +29,10 @@ export const providers: PluginServiceProviders<
   http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
-  controls: new PluginServiceProvider(controlsServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
+
+  controls: new PluginServiceProvider(controlsServiceFactory),
+  optionsList: new PluginServiceProvider(optionsListServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<

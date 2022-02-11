@@ -13,6 +13,7 @@ import uuid from 'uuid';
 
 import {
   getFlightOptionsAsync,
+  getFlightSearchOptions,
   storybookFlightsDataView,
 } from '../../../presentation_util/public/mocks';
 import {
@@ -31,6 +32,9 @@ import { pluginServices, registry } from '../services/storybook';
 import { replaceValueSuggestionMethod } from '../services/storybook/data';
 import { injectStorybookDataView } from '../services/storybook/data_views';
 import { populateStorybookControlFactories } from './storybook_control_factories';
+import { OptionsListRequest } from '../services/options_list';
+import { OptionsListResponse } from '../control_types/options_list/types';
+import { replaceOptionsListMethod } from '../services/storybook/options_list';
 
 export default {
   title: 'Controls',
@@ -40,6 +44,22 @@ export default {
 
 injectStorybookDataView(storybookFlightsDataView);
 replaceValueSuggestionMethod(getFlightOptionsAsync);
+
+const storybookStubOptionsListRequest = async (
+  request: OptionsListRequest,
+  abortSignal: AbortSignal
+) =>
+  new Promise<OptionsListResponse>((r) =>
+    setTimeout(
+      () =>
+        r({
+          suggestions: getFlightSearchOptions(request.field.name, request.searchString),
+          totalCardinality: 100,
+        }),
+      120
+    )
+  );
+replaceOptionsListMethod(storybookStubOptionsListRequest);
 
 const ControlGroupStoryComponent: FC<{
   panels?: ControlsPanels;

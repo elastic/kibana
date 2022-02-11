@@ -18,6 +18,7 @@ import { overlaysServiceFactory } from './overlays';
 import { controlsServiceFactory } from './controls';
 import { dataViewsServiceFactory } from './data_views';
 import { httpServiceFactory } from '../stub/http';
+import { optionsListServiceFactory } from './options_list';
 
 export type { ControlsServices } from '..';
 
@@ -26,7 +27,9 @@ export const providers: PluginServiceProviders<ControlsServices> = {
   http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
+
   controls: new PluginServiceProvider(controlsServiceFactory),
+  optionsList: new PluginServiceProvider(optionsListServiceFactory),
 };
 
 export const pluginServices = new PluginServices<ControlsServices>();
