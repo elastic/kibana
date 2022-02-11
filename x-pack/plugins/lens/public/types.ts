@@ -158,7 +158,12 @@ export interface DatasourceSuggestion<T = unknown> {
   keptLayerIds: string[];
 }
 
-export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
+type StateSetterArg<T> = T | ((prevState: T) => T);
+
+export type StateSetter<T, OptionsShape = unknown> = (
+  newState: StateSetterArg<T>,
+  options?: OptionsShape
+) => void;
 
 export interface InitializationOptions {
   isFullEditor?: boolean;
@@ -328,7 +333,7 @@ export interface DatasourcePublicAPI {
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
-  setState: StateSetter<T>;
+  setState: StateSetter<T, { applyImmediately: boolean }>;
   showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;

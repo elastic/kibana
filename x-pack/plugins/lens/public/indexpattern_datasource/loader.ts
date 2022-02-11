@@ -9,7 +9,7 @@ import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataView } from 'src/plugins/data_views/public';
 import type { HttpSetup, SavedObjectReference } from 'kibana/public';
-import type { InitializationOptions, StateSetter } from '../types';
+import { DatasourceDataPanelProps, InitializationOptions } from '../types';
 
 import {
   IndexPattern,
@@ -34,7 +34,7 @@ import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
 import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
-type SetState = StateSetter<IndexPatternPrivateState>;
+type SetState = DatasourceDataPanelProps<IndexPatternPrivateState>['setState'];
 type IndexPatternsService = Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
 type ErrorHandler = (err: Error) => void;
 
@@ -321,17 +321,20 @@ export async function changeIndexPattern({
   }
 
   try {
-    setState((s) => ({
-      ...s,
-      layers: isSingleEmptyLayer(state.layers)
-        ? mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
-        : state.layers,
-      indexPatterns: {
-        ...s.indexPatterns,
-        [id]: indexPatterns[id],
-      },
-      currentIndexPatternId: id,
-    }));
+    setState(
+      (s) => ({
+        ...s,
+        layers: isSingleEmptyLayer(state.layers)
+          ? mapValues(state.layers, (layer) => updateLayerIndexPattern(layer, indexPatterns[id]))
+          : state.layers,
+        indexPatterns: {
+          ...s.indexPatterns,
+          [id]: indexPatterns[id],
+        },
+        currentIndexPatternId: id,
+      }),
+      { applyImmediately: true }
+    );
     setLastUsedIndexPatternId(storage, id);
   } catch (err) {
     onError(err);
@@ -453,33 +456,39 @@ export async function syncExistingFields({
       }
     }
 
-    setState((state) => ({
-      ...state,
-      isFirstExistenceFetch: false,
-      existenceFetchFailed: false,
-      existenceFetchTimeout: false,
-      existingFields: emptinessInfo.reduce(
-        (acc, info) => {
-          acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
-          return acc;
-        },
-        { ...state.existingFields }
-      ),
-    }));
+    setState(
+      (state) => ({
+        ...state,
+        isFirstExistenceFetch: false,
+        existenceFetchFailed: false,
+        existenceFetchTimeout: false,
+        existingFields: emptinessInfo.reduce(
+          (acc, info) => {
+            acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
+            return acc;
+          },
+          { ...state.existingFields }
+        ),
+      }),
+      { applyImmediately: true }
+    );
   } catch (e) {
     // show all fields as available if fetch failed or timed out
-    setState((state) => ({
-      ...state,
-      existenceFetchFailed: e.res?.status !== 408,
-      existenceFetchTimeout: e.res?.status === 408,
-      existingFields: indexPatterns.reduce(
-        (acc, pattern) => {
-          acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
-          return acc;
-        },
-        { ...state.existingFields }
-      ),
-    }));
+    setState(
+      (state) => ({
+        ...state,
+        existenceFetchFailed: e.res?.status !== 408,
+        existenceFetchTimeout: e.res?.status === 408,
+        existingFields: indexPatterns.reduce(
+          (acc, pattern) => {
+            acc[pattern.title] = booleanMap(pattern.fields.map((field) => field.name));
+            return acc;
+          },
+          { ...state.existingFields }
+        ),
+      }),
+      { applyImmediately: true }
+    );
   }
 }
 
