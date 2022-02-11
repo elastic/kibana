@@ -226,6 +226,7 @@ export class ExceptionsListApiClient {
     return this.http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
       query: {
         filter,
+        list_id: [this.listId],
         namespace_type: 'agnostic',
       },
     });

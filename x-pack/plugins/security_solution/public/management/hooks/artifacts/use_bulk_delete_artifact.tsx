@@ -6,7 +6,7 @@
  */
 import pMap from 'p-map';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useQueryClient, useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
+import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
 import { ServerApiError } from '../../../common/types';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
@@ -19,8 +19,6 @@ export function useBulkDeleteArtifact(
     concurrency: 5,
   }
 ): UseMutationResult<ExceptionListItemSchema[], ServerApiError, string[], () => void> {
-  const queryClient = useQueryClient();
-
   return useMutation<ExceptionListItemSchema[], ServerApiError, string[], () => void>(
     (exceptionIds: string[]) => {
       return pMap(
@@ -31,12 +29,6 @@ export function useBulkDeleteArtifact(
         options
       );
     },
-    {
-      onSettled: () => {
-        queryClient.invalidateQueries(['list', exceptionListApiClient]);
-        queryClient.invalidateQueries(['get', exceptionListApiClient]);
-      },
-      ...customOptions,
-    }
+    customOptions
   );
 }

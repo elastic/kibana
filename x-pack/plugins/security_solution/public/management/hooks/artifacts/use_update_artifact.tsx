@@ -8,7 +8,7 @@ import {
   UpdateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { useQueryClient, useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
+import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
 import { ServerApiError } from '../../../common/types';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
@@ -21,22 +21,12 @@ export function useUpdateArtifact(
   UpdateExceptionListItemSchema,
   () => void
 > {
-  const queryClient = useQueryClient();
   return useMutation<
     ExceptionListItemSchema,
     ServerApiError,
     UpdateExceptionListItemSchema,
     () => void
-  >(
-    (exception: UpdateExceptionListItemSchema) => {
-      return exceptionListApiClient.update(exception);
-    },
-    {
-      onSettled: () => {
-        queryClient.invalidateQueries(['list', exceptionListApiClient]);
-        queryClient.invalidateQueries(['get', exceptionListApiClient]);
-      },
-      ...customQueryOptions,
-    }
-  );
+  >((exception: UpdateExceptionListItemSchema) => {
+    return exceptionListApiClient.update(exception);
+  }, customQueryOptions);
 }
