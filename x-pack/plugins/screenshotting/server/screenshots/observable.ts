@@ -9,8 +9,7 @@ import type { Transaction } from 'elastic-apm-node';
 import { defer, forkJoin, throwError, Observable } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
-import type { Layout as ScreenshotModeLayout } from 'src/plugins/screenshot_mode/common';
-import type { ConditionalHeaders, HeadlessChromiumDriver } from '../browsers';
+import type { ConditionalHeaders, Context, HeadlessChromiumDriver } from '../browsers';
 import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
 import type { Layout } from '../layouts';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
@@ -22,7 +21,6 @@ import type { Screenshot } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
-import type { UrlOrUrlWithContext } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
@@ -47,6 +45,10 @@ export interface PhaseTimeouts {
    */
   loadDelay: number;
 }
+
+type Url = string;
+type UrlWithContext = [url: Url, context: Context];
+export type UrlOrUrlWithContext = Url | UrlWithContext;
 
 export interface ScreenshotObservableOptions {
   /**
@@ -157,18 +159,27 @@ export class ScreenshotObservableHandler {
       );
   }
 
-  private openUrl(index: number, url: UrlOrUrlWithContext) {
-    return defer(() =>
-      openUrl(
+  private openUrl(index: number, urlOrUrlWithContext: UrlOrUrlWithContext) {
+    return defer(() => {
+      let url: string;
+      let context: Context | undefined;
+
+      if (typeof urlOrUrlWithContext === 'string') {
+        url = urlOrUrlWithContext;
+      } else {
+        [url, context] = urlOrUrlWithContext;
+      }
+
+      return openUrl(
         this.driver,
         this.logger,
         this.options.timeouts.openUrl,
         index,
         url,
-        this.options.conditionalHeaders,
-        this.layout.id as ScreenshotModeLayout
-      )
-    ).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
+        { ...(context ?? {}), layout: this.layout.id },
+        this.options.conditionalHeaders
+      );
+    }).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
   }
 
   private waitForElements() {

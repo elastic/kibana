@@ -11,11 +11,11 @@ import type { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './typ
 
 export const screenshotModePluginMock = {
   createSetupContract: (): DeeplyMockedKeys<ScreenshotModePluginSetup> => ({
-    getScreenshotLayout: jest.fn(),
+    getScreenshotContext: jest.fn(),
     isScreenshotMode: jest.fn(() => false),
   }),
   createStartContract: (): DeeplyMockedKeys<ScreenshotModePluginStart> => ({
-    getScreenshotLayout: jest.fn(),
+    getScreenshotContext: jest.fn(),
     isScreenshotMode: jest.fn(() => false),
   }),
 };

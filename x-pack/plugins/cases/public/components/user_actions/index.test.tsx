@@ -22,7 +22,6 @@ import {
 } from '../../containers/mock';
 import { UserActions } from '.';
 import { TestProviders } from '../../common/mock';
-import { Ecs } from '../../../common/ui/types';
 import { Actions } from '../../../common/api';
 
 const fetchUserActions = jest.fn();
@@ -46,7 +45,7 @@ const defaultProps = {
   statusActionButton: null,
   updateCase,
   userCanCrud: true,
-  useFetchAlertData: (): [boolean, Record<string, Ecs>] => [
+  useFetchAlertData: (): [boolean, Record<string, unknown>] => [
     false,
     { 'some-id': { _id: 'some-id' } },
   ],

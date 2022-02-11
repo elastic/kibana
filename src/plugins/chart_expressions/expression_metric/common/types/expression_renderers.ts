@@ -31,6 +31,7 @@ export interface MetricVisParam {
   labels: Labels;
   style: MetricStyle;
   colorFullBackground: boolean;
+  autoScale?: boolean;
 }
 
 export interface VisParams {
