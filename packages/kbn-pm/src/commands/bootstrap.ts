@@ -51,7 +51,7 @@ export const BootstrapCommand: ICommand = {
 
     // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
     // for bazel to know it has to re-install the node_modules after a reset or a clean
-    await ensureYarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules'));
+    // await ensureYarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules'));
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
@@ -70,12 +70,14 @@ export const BootstrapCommand: ICommand = {
     //
 
     if (forceInstall) {
-      const forceInstallStartTime = Date.now();
-      await runBazel(['run', '@nodejs//:yarn'], runOffline);
-      timings.push({
-        id: 'force install dependencies',
-        ms: Date.now() - forceInstallStartTime,
-      });
+      // const forceInstallStartTime = Date.now();
+      // process.env.BAZEL_YARN_INSTALL = '1';
+      // await runBazel(['run', '@yarn//:yarn'], runOffline);
+      // process.env.BAZEL_YARN_INSTALL = undefined;
+      // timings.push({
+      //   id: 'force install dependencies',
+      //   ms: Date.now() - forceInstallStartTime,
+      // });
     }
 
     // build packages

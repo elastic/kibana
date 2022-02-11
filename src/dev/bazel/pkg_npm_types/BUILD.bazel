@@ -19,7 +19,6 @@ exports_files(
 nodejs_binary(
   name = "_packager",
   data = [
-    "@npm//@bazel/typescript",
     "@npm//@microsoft/api-extractor",
     "@npm//mustache",
     ":packager_all_files"

@@ -147,7 +147,7 @@ pkg_npm_types = rule(
     "_packager": attr.label(
       doc = "Target that executes the npm types package assembler binary",
       executable = True,
-      cfg = "host",
+      cfg = "exec",
       default = Label("//src/dev/bazel/pkg_npm_types:_packager"),
     ),
     "_generated_package_json_template": attr.label(
