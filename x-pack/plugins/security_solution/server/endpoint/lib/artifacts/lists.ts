@@ -227,7 +227,7 @@ function getMatcherWildcardFunction({
   field: string;
   os: ExceptionListItemSchema['os_types'][number];
 }): TranslatedEntryMatchWildcardMatcher {
-  return field.endsWith('.caseless')
+  return field.endsWith('.caseless') || field.endsWith('.text')
     ? os === 'linux'
       ? 'wildcard_cased'
       : 'wildcard_caseless'
