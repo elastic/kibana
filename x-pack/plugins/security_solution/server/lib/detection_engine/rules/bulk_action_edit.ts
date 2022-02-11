@@ -12,6 +12,8 @@ import {
   BulkActionEditType,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
+import { invariant } from '../../../../common/utils/invariant';
+
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
 
@@ -42,29 +44,35 @@ export const applyBulkActionEditToRule = (
     // index_patterns actions
     // index pattern is not present in machine learning rule type, so we throw error on it
     case BulkActionEditType.add_index_patterns:
-      if (rule.params.type === 'machine_learning') {
-        throw Error(
-          "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
-        );
-      }
+      invariant(
+        rule.params.type !== 'machine_learning',
+        "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
+      );
+
       rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
       break;
 
     case BulkActionEditType.delete_index_patterns:
-      if (rule.params.type === 'machine_learning') {
-        throw Error(
-          "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
-        );
-      }
+      invariant(
+        rule.params.type !== 'machine_learning',
+        "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
+      );
+
       rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
+
+      invariant(
+        rule.params.index.length !== 0,
+        "Can't delete all index patterns. At least one index pattern must be left"
+      );
       break;
 
     case BulkActionEditType.set_index_patterns:
-      if (rule.params.type === 'machine_learning') {
-        throw Error(
-          "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
-        );
-      }
+      invariant(
+        rule.params.type !== 'machine_learning',
+        "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+      );
+      invariant(action.value.length !== 0, "Index patterns can't be overwritten with empty list");
+
       rule.params.index = action.value;
       break;
 

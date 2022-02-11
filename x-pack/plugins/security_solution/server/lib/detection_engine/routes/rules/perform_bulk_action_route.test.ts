@@ -230,6 +230,55 @@ describe.each([
       });
     });
 
+    it('returns error if all index pattern tried to be deleted', async () => {
+      readRulesMock.mockImplementationOnce(() =>
+        Promise.resolve({ ...mockRule, params: { ...mockRule.params, index: ['index-*'] } })
+      );
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionEditSchemaMock(),
+          ids: ['failed-mock-id'],
+          query: undefined,
+          edit: [
+            {
+              type: 'delete_index_patterns',
+              value: ['index-*'],
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+          errors: [
+            {
+              message: "Can't delete all index patterns. At least one index pattern must be left",
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+        },
+        message: 'Bulk edit failed',
+        status_code: 500,
+      });
+    });
+
     it('returns partial failure error if couple of rule validations fail and the rest are successful', async () => {
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
