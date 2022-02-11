@@ -215,7 +215,7 @@ const escapeQuotes = (str: string) => {
 };
 
 const constructFilterRationFormula = (operation: string, metric?: Query) => {
-  return `${operation}${metric?.language === 'kuery' ? 'kql' : 'lucene'}='${
+  return `${operation}${metric?.language === 'lucene' ? 'lucene' : 'kql'}='${
     metric?.query && typeof metric?.query === 'string'
       ? escapeQuotes(metric?.query)
       : metric?.query ?? '*'

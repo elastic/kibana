@@ -1589,13 +1589,22 @@ export function computeLayerFromContext(
         indexPattern,
         layer: tempLayer,
       }) as FormulaIndexPatternColumn;
+      let filterBy = metricContext?.params?.kql
+        ? { query: metricContext?.params?.kql, language: 'kuery' }
+        : undefined;
+      if (metricContext?.params?.lucene) {
+        filterBy = metricContext?.params?.lucene
+          ? { query: metricContext?.params?.lucene, language: 'lucene' }
+          : undefined;
+      }
       newColumn = {
         ...newColumn,
+        ...(filterBy && { filter: filterBy }),
         params: {
           ...newColumn.params,
           ...metricContext?.params,
         },
-      };
+      } as FormulaIndexPatternColumn;
       layer = metricContext?.params?.formula
         ? insertOrReplaceFormulaColumn(generateId(), newColumn, tempLayer, {
             indexPattern,
