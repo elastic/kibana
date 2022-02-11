@@ -49,6 +49,7 @@ import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/pl
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from '../../../../../../../src/plugins/data_views/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { casesPluginMock } from '../../../../../cases/public/mocks';
@@ -133,6 +134,7 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    dataViews: dataViewPluginMocks.createStartContract(),
     cases: casesPluginMock.createStartContract(),
   };
 
