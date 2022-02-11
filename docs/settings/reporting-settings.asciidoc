@@ -22,7 +22,7 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 ==== Enable reporting
 
 [[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}::
-When `true` (default), enables the {report-features}. Set this to `false` to disable {report-features} entirely.
+When `true`, enables the {report-features}. Set this to `false` to disable {report-features} entirely. The default is `true`.
 
 [NOTE]
 ============
@@ -234,7 +234,7 @@ With Security enabled, Reporting has two forms of access control: each user can 
 
 [NOTE]
 ============================================================================
-The `xpack.reporting.roles` settings are for a deprecated system of access control in Reporting. Turning off this feature allows API Keys to generate reports, and allows reporting access through Kibana application privileges. We recommend you explicitly turn off reporting's deprecated access control feature by adding `xpack.reporting.roles.enabled: false` in kibana.yml. This will enable you to create custom roles that provide application privileges for reporting, as described in <<grant-user-access, granting users access to reporting>>.
+The `xpack.reporting.roles` settings are for a deprecated system of access control in Reporting. Turning off this feature allows API Keys to generate reports, and allows reporting access through {kib} application privileges. We recommend you explicitly turn off reporting's deprecated access control feature by adding `xpack.reporting.roles.enabled: false` in kibana.yml. This will enable you to create custom roles that provide application privileges for reporting, as described in <<grant-user-access, granting users access to reporting>>.
 ============================================================================
 
 [[xpack-reporting-roles-enabled]] `xpack.reporting.roles.enabled`::
@@ -250,13 +250,13 @@ deprecated:[7.14.0] In addition to superusers, specifies the roles that can gene
 To generate screenshots for PNG and PDF reports, Reporting opens the {kib} web interface using a local
 connection on the server. In most cases, using a local connection to the {kib} server presents no issue. If
 you prefer the headless browser to connect to {kib} using a specific hostname, there are a number of
-settings which can allow the headless browser to connect to {kib} through a proxy, rather than directly.
+settings that allow the headless browser to connect to {kib} through a proxy, rather than directly.
 
 [NOTE]
 ============
 The `xpack.reporting.kibanaServer` settings are optional. Take caution when editing these settings. Adding
-these settings brings a new category of reasons that {report-features} might not work. The clues to the reason
-for failing reports will require inspecting the server logs: the full {kib} URL that Reporting is attempting to
+these settings can cause the {report-features} to fail. If report fail,
+inspect the server logs. The full {kib} URL that Reporting is attempting to
   open is logged during report execution.
 ============
 
