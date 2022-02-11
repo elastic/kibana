@@ -10,58 +10,7 @@ import type { IRouter } from 'kibana/server';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
 import { FlameGraph } from './flamegraph';
-
-interface FilterObject {
-  bool: {
-    must: Array<
-      | {
-          term: {
-            ProjectID: {
-              value: string;
-              boost: number;
-            };
-          };
-        }
-      | {
-          range: {
-            '@timestamp': {
-              gte: string;
-              lt: string;
-              format: string;
-              boost: number;
-            };
-          };
-        }
-    >;
-  };
-}
-
-function createFilterObject(projectID: string, timeFrom: string, timeTo: string): FilterObject {
-  return {
-    bool: {
-      must: [
-        {
-          term: {
-            ProjectID: {
-              value: projectID,
-              boost: 1.0,
-            },
-          },
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: timeFrom,
-              lt: timeTo,
-              format: 'epoch_second',
-              boost: 1.0,
-            },
-          },
-        },
-      ],
-    },
-  } as FilterObject;
-}
+import { newProjectTimeQuery } from './mappings';
 
 function getSampledTraceEventsIndex(
   sampleSize: number,
@@ -126,7 +75,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
 
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const filter = createFilterObject(projectID!, timeFrom!, timeTo!);
+        const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
 
         // const resp = await getCountResponse(context, filter);
         const resp = await esClient.search({
