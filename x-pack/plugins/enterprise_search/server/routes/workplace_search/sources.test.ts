@@ -312,14 +312,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /internal/workplace_search/account/sources/{id}/validate_rules', () => {
+  describe('POST /internal/workplace_search/account/sources/{id}/indexing_rules/validate', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/internal/workplace_search/account/sources/{id}/validate_rules',
+        path: '/internal/workplace_search/account/sources/{id}/indexing_rules/validate',
       });
 
       registerAccountSourceValidateIndexingRulesRoute({
@@ -330,7 +330,7 @@ describe('sources routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/sources/:id/validate_rules',
+        path: '/ws/sources/:id/indexing_rules/validate',
       });
     });
 
@@ -859,14 +859,14 @@ describe('sources routes', () => {
     });
   });
 
-  describe('POST /internal/workplace_search/org/sources/{id}/validate_rules', () => {
+  describe('POST /internal/workplace_search/org/sources/{id}/indexing_rules/validate', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/internal/workplace_search/org/sources/{id}/validate_rules',
+        path: '/internal/workplace_search/org/sources/{id}/indexing_rules/validate',
       });
 
       registerOrgSourceValidateIndexingRulesRoute({
@@ -877,7 +877,7 @@ describe('sources routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/sources/:id/validate_rules',
+        path: '/ws/org/sources/:id/indexing_rules/validate',
       });
     });
 

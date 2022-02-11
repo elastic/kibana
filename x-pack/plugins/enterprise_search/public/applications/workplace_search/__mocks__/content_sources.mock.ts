@@ -48,7 +48,20 @@ export const contentSources = [
 const defaultIndexing = {
   enabled: true,
   defaultAction: 'include',
-  rules: [],
+  rules: [
+    {
+      filterType: 'object_type',
+      include: 'value',
+    },
+    {
+      filterType: 'path_template',
+      exclude: 'value',
+    },
+    {
+      filterType: 'file_extension',
+      include: 'value',
+    },
+  ],
   schedule: {
     full: 'P1D',
     incremental: 'PT2H',

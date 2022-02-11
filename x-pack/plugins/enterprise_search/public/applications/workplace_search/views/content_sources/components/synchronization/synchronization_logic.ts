@@ -186,7 +186,6 @@ export const SynchronizationLogic = kea<
         setIndexingRules: () => true,
         addIndexingRule: () => true,
         deleteIndexingRule: () => true,
-        addIndexingRules: () => true,
         updateServerSettings: () => false,
       },
     ],
@@ -280,18 +279,19 @@ export const SynchronizationLogic = kea<
     ],
     indexingRules: [
       (props.contentSource.indexing.rules as IndexingRule[]).map((rule, index) => ({
-        ...rule,
+        filterType: rule.filterType,
         id: index,
         valueType: rule.include ? 'include' : 'exclude',
-        value: rule.include ?? rule.exclude ?? '',
+        value: rule.include ?? rule.exclude,
       })),
       {
         addIndexingRule: (indexingRules, rule) => [
           ...indexingRules,
           {
             ...rule,
+            // make sure that we get a unique number, in case of multiple deletions and additions
             id: indexingRules.reduce(
-              (prev, curr) => (curr.id > prev ? curr.id : prev),
+              (prev, curr) => (curr.id >= prev ? curr.id + 1 : prev),
               indexingRules.length
             ),
           },
@@ -371,7 +371,7 @@ export const SynchronizationLogic = kea<
     },
     initAddIndexingRule: async ({ rule, callback }) => {
       const { id: sourceId } = props.contentSource;
-      const route = `/internal/workplace_search/org/sources/${sourceId}/validate_rules`;
+      const route = `/internal/workplace_search/org/sources/${sourceId}/indexing_rules/validate`;
       const { filterType, valueType, value } = rule;
       try {
         const response = await HttpLogic.values.http.post<{
@@ -407,7 +407,7 @@ export const SynchronizationLogic = kea<
     },
     initSetIndexingRule: async ({ rule, callback }) => {
       const { id: sourceId } = props.contentSource;
-      const route = `/internal/workplace_search/org/sources/${sourceId}/validate_rules`;
+      const route = `/internal/workplace_search/org/sources/${sourceId}/indexing_rules/validate`;
       const { filterType, valueType, value } = rule;
       try {
         const response = await HttpLogic.values.http.post<{

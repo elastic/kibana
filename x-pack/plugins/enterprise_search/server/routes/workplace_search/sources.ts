@@ -300,7 +300,7 @@ export function registerAccountSourceValidateIndexingRulesRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/internal/workplace_search/account/sources/{id}/validate_rules',
+      path: '/internal/workplace_search/account/sources/{id}/indexing_rules/validate',
       validate: {
         body: validateRulesSchema,
         params: schema.object({
@@ -309,7 +309,7 @@ export function registerAccountSourceValidateIndexingRulesRoute({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/sources/:id/validate_rules',
+      path: '/ws/sources/:id/indexing_rules/validate',
     })
   );
 }
@@ -667,7 +667,7 @@ export function registerOrgSourceValidateIndexingRulesRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/internal/workplace_search/org/sources/{id}/validate_rules',
+      path: '/internal/workplace_search/org/sources/{id}/indexing_rules/validate',
       validate: {
         body: validateRulesSchema,
         params: schema.object({
@@ -676,7 +676,7 @@ export function registerOrgSourceValidateIndexingRulesRoute({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/sources/:id/validate_rules',
+      path: '/ws/org/sources/:id/indexing_rules/validate',
     })
   );
 }

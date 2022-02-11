@@ -35,7 +35,7 @@ import {
 
 describe('SynchronizationLogic', () => {
   const { http } = mockHttpValues;
-  const { flashSuccessToast } = mockFlashMessageHelpers;
+  const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount } = new LogicMounter(SynchronizationLogic);
   const contentSource = fullContentSources[0];
@@ -57,8 +57,40 @@ describe('SynchronizationLogic', () => {
     hasUnsavedFrequencyChanges: false,
     contentExtractionChecked: true,
     thumbnailsChecked: true,
-    indexingRules: [],
-    indexingRulesForAPI: [],
+    indexingRules: [
+      {
+        filterType: 'object_type',
+        id: 0,
+        value: 'value',
+        valueType: 'include',
+      },
+      {
+        filterType: 'path_template',
+        id: 1,
+        value: 'value',
+        valueType: 'exclude',
+      },
+      {
+        filterType: 'file_extension',
+        id: 2,
+        value: 'value',
+        valueType: 'include',
+      },
+    ],
+    indexingRulesForAPI: [
+      {
+        filter_type: 'object_type',
+        include: 'value',
+      },
+      {
+        filter_type: 'path_template',
+        exclude: 'value',
+      },
+      {
+        filter_type: 'file_extension',
+        include: 'value',
+      },
+    ],
     schedule: contentSource.indexing.schedule,
     cachedSchedule: contentSource.indexing.schedule,
   };
@@ -197,6 +229,7 @@ describe('SynchronizationLogic', () => {
       };
 
       it('adds indexing rule with id 0', () => {
+        SynchronizationLogic.actions.setIndexingRules([]);
         SynchronizationLogic.actions.addIndexingRule(indexingRule);
 
         expect(SynchronizationLogic.values.indexingRules).toEqual([{ ...indexingRule, id: 0 }]);
@@ -205,14 +238,20 @@ describe('SynchronizationLogic', () => {
 
       it('adds indexing rule with id existing length + 1', () => {
         SynchronizationLogic.actions.addIndexingRule(indexingRule);
-        SynchronizationLogic.actions.addIndexingRule(indexingRule);
-        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          ...defaultValues.indexingRules,
+          { ...indexingRule, id: 3 },
+        ]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
+      it('adds indexing rule with unique id in case of previous deletions', () => {
+        SynchronizationLogic.actions.deleteIndexingRule({ ...indexingRule, id: 1 });
         SynchronizationLogic.actions.addIndexingRule(indexingRule);
 
         expect(SynchronizationLogic.values.indexingRules).toEqual([
-          { ...indexingRule, id: 0 },
-          { ...indexingRule, id: 1 },
-          { ...indexingRule, id: 2 },
+          defaultValues.indexingRules[0],
+          defaultValues.indexingRules[2],
           { ...indexingRule, id: 3 },
         ]);
         expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
@@ -228,23 +267,12 @@ describe('SynchronizationLogic', () => {
       };
 
       it('updates indexing rule', () => {
-        SynchronizationLogic.actions.addIndexingRule(indexingRule);
-        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+        SynchronizationLogic.actions.setIndexingRule(indexingRule);
 
         expect(SynchronizationLogic.values.indexingRules).toEqual([
-          { ...indexingRule, id: 0 },
-          { ...indexingRule, id: 1 },
-        ]);
-
-        SynchronizationLogic.actions.setIndexingRule({
-          ...indexingRule,
-          id: 1,
-          valueType: 'include',
-        });
-
-        expect(SynchronizationLogic.values.indexingRules).toEqual([
-          { ...indexingRule, id: 0 },
-          { ...indexingRule, id: 1, valueType: 'include' },
+          defaultValues.indexingRules[0],
+          indexingRule,
+          defaultValues.indexingRules[2],
         ]);
         expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
       });
@@ -278,14 +306,11 @@ describe('SynchronizationLogic', () => {
       };
 
       it('updates indexing rules', () => {
-        SynchronizationLogic.actions.setIndexingRules([indexingRule, indexingRule]);
-        expect(SynchronizationLogic.values.indexingRules).toEqual([
-          { ...indexingRule, id: 0 },
-          { ...indexingRule, id: 1 },
-        ]);
-
+        const newIndexingRules = defaultValues.indexingRules.filter(
+          (val) => val.id !== indexingRule.id
+        );
         SynchronizationLogic.actions.deleteIndexingRule(indexingRule);
-        expect(SynchronizationLogic.values.indexingRules).toEqual([{ ...indexingRule, id: 0 }]);
+        expect(SynchronizationLogic.values.indexingRules).toEqual(newIndexingRules);
 
         expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
       });
@@ -334,7 +359,7 @@ describe('SynchronizationLogic', () => {
         SynchronizationLogic.actions.initAddIndexingRule(indexingRule, callbackObject.callback);
 
         expect(http.post).toHaveBeenCalledWith(
-          '/internal/workplace_search/org/sources/123/validate_rules',
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
           {
             body: JSON.stringify({
               rules: [
@@ -359,10 +384,41 @@ describe('SynchronizationLogic', () => {
           callback: () => true,
         };
         const callbackSpy = jest.spyOn(callbackObject, 'callback');
+        SynchronizationLogic.actions.initAddIndexingRule(
+          { ...indexingRule, valueType: 'include' },
+          callbackObject.callback
+        );
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  include: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(addIndexingRuleSpy).not.toHaveBeenCalled();
+        expect(callbackSpy).toHaveBeenCalled();
+      });
+
+      it('flashes an error if the API call fails', async () => {
+        const addIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'addIndexingRule');
+        const promise = Promise.reject('error');
+        http.post.mockReturnValue(promise);
+        const callbackObject = {
+          callback: () => true,
+        };
+        const callbackSpy = jest.spyOn(callbackObject, 'callback');
         SynchronizationLogic.actions.initAddIndexingRule(indexingRule, callbackObject.callback);
 
         expect(http.post).toHaveBeenCalledWith(
-          '/internal/workplace_search/org/sources/123/validate_rules',
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
           {
             body: JSON.stringify({
               rules: [
@@ -374,9 +430,10 @@ describe('SynchronizationLogic', () => {
             }),
           }
         );
-        await promise;
+        await nextTick();
         expect(addIndexingRuleSpy).not.toHaveBeenCalled();
-        expect(callbackSpy).toHaveBeenCalled();
+        expect(callbackSpy).not.toHaveBeenCalled();
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -398,7 +455,7 @@ describe('SynchronizationLogic', () => {
         SynchronizationLogic.actions.initSetIndexingRule(indexingRule, callbackObject.callback);
 
         expect(http.post).toHaveBeenCalledWith(
-          '/internal/workplace_search/org/sources/123/validate_rules',
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
           {
             body: JSON.stringify({
               rules: [
@@ -423,10 +480,40 @@ describe('SynchronizationLogic', () => {
           callback: () => true,
         };
         const callbackSpy = jest.spyOn(callbackObject, 'callback');
+        SynchronizationLogic.actions.initSetIndexingRule(
+          { ...indexingRule, valueType: 'include' },
+          callbackObject.callback
+        );
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  include: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(setIndexingRuleSpy).not.toHaveBeenCalled();
+        expect(callbackSpy).toHaveBeenCalled();
+      });
+      it('flashes an error if the API call fails', async () => {
+        const setIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'setIndexingRule');
+        const promise = Promise.reject('error');
+        http.post.mockReturnValue(promise);
+        const callbackObject = {
+          callback: () => true,
+        };
+        const callbackSpy = jest.spyOn(callbackObject, 'callback');
         SynchronizationLogic.actions.initSetIndexingRule(indexingRule, callbackObject.callback);
 
         expect(http.post).toHaveBeenCalledWith(
-          '/internal/workplace_search/org/sources/123/validate_rules',
+          '/internal/workplace_search/org/sources/123/indexing_rules/validate',
           {
             body: JSON.stringify({
               rules: [
@@ -438,9 +525,10 @@ describe('SynchronizationLogic', () => {
             }),
           }
         );
-        await promise;
+        await nextTick();
         expect(setIndexingRuleSpy).not.toHaveBeenCalled();
-        expect(callbackSpy).toHaveBeenCalled();
+        expect(callbackSpy).not.toHaveBeenCalled();
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -475,7 +563,20 @@ describe('SynchronizationLogic', () => {
                 content_extraction: { enabled: true },
                 thumbnails: { enabled: true },
               },
-              rules: [],
+              rules: [
+                {
+                  filter_type: 'object_type',
+                  include: 'value',
+                },
+                {
+                  filter_type: 'path_template',
+                  exclude: 'value',
+                },
+                {
+                  filter_type: 'file_extension',
+                  include: 'value',
+                },
+              ],
             },
           },
         });

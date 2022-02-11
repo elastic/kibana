@@ -168,11 +168,15 @@ export interface BlockedWindow {
   end: string;
 }
 
-export interface IndexingRule {
-  filterType: 'object_type' | 'path_template' | 'file_extension';
-  exclude?: string;
-  include?: string;
-}
+export type IndexingRule =
+  | {
+      filterType: 'object_type' | 'path_template' | 'file_extension';
+      exclude: string;
+    }
+  | {
+      filterType: 'object_type' | 'path_template' | 'file_extension';
+      include: string;
+    };
 
 export interface IndexingConfig {
   enabled: boolean;
