@@ -30,26 +30,32 @@ export function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): ISco
 }
 
 function wrapEsClient(esClient: ElasticsearchClient): ElasticsearchClient {
-  return {
-    ...esClient,
-    search: async <
-      TDocument = unknown,
-      TAggregations = Record<AggregateName, AggregationsAggregate>,
-      TContext = unknown
-    >(
-      query?: SearchRequest | SearchRequestWithBody,
-      options?: TransportRequestOptions
-    ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, TContext>> => {
-      try {
-        const searchOptions = options ?? {};
-        const result = await esClient.search<TDocument, TAggregations, TContext>(
-          query,
-          searchOptions
-        );
-        return result;
-      } catch (e) {
-        throw e;
-      }
-    },
+  const wrappedClient: Record<string, unknown> = {};
+  for (const attr in esClient) {
+    if (!['search'].includes(attr)) {
+      wrappedClient[attr] = esClient[attr as keyof ElasticsearchClient];
+    }
+  }
+
+  wrappedClient.search = async <
+    TDocument = unknown,
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
+    TContext = unknown
+  >(
+    query?: SearchRequest | SearchRequestWithBody,
+    options?: TransportRequestOptions
+  ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, TContext>> => {
+    try {
+      const searchOptions = options ?? {};
+      const result = await esClient.search<TDocument, TAggregations, TContext>(
+        query,
+        searchOptions
+      );
+      return result;
+    } catch (e) {
+      throw e;
+    }
   };
+
+  return wrappedClient as ElasticsearchClient;
 }
