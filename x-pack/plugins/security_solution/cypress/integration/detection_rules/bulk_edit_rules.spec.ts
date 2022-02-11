@@ -98,7 +98,6 @@ describe('Detection rules, bulk edit', () => {
 
     // Select Elastic rules and custom rules, check mixed rules warning modal window, proceed with editing custom rules
     cy.get(ELASTIC_RULES_BTN).click();
-
     selectAllRules();
     clickAddIndexPatternsMenuItem();
     waitForMixedRulesBulkEditModal(totalNumberOfPrebuiltRules, 6);
@@ -121,18 +120,14 @@ describe('Detection rules, bulk edit', () => {
     selectAllRules();
 
     openBulkEditAddIndexPatternsForm();
-
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
     confirmBulkEditForm();
-
     waitForBulkEditActionToFinish({ rulesCount: 6 });
 
-    changeRowsPerPageTo(20);
-
     // check if rule has been updated
+    changeRowsPerPageTo(20);
     goToTheRuleDetailsOf(RULE_NAME);
     hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
-
     cy.go('back');
 
     cy.log('Deletes index patterns');
@@ -140,32 +135,25 @@ describe('Detection rules, bulk edit', () => {
     // This way we also test bulk edit with rules ids parameter instead if a query.
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
     openBulkEditDeleteIndexPatternsForm();
-
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
     confirmBulkEditForm();
-
     waitForBulkEditActionToFinish({ rulesCount: 6 });
 
     // check if rule has been updated
     goToTheRuleDetailsOf(RULE_NAME);
     hasIndexPatterns(DEFAULT_INDEX_PATTERNS.join(''));
-
     cy.go('back');
 
     cy.log('Overwrites index patterns');
-    const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
-
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
     openBulkEditAddIndexPatternsForm();
     cy.get(RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX)
       .should('have.text', 'Overwrite all selected rules index patterns')
       .click();
-
     cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
       'have.text',
       'You’re about to overwrite index patterns for 6 selected rules, press Save to apply changes.'
     );
-
     typeIndexPatterns(OVERWRITE_INDEX_PATTERNS);
     confirmBulkEditForm();
     waitForBulkEditActionToFinish({ rulesCount: 6 });
@@ -212,15 +200,14 @@ describe('Detection rules, bulk edit', () => {
     cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
       .should('have.text', 'Overwrite all selected rules tags')
       .click();
-
     cy.get(RULES_BULK_EDIT_TAGS_WARNING).should(
       'have.text',
       'You’re about to overwrite tags for 6 selected rules, press Save to apply changes.'
     );
-
     typeTags(['overwrite-tag']);
     confirmBulkEditForm();
     waitForBulkEditActionToFinish({ rulesCount: 6 });
+
     testAllTagsBadges(['overwrite-tag']);
   });
 });
