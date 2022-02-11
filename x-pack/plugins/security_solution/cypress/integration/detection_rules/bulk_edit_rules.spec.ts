@@ -17,6 +17,7 @@ import {
   RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
   RULES_BULK_EDIT_TAGS_WARNING,
+  RULES_TAGS_FILTER_BTN,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -56,13 +57,12 @@ const RULE_NAME = 'Custom rule for bulk actions';
 
 const CUSTOM_INDEX_PATTERN_1 = 'custom-cypress-test-*';
 const DEFAULT_INDEX_PATTERNS = ['index-1-*', 'index-2-*'];
-const DEFAULT_TAGS = ['default-tag'];
+const TAGS = ['cypress-tag-1', 'cypress-tag-2'];
 
 const customRule = {
   ...getNewRule(),
   index: DEFAULT_INDEX_PATTERNS,
   name: RULE_NAME,
-  tags: DEFAULT_TAGS,
 };
 
 describe('Detection rules, bulk edit', () => {
@@ -114,7 +114,7 @@ describe('Detection rules, bulk edit', () => {
   });
 
   it('should add/delete/overwrite index patterns in rules', () => {
-    // First step: add index patterns to all rules
+    cy.log('Adds index patterns');
     // Switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
     // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
     changeRowsPerPageTo(5);
@@ -135,7 +135,7 @@ describe('Detection rules, bulk edit', () => {
 
     cy.go('back');
 
-    // Second step: remove one index pattern
+    cy.log('Deletes index patterns');
     // select all rules on page (as page displays all existing rules).
     // This way we also test bulk edit with rules ids parameter instead if a query.
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
@@ -152,7 +152,7 @@ describe('Detection rules, bulk edit', () => {
 
     cy.go('back');
 
-    // Third step: overwrite index patterns
+    cy.log('Overwrites index patterns');
     const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
 
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
@@ -176,34 +176,38 @@ describe('Detection rules, bulk edit', () => {
   });
 
   it('should add/delete/overwrite tags in rules', () => {
-    // First step: add tags to all rules
+    cy.log('Add tags to all rules');
     // Switch to 5 rules per page, so we can edit all existing rules, not only ones on a page
     // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
     changeRowsPerPageTo(5);
     selectAllRules();
 
-    // open add tags from and add save 2 new tags
+    // open add tags form and add 2 new tags
     openBulkEditAddTagsForm();
-    typeTags(['tag1', 'tag2']);
+    typeTags(TAGS);
     confirmBulkEditForm();
     waitForBulkEditActionToFinish({ rulesCount: 6 });
 
-    // check if all rules have been updated
+    // check if all rules have been updated with new tags
     changeRowsPerPageTo(20);
-    testAllTagsBadges(['tag1', 'tag2']);
+    testAllTagsBadges(TAGS);
+    // test how many tags exist and displayed in filter button
+    cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags2/);
 
-    // Second step: remove one tag from all rules
+    cy.log('Remove one tag from all rules');
     // select all rules on page (as page displays all existing rules).
     // This way we also test bulk edit with rules ids parameter instead if a query.
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
 
     openBulkEditDeleteTagsForm();
-    typeTags(['tag1']);
+    typeTags([TAGS[0]]);
     confirmBulkEditForm();
     waitForBulkEditActionToFinish({ rulesCount: 6 });
-    testAllTagsBadges(['tag2']);
 
-    // Third step: overwrite all tags
+    testAllTagsBadges(TAGS.slice(1));
+    cy.get(RULES_TAGS_FILTER_BTN).contains(/Tags1/);
+
+    cy.log('Overwrite all tags');
     openBulkEditAddTagsForm();
     cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
       .should('have.text', 'Overwrite all selected rules tags')
