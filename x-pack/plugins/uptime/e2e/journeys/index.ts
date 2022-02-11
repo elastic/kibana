@@ -12,3 +12,4 @@ export * from './step_duration.journey';
 export * from './alerts';
 export * from './read_only_user';
 export * from './monitor_name.journey';
+export * from './monitor_details';
