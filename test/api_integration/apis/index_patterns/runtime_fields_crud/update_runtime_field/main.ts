@@ -70,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
             config.serviceKey === 'index_pattern' ? response3.body.field : response3.body.fields[0];
 
           expect(response3.status).to.be(200);
+          expect(response3.body[config.serviceKey]).to.not.be.empty();
           expect(field.type).to.be('string');
           expect(field.runtimeField.type).to.be('keyword');
           expect(field.runtimeField.script.source).to.be("doc['something_new'].value");
