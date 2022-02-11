@@ -38,7 +38,7 @@ journey('MontiorDetails', async ({ page, params }: { page: Page; params: any }) 
     await uptime.assertText({ text: 'Test Monitor' });
     const url = await page.textContent('[data-test-subj="monitor-page-url"]');
     const type = await page.textContent('[data-test-subj="monitor-page-type"]');
-    expect(url).toEqual('--');
+    expect(url).toEqual('https://us-central.synthetics.elastic.dev');
     expect(type).toEqual('HTTP');
   });
 });

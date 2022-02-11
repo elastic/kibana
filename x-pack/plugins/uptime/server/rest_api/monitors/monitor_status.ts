@@ -57,9 +57,11 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
       } = monitorSavedObject.attributes as MonitorFields;
 
       return {
+        url: {
+          full: url || host,
+        },
         monitor: {
           name,
-          urls: url || host,
           type,
           id: monitorSavedObject.id,
         },
