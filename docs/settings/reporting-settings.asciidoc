@@ -70,7 +70,7 @@ How often the index that stores reporting jobs rolls over to a new index. Valid 
 When `true`, enables the {kib} instance to poll {es} for pending jobs and claim them for
 execution. When `false`, allows the {kib} instance to only add new jobs to the reporting queue, list
 jobs, and provide the downloads to completed reports through the UI. This requires a deployment where at least
-one other Kibana instance in the Elastic cluster has this setting to `true`. The default is `true`.
+one other {kib} instance in the Elastic cluster has this setting to `true`. The default is `true`.
 
 NOTE: Running multiple instances of {kib} in a cluster for load balancing of
 reporting requires identical values for <<xpack-reporting-encryptionKey, `xpack.reporting.encryptionKey`>> and, if
