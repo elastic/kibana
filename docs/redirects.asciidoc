@@ -386,15 +386,15 @@ This content has moved. Refer to <<managing-data-views>>.
 
 This content has moved. Refer to <<kibana-role-management>>.
 
-[role="exclude",id="logging-configuration-changes"]
-== Logging configuration changes
-
-This content has moved. Refer to <<logging-config-changes>>.
-
 [role="exclude",id="upgrade-migrations"]
 == Upgrade migrations
 
 This content has moved. Refer to <<saved-object-migrations>>.
+
+[role="exclude",id="upgrade-standard"]
+== Standard Upgrade
+
+This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
 
 [role="exclude",id="upgrade-assistant"]
 == Upgrade Assistant
