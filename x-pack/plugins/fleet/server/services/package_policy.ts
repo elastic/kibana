@@ -164,24 +164,12 @@ class PackagePolicyService {
       }
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      const installablePackage: InstallablePackage = await Registry.fetchInfo(
-        pkgInfo.name,
-        pkgInfo.version
-      ).catch(async (error) => {
-        // Attempt to get an ArchivePackage object from the package info cache if the registry
-        // is not reachable. This will pull a bundled package if it was previously installed.
-        const archivePackage = await getArchivePackage({
-          name: pkgInfo.name,
-          version: pkgInfo.version,
-        });
+      let installablePackage: InstallablePackage | undefined =
+        getArchivePackage(pkgInfo)?.packageInfo;
 
-        // If we don't find a package in the cache, throw the original error
-        if (!archivePackage) {
-          throw error;
-        }
-
-        return archivePackage?.packageInfo;
-      });
+      if (!installablePackage) {
+        installablePackage = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      }
 
       inputs = await this._compilePackagePolicyInputs(
         installablePackage,
