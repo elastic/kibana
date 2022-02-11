@@ -109,22 +109,22 @@ exports[`NoDataPage render 1`] = `
   <NoDataPageBody
     actionCards={
       Array [
-        <EuiFlexItem
-          className="kbnNoDataPageContents__item"
-        >
-          <ElasticAgentCard
-            solution="Elastic"
-          />
-        </EuiFlexItem>,
-        <EuiFlexItem
-          className="kbnNoDataPageContents__item"
-        >
-          <ElasticAgentCard
-            solution="Elastic"
-          />
-        </EuiFlexItem>,
         <ActionCard
-          action={Object {}}
+          child={
+            <ElasticAgentCard
+              solution="Elastic"
+            />
+          }
+        />,
+        <ActionCard
+          child={
+            <ElasticAgentCard
+              solution="Elastic"
+            />
+          }
+        />,
+        <ActionCard
+          child={<NoDataCard />}
         />,
       ]
     }
