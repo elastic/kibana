@@ -84,7 +84,7 @@ export const TEST_CASES: Record<string, ResolveImportErrorsTestCase> = Object.fr
     id: `conflict_2d`,
     originId: `conflict_2`,
     // destinationId is undefined on purpose
-    expectedNewId: `conflict_2b`, // since conflict_2c was matched with conflict_2a, this (conflict_2d will result in a regular inexact match conflict with conflict_2b
+    expectedNewId: `conflict_2b`, // since conflict_2c was matched with conflict_2a, this (conflict_2d) will result in a regular inexact match conflict with conflict_2b
   }),
   CONFLICT_3A_OBJ: Object.freeze({
     type: 'sharedtype',
