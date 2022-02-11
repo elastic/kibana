@@ -129,11 +129,13 @@ export function getMigrations(
   const migrationRules800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(
-      addThreatIndicatorPathToThreatMatchRules,
-      addSecuritySolutionAADRuleTypes,
-      fixInventoryThresholdGroupId
-    )
+    pipeMigrations(addThreatIndicatorPathToThreatMatchRules, fixInventoryThresholdGroupId)
+  );
+
+  const migrationRules801 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addSecuritySolutionAADRuleTypes)
   );
 
   return {
@@ -145,6 +147,7 @@ export function getMigrations(
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
     '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
+    '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
   };
 }
 
@@ -661,6 +664,9 @@ function addSecuritySolutionAADRuleTypes(
         ...doc,
         attributes: {
           ...doc.attributes,
+          tags: doc.attributes.enabled
+            ? [...doc.attributes.tags, 'auto_disabled_8.0.1']
+            : doc.attributes.tags,
           alertTypeId: ruleTypeMappings[ruleType],
           enabled: false,
           params: {

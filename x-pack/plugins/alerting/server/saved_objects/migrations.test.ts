@@ -2058,16 +2058,17 @@ describe('successful migrations', () => {
     });
 
     test('doesnt change AAD rule params if not a siem.signals rule', () => {
-      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
       const alert = getMockData(
         { params: { outputIndex: 'output-index', type: 'query' }, alertTypeId: 'not.siem.signals' },
         true
       );
-      expect(migration800(alert, migrationContext).attributes.alertTypeId).toEqual(
+      expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
         'not.siem.signals'
       );
-      expect(migration800(alert, migrationContext).attributes.enabled).toEqual(true);
-      expect(migration800(alert, migrationContext).attributes.params.outputIndex).toEqual(
+      expect(migration801(alert, migrationContext).attributes.enabled).toEqual(true);
+      expect(migration801(alert, migrationContext).attributes.tags).toEqual(['foo']);
+      expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual(
         'output-index'
       );
     });
@@ -2075,16 +2076,41 @@ describe('successful migrations', () => {
     test.each(Object.keys(ruleTypeMappings) as RuleType[])(
       'Changes AAD rule params accordingly if rule is a siem.signals %p rule',
       (ruleType) => {
-        const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+        const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
         const alert = getMockData(
           { params: { outputIndex: 'output-index', type: ruleType }, alertTypeId: 'siem.signals' },
           true
         );
-        expect(migration800(alert, migrationContext).attributes.alertTypeId).toEqual(
+        expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
           ruleTypeMappings[ruleType]
         );
-        expect(migration800(alert, migrationContext).attributes.enabled).toEqual(false);
-        expect(migration800(alert, migrationContext).attributes.params.outputIndex).toEqual('');
+        expect(migration801(alert, migrationContext).attributes.enabled).toEqual(false);
+        expect(migration801(alert, migrationContext).attributes.tags).toEqual([
+          'foo',
+          'auto_disabled_8.0.1',
+        ]);
+        expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual('');
+      }
+    );
+
+    test.each(Object.keys(ruleTypeMappings) as RuleType[])(
+      'Does not update %p rule tags if rule is disabled',
+      (ruleType) => {
+        const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
+        const alert = getMockData(
+          {
+            params: { outputIndex: 'output-index', type: ruleType },
+            alertTypeId: 'siem.signals',
+            enabled: false,
+          },
+          true
+        );
+        expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
+          ruleTypeMappings[ruleType]
+        );
+        expect(migration801(alert, migrationContext).attributes.enabled).toEqual(false);
+        expect(migration801(alert, migrationContext).attributes.tags).toEqual(['foo']);
+        expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual('');
       }
     );
 
