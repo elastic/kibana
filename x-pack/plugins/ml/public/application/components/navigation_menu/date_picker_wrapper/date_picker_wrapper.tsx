@@ -260,7 +260,7 @@ export const DatePickerWrapper: FC = () => {
           end={time.to}
           isPaused={refreshInterval.pause}
           isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-          refreshInterval={refreshInterval.value}
+          refreshInterval={refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS}
           onTimeChange={updateTimeFilter}
           onRefresh={updateLastRefresh}
           onRefreshChange={updateInterval}
