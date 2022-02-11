@@ -27,7 +27,6 @@ describe('When on the blocklist page', () => {
     });
   });
 
-  // FIXME: unskip once api mocks has been created
   describe('And no data exists', () => {
     it('should show the Empty message', async () => {
       render();
