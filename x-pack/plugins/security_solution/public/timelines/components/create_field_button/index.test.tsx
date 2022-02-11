@@ -112,7 +112,7 @@ describe('CreateFieldButton', () => {
   it("stores 'closeEditor' in the actions ref when editor is open", async () => {
     const mockCloseEditor = jest.fn();
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
+    useKibanaMock().services.indexPatternFieldEditor.openEditor = () => mockCloseEditor;
 
     const editorActionsRef: MutableRefObject<CreateFieldEditorActions> = React.createRef();
     await act(async () => {
