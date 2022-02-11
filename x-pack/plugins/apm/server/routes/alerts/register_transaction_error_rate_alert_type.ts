@@ -234,7 +234,7 @@ export function registerTransactionErrorRateAlertType({
               threshold: ruleParams.threshold,
               triggerValue: asDecimalOrInteger(errorRate),
               interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
-              reason: reasonMessage
+              reason: reasonMessage,
             });
         });
 

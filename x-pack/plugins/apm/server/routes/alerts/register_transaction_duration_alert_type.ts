@@ -210,7 +210,7 @@ export function registerTransactionDurationAlertType({
             threshold: thresholdMicroseconds,
             triggerValue: transactionDurationFormatted,
             interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
-            reason: reasonMessage
+            reason: reasonMessage,
           });
       }
 
