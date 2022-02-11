@@ -7,17 +7,19 @@
 
 import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicAlert } from './alert';
-import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
-import { PluginSetupContract, PluginStartContract } from './plugin';
-import { RulesClient } from './rules_client';
-export * from '../common';
+import { Dictionary } from 'lodash';
 import {
   IScopedClusterClient,
   KibanaRequest,
+  Logger,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '../../../../src/core/server';
+import { Alert as CreatedAlert, PublicAlert } from './alert';
+import { NormalizedRuleType, RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
+import { PluginSetupContract, PluginStartContract } from './plugin';
+import { RulesClient } from './rules_client';
+export * from '../common';
 import {
   Alert,
   AlertActionParams,
@@ -34,9 +36,16 @@ import {
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
+  RuleTaskStateWithActions,
+  IntervalSchedule,
+  RuleTaskState,
+  SanitizedAlert,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
+import { ConcreteTaskInstance } from '../../task_manager/server';
+import { IEventLogger } from '../../event_log/server';
+import { ExecutionHandler } from './task_runner/create_execution_handler';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -281,3 +290,81 @@ export interface InvalidatePendingApiKey {
 }
 
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
+
+export interface RuleTaskRunResultWithActions {
+  state: RuleTaskStateWithActions;
+  monitoring: RuleMonitoring | undefined;
+  schedule: IntervalSchedule | undefined;
+}
+
+export interface RuleTaskRunResult {
+  state: RuleTaskState;
+  monitoring: RuleMonitoring | undefined;
+  schedule: IntervalSchedule | undefined;
+}
+
+export interface RuleTaskInstance extends ConcreteTaskInstance {
+  state: RuleTaskState;
+}
+
+export interface TrackAlertDurationsParams<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+> {
+  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+}
+
+export interface GenerateNewAndRecoveredAlertEventsParams<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+> {
+  eventLogger: IEventLogger;
+  executionId: string;
+  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  ruleId: string;
+  ruleLabel: string;
+  namespace: string | undefined;
+  ruleType: NormalizedRuleType<
+    AlertTypeParams,
+    AlertTypeParams,
+    AlertTypeState,
+    {
+      [x: string]: unknown;
+    },
+    {
+      [x: string]: unknown;
+    },
+    string,
+    string
+  >;
+  rule: SanitizedAlert<AlertTypeParams>;
+}
+
+export interface ScheduleActionsForRecoveredAlertsParams<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  RecoveryActionGroupId extends string
+> {
+  logger: Logger;
+  recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
+  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
+  mutedAlertIdsSet: Set<string>;
+  ruleLabel: string;
+}
+
+export interface LogActiveAndRecoveredAlertsParams<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  logger: Logger;
+  activeAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, ActionGroupIds>>;
+  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  ruleLabel: string;
+}
