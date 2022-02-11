@@ -119,9 +119,13 @@ export function removeRuleInformation(
   try {
     const { new_value, action, action_field } = doc.attributes;
 
+    if (!isCreateComment(action, action_field)) {
+      return originalDocWithReferences;
+    }
+
     const decodedNewValueData = decodeNewValue(new_value);
 
-    if (!isAlertUserAction(action, action_field, decodedNewValueData)) {
+    if (!isAlertUserAction(decodedNewValueData)) {
       return originalDocWithReferences;
     }
 
@@ -159,21 +163,15 @@ function decodeNewValue(data?: string | null): unknown | null {
     return null;
   }
 
-  return JSON.parse(data);
+  try {
+    return JSON.parse(data);
+  } catch (error) {
+    return null;
+  }
 }
 
-function isAlertUserAction(
-  action?: string,
-  actionFields?: string[],
-  newValue?: unknown | null
-): newValue is AlertCommentOptional {
-  return isCreateComment(action, actionFields) && isAlertObject(newValue);
-}
-
-type AlertCommentOptional = Partial<CommentRequestAlertType>;
-
-function isAlertObject(data?: unknown | null): boolean {
-  const unsafeAlertData = data as AlertCommentOptional;
+function isAlertUserAction(newValue?: unknown | null): newValue is AlertCommentOptional {
+  const unsafeAlertData = newValue as AlertCommentOptional;
 
   return (
     unsafeAlertData !== undefined &&
@@ -182,6 +180,8 @@ function isAlertObject(data?: unknown | null): boolean {
       unsafeAlertData.type === CommentType.alert)
   );
 }
+
+type AlertCommentOptional = Partial<CommentRequestAlertType>;
 
 export const userActionsMigrations = {
   '7.10.0': (doc: SavedObjectUnsanitizedDoc<UserActions>): SavedObjectSanitizedDoc<UserActions> => {
