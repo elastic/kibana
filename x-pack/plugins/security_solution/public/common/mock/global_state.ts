@@ -90,7 +90,6 @@ export const mockGlobalState: State = {
           sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
-        sessions: null,
       },
     },
     details: {
@@ -112,7 +111,6 @@ export const mockGlobalState: State = {
           sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
-        sessions: null,
       },
     },
   },

@@ -62,7 +62,6 @@ export const initialHostsState: HostsState = {
         },
         severitySelection: [],
       },
-      [HostsTableType.sessions]: null,
     },
   },
   details: {
@@ -99,7 +98,6 @@ export const initialHostsState: HostsState = {
         },
         severitySelection: [],
       },
-      [HostsTableType.sessions]: null,
     },
   },
 };

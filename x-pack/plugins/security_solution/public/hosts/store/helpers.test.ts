@@ -45,7 +45,6 @@ export const mockHostsState: HostsModel = {
         },
         severitySelection: [],
       },
-      [HostsTableType.sessions]: null,
     },
   },
   details: {
@@ -82,7 +81,6 @@ export const mockHostsState: HostsModel = {
         },
         severitySelection: [],
       },
-      [HostsTableType.sessions]: null,
     },
   },
 };

@@ -50,7 +50,6 @@ export interface Queries {
   [HostsTableType.anomalies]: null | undefined;
   [HostsTableType.alerts]: BasicQueryPaginated;
   [HostsTableType.risk]: HostRiskScoreQuery;
-  [HostsTableType.sessions]: null | undefined;
 }
 
 export interface GenericHostsModel {

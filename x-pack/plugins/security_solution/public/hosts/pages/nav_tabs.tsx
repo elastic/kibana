@@ -61,12 +61,6 @@ export const navTabsHosts = (
       href: getTabsOnHostsUrl(HostsTableType.risk),
       disabled: false,
     },
-    [HostsTableType.sessions]: {
-      id: HostsTableType.sessions,
-      name: i18n.NAVIGATION_SESSIONS_TITLE,
-      href: getTabsOnHostsUrl(HostsTableType.sessions),
-      disabled: false,
-    },
   };
 
   if (!hasMlUserPermissions) {

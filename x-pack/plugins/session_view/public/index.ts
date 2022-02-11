@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
 import { SessionViewPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new SessionViewPlugin(initializerContext);
+export function plugin() {
+  return new SessionViewPlugin();
 }
