@@ -6,13 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
-  EuiToolTip,
-  EuiButton,
-  EuiPopover,
-  EuiIcon,
-  EuiContextMenu,
-} from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiPopover, EuiIcon, EuiContextMenu } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LayerType, layerTypes } from '../../../../common';

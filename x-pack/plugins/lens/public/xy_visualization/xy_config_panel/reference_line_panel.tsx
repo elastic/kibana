@@ -314,48 +314,51 @@ export const ReferenceLinePanel = (
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
-        label={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
-          defaultMessage: 'Decoration position',
-        })}
-      >
-        <TooltipWrapper
-          tooltipContent={i18n.translate(
-            'xpack.lens.referenceLineMarker.positionRequirementTooltip',
-            {
-              defaultMessage:
-                'You must select an icon or show the display name in order to alter its position',
-            }
-          )}
-          condition={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
-          position="top"
-          delay="regular"
-          display="block"
+      {currentYConfig?.icon || Boolean(currentYConfig?.textVisibility) ? (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
+          label={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
+            defaultMessage: 'Decoration position',
+          })}
         >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
-              defaultMessage: 'Decoration position',
-            })}
-            data-test-subj="lnsXY_markerPosition_referenceLine"
-            name="markerPosition"
-            isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
-            buttonSize="compressed"
-            options={getIconPositionOptions({
-              isHorizontal,
-              axisMode: currentYConfig!.axisMode,
-            })}
-            idSelected={`${idPrefix}${currentYConfig?.iconPosition || 'auto'}`}
-            onChange={(id) => {
-              const newMode = id.replace(idPrefix, '') as IconPosition;
-              setYConfig({ forAccessor: accessor, iconPosition: newMode });
-            }}
-          />
-        </TooltipWrapper>
-      </EuiFormRow>
+          <TooltipWrapper
+            tooltipContent={i18n.translate(
+              'xpack.lens.referenceLineMarker.positionRequirementTooltip',
+              {
+                defaultMessage:
+                  'You must select an icon or show the name in order to alter its position',
+              }
+            )}
+            condition={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
+            position="top"
+            delay="regular"
+            display="block"
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
+                defaultMessage: 'Decoration position',
+              })}
+              data-test-subj="lnsXY_markerPosition_referenceLine"
+              name="markerPosition"
+              isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
+              buttonSize="compressed"
+              options={getIconPositionOptions({
+                isHorizontal,
+                axisMode: currentYConfig!.axisMode,
+              })}
+              idSelected={`${idPrefix}${currentYConfig?.iconPosition || 'auto'}`}
+              onChange={(id) => {
+                const newMode = id.replace(idPrefix, '') as IconPosition;
+                setYConfig({ forAccessor: accessor, iconPosition: newMode });
+              }}
+            />
+          </TooltipWrapper>
+        </EuiFormRow>
+      ) : null}
+
       <EuiFormRow
         display="columnCompressed"
         fullWidth
