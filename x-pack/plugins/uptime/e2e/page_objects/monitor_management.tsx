@@ -96,9 +96,8 @@ export function monitorManagementPageProvider({
     },
 
     async selectLocations({ locations }: { locations: string[] }) {
-      await this.clickByTestSubj('syntheticsServiceLocationsComboBox');
       for (let i = 0; i < locations.length; i++) {
-        await page.click(`text=${locations[i]}`);
+        await page.check(`text=${locations[i]}`);
       }
     },
 
