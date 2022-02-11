@@ -24,6 +24,7 @@ import { PromiseStream } from '../../import_exception_list_and_items';
 import {
   createExceptionsStreamFromNdjson,
   exceptionsChecksFromArray,
+  manageExceptionComments,
 } from './create_exceptions_stream_logic';
 
 describe('create_exceptions_stream_logic', () => {
@@ -336,6 +337,80 @@ describe('create_exceptions_stream_logic', () => {
           },
         ]);
       });
+    });
+  });
+
+  describe('manageExceptionComments', () => {
+    test('returns empty array if passed in "comments" undefined', () => {
+      const result = manageExceptionComments(undefined);
+      expect(result).toEqual([]);
+    });
+
+    test('returns empty array if passed in "comments" empty array', () => {
+      const result = manageExceptionComments([]);
+      expect(result).toEqual([]);
+    });
+
+    test('returns formatted comment when meta fields exist', () => {
+      const result = manageExceptionComments([
+        {
+          comment: 'some old comment',
+          created_at: '2020-04-20T15:25:31.830Z',
+          created_by: 'kibana',
+          id: 'uuid_here',
+          updated_at: '2020-05-20T15:25:31.830Z',
+          updated_by: 'lily',
+        },
+      ]);
+
+      expect(result).toEqual([
+        {
+          comment: 'some old comment',
+          meta: {
+            import_fields: {
+              created_at: '2020-04-20T15:25:31.830Z',
+              created_by: 'kibana',
+              updated_at: '2020-05-20T15:25:31.830Z',
+              updated_by: 'lily',
+            },
+          },
+        },
+      ]);
+    });
+
+    test('returns formatted comment when meta fields do not exist', () => {
+      const result = manageExceptionComments([
+        {
+          comment: 'some old comment',
+        },
+      ]);
+
+      expect(result).toEqual([
+        {
+          comment: 'some old comment',
+          meta: undefined,
+        },
+      ]);
+    });
+
+    test('returns formatted comment when comment includes "item.meta"', () => {
+      const result = manageExceptionComments([
+        {
+          comment: 'some old comment',
+          meta: {
+            some_field: 'some field',
+          },
+        },
+      ]);
+
+      expect(result).toEqual([
+        {
+          comment: 'some old comment',
+          meta: {
+            some_field: 'some field',
+          },
+        },
+      ]);
     });
   });
 });

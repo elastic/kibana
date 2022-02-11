@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
-  describe.only('import_export_rules_flow', () => {
+  describe('import_export_rules_flow', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
       await createUserAndRole(getService, ROLES.soc_manager);

@@ -124,7 +124,10 @@ export const sortExceptionsStream = (): Transform => {
 
 /**
  * Updates any comments associated with exception items to resemble
- * comment creation schema. Attach
+ * comment creation schema. Attaches a "meta" to preserve attributes
+ * passed in by the user on import that cannot be trusted but may want
+ * to be preserved
+ * See issue for context https://github.com/elastic/kibana/issues/124742#issuecomment-1033082093
  * @returns {stream} incoming exceptions sorted into lists and items
  */
 export const manageExceptionComments = (
@@ -136,12 +139,19 @@ export const manageExceptionComments = (
     return comments.map(
       ({
         comment,
-        meta,
-        created_by: createdBy,
         created_at: createdAt,
+        created_by: createdBy,
+        meta,
         updated_at: updatedAt,
         updated_by: updatedBy,
       }) => {
+        if (createdAt == null && createdBy == null) {
+          return {
+            comment,
+            meta: meta ? { ...meta } : undefined,
+          };
+        }
+
         return {
           comment,
           meta: {
@@ -246,9 +256,7 @@ export const validateExceptionsItems = (
   return items.map((item: ImportExceptionListItemSchema | Error) => {
     if (!(item instanceof Error)) {
       const itemWithUpdatedComments = { ...item, comments: manageExceptionComments(item.comments) };
-      console.log({ itemWithUpdatedComments });
       const decodedItem = importExceptionListItemSchema.decode(itemWithUpdatedComments);
-      console.log({ decodedItem: JSON.stringify(decodedItem) });
       const checkedItem = exactCheck(itemWithUpdatedComments, decodedItem);
 
       return pipe(checkedItem, fold(onLeft, onRight));
