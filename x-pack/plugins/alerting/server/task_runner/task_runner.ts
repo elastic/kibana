@@ -63,7 +63,7 @@ import {
   Event,
 } from '../lib/create_alert_event_log_record_object';
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
-import { wrapScopedClusterClient } from '../lib';
+import { createWrappedEsClientFactory } from '../lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -344,6 +344,15 @@ export class TaskRunner<
       };
 
       const scopedClusterClient = this.context.elasticsearch.client.asScoped(generatedRequest);
+      const wrappedScopedClusterClient = createWrappedEsClientFactory({
+        scopedClusterClient,
+        rule: {
+          name: rule.name,
+          alertTypeId: rule.alertTypeId,
+          id: rule.id,
+        },
+        logger: this.logger,
+      });
 
       updatedRuleTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.ruleType.executor({
@@ -353,9 +362,7 @@ export class TaskRunner<
             savedObjectsClient: this.context.savedObjects.getScopedClient(generatedRequest, {
               includedHiddenTypes: ['alert', 'action'],
             }),
-            scopedClusterClient: wrapScopedClusterClient({
-              scopedClusterClient,
-            }),
+            scopedClusterClient: wrappedScopedClusterClient.client(),
             alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,
