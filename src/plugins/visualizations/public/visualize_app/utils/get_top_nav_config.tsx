@@ -303,14 +303,14 @@ export const getTopNavConfig = (
             className: 'visNavItem__goToLens',
             disableButton: !editInLensConfig,
             testId: 'visualizeEditInLensButton',
-            badge: showBadge
-              ? {
-                  label: i18n.translate('visualizations.tonNavMenu.tryItBadgeText', {
-                    defaultMessage: 'Try it',
-                  }),
-                  color: 'accent' as EuiBetaBadgeProps['color'],
-                }
-              : undefined,
+            ...(showBadge && {
+              badge: {
+                label: i18n.translate('visualizations.tonNavMenu.tryItBadgeText', {
+                  defaultMessage: 'Try it',
+                }),
+                color: 'accent' as EuiBetaBadgeProps['color'],
+              },
+            }),
             run: async () => {
               const updatedWithMeta = {
                 ...editInLensConfig,
