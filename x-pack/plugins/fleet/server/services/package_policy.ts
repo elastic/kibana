@@ -406,14 +406,20 @@ class PackagePolicyService {
 
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      let installablePackage: InstallablePackage | undefined =
+        getArchivePackage(pkgInfo)?.packageInfo;
+
+      if (!installablePackage) {
+        installablePackage = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+      }
+
       inputs = await this._compilePackagePolicyInputs(
-        registryPkgInfo,
+        installablePackage,
         pkgInfo,
         packagePolicy.vars || {},
         inputs
       );
-      elasticsearch = registryPkgInfo.elasticsearch;
+      elasticsearch = installablePackage.elasticsearch;
     }
 
     await soClient.update<PackagePolicySOAttributes>(
