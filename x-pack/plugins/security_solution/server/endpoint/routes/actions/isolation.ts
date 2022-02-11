@@ -111,6 +111,7 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
+    endpointContext.service.getFeatureUsageService().notifyUsage('HOST_ISOLATION');
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
 
     // fetch the Agent IDs to send the commands to
