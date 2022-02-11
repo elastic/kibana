@@ -13,7 +13,7 @@ import { shouldShowValuesInLegend } from './render_helpers';
 import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 
-export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: PieLayerState) => {
+export const getSortedGroups = (datasource: DatasourcePublicAPI, layer: PieLayerState) => {
   const originalOrder = datasource
     .getTableSpec()
     .map(({ columnId }: { columnId: string }) => columnId)
@@ -42,7 +42,7 @@ function expressionHelper(
 ): Ast | null {
   const layer = state.layers[0];
   const datasource = datasourceLayers[layer.layerId];
-  const groups = getSortedAccessors(datasource, layer);
+  const groups = getSortedGroups(datasource, layer);
 
   const operations = groups
     .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))

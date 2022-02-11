@@ -19,7 +19,7 @@ import type {
   AccessorConfig,
   VisualizationDimensionGroupConfig,
 } from '../types';
-import { getSortedAccessors, toExpression, toPreviewExpression } from './to_expression';
+import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
 import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { suggestions } from './suggestions';
@@ -126,7 +126,7 @@ export const getPieVisualization = ({
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
-    const originalOrder = getSortedAccessors(datasource, layer);
+    const originalOrder = getSortedGroups(datasource, layer);
     // When we add a column it could be empty, and therefore have no order
     const sortedColumns: AccessorConfig[] = originalOrder.map((accessor) => ({
       columnId: accessor,
