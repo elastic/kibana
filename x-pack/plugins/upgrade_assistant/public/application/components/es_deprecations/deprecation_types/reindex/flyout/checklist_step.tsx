@@ -109,7 +109,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
         )}
         {(hasFetchFailed || hasReindexingFailed) && (
           <>
-            <EuiSpacer />
             <EuiCallOut
               color="danger"
               iconType="alert"
@@ -130,6 +129,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             >
               {reindexState.errorMessage}
             </EuiCallOut>
+            <EuiSpacer />
           </>
         )}
         <EuiText>

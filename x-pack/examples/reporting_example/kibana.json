@@ -17,6 +17,5 @@
     "navigation",
     "screenshotMode",
     "share"
-  ],
-  "requiredBundles": ["screenshotting"]
+  ]
 }

@@ -27,6 +27,7 @@ export interface MetricArguments {
   labelPosition: 'bottom' | 'top';
   metric: ExpressionValueVisDimension[];
   bucket?: ExpressionValueVisDimension;
+  autoScale?: boolean;
 }
 
 export type MetricInput = Datatable;

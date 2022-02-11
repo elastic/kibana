@@ -30,6 +30,7 @@ export interface MetricVisParam {
   palette?: CustomPaletteState;
   labels: Labels & { style: Style; position: 'bottom' | 'top' };
   style: MetricStyle;
+  autoScale?: boolean;
 }
 
 export interface VisParams {
