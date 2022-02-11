@@ -217,7 +217,7 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
 }
 
 export function hasIcon(icon: string | undefined): icon is string {
-  return icon != null && icon !== 'none';
+  return icon != null && icon !== 'empty';
 }
 
 export const ReferenceLinePanel = (
@@ -314,7 +314,7 @@ export const ReferenceLinePanel = (
           }}
         />
       </EuiFormRow>
-      {currentYConfig?.icon || Boolean(currentYConfig?.textVisibility) ? (
+      {hasIcon(currentYConfig?.icon) || currentYConfig?.textVisibility ? (
         <EuiFormRow
           display="columnCompressed"
           fullWidth
