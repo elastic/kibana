@@ -19,6 +19,7 @@ import { ReportConfigMap } from '../contexts/exploratory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
+import { ViewMode } from '../../../../../../../../src/plugins/embeddable/common';
 
 export interface ExploratoryEmbeddableProps {
   reportType: ReportViewType;
@@ -145,6 +146,7 @@ export default function Embeddable({
         onBrushEnd={onBrushEnd}
         withDefaultActions={Boolean(withActions)}
         extraActions={actions}
+        viewMode={ViewMode.VIEW}
       />
       {isSaveOpen && attributesJSON && (
         <LensSaveModalComponent
