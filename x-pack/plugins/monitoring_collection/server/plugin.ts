@@ -37,6 +37,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     if (this.metrics.hasOwnProperty(type)) {
       return await this.metrics[type].fetch();
     }
+    this.logger.warn(`Call to 'getMetric' failed because type '${type}' does not exist.`);
     return undefined;
   }
 

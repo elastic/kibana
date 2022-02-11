@@ -47,14 +47,14 @@ describe('dynamic route', () => {
   it('returns for a valid type', async () => {
     const router = httpServiceMock.createRouter();
 
-    const getMetrics = async () => {
+    const getMetric = async () => {
       return { foo: 1 };
     };
     registerDynamicRoute({
       router,
       config: kibanaStatsConfig,
       overallStatus$,
-      getMetrics,
+      getMetric,
     });
 
     const [_, handler] = router.get.mock.calls[0];
@@ -86,10 +86,10 @@ describe('dynamic route', () => {
   it('returns the an empty object if there is no data', async () => {
     const router = httpServiceMock.createRouter();
 
-    const getMetrics = async () => {
+    const getMetric = async () => {
       return {};
     };
-    registerDynamicRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetrics });
+    registerDynamicRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetric });
 
     const [_, handler] = router.get.mock.calls[0];
 
