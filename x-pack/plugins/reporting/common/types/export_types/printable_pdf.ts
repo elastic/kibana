@@ -15,11 +15,15 @@ interface BaseParamsPDF {
 }
 
 // Job params: structure of incoming user request data, after being parsed from RISON
+
 /**
  * @deprecated
  */
 export type JobParamsPDFDeprecated = BaseParamsPDF & BaseParams;
 
+/**
+ * @deprecated
+ */
 export type JobAppParamsPDF = Omit<JobParamsPDFDeprecated, 'browserTimezone' | 'version'>;
 
 // Job payload: structure of stored job data provided by create_job

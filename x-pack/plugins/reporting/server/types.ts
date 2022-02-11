@@ -33,13 +33,18 @@ import type { LevelLogger } from './lib';
 import type { ReportTaskParams } from './lib/tasks';
 
 /*
- * Plugin Contract
+ * Plugin Setup Contract
  */
-
 export interface ReportingSetup {
+  /*
+   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
+   */
   usesUiCapabilities: () => boolean;
 }
 
+/*
+ * Plugin Start Contract
+ */
 export type ReportingStart = ReportingSetup;
 
 /*
