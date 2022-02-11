@@ -11,7 +11,7 @@ import { NoDataViewsComponent } from './no_data_views_component';
 import { useServices } from '../../services';
 import { DataView } from '../../../../data_views/public';
 
-interface NoDataViewsPageProps {
+export interface NoDataViewsPageProps {
   onDataViewCreated: (dataView: DataView) => void;
 }
 

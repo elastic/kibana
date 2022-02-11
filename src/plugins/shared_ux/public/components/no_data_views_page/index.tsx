@@ -5,5 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { NoDataViewsPage } from './no_data_views_page';
+export { NoDataViewsPage, NoDataViewsPageProps } from './no_data_views_page';
 
-export { NoDataViewsPage } from './no_data_views_page';
+// eslint-disable-next-line import/no-default-export
+export default NoDataViewsPage;
