@@ -8,7 +8,7 @@
 import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -110,6 +110,7 @@ export function App({
   const [initialDocFromContext, setInitialDocFromContext] = useState<Document | undefined>(
     undefined
   );
+  const [isGoBackToVizEditorModalVisible, setIsGoBackToVizEditorModalVisible] = useState(false);
 
   useEffect(() => {
     if (currentDoc) {
@@ -157,38 +158,6 @@ export function App({
   useEffect(() => {
     onAppLeave((actions) => {
       if (
-        initialContext &&
-        'vizEditorOriginatingAppUrl' in initialContext &&
-        initialContext.vizEditorOriginatingAppUrl
-      ) {
-        const initialDocFromContextHasChanged = !isLensEqual(
-          initialDocFromContext,
-          lastKnownDoc,
-          data.query.filterManager.inject,
-          datasourceMap
-        );
-        if (!initialDocFromContextHasChanged) {
-          return actions.default();
-        } else {
-          return actions.confirm(
-            i18n.translate('xpack.lens.app.goBackModalMessage', {
-              defaultMessage:
-                'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
-              values: { contextOriginatingApp },
-            }),
-            i18n.translate('xpack.lens.app.goBackModalTitle', {
-              defaultMessage: 'Discard changes?',
-            }),
-            undefined,
-            i18n.translate('xpack.lens.app.unsavedWorkConfirmBtn', {
-              defaultMessage: 'Discard changes',
-            }),
-            'danger'
-          );
-        }
-      }
-
-      if (
         application.capabilities.visualize.save &&
         !isLensEqual(
           persistedDoc,
@@ -221,9 +190,6 @@ export function App({
     isSaveable,
     persistedDoc,
     application.capabilities.visualize.save,
-    initialContext,
-    initialDocFromContext,
-    contextOriginatingApp,
     data.query.filterManager,
     datasourceMap,
   ]);
@@ -362,9 +328,44 @@ export function App({
       'vizEditorOriginatingAppUrl' in initialContext &&
       initialContext.vizEditorOriginatingAppUrl
     ) {
+      const initialDocFromContextHasChanged = !isLensEqual(
+        initialDocFromContext,
+        lastKnownDoc,
+        data.query.filterManager.inject,
+        datasourceMap
+      );
+      if (!initialDocFromContextHasChanged) {
+        onAppLeave((actions) => {
+          return actions.default();
+        });
+        application.navigateToApp('visualize', { path: initialContext.vizEditorOriginatingAppUrl });
+      } else {
+        setIsGoBackToVizEditorModalVisible(true);
+      }
+    }
+  }, [
+    application,
+    data.query.filterManager.inject,
+    datasourceMap,
+    initialContext,
+    initialDocFromContext,
+    lastKnownDoc,
+    onAppLeave,
+  ]);
+
+  const navigateToVizEditor = useCallback(() => {
+    setIsGoBackToVizEditorModalVisible(false);
+    if (
+      initialContext &&
+      'vizEditorOriginatingAppUrl' in initialContext &&
+      initialContext.vizEditorOriginatingAppUrl
+    ) {
+      onAppLeave((actions) => {
+        return actions.default();
+      });
       application.navigateToApp('visualize', { path: initialContext.vizEditorOriginatingAppUrl });
     }
-  }, [application, initialContext]);
+  }, [application, initialContext, onAppLeave]);
 
   const initialContextIsEmbedded = useMemo(() => {
     return Boolean(
@@ -427,6 +428,30 @@ export function App({
               : undefined
           }
         />
+      )}
+      {isGoBackToVizEditorModalVisible && (
+        <EuiConfirmModal
+          maxWidth={600}
+          title={i18n.translate('xpack.lens.app.goBackModalTitle', {
+            defaultMessage: 'Discard changes?',
+          })}
+          onCancel={() => setIsGoBackToVizEditorModalVisible(false)}
+          onConfirm={navigateToVizEditor}
+          cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('xpack.lens.app.goBackModalTitle', {
+            defaultMessage: 'Discard changes?',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          {i18n.translate('xpack.lens.app.goBackModalMessage', {
+            defaultMessage:
+              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
+            values: { contextOriginatingApp },
+          })}
+        </EuiConfirmModal>
       )}
     </>
   );
