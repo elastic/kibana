@@ -16,6 +16,7 @@ let mockedLicenseState: jest.Mocked<ILicenseState>;
 let ruleTypeRegistryParams: ConstructorOptions;
 
 const taskManager = taskManagerMock.createSetup();
+const minimumScheduleIntervalConfig = '1m';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -36,21 +37,24 @@ describe('has()', () => {
 
   test('returns true for registered rule types', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register({
-      id: 'foo',
-      name: 'Foo',
-      actionGroups: [
-        {
-          id: 'default',
-          name: 'Default',
-        },
-      ],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      executor: jest.fn(),
-      producer: 'alerts',
-    });
+    registry.register(
+      {
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        producer: 'alerts',
+      },
+      minimumScheduleIntervalConfig
+    );
     expect(registry.has('foo')).toEqual(true);
   });
 });
@@ -76,14 +80,20 @@ describe('register()', () => {
 
     const invalidCharacters = [' ', ':', '*', '*', '/'];
     for (const char of invalidCharacters) {
-      expect(() => registry.register({ ...ruleType, id: `${ruleType.id}${char}` })).toThrowError(
-        new Error(`expected RuleType Id not to include invalid character: ${char}`)
-      );
+      expect(() =>
+        registry.register(
+          { ...ruleType, id: `${ruleType.id}${char}` },
+          minimumScheduleIntervalConfig
+        )
+      ).toThrowError(new Error(`expected RuleType Id not to include invalid character: ${char}`));
     }
 
     const [first, second] = invalidCharacters;
     expect(() =>
-      registry.register({ ...ruleType, id: `${first}${ruleType.id}${second}` })
+      registry.register(
+        { ...ruleType, id: `${first}${ruleType.id}${second}` },
+        minimumScheduleIntervalConfig
+      )
     ).toThrowError(
       new Error(`expected RuleType Id not to include invalid characters: ${first}, ${second}`)
     );
@@ -107,7 +117,7 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(ruleType)).toThrowError(
+    expect(() => registry.register(ruleType, minimumScheduleIntervalConfig)).toThrowError(
       new Error(`expected value of type [string] but got [number]`)
     );
   });
@@ -131,7 +141,7 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(ruleType)).toThrowError(
+    expect(() => registry.register(ruleType, minimumScheduleIntervalConfig)).toThrowError(
       new Error(
         `Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`
       )
@@ -158,10 +168,35 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(ruleType)).toThrowError(
+    expect(() => registry.register(ruleType, minimumScheduleIntervalConfig)).toThrowError(
       new Error(
         `Rule type \"123\" has invalid default interval: string is not a valid duration: foobar.`
       )
+    );
+  });
+
+  test('throws if defaultScheduleInterval is less than configured minimumScheduleInterval', () => {
+    const ruleType: RuleType<never, never, never, never, never, 'default'> = {
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: jest.fn(),
+      producer: 'alerts',
+      defaultScheduleInterval: '10s',
+    };
+    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+
+    expect(() => registry.register(ruleType, minimumScheduleIntervalConfig)).toThrowError(
+      new Error(`Rule type \"123\" cannot specify a default interval less than 1m.`)
     );
   });
 
@@ -191,7 +226,7 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(ruleType)).toThrowError(
+    expect(() => registry.register(ruleType, minimumScheduleIntervalConfig)).toThrowError(
       new Error(
         `Rule type [id="${ruleType.id}"] cannot be registered. Action groups [recovered] are reserved by the framework.`
       )
@@ -219,7 +254,7 @@ describe('register()', () => {
       isExportable: true,
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(ruleType);
+    registry.register(ruleType, minimumScheduleIntervalConfig);
     expect(registry.get('test').actionGroups).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -252,7 +287,7 @@ describe('register()', () => {
       isExportable: true,
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(ruleType);
+    registry.register(ruleType, minimumScheduleIntervalConfig);
     expect(registry.get('test').ruleTaskTimeout).toBe('13m');
   });
 
@@ -290,7 +325,7 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(ruleType)).toThrowError(
+    expect(() => registry.register(ruleType, minimumScheduleIntervalConfig)).toThrowError(
       new Error(
         `Rule type [id="${ruleType.id}"] cannot be registered. Action group [backToAwesome] cannot be used as both a recovery and an active action group.`
       )
@@ -315,7 +350,7 @@ describe('register()', () => {
       ruleTaskTimeout: '20m',
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(ruleType);
+    registry.register(ruleType, minimumScheduleIntervalConfig);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -347,30 +382,15 @@ describe('register()', () => {
       producer: 'alerts',
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(ruleType);
+    registry.register(ruleType, minimumScheduleIntervalConfig);
     ruleType.name = 'Changed';
     expect(registry.get('test').name).toEqual('Test');
   });
 
   test('should throw an error if type is already registered', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register({
-      id: 'test',
-      name: 'Test',
-      actionGroups: [
-        {
-          id: 'default',
-          name: 'Default',
-        },
-      ],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      executor: jest.fn(),
-      producer: 'alerts',
-    });
-    expect(() =>
-      registry.register({
+    registry.register(
+      {
         id: 'test',
         name: 'Test',
         actionGroups: [
@@ -384,7 +404,28 @@ describe('register()', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
-      })
+      },
+      minimumScheduleIntervalConfig
+    );
+    expect(() =>
+      registry.register(
+        {
+          id: 'test',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'default',
+              name: 'Default',
+            },
+          ],
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          executor: jest.fn(),
+          producer: 'alerts',
+        },
+        minimumScheduleIntervalConfig
+      )
     ).toThrowErrorMatchingInlineSnapshot(`"Rule type \\"test\\" is already registered."`);
   });
 });
@@ -392,21 +433,24 @@ describe('register()', () => {
 describe('get()', () => {
   test('should return registered type', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register({
-      id: 'test',
-      name: 'Test',
-      actionGroups: [
-        {
-          id: 'default',
-          name: 'Default',
-        },
-      ],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      executor: jest.fn(),
-      producer: 'alerts',
-    });
+    registry.register(
+      {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        producer: 'alerts',
+      },
+      minimumScheduleIntervalConfig
+    );
     const ruleType = registry.get('test');
     expect(ruleType).toMatchInlineSnapshot(`
       Object {
@@ -457,22 +501,25 @@ describe('list()', () => {
 
   test('should return registered types', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register({
-      id: 'test',
-      name: 'Test',
-      actionGroups: [
-        {
-          id: 'testActionGroup',
-          name: 'Test Action Group',
-        },
-      ],
-      defaultActionGroupId: 'testActionGroup',
-      isExportable: true,
-      ruleTaskTimeout: '20m',
-      minimumLicenseRequired: 'basic',
-      executor: jest.fn(),
-      producer: 'alerts',
-    });
+    registry.register(
+      {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        producer: 'alerts',
+      },
+      minimumScheduleIntervalConfig
+    );
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
       Set {
@@ -512,7 +559,7 @@ describe('list()', () => {
 
   test('should return action variables state and empty context', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(ruleTypeWithVariables('x', '', 's'));
+    registry.register(ruleTypeWithVariables('x', '', 's'), minimumScheduleIntervalConfig);
     const ruleType = registry.get('x');
     expect(ruleType.actionVariables).toBeTruthy();
 
@@ -529,7 +576,7 @@ describe('list()', () => {
 
   test('should return action variables context and empty state', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(ruleTypeWithVariables('x', 'c', ''));
+    registry.register(ruleTypeWithVariables('x', 'c', ''), minimumScheduleIntervalConfig);
     const ruleType = registry.get('x');
     expect(ruleType.actionVariables).toBeTruthy();
 
@@ -550,22 +597,25 @@ describe('ensureRuleTypeEnabled', () => {
 
   beforeEach(() => {
     ruleTypeRegistry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    ruleTypeRegistry.register({
-      id: 'test',
-      name: 'Test',
-      actionGroups: [
-        {
-          id: 'default',
-          name: 'Default',
-        },
-      ],
-      defaultActionGroupId: 'default',
-      executor: jest.fn(),
-      producer: 'alerts',
-      isExportable: true,
-      minimumLicenseRequired: 'basic',
-      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-    });
+    ruleTypeRegistry.register(
+      {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        executor: jest.fn(),
+        producer: 'alerts',
+        isExportable: true,
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+      },
+      minimumScheduleIntervalConfig
+    );
   });
 
   test('should call ensureLicenseForAlertType on the license state', async () => {

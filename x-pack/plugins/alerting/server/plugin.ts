@@ -293,7 +293,7 @@ export class AlertingPlugin {
           ruleType.ruleTaskTimeout = ruleType.ruleTaskTimeout ?? config.defaultRuleTaskTimeout;
           ruleType.cancelAlertsOnRuleTimeout =
             ruleType.cancelAlertsOnRuleTimeout ?? config.cancelAlertsOnRuleTimeout;
-          ruleTypeRegistry.register(ruleType);
+          ruleTypeRegistry.register(ruleType, config.minimumScheduleInterval);
         });
       },
       getSecurityHealth: async () => {

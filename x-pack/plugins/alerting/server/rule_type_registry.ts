@@ -26,6 +26,7 @@ import {
   RecoveredActionGroupId,
   ActionGroup,
   validateDurationSchema,
+  parseDuration,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
@@ -161,7 +162,8 @@ export class RuleTypeRegistry {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >
+    >,
+    minimumScheduleInterval: string
   ) {
     if (this.has(ruleType.id)) {
       throw new Error(
@@ -202,6 +204,24 @@ export class RuleTypeRegistry {
               values: {
                 id: ruleType.id,
                 errorMessage: invalidDefaultTimeout,
+              },
+            }
+          )
+        );
+      }
+
+      const defaultIntervalInMs = parseDuration(ruleType.defaultScheduleInterval);
+      const minimumIntervalInMs = parseDuration(minimumScheduleInterval);
+      if (defaultIntervalInMs < minimumIntervalInMs) {
+        throw new Error(
+          i18n.translate(
+            'xpack.alerting.ruleTypeRegistry.register.defaultTimeoutTooShortRuleTypeError',
+            {
+              defaultMessage:
+                'Rule type "{id}" cannot specify a default interval less than {minimumInterval}.',
+              values: {
+                id: ruleType.id,
+                minimumInterval: minimumScheduleInterval,
               },
             }
           )

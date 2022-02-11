@@ -22,6 +22,7 @@ export const configSchema = schema.object({
   }),
   defaultRuleTaskTimeout: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
+  minimumScheduleInterval: schema.string({ validate: validateDurationSchema, defaultValue: '1m' }),
 });
 
 export type AlertsConfig = TypeOf<typeof configSchema>;
