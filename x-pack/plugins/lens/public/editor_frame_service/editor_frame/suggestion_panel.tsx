@@ -62,7 +62,7 @@ import {
   selectChangesApplied,
   applyChanges,
 } from '../../state_management';
-import { APPLY_CHANGES_BUTTON_IDENTIFIER } from '../../apply_changes_button_identifier';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from './config_panel/dimension_container';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -359,7 +359,7 @@ export function SuggestionPanel({
             fill
             iconType="play"
             size="s"
-            className={APPLY_CHANGES_BUTTON_IDENTIFIER}
+            className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
             onClick={() => dispatchLens(applyChanges())}
           >
             <FormattedMessage

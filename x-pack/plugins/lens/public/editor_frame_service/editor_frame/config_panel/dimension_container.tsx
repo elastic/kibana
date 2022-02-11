@@ -23,16 +23,23 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { APPLY_CHANGES_BUTTON_IDENTIFIER } from '../../../apply_changes_button_identifier';
 
-function fromApplyChangesButton(event: Event) {
+/**
+ * The dimension container is set up to close when it detects a click outside it.
+ * Use this CSS class to exclude particular elements from this behavior.
+ */
+export const DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS =
+  'lensDontCloseDimensionContainerOnClick';
+
+function fromExcludedClickTarget(event: Event) {
   for (
     let node: HTMLElement | null = event.target as HTMLElement;
     node !== null;
     node = node!.parentElement
   ) {
-    if (node.tagName === 'BUTTON' && node.className.includes(APPLY_CHANGES_BUTTON_IDENTIFIER))
+    if (node.className.includes(DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS)) {
       return true;
+    }
   }
   return false;
 }
@@ -91,7 +98,7 @@ export function DimensionContainer({
         <EuiWindowEvent event="keydown" handler={closeOnEscape} />
         <EuiOutsideClickDetector
           onOutsideClick={(event) => {
-            if (isFullscreen || fromApplyChangesButton(event)) {
+            if (isFullscreen || fromExcludedClickTarget(event)) {
               return;
             }
             closeFlyout();

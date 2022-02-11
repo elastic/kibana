@@ -31,7 +31,7 @@ import {
   selectChangesApplied,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
-import { APPLY_CHANGES_BUTTON_IDENTIFIER } from '../apply_changes_button_identifier';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../editor_frame_service/editor_frame/config_panel/dimension_container';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -458,14 +458,19 @@ export const LensTopNavMenu = ({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiSwitch label="Auto-Apply" checked={autoApplyEnabled} onChange={onToggleAutoApply} />
+            <EuiSwitch
+              label="Auto-Apply"
+              checked={autoApplyEnabled}
+              onChange={onToggleAutoApply}
+              className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               // data-test-subj="visualizeEditorRenderButton"
               disabled={autoApplyEnabled || changesApplied}
               fill
-              className={APPLY_CHANGES_BUTTON_IDENTIFIER}
+              className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
               iconType="play"
               onClick={onApplyChanges}
               size="s"
