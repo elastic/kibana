@@ -124,3 +124,4 @@ window of 1 hour and checks if there are more than 99 matches for the query. The
 | `Execution 4 (0:03)`
 | Rule finds 190 matches in the last hour. 71 of them are duplicates that were already alerted on previously, so you actually have 119 matches: `119 > 99`
 | Rule is active and user is alerted.
+|===
