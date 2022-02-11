@@ -25,7 +25,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
 import { initPromisePool } from '../../../../utils/promise_pool';
-import { isElasticRule } from '../../../../usage/detections';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
@@ -364,7 +363,7 @@ export const performBulkActionRoute = (
               rules,
               async (rule) => {
                 throwHttpError({
-                  valid: !isElasticRule(rule.tags),
+                  valid: !rule.params.immutable,
                   message: 'Elastic rule can`t be edited',
                 });
 
