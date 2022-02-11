@@ -395,6 +395,7 @@ export class CsvGenerator {
     return {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
+      csv_rows: this.csvRowCount,
       max_size_reached: this.maxSizeReached,
       warnings,
     };
