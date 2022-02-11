@@ -106,6 +106,7 @@ const IconSelect = ({
       singleSelection={{ asPlainText: true }}
       renderOption={IconView}
       compressed
+      prepend={hasIcon(selectedIcon.value) ? <EuiIcon type={selectedIcon.value} /> : undefined}
     />
   );
 };
