@@ -10,7 +10,7 @@ import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LensPublicStart } from '../../../plugins/lens/public';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import { mount } from './mount';
-import image from './image.jpg';
+import image from './image.png';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
