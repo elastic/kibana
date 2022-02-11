@@ -6,8 +6,7 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { loginToKibana, waitForLoadingToFinish } from './utils';
-import { byTestId } from './uptime.journey';
+import { byTestId, loginToKibana, waitForLoadingToFinish } from './utils';
 import { callKibana } from '../../../apm/scripts/create_apm_users_and_roles/helpers/call_kibana';
 
 journey('DataViewPermissions', async ({ page, params }) => {

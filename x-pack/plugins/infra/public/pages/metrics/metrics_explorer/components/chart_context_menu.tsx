@@ -28,7 +28,7 @@ import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
-import { useLinkProps } from '../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../observability/public';
 
 export interface Props {
   options: MetricsExplorerOptions;
