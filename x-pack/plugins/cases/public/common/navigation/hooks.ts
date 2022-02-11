@@ -7,10 +7,17 @@
 
 import { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+
+import { APP_ID } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
 import { CasesDeepLinkId, ICasesDeepLinkId } from './deep_links';
-import { CaseViewPathParams, generateCaseViewPath } from './paths';
+import {
+  CASES_CONFIGURE_PATH,
+  CASES_CREATE_PATH,
+  CaseViewPathParams,
+  generateCaseViewPath,
+} from './paths';
 import { useIsMainApplication } from '../hooks';
 
 export const useCaseViewParams = () => useParams<CaseViewPathParams>();
@@ -39,35 +46,44 @@ export const useCasesNavigation = ({
   return [getCasesUrl, navigateToCases];
 };
 
+/**
+ * Cases can be either be part of a solution or a standalone application
+ * The standalone application is registered from the cases plugin and is called
+ * the main application. The main application uses paths and the solutions
+ * deep links.
+ */
+const navigationMapping = {
+  all: { path: '/', deepLinkId: CasesDeepLinkId.cases },
+  create: { path: CASES_CREATE_PATH, deepLinkId: CasesDeepLinkId.casesCreate },
+  configure: { path: CASES_CONFIGURE_PATH, deepLinkId: CasesDeepLinkId.casesConfigure },
+};
+
 const getNavigationArguments = (
-  isMainApplication: boolean,
-  path: string,
-  deepLinkId: ICasesDeepLinkId
-) => ({
-  /**
-   * TODO: Switch to deep links for the main application
-   * when https://github.com/elastic/kibana/issues/125235 is fixed
-   */
-  ...(isMainApplication && { path }),
-  ...(!isMainApplication && { deepLinkId }),
-});
+  view: keyof typeof navigationMapping,
+  isMainApplication: boolean
+) => {
+  return {
+    /**
+     * Because the Cases application is a descendant of the stack management plugin
+     * we can use the deepLinkId to navigate within the main application. For that reason,
+     * the path attribute can be relative to the base path.
+     */
+    ...(isMainApplication && { path: navigationMapping[view].path, deepLinkId: APP_ID }),
+    /**
+     * Solutions that use cases navigate in cases only by using deepLinks
+     */
+    ...(!isMainApplication && { deepLinkId: navigationMapping[view].deepLinkId }),
+  };
+};
 
 const getAllCasesNavigationArguments = (isMainApplication: boolean) =>
-  getNavigationArguments(isMainApplication, '/insightsAndAlerting/cases', CasesDeepLinkId.cases);
+  getNavigationArguments('all', isMainApplication);
 
 const getCreateCaseNavigationArguments = (isMainApplication: boolean) =>
-  getNavigationArguments(
-    isMainApplication,
-    '/insightsAndAlerting/cases/create',
-    CasesDeepLinkId.casesCreate
-  );
+  getNavigationArguments('create', isMainApplication);
 
 const getConfigureCaseNavigationArguments = (isMainApplication: boolean) =>
-  getNavigationArguments(
-    isMainApplication,
-    '/insightsAndAlerting/cases/configure',
-    CasesDeepLinkId.casesConfigure
-  );
+  getNavigationArguments('configure', isMainApplication);
 
 export const useAllCasesNavigation = () => {
   const isMainApplication = useIsMainApplication();
@@ -101,28 +117,25 @@ export const useCaseViewNavigation = () => {
   const { appId } = useCasesContext();
   const { navigateTo, getAppUrl } = useNavigation(appId);
   const isMainApplication = useIsMainApplication();
+  const deepLinkId = isMainApplication ? APP_ID : CasesDeepLinkId.cases;
 
   const getCaseViewUrl = useCallback<GetCaseViewUrl>(
     (pathParams, absolute) =>
       getAppUrl({
-        ...(!isMainApplication && { deepLinkId: CasesDeepLinkId.cases }),
+        deepLinkId,
         absolute,
-        path: isMainApplication
-          ? `/insightsAndAlerting/cases/${generateCaseViewPath(pathParams)}`
-          : generateCaseViewPath(pathParams),
+        path: generateCaseViewPath(pathParams),
       }),
-    [getAppUrl, isMainApplication]
+    [deepLinkId, getAppUrl]
   );
 
   const navigateToCaseView = useCallback<NavigateToCaseView>(
     (pathParams) =>
       navigateTo({
-        ...(!isMainApplication && { deepLinkId: CasesDeepLinkId.cases }),
-        path: isMainApplication
-          ? `/insightsAndAlerting/cases/${generateCaseViewPath(pathParams)}`
-          : generateCaseViewPath(pathParams),
+        deepLinkId,
+        path: generateCaseViewPath(pathParams),
       }),
-    [navigateTo, isMainApplication]
+    [navigateTo, deepLinkId]
   );
   return { getCaseViewUrl, navigateToCaseView };
 };

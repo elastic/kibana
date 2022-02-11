@@ -33,9 +33,12 @@ describe('hooks', () => {
 
   describe('useCasesNavigation', () => {
     it('it calls getAppUrl with correct arguments', () => {
-      const { result } = renderHook(() => useCasesNavigation(CasesDeepLinkId.cases), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+      const { result } = renderHook(
+        () => useCasesNavigation({ deepLinkId: CasesDeepLinkId.cases }),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
+      );
 
       const [getCasesUrl] = result.current;
 
@@ -47,9 +50,12 @@ describe('hooks', () => {
     });
 
     it('it calls navigateToAllCases with correct arguments', () => {
-      const { result } = renderHook(() => useCasesNavigation(CasesDeepLinkId.cases), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
+      const { result } = renderHook(
+        () => useCasesNavigation({ deepLinkId: CasesDeepLinkId.cases }),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
+      );
       const [, navigateToCases] = result.current;
 
       act(() => {
