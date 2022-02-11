@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
@@ -178,15 +177,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        // const { body } = await mlClient.putTrainedModel({
-        //   model_id: modelId,
-        //   // @ts-expect-error job type custom_rules is incorrect
-        //   body: request.body  ,
-        // });
         const { body } = await mlClient.putTrainedModel({
           model_id: modelId,
-          // @ts-expect-error body deprecated
-          body: request.body as estypes.MlPutTrainedModelRequest,
+          body: request.body,
         });
         return response.ok({
           body,
