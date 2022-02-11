@@ -8,19 +8,15 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { postCaseReq, getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
-  createCaseAction,
-  createSubCase,
   deleteAllCaseItems,
-  deleteCaseAction,
   createCase,
   createComment,
   getAllComments,
   superUserSpace1Auth,
+  extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
-import { CommentType } from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -32,6 +28,8 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { getCaseCommentsUrl } from '../../../../../../plugins/cases/common/api';
+import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -58,80 +56,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const comments = await getAllComments({ supertest, caseId: postedCase.id });
 
       expect(comments.length).to.eql(2);
-    });
-
-    it('should return a 400 when passing the subCaseId parameter', async () => {
-      const { body } = await supertest
-        .get(`${CASES_URL}/case-id/comments?subCaseId=value`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-
-      expect(body.message).to.contain('disabled');
-    });
-
-    it('should return a 400 when passing the includeSubCaseComments parameter', async () => {
-      const { body } = await supertest
-        .get(`${CASES_URL}/case-id/comments?includeSubCaseComments=true`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-
-      expect(body.message).to.contain('disabled');
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    describe.skip('sub cases', () => {
-      let actionID: string;
-      before(async () => {
-        actionID = await createCaseAction(supertest);
-      });
-      after(async () => {
-        await deleteCaseAction(supertest, actionID);
-      });
-
-      it('should get comments from a case and its sub cases', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(200);
-
-        const { body: comments } = await supertest
-          .get(`${CASES_URL}/${caseInfo.id}/comments?includeSubCaseComments=true`)
-          .expect(200);
-
-        expect(comments.length).to.eql(2);
-        expect(comments[0].type).to.eql(CommentType.generatedAlert);
-        expect(comments[1].type).to.eql(CommentType.user);
-      });
-
-      it('should get comments from a sub cases', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        await supertest
-          .post(`${CASES_URL}/${caseInfo.subCases![0].id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(200);
-
-        const { body: comments } = await supertest
-          .get(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .expect(200);
-
-        expect(comments.length).to.eql(2);
-        expect(comments[0].type).to.eql(CommentType.generatedAlert);
-        expect(comments[1].type).to.eql(CommentType.user);
-      });
-
-      it('should not find any comments for an invalid case id', async () => {
-        const { body } = await supertest
-          .get(`${CASES_URL}/fake-id/comments`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-        expect(body.length).to.eql(0);
-      });
     });
 
     describe('rbac', () => {
@@ -225,6 +149,19 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: secOnly, space: 'space2' },
           expectedHttpCode: 403,
         });
+      });
+    });
+
+    describe('deprecations', () => {
+      it('should return a warning header', async () => {
+        const theCase = await createCase(supertest, postCaseReq);
+        const res = await supertest.get(getCaseCommentsUrl(theCase.id)).expect(200);
+        const warningHeader = res.header.warning;
+
+        assertWarningHeader(warningHeader);
+
+        const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+        expect(warningValue).to.be('Deprecated endpoint');
       });
     });
   });

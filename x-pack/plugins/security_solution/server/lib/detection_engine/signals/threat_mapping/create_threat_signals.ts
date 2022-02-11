@@ -91,6 +91,11 @@ export const createThreatSignals = async ({
 
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
+  const threatListConfig = {
+    fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
+    _source: false,
+  };
+
   let threatList = await getThreatList({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
@@ -98,19 +103,16 @@ export const createThreatSignals = async ({
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
-    listClient,
     searchAfter: undefined,
-    sortField: undefined,
-    sortOrder: undefined,
     logger,
     buildRuleMessage,
     perPage,
+    threatListConfig,
   });
 
   const threatEnrichment = buildThreatEnrichment({
     buildRuleMessage,
     exceptionItems,
-    listClient,
     logger,
     services,
     threatFilters,
@@ -180,14 +182,11 @@ export const createThreatSignals = async ({
       language: threatLanguage,
       threatFilters,
       index: threatIndex,
-      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
-      sortField: undefined,
-      sortOrder: undefined,
-      listClient,
       buildRuleMessage,
       logger,
       perPage,
+      threatListConfig,
     });
   }
 

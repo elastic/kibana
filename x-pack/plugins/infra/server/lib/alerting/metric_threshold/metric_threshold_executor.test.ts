@@ -158,9 +158,10 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toContain('current value is 1');
-      expect(action.reason).toContain('threshold of 0.75');
+      expect(action.reason).toContain('is 1');
+      expect(action.reason).toContain('Alert when > 0.75');
       expect(action.reason).toContain('test.metric.1');
+      expect(action.reason).toContain('in the last 1 min');
     });
   });
 
@@ -343,10 +344,14 @@ describe('The metric threshold alert type', () => {
       expect(reasons.length).toBe(2);
       expect(reasons[0]).toContain('test.metric.1');
       expect(reasons[1]).toContain('test.metric.2');
-      expect(reasons[0]).toContain('current value is 1');
-      expect(reasons[1]).toContain('current value is 3');
-      expect(reasons[0]).toContain('threshold of 1');
-      expect(reasons[1]).toContain('threshold of 3');
+      expect(reasons[0]).toContain('is 1');
+      expect(reasons[1]).toContain('is 3');
+      expect(reasons[0]).toContain('Alert when >= 1');
+      expect(reasons[1]).toContain('Alert when >= 3');
+      expect(reasons[0]).toContain('in the last 1 min');
+      expect(reasons[1]).toContain('in the last 1 min');
+      expect(reasons[0]).toContain('for all hosts');
+      expect(reasons[1]).toContain('for all hosts');
     });
   });
   describe('querying with the count aggregator', () => {
@@ -714,8 +719,8 @@ describe('The metric threshold alert type', () => {
       await execute();
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toContain('current value is 100%');
-      expect(action.reason).toContain('threshold of 75%');
+      expect(action.reason).toContain('is 100%');
+      expect(action.reason).toContain('Alert when > 75%');
       expect(action.threshold.condition0[0]).toBe('75%');
       expect(action.value.condition0).toBe('100%');
     });
@@ -835,9 +840,9 @@ services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId
 });
 
 const alertInstances = new Map<string, AlertTestInstance>();
-services.alertInstanceFactory.mockImplementation((instanceID: string) => {
+services.alertFactory.create.mockImplementation((instanceID: string) => {
   const newAlertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertInstanceFactory(),
+    instance: alertsMock.createAlertFactory.create(),
     actionQueue: [],
     state: {},
   };

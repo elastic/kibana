@@ -70,9 +70,9 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
         advancedVars.filter(
-          ({ name: varName }) => inputStreamValidationResults.vars?.[varName]?.length
+          ({ name: varName }) => inputStreamValidationResults?.vars?.[varName]?.length
         ).length,
-      [advancedVars, inputStreamValidationResults.vars]
+      [advancedVars, inputStreamValidationResults?.vars]
     );
 
     return (
@@ -106,6 +106,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
         <FlexItemWithMaxWidth>
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
+              if (!packagePolicyInputStream?.vars) return null;
               const { name: varName, type: varType } = varDef;
               const varConfigEntry = packagePolicyInputStream.vars?.[varName];
               const value = varConfigEntry?.value;
@@ -128,7 +129,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                         },
                       });
                     }}
-                    errors={inputStreamValidationResults.vars![varName]}
+                    errors={inputStreamValidationResults?.vars![varName]}
                     forceShowErrors={forceShowErrors}
                   />
                 </EuiFlexItem>
@@ -166,6 +167,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                 </EuiFlexItem>
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
+                      if (!packagePolicyInputStream.vars) return null;
                       const { name: varName, type: varType } = varDef;
                       const value = packagePolicyInputStream.vars?.[varName]?.value;
 
@@ -185,7 +187,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                                 },
                               });
                             }}
-                            errors={inputStreamValidationResults.vars![varName]}
+                            errors={inputStreamValidationResults?.vars![varName]}
                             forceShowErrors={forceShowErrors}
                           />
                         </EuiFlexItem>
