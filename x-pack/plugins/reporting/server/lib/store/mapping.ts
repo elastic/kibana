@@ -62,11 +62,31 @@ export const mapping = {
   metrics: {
     type: 'object',
     properties: {
-      cpu: { type: 'double' },
-      cpuInPercentage: { type: 'double' },
-      memory: { type: 'long' },
-      memoryInMegabytes: { type: 'double' },
-      pdfPages: { type: 'long' },
+      csv: {
+        type: 'object',
+        properties: {
+          rows: { type: 'long' },
+        },
+      },
+      pdf: {
+        type: 'object',
+        properties: {
+          pages: { type: 'long' },
+          cpu: { type: 'double' },
+          cpuInPercentage: { type: 'double' },
+          memory: { type: 'long' },
+          memoryInMegabytes: { type: 'double' },
+        },
+      },
+      png: {
+        type: 'object',
+        properties: {
+          cpu: { type: 'double' },
+          cpuInPercentage: { type: 'double' },
+          memory: { type: 'long' },
+          memoryInMegabytes: { type: 'double' },
+        },
+      },
     },
   },
 } as const;

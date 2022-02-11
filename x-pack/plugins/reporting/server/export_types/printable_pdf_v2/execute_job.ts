@@ -66,7 +66,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
         }),
         map(({ metrics, warnings }) => ({
           content_type: 'application/pdf',
-          metrics,
+          metrics: { pdf: metrics },
           warnings,
         })),
         catchError((err) => {

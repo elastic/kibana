@@ -198,10 +198,12 @@ describe('ReportingStore', () => {
         timeout: 30000,
         output: null,
         metrics: {
-          cpu: 0.02,
-          cpuInPercentage: 2,
-          memory: 1024 * 1024,
-          memoryInMegabytes: 1,
+          png: {
+            cpu: 0.02,
+            cpuInPercentage: 2,
+            memory: 1024 * 1024,
+            memoryInMegabytes: 1,
+          },
         },
       },
     };
@@ -230,10 +232,12 @@ describe('ReportingStore', () => {
           "testMeta": "meta",
         },
         "metrics": Object {
-          "cpu": 0.02,
-          "cpuInPercentage": 2,
-          "memory": 1048576,
-          "memoryInMegabytes": 1,
+          "png": Object {
+            "cpu": 0.02,
+            "cpuInPercentage": 2,
+            "memory": 1048576,
+            "memoryInMegabytes": 1,
+          },
         },
         "migration_version": "7.14.0",
         "output": null,

@@ -35,17 +35,30 @@ export interface ReportOutput extends TaskRunResult {
   size: number;
 }
 
-export interface TaskRunMetrics extends Partial<Required<ScreenshotResult>['metrics']> {
+type ScreenshotMetrics = Required<ScreenshotResult>['metrics'];
+
+export interface CsvMetrics {
+  rows: number;
+}
+
+export type PngMetrics = ScreenshotMetrics;
+
+export interface PdfMetrics extends Partial<ScreenshotMetrics> {
   /**
    * A number of emitted pages in the generated PDF report.
    */
-  pdfPages?: number;
+  pages: number;
+}
+
+export interface TaskRunMetrics {
+  csv?: CsvMetrics;
+  png?: PngMetrics;
+  pdf?: PdfMetrics;
 }
 
 export interface TaskRunResult {
   content_type: string | null;
   csv_contains_formulas?: boolean;
-  csv_rows?: number;
   max_size_reached?: boolean;
   warnings?: string[];
   metrics?: TaskRunMetrics;
@@ -142,7 +155,6 @@ export interface JobSummary {
   title: ReportSource['payload']['title'];
   maxSizeReached: TaskRunResult['max_size_reached'];
   csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
-  csvRows: TaskRunResult['csv_rows'];
 }
 
 export interface JobSummarySet {

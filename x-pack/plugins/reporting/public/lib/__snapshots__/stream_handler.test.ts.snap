@@ -5,7 +5,6 @@ Object {
   "completed": Array [
     Object {
       "csvContainsFormulas": false,
-      "csvRows": undefined,
       "id": "job-source-mock1",
       "jobtype": undefined,
       "maxSizeReached": false,
@@ -14,7 +13,6 @@ Object {
     },
     Object {
       "csvContainsFormulas": true,
-      "csvRows": 42000000,
       "id": "job-source-mock4",
       "jobtype": undefined,
       "maxSizeReached": false,
@@ -25,7 +23,6 @@ Object {
   "failed": Array [
     Object {
       "csvContainsFormulas": false,
-      "csvRows": undefined,
       "id": "job-source-mock2",
       "jobtype": undefined,
       "maxSizeReached": false,

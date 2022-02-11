@@ -9,7 +9,7 @@ import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
-import { LocatorParams, UrlOrUrlLocatorTuple, TaskRunMetrics } from '../../../../common/types';
+import { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '../../../../common/types';
 import { LevelLogger } from '../../../lib';
 import { ScreenshotResult } from '../../../../../screenshotting/server';
 import { ScreenshotOptions } from '../../../types';
@@ -30,7 +30,7 @@ const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
 
 interface PdfResult {
   buffer: Buffer | null;
-  metrics?: TaskRunMetrics;
+  metrics?: PdfMetrics;
   warnings: string[];
 }
 
@@ -111,7 +111,7 @@ export function generatePdfObservable(
         buffer,
         metrics: {
           ...metrics,
-          pdfPages: pdfOutput.getPageCount(),
+          pages: pdfOutput.getPageCount(),
         },
         warnings: results.reduce((found, current) => {
           if (current.error) {

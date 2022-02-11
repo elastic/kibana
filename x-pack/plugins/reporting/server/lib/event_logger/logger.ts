@@ -9,6 +9,7 @@ import deepMerge from 'deepmerge';
 import { LogMeta } from 'src/core/server';
 import { LevelLogger } from '../';
 import { PLUGIN_ID } from '../../../common/constants';
+import type { TaskRunMetrics } from '../../../common/types';
 import { IReport } from '../store';
 import { ActionType } from './';
 import { EcsLogAdapter } from './adapter';
@@ -25,12 +26,8 @@ import {
 } from './types';
 
 /** @internal */
-export interface ExecutionCompleteMetrics {
+export interface ExecutionCompleteMetrics extends TaskRunMetrics {
   byteSize: number;
-  cpu?: number;
-  csvRows?: number;
-  memory?: number;
-  pdfPages?: number;
 }
 
 export interface IReportingEventLogger {
@@ -107,10 +104,9 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
 
     logExecutionComplete({
       byteSize,
-      cpu,
-      csvRows,
-      memory,
-      pdfPages,
+      csv,
+      pdf,
+      png,
     }: ExecutionCompleteMetrics): CompletedExecution {
       const message = `completed ${this.report.jobtype} execution`;
       this.completionLogger.stopTiming();
@@ -121,10 +117,9 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
             reporting: {
               actionType: ActionType.EXECUTE_COMPLETE,
               byteSize,
-              cpu,
-              csvRows,
-              memory,
-              pdfPages,
+              csv,
+              pdf,
+              png,
             },
           },
         } as Partial<CompletedExecution>,

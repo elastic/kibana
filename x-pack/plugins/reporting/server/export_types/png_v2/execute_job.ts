@@ -52,7 +52,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
         tap(({ buffer }) => stream.write(buffer)),
         map(({ metrics, warnings }) => ({
           content_type: 'image/png',
-          metrics,
+          metrics: { png: metrics },
           warnings,
         })),
         tap({ error: (error) => jobLogger.error(error) }),

@@ -10,14 +10,14 @@ import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
 import { LayoutTypes } from '../../../../screenshotting/common';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import type { TaskRunMetrics } from '../../../common/types';
+import type { PngMetrics } from '../../../common/types';
 import { ReportingCore } from '../../';
 import { ScreenshotOptions } from '../../types';
 import { LevelLogger } from '../../lib';
 
 interface PngResult {
   buffer: Buffer;
-  metrics?: TaskRunMetrics;
+  metrics?: PngMetrics;
   warnings: string[];
 }
 

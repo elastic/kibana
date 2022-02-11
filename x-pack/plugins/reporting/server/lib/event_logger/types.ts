@@ -6,6 +6,7 @@
  */
 
 import { LogMeta } from 'src/core/server';
+import type { TaskRunMetrics } from '../../../common/types';
 import { ActionType } from './';
 
 export interface ReportingAction<A extends ActionType> extends LogMeta {
@@ -19,11 +20,7 @@ export interface ReportingAction<A extends ActionType> extends LogMeta {
       id?: string; // "immediate download" exports have no ID
       jobType: string;
       byteSize?: number;
-      cpu?: number;
-      csvRows?: number;
-      memory?: number;
-      pdfPages?: number;
-    };
+    } & TaskRunMetrics;
     task?: { id?: string };
   };
   user?: { name: string };

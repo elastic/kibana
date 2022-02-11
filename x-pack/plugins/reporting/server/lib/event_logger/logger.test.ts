@@ -118,10 +118,11 @@ describe('Event Logger', () => {
 
     const result = logger.logExecutionComplete({
       byteSize: 444,
-      cpu: 0.1,
-      csvRows: 440000,
-      memory: 1024,
-      pdfPages: 5,
+      pdf: {
+        cpu: 0.1,
+        memory: 1024,
+        pages: 5,
+      },
     });
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
@@ -131,12 +132,15 @@ describe('Event Logger', () => {
         Object {
           "actionType": "execute-complete",
           "byteSize": 444,
-          "cpu": 0.1,
-          "csvRows": 440000,
+          "csv": undefined,
           "id": "12348",
           "jobType": "csv",
-          "memory": 1024,
-          "pdfPages": 5,
+          "pdf": Object {
+            "cpu": 0.1,
+            "memory": 1024,
+            "pages": 5,
+          },
+          "png": undefined,
         },
         "completed csv execution",
       ]
