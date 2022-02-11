@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { QueryObserverResult, useQuery } from 'react-query';
+import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import { ServerApiError } from '../../../common/types';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 export function useGetArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  id: string
+  id: string,
+  customQueryOptions: UseQueryOptions<ExceptionListItemSchema, ServerApiError>
 ): QueryObserverResult<ExceptionListItemSchema, ServerApiError> {
   return useQuery<ExceptionListItemSchema, ServerApiError>(
     ['get', exceptionListApiClient, id],
@@ -22,6 +23,7 @@ export function useGetArtifact(
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
+      ...customQueryOptions,
     }
   );
 }

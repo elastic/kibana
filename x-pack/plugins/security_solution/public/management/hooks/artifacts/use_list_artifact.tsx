@@ -5,17 +5,11 @@
  * 2.0.
  */
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { QueryObserverResult, useQuery } from 'react-query';
+import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import { ServerApiError } from '../../../common/types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
-
-export type CallbackTypes = {
-  onSuccess?: (foundExceptions: FoundExceptionListItemSchema) => void;
-  onError?: (error?: ServerApiError) => void;
-  onSettled?: () => void;
-};
 
 export function useListArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
@@ -31,12 +25,9 @@ export function useListArtifact(
     perPage: MANAGEMENT_DEFAULT_PAGE_SIZE,
     policies: [],
   },
-  callbacks: CallbackTypes = {},
-  customQueryOptions = {}
+  customQueryOptions: UseQueryOptions<FoundExceptionListItemSchema, ServerApiError>
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const { filter, page, perPage, policies } = options;
-
-  const { onSuccess = () => {}, onError = () => {}, onSettled = () => {} } = callbacks;
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['list', exceptionListApiClient, options],
@@ -55,9 +46,6 @@ export function useListArtifact(
       refetchOnWindowFocus: false,
       refetchOnMount: true,
       keepPreviousData: true,
-      onSuccess,
-      onError,
-      onSettled,
       ...customQueryOptions,
     }
   );

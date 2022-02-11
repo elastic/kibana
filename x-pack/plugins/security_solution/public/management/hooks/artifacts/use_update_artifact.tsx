@@ -8,23 +8,20 @@ import {
   UpdateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { useQueryClient, useMutation } from 'react-query';
+import { useQueryClient, useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
 import { ServerApiError } from '../../../common/types';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
-export type CallbackTypes = {
-  onSuccess?: (updatedException: ExceptionListItemSchema) => void;
-  onError?: (error?: ServerApiError) => void;
-  onSettled?: () => void;
-};
-
 export function useUpdateArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  callbacks: CallbackTypes = {}
-) {
+  customQueryOptions: UseQueryOptions<ExceptionListItemSchema, ServerApiError>
+): UseMutationResult<
+  ExceptionListItemSchema,
+  ServerApiError,
+  UpdateExceptionListItemSchema,
+  () => void
+> {
   const queryClient = useQueryClient();
-  const { onSuccess = () => {}, onError = () => {}, onSettled = () => {} } = callbacks;
-
   return useMutation<
     ExceptionListItemSchema,
     ServerApiError,
@@ -35,13 +32,11 @@ export function useUpdateArtifact(
       return exceptionListApiClient.update(exception);
     },
     {
-      onSuccess,
-      onError,
       onSettled: () => {
         queryClient.invalidateQueries(['list', exceptionListApiClient]);
         queryClient.invalidateQueries(['get', exceptionListApiClient]);
-        onSettled();
       },
+      ...customQueryOptions,
     }
   );
 }

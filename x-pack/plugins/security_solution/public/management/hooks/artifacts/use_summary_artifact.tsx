@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
-import { QueryObserverResult, useQuery } from 'react-query';
+import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import { ServerApiError } from '../../../common/types';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
@@ -19,7 +19,8 @@ export function useSummaryArtifact(
   } = {
     filter: '',
     policies: [],
-  }
+  },
+  customQueryOptions: UseQueryOptions<ExceptionListSummarySchema, ServerApiError>
 ): QueryObserverResult<ExceptionListSummarySchema, ServerApiError> {
   const { filter, policies } = options;
 
@@ -38,6 +39,7 @@ export function useSummaryArtifact(
       refetchOnWindowFocus: false,
       refetchOnMount: true,
       keepPreviousData: true,
+      ...customQueryOptions,
     }
   );
 }

@@ -7,7 +7,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { CoreStart, HttpSetup } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
@@ -32,7 +32,8 @@ export const getFakeHttpService = () => {
 };
 
 export const render = async (
-  hook: any, // TODO: fix me
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  hook: () => any,
   waitForHook: 'isSuccess' | 'isLoading' | 'isError' = 'isSuccess'
 ) => {
   const queryClient = new QueryClient();

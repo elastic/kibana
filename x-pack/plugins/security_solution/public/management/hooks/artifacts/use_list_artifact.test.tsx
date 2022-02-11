@@ -6,16 +6,13 @@
  */
 
 import { useListArtifact } from './use_list_artifact';
-import { QueryObserverResult } from 'react-query';
 import { HttpSetup } from 'kibana/public';
-import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
-import { ServerApiError } from '../../../common/types';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getFakeListId, getFakeListDefinition, getFakeHttpService, render } from './test_utils';
 
 describe('List artifact hook', () => {
-  let result: QueryObserverResult<FoundExceptionListItemSchema, ServerApiError>;
+  let result: ReturnType<typeof useListArtifact>;
   let searchableFields: string[];
   let options:
     | {
@@ -54,15 +51,10 @@ describe('List artifact hook', () => {
 
     result = await render(
       () =>
-        useListArtifact(
-          instance,
-          searchableFields,
-          options,
-          {
-            onSuccess: onSuccessMock,
-          },
-          { retry: false }
-        ),
+        useListArtifact(instance, searchableFields, options, {
+          onSuccess: onSuccessMock,
+          retry: false,
+        }),
       'isSuccess'
     );
 
@@ -95,15 +87,10 @@ describe('List artifact hook', () => {
 
     result = await render(
       () =>
-        useListArtifact(
-          instance,
-          searchableFields,
-          options,
-          {
-            onError: onErrorMock,
-          },
-          { retry: false }
-        ),
+        useListArtifact(instance, searchableFields, options, {
+          onError: onErrorMock,
+          retry: false,
+        }),
       'isError'
     );
 
