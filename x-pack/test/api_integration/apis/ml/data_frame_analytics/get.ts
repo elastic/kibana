@@ -16,6 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
+  const retry = getService('retry');
 
   const jobId = `bm_${Date.now()}`;
 
@@ -76,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
     ];
 
     for (const jobConfig of mockJobConfigs) {
-      await ml.api.createAndRunDFAJob(jobConfig as DataFrameAnalyticsConfig);
+      await ml.api.createDataFrameAnalyticsJob(jobConfig as DataFrameAnalyticsConfig);
     }
   }
 
@@ -247,7 +248,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.have.keys('elements', 'details', 'error');
         // Index node, 2 job nodes (with same source index), and 2 edge nodes to connect them
-        expect(body.elements.length).to.eql(9);
+        expect(body.elements.length).to.eql(5);
 
         for (const detailsId in body.details) {
           if (detailsId.includes('analytics')) {
@@ -276,13 +277,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('GetDataFrameAnalyticsMessages', () => {
       it('should fetch single analytics job messages by id', async () => {
-        const { body } = await supertest
-          .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
-          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+        await retry.tryForTime(5000, async () => {
+          const { body } = await supertest
+            .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
+            .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+            .set(COMMON_REQUEST_HEADERS)
+            .expect(200);
 
-          expect(body.length).to.eql(12);
+          expect(body.length).to.eql(1);
           expect(body[0].job_id).to.eql(`${jobId}_1`);
           expect(body[0]).to.have.keys(
             'job_id',
@@ -291,10 +293,11 @@ export default ({ getService }: FtrProviderContext) => {
             'timestamp',
             'node_name',
             'job_type'
-        );
+          );
+        });
       });
 
-      it('should not allow to retrieve a job stats for the user without required permissions', async () => {
+      it('should not allow to retrieve job messages without required permissions', async () => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1/messages`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
