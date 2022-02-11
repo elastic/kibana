@@ -12,6 +12,12 @@
 
 export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KEY__';
 
+declare global {
+  interface Window {
+    [KBN_SCREENSHOT_MODE_ENABLED_KEY]?: boolean;
+  }
+}
+
 /**
  * This function is responsible for detecting whether we are currently in screenshot mode.
  *
@@ -21,7 +27,7 @@ export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KE
  */
 export const getScreenshotMode = (): boolean => {
   return (
-    (window as unknown as Record<string, unknown>)[KBN_SCREENSHOT_MODE_ENABLED_KEY] === true ||
+    window[KBN_SCREENSHOT_MODE_ENABLED_KEY] === true ||
     window.localStorage.getItem(KBN_SCREENSHOT_MODE_ENABLED_KEY) === 'true'
   );
 };
@@ -59,33 +65,5 @@ export const setScreenshotModeDisabled = () => {
       configurable: false,
       value: undefined,
     }
-  );
-};
-
-/** @deprecated */
-export const KBN_SCREENSHOT_MODE_LAYOUT_KEY = '__KBN_SCREENSHOT_MODE_LAYOUT_KEY__';
-
-/** @deprecated */
-export type Layout = 'canvas' | 'preserve_layout' | 'print';
-
-/** @deprecated */
-export const setScreenshotLayout = (value: Layout) => {
-  Object.defineProperty(
-    window,
-    '__KBN_SCREENSHOT_MODE_LAYOUT_KEY__', // Literal value to prevent adding an external reference
-    {
-      enumerable: true,
-      writable: true,
-      configurable: false,
-      value,
-    }
-  );
-};
-
-/** @deprecated */
-export const getScreenshotLayout = (): undefined | Layout => {
-  return (
-    (window as unknown as Record<string, Layout>)[KBN_SCREENSHOT_MODE_LAYOUT_KEY] ||
-    (window.localStorage.getItem(KBN_SCREENSHOT_MODE_LAYOUT_KEY) as Layout)
   );
 };
