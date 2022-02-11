@@ -20,6 +20,7 @@ import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useAlertIndexNames } from '../../hooks/use_alert_indexNames';
 import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { getBucketSize } from '../../utils/get_bucket_size';
@@ -52,7 +53,8 @@ function OverviewPage({ routeParams }: Props) {
       }),
     },
   ]);
-  const { rangeFrom, rangeTo, kuery } = useAlertsPageStateContainer();
+  const { rangeFrom, rangeTo } = useAlertsPageStateContainer();
+  const indexNames = useAlertIndexNames();
 
   const { core, ObservabilityPageTemplate } = usePluginContext();
 
@@ -114,15 +116,9 @@ function OverviewPage({ routeParams }: Props) {
                     <EuiPanel color="subdued">
                       <AlertsTableTGrid
                         setRefetch={() => {}}
-                        kuery={kuery}
                         rangeFrom={rangeFrom}
                         rangeTo={rangeTo}
-                        indexNames={[
-                          '.alerts-observability.apm.alerts-default',
-                          '.alerts-observability.logs.alerts-default',
-                          '.alerts-observability.metrics.alerts-default',
-                          '.alerts-observability.uptime.alerts-default',
-                        ]}
+                        indexNames={indexNames}
                       />
                       <AlertsSection />
                     </EuiPanel>

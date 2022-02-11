@@ -72,7 +72,7 @@ interface AlertsTableTGridProps {
   indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
-  kuery: string;
+  kuery?: string;
   setRefetch: (ref: () => void) => void;
 }
 

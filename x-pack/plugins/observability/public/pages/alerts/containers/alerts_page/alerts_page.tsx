@@ -20,11 +20,10 @@ import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/pa
 import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useAlertIndexNames } from '../../../../hooks/use_alert_indexNames';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
-import { callObservabilityApi } from '../../../../services/call_observability_api';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
 import { LoadingObservability } from '../../../overview/loading_observability';
 import { AlertsTableTGrid } from '../alerts_table_t_grid';
@@ -97,6 +96,7 @@ function AlertsPage() {
       }),
     },
   ]);
+  const indexNames = useAlertIndexNames();
 
   async function loadRuleStats() {
     setRuleStatsLoading(true);
@@ -138,23 +138,6 @@ function AlertsPage() {
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
   const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
-
-  const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
-    return callObservabilityApi('GET /api/observability/rules/alerts/dynamic_index_pattern', {
-      signal,
-      params: {
-        query: {
-          namespace: 'default',
-          registrationContexts: [
-            'observability.apm',
-            'observability.logs',
-            'observability.metrics',
-            'observability.uptime',
-          ],
-        },
-      },
-    });
-  }, []);
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
