@@ -9,14 +9,14 @@ import {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { useQueryClient, useMutation } from 'react-query';
-import { ServerApiError } from '../../../../common/types';
+import { HttpFetchError } from 'kibana/public';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 // FIXME: delete entire file once PR# 125198 is merged. This entire file was copied from that pr
 
 export interface CallbackTypes {
   onSuccess?: (updatedException: ExceptionListItemSchema) => void;
-  onError?: (error?: ServerApiError) => void;
+  onError?: (error?: HttpFetchError) => void;
   onSettled?: () => void;
 }
 
@@ -29,7 +29,7 @@ export function useUpdateArtifact(
 
   return useMutation<
     ExceptionListItemSchema,
-    ServerApiError,
+    HttpFetchError,
     UpdateExceptionListItemSchema,
     () => void
   >(

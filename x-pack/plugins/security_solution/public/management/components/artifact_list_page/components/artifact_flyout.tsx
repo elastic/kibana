@@ -88,7 +88,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
 
 const createFormInitialState = (
   listId: string,
-  item: ArtifactFormComponentOnChangeCallbackProps['item']
+  item: ArtifactFormComponentOnChangeCallbackProps['item'] | undefined
 ): ArtifactFormComponentOnChangeCallbackProps => {
   return {
     isValid: false,
@@ -152,9 +152,12 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     } = useArtifactGetItem(apiClient, urlParams.itemId ?? '', false);
 
     const [formState, setFormState] = useState<ArtifactFormComponentOnChangeCallbackProps>(
-      createFormInitialState.bind(apiClient.listId, item)
+      createFormInitialState.bind(null, apiClient.listId, item)
     );
-    const showExpiredLicenseBanner = useIsArtifactAllowedPerPolicyUsage(formState.item, formMode);
+    const showExpiredLicenseBanner = useIsArtifactAllowedPerPolicyUsage(
+      { tags: formState.item.tags ?? [] },
+      formMode
+    );
 
     const hasItemDataForEdit = useMemo<boolean>(() => {
       // `item_id` will not be defined for a `create` flow, so we use it below to determine if we
@@ -200,7 +203,9 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     useEffect(() => {
       if (isEditFlow && !hasItemDataForEdit && !error && isInitializing && !isLoadingItemForEdit) {
         fetchItemForEdit().then(({ data: editItemData }) => {
-          setFormState(createFormInitialState(apiClient.listId, editItemData));
+          if (editItemData) {
+            setFormState(createFormInitialState(apiClient.listId, editItemData));
+          }
         });
       }
     }, [
@@ -273,10 +278,6 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {/*
-                FIXME:PT implement disabled property
-                FIXME:PT implement isLoading
-               */}
                 <EuiButton
                   data-test-subj={getTestId('submitButton')}
                   fill

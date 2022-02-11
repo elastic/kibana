@@ -6,6 +6,10 @@
  */
 
 import { HttpFetchError } from 'kibana/public';
+import type {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 export interface ArtifactListPageUrlParams {
   page?: number;
@@ -19,7 +23,7 @@ export interface ArtifactListPageUrlParams {
 }
 
 export interface ArtifactFormComponentProps {
-  item: object; // FIXME:PT should be a type? and optional?
+  item: ExceptionListItemSchema | CreateExceptionListItemSchema;
   mode: 'edit' | 'create';
   /** signals that the form should be made disabled (ex. while an update/create api call is in flight) */
   disabled: boolean;
@@ -32,5 +36,5 @@ export interface ArtifactFormComponentProps {
 
 export interface ArtifactFormComponentOnChangeCallbackProps {
   isValid: boolean;
-  item: object;
+  item: ExceptionListItemSchema | CreateExceptionListItemSchema;
 }
