@@ -13,22 +13,53 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
 } from '../../../../../plugins/security_solution/common/constants';
 import {
+  createRule,
   createSignalsIndex,
+  deleteAllAlerts,
   deleteSignalsIndex,
   finalizeSignalsMigration,
+  getEqlRuleForSignalTesting,
+  getRuleForSignalTesting,
+  getSavedQueryRuleForSignalTesting,
+  getSignalsByIds,
+  getThreatMatchRuleForSignalTesting,
+  getThresholdRuleForSignalTesting,
   startSignalsMigration,
   waitFor,
+  waitForRuleSuccessOrStatus,
+  waitForSignalsToBePresent,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ThreatEcs } from '../../../../../plugins/security_solution/common/ecs/threat';
+import {
+  EqlCreateSchema,
+  QueryCreateSchema,
+  SavedQueryCreateSchema,
+  ThreatMatchCreateSchema,
+  ThresholdCreateSchema,
+} from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
   const log = getService('log');
+  const supertest = getService('supertest');
 
   describe('Alerts Compatibility', function () {
+    beforeEach(async () => {
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
+      );
+      await createSignalsIndex(supertest, log);
+    });
+
+    afterEach(async () => {
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
+      );
+      await deleteSignalsIndex(supertest, log);
+    });
+
     describe('CTI', () => {
       const expectedDomain = 'elastic.local';
       const expectedProvider = 'provider1';
@@ -39,20 +70,6 @@ export default ({ getService }: FtrProviderContext) => {
         index: 'filebeat-7.14.0-2021.08.04-000001',
         type: 'indicator_match_rule',
       };
-
-      beforeEach(async () => {
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
-        );
-        await createSignalsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
-        );
-        await deleteSignalsIndex(supertest, log);
-      });
 
       it('allows querying of legacy enriched signals by threat.indicator', async () => {
         const {
@@ -160,6 +177,133 @@ export default ({ getService }: FtrProviderContext) => {
           (enrichment) => enrichment?.indicator?.provider
         );
         expect(enrichmentProviders).to.eql([expectedProvider, expectedProvider]);
+      });
+
+      it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
+        const rule: ThreatMatchCreateSchema = getThreatMatchRuleForSignalTesting([
+          '.siem-signals-*',
+        ]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+
+      it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
+        const rule: ThreatMatchCreateSchema = getThreatMatchRuleForSignalTesting([
+          `.alerts-security.alerts-default`,
+        ]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+    });
+
+    describe('Query', () => {
+      it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
+        const rule: QueryCreateSchema = getRuleForSignalTesting([`.siem-signals-*`]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+
+      it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
+        const rule: QueryCreateSchema = getRuleForSignalTesting([
+          `.alerts-security.alerts-default`,
+        ]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+    });
+
+    describe('Saved Query', () => {
+      it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
+        const rule: SavedQueryCreateSchema = getSavedQueryRuleForSignalTesting([`.siem-signals-*`]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+
+      it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
+        const rule: SavedQueryCreateSchema = getSavedQueryRuleForSignalTesting([
+          `.alerts-security.alerts-default`,
+        ]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+    });
+
+    describe('EQL', () => {
+      it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
+        const rule: EqlCreateSchema = getEqlRuleForSignalTesting(['.siem-signals-*']);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+
+      it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
+        const rule: EqlCreateSchema = getEqlRuleForSignalTesting([
+          `.alerts-security.alerts-default`,
+        ]);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+    });
+
+    describe('Threshold', () => {
+      it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
+        const baseRule: ThresholdCreateSchema = getThresholdRuleForSignalTesting([
+          // '.siem-signals-default',
+          '*',
+        ]);
+        const rule: ThresholdCreateSchema = {
+          ...baseRule,
+          threshold: {
+            ...baseRule.threshold,
+            value: 1,
+          },
+        };
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
+      });
+
+      it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
+        const baseRule: ThresholdCreateSchema = getThresholdRuleForSignalTesting([
+          `.alerts-security.alerts-default`,
+        ]);
+        const rule: ThresholdCreateSchema = {
+          ...baseRule,
+          threshold: {
+            ...baseRule.threshold,
+            value: 1,
+          },
+        };
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        expect(signalsOpen.hits.hits.length).greaterThan(0);
       });
     });
   });
