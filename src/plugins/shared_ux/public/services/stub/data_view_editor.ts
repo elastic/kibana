@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { FC } from 'react';
 import { DataViewEditorProps, DataViewEditorStart } from '../../../../data_view_editor/public';
-import { FakeDataViewEditor } from './fake_data_view_editor';
 
 const dataViewEditor = (): DataViewEditorStart => {
   return {
-    IndexPatternEditorComponent: FakeDataViewEditor,
+    IndexPatternEditorComponent: {} as FC<DataViewEditorProps>,
     openEditor: (options: DataViewEditorProps) => () => {},
     userPermissions: {
       editDataView: () => {

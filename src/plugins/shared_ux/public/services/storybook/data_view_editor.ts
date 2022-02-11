@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import { action } from '@storybook/addon-actions';
-import { FakeDataViewEditor } from './fake_data_view_editor';
+import { FC } from 'react';
 import { DataViewEditorProps, DataViewEditorStart } from '../../../../data_view_editor/public';
 
 const createStartContract = (): DataViewEditorStart => {
   return {
-    IndexPatternEditorComponent: FakeDataViewEditor,
+    IndexPatternEditorComponent: {} as FC<DataViewEditorProps>,
     openEditor: action('openEditor') as any as (options: DataViewEditorProps) => () => void,
     userPermissions: {
       editDataView: () => {

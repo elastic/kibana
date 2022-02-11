@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
-import { DataViewEditorProps } from '../../../../data_view_editor/public';
 
-export const FakeDataViewEditor = (props: DataViewEditorProps) => {
-  return <div>Data View Editor</div>;
-};
+import { NoDataViewsPage } from './no_data_views_page';
+export type { NoDataViewsPageProps } from './no_data_views_page';
+export { NoDataViewsPage } from './no_data_views_page';
+
+// eslint-disable-next-line import/no-default-export
+export default NoDataViewsPage;

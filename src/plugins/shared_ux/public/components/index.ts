@@ -21,3 +21,6 @@ export const LazyExitFullScreenButton = React.lazy(() => import('./exit_full_scr
  * a predefined fallback and error boundary.
  */
 export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
+
+export const LazyNoDataViewsPage = React.lazy(() => import('./no_data_views_page'));
+export const NoDataViewsPage = withSuspense(LazyNoDataViewsPage);

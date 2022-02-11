@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { indexPatternEditorPluginMock } from './index_pattern_editor_plugin.mock';
+
 export type { MockPlatformServiceFactory } from './platform.mock';
 export { platformServiceFactory } from './platform.mock';
 
@@ -18,4 +20,5 @@ import { platformServiceFactory } from './platform.mock';
  */
 export const servicesFactory: PluginServiceFactory<SharedUXServices> = () => ({
   platform: platformServiceFactory(),
+  dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
 });

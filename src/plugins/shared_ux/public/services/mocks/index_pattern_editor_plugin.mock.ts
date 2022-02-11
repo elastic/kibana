@@ -5,9 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
-import { DataViewEditorProps } from '../../../../data_view_editor/public';
 
-export const FakeDataViewEditor = (props: DataViewEditorProps) => {
-  return <div>Data View Editor</div>;
+import { DataViewEditorStart } from '../../../../data_view_editor/public';
+
+const createStartContract = (): DataViewEditorStart => {
+  return {
+    openEditor: jest.fn(),
+    IndexPatternEditorComponent: jest.fn(),
+    userPermissions: {
+      editDataView: jest.fn(),
+    },
+  };
+};
+
+export const indexPatternEditorPluginMock = {
+  createStartContract,
 };
