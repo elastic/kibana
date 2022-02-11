@@ -10,11 +10,16 @@ import { i18n } from '@kbn/i18n';
 import {
   RuleType,
   AlertExecutorOptions,
-  AlertInstance,
+  Alert,
   RulesClient,
   AlertServices,
 } from '../../../alerting/server';
-import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import {
+  Alert as Rule,
+  AlertTypeParams,
+  RawAlertInstance,
+  SanitizedAlert,
+} from '../../../alerting/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -121,7 +126,7 @@ export class BaseRule {
     });
 
     if (existingRuleData.total > 0) {
-      return existingRuleData.data[0] as Alert;
+      return existingRuleData.data[0] as Rule;
     }
 
     const ruleActions = [];
@@ -272,7 +277,7 @@ export class BaseRule {
       for (const node of nodes) {
         const newAlertStates: AlertNodeState[] = [];
         // quick fix for now so that non node level alerts will use the cluster id
-        const instance = services.alertInstanceFactory(
+        const instance = services.alertFactory.create(
           node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid
         );
 
@@ -331,7 +336,7 @@ export class BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     instanceState: AlertInstanceState | AlertState | unknown,
     item: AlertData | unknown,
     cluster?: AlertCluster | unknown
