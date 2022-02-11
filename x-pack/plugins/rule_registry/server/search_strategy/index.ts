@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { map, mergeMap, catchError } from 'rxjs/operators';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import { from } from 'rxjs';
 import { intersection } from 'lodash';
 import {
@@ -26,10 +27,10 @@ import {
   PluginStartContract as AlertingPluginStartContract,
 } from '../../../alerting/server';
 import { SecurityPluginSetup } from '../../../security/server';
+import { SpacesPluginStart } from '../../../spaces/server';
 import { IRuleDataService } from '..';
 import { Dataset } from '../rule_data_plugin_service/index_options';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
-import { createQueryFilterClauses } from './build_query';
 import { AlertAuditAction, alertAuditEvent } from '../';
 
 const USE_RBAC = [
@@ -43,42 +44,18 @@ export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
   ruleDataService: IRuleDataService,
   alerting: AlertingPluginStartContract,
-  security?: SecurityPluginSetup
+  security?: SecurityPluginSetup,
+  spaces?: SpacesPluginStart
 ): ISearchStrategy<RuleRegistrySearchRequest, RuleRegistrySearchResponse> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
   return {
     search: (request, options, deps) => {
-      const spaceId = null; // TODO
       const securityAuditLogger = security?.audit.asScoped(deps.request);
-      const indices: string[] = request.featureIds.reduce((accum: string[], featureId) => {
-        if (!isValidFeatureId(featureId)) {
-          throw new Error('this is no good');
-        }
-
-        return [
-          ...accum,
-          ...ruleDataService.findIndicesByFeature(featureId, Dataset.alerts).map((indexInfo) => {
-            return featureId === 'siem'
-              ? `${indexInfo.baseName}-${spaceId}*`
-              : `${indexInfo.baseName}*`;
-          }),
-        ];
-      }, []);
-
-      const queryFilters = [];
-      console.log({ request })
-      // if (request.query) {
-      //   try {
-      //     queryFilters.push(...createQueryFilterClauses(request.query));
-      //   } catch (err) {
-      //     console.error('error', err);
-      //   }
-      // }
-
       const alertingAuthorizationClient = alerting.getAlertingAuthorizationWithRequest(
         deps.request
       );
+      const getActiveSpace = async () => spaces?.spacesService.getActiveSpace(deps.request);
       const getAuthFilter = async () =>
         alertingAuthorizationClient.getFindAuthorizationFilter(AlertingAuthorizationEntity.Alert, {
           type: AlertingAuthorizationFilterType.ESDSL,
@@ -89,24 +66,54 @@ export const ruleRegistrySearchStrategyProvider = (
             spaceIds: SPACE_IDS,
           },
         });
-
-      const params = {
-        index: indices,
-        body: {
-          size: MAX_ALERT_SEARCH_SIZE,
-          query: {
-            bool: {
-              filter: queryFilters,
-            },
-          },
-        },
+      const getAsync = async () => {
+        const [filter, space] = await Promise.all([getAuthFilter(), getActiveSpace()]);
+        return { filter, space };
       };
-
-      return from(getAuthFilter()).pipe(
-        mergeMap(({ filter }) => {
-          if (intersection(USE_RBAC, request.featureIds).length) {
-            params.body.query.bool.filter.push(filter);
+      return from(getAsync()).pipe(
+        mergeMap(({ filter: { filter }, space }) => {
+          let esQuery;
+          if (typeof request.query === 'string') {
+            esQuery = { query: request.query, language: 'kuery' };
+          } else if (request.query != null && typeof request.query === 'object') {
+            esQuery = [];
           }
+
+          const filters: Filter[] = [];
+          if (filter && intersection(USE_RBAC, request.featureIds).length) {
+            filters.push(filter as unknown as Filter);
+          }
+
+          const query = buildEsQuery(
+            undefined,
+            esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
+            filters
+          );
+
+          const indices: string[] = request.featureIds.reduce((accum: string[], featureId) => {
+            if (!isValidFeatureId(featureId)) {
+              throw new Error('this is no good');
+            }
+
+            return [
+              ...accum,
+              ...ruleDataService
+                .findIndicesByFeature(featureId, Dataset.alerts)
+                .map((indexInfo) => {
+                  return featureId === 'siem'
+                    ? `${indexInfo.baseName}-${space?.id ?? ''}*`
+                    : `${indexInfo.baseName}*`;
+                }),
+            ];
+          }, []);
+
+          const params = {
+            index: indices,
+            body: {
+              size: MAX_ALERT_SEARCH_SIZE,
+              query,
+            },
+          };
           return es.search({ ...request, params }, options, deps);
         }),
         map((response) => {
@@ -125,7 +132,6 @@ export const ruleRegistrySearchStrategyProvider = (
           }
           return response;
         }),
-        // mergeMap((esSearchRes) => queryFactory.parse(requestWithAlertsIndices, esSearchRes)),
         catchError((err) => {
           // check if auth error, if yes, write to ecs logger
           if (securityAuditLogger != null && err?.output?.statusCode === 403) {

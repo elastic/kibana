@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { DataViewBase } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { EuiDataGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -44,7 +45,8 @@ const AlertsListUI: React.FunctionComponent = () => {
   const [alerts, setAlerts] = useState<ParsedTechnicalFields[]>([]);
   const [alertsTotal, setAlertsTotal] = useState<number>(0);
   const [dynamicIndexPatterns, setDynamicIndexPatterns] = useState<DataViewBase[]>([]);
-  // const [filteredConsumers, setFilteredConsumers] = useState<Consumer[]>(visibleConsumers);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [sortingColumns, setSortingColumns] = useState([]);
 
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } = useStateContainer();
 
@@ -63,10 +65,17 @@ const AlertsListUI: React.FunctionComponent = () => {
       .subscribe({
         next: (res) => {
           // eslint-disable-next-line no-console
-          console.log({ res });
+          console.log('response from search strategy', {
+            isPartial: res.isPartial,
+            isRunning: res.isRunning,
+            res,
+          });
           const alertsResponse = res.rawResponse.hits.hits.map((hit) => hit._source!);
           setAlerts(alertsResponse);
-          setAlertsTotal(res.total ?? 0);
+          const total = !isNaN(res.rawResponse.hits.total as number)
+            ? (res.rawResponse.hits.total as number)
+            : (res.rawResponse.hits.total as estypes.SearchTotalHits).value ?? 0;
+          setAlertsTotal(total);
         },
         error: (e) => {
           if (e instanceof AbortError) {
@@ -135,6 +144,26 @@ const AlertsListUI: React.FunctionComponent = () => {
     },
   ];
 
+  const onChangeItemsPerPage = useCallback(
+    (pageSize) =>
+      setPagination((_state) => ({
+        ..._state,
+        pageSize,
+        pageIndex: 0,
+      })),
+    [setPagination]
+  );
+  const onChangePage = useCallback(
+    (pageIndex) => setPagination((_state) => ({ ..._state, pageIndex })),
+    [setPagination]
+  );
+  const onSort = useCallback(
+    (_state) => {
+      setSortingColumns(_state);
+    },
+    [setSortingColumns]
+  );
+
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(
     columns.map(({ id }) => id) // initialize to the full set of columns
@@ -142,25 +171,20 @@ const AlertsListUI: React.FunctionComponent = () => {
 
   const RenderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
     const row = alerts[rowIndex];
-    // console.log({ rowIndex, columnId });
-    return get(row, columnId);
+    return get(row, columnId) ?? 'N/A';
   };
 
   return (
     <>
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <QueryBar
-                dynamicIndexPatterns={dynamicIndexPatterns}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                query={kuery}
-                onQueryChange={onQueryBarQueryChange}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexItem grow={true}>
+          <QueryBar
+            dynamicIndexPatterns={dynamicIndexPatterns}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            query={kuery}
+            onQueryChange={onQueryBarQueryChange}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -172,13 +196,13 @@ const AlertsListUI: React.FunctionComponent = () => {
         rowCount={alertsTotal}
         renderCellValue={RenderCellValue}
         // inMemory={{ level: 'sorting' }}
-        // sorting={{ columns: sortingColumns, onSort }}
-        // pagination={{
-        //   ...pagination,
-        //   pageSizeOptions: [10, 50, 100],
-        //   onChangeItemsPerPage: onChangeItemsPerPage,
-        //   onChangePage: onChangePage,
-        // }}
+        sorting={{ columns: sortingColumns, onSort }}
+        pagination={{
+          ...pagination,
+          pageSizeOptions: [10, 50, 100],
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
         // onColumnResize={onColumnResize.current}
       />
     </>

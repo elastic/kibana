@@ -17,6 +17,7 @@ import {
 
 import { PluginStartContract as AlertingStart } from '../../alerting/server';
 import { SecurityPluginSetup } from '../../security/server';
+import { SpacesPluginStart } from '../../spaces/server';
 import {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
@@ -38,6 +39,7 @@ export interface RuleRegistryPluginSetupDependencies {
 export interface RuleRegistryPluginStartDependencies {
   alerting: AlertingStart;
   data: DataPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface RuleRegistryPluginSetupContract {
@@ -107,7 +109,8 @@ export class RuleRegistryPlugin
         depsStart.data,
         this.ruleDataService!,
         depsStart.alerting,
-        plugins.security
+        plugins.security,
+        depsStart.spaces
       );
 
       plugins.data.search.registerSearchStrategy(
