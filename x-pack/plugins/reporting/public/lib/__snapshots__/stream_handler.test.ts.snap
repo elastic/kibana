@@ -4,18 +4,18 @@ exports[`stream handler findChangedStatusJobs finds changed status jobs 1`] = `
 Object {
   "completed": Array [
     Object {
-      "csvContainsFormulas": true,
-      "csvRows": 42000000,
-      "id": "job-source-mock4",
+      "csvContainsFormulas": false,
+      "csvRows": undefined,
+      "id": "job-source-mock1",
       "jobtype": undefined,
       "maxSizeReached": false,
       "status": "completed",
       "title": "specimen",
     },
     Object {
-      "csvContainsFormulas": false,
-      "csvRows": undefined,
-      "id": "job-source-mock1",
+      "csvContainsFormulas": true,
+      "csvRows": 42000000,
+      "id": "job-source-mock4",
       "jobtype": undefined,
       "maxSizeReached": false,
       "status": "completed",
