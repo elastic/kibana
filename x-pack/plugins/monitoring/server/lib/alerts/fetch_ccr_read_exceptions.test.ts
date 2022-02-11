@@ -47,9 +47,32 @@ describe('fetchCCReadExceptions', () => {
           bool: {
             filter: [
               {
-                nested: {
-                  path: 'ccr_stats.read_exceptions',
-                  query: { exists: { field: 'ccr_stats.read_exceptions.exception' } },
+                bool: {
+                  should: [
+                    {
+                      nested: {
+                        ignore_unmapped: true,
+                        path: 'ccr_stats.read_exceptions',
+                        query: {
+                          exists: {
+                            field: 'ccr_stats.read_exceptions.exception',
+                          },
+                        },
+                      },
+                    },
+                    {
+                      nested: {
+                        ignore_unmapped: true,
+                        path: 'elasticsearch.ccr.read_exceptions',
+                        query: {
+                          exists: {
+                            field: 'elasticsearch.ccr.read_exceptions.exception',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
                 },
               },
               {
@@ -83,9 +106,13 @@ describe('fetchCCReadExceptions', () => {
                       _source: {
                         includes: [
                           'cluster_uuid',
+                          'elasticsearch.cluster.id',
                           'ccr_stats.read_exceptions',
+                          'elasticsearch.ccr.read_exceptions',
                           'ccr_stats.shard_id',
+                          'elasticsearch.ccr.shard_id',
                           'ccr_stats.leader_index',
+                          'elasticsearch.ccr.leader.index',
                         ],
                       },
                       size: 1,
