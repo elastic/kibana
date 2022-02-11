@@ -9,7 +9,7 @@ import { isEqual, intersection, union } from 'lodash';
 import { FilterManager } from 'src/plugins/data/public';
 import { Document } from '../persistence/saved_object_store';
 import { DatasourceMap } from '../types';
-import { injectDocFilterReferences, removePinnedFilters } from './save_modal_container';
+import { removePinnedFilters } from './save_modal_container';
 
 const removeNonSerializable = (obj: Parameters<JSON['stringify']>[0]) =>
   JSON.parse(JSON.stringify(obj));
@@ -75,3 +75,17 @@ export const isLensEqual = (
 
   return true;
 };
+
+function injectDocFilterReferences(
+  injectFilterReferences: FilterManager['inject'],
+  doc?: Document
+) {
+  if (!doc) return undefined;
+  return {
+    ...doc,
+    state: {
+      ...doc.state,
+      filters: injectFilterReferences(doc.state?.filters || [], doc.references),
+    },
+  };
+}
