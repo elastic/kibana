@@ -58,6 +58,7 @@ const RULE_NAME = 'Custom rule for bulk actions';
 const CUSTOM_INDEX_PATTERN_1 = 'custom-cypress-test-*';
 const DEFAULT_INDEX_PATTERNS = ['index-1-*', 'index-2-*'];
 const TAGS = ['cypress-tag-1', 'cypress-tag-2'];
+const OVERWRITE_INDEX_PATTERNS = ['overwrite-index-1-*', 'overwrite-index-2-*'];
 
 const customRule = {
   ...getNewRule(),
@@ -132,7 +133,7 @@ describe('Detection rules, bulk edit', () => {
 
     cy.log('Deletes index patterns');
     // select all rules on page (as page displays all existing rules).
-    // This way we also test bulk edit with rules ids parameter instead if a query.
+    // this way we will use underlying bulk edit API with ids parameter, which updates rules based their ids
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
     openBulkEditDeleteIndexPatternsForm();
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
@@ -184,7 +185,7 @@ describe('Detection rules, bulk edit', () => {
 
     cy.log('Remove one tag from all rules');
     // select all rules on page (as page displays all existing rules).
-    // This way we also test bulk edit with rules ids parameter instead if a query.
+    // this way we will use underlying bulk edit API with query parameter, which update all rules based on query search results
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
 
     openBulkEditDeleteTagsForm();
