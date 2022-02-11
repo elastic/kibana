@@ -51,7 +51,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const { displayErrorToast } = useToastNotificationService();
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const [items, setItems] = useState<NodeItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
@@ -82,6 +82,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
           defaultMessage: 'Nodes fetch failed',
         })
       );
+      setIsLoading(false);
     }
   }, [itemIdToExpandedRowMap]);
 
