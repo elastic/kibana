@@ -54,11 +54,11 @@ export interface ArtifactListPageProps {
   apiClient: ExceptionsListApiClient;
   /** The artifact Component that will be displayed in the Flyout for Create and Edit flows */
   ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
+  /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
+  labels: ArtifactListPageLabels;
   /** A list of fields that will be used by the search functionality when a user enters a value in the searchbar */
   searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;
-  /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
-  labels?: Partial<ArtifactListPageLabels>; // FIXME:PT alter the type to list required labels (those that have the artifact name in it)
   'data-test-subj'?: string;
 }
 

@@ -47,6 +47,16 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Search on the fields below: name, description, comments, value',
     }
   ),
+  /**
+   * Return the label to show under the search bar with the total number of items that match the current filter (or all)
+   * @param total
+   *
+   * @example:
+   *  (total) => i18n.translate('xpack.securitySolution.somepage.showingTotal', {
+   *    defaultMessage: 'Showing {total} {total, plural, one {event filter} other {event filters}}',
+   *    values: { total },
+   *  })
+   */
   getShowingCountLabel: (total: number) => {
     return i18n.translate('xpack.securitySolution.artifactListPage.showingTotal', {
       defaultMessage: 'Showing {total, plural, one {# artifact} other {# artifacts}}',
@@ -82,4 +92,32 @@ export const artifactListPageLabels = Object.freeze({
   ...ARTIFACT_DELETE_ACTION_LABELS,
 });
 
-export type ArtifactListPageLabels = typeof artifactListPageLabels;
+type IAllLabels = typeof artifactListPageLabels;
+
+/**
+ * The set of labels that normally have the artifact specific name in it, thus must be set for every page
+ */
+export type ArtifactListPageRequiredLabels = Pick<
+  IAllLabels,
+  | 'pageTitle'
+  | 'pageAboutInfo'
+  | 'pageAddButtonTitle'
+  | 'getShowingCountLabel'
+  | 'cardActionEditLabel'
+  | 'cardActionDeleteLabel'
+  | 'flyoutCreateTitle'
+  | 'flyoutEditTitle'
+  | 'flyoutCreateSubmitButtonLabel'
+  | 'flyoutCreateSubmitSuccess'
+  | 'flyoutEditSubmitSuccess'
+  | 'flyoutDowngradedLicenseDocsInfo'
+  | 'deleteActionSuccess'
+  | 'emptyStateTitle'
+  | 'emptyStateInfo'
+  | 'emptyStatePrimaryButtonLabel'
+>;
+
+export type ArtifactListPageOptionalLabels = Omit<IAllLabels, keyof ArtifactListPageRequiredLabels>;
+
+export type ArtifactListPageLabels = ArtifactListPageRequiredLabels &
+  Partial<ArtifactListPageOptionalLabels>;

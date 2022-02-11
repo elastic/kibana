@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { HostIsolationExceptionsApiClient } from '../../host_isolation_exceptions/host_isolation_exceptions_api_client';
@@ -33,6 +34,88 @@ const TempDevFormComponent: ArtifactListPageProps['ArtifactFormComponent'] = (pr
   );
 };
 
+const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+  pageTitle: i18n.translate('xpack.securitySolution.blocklist.pageTitle', {
+    defaultMessage: 'Blocklist',
+  }),
+  pageAboutInfo: i18n.translate('xpack.securitySolution.pageAboutInfo', {
+    defaultMessage: '(DEV: temporarily using isolation exception api)', // FIXME: need wording from PM
+  }),
+  pageAddButtonTitle: i18n.translate('xpack.securitySolution.pageAddButtonTitle', {
+    defaultMessage: 'Add blocklist entry',
+  }),
+  getShowingCountLabel: (total) =>
+    i18n.translate('xpack.securitySolution.somepage.showingTotal', {
+      defaultMessage: 'Showing {total} {total, plural, one {blocklist} other {blocklists}}',
+      values: { total },
+    }),
+  cardActionEditLabel: i18n.translate('xpack.securitySolution.cardActionEditLabel', {
+    defaultMessage: 'Edit blocklist',
+  }),
+  cardActionDeleteLabel: i18n.translate('xpack.securitySolution.cardActionDeleteLabel', {
+    defaultMessage: 'Delete blocklist',
+  }),
+  flyoutCreateTitle: i18n.translate('xpack.securitySolution.flyoutCreateTitle', {
+    defaultMessage: 'Add blocklist',
+  }),
+  flyoutEditTitle: i18n.translate('xpack.securitySolution.flyoutEditTitle', {
+    defaultMessage: 'Edit blocklist',
+  }),
+  flyoutCreateSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.flyoutCreateSubmitButtonLabel',
+    { defaultMessage: 'Add blocklist' }
+  ),
+  flyoutCreateSubmitSuccess: ({ name }) =>
+    i18n.translate('xpack.securitySolution.flyoutCreateSubmitSuccess', {
+      defaultMessage: '"{name}" has been added to your blocklist.', // FIXME: match this to design (needs count of items)
+      values: { name },
+    }),
+  flyoutEditSubmitSuccess: ({ name }) =>
+    i18n.translate('xpack.securitySolution.flyoutEditSubmitSuccess', {
+      defaultMessage: '"{name}" has been updated.',
+      values: { name },
+    }),
+  flyoutDowngradedLicenseDocsInfo: () => {
+    return 'tbd...';
+    // FIXME: define docs link for license downgrade message. sample code below
+
+    // const { docLinks } = useKibana().services;
+    // return (
+    //   <FormattedMessage
+    //     id="some-id-1"
+    //     defaultMessage="For more information, see our {link}."
+    //     value={{
+    //       link: (
+    //         <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
+    //           {' '}
+    //           <FormattedMessage
+    //             id="dome-id-2"
+    //             defaultMessage="Event filters documentation"
+    //           />{' '}
+    //         </EuiLink>
+    //       ),
+    //     }}
+    //   />
+    // );
+  },
+  deleteActionSuccess: (itemName) =>
+    i18n.translate('xpack.securitySolution.some_page.deleteSuccess', {
+      defaultMessage: '"{itemName}" has been removed from blocklist.',
+      values: { itemName },
+    }),
+  emptyStateTitle: i18n.translate('xpack.securitySolution.emptyStateTitle', {
+    defaultMessage: 'Add your first blocklist',
+  }),
+  emptyStateInfo: i18n.translate(
+    'xpack.securitySolution.emptyStateInfo',
+    { defaultMessage: 'Add a blocklist to prevent execution on the endpoint' } // FIXME: need wording here form PM
+  ),
+  emptyStatePrimaryButtonLabel: i18n.translate(
+    'xpack.securitySolution.emptyStatePrimaryButtonLabel',
+    { defaultMessage: 'Add blocklist' }
+  ),
+};
+
 export const Blocklist = memo(() => {
   const http = useHttp();
   // FIXME: Implement Blocklist API client and define list
@@ -43,10 +126,8 @@ export const Blocklist = memo(() => {
     <ArtifactListPage
       apiClient={eventFiltersApiClient}
       ArtifactFormComponent={TempDevFormComponent} // FIXME: Implement create/edit form
-      labels={{
-        pageTitle: 'Blocklist', // FIXME: Implement labels prop overrides for blocklist
-        pageAboutInfo: '(DEV: temporarily using isolation exception api)',
-      }}
+      labels={BLOCKLIST_PAGE_LABELS}
+      data-test-subj="blocklistPage"
     />
   );
 });

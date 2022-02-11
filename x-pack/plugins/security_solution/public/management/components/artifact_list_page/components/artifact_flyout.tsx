@@ -73,16 +73,66 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
         'Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies.',
     }
   ),
+  /**
+   * This should be set to a sentence that includes a link to the documentation page for this specific artifact type.
+   *
+   * @example
+   * // in a component
+   * () => {
+   *   const { docLinks } = useKibana().services;
+   *   return (
+   *     <FormattedMessage
+   *        id="some-id-1"
+   *        defaultMessage="For more information, see our {link}."
+   *        value={{
+   *          link: <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
+   *            <FormattedMessage id="dome-id-2" defaultMessage="Event filters documentation" />
+   *          </EuiLink>
+   *        }}
+   *     />
+   *   );
+   * }
+   */
+  flyoutDowngradedLicenseDocsInfo: (): React.ReactNode =>
+    i18n.translate('xpack.securitySolution.artifactListPage.flyoutDowngradedLicenseDocsInfo', {
+      defaultMessage: 'For more information, see our documentation.',
+    }),
+
   flyoutEditItemLoadFailure: (errorMessage: string) =>
     i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditItemLoadFailure', {
       defaultMessage: 'Failed to retrieve item for edit. Reason: {errorMessage}',
       values: { errorMessage },
     }),
 
-  flyoutSubmitSuccess: (itemName: string) =>
-    i18n.translate('xpack.securitySolution.artifactListPage.flyoutSubmitSuccess', {
-      defaultMessage: '"{itemName}" has been added.',
-      values: { itemName },
+  /**
+   * A function returning the label for the success message toast
+   * @param itemName
+   * @example
+   *  ({ name }) => i18n.translate('xpack.securitySolution.some_page.flyoutCreateSubmitSuccess', {
+   *    defaultMessage: '"{name}" has been added.',
+   *    values: { name },
+   *  })
+   */
+  flyoutCreateSubmitSuccess: ({ name }: ExceptionListItemSchema) =>
+    i18n.translate('xpack.securitySolution.some_page.flyoutCreateSubmitSuccess', {
+      defaultMessage: '"{name}" has been added to your event filters.',
+      values: { name },
+    }),
+
+  /**
+   * Returns the edit success message for the toast
+   * @param item
+   * @example
+   *  ({ name }) =>
+   *    i18n.translate('xpack.securitySolution.some_page.flyoutEditSubmitSuccess', {
+   *    defaultMessage: '"{name}" has been updated.',
+   *    values: { name },
+   *  })
+   */
+  flyoutEditSubmitSuccess: ({ name }: ExceptionListItemSchema) =>
+    i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditSubmitSuccess', {
+      defaultMessage: '"{name}" has been updated.',
+      values: { name },
     }),
 });
 
@@ -190,13 +240,17 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     const handleSubmitClick = useCallback(() => {
       submitData(formState.item).then((result) => {
-        toasts.addSuccess(labels.flyoutSubmitSuccess(result.name));
+        toasts.addSuccess(
+          isEditFlow
+            ? labels.flyoutEditSubmitSuccess(result)
+            : labels.flyoutCreateSubmitSuccess(result)
+        );
 
         // Close the flyout
         // `undefined` will cause params to be dropped from url
         setUrlParams({ id: undefined, show: undefined }, true);
       });
-    }, [formState.item, labels, setUrlParams, submitData, toasts]);
+    }, [formState.item, isEditFlow, labels, setUrlParams, submitData, toasts]);
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now
@@ -247,7 +301,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
             iconType="help"
             data-test-subj={getTestId('expiredLicenseCallout')}
           >
-            {labels.flyoutDowngradedLicenseInfo}
+            {`${labels.flyoutDowngradedLicenseInfo} ${labels.flyoutDowngradedLicenseDocsInfo()}`}
           </EuiCallOut>
         )}
 
