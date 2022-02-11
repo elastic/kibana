@@ -7,6 +7,7 @@
  */
 
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export const autoScaleWrapperStyle = css({
   display: 'flex',
@@ -15,5 +16,5 @@ export const autoScaleWrapperStyle = css({
   maxWidth: '100%',
   maxHeight: '100%',
   overflow: 'hidden',
-  lineHeight: 1.5,
+  lineHeight: euiThemeVars.euiLineHeight,
 });
