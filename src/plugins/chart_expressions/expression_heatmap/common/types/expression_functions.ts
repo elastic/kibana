@@ -77,6 +77,7 @@ export interface HeatmapArguments {
   splitColumnAccessor?: string | ExpressionValueVisDimension;
   legend: HeatmapLegendConfigResult;
   gridConfig: HeatmapGridConfigResult;
+  ariaLabel?: string;
 }
 
 export type HeatmapInput = Datatable;
