@@ -28,7 +28,6 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
-  SO_SEARCH_LIMIT,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -1386,27 +1385,4 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   }
 
   return result;
-}
-
-export async function incrementPackageName(
-  soClient: SavedObjectsClientContract,
-  packageName: string
-): Promise<string> {
-  // Fetch all packagePolicies having the package name
-  const packagePolicyData = await packagePolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
-  });
-
-  // Retrieve highest number appended to package policy name and increment it by one
-  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
-
-  const maxPkgPolicyName = Math.max(
-    ...(packagePolicyData?.items ?? [])
-      .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-      .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
-    0
-  );
-
-  return `${packageName}-${maxPkgPolicyName + 1}`;
 }
