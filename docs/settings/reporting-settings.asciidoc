@@ -26,8 +26,8 @@ When `true`, enables the {report-features}. Set this to `false` to disable {repo
 
 [NOTE]
 ============
-Disabling {report-features} entirely is discouraged. If you need to turn off the ability to generate reports in
-the UI, you can do so on a per-role and per-space basis with <<grant-user-access, {kib} application privileges>>.
+Disabling the {report-features} is discouraged. If you need to turn off the ability to generate reports,
+configure the roles and spaces in the <<grant-user-access, {kib} application privileges>>.
 
 If needed, you can also prevent a {kib} instance from claiming reporting work by setting
 <<xpack-reportingQueue-pollEnabled, `xpack.reporting.queue.pollEnabled: false`>>.
