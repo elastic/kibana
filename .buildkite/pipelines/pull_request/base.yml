@@ -4,5 +4,4 @@ steps:
     parallelism: 100
     agents:
       queue: n2-2
-    depends_on: build
     timeout_in_minutes: 30
