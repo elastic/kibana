@@ -86,7 +86,10 @@ export function columnToOperation(
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
-    sortingHint: fieldTypes?.includes(ES_FIELD_TYPES.VERSION) ? 'version' : undefined,
+    sortingHint:
+      column.dataType === 'string' && fieldTypes?.includes(ES_FIELD_TYPES.VERSION)
+        ? 'version'
+        : undefined,
   };
 }
 
