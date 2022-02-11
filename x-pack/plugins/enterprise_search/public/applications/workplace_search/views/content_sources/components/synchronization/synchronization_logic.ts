@@ -34,6 +34,7 @@ import {
   ContentSourceFullData,
   SyncJobType,
   TimeUnit,
+  IndexingRuleInclude,
 } from '../../../../types';
 
 import { SYNC_SETTINGS_UPDATED_MESSAGE } from '../../constants';
@@ -143,6 +144,10 @@ interface EditableIndexingRuleBase {
 export interface EditableIndexingRule extends EditableIndexingRuleBase {
   id: number;
 }
+
+const isIncludeRule = (rule: IndexingRule): rule is IndexingRuleInclude => {
+  return !!(rule as IndexingRuleInclude).include;
+};
 
 export const SynchronizationLogic = kea<
   MakeLogicType<SynchronizationValues, SynchronizationActions>
@@ -281,8 +286,8 @@ export const SynchronizationLogic = kea<
       (props.contentSource.indexing.rules as IndexingRule[]).map((rule, index) => ({
         filterType: rule.filterType,
         id: index,
-        valueType: rule.include ? 'include' : 'exclude',
-        value: rule.include ?? rule.exclude,
+        valueType: isIncludeRule(rule) ? 'include' : 'exclude',
+        value: isIncludeRule(rule) ? rule.include : rule.exclude,
       })),
       {
         addIndexingRule: (indexingRules, rule) => [

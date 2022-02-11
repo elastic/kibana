@@ -50,6 +50,27 @@ describe('SynchronizationLogic', () => {
     },
   };
 
+  const defaultIndexingRules: EditableIndexingRule[] = [
+    {
+      filterType: 'object_type',
+      id: 0,
+      value: 'value',
+      valueType: 'include',
+    },
+    {
+      filterType: 'path_template',
+      id: 1,
+      value: 'value',
+      valueType: 'exclude',
+    },
+    {
+      filterType: 'file_extension',
+      id: 2,
+      value: 'value',
+      valueType: 'include',
+    },
+  ];
+
   const defaultValues = {
     navigatingBetweenTabs: false,
     hasUnsavedAssetsAndObjectsChanges: false,
@@ -57,26 +78,7 @@ describe('SynchronizationLogic', () => {
     hasUnsavedFrequencyChanges: false,
     contentExtractionChecked: true,
     thumbnailsChecked: true,
-    indexingRules: [
-      {
-        filterType: 'object_type',
-        id: 0,
-        value: 'value',
-        valueType: 'include',
-      },
-      {
-        filterType: 'path_template',
-        id: 1,
-        value: 'value',
-        valueType: 'exclude',
-      },
-      {
-        filterType: 'file_extension',
-        id: 2,
-        value: 'value',
-        valueType: 'include',
-      },
-    ],
+    indexingRules: defaultIndexingRules,
     indexingRulesForAPI: [
       {
         filter_type: 'object_type',
