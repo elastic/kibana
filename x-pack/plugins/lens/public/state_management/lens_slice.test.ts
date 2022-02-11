@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EnhancedStore } from '@reduxjs/toolkit';
 import { Query } from 'src/plugins/data/public';
 import {
   switchDatasource,
@@ -16,13 +17,19 @@ import {
   removeOrClearLayer,
   addLayer,
   LensRootStore,
+  DatasourceStates,
 } from '.';
 import { layerTypes } from '../../common';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
 import { DatasourceMap, VisualizationMap } from '../types';
+import { applyChanges, disableAutoApply, enableAutoApply } from './lens_slice';
+import { LensAppState } from './types';
 
 describe('lensSlice', () => {
-  const { store } = makeLensStore({});
+  let store: EnhancedStore<{ lens: LensAppState }>;
+  beforeEach(() => {
+    store = makeLensStore({}).store;
+  });
   const customQuery = { query: 'custom' } as Query;
 
   describe('state update', () => {
@@ -32,6 +39,63 @@ describe('lensSlice', () => {
       store.dispatch(setState({ query: customQuery }));
       const changedState = store.getState().lens;
       expect(changedState).toEqual({ ...defaultState, query: customQuery });
+    });
+
+    describe('auto-apply-related actions', () => {
+      it('should disable auto apply', () => {
+        expect(store.getState().lens.appliedState).toBeUndefined();
+
+        store.dispatch(disableAutoApply());
+
+        const newState = store.getState().lens;
+
+        expect(newState.appliedState).toBeDefined();
+        expect(newState.appliedState).toEqual({
+          visualization: newState.visualization,
+          datasourceStates: newState.datasourceStates,
+        });
+        // check for deep copy
+        expect(newState.appliedState?.visualization).not.toBe(newState.visualization);
+        expect(newState.appliedState?.datasourceStates).not.toBe(newState.datasourceStates);
+      });
+
+      it('should enable auto-apply', () => {
+        store.dispatch(disableAutoApply());
+
+        expect(store.getState().lens.appliedState).toBeDefined();
+
+        store.dispatch(enableAutoApply());
+
+        expect(store.getState().lens.appliedState).toBeUndefined();
+      });
+
+      it('applies changes when auto-apply disabled', () => {
+        store.dispatch(disableAutoApply());
+
+        const newState = {
+          visualization: { activeId: 'fooid', state: { foo: 'bar' } },
+          datasourceStates: { another: 'foo' } as unknown as DatasourceStates,
+        };
+
+        store.dispatch(setState(newState));
+
+        store.dispatch(applyChanges());
+
+        const stateAfterApply = store.getState().lens;
+        expect(stateAfterApply.appliedState?.visualization).toEqual(newState.visualization);
+        expect(stateAfterApply.appliedState?.datasourceStates).toEqual(newState.datasourceStates);
+        // check for deep copy
+        expect(stateAfterApply.appliedState?.visualization).not.toBe(newState.visualization);
+        expect(stateAfterApply.appliedState?.datasourceStates).not.toBe(newState.datasourceStates);
+      });
+
+      it('does not apply changes if auto-apply enabled', () => {
+        expect(store.getState().lens.appliedState).toBeUndefined();
+
+        store.dispatch(applyChanges());
+
+        expect(store.getState().lens.appliedState).toBeUndefined();
+      });
     });
 
     it('updateState: updates state with updater', () => {
