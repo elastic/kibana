@@ -15,7 +15,6 @@ import {
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
   deleteSignalsIndex,
   finalizeSignalsMigration,
   getEqlRuleForSignalTesting,
@@ -271,8 +270,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Threshold', () => {
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const baseRule: ThresholdCreateSchema = getThresholdRuleForSignalTesting([
-          // '.siem-signals-default',
-          '*',
+          '.siem-signals-*',
         ]);
         const rule: ThresholdCreateSchema = {
           ...baseRule,
