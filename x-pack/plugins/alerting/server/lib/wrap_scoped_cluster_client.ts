@@ -34,7 +34,11 @@ function wrapEsClient(
   esClient: ElasticsearchClient,
   abortController: AbortController
 ): ElasticsearchClient {
-  const wrappedClient: Record<string, unknown> = {};
+  const wrappedClient: Record<string, unknown> = Object.create(
+    Object.getPrototypeOf(esClient),
+    Object.getOwnPropertyDescriptors(esClient)
+  );
+
   for (const attr in esClient) {
     if (!['search'].includes(attr)) {
       wrappedClient[attr] = esClient[attr as keyof ElasticsearchClient];
