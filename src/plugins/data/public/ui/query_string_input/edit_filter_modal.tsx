@@ -96,7 +96,7 @@ export function EditFilterModal({
   timeRangeForSuggestionsOverride,
   initialAddFilterMode,
   onRemoveFilterGroup,
-  saveFilters,
+  saveFilters
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (
@@ -120,12 +120,11 @@ export function EditFilterModal({
   );
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
-  const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
+  const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(currentEditFilters?.map(filter => cleanFilter(filter)), null, 2));
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
   const [groupsCount, setGroupsCount] = useState<number>(filter.groupCount !== undefined ? filter.groupCount : 0);
-
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
       return [
@@ -661,7 +660,7 @@ export function EditFilterModal({
   };
 
   return (
-    <EuiModal style={{minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
+    <EuiModal style={{ minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>

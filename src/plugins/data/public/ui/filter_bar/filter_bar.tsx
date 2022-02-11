@@ -51,7 +51,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
-  const [groupId, setGroupId] = useState<number | null>(null);
+  const [groupIds, setGroupIds] = useState<[] | undefined>(undefined);
   if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
@@ -62,16 +62,18 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     }
   }
 
-  const onEditFilterClick = (groupId: number) => {
-    setGroupId(groupId);
+  const onEditFilterClick = (groupIds: []) => {
+    setGroupIds(groupIds);
     props.toggleEditFilterModal?.(true);
   };
 
   const onDeleteFilterGroup = (groupId: string) => {
     const multipleFilters = [...props.multipleFilters];
+
     const updatedMultipleFilters = multipleFilters.filter(
-      (filter) => filter.groupId !== Number(groupId)
+      (filter) => !groupIds.includes(filter.groupId)
     );
+
     const filters = [...props.filters];
     const updatedFilters: Filter[] = [];
 
@@ -114,7 +116,9 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
     const multipleFilters = [...props.multipleFilters];
 
-    const newMultipleFilters = multipleFilters.filter((filter) => filter.groupId !== Number(groupId));
+    const newMultipleFilters = multipleFilters.filter(
+      (filter) => !groupIds.includes(filter.groupId)
+    );
 
     const filtersNew = newMultipleFilters.concat(mergedFilters);
 
@@ -190,7 +194,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     labels.map((label) => {
       // we should have same groupIds on our labeled filters group
       groupId = (groupedByAlias[label][0] as any).groupId;
-      // groupedByAlias[label].forEach((filter) => ((filter as any).groupId = groupId));
       const labelBadge = (
         <FilterExpressionItem
           groupId={groupId}
@@ -214,9 +217,11 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function renderEditFilter() {
-    const currentEditFilters = props.multipleFilters.filter(
-      (filter) => filter.meta.alias === 'some filter'
-    );
+    let currentEditFilters = [];
+    groupIds?.forEach((groupId) => {
+      const filteredFilters = props.multipleFilters.filter(filter => filter.groupId === groupId);
+      currentEditFilters.push(...filteredFilters);
+    });
 
     return (
       <EuiFlexItem grow={false}>
