@@ -180,6 +180,22 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
           'https://swiftype.com/sitemap2.xml',
         ]);
       });
+
+      it('filters selected entry point urls by selected domains', () => {
+        mount({
+          selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
+          selectedEntryPointUrls: [
+            'https://www.elastic.co/guide',
+            'https://swiftype.com/documentation',
+          ],
+        });
+
+        CrawlCustomSettingsFlyoutLogic.actions.onSelectDomainUrls(['https://swiftype.com']);
+
+        expect(CrawlCustomSettingsFlyoutLogic.values.selectedEntryPointUrls).toEqual([
+          'https://swiftype.com/documentation',
+        ]);
+      });
     });
 
     describe('onSelectEntryPointUrls', () => {

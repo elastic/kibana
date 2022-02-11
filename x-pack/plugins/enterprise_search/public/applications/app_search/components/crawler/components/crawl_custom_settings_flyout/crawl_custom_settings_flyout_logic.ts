@@ -150,6 +150,8 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       {
         showFlyout: () => [],
         onSelectEntryPointUrls: (_, { entryPointUrls }) => entryPointUrls,
+        onSelectDomainUrls: (entryPointUrls, { domainUrls }) =>
+          filterSeedUrlsByDomainUrls(entryPointUrls, domainUrls),
       },
     ],
     selectedSitemapUrls: [
