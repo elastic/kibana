@@ -223,7 +223,6 @@ export interface RuleType<
     | 'defaultActionGroupId'
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
-    | 'minimumScheduleInterval'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;

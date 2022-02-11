@@ -43,21 +43,6 @@ describe('alert_errors', () => {
       });
     });
 
-    it('should validate the minimumScheduleInterval', () => {
-      const alert = mockAlert();
-      alert.schedule.interval = '2m';
-      const result = validateBaseProperties(
-        alert,
-        mockserverRuleType({ minimumScheduleInterval: '5m' })
-      );
-      expect(result.errors).toStrictEqual({
-        name: [],
-        interval: ['Interval is below minimum (5m) for this rule type'],
-        alertTypeId: [],
-        actionConnectors: [],
-      });
-    });
-
     it('should validate the alertTypeId', () => {
       const alert = mockAlert();
       alert.alertTypeId = '';

@@ -36,7 +36,6 @@ export interface RuleType<
   isExportable: boolean;
   ruleTaskTimeout?: string;
   defaultScheduleInterval?: string;
-  minimumScheduleInterval?: string;
   enabledInLicense: boolean;
   authorizedConsumers: Record<string, ConsumerPrivileges>;
 }

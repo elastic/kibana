@@ -49,7 +49,6 @@ export interface RegistryRuleType
     | 'minimumLicenseRequired'
     | 'isExportable'
     | 'ruleTaskTimeout'
-    | 'minimumScheduleInterval'
     | 'defaultScheduleInterval'
   > {
   id: string;
@@ -210,25 +209,6 @@ export class RuleTypeRegistry {
       }
     }
 
-    // validate minimumScheduleInterval here
-    if (ruleType.minimumScheduleInterval) {
-      const invalidMinimumTimeout = validateDurationSchema(ruleType.minimumScheduleInterval);
-      if (invalidMinimumTimeout) {
-        throw new Error(
-          i18n.translate(
-            'xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutRuleTypeError',
-            {
-              defaultMessage: 'Rule type "{id}" has invalid minimum interval: {errorMessage}.',
-              values: {
-                id: ruleType.id,
-                errorMessage: invalidMinimumTimeout,
-              },
-            }
-          )
-        );
-      }
-    }
-
     const normalizedRuleType = augmentActionGroupsWithReserved<
       Params,
       ExtractedParams,
@@ -329,7 +309,6 @@ export class RuleTypeRegistry {
             minimumLicenseRequired,
             isExportable,
             ruleTaskTimeout,
-            minimumScheduleInterval,
             defaultScheduleInterval,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
@@ -343,7 +322,6 @@ export class RuleTypeRegistry {
           minimumLicenseRequired,
           isExportable,
           ruleTaskTimeout,
-          minimumScheduleInterval,
           defaultScheduleInterval,
           enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
             id,

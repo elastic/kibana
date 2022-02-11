@@ -165,32 +165,6 @@ describe('register()', () => {
     );
   });
 
-  test('throws if minimumScheduleInterval isnt valid', () => {
-    const ruleType: RuleType<never, never, never, never, never, 'default'> = {
-      id: '123',
-      name: 'Test',
-      actionGroups: [
-        {
-          id: 'default',
-          name: 'Default',
-        },
-      ],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      executor: jest.fn(),
-      producer: 'alerts',
-      minimumScheduleInterval: 'foobar',
-    };
-    const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-
-    expect(() => registry.register(ruleType)).toThrowError(
-      new Error(
-        `Rule type \"123\" has invalid minimum interval: string is not a valid duration: foobar.`
-      )
-    );
-  });
-
   test('throws if RuleType action groups contains reserved group id', () => {
     const ruleType: RuleType<never, never, never, never, never, 'default' | 'NotReserved'> = {
       id: 'test',
@@ -524,7 +498,6 @@ describe('list()', () => {
           "id": "test",
           "isExportable": true,
           "minimumLicenseRequired": "basic",
-          "minimumScheduleInterval": undefined,
           "name": "Test",
           "producer": "alerts",
           "recoveryActionGroup": Object {
