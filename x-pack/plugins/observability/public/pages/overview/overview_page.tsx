@@ -13,6 +13,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useAlertIndexNames } from '../../hooks/use_alert_indexNames';
 import { RouteParams } from '../../routes';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
@@ -33,7 +34,9 @@ export function OverviewPage({ routeParams }: Props) {
       }),
     },
   ]);
-  const { rangeFrom, rangeTo, kuery } = useAlertsPageStateContainer();
+  const { rangeFrom, rangeTo } = useAlertsPageStateContainer();
+  const indexNames = useAlertIndexNames();
+
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const { core, ObservabilityPageTemplate } = usePluginContext();
@@ -79,15 +82,9 @@ export function OverviewPage({ routeParams }: Props) {
     >
       <AlertsTableTGrid
         setRefetch={() => {}}
-        kuery={kuery}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
-        indexNames={[
-          '.alerts-observability.apm.alerts-default',
-          '.alerts-observability.logs.alerts-default',
-          '.alerts-observability.metrics.alerts-default',
-          '.alerts-observability.uptime.alerts-default',
-        ]}
+        indexNames={indexNames}
       />
       {hasData && (
         <>
