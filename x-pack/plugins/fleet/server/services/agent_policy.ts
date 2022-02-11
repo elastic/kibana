@@ -56,7 +56,8 @@ import { elasticAgentManifest } from './elastic_agent_manifest';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
-import { packagePolicyService, incrementPackagePolicyCopyName } from './package_policy';
+import { packagePolicyService } from './package_policy';
+import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';

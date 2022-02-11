@@ -28,8 +28,6 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
-  SO_SEARCH_LIMIT,
-  getMaxPackageName,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -1387,52 +1385,4 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   }
 
   return result;
-}
-
-export async function incrementPackageName(
-  soClient: SavedObjectsClientContract,
-  packageName: string
-): Promise<string> {
-  // Fetch all packagePolicies having the package name
-  const packagePolicyData = await packagePolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
-  });
-
-  return getMaxPackageName(packageName, packagePolicyData?.items);
-}
-
-export async function incrementPackagePolicyCopyName(
-  soClient: SavedObjectsClientContract,
-  packagePolicyName: string
-): Promise<string> {
-  let packageName = packagePolicyName;
-  const packageNameMatches = packagePolicyName.match(/^(.*)\s\(copy\s?[0-9]*\)$/);
-  if (packageNameMatches) {
-    packageName = packageNameMatches[1];
-  }
-
-  // find all pacakge policies starting with the same name and increment the name
-  const packagePolicyData = await packagePolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${packageName}*`,
-  });
-
-  const copyVersion =
-    packagePolicyData.items
-      .map((item) => {
-        const matches = item.name.match(/^(.*)\s\(copy\s?([0-9]*)\)$/);
-        if (matches) {
-          return parseInt(matches[2], 10) || 1;
-        }
-
-        return 0;
-      })
-      .sort((a, b) => b - a)[0] + 1 || 1;
-
-  if (copyVersion === 1) {
-    return `${packageName} (copy)`;
-  }
-
-  return `${packageName} (copy ${copyVersion})`;
 }
