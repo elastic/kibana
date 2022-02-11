@@ -91,18 +91,11 @@ async function execute({ data: { layout, logo, title, content }, port }: Generat
       },
     });
 
-    const buffer = await new Promise<Buffer>((resolve, reject) => {
-      if (!pdfDoc) {
-        throw new Error(
-          i18n.translate(
-            'xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage',
-            {
-              defaultMessage: 'Document stream has not been generated',
-            }
-          )
-        );
-      }
+    if (!pdfDoc) {
+      throw new Error('Document stream has not been generated');
+    }
 
+    const buffer = await new Promise<Buffer>((resolve, reject) => {
       const buffers: Buffer[] = [];
       pdfDoc.on('error', reject);
       pdfDoc.on('data', (data: Buffer) => {
