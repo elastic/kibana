@@ -41,7 +41,7 @@ describe('PdfMaker', () => {
     it('should report when the PDF worker runs out of memory instead of crashing the main thread', async () => {
       const leakyMaker = new (class MemoryLeakPdfMaker extends PdfMaker {
         // From local testing:
-        // OOMs after 456.486 seconds  with high young generation size
+        // OOMs after 456.486 seconds with high young generation size
         // OOMs after 53.538 seconds low young generation size
         protected workerMaxOldHeapSizeMb = 2;
         protected workerMaxYoungHeapSizeMb = 2;
