@@ -51510,7 +51510,7 @@ async function sortPackageJson(kbn) {
   await fs_promises__WEBPACK_IMPORTED_MODULE_0___default.a.writeFile(packageJsonPath, JSON.stringify(sort_package_json__WEBPACK_IMPORTED_MODULE_1___default()(JSON.parse(packageJson), {
     // top level keys in the order they were written when this was implemented
     sortOrder: ['name', 'description', 'keywords', 'private', 'version', 'branch', 'types', 'tsdocMetadata', 'build', 'homepage', 'bugs', 'kibana', 'author', 'scripts', 'repository', 'engines', 'resolutions']
-  }), null, 2));
+  }), null, 2) + '\n');
 }
 
 /***/ }),
