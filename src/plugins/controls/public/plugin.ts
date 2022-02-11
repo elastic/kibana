@@ -14,8 +14,6 @@ import {
   ControlsPluginSetupDeps,
   ControlsPluginStartDeps,
   IEditableControlFactory,
-  ControlEditorProps,
-  ControlEmbeddable,
   ControlInput,
 } from './types';
 import {

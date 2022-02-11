@@ -33,7 +33,7 @@ export const pluginServices = new PluginServices<ControlsServices>();
 export const getStubPluginServices = (): ControlsPluginStart => {
   pluginServices.setRegistry(stubRegistry.start({}));
   return {
-    ContextProvider: pluginServices.getContextProvider(),
-    controlsService: pluginServices.getServices().controls,
+    getControlFactory: pluginServices.getServices().controls.getControlFactory,
+    getControlTypes: pluginServices.getServices().controls.getControlTypes,
   };
 };
