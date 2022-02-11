@@ -287,7 +287,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         ),
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnIdDescription',
-          { defaultMessage: 'ID of the index pattern' }
+          { defaultMessage: 'ID of the data view' }
         ),
         sortable: true,
       },
@@ -329,7 +329,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         field: 'existingIndexPatternId',
         name: i18n.translate(
           'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
-          { defaultMessage: 'New index pattern' }
+          { defaultMessage: 'New data view' }
         ),
         render: (id: string) => {
           const options = [
@@ -573,7 +573,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           title={
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
-              defaultMessage="Index Pattern Conflicts"
+              defaultMessage="Data Views Conflicts"
             />
           }
           color="warning"
@@ -582,15 +582,15 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <p>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
-              defaultMessage="The following saved objects use index patterns that do not exist.
-              Please select the index patterns you'd like re-associated with
+              defaultMessage="The following saved objects use data views that do not exist.
+              Please select the data views you'd like re-associated with
               them. You can {indexPatternLink} if necessary."
               values={{
                 indexPatternLink: (
                   <EuiLink href={this.props.newIndexPatternUrl}>
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                      defaultMessage="create a new index pattern"
+                      defaultMessage="create a new data view"
                     />
                   </EuiLink>
                 ),
