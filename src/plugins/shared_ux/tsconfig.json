@@ -17,7 +17,7 @@
     {
       "path": "../../core/tsconfig.json"
     },
-    { "path": "../plugins/data_view_editor/tsconfig.json" },
-    { "path": "../plugins/data_views/tsconfig.json" },
+    { "path": "../data_view_editor/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
   ]
 }
