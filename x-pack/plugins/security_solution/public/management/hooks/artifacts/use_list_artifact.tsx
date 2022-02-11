@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { HttpFetchError } from 'kibana/public';
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
-import { ServerApiError } from '../../../common/types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
@@ -25,11 +25,11 @@ export function useListArtifact(
     perPage: MANAGEMENT_DEFAULT_PAGE_SIZE,
     policies: [],
   },
-  customQueryOptions: UseQueryOptions<FoundExceptionListItemSchema, ServerApiError>
-): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
+  customQueryOptions: UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError>
+): QueryObserverResult<FoundExceptionListItemSchema, HttpFetchError> {
   const { filter, page, perPage, policies } = options;
 
-  return useQuery<FoundExceptionListItemSchema, ServerApiError>(
+  return useQuery<FoundExceptionListItemSchema, HttpFetchError>(
     ['list', exceptionListApiClient, options],
     () => {
       return exceptionListApiClient.find({

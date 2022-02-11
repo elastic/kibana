@@ -8,22 +8,22 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { HttpFetchError } from 'kibana/public';
 import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
-import { ServerApiError } from '../../../common/types';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 export function useCreateArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  customOptions: UseQueryOptions<ExceptionListItemSchema, ServerApiError>
+  customOptions: UseQueryOptions<ExceptionListItemSchema, HttpFetchError>
 ): UseMutationResult<
   ExceptionListItemSchema,
-  ServerApiError,
+  HttpFetchError,
   CreateExceptionListItemSchema,
   () => void
 > {
   return useMutation<
     ExceptionListItemSchema,
-    ServerApiError,
+    HttpFetchError,
     CreateExceptionListItemSchema,
     () => void
   >((exception: CreateExceptionListItemSchema) => {

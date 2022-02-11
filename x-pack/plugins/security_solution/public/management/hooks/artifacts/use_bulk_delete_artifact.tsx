@@ -5,21 +5,21 @@
  * 2.0.
  */
 import pMap from 'p-map';
+import { HttpFetchError } from 'kibana/public';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
-import { ServerApiError } from '../../../common/types';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 export function useBulkDeleteArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  customOptions: UseQueryOptions<ExceptionListItemSchema[], ServerApiError>,
+  customOptions: UseQueryOptions<ExceptionListItemSchema[], HttpFetchError>,
   options: {
     concurrency: number;
   } = {
     concurrency: 5,
   }
-): UseMutationResult<ExceptionListItemSchema[], ServerApiError, string[], () => void> {
-  return useMutation<ExceptionListItemSchema[], ServerApiError, string[], () => void>(
+): UseMutationResult<ExceptionListItemSchema[], HttpFetchError, string[], () => void> {
+  return useMutation<ExceptionListItemSchema[], HttpFetchError, string[], () => void>(
     (exceptionIds: string[]) => {
       return pMap(
         exceptionIds,

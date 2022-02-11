@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { HttpSetup } from 'kibana/public';
 import { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 
 export const getFakeListId: () => string = () => 'FAKE_LIST_ID';
 export const getFakeListDefinition: () => CreateExceptionListSchema = () => ({
@@ -36,9 +36,8 @@ export const renderQuery = async (
   hook: () => any,
   waitForHook: 'isSuccess' | 'isLoading' | 'isError' = 'isSuccess'
 ) => {
-  const queryClient = new QueryClient();
   const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
   );
   const { result: resultHook, waitFor } = renderHook(() => hook(), {
     wrapper,
@@ -51,9 +50,8 @@ export const renderMutation = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hook: () => any
 ) => {
-  const queryClient = new QueryClient();
   const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
   );
   const { result: resultHook } = renderHook(() => hook(), {
     wrapper,

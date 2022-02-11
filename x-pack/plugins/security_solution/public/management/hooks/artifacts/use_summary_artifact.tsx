@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
+import { HttpFetchError } from 'kibana/public';
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
-import { ServerApiError } from '../../../common/types';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
@@ -20,11 +20,11 @@ export function useSummaryArtifact(
     filter: '',
     policies: [],
   },
-  customQueryOptions: UseQueryOptions<ExceptionListSummarySchema, ServerApiError>
-): QueryObserverResult<ExceptionListSummarySchema, ServerApiError> {
+  customQueryOptions: UseQueryOptions<ExceptionListSummarySchema, HttpFetchError>
+): QueryObserverResult<ExceptionListSummarySchema, HttpFetchError> {
   const { filter, policies } = options;
 
-  return useQuery<ExceptionListSummarySchema, ServerApiError>(
+  return useQuery<ExceptionListSummarySchema, HttpFetchError>(
     ['summary', exceptionListApiClient, options],
     () => {
       return exceptionListApiClient.summary(

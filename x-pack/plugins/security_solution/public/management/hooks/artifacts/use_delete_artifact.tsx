@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { HttpFetchError } from 'kibana/public';
 import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
-import { ServerApiError } from '../../../common/types';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 export function useDeleteArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  customOptions: UseQueryOptions<ExceptionListItemSchema, ServerApiError>
-): UseMutationResult<ExceptionListItemSchema, ServerApiError, string, () => void> {
-  return useMutation<ExceptionListItemSchema, ServerApiError, string, () => void>((id: string) => {
+  customOptions: UseQueryOptions<ExceptionListItemSchema, HttpFetchError>
+): UseMutationResult<ExceptionListItemSchema, HttpFetchError, string, () => void> {
+  return useMutation<ExceptionListItemSchema, HttpFetchError, string, () => void>((id: string) => {
     return exceptionListApiClient.delete(id);
   }, customOptions);
 }
