@@ -1,0 +1,5 @@
+.presDataViewPicker__panel {
+    @include euiBreakpoint('m', 'l', 'xl') {
+      width: $euiFormMaxWidth;
+    }
+  }

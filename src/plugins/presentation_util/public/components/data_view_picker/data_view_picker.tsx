@@ -13,6 +13,8 @@ import { DataViewListItem } from '../../../../data_views/common';
 
 import { ToolbarButton, ToolbarButtonProps } from '../../../../kibana_react/public';
 
+import './data_view_picker.scss';
+
 export type DataViewTriggerProps = ToolbarButtonProps & {
   label: string;
   title?: string;
@@ -67,49 +69,48 @@ export function DataViewPicker({
         display="block"
         panelPaddingSize="s"
         ownFocus
+        panelClassName="presDataViewPicker__panel"
       >
-        <div style={{ width: 368 }}>
-          <EuiPopoverTitle data-test-subj="data-view-picker-title">
-            {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
-              defaultMessage: 'Data view',
-            })}
-          </EuiPopoverTitle>
-          <EuiSelectable<{
-            key?: string;
-            label: string;
-            value?: string;
-            checked?: 'on' | 'off' | undefined;
-          }>
-            {...selectableProps}
-            searchable
-            singleSelection="always"
-            options={dataViews.map(({ title, id }) => ({
-              key: id,
-              label: title,
-              value: id,
-              'data-test-subj': `data-view-picker-${title}`,
-              checked: id === selectedDataViewId ? 'on' : undefined,
-            }))}
-            onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked) as unknown as {
-                value: string;
-              };
-              onChangeDataViewId(choice.value);
-              setPopoverIsOpen(false);
-            }}
-            searchProps={{
-              compressed: true,
-              ...(selectableProps ? selectableProps.searchProps : undefined),
-            }}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
-        </div>
+        <EuiPopoverTitle data-test-subj="data-view-picker-title">
+          {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
+            defaultMessage: 'Data view',
+          })}
+        </EuiPopoverTitle>
+        <EuiSelectable<{
+          key?: string;
+          label: string;
+          value?: string;
+          checked?: 'on' | 'off' | undefined;
+        }>
+          {...selectableProps}
+          searchable
+          singleSelection="always"
+          options={dataViews.map(({ title, id }) => ({
+            key: id,
+            label: title,
+            value: id,
+            'data-test-subj': `data-view-picker-${title}`,
+            checked: id === selectedDataViewId ? 'on' : undefined,
+          }))}
+          onChange={(choices) => {
+            const choice = choices.find(({ checked }) => checked) as unknown as {
+              value: string;
+            };
+            onChangeDataViewId(choice.value);
+            setPopoverIsOpen(false);
+          }}
+          searchProps={{
+            compressed: true,
+            ...(selectableProps ? selectableProps.searchProps : undefined),
+          }}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
       </EuiPopover>
     </>
   );
