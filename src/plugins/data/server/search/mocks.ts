@@ -17,6 +17,7 @@ export function createSearchSetupMock(): jest.Mocked<ISearchSetup> {
     aggs: searchAggsSetupMock(),
     registerSearchStrategy: jest.fn(),
     __enhance: jest.fn(),
+    searchSource: searchSourceMock.createSetupContract(),
   };
 }
 

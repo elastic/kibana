@@ -14,6 +14,7 @@ import {
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data';
+import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
@@ -219,6 +220,52 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await ml.navigation.navigateToDataVisualizer();
       });
       runTests(sampleLogTestData);
+    });
+
+    describe('with view in lens action ', function () {
+      const testData = farequoteDataViewTestData;
+      // Run tests on full ft_module_sample_logs index.
+      it(`${testData.suiteTitle} loads the data visualizer selector page`, async () => {
+        // Start navigation from the base of the ML app.
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToDataVisualizer();
+      });
+
+      it(`${testData.suiteTitle} loads lens charts`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} loads the saved search selection page`
+        );
+        await ml.dataVisualizer.navigateToIndexPatternSelection();
+
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} loads the index data visualizer page`
+        );
+        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
+          testData.sourceIndexOrSavedSearch
+        );
+
+        await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
+        await ml.dataVisualizerIndexBased.clickUseFullDataButton(
+          testData.expected.totalDocCountFormatted
+        );
+        await headerPage.waitUntilLoadingHasFinished();
+
+        await ml.testExecution.logTestStep('navigate to Lens');
+        const lensMetricField = testData.expected.metricFields![0];
+
+        if (lensMetricField) {
+          await ml.dataVisualizerTable.assertLensActionShowChart(lensMetricField.fieldName);
+          await ml.navigation.browserBackTo('dataVisualizerTable');
+        }
+        const lensNonMetricField = testData.expected.nonMetricFields?.find(
+          (f) => f.type === ML_JOB_FIELD_TYPES.KEYWORD
+        );
+
+        if (lensNonMetricField) {
+          await ml.dataVisualizerTable.assertLensActionShowChart(lensNonMetricField.fieldName);
+          await ml.navigation.browserBackTo('dataVisualizerTable');
+        }
+      });
     });
   });
 }

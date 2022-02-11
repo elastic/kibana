@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { map, truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { Logger } from 'src/core/server';
-import type { Layout } from 'src/plugins/screenshot_mode/common';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
 } from '../../../../../../src/plugins/screenshot_mode/server';
-import { Context, SCREENSHOTTING_CONTEXT_KEY } from '../../../common/context';
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
 
@@ -31,6 +28,8 @@ export interface ConditionalHeaders {
   headers: Record<string, string>;
   conditions: ConditionalHeadersConditions;
 }
+
+export type Context = Record<string, unknown>;
 
 export interface ElementPosition {
   boundingClientRect: {
@@ -57,7 +56,6 @@ interface OpenOptions {
   context?: Context;
   waitForSelector: string;
   timeout: number;
-  layout?: Layout;
 }
 
 interface WaitForSelectorOpts {
@@ -92,10 +90,7 @@ const WAIT_FOR_DELAY_MS: number = 100;
 
 function getDisallowedOutgoingUrlError(interceptedUrl: string) {
   return new Error(
-    i18n.translate('xpack.screenshotting.chromiumDriver.disallowedOutgoingUrl', {
-      defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}". Failing the request and closing the browser.`,
-      values: { interceptedUrl },
-    })
+    `Received disallowed outgoing URL: "${interceptedUrl}". Failing the request and closing the browser.`
   );
 }
 
@@ -128,13 +123,7 @@ export class HeadlessChromiumDriver {
    */
   async open(
     url: string,
-    {
-      conditionalHeaders,
-      context,
-      layout,
-      waitForSelector: pageLoadSelector,
-      timeout,
-    }: OpenOptions,
+    { conditionalHeaders, context, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
     logger: Logger
   ): Promise<void> {
     logger.info(`opening url ${url}`);
@@ -148,23 +137,8 @@ export class HeadlessChromiumDriver {
      */
     await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotModeEnabled);
 
-    if (context) {
-      await this.page.evaluateOnNewDocument(
-        (key: string, value: unknown) => {
-          Object.defineProperty(window, key, {
-            configurable: false,
-            writable: true,
-            enumerable: true,
-            value,
-          });
-        },
-        SCREENSHOTTING_CONTEXT_KEY,
-        context
-      );
-    }
-
-    if (layout) {
-      await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotLayout, layout);
+    for (const [key, value] of Object.entries(context ?? {})) {
+      await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotContext, key, value);
     }
 
     await this.page.setRequestInterception(true);
@@ -323,15 +297,7 @@ export class HeadlessChromiumDriver {
             headers,
           });
         } catch (err) {
-          logger.error(
-            i18n.translate(
-              'xpack.screenshotting.chromiumDriver.failedToCompleteRequestUsingHeaders',
-              {
-                defaultMessage: 'Failed to complete a request using headers: {error}',
-                values: { error: err },
-              }
-            )
-          );
+          logger.error(`Failed to complete a request using headers: ${err.message}`);
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
@@ -339,12 +305,7 @@ export class HeadlessChromiumDriver {
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
-          logger.error(
-            i18n.translate('xpack.screenshotting.chromiumDriver.failedToCompleteRequest', {
-              defaultMessage: 'Failed to complete a request: {error}',
-              values: { error: err },
-            })
-          );
+          logger.error(`Failed to complete a request: ${err.message}`);
         }
       }
 

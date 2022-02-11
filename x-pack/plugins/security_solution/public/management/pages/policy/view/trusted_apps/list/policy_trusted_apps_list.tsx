@@ -22,7 +22,6 @@ import {
   getPolicyTrustedAppsListPagination,
   getTrustedAppsAllPoliciesById,
   isPolicyTrustedAppListLoading,
-  policyIdFromParams,
   getCurrentPolicyArtifactsFilter,
 } from '../../../store/policy_details/selectors';
 import {
@@ -39,21 +38,23 @@ import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/art
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { useGetLinkTo } from '../empty/use_policy_trusted_apps_empty_hooks';
 
 const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
 export interface PolicyTrustedAppsListProps {
   hideTotalShowingLabel?: boolean;
+  policyId: string;
+  policyName: string;
 }
 
 export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
-  ({ hideTotalShowingLabel = false }) => {
+  ({ hideTotalShowingLabel = false, policyId, policyName }) => {
     const getTestId = useTestIdGenerator(DATA_TEST_SUBJ);
     const toasts = useToasts();
     const history = useHistory();
     const { getAppUrl } = useAppUrl();
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
-    const policyId = usePolicyDetailsSelector(policyIdFromParams);
     const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
     const defaultFilter = usePolicyDetailsSelector(getCurrentPolicyArtifactsFilter);
     const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
@@ -62,6 +63,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
     const allPoliciesById = usePolicyDetailsSelector(getTrustedAppsAllPoliciesById);
     const trustedAppsApiError = usePolicyDetailsSelector(getPolicyTrustedAppListError);
     const navigateCallback = usePolicyDetailsNavigateCallback();
+    const { state } = useGetLinkTo(policyId, policyName);
 
     const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
     const [trustedAppsForRemoval, setTrustedAppsForRemoval] = useState<typeof trustedAppItems>([]);
@@ -152,7 +154,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
             ),
             href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
             navigateAppId: APP_UI_ID,
-            navigateOptions: { path: viewUrlPath },
+            navigateOptions: { path: viewUrlPath, state },
             'data-test-subj': getTestId('viewFullDetailsAction'),
           },
         ];
@@ -201,6 +203,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
       isCardExpanded,
       trustedAppItems,
       canCreateArtifactsByPolicy,
+      state,
     ]);
 
     const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
