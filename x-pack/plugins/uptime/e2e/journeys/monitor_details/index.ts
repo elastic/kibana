@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './uptime.journey';
-export * from './alerts';
-export * from './monitor_details';
+export * from './monitor_details.journey';
+export * from './monitor_alerts.journey';
+export * from './ping_redirects.journey';
