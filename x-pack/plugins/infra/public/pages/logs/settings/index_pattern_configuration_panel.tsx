@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LogIndexPatternReference } from '../../../../common/log_sources';
-import { useLinkProps } from '../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../observability/public';
 import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';
