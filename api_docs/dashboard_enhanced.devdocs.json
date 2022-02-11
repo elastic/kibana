@@ -598,8 +598,14 @@
               ") => void; } & { urlGenerators: ",
               "UrlGeneratorsSetup",
               "; url: ",
-              "UrlService",
-              "<unknown>; navigate(options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
               "RedirectOptions",
               "<",
               "SerializableRecord",
@@ -705,8 +711,14 @@
               ") => void; } & { urlGenerators: ",
               "UrlGeneratorsStart",
               "; url: ",
-              "UrlService",
-              "<unknown>; navigate(options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
               "RedirectOptions",
               "<",
               "SerializableRecord",

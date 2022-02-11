@@ -57,7 +57,7 @@
                 "section": "def-common.AlertAction",
                 "text": "AlertAction"
               },
-              "[]; alertTypeId: string; consumer: string; schedule: ",
+              "[]; throttle: string | null; alertTypeId: string; consumer: string; schedule: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -65,7 +65,7 @@
                 "section": "def-common.IntervalSchedule",
                 "text": "IntervalSchedule"
               },
-              "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
+              "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -1075,7 +1075,7 @@
                 "section": "def-common.SanitizedAlert",
                 "text": "SanitizedAlert"
               },
-              "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+              "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
@@ -1319,41 +1319,24 @@
         "children": [
           {
             "parentPluginId": "alerting",
-            "id": "def-server.AlertServices.alertInstanceFactory",
-            "type": "Function",
+            "id": "def-server.AlertServices.alertFactory",
+            "type": "Object",
             "tags": [],
-            "label": "alertInstanceFactory",
+            "label": "alertFactory",
             "description": [],
             "signature": [
-              "(id: string) => ",
+              "{ create: (id: string) => ",
               {
                 "pluginId": "alerting",
                 "scope": "server",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.PublicAlertInstance",
-                "text": "PublicAlertInstance"
+                "section": "def-server.PublicAlert",
+                "text": "PublicAlert"
               },
-              "<InstanceState, InstanceContext, ActionGroupIds>"
+              "<InstanceState, InstanceContext, ActionGroupIds>; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "alerting",
-                "id": "def-server.AlertServices.alertInstanceFactory.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/alerting/server/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "deprecated": false
           },
           {
             "parentPluginId": "alerting",
@@ -2441,21 +2424,21 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-server.PublicAlertInstance",
+        "id": "def-server.PublicAlert",
         "type": "Type",
         "tags": [],
-        "label": "PublicAlertInstance",
+        "label": "PublicAlert",
         "description": [],
         "signature": [
           "{ getState: () => State; replaceState: (state: State) => ",
-          "AlertInstance",
+          "Alert",
           "<State, Context, ActionGroupIds>; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => ",
-          "AlertInstance",
+          "Alert",
           "<State, Context, ActionGroupIds>; scheduleActionsWithSubGroup: (actionGroup: ActionGroupIds, subgroup: string, context?: Context) => ",
-          "AlertInstance",
+          "Alert",
           "<State, Context, ActionGroupIds>; }"
         ],
-        "path": "x-pack/plugins/alerting/server/alert_instance/alert_instance.ts",
+        "path": "x-pack/plugins/alerting/server/alert/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2497,9 +2480,9 @@
             "section": "def-common.AlertTypeParams",
             "text": "AlertTypeParams"
           },
-          " = never>({ options: { fields, ...options }, }?: { options?: ",
+          " = never>({ options: { fields, ...options }, excludeFromPublicApi, }?: { options?: ",
           "FindOptions",
-          " | undefined; }) => Promise<",
+          " | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -2515,7 +2498,7 @@
             "section": "def-common.AlertTypeParams",
             "text": "AlertTypeParams"
           },
-          " = never>({ id, includeLegacyId, }: { id: string; includeLegacyId?: boolean | undefined; }) => Promise<",
+          " = never>({ id, includeLegacyId, excludeFromPublicApi, }: { id: string; includeLegacyId?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -4786,7 +4769,7 @@
             "section": "def-common.AlertAction",
             "text": "AlertAction"
           },
-          "[]; alertTypeId: string; consumer: string; schedule: ",
+          "[]; throttle: string | null; alertTypeId: string; consumer: string; schedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -4794,7 +4777,7 @@
             "section": "def-common.IntervalSchedule",
             "text": "IntervalSchedule"
           },
-          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
+          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -4824,7 +4807,7 @@
             "section": "def-common.SanitizedAlert",
             "text": "SanitizedAlert"
           },
-          "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,

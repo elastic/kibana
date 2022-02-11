@@ -2680,10 +2680,6 @@
             "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/public/application/hooks/use_dashboard_app_state.d.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
           },
@@ -2756,70 +2752,6 @@
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_app_index_pattern.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/percentile_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/percentile_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/expanded_row/geo_point_content_with_map/geo_point_content_with_map.tsx"
           },
@@ -2912,14 +2844,6 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
@@ -2960,14 +2884,6 @@
             "path": "x-pack/plugins/lens/server/routes/existing_fields.test.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/rtl_helpers.tsx"
           },
@@ -2984,20 +2900,12 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/percentile_agg_field.d.ts"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_filters.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/percentile_agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_filters.tsx"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -3032,12 +2940,12 @@
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_wildcards.tsx"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_wildcards.tsx"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_wildcards.tsx"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_wildcards.tsx"
           },
           {
             "plugin": "dataViews",
@@ -3148,36 +3056,8 @@
             "path": "src/plugins/visualizations/public/visualize_app/components/visualize_top_nav.tsx"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
             "plugin": "lens",
@@ -3246,186 +3126,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/components/filter_label.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_agg_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_agg_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/count_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/count_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/geo_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/geo_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/filter_editor/filter_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/filter_editor/filter_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/filter_editor/filter_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/geo_line_form.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/geo_line_form.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
           },
           {
             "plugin": "dataVisualizer",
@@ -3661,38 +3361,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/es_search_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/es_search_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/fields/agg/percentile_agg_field.test.ts"
           },
           {
@@ -3701,14 +3369,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_index_pattern_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_index_pattern_select.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
           },
           {
@@ -3718,98 +3378,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/count_agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/count_agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/geo_line_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/geo_line_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/filter_editor/filter_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/filter_editor/filter_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.d.ts"
           },
           {
             "plugin": "stackAlerts",
@@ -3961,6 +3529,34 @@
           },
           {
             "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/panel_config/types.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/panel_config/types.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/annotations_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/annotations_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/annotations_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/vis_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/vis_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
           },
           {
@@ -4069,7 +3665,23 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -4078,6 +3690,18 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -4157,18 +3781,6 @@
             "path": "src/plugins/data_views/common/index.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/types/field_data_row.ts"
           },
@@ -4239,18 +3851,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/server/routes/field_stats.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
           },
           {
             "plugin": "lens",
@@ -4338,66 +3938,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
           },
           {
@@ -4407,14 +3947,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
             "plugin": "maps",
@@ -4439,14 +3971,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
           },
           {
             "plugin": "maps",
@@ -4482,34 +4006,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.tsx"
           },
           {
@@ -4526,38 +4022,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/index_pattern_util.test.ts"
           },
           {
@@ -4595,14 +4059,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
           },
           {
             "plugin": "maps",
@@ -4623,66 +4079,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
           },
           {
             "plugin": "maps",
@@ -4742,46 +4138,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
           },
           {
@@ -4791,14 +4147,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
           },
           {
             "plugin": "maps",
@@ -9493,14 +8841,6 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
-          },
-          {
             "plugin": "stackAlerts",
             "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/single_field_select.tsx"
           },
@@ -11046,16 +10386,7 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": true,
-            "references": [
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              }
-            ]
+            "references": []
           },
           {
             "parentPluginId": "data",
@@ -11215,6 +10546,9 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "ES_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -11226,6 +10560,9 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "KBN_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -12171,63 +11508,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_container_input.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_container_input.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx"
           },
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
           },
           {
             "plugin": "dashboardEnhanced",
@@ -12282,14 +11567,6 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
           },
@@ -12320,14 +11597,6 @@
           {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/public/vis_controller.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
           },
           {
             "plugin": "inputControlVis",
@@ -12407,94 +11676,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_component.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_component.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
           },
           {
@@ -12508,26 +11689,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
           },
           {
             "plugin": "discover",
@@ -13055,30 +12216,6 @@
             "path": "src/plugins/data_views/public/index.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
@@ -13265,34 +12402,6 @@
           {
             "plugin": "visTypeTimelion",
             "path": "src/plugins/vis_types/timelion/public/components/timelion_expression_input_helpers.test.ts"
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.IndexPatternSpec",
-        "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "IndexPatternSpec",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
-          }
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -13649,6 +12758,9 @@
         ],
         "label": "KueryNode",
         "description": [],
+        "signature": [
+          "KueryNode"
+        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -13873,6 +12985,9 @@
         ],
         "label": "RangeFilterParams",
         "description": [],
+        "signature": [
+          "RangeFilterParams"
+        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -14148,122 +13263,6 @@
             "path": "src/plugins/discover/public/plugin.tsx"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/save_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/save_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_container_input.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_container_input.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_container_input.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/es_geo_line_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/es_geo_line_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/es_geo_line_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/url_state/app_sync.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/url_state/app_sync.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/locators.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/locators.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/locators.ts"
-          },
-          {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/embeddable_to_dashboard_drilldown/embeddable_to_dashboard_drilldown.tsx"
           },
@@ -14290,42 +13289,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/locators.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/listing/get_dashboard_list_item_link.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/listing/get_dashboard_list_item_link.test.ts"
           }
         ],
         "children": [
@@ -15882,26 +14845,6 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
           },
           {
             "plugin": "stackAlerts",
@@ -18328,14 +17271,6 @@
               "path": "src/plugins/visualizations/public/plugin.ts"
             },
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/application/dashboard_router.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/application/dashboard_router.tsx"
-            },
-            {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/datapanel.tsx"
             },
@@ -18370,14 +17305,6 @@
             {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/pages/alerts/containers/alerts_page/alerts_page.tsx"
             },
             {
               "plugin": "maps",
@@ -18492,50 +17419,6 @@
               "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
             },
             {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.test.ts"
-            },
-            {
               "plugin": "inputControlVis",
               "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
             },
@@ -18566,6 +17449,10 @@
             {
               "plugin": "visTypeTimeseries",
               "path": "src/plugins/vis_types/timeseries/public/application/components/annotation_row.tsx"
+            },
+            {
+              "plugin": "visTypeTimeseries",
+              "path": "src/plugins/vis_types/timeseries/public/metrics_type.ts"
             },
             {
               "plugin": "visTypeTimeseries",
@@ -18610,10 +17497,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/public/common/mock/endpoint/dependencies_start_mock.ts"
-            },
-            {
-              "plugin": "dataViewManagement",
-              "path": "src/plugins/data_view_management/public/mocks.ts"
             },
             {
               "plugin": "savedObjects",
@@ -18738,32 +17621,32 @@
               "path": "src/plugins/vis_types/vislib/public/plugin.ts"
             },
             {
-              "plugin": "expressionPie",
-              "path": "src/plugins/chart_expressions/expression_pie/public/utils/get_layers.test.ts"
-            },
-            {
               "plugin": "dataViewFieldEditor",
               "path": "src/plugins/data_view_field_editor/target/types/public/components/field_format_editor/field_format_editor.d.ts"
             },
             {
-              "plugin": "expressionPie",
-              "path": "src/plugins/chart_expressions/expression_pie/public/utils/get_layers.test.ts"
+              "plugin": "expressionPartitionVis",
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
             },
             {
-              "plugin": "expressionPie",
-              "path": "src/plugins/chart_expressions/expression_pie/public/utils/get_layers.test.ts"
+              "plugin": "expressionPartitionVis",
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
             },
             {
-              "plugin": "expressionPie",
-              "path": "src/plugins/chart_expressions/expression_pie/public/utils/get_layers.test.ts"
+              "plugin": "expressionPartitionVis",
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
             },
             {
-              "plugin": "expressionPie",
-              "path": "src/plugins/chart_expressions/expression_pie/public/utils/get_layers.test.ts"
+              "plugin": "expressionPartitionVis",
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
             },
             {
-              "plugin": "expressionPie",
-              "path": "src/plugins/chart_expressions/expression_pie/public/utils/get_layers.test.ts"
+              "plugin": "expressionPartitionVis",
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+            },
+            {
+              "plugin": "expressionPartitionVis",
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
             }
           ]
         },
@@ -20663,10 +19546,6 @@
             "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/public/application/hooks/use_dashboard_app_state.d.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
           },
@@ -20739,70 +19618,6 @@
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_app_index_pattern.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/percentile_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/percentile_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/expanded_row/geo_point_content_with_map/geo_point_content_with_map.tsx"
           },
@@ -20895,14 +19710,6 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
@@ -20943,14 +19750,6 @@
             "path": "x-pack/plugins/lens/server/routes/existing_fields.test.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/rtl_helpers.tsx"
           },
@@ -20967,20 +19766,12 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/percentile_agg_field.d.ts"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_filters.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/percentile_agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_filters.tsx"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -21015,12 +19806,12 @@
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_wildcards.tsx"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_wildcards.tsx"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_wildcards.tsx"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_wildcards.tsx"
           },
           {
             "plugin": "dataViews",
@@ -21131,36 +19922,8 @@
             "path": "src/plugins/visualizations/public/visualize_app/components/visualize_top_nav.tsx"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
             "plugin": "lens",
@@ -21229,186 +19992,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/components/filter_label.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_agg_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_agg_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/count_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/count_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/geo_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/geo_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/filter_editor/filter_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/filter_editor/filter_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/filter_editor/filter_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/geo_line_form.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/geo_line_form.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
           },
           {
             "plugin": "dataVisualizer",
@@ -21644,38 +20227,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/es_search_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/es_search_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/fields/agg/percentile_agg_field.test.ts"
           },
           {
@@ -21684,14 +20235,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_index_pattern_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_index_pattern_select.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
           },
           {
@@ -21701,98 +20244,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/count_agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/count_agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/geo_line_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/geo_line_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/filter_editor/filter_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/filter_editor/filter_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.d.ts"
           },
           {
             "plugin": "stackAlerts",
@@ -21944,6 +20395,34 @@
           },
           {
             "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/panel_config/types.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/panel_config/types.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/annotations_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/annotations_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/annotations_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/vis_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/vis_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
           },
           {
@@ -22052,7 +20531,23 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -22061,6 +20556,18 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -22140,18 +20647,6 @@
             "path": "src/plugins/data_views/common/index.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/types/field_data_row.ts"
           },
@@ -22222,18 +20717,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/server/routes/field_stats.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
           },
           {
             "plugin": "lens",
@@ -22321,66 +20804,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
           },
           {
@@ -22390,14 +20813,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
             "plugin": "maps",
@@ -22422,14 +20837,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
           },
           {
             "plugin": "maps",
@@ -22465,34 +20872,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.tsx"
           },
           {
@@ -22509,38 +20888,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/index_pattern_util.test.ts"
           },
           {
@@ -22578,14 +20925,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
           },
           {
             "plugin": "maps",
@@ -22606,66 +20945,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
           },
           {
             "plugin": "maps",
@@ -22725,46 +21004,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
           },
           {
@@ -22774,14 +21013,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
           },
           {
             "plugin": "maps",
@@ -24167,14 +22398,6 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
-          },
-          {
             "plugin": "stackAlerts",
             "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/single_field_select.tsx"
           },
@@ -24741,6 +22964,9 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "ES_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -24752,6 +22978,9 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "KBN_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -24960,63 +23189,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_container_input.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_container_input.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx"
           },
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
           },
           {
             "plugin": "dashboardEnhanced",
@@ -25071,14 +23248,6 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
           },
@@ -25109,14 +23278,6 @@
           {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/public/vis_controller.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
           },
           {
             "plugin": "inputControlVis",
@@ -25196,94 +23357,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_component.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_component.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
           },
           {
@@ -25297,26 +23370,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
           },
           {
             "plugin": "discover",
@@ -25485,6 +23538,9 @@
         ],
         "label": "KueryNode",
         "description": [],
+        "signature": [
+          "KueryNode"
+        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -29788,7 +27844,7 @@
               }
             ],
             "returnComment": [
-              "IndexPatternSpec"
+              "DataViewSpec"
             ]
           },
           {
@@ -30298,10 +28354,6 @@
             "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/public/application/hooks/use_dashboard_app_state.d.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
           },
@@ -30374,70 +28426,6 @@
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_app_index_pattern.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/percentile_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/percentile_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/expanded_row/geo_point_content_with_map/geo_point_content_with_map.tsx"
           },
@@ -30530,14 +28518,6 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
@@ -30578,14 +28558,6 @@
             "path": "x-pack/plugins/lens/server/routes/existing_fields.test.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/rtl_helpers.tsx"
           },
@@ -30602,20 +28574,12 @@
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/percentile_agg_field.d.ts"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_filters.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/percentile_agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_filters.tsx"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -30650,12 +28614,12 @@
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/index_pattern_select/index_pattern_select.tsx"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_wildcards.tsx"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_wildcards.tsx"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_wildcards.tsx"
+            "plugin": "ux",
+            "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_wildcards.tsx"
           },
           {
             "plugin": "dataViews",
@@ -30766,36 +28730,8 @@
             "path": "src/plugins/visualizations/public/visualize_app/components/visualize_top_nav.tsx"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
             "plugin": "lens",
@@ -30864,186 +28800,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/components/filter_label.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_agg_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_agg_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/count_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/count_agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/fields/agg/agg_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/geo_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/geo_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/filter_editor/filter_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/filter_editor/filter_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/filter_editor/filter_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/geo_line_form.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/geo_line_form.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
           },
           {
             "plugin": "dataVisualizer",
@@ -31279,38 +29035,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/es_search_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/es_search_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/fields/agg/percentile_agg_field.test.ts"
           },
           {
@@ -31319,14 +29043,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_index_pattern_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_index_pattern_select.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
           },
           {
@@ -31336,98 +29052,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/count_agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/count_agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/agg/agg_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/geo_line_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/geo_line_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/filter_editor/filter_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/filter_editor/filter_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/where_expression.d.ts"
           },
           {
             "plugin": "stackAlerts",
@@ -31579,6 +29203,34 @@
           },
           {
             "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/panel_config/types.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/panel_config/types.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/annotations_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/annotations_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/annotations_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/vis_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/public/application/components/vis_editor.tsx"
+          },
+          {
+            "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
           },
           {
@@ -31687,7 +29339,23 @@
           },
           {
             "plugin": "visTypeTimeseries",
-            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/annotations_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/vis_editor.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -31696,6 +29364,18 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/panel_config/types.d.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -31775,18 +29455,6 @@
             "path": "src/plugins/data_views/common/index.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/types/field_data_row.ts"
           },
@@ -31857,18 +29525,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/server/routes/field_stats.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/common/elasticsearch_util/es_agg_utils.d.ts"
           },
           {
             "plugin": "lens",
@@ -31956,66 +29612,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
           },
           {
@@ -32025,14 +29621,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
             "plugin": "maps",
@@ -32057,14 +29645,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
           },
           {
             "plugin": "maps",
@@ -32100,34 +29680,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/create_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.tsx"
           },
           {
@@ -32144,38 +29696,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/sources/es_geo_line_source/update_source_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.tsx"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/index_pattern_util.test.ts"
           },
           {
@@ -32213,14 +29733,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_source/es_source.d.ts"
           },
           {
             "plugin": "maps",
@@ -32241,66 +29753,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/index_pattern_util.d.ts"
           },
           {
             "plugin": "maps",
@@ -32360,46 +29812,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_geo_line_source/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/layers/wizards/choropleth_layer_wizard/layer_template.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/create_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
           },
           {
@@ -32409,14 +29821,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
           },
           {
             "plugin": "maps",
@@ -32846,6 +30250,9 @@
         "tags": [],
         "label": "KbnFieldType",
         "description": [],
+        "signature": [
+          "KbnFieldType"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "children": [
@@ -36823,14 +34230,6 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
-          },
-          {
             "plugin": "stackAlerts",
             "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/single_field_select.tsx"
           },
@@ -38049,6 +35448,9 @@
         "tags": [],
         "label": "KbnFieldTypeOptions",
         "description": [],
+        "signature": [
+          "KbnFieldTypeOptions"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "children": [
@@ -38898,6 +36300,9 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "ES_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -38911,6 +36316,9 @@
         "description": [
           "\r\n Filter,\r\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
         ],
+        "signature": [
+          "FilterStateStore"
+        ],
         "path": "node_modules/@types/kbn__es-query/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -38922,6 +36330,9 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "KBN_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -39484,63 +36895,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_container_input.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_container_input.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx"
           },
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/locator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
           },
           {
             "plugin": "dashboardEnhanced",
@@ -39595,14 +36954,6 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
           },
@@ -39633,14 +36984,6 @@
           {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/public/vis_controller.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
           },
           {
             "plugin": "inputControlVis",
@@ -39720,94 +37063,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/descriptor_types/data_request_descriptor_types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/elasticsearch_util/types.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_component.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_component.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/region_map/region_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_fn.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/legacy_visualizations/tile_map/tile_map_visualization.tsx"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
           },
           {
@@ -39821,26 +37076,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
           },
           {
             "plugin": "discover",
@@ -39941,42 +37176,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.IIndexPatternsApiClient",
-        "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "IIndexPatternsApiClient",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.IDataViewsApiClient",
-            "text": "IDataViewsApiClient"
-          }
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/index.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/server/index_patterns_api_client.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/server/index_patterns_api_client.ts"
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.INDEX_PATTERN_SAVED_OBJECT_TYPE",
         "type": "string",
         "tags": [
@@ -40009,26 +37208,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/replace_index_pattern_reference.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/replace_index_pattern_reference.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/dashboard_migrations.ts"
           },
           {
             "plugin": "visualizations",
@@ -40125,36 +37304,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.IndexPatternFieldMap",
-        "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "IndexPatternFieldMap",
-        "description": [],
-        "signature": [
-          "{ [x: string]: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -40430,30 +37579,6 @@
             "path": "src/plugins/data_views/public/index.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
@@ -40640,34 +37765,6 @@
           {
             "plugin": "visTypeTimelion",
             "path": "src/plugins/vis_types/timelion/public/components/timelion_expression_input_helpers.test.ts"
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.IndexPatternSpec",
-        "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "IndexPatternSpec",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
-          }
-        ],
-        "path": "src/plugins/data_views/common/types.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -40695,6 +37792,9 @@
         ],
         "label": "KueryNode",
         "description": [],
+        "signature": [
+          "KueryNode"
+        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
@@ -41030,6 +38130,9 @@
         ],
         "label": "RangeFilterParams",
         "description": [],
+        "signature": [
+          "RangeFilterParams"
+        ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",

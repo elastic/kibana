@@ -931,21 +931,6 @@
           },
           {
             "parentPluginId": "cases",
-            "id": "def-server.CasesClient.stats",
-            "type": "Object",
-            "tags": [],
-            "label": "stats",
-            "description": [
-              "\nRetrieves an interface for retrieving statistics related to the cases entities."
-            ],
-            "signature": [
-              "StatsSubClient"
-            ],
-            "path": "x-pack/plugins/cases/server/client/client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
             "id": "def-server.CasesClient.metrics",
             "type": "Object",
             "tags": [],

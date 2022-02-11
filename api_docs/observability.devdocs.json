@@ -215,6 +215,39 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.DatePicker",
+        "type": "Function",
+        "tags": [],
+        "label": "DatePicker",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "DatePickerProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.DatePicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "DatePickerProps"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.ExploratoryView",
         "type": "Function",
         "tags": [],
@@ -336,6 +369,37 @@
               "FilterValueLabelProps"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.fromQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "fromQuery",
+        "description": [],
+        "signature": [
+          "(query: Record<string, any>) => string"
+        ],
+        "path": "x-pack/plugins/observability/public/utils/url.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.fromQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "x-pack/plugins/observability/public/utils/url.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -566,6 +630,68 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.NavigationWarningPromptProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "NavigationWarningPromptProvider",
+        "description": [],
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/utils/navigation_warning_prompt/context.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.NavigationWarningPromptProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              "{ children?: React.ReactNode; }"
+            ],
+            "path": "x-pack/plugins/observability/public/utils/navigation_warning_prompt/context.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.Prompt",
+        "type": "Function",
+        "tags": [],
+        "label": "Prompt",
+        "description": [],
+        "signature": [
+          "({ prompt }: React.PropsWithChildren<Props>) => null"
+        ],
+        "path": "x-pack/plugins/observability/public/utils/navigation_warning_prompt/prompt.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.Prompt.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ prompt }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "path": "x-pack/plugins/observability/public/utils/navigation_warning_prompt/prompt.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.Section",
         "type": "Function",
         "tags": [],
@@ -782,6 +908,70 @@
             "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
             "deprecated": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.shouldHandleLinkEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "shouldHandleLinkEvent",
+        "description": [],
+        "signature": [
+          "(e: React.MouseEvent<Element, MouseEvent> | React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>) => boolean"
+        ],
+        "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.shouldHandleLinkEvent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "e",
+            "description": [],
+            "signature": [
+              "React.MouseEvent<Element, MouseEvent> | React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>"
+            ],
+            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.toQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "toQuery",
+        "description": [],
+        "signature": [
+          "(search: string | undefined) => ",
+          "ParsedQuery",
+          "<string>"
+        ],
+        "path": "x-pack/plugins/observability/public/utils/url.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.toQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/utils/url.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1058,6 +1248,103 @@
         "path": "x-pack/plugins/observability/public/context/inspector/use_inspector_context.tsx",
         "deprecated": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.useLinkProps",
+        "type": "Function",
+        "tags": [],
+        "label": "useLinkProps",
+        "description": [],
+        "signature": [
+          "({ app, pathname, hash, search }: ",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.LinkDescriptor",
+            "text": "LinkDescriptor"
+          },
+          ", options?: ",
+          "Options",
+          ") => ",
+          "LinkProps"
+        ],
+        "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.useLinkProps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ app, pathname, hash, search }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.LinkDescriptor",
+                "text": "LinkDescriptor"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.useLinkProps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options"
+            ],
+            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.useRulesLink",
+        "type": "Function",
+        "tags": [],
+        "label": "useRulesLink",
+        "description": [],
+        "signature": [
+          "(options: ",
+          "Options",
+          " | undefined) => ",
+          "LinkProps"
+        ],
+        "path": "x-pack/plugins/observability/public/hooks/use_rules_link.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.useRulesLink.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/hooks/use_rules_link.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1940,6 +2227,68 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.LinkDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "LinkDescriptor",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.LinkDescriptor.app",
+            "type": "string",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.LinkDescriptor.pathname",
+            "type": "string",
+            "tags": [],
+            "label": "pathname",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.LinkDescriptor.hash",
+            "type": "string",
+            "tags": [],
+            "label": "hash",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.LinkDescriptor.search",
+            "type": "Object",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "Search | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/hooks/use_link_props.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.LogsFetchDataResponse",
         "type": "Interface",
         "tags": [],
@@ -2685,6 +3034,219 @@
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
               }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              "{ create: (spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", skipFetchFields?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">; delete: (indexPatternId: string) => Promise<{}>; find: (search: string, size?: number) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]>; get: (id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">; getCanSave: () => Promise<boolean>; ensureDefaultDataView: ",
+              "EnsureDefaultDataView",
+              "; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewListItem",
+                "text": "DataViewListItem"
+              },
+              "[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
+              "SavedObject",
+              "<",
+              "IndexPatternSavedObjectAttrs",
+              ">[] | null | undefined>; getDefault: () => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.GetFieldsOptions",
+                "text": "GetFieldsOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>; getFieldsForIndexPattern: (indexPattern: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", options?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.GetFieldsOptions",
+                "text": "GetFieldsOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>; refreshFields: (indexPattern: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<void>; fieldArrayToMap: (fields: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[], fieldAttrs?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldAttrs",
+                "text": "FieldAttrs"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
+              },
+              "; savedObjectToSpec: (savedObject: ",
+              "SavedObject",
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewAttributes",
+                "text": "DataViewAttributes"
+              },
+              ">) => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "; createAndSave: (spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">; createSavedObject: (indexPattern: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ", override?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">; updateSavedObject: (indexPattern: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; getDefaultDataView: () => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | null>; getCanSaveSync: () => boolean; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false
@@ -3684,6 +4246,9 @@
         "tags": [],
         "label": "METRIC_TYPE",
         "description": [],
+        "signature": [
+          "METRIC_TYPE"
+        ],
         "path": "node_modules/@types/kbn__analytics/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -3799,6 +4364,9 @@
         "tags": [],
         "label": "DropResult",
         "description": [],
+        "signature": [
+          "DropResult"
+        ],
         "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -4057,6 +4625,34 @@
           " | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.RECORDS_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "RECORDS_FIELD",
+        "description": [],
+        "signature": [
+          "\"___records___\""
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.RECORDS_PERCENTAGE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "RECORDS_PERCENTAGE_FIELD",
+        "description": [],
+        "signature": [
+          "\"RecordsPercentage\""
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4379,13 +4975,7 @@
             "text": "ElasticsearchClient"
           },
           "; logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "server",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
-            "text": "Logger"
-          },
+          "Logger",
           "; }) => Promise<void>"
         ],
         "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
@@ -4470,13 +5060,7 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/logging",
-                    "scope": "server",
-                    "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.Logger",
-                    "text": "Logger"
-                  }
+                  "Logger"
                 ],
                 "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
                 "deprecated": false
@@ -4988,13 +5572,7 @@
             "label": "logger",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
             "deprecated": false

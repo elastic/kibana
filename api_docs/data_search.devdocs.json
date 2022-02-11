@@ -23692,16 +23692,7 @@
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": true,
-            "references": [
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-              }
-            ]
+            "references": []
           },
           {
             "parentPluginId": "data",
