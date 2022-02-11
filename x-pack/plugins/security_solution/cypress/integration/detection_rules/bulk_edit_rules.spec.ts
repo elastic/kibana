@@ -11,33 +11,40 @@ import {
   MODAL_CONFIRMATION_BTN,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
+  RULES_TAGS_FILTER_BTN,
+} from '../../screens/alerts_detection_rules';
+
+import {
   RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
   RULES_BULK_EDIT_TAGS_WARNING,
-  RULES_TAGS_FILTER_BTN,
-} from '../../screens/alerts_detection_rules';
+} from '../../screens/rules_bulk_edit';
 
 import {
   changeRowsPerPageTo,
   waitForRulesTableToBeLoaded,
   selectAllRules,
+  goToTheRuleDetailsOf,
+  waitForRulesTableToBeRefreshed,
+  selectNumberOfRules,
+  testAllTagsBadges,
+} from '../../tasks/alerts_detection_rules';
+
+import {
   openBulkEditAddIndexPatternsForm,
   openBulkEditDeleteIndexPatternsForm,
   typeIndexPatterns,
   waitForBulkEditActionToFinish,
-  goToTheRuleDetailsOf,
   confirmBulkEditForm,
-  waitForRulesTableToBeRefreshed,
-  selectNumberOfRules,
   clickAddIndexPatternsMenuItem,
   waitForElasticRulesBulkEditModal,
   waitForMixedRulesBulkEditModal,
   openBulkEditAddTagsForm,
   openBulkEditDeleteTagsForm,
-  testAllTagsBadges,
   typeTags,
-} from '../../tasks/alerts_detection_rules';
+} from '../../tasks/rules_bulk_edit';
+
 import { hasIndexPatterns } from '../../tasks/rule_details';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 

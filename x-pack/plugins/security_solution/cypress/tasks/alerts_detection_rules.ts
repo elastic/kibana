@@ -8,7 +8,6 @@
 import { duplicatedRuleName } from '../objects/rule';
 import {
   BULK_ACTIONS_BTN,
-  BULK_ACTIONS_PROGRESS_BTN,
   COLLAPSED_ACTION_BTN,
   CREATE_NEW_RULE_BTN,
   CUSTOM_RULES_BTN,
@@ -46,19 +45,6 @@ import {
   TOASTER,
   RULE_IMPORT_OVERWRITE_CHECKBOX,
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
-  MODAL_CONFIRMATION_TITLE,
-  MODAL_CONFIRMATION_BODY,
-  INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
-  ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
-  DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
-  TAGS_RULE_BULK_MENU_ITEM,
-  ADD_TAGS_RULE_BULK_MENU_ITEM,
-  DELETE_TAGS_RULE_BULK_MENU_ITEM,
-  RULES_BULK_EDIT_FORM_TITLE,
-  RULES_BULK_EDIT_INDEX_PATTERNS,
-  RULES_BULK_EDIT_TAGS,
-  RULES_BULK_EDIT_FORM_CONFIRM_BTN,
-  TOASTER_BODY,
   RULES_TAGS_POPOVER_BTN,
   RULES_TAGS_POPOVER_WRAPPER,
 } from '../screens/alerts_detection_rules';
@@ -305,83 +291,6 @@ export const importRulesWithOverwriteAll = (rulesFile: string) => {
   selectOverwriteExceptionsRulesImport();
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
-};
-
-export const clickAddIndexPatternsMenuItem = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
-  cy.get(ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
-};
-
-export const openBulkEditAddIndexPatternsForm = () => {
-  clickAddIndexPatternsMenuItem();
-
-  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add index patterns');
-};
-
-export const openBulkEditDeleteIndexPatternsForm = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
-  cy.get(DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
-
-  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete index patterns');
-};
-
-export const openBulkEditAddTagsForm = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
-  cy.get(ADD_TAGS_RULE_BULK_MENU_ITEM).click();
-
-  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add tags');
-};
-
-export const openBulkEditDeleteTagsForm = () => {
-  cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
-  cy.get(DELETE_TAGS_RULE_BULK_MENU_ITEM).click();
-
-  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete tags');
-};
-
-export const typeIndexPatterns = (indices: string[]) => {
-  cy.get(RULES_BULK_EDIT_INDEX_PATTERNS).find('input').type(indices.join('{enter}'));
-};
-
-export const typeTags = (tags: string[]) => {
-  cy.get(RULES_BULK_EDIT_TAGS).find('input').type(tags.join('{enter}'));
-};
-
-export const confirmBulkEditForm = () => cy.get(RULES_BULK_EDIT_FORM_CONFIRM_BTN).click();
-
-export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: number }) => {
-  cy.get(BULK_ACTIONS_PROGRESS_BTN).should('be.disabled');
-  cy.contains(TOASTER_BODY, `You’ve successfully updated ${rulesCount} rule`);
-};
-
-export const waitForElasticRulesBulkEditModal = (rulesCount: number) => {
-  cy.get(MODAL_CONFIRMATION_TITLE).should(
-    'have.text',
-    `${rulesCount} Elastic rules cannot be edited`
-  );
-  cy.get(MODAL_CONFIRMATION_BODY).should(
-    'have.text',
-    'Elastic rules are not modifiable. The update action will only be applied to Custom rules.'
-  );
-};
-
-export const waitForMixedRulesBulkEditModal = (
-  elasticRulesCount: number,
-  customRulesCount: number
-) => {
-  cy.get(MODAL_CONFIRMATION_TITLE).should(
-    'have.text',
-    `${elasticRulesCount} Elastic rules cannot be edited`
-  );
-
-  cy.get(MODAL_CONFIRMATION_BODY).should(
-    'have.text',
-    `The update action will only be applied to ${customRulesCount} Custom rules you’ve selected.`
-  );
 };
 
 export const testAllTagsBadges = (tags: string[]) => {

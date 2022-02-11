@@ -119,41 +119,8 @@ export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-l
 export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
   '[id="import-data-modal-exceptions-checkbox-label"]';
 
-export const INDEX_PATTERNS_RULE_BULK_MENU_ITEM = '[data-test-subj="indexPatternsBulkEditRule"]';
-
-export const ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM =
-  '[data-test-subj="addIndexPatternsBulkEditRule"]';
-
-export const DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM =
-  '[data-test-subj="deleteIndexPatternsBulkEditRule"]';
-
-export const TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="tagsBulkEditRule"]';
-
-export const ADD_TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="addTagsBulkEditRule"]';
-
-export const DELETE_TAGS_RULE_BULK_MENU_ITEM = '[data-test-subj="deleteTagsBulkEditRule"]';
-
-export const RULES_BULK_EDIT_FORM_TITLE = '[data-test-subj="rulesBulkEditFormTitle"]';
-
-export const RULES_BULK_EDIT_FORM_CONFIRM_BTN = '[data-test-subj="rulesBulkEditFormSaveBtn"]';
-
-export const RULES_BULK_EDIT_INDEX_PATTERNS = '[data-test-subj="bulkEditRulesIndexPatterns"]';
-
-export const RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX =
-  '[data-test-subj="bulkEditRulesOverwriteIndexPatterns"]';
-
-export const RULES_BULK_EDIT_TAGS = '[data-test-subj="bulkEditRulesTags"]';
-
-export const RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX =
-  '[data-test-subj="bulkEditRulesOverwriteTags"]';
-
 export const RULES_TAGS_POPOVER_BTN = '[data-test-subj="tagsDisplayPopoverButton"]';
 
 export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWrapper"]';
-
-export const RULES_BULK_EDIT_INDEX_PATTERNS_WARNING =
-  '[data-test-subj="bulkEditRulesIndexPatternsWarning"]';
-
-export const RULES_BULK_EDIT_TAGS_WARNING = '[data-test-subj="bulkEditRulesTagsWarning"]';
 
 export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-button"]';
