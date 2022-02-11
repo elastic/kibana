@@ -18,7 +18,6 @@ import {
   ErrorAction,
   ExecuteError,
   FailedReport,
-  ReportingAction,
   SavedReport,
   ScheduledRetry,
   ScheduledTask,
@@ -28,6 +27,7 @@ import {
 /** @internal */
 export interface ExecutionCompleteMetrics {
   byteSize: number;
+  csvRows?: number;
 }
 
 export interface IReportingEventLogger {
@@ -36,21 +36,21 @@ export interface IReportingEventLogger {
   stopTiming(): void;
 }
 
+export interface BaseEvent {
+  event: { timezone: string };
+  kibana: {
+    reporting: { id?: string; jobType: string };
+    task?: { id: string };
+  };
+  user?: { name: string };
+}
+
 /** @internal */
 export function reportingEventLoggerFactory(logger: LevelLogger) {
   const genericLogger = new EcsLogAdapter(logger, { event: { provider: PLUGIN_ID } });
 
   return class ReportingEventLogger {
-    readonly eventObj: {
-      event: {
-        timezone: string;
-      };
-      kibana: {
-        reporting: ReportingAction<ActionType>['kibana']['reporting'];
-        task?: { id: string };
-      };
-      user?: { name: string };
-    };
+    readonly eventObj: BaseEvent;
 
     readonly report: IReport;
     readonly task?: { id: string };
@@ -102,13 +102,13 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       return event;
     }
 
-    logExecutionComplete({ byteSize }: ExecutionCompleteMetrics): CompletedExecution {
+    logExecutionComplete({ byteSize, csvRows }: ExecutionCompleteMetrics): CompletedExecution {
       const message = `completed ${this.report.jobtype} execution`;
       this.completionLogger.stopTiming();
       const event = deepMerge(
         {
           message,
-          kibana: { reporting: { actionType: ActionType.EXECUTE_COMPLETE, byteSize } },
+          kibana: { reporting: { actionType: ActionType.EXECUTE_COMPLETE, byteSize, csvRows } },
         } as Partial<CompletedExecution>,
         this.eventObj
       );

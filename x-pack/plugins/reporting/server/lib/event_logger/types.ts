@@ -8,19 +8,21 @@
 import { LogMeta } from 'src/core/server';
 import { ActionType } from './';
 
-interface ActionBase<A extends ActionType> {
+export interface ReportingAction<A extends ActionType> extends LogMeta {
   event: {
     timezone: string;
   };
   message: string;
   kibana: {
     reporting: {
-      actionType?: A;
+      actionType: A;
       id?: string; // "immediate download" exports have no ID
       jobType: string;
       byteSize?: number;
+      csvRows?: number;
     };
-  } & { task?: { id?: string } };
+    task?: { id?: string };
+  };
   user?: { name: string };
 }
 
@@ -30,8 +32,6 @@ export interface ErrorAction {
   stack_trace?: string;
   type?: string;
 }
-
-export type ReportingAction<A extends ActionType> = ActionBase<A> & LogMeta;
 
 export type ScheduledTask = ReportingAction<ActionType.SCHEDULE_TASK>;
 export type StartedExecution = ReportingAction<ActionType.EXECUTE_START>;
