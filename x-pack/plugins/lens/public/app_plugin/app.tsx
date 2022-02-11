@@ -60,6 +60,8 @@ export function App({
   setHeaderActionMenu,
   datasourceMap,
   visualizationMap,
+  topNavMenuEntryGenerators,
+  initialContext,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -98,9 +100,9 @@ export function App({
     () => ({
       datasourceMap,
       visualizationMap,
-      extractFilterReferences: data.query.filterManager.extract,
+      extractFilterReferences: data.query.filterManager.extract.bind(data.query.filterManager),
     }),
-    [datasourceMap, visualizationMap, data.query.filterManager.extract]
+    [datasourceMap, visualizationMap, data.query.filterManager]
   );
 
   const currentDoc = useLensSelector((state) =>
@@ -159,7 +161,12 @@ export function App({
     onAppLeave((actions) => {
       if (
         application.capabilities.visualize.save &&
-        !isLensEqual(persistedDoc, lastKnownDoc, data.query.filterManager.inject, datasourceMap) &&
+        !isLensEqual(
+          persistedDoc,
+          lastKnownDoc,
+          data.query.filterManager.inject.bind(data.query.filterManager),
+          datasourceMap
+        ) &&
         (isSaveable || persistedDoc)
       ) {
         return actions.confirm(
@@ -180,7 +187,7 @@ export function App({
     isSaveable,
     persistedDoc,
     application.capabilities.visualize.save,
-    data.query.filterManager.inject,
+    data.query.filterManager,
     datasourceMap,
   ]);
 
@@ -325,6 +332,8 @@ export function App({
           autoApplyEnabled={autoApplyEnabled}
           onToggleAutoApply={toggleAutoApply}
           onApplyChanges={() => dispatch(applyChanges())}
+          topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+          initialContext={initialContext}
         />
 
         {getLegacyUrlConflictCallout()}

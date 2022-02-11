@@ -12,13 +12,14 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import type {
   Visualization,
   OperationMetadata,
   AccessorConfig,
   VisualizationDimensionGroupConfig,
 } from '../types';
-import { toExpression, toPreviewExpression } from './to_expression';
+import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
 import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { suggestions } from './suggestions';
@@ -102,6 +103,8 @@ export const getPieVisualization = ({
     shape: visualizationTypeId as PieVisualizationState['shape'],
   }),
 
+  triggers: [VIS_EVENT_TO_TRIGGER.filter],
+
   initialize(addNewLayer, state, mainPalette) {
     return (
       state || {
@@ -123,14 +126,11 @@ export const getPieVisualization = ({
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
-    const originalOrder = datasource
-      .getTableSpec()
-      .map(({ columnId }) => columnId)
-      .filter((columnId) => columnId !== layer.metric);
+    const originalOrder = getSortedGroups(datasource, layer);
     // When we add a column it could be empty, and therefore have no order
-    const sortedColumns: AccessorConfig[] = Array.from(
-      new Set(originalOrder.concat(layer.groups))
-    ).map((accessor) => ({ columnId: accessor }));
+    const sortedColumns: AccessorConfig[] = originalOrder.map((accessor) => ({
+      columnId: accessor,
+    }));
 
     if (sortedColumns.length) {
       applyPaletteToColumnConfig(sortedColumns, state, paletteService);
@@ -194,7 +194,7 @@ export const getPieVisualization = ({
           return l;
         }
         if (groupId === 'groups') {
-          return { ...l, groups: [...l.groups, columnId] };
+          return { ...l, groups: [...l.groups.filter((group) => group !== columnId), columnId] };
         }
         return { ...l, metric: columnId };
       }),

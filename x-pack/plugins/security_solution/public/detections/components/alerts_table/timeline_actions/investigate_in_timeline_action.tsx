@@ -19,25 +19,19 @@ import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 interface InvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
   ariaLabel?: string;
-  alertIds?: string[];
   buttonType?: 'text' | 'icon';
   onInvestigateInTimelineAlertClick?: () => void;
-  timelineId?: string;
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
   ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
-  alertIds,
   ecsRowData,
   buttonType,
   onInvestigateInTimelineAlertClick,
-  timelineId,
 }) => {
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
     ecsRowData,
-    alertIds,
     onInvestigateInTimelineAlertClick,
-    timelineId,
   });
 
   return (
