@@ -20,6 +20,7 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/common';
+import { observabilityFeatureId } from '../../../../../common';
 
 export interface ExploratoryEmbeddableProps {
   reportType: ReportViewType;
@@ -30,12 +31,12 @@ export interface ExploratoryEmbeddableProps {
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   legendIsVisible?: boolean;
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
-  owner: string;
+  owner?: string;
   reportConfigMap?: ReportConfigMap;
   withActions?: boolean | ActionTypes[];
   appId?: 'security' | 'observability';
   customLensAttrs?: any;
-  customTimeRange: { from: string; to: string };
+  customTimeRange?: { from: string; to: string };
   onBrushEnd?: () => void;
 }
 
@@ -61,7 +62,7 @@ export default function Embeddable({
   customLensAttrs,
   customTimeRange,
   onBrushEnd,
-  owner,
+  owner = observabilityFeatureId,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
