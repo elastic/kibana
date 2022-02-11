@@ -19,26 +19,25 @@ import { ReportConfigMap } from '../contexts/exploratory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
+import { observabilityFeatureId } from '../../../../../common';
+import { SingleMetric } from './single_metric';
 
 export interface ExploratoryEmbeddableProps {
-  alignLnsMetric?: string;
   appId?: 'security' | 'observability';
   appendHeader?: JSX.Element;
   appendTitle?: JSX.Element;
   attributes?: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
-  compressed?: boolean;
   customHeight?: string | number;
   customLensAttrs?: any;
-  customTimeRange: { from: string; to: string };
+  customTimeRange?: { from: string; to: string };
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
-  disableBorder?: boolean;
-  disableShadow?: boolean;
+  isSingleMetric?: boolean;
   legendIsVisible?: boolean;
   metricIcon?: string;
   metricIconColor?: string;
   metricPostfix?: string;
-  onBrushEnd?: () => void;
+  onBrushEnd?: (param: { range: number[] }) => void;
   owner: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
@@ -56,28 +55,25 @@ export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddab
 export default function Embeddable({
   appId,
   appendTitle,
-  alignLnsMetric,
   attributes = [],
   axisTitlesVisibility,
-  compressed = false,
   customHeight,
   customLensAttrs,
   customTimeRange,
-  disableBorder = false,
-  disableShadow = false,
   indexPatterns,
+  isSingleMetric = false,
   legendIsVisible,
   lens,
   metricIcon,
   metricIconColor,
   metricPostfix,
   onBrushEnd,
+  owner = observabilityFeatureId,
   reportConfigMap = {},
   reportType,
   showCalculationMethod = false,
   title,
   withActions = true,
-  owner,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -135,7 +131,7 @@ export default function Embeddable({
   }
 
   return (
-    <Wrapper $customHeight={customHeight} $compressed={compressed}>
+    <Wrapper $customHeight={customHeight}>
       <EuiFlexGroup alignItems="center" gutterSize="none">
         {title && (
           <EuiFlexItem>
@@ -156,103 +152,59 @@ export default function Embeddable({
         )}
         {appendTitle}
       </EuiFlexGroup>
-      <LensWrapper
-        gutterSize="none"
-        $alignLnsMetric={alignLnsMetric}
-        $disableBorder={disableBorder}
-        $disableShadow={disableShadow}
-      >
-        {metricIcon && (
-          <EuiFlexItem style={{ justifyContent: 'space-evenly', paddingTop: '24px' }} grow={false}>
-            <EuiIcon type={metricIcon} size="l" color={metricIconColor} />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={metricIcon && metricPostfix ? false : 1}>
+      {isSingleMetric && (
+        <SingleMetric
+          metricIcon={metricIcon}
+          metricIconColor={metricIconColor}
+          metricPostfix={metricPostfix}
+        >
           <LensComponent
-            id="exploratoryView"
+            id="exploratoryView-singleMetric"
             style={{ height: '100%' }}
             timeRange={customTimeRange ?? series?.time}
             attributes={attributesJSON}
-            onBrushEnd={({ range }) => {}}
+            onBrushEnd={onBrushEnd}
             withDefaultActions={Boolean(withActions)}
             extraActions={actions}
           />
-        </EuiFlexItem>
-        {metricPostfix && (
-          <EuiFlexItem style={{ justifyContent: 'space-evenly', paddingTop: '24px' }} grow={false}>
-            <EuiTitle size="s">
-              <h3> {metricPostfix}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        )}
-
-        {isSaveOpen && attributesJSON && (
-          <LensSaveModalComponent
-            initialInput={attributesJSON as unknown as LensEmbeddableInput}
-            onClose={() => setIsSaveOpen(false)}
-            // if we want to do anything after the viz is saved
-            // right now there is no action, so an empty function
-            onSave={() => {}}
-          />
-        )}
-        <AddToCaseAction
-          lensAttributes={attributesJSON}
+        </SingleMetric>
+      )}
+      {!isSingleMetric && (
+        <LensComponent
+          id="exploratoryView"
+          style={{ height: '100%' }}
           timeRange={customTimeRange ?? series?.time}
-          autoOpen={isAddToCaseOpen}
-          setAutoOpen={setAddToCaseOpen}
-          appId={appId}
-          owner={owner}
+          attributes={attributesJSON}
+          onBrushEnd={onBrushEnd}
+          withDefaultActions={Boolean(withActions)}
+          extraActions={actions}
         />
-      </LensWrapper>
+      )}
+      {isSaveOpen && attributesJSON && (
+        <LensSaveModalComponent
+          initialInput={attributesJSON as unknown as LensEmbeddableInput}
+          onClose={() => setIsSaveOpen(false)}
+          // if we want to do anything after the viz is saved
+          // right now there is no action, so an empty function
+          onSave={() => {}}
+        />
+      )}
+      <AddToCaseAction
+        lensAttributes={attributesJSON}
+        timeRange={customTimeRange ?? series?.time}
+        autoOpen={isAddToCaseOpen}
+        setAutoOpen={setAddToCaseOpen}
+        appId={appId}
+        owner={owner}
+      />
     </Wrapper>
   );
 }
 
-const LensWrapper = styled(EuiFlexGroup)<{
-  $alignLnsMetric?: string;
-  $disableBorder?: boolean;
-  $disableShadow?: boolean;
-}>`
-  .embPanel__optionsMenuPopover {
-    visibility: collapse;
-  }
-  .embPanel--editing {
-    background-color: transparent;
-  }
-  ${(props) =>
-    props.$disableBorder
-      ? `.embPanel--editing {
-    border: 0;
-  }`
-      : ''}
-  &&&:hover {
-    .embPanel__optionsMenuPopover {
-      visibility: visible;
-    }
-    ${(props) =>
-      props.$disableShadow
-        ? `.embPanel--editing {
-      box-shadow: none;
-    }`
-        : ''}
-  }
-  .embPanel__title {
-    display: none;
-  }
-  ${(props) =>
-    props.$alignLnsMetric
-      ? `.lnsMetricExpression__container {
-    align-items: ${props.$alignLnsMetric};
-  }`
-      : ''}
-`;
-
 const Wrapper = styled.div<{
   $customHeight?: string | number;
-  $compressed?: boolean;
 }>`
   height: 100%;
-  ${(props) => (props.$compressed ? 'position: relative;' : '')}
   &&& {
     > :nth-child(2) {
       height: ${(props) =>
