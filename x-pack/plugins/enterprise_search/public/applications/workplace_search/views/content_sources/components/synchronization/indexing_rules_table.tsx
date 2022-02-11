@@ -20,6 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { docLinks } from '../../../../../shared/doc_links';
 import { clearFlashMessages } from '../../../../../shared/flash_messages';
 import { InlineEditableTable } from '../../../../../shared/tables/inline_editable_table/inline_editable_table';
 import { InlineEditableTableColumn } from '../../../../../shared/tables/inline_editable_table/types';
@@ -35,6 +36,7 @@ import {
   SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_POLICY_LABEL,
   SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_RULE_LABEL,
   SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_VALUE_LABEL,
+  SOURCE_ASSETS_AND_OBJECTS_SYNC_RULES_LEARN_MORE_LINK,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
 
@@ -53,6 +55,9 @@ export const IndexingRulesTable: React.FC = () => {
     <EuiText size="s" color="default">
       {SOURCE_ASSETS_AND_OBJECTS_OBJECTS_DESCRIPTION(contentSource.name)}
       <EuiSpacer />
+      <EuiLink href={docLinks.workplaceSearchSynch} external>
+        {SOURCE_ASSETS_AND_OBJECTS_SYNC_RULES_LEARN_MORE_LINK}
+      </EuiLink>
     </EuiText>
   );
 
