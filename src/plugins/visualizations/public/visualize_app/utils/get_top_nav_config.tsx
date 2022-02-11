@@ -10,6 +10,7 @@ import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
 
 import { Capabilities } from 'src/core/public';
@@ -73,6 +74,7 @@ export interface TopNavConfigParams {
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
+  showBadge: boolean;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -103,6 +105,7 @@ export const getTopNavConfig = (
     displayEditInLensItem,
     hideLensBadge,
     setNavigateToLens,
+    showBadge,
   }: TopNavConfigParams,
   {
     data,
@@ -300,6 +303,14 @@ export const getTopNavConfig = (
             className: 'visNavItem__goToLens',
             disableButton: !editInLensConfig,
             testId: 'visualizeEditInLensButton',
+            badge: showBadge
+              ? {
+                  label: i18n.translate('visualizations.tonNavMenu.tryItBadgeText', {
+                    defaultMessage: 'Try it',
+                  }),
+                  color: 'accent' as EuiBetaBadgeProps['color'],
+                }
+              : undefined,
             run: async () => {
               const updatedWithMeta = {
                 ...editInLensConfig,

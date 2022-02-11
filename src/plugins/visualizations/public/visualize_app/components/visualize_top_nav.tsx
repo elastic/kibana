@@ -127,6 +127,7 @@ const TopNav = ({
           displayEditInLensItem,
           hideLensBadge,
           setNavigateToLens,
+          showBadge: !hideTryInLensBadge && displayEditInLensItem,
         },
         services
       );
@@ -148,7 +149,7 @@ const TopNav = ({
     editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
-    setNavigateToLens,
+    hideTryInLensBadge,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
@@ -269,19 +270,6 @@ const TopNav = ({
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       showSearchBar
       useDefaultBehaviors
-      badges={
-        !hideTryInLensBadge && displayEditInLensItem
-          ? [
-              {
-                badgeText: i18n.translate('visualizations.tonNavMenu.tryItBadgeText', {
-                  defaultMessage: 'Try it',
-                }),
-                color: 'accent',
-              },
-            ]
-          : []
-      }
-      isBetaBadge={true}
     />
   ) : showFilterBar ? (
     /**

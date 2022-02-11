@@ -8,7 +8,7 @@
 
 import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink } from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
@@ -37,7 +37,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     className: props.className,
   };
 
-  const btn = props.emphasize ? (
+  let btn = props.emphasize ? (
     <EuiButton size="s" {...commonButtonProps} fill>
       {upperFirst(props.label || props.id!)}
     </EuiButton>
@@ -46,6 +46,14 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       {upperFirst(props.label || props.id!)}
     </EuiHeaderLink>
   );
+
+  if (props.badge) {
+    btn = (
+      <div className="kbnTopNavMenu__badgeWrapper">
+        <EuiBetaBadge className="kbnTopNavMenu__betaBadgeItem" {...props.badge} size="s" /> {btn}
+      </div>
+    );
+  }
 
   const tooltip = getTooltip();
   if (tooltip) {
