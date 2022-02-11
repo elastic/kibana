@@ -36,6 +36,7 @@ export interface ConstructorOptions {
   taskRunnerFactory: TaskRunnerFactory;
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
+  minimumScheduleInterval: string;
 }
 
 export interface RegistryRuleType
@@ -128,13 +129,21 @@ export class RuleTypeRegistry {
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
+  private readonly minimumScheduleInterval: string;
   private readonly licensing: LicensingPluginSetup;
 
-  constructor({ taskManager, taskRunnerFactory, licenseState, licensing }: ConstructorOptions) {
+  constructor({
+    taskManager,
+    taskRunnerFactory,
+    licenseState,
+    licensing,
+    minimumScheduleInterval,
+  }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
     this.licenseState = licenseState;
     this.licensing = licensing;
+    this.minimumScheduleInterval = minimumScheduleInterval;
   }
 
   public has(id: string) {
@@ -162,8 +171,7 @@ export class RuleTypeRegistry {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >,
-    minimumScheduleInterval: string
+    >
   ) {
     if (this.has(ruleType.id)) {
       throw new Error(
@@ -211,7 +219,7 @@ export class RuleTypeRegistry {
       }
 
       const defaultIntervalInMs = parseDuration(ruleType.defaultScheduleInterval);
-      const minimumIntervalInMs = parseDuration(minimumScheduleInterval);
+      const minimumIntervalInMs = parseDuration(this.minimumScheduleInterval);
       if (defaultIntervalInMs < minimumIntervalInMs) {
         throw new Error(
           i18n.translate(
@@ -221,7 +229,7 @@ export class RuleTypeRegistry {
                 'Rule type "{id}" cannot specify a default interval less than {minimumInterval}.',
               values: {
                 id: ruleType.id,
-                minimumInterval: minimumScheduleInterval,
+                minimumInterval: this.minimumScheduleInterval,
               },
             }
           )

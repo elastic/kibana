@@ -25,4 +25,4 @@ export const configSchema = schema.object({
   minimumScheduleInterval: schema.string({ validate: validateDurationSchema, defaultValue: '1m' }),
 });
 
-export type AlertsConfig = TypeOf<typeof configSchema>;
+export type AlertingConfig = TypeOf<typeof configSchema>;

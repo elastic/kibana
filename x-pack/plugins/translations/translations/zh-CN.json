@@ -26771,7 +26771,6 @@
     "xpack.triggersActionsUI.sections.alertForm.conditions.removeConditionLabel": "移除",
     "xpack.triggersActionsUI.sections.alertForm.conditions.title": "条件：",
     "xpack.triggersActionsUI.sections.alertForm.documentationLabel": "文档",
-    "xpack.triggersActionsUI.sections.alertForm.error.belowMinimumText": "时间间隔小于此规则类型的最小值 ({minimum})",
     "xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedRuleTypes": "为了{operation}规则，您需要获得相应的权限。",
     "xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedRuleTypesTitle": "您尚无权{operation}任何规则类型",
     "xpack.triggersActionsUI.sections.alertForm.error.requiredActionConnector": "“{actionTypeId} 连接器的操作”必填。",

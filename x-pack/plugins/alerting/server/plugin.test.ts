@@ -15,7 +15,7 @@ import { eventLogServiceMock } from '../../event_log/server/event_log_service.mo
 import { KibanaRequest } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { KibanaFeature } from '../../features/server';
-import { AlertsConfig } from './config';
+import { AlertingConfig } from './config';
 import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
@@ -29,7 +29,7 @@ describe('Alerting Plugin', () => {
     beforeEach(() => jest.clearAllMocks());
 
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
         healthCheck: {
           interval: '5m',
         },
@@ -65,7 +65,7 @@ describe('Alerting Plugin', () => {
     });
 
     it('should create usage counter if usageCollection plugin is defined', async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
         healthCheck: {
           interval: '5m',
         },
@@ -192,7 +192,7 @@ describe('Alerting Plugin', () => {
   describe('start()', () => {
     describe('getRulesClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
-        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>({
           healthCheck: {
             interval: '5m',
           },
@@ -235,7 +235,7 @@ describe('Alerting Plugin', () => {
       });
 
       it(`doesn't throw error when encryptedSavedObjects plugin has encryption key`, async () => {
-        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>({
           healthCheck: {
             interval: '5m',
           },
@@ -292,7 +292,7 @@ describe('Alerting Plugin', () => {
     });
 
     test(`exposes getAlertingAuthorizationWithRequest()`, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
         healthCheck: {
           interval: '5m',
         },
