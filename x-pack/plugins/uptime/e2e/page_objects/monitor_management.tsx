@@ -58,6 +58,7 @@ export function monitorManagementPageProvider({
 
     async deleteMonitor() {
       await this.clickByTestSubj('monitorManagementDeleteMonitor');
+      await this.clickByTestSubj('confirmModalConfirmButton');
       return await this.findByTestSubj('uptimeDeleteMonitorSuccess');
     },
 
