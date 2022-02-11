@@ -30,6 +30,7 @@ import {
   EuiText,
   EuiIcon,
   EuiFieldText,
+  EuiBadge,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -139,7 +140,24 @@ export function AddFilterModal({
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
     setLocalFilters([
-      { field: undefined, operator: undefined, value: undefined, groupId: 1, id: 0, subGroupId: 1 },
+      {
+        field: undefined,
+        operator: undefined,
+        value: undefined,
+        groupId: multipleFilters?.length
+          ? Math.max.apply(
+              Math,
+              multipleFilters.map((f) => f.groupId)
+            ) + 1
+          : 1,
+        id: multipleFilters?.length
+          ? Math.max.apply(
+              Math,
+              multipleFilters.map((f) => f.id)
+            ) + 1
+          : 0,
+        subGroupId: 1,
+      },
     ]);
     setGroupsCount(1);
   };
