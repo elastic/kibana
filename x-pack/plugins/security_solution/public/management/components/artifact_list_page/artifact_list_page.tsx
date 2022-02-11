@@ -248,6 +248,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             aboutInfo={labels.emptyStateInfo}
             primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
             backComponent={backButtonEmptyComponent}
+            data-test-subj={getTestId('emptyState')}
           />
         )}
 
