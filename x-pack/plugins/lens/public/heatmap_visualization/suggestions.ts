@@ -42,7 +42,15 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
    */
   let score = 0;
 
-  const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
+  const [groups, metrics] = partition(
+    // filter out all metrics which are not number based
+    table.columns.filter((col) => col.operation.isBucketed || col.operation.dataType === 'number'),
+    (col) => col.operation.isBucketed
+  );
+
+  if (groups.length === 0 && metrics.length === 0) {
+    return [];
+  }
 
   if (groups.length >= 3) {
     return [];

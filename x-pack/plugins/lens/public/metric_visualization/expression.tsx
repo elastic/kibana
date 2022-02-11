@@ -144,7 +144,7 @@ export function MetricChart({
 
   return (
     <VisualizationContainer className="lnsMetricExpression__container" style={color}>
-      <AutoScale key={value}>
+      <AutoScale key={value} minScale={mode === 'full' ? undefined : 0.05}>
         <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value">
           {value}
         </div>

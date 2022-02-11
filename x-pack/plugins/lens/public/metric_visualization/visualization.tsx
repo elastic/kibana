@@ -22,6 +22,8 @@ import { layerTypes } from '../../common';
 import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
 
+export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+
 const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricState,
@@ -151,7 +153,8 @@ export const getMetricVisualization = ({
               ]
             : [],
           supportsMoreColumns: !props.state.accessor,
-          filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+          filterOperations: (op: OperationMetadata) =>
+            !op.isBucketed && supportedTypes.has(op.dataType),
           enableDimensionEditor: true,
           required: true,
         },
