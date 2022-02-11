@@ -52,6 +52,9 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
 
   const hasCsvRows = info.csv_rows != null;
   const hasScreenshot = USES_HEADLESS_JOB_TYPES.includes(info.jobtype);
+  const hasCpuMetric = info.metrics?.cpuInPercentage != null;
+  const hasMemoryMetric = info.metrics?.memoryInMegabytes != null;
+  const hasPdfPagesMetric = info.metrics?.pdfPages != null;
 
   const outputInfo = [
     {
@@ -118,6 +121,12 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       description:
         info.layout?.dimensions?.width != null ? Math.ceil(info.layout.dimensions.width) : UNKNOWN,
     },
+    hasPdfPagesMetric && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.pdfPagesInfo', {
+        defaultMessage: 'Pages count',
+      }),
+      description: info.metrics?.pdfPages,
+    },
 
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
@@ -131,6 +140,20 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
         defaultMessage: 'Timeout',
       }),
       description: info.prettyTimeout,
+    },
+
+    hasCpuMetric && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.cpuInfo', {
+        defaultMessage: 'CPU usage',
+      }),
+      description: `${info.metrics?.cpuInPercentage}%`,
+    },
+
+    hasMemoryMetric && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.memoryInfo', {
+        defaultMessage: 'RAM usage',
+      }),
+      description: `${info.metrics?.memoryInMegabytes}MB`,
     },
   ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
