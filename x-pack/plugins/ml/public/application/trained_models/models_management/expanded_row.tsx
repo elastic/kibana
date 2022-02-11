@@ -348,7 +348,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           },
         ]
       : []),
-    ...(pipelines && Object.keys(pipelines).length > 0
+    ...((pipelines && Object.keys(pipelines).length > 0) || stats.ingest
       ? [
           {
             id: 'pipelines',
