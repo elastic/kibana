@@ -97,7 +97,7 @@ export const useAddToCase = ({
         /* save lens attributes and timerange to local storage,
          ** so the description field will be automatically filled on case creation page.
          */
-        storage.set(DRAFT_COMMENT_STORAGE_ID, {
+        storage?.set(DRAFT_COMMENT_STORAGE_ID, {
           commentId: 'description',
           comment: `!{lens${JSON.stringify({
             timeRange,
