@@ -42,7 +42,6 @@ describe('PingList component', () => {
         type: 'io',
       },
       monitor: {
-        duration: { us: null },
         id: 'auto-tcp-0X81440A68E839814D',
         ip: '255.255.255.0',
         name: '',
@@ -161,9 +160,6 @@ describe('PingList component', () => {
                 "type": "io",
               },
               "monitor": Object {
-                "duration": Object {
-                  "us": null,
-                },
                 "id": "auto-tcp-0X81440A68E839814D",
                 "ip": "255.255.255.0",
                 "name": "",

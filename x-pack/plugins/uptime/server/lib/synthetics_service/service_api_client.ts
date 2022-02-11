@@ -124,7 +124,7 @@ export class ServiceAPIClient {
       );
       if (locMonitors.length > 0) {
         promises.push(
-          rxjsFrom(callServiceEndpoint(locMonitors, url)).pipe(
+          rxjsFrom(callServiceEndpoint(locMonitors, `${url}-test`)).pipe(
             tap((result) => {
               this.logger.debug(result.data);
               this.logger.debug(
