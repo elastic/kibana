@@ -249,8 +249,23 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
       await this.assertTabContent('stats', expectVisible);
     }
 
-    public async assertPipelinesTabContent(expectVisible = true) {
+    public async assertPipelinesTabContent(
+      expectVisible = true,
+      pipelinesExpectOptions?: Array<{ pipelineName: string; expectDefinition: boolean }>
+    ) {
       await this.assertTabContent('pipelines', expectVisible);
+
+      if (Array.isArray(pipelinesExpectOptions)) {
+        for (const p of pipelinesExpectOptions) {
+          if (p.expectDefinition) {
+            await testSubjects.existOrFail(`mlTrainedModelPipelineEditButton_${p.pipelineName}`);
+            await testSubjects.existOrFail(`mlTrainedModelPipelineDefinition_${p.pipelineName}`);
+          } else {
+            await testSubjects.missingOrFail(`mlTrainedModelPipelineEditButton_${p.pipelineName}`);
+            await testSubjects.missingOrFail(`mlTrainedModelPipelineDefinition_${p.pipelineName}`);
+          }
+        }
+      }
     }
   })();
 }

@@ -69,7 +69,9 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertDetailsTabContent();
         await ml.trainedModelsTable.assertInferenceConfigTabContent();
         await ml.trainedModelsTable.assertStatsTabContent();
-        await ml.trainedModelsTable.assertPipelinesTabContent();
+        await ml.trainedModelsTable.assertPipelinesTabContent(true, [
+          { pipelineName: `pipeline_${modelWithPipelineData.modelId}`, expectDefinition: true },
+        ]);
       });
 
       it('renders expanded row content correctly for model without pipelines', async () => {
@@ -182,7 +184,9 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertDetailsTabContent();
         await ml.trainedModelsTable.assertInferenceConfigTabContent();
         await ml.trainedModelsTable.assertStatsTabContent();
-        await ml.trainedModelsTable.assertPipelinesTabContent(false);
+        await ml.trainedModelsTable.assertPipelinesTabContent(true, [
+          { pipelineName: `pipeline_${modelWithPipelineData.modelId}`, expectDefinition: false },
+        ]);
       });
     });
   });

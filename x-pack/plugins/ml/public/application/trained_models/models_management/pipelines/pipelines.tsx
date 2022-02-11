@@ -57,6 +57,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
               extraAction={
                 pipelineDefinition ? (
                   <EuiButtonEmpty
+                    data-test-subj={`mlTrainedModelPipelineEditButton_${pipelineName}`}
                     onClick={() => {
                       const locator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
                       if (!locator) return;
@@ -81,7 +82,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
             >
               <EuiFlexGrid columns={2}>
                 {ingestStats?.pipelines ? (
-                  <EuiFlexItem>
+                  <EuiFlexItem data-test-subj={`mlTrainedModelPipelineIngestStats_${pipelineName}`}>
                     <EuiPanel>
                       <EuiTitle size={'xxs'}>
                         <h6>
@@ -98,7 +99,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                 ) : null}
 
                 {pipelineDefinition ? (
-                  <EuiFlexItem>
+                  <EuiFlexItem data-test-subj={`mlTrainedModelPipelineDefinition_${pipelineName}`}>
                     <EuiPanel>
                       <EuiTitle size={'xxs'}>
                         <h6>
