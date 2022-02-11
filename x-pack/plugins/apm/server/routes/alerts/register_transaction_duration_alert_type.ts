@@ -147,13 +147,13 @@ export function registerTransactionDurationAlertType({
               ruleParams.aggregationType === 'avg'
                 ? { avg: { field } }
                 : {
-                  percentiles: {
-                    field,
-                    percents: [
-                      ruleParams.aggregationType === '95th' ? 95 : 99,
-                    ],
+                    percentiles: {
+                      field,
+                      percents: [
+                        ruleParams.aggregationType === '95th' ? 95 : 99,
+                      ],
+                    },
                   },
-                },
           },
         },
       };

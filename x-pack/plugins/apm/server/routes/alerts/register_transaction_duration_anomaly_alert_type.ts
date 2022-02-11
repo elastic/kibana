@@ -236,7 +236,7 @@ export function registerTransactionDurationAnomalyAlertType({
                 [ALERT_SEVERITY]: severityLevel,
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
-                [ALERT_REASON]: reasonMessage
+                [ALERT_REASON]: reasonMessage,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
