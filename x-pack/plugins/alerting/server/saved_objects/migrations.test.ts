@@ -2114,6 +2114,52 @@ describe('successful migrations', () => {
       }
     );
 
+    test.each(Object.keys(ruleTypeMappings) as RuleType[])(
+      'Updates %p rule tags correctly if tags are undefined',
+      (ruleType) => {
+        const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
+        const alert = getMockData(
+          {
+            params: { outputIndex: 'output-index', type: ruleType },
+            alertTypeId: 'siem.signals',
+            tags: undefined,
+          },
+          true
+        );
+        expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
+          ruleTypeMappings[ruleType]
+        );
+        expect(migration801(alert, migrationContext).attributes.enabled).toEqual(false);
+        expect(migration801(alert, migrationContext).attributes.tags).toEqual([
+          'auto_disabled_8.0.1',
+        ]);
+        expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual('');
+      }
+    );
+
+    test.each(Object.keys(ruleTypeMappings) as RuleType[])(
+      'Updates %p rule tags correctly if tags are null',
+      (ruleType) => {
+        const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
+        const alert = getMockData(
+          {
+            params: { outputIndex: 'output-index', type: ruleType },
+            alertTypeId: 'siem.signals',
+            tags: null,
+          },
+          true
+        );
+        expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
+          ruleTypeMappings[ruleType]
+        );
+        expect(migration801(alert, migrationContext).attributes.enabled).toEqual(false);
+        expect(migration801(alert, migrationContext).attributes.tags).toEqual([
+          'auto_disabled_8.0.1',
+        ]);
+        expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual('');
+      }
+    );
+
     describe('Metrics Inventory Threshold rule', () => {
       test('Migrates incorrect action group spelling', () => {
         const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];

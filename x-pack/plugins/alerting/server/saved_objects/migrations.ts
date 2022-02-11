@@ -665,8 +665,8 @@ function addSecuritySolutionAADRuleTypes(
         attributes: {
           ...doc.attributes,
           tags: doc.attributes.enabled
-            ? [...doc.attributes.tags, 'auto_disabled_8.0.1']
-            : doc.attributes.tags,
+            ? [...(doc.attributes.tags ?? []), 'auto_disabled_8.0.1']
+            : doc.attributes.tags ?? [],
           alertTypeId: ruleTypeMappings[ruleType],
           enabled: false,
           params: {
