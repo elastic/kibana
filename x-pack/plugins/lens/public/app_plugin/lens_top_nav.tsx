@@ -31,6 +31,7 @@ import {
   selectChangesApplied,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
+import { APPLY_CHANGES_BUTTON_IDENTIFIER } from '../apply_changes_button_identifier';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -464,6 +465,7 @@ export const LensTopNavMenu = ({
               // data-test-subj="visualizeEditorRenderButton"
               disabled={autoApplyEnabled || changesApplied}
               fill
+              className={APPLY_CHANGES_BUTTON_IDENTIFIER}
               iconType="play"
               onClick={onApplyChanges}
               size="s"

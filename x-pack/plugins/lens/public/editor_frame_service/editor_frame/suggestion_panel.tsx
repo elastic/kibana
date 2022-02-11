@@ -62,6 +62,7 @@ import {
   selectChangesApplied,
   applyChanges,
 } from '../../state_management';
+import { APPLY_CHANGES_BUTTON_IDENTIFIER } from '../../apply_changes_button_identifier';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -354,7 +355,13 @@ export function SuggestionPanel({
             />
           </h3>
           <EuiSpacer size="s" />
-          <EuiButton fill iconType="play" size="s" onClick={() => dispatchLens(applyChanges())}>
+          <EuiButton
+            fill
+            iconType="play"
+            size="s"
+            className={APPLY_CHANGES_BUTTON_IDENTIFIER}
+            onClick={() => dispatchLens(applyChanges())}
+          >
             <FormattedMessage
               id="xpack.lens.suggestions.applyChangesLabel"
               defaultMessage="Apply"

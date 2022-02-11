@@ -23,6 +23,19 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { APPLY_CHANGES_BUTTON_IDENTIFIER } from '../../../apply_changes_button_identifier';
+
+function fromApplyChangesButton(event: Event) {
+  for (
+    let node: HTMLElement | null = event.target as HTMLElement;
+    node !== null;
+    node = node!.parentElement
+  ) {
+    if (node.tagName === 'BUTTON' && node.className.includes(APPLY_CHANGES_BUTTON_IDENTIFIER))
+      return true;
+  }
+  return false;
+}
 
 export function DimensionContainer({
   isOpen,
@@ -77,8 +90,8 @@ export function DimensionContainer({
       <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
         <EuiWindowEvent event="keydown" handler={closeOnEscape} />
         <EuiOutsideClickDetector
-          onOutsideClick={() => {
-            if (isFullscreen) {
+          onOutsideClick={(event) => {
+            if (isFullscreen || fromApplyChangesButton(event)) {
               return;
             }
             closeFlyout();
