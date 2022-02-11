@@ -23,7 +23,6 @@ import {
   ABOUT_RULE_DESCRIPTION,
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
-  getDetails,
   INDEX_PATTERNS_DETAILS,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
@@ -34,6 +33,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
+import { getDetails } from '../../../tasks/rule_details';
 import { waitForPageToBeLoaded } from '../../../tasks/common';
 import {
   waitForRulesTableToBeLoaded,

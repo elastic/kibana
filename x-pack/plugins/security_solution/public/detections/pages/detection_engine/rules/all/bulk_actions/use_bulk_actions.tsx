@@ -224,124 +224,112 @@ export const useBulkActions = ({
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
         let longTimeWarningToast: Toast;
         let isBulkEditFinished = false;
-        try {
-          // disabling auto-refresh so user's selected rules won't disappear after table refresh
-          setIsRefreshOn(false);
-          closePopover();
 
-          const customSelectedRuleIds = selectedRules
-            .filter((rule) => rule.immutable === false)
-            .map((rule) => rule.id);
+        // disabling auto-refresh so user's selected rules won't disappear after table refresh
+        setIsRefreshOn(false);
+        closePopover();
 
-          // User has cancelled edit action or there are no custom rules to proceed
-          if ((await confirmBulkEdit()) === false) {
-            setIsRefreshOn(true);
+        const customSelectedRuleIds = selectedRules
+          .filter((rule) => rule.immutable === false)
+          .map((rule) => rule.id);
+
+        // User has cancelled edit action or there are no custom rules to proceed
+        if ((await confirmBulkEdit()) === false) {
+          setIsRefreshOn(true);
+          return;
+        }
+
+        const editPayload = await completeBulkEditForm(bulkEditActionType);
+        if (editPayload == null) {
+          setIsRefreshOn(true);
+          return;
+        }
+
+        const hideWarningToast = () => {
+          if (longTimeWarningToast) {
+            toasts.api.remove(longTimeWarningToast);
+          }
+        };
+
+        const customRulesCount = isAllSelected
+          ? getCustomRulesCountFromCache(queryClient)
+          : customSelectedRuleIds.length;
+
+        // show warning toast only if bulk edit action exceeds 5s
+        // if bulkAction already finished, we won't show toast at all (hence flag "isBulkEditFinished")
+        setTimeout(() => {
+          if (isBulkEditFinished) {
             return;
           }
-
-          const editPayload = await completeBulkEditForm(bulkEditActionType);
-          if (editPayload == null) {
-            throw Error('Bulk edit payload is empty');
-          }
-
-          const hideWarningToast = () => {
-            if (longTimeWarningToast) {
-              toasts.api.remove(longTimeWarningToast);
-            }
-          };
-
-          const customRulesCount = isAllSelected
-            ? getCustomRulesCountFromCache(queryClient)
-            : customSelectedRuleIds.length;
-
-          // show warning toast only if bulk edit action exceeds 5s
-          // if bulkAction already finished, we won't show toast at all (hence flag "isBulkEditFinished")
-          setTimeout(() => {
-            if (isBulkEditFinished) {
-              return;
-            }
-            longTimeWarningToast = toasts.addWarning(
-              {
-                title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
-                text: mountReactNode(
-                  <>
-                    <p>{i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount)}</p>
-                    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiButton color="warning" size="s" onClick={hideWarningToast}>
-                          {i18n.BULK_EDIT_WARNING_TOAST_NOTIFY}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                ),
-                iconType: undefined,
-              },
-              { toastLifeTimeMs: 10 * 60 * 1000 }
-            );
-          }, 5 * 1000);
-
-          const rulesBulkAction = initRulesBulkAction({
-            visibleRuleIds: selectedRuleIds,
-            action: BulkAction.edit,
-            setLoadingRules,
-            toasts,
-            payload: { edit: [editPayload] },
-            onSuccess: ({ rulesCount }) => {
-              hideWarningToast();
-              toasts.addSuccess({
-                title: i18n.BULK_EDIT_SUCCESS_TOAST_TITLE,
-                text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(rulesCount),
-                iconType: undefined,
-              });
+          longTimeWarningToast = toasts.addWarning(
+            {
+              title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
+              text: mountReactNode(
+                <>
+                  <p>{i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount)}</p>
+                  <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton color="warning" size="s" onClick={hideWarningToast}>
+                        {i18n.BULK_EDIT_WARNING_TOAST_NOTIFY}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
+              ),
+              iconType: undefined,
             },
-            onError: (error: HTTPError) => {
-              hideWarningToast();
+            { toastLifeTimeMs: 10 * 60 * 1000 }
+          );
+        }, 5 * 1000);
 
-              // if response doesn't have number of failed rules, it means the whole bulk action failed
-              // and general error toast will be shown. Otherwise - error toast for partial failure
-              const failedRulesCount = (error?.body as BulkActionPartialErrorResponse)?.attributes
-                ?.rules?.failed;
-
-              if (isNaN(failedRulesCount)) {
-                toasts.addError(error, { title: i18n.BULK_ACTION_FAILED });
-              } else {
-                try {
-                  error.stack = JSON.stringify(error.body, null, 2);
-                  toasts.addError(error, {
-                    title: i18n.BULK_EDIT_ERROR_TOAST_TITLE,
-                    toastMessage: i18n.BULK_EDIT_ERROR_TOAST_DESCRIPTION(failedRulesCount),
-                  });
-                } catch (e) {
-                  // toast error has failed
-                }
-              }
-            },
-          });
-
-          // only edit custom rules, as elastic rule are immutable
-          if (isAllSelected) {
-            const customRulesOnlyFilterQuery = convertRulesFilterToKQL({
-              ...filterOptions,
-              showCustomRules: true,
+        const rulesBulkAction = initRulesBulkAction({
+          visibleRuleIds: selectedRuleIds,
+          action: BulkAction.edit,
+          setLoadingRules,
+          toasts,
+          payload: { edit: [editPayload] },
+          onSuccess: ({ rulesCount }) => {
+            hideWarningToast();
+            toasts.addSuccess({
+              title: i18n.BULK_EDIT_SUCCESS_TOAST_TITLE,
+              text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(rulesCount),
+              iconType: undefined,
             });
-            await rulesBulkAction.byQuery(customRulesOnlyFilterQuery);
-          } else {
-            await rulesBulkAction.byIds(customSelectedRuleIds);
-          }
+          },
+          onError: (error: HTTPError) => {
+            hideWarningToast();
+            // if response doesn't have number of failed rules, it means the whole bulk action failed
+            // and general error toast will be shown. Otherwise - error toast for partial failure
+            const failedRulesCount = (error?.body as BulkActionPartialErrorResponse)?.attributes
+              ?.rules?.failed;
 
-          invalidateRules();
-          isBulkEditFinished = true;
-          if (getIsMounted()) {
-            await resolveTagsRefetch(bulkEditActionType);
-          }
-        } catch (e) {
-          // user has cancelled form or error has occured
-        } finally {
-          isBulkEditFinished = true;
-          if (getIsMounted()) {
-            setIsRefreshOn(true);
-          }
+            if (isNaN(failedRulesCount)) {
+              toasts.addError(error, { title: i18n.BULK_ACTION_FAILED });
+            } else {
+              error.stack = JSON.stringify(error.body, null, 2);
+              toasts.addError(error, {
+                title: i18n.BULK_EDIT_ERROR_TOAST_TITLE,
+                toastMessage: i18n.BULK_EDIT_ERROR_TOAST_DESCRIPTION(failedRulesCount),
+              });
+            }
+          },
+        });
+
+        // only edit custom rules, as elastic rule are immutable
+        if (isAllSelected) {
+          const customRulesOnlyFilterQuery = convertRulesFilterToKQL({
+            ...filterOptions,
+            showCustomRules: true,
+          });
+          await rulesBulkAction.byQuery(customRulesOnlyFilterQuery);
+        } else {
+          await rulesBulkAction.byIds(customSelectedRuleIds);
+        }
+
+        isBulkEditFinished = true;
+        invalidateRules();
+        if (getIsMounted()) {
+          await resolveTagsRefetch(bulkEditActionType);
         }
       };
 
