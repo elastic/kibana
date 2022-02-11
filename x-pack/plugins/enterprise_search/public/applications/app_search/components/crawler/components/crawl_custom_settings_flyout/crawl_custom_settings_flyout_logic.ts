@@ -27,6 +27,7 @@ export interface CrawlCustomSettingsFlyoutLogicValues {
   isDataLoading: boolean;
   isFormSubmitting: boolean;
   isFlyoutVisible: boolean;
+  maxCrawlDepth: number;
   selectedDomainUrls: string[];
   selectedEntryPointUrls: string[];
   selectedSitemapUrls: string[];
@@ -39,6 +40,7 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
   onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
   onSelectDomainUrls(domainUrls: string[]): { domainUrls: string[] };
   onSelectEntryPointUrls(entryPointUrls: string[]): { entryPointUrls: string[] };
+  onSelectMaxCrawlDepth(maxCrawlDepth: number): { maxCrawlDepth: number };
   onSelectSitemapUrls(sitemapUrls: string[]): { sitemapUrls: string[] };
   showFlyout(): void;
   startCustomCrawl(): void;
@@ -67,6 +69,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     onRecieveDomainConfigData: (domainConfigs) => ({ domainConfigs }),
     onSelectDomainUrls: (domainUrls) => ({ domainUrls }),
     onSelectEntryPointUrls: (entryPointUrls) => ({ entryPointUrls }),
+    onSelectMaxCrawlDepth: (maxCrawlDepth) => ({ maxCrawlDepth }),
     onSelectSitemapUrls: (sitemapUrls) => ({ sitemapUrls }),
     startCustomCrawl: true,
     toggleIncludeRobotsTxt: true,
@@ -106,6 +109,13 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         showFlyout: () => true,
         hideFlyout: () => false,
         [CrawlerLogic.actionTypes.onStartCrawlRequestComplete]: () => false,
+      },
+    ],
+    maxCrawlDepth: [
+      2,
+      {
+        showFlyout: () => 2,
+        onSelectMaxCrawlDepth: (_, { maxCrawlDepth }) => maxCrawlDepth,
       },
     ],
     selectedDomainUrls: [
@@ -182,6 +192,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     startCustomCrawl: () => {
       CrawlerLogic.actions.startCrawl({
         domain_allowlist: values.selectedDomainUrls,
+        max_crawl_depth: values.maxCrawlDepth,
         seed_urls: values.selectedEntryPointUrls,
         sitemap_urls: values.selectedSitemapUrls,
         sitemap_discovery_disabled: !values.includeRobotsTxt,

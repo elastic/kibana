@@ -21,14 +21,15 @@ import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic
   entryPointUrls: ['https://www.elastic.co/guide', 'https://swiftype.com/documentation'],
+  selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
+  selectedEntryPointUrls: ['https://swiftype.com/documentation'],
+  selectedSitemapUrls: ['https://www.elastic.co/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
   sitemapUrls: [
     'https://www.elastic.co/sitemap1.xml',
     'https://www.elastic.co/sitemap2.xml',
     'https://swiftype.com/sitemap1.xml',
     'https://swiftype.com/sitemap2.xml',
   ],
-  selectedEntryPointUrls: ['https://swiftype.com/documentation'],
-  selectedSitemapUrls: ['https://www.elastic.co/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
   includeRobotsTxt: true,
 };
 
@@ -45,7 +46,7 @@ const getAccordionBadge = (wrapper: ShallowWrapper) => {
   return extraActionWrapper.find(EuiNotificationBadge);
 };
 
-describe('CrawlCustom', () => {
+describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
   let wrapper: ShallowWrapper;
 
   beforeEach(() => {
@@ -64,7 +65,7 @@ describe('CrawlCustom', () => {
       sitemapTab = shallow(<div>{tabs[0].content}</div>);
     });
 
-    it('allows the user to select sitemap urls and toggle whether', () => {
+    it('allows the user to select sitemap urls', () => {
       expect(sitemapTab.find(SimplifiedSelectable).props()).toEqual({
         options: MOCK_VALUES.sitemapUrls,
         selectedOptions: MOCK_VALUES.selectedSitemapUrls,
@@ -83,7 +84,7 @@ describe('CrawlCustom', () => {
   });
 
   describe('entry points tab', () => {
-    it('allows the user to toggle whether to include robots.txt sitemaps', () => {
+    it('allows the user to select entry point urls', () => {
       const tabs = wrapper.find(EuiTabbedContent).prop('tabs');
       const entryPointsTab = shallow(<div>{tabs[1].content}</div>);
 
@@ -112,5 +113,21 @@ describe('CrawlCustom', () => {
 
     expect(badge.render().text()).toContain('0');
     expect(badge.prop('color')).toEqual('subdued');
+  });
+
+  it('shows empty messages when the user has not selected any domains', () => {
+    setMockValues({
+      ...MOCK_VALUES,
+      selectedDomainUrls: [],
+    });
+
+    rerender(wrapper);
+
+    const tabs = wrapper.find(EuiTabbedContent).prop('tabs');
+    const sitemapsTab = shallow(<div>{tabs[0].content}</div>);
+    const entryPointsTab = shallow(<div>{tabs[1].content}</div>);
+
+    expect(sitemapsTab.find(SimplifiedSelectable).prop('emptyMessage')).toBeDefined();
+    expect(entryPointsTab.find(SimplifiedSelectable).prop('emptyMessage')).toBeDefined();
   });
 });

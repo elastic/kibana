@@ -35,6 +35,7 @@ const ACTIVE_STATUSES = [
 
 interface CrawlRequestOverrides {
   domain_allowlist?: string[];
+  max_crawl_depth?: number;
   seed_urls?: string[];
   sitemap_urls?: string[];
   sitemap_discovery_disabled?: boolean;

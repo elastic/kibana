@@ -17,6 +17,7 @@ import { Loading } from '../../../../../shared/loading';
 import { rerender } from '../../../../../test_helpers';
 
 import { CrawlCustomSettingsFlyout } from './crawl_custom_settings_flyout';
+import { CrawlCustomSettingsFlyoutCrawlDepthPanel } from './crawl_custom_settings_flyout_crawl_depth_panel';
 import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
@@ -70,8 +71,13 @@ describe('CrawlCustomSettingsFlyout', () => {
 
   it('lets the user customize their crawl', () => {
     expect(wrapper.find(Loading)).toHaveLength(0);
-    expect(wrapper.find(CrawlCustomSettingsFlyoutDomainsPanel)).toHaveLength(1);
-    expect(wrapper.find(CrawlCustomSettingsFlyoutSeedUrlsPanel)).toHaveLength(1);
+    for (const component of [
+      CrawlCustomSettingsFlyoutCrawlDepthPanel,
+      CrawlCustomSettingsFlyoutDomainsPanel,
+      CrawlCustomSettingsFlyoutSeedUrlsPanel,
+    ]) {
+      expect(wrapper.find(component)).toHaveLength(1);
+    }
   });
 
   it('shows a loading state', () => {
@@ -83,8 +89,13 @@ describe('CrawlCustomSettingsFlyout', () => {
     rerender(wrapper);
 
     expect(wrapper.find(Loading)).toHaveLength(1);
-    expect(wrapper.find(CrawlCustomSettingsFlyoutDomainsPanel)).toHaveLength(0);
-    expect(wrapper.find(CrawlCustomSettingsFlyoutSeedUrlsPanel)).toHaveLength(0);
+    for (const component of [
+      CrawlCustomSettingsFlyoutCrawlDepthPanel,
+      CrawlCustomSettingsFlyoutDomainsPanel,
+      CrawlCustomSettingsFlyoutSeedUrlsPanel,
+    ]) {
+      expect(wrapper.find(component)).toHaveLength(0);
+    }
   });
 
   describe('submit button', () => {

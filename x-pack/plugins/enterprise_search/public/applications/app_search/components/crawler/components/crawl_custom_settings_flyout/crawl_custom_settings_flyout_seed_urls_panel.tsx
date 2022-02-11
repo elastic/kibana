@@ -34,6 +34,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
   const {
     entryPointUrls,
     includeRobotsTxt,
+    selectedDomainUrls,
     selectedEntryPointUrls,
     selectedSitemapUrls,
     sitemapUrls,
@@ -118,6 +119,16 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                     options={sitemapUrls}
                     selectedOptions={selectedSitemapUrls}
                     onChange={onSelectSitemapUrls}
+                    emptyMessage={
+                      selectedDomainUrls.length === 0
+                        ? i18n.translate(
+                            'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
+                            {
+                              defaultMessage: 'Please select a domain.',
+                            }
+                          )
+                        : undefined
+                    }
                   />
                 </>
               ),
@@ -131,11 +142,24 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                 }
               ),
               content: (
-                <SimplifiedSelectable
-                  options={entryPointUrls}
-                  selectedOptions={selectedEntryPointUrls}
-                  onChange={onSelectEntryPointUrls}
-                />
+                <>
+                  <EuiSpacer size="s" />
+                  <SimplifiedSelectable
+                    options={entryPointUrls}
+                    selectedOptions={selectedEntryPointUrls}
+                    onChange={onSelectEntryPointUrls}
+                    emptyMessage={
+                      selectedDomainUrls.length === 0
+                        ? i18n.translate(
+                            'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
+                            {
+                              defaultMessage: 'Please select a domain.',
+                            }
+                          )
+                        : undefined
+                    }
+                  />
+                </>
               ),
             },
           ]}

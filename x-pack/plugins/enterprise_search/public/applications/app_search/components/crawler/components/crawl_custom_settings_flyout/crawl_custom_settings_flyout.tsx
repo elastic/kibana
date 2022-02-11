@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
 import { Loading } from '../../../../../shared/loading';
 
+import { CrawlCustomSettingsFlyoutCrawlDepthPanel } from './crawl_custom_settings_flyout_crawl_depth_panel';
 import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
@@ -72,6 +73,8 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
           <Loading />
         ) : (
           <>
+            <CrawlCustomSettingsFlyoutCrawlDepthPanel />
+            <EuiSpacer />
             <CrawlCustomSettingsFlyoutDomainsPanel />
             <EuiSpacer />
             <CrawlCustomSettingsFlyoutSeedUrlsPanel />

@@ -67,6 +67,7 @@ export function registerCrawlerRoutes({
           overrides: schema.maybe(
             schema.object({
               domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+              max_crawl_depth: schema.maybe(schema.number()),
               seed_urls: schema.maybe(schema.arrayOf(schema.string())),
               sitemap_urls: schema.maybe(schema.arrayOf(schema.string())),
               sitemap_discovery_disabled: schema.maybe(schema.boolean()),

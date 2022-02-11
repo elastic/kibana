@@ -34,6 +34,7 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
       isDataLoading: true,
       isFlyoutVisible: false,
       isFormSubmitting: false,
+      maxCrawlDepth: 2,
       selectedDomainUrls: [],
       selectedEntryPointUrls: [],
       selectedSitemapUrls: [],
@@ -161,6 +162,18 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
       });
     });
 
+    describe('onSelectMaxCrawlDepth', () => {
+      it('saves the crawl depth', () => {
+        mount({
+          maxCrawlDepth: 5,
+        });
+
+        CrawlCustomSettingsFlyoutLogic.actions.onSelectMaxCrawlDepth(10);
+
+        expect(CrawlCustomSettingsFlyoutLogic.values.maxCrawlDepth).toEqual(10);
+      });
+    });
+
     describe('onSelectSitemapUrls', () => {
       it('saves the urls', () => {
         mount({
@@ -219,6 +232,7 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
       it('starts a custom crawl with the user set values', async () => {
         mount({
           includeRobotsTxt: true,
+          maxCrawlDepth: 5,
           selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
           selectedEntryPointUrls: [
             'https://www.elastic.co/guide',
@@ -236,6 +250,7 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
 
         expect(CrawlerLogic.actions.startCrawl).toHaveBeenCalledWith({
           domain_allowlist: ['https://www.elastic.co', 'https://swiftype.com'],
+          max_crawl_depth: 5,
           seed_urls: ['https://www.elastic.co/guide', 'https://swiftype.com/documentation'],
           sitemap_urls: [
             'https://www.elastic.co/sitemap1.xml',

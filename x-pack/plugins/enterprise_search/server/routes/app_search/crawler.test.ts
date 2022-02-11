@@ -149,6 +149,14 @@ describe('crawler routes', () => {
       mockRouter.shouldValidate(request);
     });
 
+    it('validates correctly with max crawl depth', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { max_crawl_depth: 10 } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
     it('validates correctly with seed urls', () => {
       const request = {
         params: { name: 'some-engine' },
