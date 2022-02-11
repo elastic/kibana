@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from 'kibana/server';
 import { JobSavedObjectService } from '../../saved_objects';
+import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
 import { JobType } from '../../../common/types/saved_objects';
 
 import { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
@@ -21,6 +22,7 @@ import {
   MlGetADParams,
   MlGetDFAParams,
   MlGetDatafeedParams,
+  MlGetTrainedModelParams,
 } from './types';
 
 export function getMlClient(
@@ -198,6 +200,7 @@ export function getMlClient(
       return mlClient.deleteModelSnapshot(...p);
     },
     async deleteTrainedModel(...p: Parameters<MlClient['deleteTrainedModel']>) {
+      await modelIdsCheck(p);
       return mlClient.deleteTrainedModel(...p);
     },
     async estimateModelMemory(...p: Parameters<MlClient['estimateModelMemory']>) {
@@ -490,7 +493,14 @@ export function getMlClient(
       return resp;
     },
     async putTrainedModel(...p: Parameters<MlClient['putTrainedModel']>) {
-      return mlClient.putTrainedModel(...p);
+      const resp = await mlClient.putTrainedModel(...p);
+      const [modelId] = getModelIdsFromRequest(p);
+      if (modelId !== undefined) {
+        const model = (p[0] as estypes.MlPutTrainedModelRequest).body;
+        const job = getJobDetailsFromTrainedModel(model);
+        await jobSavedObjectService.createTrainedModel(modelId, job);
+      }
+      return resp;
     },
     async revertModelSnapshot(...p: Parameters<MlClient['revertModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
@@ -576,8 +586,8 @@ function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
   return ids || [];
 }
 
-function getModelIdsFromRequest([params]: MlGetDFAParams): string[] {
-  const ids = params?.id?.split(',');
+function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[] {
+  const ids = params?.model_id?.split(',');
   return ids || [];
 }
 

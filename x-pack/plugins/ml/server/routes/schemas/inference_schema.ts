@@ -26,3 +26,5 @@ export const getInferenceQuerySchema = schema.object({
   with_pipelines: schema.maybe(schema.string()),
   include: schema.maybe(schema.string()),
 });
+
+export const trainedModel = schema.any();

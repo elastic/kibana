@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   getInferenceQuerySchema,
   modelIdSchema,
   optionalModelIdSchema,
+  trainedModel,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -148,6 +150,46 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         );
         return response.ok({
           body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {put} /api/ml/trained_models/:modelId Put a trained model
+   * @apiName PutTrainedModel
+   * @apiDescription Adds a new trained model
+   */
+  router.put(
+    {
+      path: '/api/ml/trained_models/{modelId}',
+      validate: {
+        params: modelIdSchema,
+        body: trainedModel,
+      },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        // const { body } = await mlClient.putTrainedModel({
+        //   model_id: modelId,
+        //   // @ts-expect-error job type custom_rules is incorrect
+        //   body: request.body  ,
+        // });
+        const { body } = await mlClient.putTrainedModel({
+          model_id: modelId,
+          // @ts-expect-error body deprecated
+          body: request.body as estypes.MlPutTrainedModelRequest,
+        });
+        return response.ok({
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

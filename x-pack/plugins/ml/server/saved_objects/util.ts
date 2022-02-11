@@ -44,7 +44,7 @@ export function getSavedObjectClientError(error: any) {
 }
 
 export function getJobDetailsFromTrainedModel(
-  model: estypes.MlTrainedModelConfig
+  model: estypes.MlTrainedModelConfig | estypes.MlPutTrainedModelRequest['body']
 ): TrainedModelJob | null {
   // @ts-ignore types are wrong
   if (model.metadata?.analytics_config === undefined) {
