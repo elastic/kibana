@@ -8,10 +8,13 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
+import { getWarningHeader, logDeprecatedEndpoint, wrapError } from '../utils';
 import { CASE_USER_ACTIONS_URL } from '../../../../common/constants';
 
-export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
+/**
+ * @deprecated since version 8.1.0
+ */
+export function initGetAllCaseUserActionsApi({ router, logger, kibanaVersion }: RouteDeps) {
   router.get(
     {
       path: CASE_USER_ACTIONS_URL,
@@ -27,10 +30,19 @@ export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
+        logDeprecatedEndpoint(
+          logger,
+          request.headers,
+          `The get all cases user actions API '${CASE_USER_ACTIONS_URL}' is deprecated.`
+        );
+
         const casesClient = await context.cases.getCasesClient();
         const caseId = request.params.case_id;
 
         return response.ok({
+          headers: {
+            ...getWarningHeader(kibanaVersion),
+          },
           body: await casesClient.userActions.getAll({ caseId }),
         });
       } catch (error) {

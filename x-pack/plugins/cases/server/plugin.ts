@@ -59,11 +59,13 @@ export interface PluginStartContract {
 
 export class CasePlugin {
   private readonly log: Logger;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
   private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.log = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.log);
   }
@@ -101,6 +103,7 @@ export class CasePlugin {
     initCaseApi({
       logger: this.log,
       router,
+      kibanaVersion: this.kibanaVersion,
     });
   }
 
