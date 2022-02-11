@@ -162,7 +162,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           setUrlParams({
             // ensure page is reset if user changes page size
             page: pageSize !== uiPagination.pageSize ? 1 : pageIndex + 1,
-            perPage: pageSize,
+            pageSize,
           });
         },
         [setUrlParams, uiPagination.pageSize]

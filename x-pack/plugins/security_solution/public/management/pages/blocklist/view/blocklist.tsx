@@ -7,7 +7,6 @@
 
 import React, { memo } from 'react';
 import { useHttp } from '../../../../common/lib/kibana';
-import { EventFiltersApiClient } from '../../event_filters/service/event_filters_api_client';
 import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { HostIsolationExceptionsApiClient } from '../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 

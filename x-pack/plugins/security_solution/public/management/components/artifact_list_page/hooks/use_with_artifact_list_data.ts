@@ -52,7 +52,7 @@ export const useWithArtifactListData = (
   const {
     urlParams: {
       page = 1,
-      perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
+      pageSize = MANAGEMENT_DEFAULT_PAGE_SIZE,
       sortOrder,
       sortField,
       filter,
@@ -66,16 +66,20 @@ export const useWithArtifactListData = (
     data: doesDataExist,
     isLoading: isLoadingDataExists,
     refetch: checkIfDataExists,
-  } = useQuery<boolean, ServerApiError>([apiClient], async () => apiClient.hasData(), {
-    enabled: true,
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
-  });
+  } = useQuery<boolean, ServerApiError>(
+    ['does-data-exists', apiClient],
+    async () => apiClient.hasData(),
+    {
+      enabled: true,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   // Convert to useMemo()? that uses data from API request?
   const [uiPagination, setUiPagination] = useState<Pagination>({
     totalItemCount: 0,
-    pageSize: perPage,
+    pageSize,
     pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
     pageIndex: page - 1,
   });
@@ -83,8 +87,8 @@ export const useWithArtifactListData = (
   const [isPageInitializing, setIsPageInitializing] = useState(true);
 
   const listDataRequest = useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['list', apiClient, page, perPage, sortField, sortField, kuery],
-    async () => apiClient.find({ page, perPage, filter: kuery, sortField, sortOrder }),
+    ['list', apiClient, page, pageSize, sortField, sortField, kuery],
+    async () => apiClient.find({ page, perPage: pageSize, filter: kuery, sortField, sortOrder }),
     {
       enabled: true,
       keepPreviousData: true,

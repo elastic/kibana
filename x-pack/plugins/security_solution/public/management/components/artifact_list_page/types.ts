@@ -13,7 +13,7 @@ import type {
 
 export interface ArtifactListPageUrlParams {
   page?: number;
-  perPage?: number; // FIXME:PT change to `pageSize` to be consistent
+  pageSize?: number; // FIXME:PT change to `pageSize` to be consistent
   filter?: string;
   includedPolicies?: string;
   show?: 'create' | 'edit';
