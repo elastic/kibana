@@ -176,7 +176,7 @@ export const DatePickerWrapper: FC = () => {
             )
           ),
         },
-        { toastLifeTimeMs: 600000 }
+        { toastLifeTimeMs: 30000 }
       );
     },
     [
