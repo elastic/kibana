@@ -387,53 +387,26 @@ export const QueryBarTopRow = React.memo(
       props?.onFiltersUpdated?.(filters);
     }
 
-    function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[], alias = '') {
+    function onAddMultipleFiltersANDOR(
+      selectedFilters: FilterGroup[],
+      buildFilters: Filter[],
+      groupCount: number
+    ) {
       let mergedFilters = [];
-      const firstElement = selectedFilters[0];
-      if (alias && selectedFilters[0].relationship !== 'OR') {
-        const mappedFilters = mapAndFlattenFilters(buildFilters);
+      const mappedFilters = mapAndFlattenFilters(buildFilters);
 
-        mergedFilters = mappedFilters.map((filter, idx) => {
-          // debugger
-          const selectedFilter = selectedFilters[idx];
-          if (selectedFilter.relationship === 'OR') {
-            let groupId = firstElement?.groupId;
-            let id = selectedFilter?.id;
-            let subGroupId = selectedFilter?.subGroupId + 1;
-            return {
-              ...filter,
-              groupId,
-              id,
-              relationship: selectedFilter.relationship,
-              subGroupId,
-            };
-          } else {
-            let groupId = firstElement.groupId;
-            let id = selectedFilter.id;
-            return {
-              ...filter,
-              groupId,
-              id,
-              relationship: selectedFilter.relationship,
-              subGroupId: selectedFilter.subGroupId,
-            };
-          }
-        });
-      } else {
-        const mappedFilters = mapAndFlattenFilters(buildFilters);
-
-        mergedFilters = mappedFilters.map((filter, idx) => {
-          let groupId = selectedFilters[idx].groupId;
-          let id = selectedFilters[idx].id;
-          return {
-            ...filter,
-            groupId,
-            id,
-            relationship: selectedFilters[idx].relationship,
-            subGroupId: selectedFilters[idx].subGroupId,
-          };
-        });
-      }
+      mergedFilters = mappedFilters.map((filter, idx) => {
+        let groupId = selectedFilters[idx].groupId;
+        let id = selectedFilters[idx].id;
+        return {
+          ...filter,
+          groupId,
+          id,
+          relationship: selectedFilters[idx].relationship,
+          subGroupId: selectedFilters[idx].subGroupId,
+          groupCount
+        };
+      });
 
       props.toggleAddFilterModal?.(false);
       props?.onMultipleFiltersUpdated?.([...props.multipleFilters, ...mergedFilters]);

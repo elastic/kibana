@@ -95,7 +95,11 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     props?.onFiltersUpdated?.(filters);
   }
 
-  function onEditMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+  function onEditMultipleFiltersANDOR(
+    selectedFilters: FilterGroup[],
+    buildFilters: Filter[],
+    groupCount: number
+  ) {
     const mappedFilters = mapAndFlattenFilters(buildFilters);
     const mergedFilters = mappedFilters.map((filter, idx) => {
       return {
@@ -104,6 +108,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         id: selectedFilters[idx].id,
         relationship: selectedFilters[idx].relationship,
         subGroupId: selectedFilters[idx].subGroupId,
+        groupCount
       };
     });
 
@@ -210,7 +215,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   function renderEditFilter() {
     const currentEditFilters = props.multipleFilters.filter(
-      (filter) => filter.groupId == Number(groupId)
+      (filter) => filter.meta.alias === 'some filter'
     );
 
     return (

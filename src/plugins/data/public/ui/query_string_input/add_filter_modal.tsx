@@ -78,6 +78,7 @@ export interface FilterGroup {
   id: number;
   relationship?: string;
   subGroupId?: number;
+  groupsCount?: number;
 }
 
 export function AddFilterModal({
@@ -97,7 +98,7 @@ export function AddFilterModal({
   onMultipleFiltersSubmit: (
     filters: FilterGroup[],
     buildFilters: Filter[],
-    alias: string | null
+    groupsCount: number
   ) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
@@ -126,13 +127,22 @@ export function AddFilterModal({
       id: multipleFilters?.length ? multipleFilters?.length : 0,
       subGroupId: 1,
       relationship: undefined,
+      groupsCount,
     },
   ]);
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
     setLocalFilters([
-      { field: undefined, operator: undefined, value: undefined, groupId: 1, id: 0, subGroupId: 1 },
+      {
+        field: undefined,
+        operator: undefined,
+        value: undefined,
+        groupId: 1,
+        id: 0,
+        subGroupId: 1,
+        groupsCount
+      },
     ]);
     setGroupsCount(1);
   };
@@ -399,7 +409,7 @@ export function AddFilterModal({
         ) as Filter[];
         // onSubmit(finalFilters);
 
-        onMultipleFiltersSubmit(localFilters, finalFilters, alias);
+        onMultipleFiltersSubmit(localFilters, finalFilters, groupsCount);
         if (alias) {
           saveFilters({
             title: customLabel,
@@ -484,6 +494,7 @@ export function AddFilterModal({
                                           groupId: localfilter.groupId,
                                           id: Number(multipleFilters?.length) + localFilters.length,
                                           subGroupId,
+                                          groupsCount,
                                         },
                                       ]);
                                     }}
@@ -503,7 +514,7 @@ export function AddFilterModal({
                                     const subGroupId =
                                       filtersOnGroup.length > 2
                                         ? localfilter?.subGroupId ?? 0
-                                        : (localfilter?.subGroupId ?? 0);
+                                        : localfilter?.subGroupId ?? 0;
                                     const updatedLocalFilter = {
                                       ...localfilter,
                                       relationship: 'AND',
@@ -522,6 +533,7 @@ export function AddFilterModal({
                                         relationship: undefined,
                                         groupId: filtersOnGroup.length > 1 ? groupsCount : (Number(multipleFilters?.length) + localFilters.length + 1),
                                         subGroupId,
+                                        groupsCount,
                                         id: Number(multipleFilters?.length) + localFilters.length,
                                       },
                                     ]);

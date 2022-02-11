@@ -81,6 +81,7 @@ export interface FilterGroup {
   id: number;
   relationship?: string;
   subGroupId?: number;
+  groupCount?: number;
 }
 
 export function EditFilterModal({
@@ -98,7 +99,11 @@ export function EditFilterModal({
   saveFilters,
 }: {
   onSubmit: (filters: Filter[]) => void;
-  onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
+  onMultipleFiltersSubmit: (
+    filters: FilterGroup[],
+    buildFilters: Filter[],
+    groupCount: number
+  ) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -119,7 +124,7 @@ export function EditFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(0);
+  const [groupsCount, setGroupsCount] = useState<number>(filter.groupCount !== undefined ? filter.groupCount : 0);
 
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
@@ -132,6 +137,7 @@ export function EditFilterModal({
           id: 0,
           subGroupId: 1,
           relationship: undefined,
+          groupsCount
         },
       ];
     }
@@ -145,6 +151,7 @@ export function EditFilterModal({
         id: convertedfilter.id,
         subGroupId: convertedfilter.subGroupId,
         relationship: convertedfilter.relationship,
+        groupsCount: convertedfilter.groupsCount
       };
     });
   }
