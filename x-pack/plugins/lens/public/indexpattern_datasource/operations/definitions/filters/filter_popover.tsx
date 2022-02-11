@@ -19,14 +19,14 @@ export const FilterPopover = ({
   filter,
   setFilter,
   indexPattern,
-  Button,
+  button,
   isOpen,
   triggerClose,
 }: {
   filter: FilterValue;
   setFilter: Function;
   indexPattern: IndexPattern;
-  Button: React.FunctionComponent;
+  button: React.ReactChild;
   isOpen: boolean;
   triggerClose: () => void;
 }) => {
@@ -78,7 +78,7 @@ export const FilterPopover = ({
       isOpen={isOpen}
       ownFocus
       closePopover={() => triggerClose()}
-      button={<Button />}
+      button={button}
     >
       <QueryInput
         isInvalid={!isQueryValid(filter.input, indexPattern)}
