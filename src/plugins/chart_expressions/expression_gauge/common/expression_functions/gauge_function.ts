@@ -49,7 +49,12 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
   args: {
     shape: {
       types: ['string'],
-      options: [GaugeShapes.HORIZONTAL_BULLET, GaugeShapes.VERTICAL_BULLET],
+      options: [
+        GaugeShapes.HORIZONTAL_BULLET,
+        GaugeShapes.VERTICAL_BULLET,
+        GaugeShapes.ARC,
+        GaugeShapes.CIRCLE,
+      ],
       help: i18n.translate('expressionGauge.functions.gauge.args.shape.help', {
         defaultMessage: 'Type of gauge chart',
       }),
