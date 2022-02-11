@@ -58,7 +58,7 @@ async function withDefaultIndexPattern(
   const { indexPatterns } = getDataStart();
 
   const defaultIndex = await indexPatterns.getDefault();
-  if (!defaultIndex || !defaultIndex.id) return vis;
+  if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
   vis.params.index_pattern = {
     id: defaultIndex.id,
   };
