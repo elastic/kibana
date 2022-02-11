@@ -28,6 +28,7 @@ import {
   switchVisualization,
   DatasourceStates,
   VisualizationState,
+  applyChanges,
 } from '../../state_management';
 
 export interface Suggestion {
@@ -240,6 +241,7 @@ export function switchToSuggestion(
       clearStagedPreview,
     })
   );
+  dispatchLens(applyChanges());
 }
 
 export function getTopSuggestionForField(

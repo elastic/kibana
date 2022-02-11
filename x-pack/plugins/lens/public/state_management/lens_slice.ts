@@ -221,10 +221,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       };
     },
     [applyChanges.type]: (state) => {
-      state.appliedState = {
-        visualization: cloneDeep(state.visualization),
-        datasourceStates: cloneDeep(state.datasourceStates),
-      };
+      if (state.appliedState) {
+        state.appliedState = {
+          visualization: cloneDeep(state.visualization),
+          datasourceStates: cloneDeep(state.datasourceStates),
+        };
+      }
     },
     [updateState.type]: (
       state,

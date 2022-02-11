@@ -334,6 +334,7 @@ export function SuggestionPanel({
       trackSuggestionEvent('back_to_current');
       setLastSelectedSuggestion(-1);
       dispatchLens(rollbackSuggestion());
+      dispatchLens(applyChanges());
     }
   }
 
