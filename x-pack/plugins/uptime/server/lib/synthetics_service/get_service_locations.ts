@@ -16,7 +16,7 @@ import { UptimeServerSetup } from '../adapters/framework';
 export async function getServiceLocations(server: UptimeServerSetup) {
   const locations: ServiceLocations = [];
 
-  if (!server.config.service!.manifestUrl!) {
+  if (!server.config.service?.manifestUrl) {
     return { locations };
   }
 
