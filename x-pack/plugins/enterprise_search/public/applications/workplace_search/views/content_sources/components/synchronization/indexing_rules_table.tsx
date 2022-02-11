@@ -35,7 +35,6 @@ import {
   SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_POLICY_LABEL,
   SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_RULE_LABEL,
   SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_VALUE_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_SYNC_RULES_LEARN_MORE_LINK,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
 
@@ -54,9 +53,6 @@ export const IndexingRulesTable: React.FC = () => {
     <EuiText size="s" color="default">
       {SOURCE_ASSETS_AND_OBJECTS_OBJECTS_DESCRIPTION(contentSource.name)}
       <EuiSpacer />
-      <EuiLink href={'TODO: FILL IN URL HERE'} target="_blank" external>
-        {SOURCE_ASSETS_AND_OBJECTS_SYNC_RULES_LEARN_MORE_LINK}
-      </EuiLink>
     </EuiText>
   );
 
