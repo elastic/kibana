@@ -522,34 +522,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should display correct annotations data when using runtime field', async () => {
             const expectedAnnotationsData = [
               {
-                dataValue: 1442736000000,
-                details: 'hello world from US!',
-                header: '2015-09-20 08:00',
-              },
-              {
-                dataValue: 1442746800000,
+                dataValue: 1442707200000,
                 details: 'hello world from CN!',
-                header: '2015-09-20 11:00',
+                header: '2015-09-20 00:00',
               },
               {
-                dataValue: 1442761200000,
+                dataValue: 1442750400000,
                 details: 'hello world from MX!',
-                header: '2015-09-20 15:00',
+                header: '2015-09-20 12:00',
               },
               {
-                dataValue: 1442822400000,
-                details: 'hello world from IN!',
-                header: '2015-09-21 08:00',
-              },
-              {
-                dataValue: 1442826000000,
-                details: 'hello world from TH!',
-                header: '2015-09-21 09:00',
-              },
-              {
-                dataValue: 1442829600000,
+                dataValue: 1442793600000,
                 details: 'hello world from SY!',
-                header: '2015-09-21 10:00',
+                header: '2015-09-21 00:00',
+              },
+              {
+                dataValue: 1442880000000,
+                details: 'hello world from BD!',
+                header: '2015-09-22 00:00',
               },
             ];
             await visualBuilder.setAnnotationFilter('memory > 300000 and geo.src: "US"');
