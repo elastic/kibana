@@ -306,7 +306,7 @@ export const ExceptionListsTable = React.memo(() => {
   const paginationMemo = useMemo(
     () => ({
       pageIndex: pagination.page - 1,
-      pageSize: pagination.pageSize,
+      pageSize: pagination.perPage,
       totalItemCount: pagination.total || 0,
       pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
     }),
