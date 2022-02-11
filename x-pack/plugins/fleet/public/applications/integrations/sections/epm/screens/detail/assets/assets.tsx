@@ -39,10 +39,6 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
   const { spaces } = useKibana<StartPlugins>().services;
   const pkgkey = `${name}-${version}`;
-  const assetInstallSpaceId =
-    'savedObject' in packageInfo
-      ? packageInfo.savedObject.attributes.installed_kibana_space_id
-      : undefined;
   const {
     savedObjects: { client: savedObjectsClient },
   } = useStartServices();
@@ -63,6 +59,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       if ('savedObject' in packageInfo) {
         if (spaces) {
           const { id: spaceId } = await spaces.getActiveSpace();
+          const assetInstallSpaceId = packageInfo.savedObject.attributes.installed_kibana_space_id;
           // if assets are installed in a different space no need to attempt to load them.
           if (assetInstallSpaceId && assetInstallSpaceId !== spaceId) {
             setAssetsInstalledInCurrentSpace(false);
@@ -131,7 +128,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       }
     };
     fetchAssetSavedObjects();
-  }, [savedObjectsClient, packageInfo, spaces, assetInstallSpaceId]);
+  }, [savedObjectsClient, packageInfo, spaces]);
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
