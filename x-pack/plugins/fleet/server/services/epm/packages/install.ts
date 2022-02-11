@@ -44,6 +44,7 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
+import { getBundledPackages } from './get_bundled_packages';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -468,8 +469,31 @@ export async function installPackage(args: InstallPackageParams) {
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
 
+  const bundledPackages = await getBundledPackages();
+
   if (args.installSource === 'registry') {
     const { pkgkey, force, spaceId } = args;
+
+    const matchingBundledPackage = bundledPackages.find(
+      (pkg) => Registry.pkgToPkgKey(pkg) === pkgkey
+    );
+
+    if (matchingBundledPackage) {
+      logger.debug(
+        `found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
+      );
+
+      const response = installPackageByUpload({
+        savedObjectsClient,
+        esClient,
+        archiveBuffer: matchingBundledPackage.buffer,
+        contentType: 'application/zip',
+        spaceId,
+      });
+
+      return response;
+    }
+
     logger.debug(`kicking off install of ${pkgkey} from registry`);
     const response = installPackageFromRegistry({
       savedObjectsClient,
