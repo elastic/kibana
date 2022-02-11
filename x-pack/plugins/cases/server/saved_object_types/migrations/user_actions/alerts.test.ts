@@ -82,7 +82,7 @@ describe('alert user actions', () => {
         ['create', ['status']],
         ['create', []],
       ])(
-        'does not modify the document and does not call JSON.prase when action: %s and action_field: %s',
+        'does not modify the document and does not call JSON.parse when action: %s and action_field: %s',
         (action, actionField) => {
           const doc = {
             id: '123',
