@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('model management', function () {
-    this.tags(['mlqa', 'skipFirefox', 'dima']);
+    this.tags(['mlqa', 'skipFirefox']);
 
     loadTestFile(require.resolve('./model_list'));
   });

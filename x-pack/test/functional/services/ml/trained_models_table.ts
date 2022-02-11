@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import { upperFirst } from 'lodash';
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -219,24 +220,37 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async assertDetailsTabVisible() {
-      await testSubjects.existOrFail('mlTrainedModelDetails');
-    }
+    public async assertTabContent(
+      type: 'details' | 'stats' | 'inferenceConfig' | 'pipelines',
+      expectVisible = true
+    ) {
+      const tabTestSubj = `mlTrainedModel${upperFirst(type)}`;
+      const tabContentTestSubj = `mlTrainedModel${upperFirst(type)}Content`;
 
-    public async assertInferenceConfigTabVisible() {
-      await testSubjects.existOrFail('mlTrainedModelInferenceConfig');
-    }
-
-    public async assertStatsTabVisible() {
-      await testSubjects.existOrFail('mlTrainedModelStats');
-    }
-
-    public async assertPipelinesTabVisible(expectVisible: boolean = true) {
-      if (expectVisible) {
-        await testSubjects.existOrFail('mlTrainedModelPipelines');
-      } else {
-        await testSubjects.missingOrFail('mlTrainedModelPipelines');
+      if (!expectVisible) {
+        await testSubjects.missingOrFail(tabTestSubj);
+        return;
       }
+
+      await testSubjects.existOrFail(tabTestSubj);
+      await testSubjects.click(tabTestSubj);
+      await testSubjects.existOrFail(tabContentTestSubj);
+    }
+
+    public async assertDetailsTabContent(expectVisible = true) {
+      await this.assertTabContent('details', expectVisible);
+    }
+
+    public async assertInferenceConfigTabContent(expectVisible = true) {
+      await this.assertTabContent('inferenceConfig', expectVisible);
+    }
+
+    public async assertStatsTabContent(expectVisible = true) {
+      await this.assertTabContent('stats', expectVisible);
+    }
+
+    public async assertPipelinesTabContent(expectVisible = true) {
+      await this.assertTabContent('stats', expectVisible);
     }
   })();
 }

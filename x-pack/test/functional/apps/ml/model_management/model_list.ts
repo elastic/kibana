@@ -56,18 +56,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('renders expanded row content correctly for model with pipelines', async () => {
       await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineData.modelId);
-      await ml.trainedModelsTable.assertDetailsTabVisible();
-      await ml.trainedModelsTable.assertInferenceConfigTabVisible();
-      await ml.trainedModelsTable.assertStatsTabVisible();
-      await ml.trainedModelsTable.assertPipelinesTabVisible();
+      await ml.trainedModelsTable.assertDetailsTabContent();
+      await ml.trainedModelsTable.assertInferenceConfigTabContent();
+      await ml.trainedModelsTable.assertStatsTabContent();
+      await ml.trainedModelsTable.assertPipelinesTabContent();
     });
 
     it('renders expanded row content correctly for model without pipelines', async () => {
       await ml.trainedModelsTable.ensureRowIsExpanded(modelWithoutPipelineData.modelId);
-      await ml.trainedModelsTable.assertDetailsTabVisible();
-      await ml.trainedModelsTable.assertInferenceConfigTabVisible();
-      await ml.trainedModelsTable.assertStatsTabVisible();
-      await ml.trainedModelsTable.assertPipelinesTabVisible(false);
+      await ml.trainedModelsTable.assertDetailsTabContent();
+      await ml.trainedModelsTable.assertInferenceConfigTabContent();
+      await ml.trainedModelsTable.assertStatsTabContent();
+      await ml.trainedModelsTable.assertPipelinesTabContent(false);
     });
 
     it('displays the built-in model and no actions are enabled', async () => {
