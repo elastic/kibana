@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef, MutableRefObj
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 
-import { Case, Ecs, CaseViewRefreshPropInterface } from '../../../common/ui/types';
+import { Case, CaseViewRefreshPropInterface, UseFetchAlertData } from '../../../common/ui/types';
 import { CaseStatuses, CaseAttributes, CaseType, CaseConnector } from '../../../common/api';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
@@ -46,7 +46,7 @@ export interface CaseViewComponentProps {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   subCaseId?: string;
-  useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
+  useFetchAlertData: UseFetchAlertData;
   userCanCrud: boolean;
   /**
    * A React `Ref` that Exposes data refresh callbacks.

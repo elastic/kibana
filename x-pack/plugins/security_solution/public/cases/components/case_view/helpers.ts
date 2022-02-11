@@ -101,7 +101,7 @@ export interface Alert {
   signal: Signal;
   [key: string]: unknown;
 }
-export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, Ecs>] => {
+export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 
@@ -112,7 +112,7 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
 
   const alerts = useMemo(
     () =>
-      alertsData?.hits.hits.reduce<Record<string, Ecs>>(
+      alertsData?.hits.hits.reduce<Record<string, unknown>>(
         (acc, { _id, _index, _source }) => ({
           ...acc,
           [_id]: {

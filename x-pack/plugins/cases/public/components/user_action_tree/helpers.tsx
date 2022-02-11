@@ -18,7 +18,7 @@ import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical
 import React, { useContext } from 'react';
 import classNames from 'classnames';
 import { ThemeContext } from 'styled-components';
-import { Comment, Ecs } from '../../../common/ui/types';
+import { Comment } from '../../../common/ui/types';
 import {
   CaseFullExternalService,
   ActionConnector,
@@ -466,7 +466,7 @@ export const getFirstItem = (items?: string | string[] | null): string | null =>
   return Array.isArray(items) ? items[0] : items ?? null;
 };
 
-export const getRuleId = (comment: CommentRequestAlertType, alertData?: Ecs): string | null =>
+export const getRuleId = (comment: CommentRequestAlertType, alertData?: unknown): string | null =>
   getRuleField({
     commentRuleField: comment?.rule?.id,
     alertData,
@@ -474,7 +474,7 @@ export const getRuleId = (comment: CommentRequestAlertType, alertData?: Ecs): st
     kibanaAlertFieldPath: ALERT_RULE_UUID,
   });
 
-export const getRuleName = (comment: CommentRequestAlertType, alertData?: Ecs): string | null =>
+export const getRuleName = (comment: CommentRequestAlertType, alertData?: unknown): string | null =>
   getRuleField({
     commentRuleField: comment?.rule?.name,
     alertData,
@@ -489,7 +489,7 @@ const getRuleField = ({
   kibanaAlertFieldPath,
 }: {
   commentRuleField: string | string[] | null | undefined;
-  alertData: Ecs | undefined;
+  alertData: unknown | undefined;
   signalRuleFieldPath: string;
   kibanaAlertFieldPath: string;
 }): string | null => {
