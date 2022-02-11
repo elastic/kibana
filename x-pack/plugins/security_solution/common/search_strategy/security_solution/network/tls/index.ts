@@ -39,7 +39,7 @@ export interface NetworkTlsNode {
   issuers?: Maybe<string[]>;
 }
 
-export enum NetworkTlsFields {
+export const enum NetworkTlsFields {
   _id = '_id',
 }
 

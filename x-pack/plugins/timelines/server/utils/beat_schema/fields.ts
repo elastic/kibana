@@ -27362,7 +27362,7 @@ export const fieldsBeat: BeatFields = {
   },
   'gcp.audit.status.code': {
     category: 'gcp',
-    description: 'The status code, which should be an enum value of google.rpc.Code.  ',
+    description: 'The status code, which should be an const enum value of google.rpc.Code.  ',
     name: 'gcp.audit.status.code',
     type: 'integer',
   },

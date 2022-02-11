@@ -375,7 +375,7 @@ export const CertificateFingerprintLink = React.memo<{
 
 CertificateFingerprintLink.displayName = 'CertificateFingerprintLink';
 
-enum DefaultReputationLink {
+const enum DefaultReputationLink {
   'virustotal.com' = 'virustotal.com',
   'talosIntelligence.com' = 'talosIntelligence.com',
 }

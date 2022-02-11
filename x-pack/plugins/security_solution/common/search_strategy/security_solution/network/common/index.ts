@@ -8,7 +8,7 @@
 import { GeoEcs } from '../../../../ecs/geo';
 import { Maybe } from '../../..';
 
-export enum NetworkDirectionEcs {
+export const enum NetworkDirectionEcs {
   inbound = 'inbound',
   outbound = 'outbound',
   internal = 'internal',
@@ -19,7 +19,7 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
-export enum NetworkTopTablesFields {
+export const enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',
   bytes_out = 'bytes_out',
   flows = 'flows',
@@ -27,14 +27,14 @@ export enum NetworkTopTablesFields {
   source_ips = 'source_ips',
 }
 
-export enum FlowTarget {
+export const enum FlowTarget {
   client = 'client',
   destination = 'destination',
   server = 'server',
   source = 'source',
 }
 
-export enum FlowTargetSourceDest {
+export const enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
 }

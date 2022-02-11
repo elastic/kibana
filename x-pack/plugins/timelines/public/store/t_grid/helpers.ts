@@ -25,7 +25,7 @@ import { getTGridManageDefaults, tGridDefaults } from './defaults';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;
 
-enum TimelineTabs {
+const enum TimelineTabs {
   query = 'query',
   graph = 'graph',
   notes = 'notes',

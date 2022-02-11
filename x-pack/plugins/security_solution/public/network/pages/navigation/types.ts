@@ -67,7 +67,7 @@ type KeyNetworkNavTab = KeyNetworkNavTabWithoutMlPermission | KeyNetworkNavTabWi
 
 export type NetworkNavTab = Record<KeyNetworkNavTab, NavTab>;
 
-export enum NetworkRouteType {
+export const enum NetworkRouteType {
   flows = 'flows',
   dns = 'dns',
   anomalies = 'anomalies',

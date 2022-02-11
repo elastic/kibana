@@ -14,7 +14,7 @@ import { SortNumber } from './sort_number';
 import type { SortDirection } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 
-enum SortDirectionIndicatorEnum {
+const enum SortDirectionIndicatorEnum {
   SORT_UP = 'sortUp',
   SORT_DOWN = 'sortDown',
 }

@@ -192,7 +192,7 @@ export interface TimelineInput {
   status?: Maybe<TimelineStatus>;
 }
 
-export enum FlowDirection {
+export const enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
 }

@@ -15,7 +15,7 @@ import { validateEql } from '../../../../common/hooks/eql/api';
 import { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
 
-export enum ERROR_CODES {
+export const enum ERROR_CODES {
   FAILED_REQUEST = 'ERR_FAILED_REQUEST',
   INVALID_EQL = 'ERR_INVALID_EQL',
 }

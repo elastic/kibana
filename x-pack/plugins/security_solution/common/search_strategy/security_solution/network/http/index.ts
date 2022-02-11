@@ -9,7 +9,7 @@ import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data
 import { Maybe, CursorType, Inspect, PageInfoPaginated, GenericBuckets } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
 
-export enum NetworkHttpFields {
+export const enum NetworkHttpFields {
   domains = 'domains',
   lastHost = 'lastHost',
   lastSourceIp = 'lastSourceIp',

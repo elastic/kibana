@@ -17,7 +17,7 @@ import { NetworkKpiTlsHandshakesStrategyResponse } from './tls_handshakes';
 import { NetworkKpiUniqueFlowsStrategyResponse } from './unique_flows';
 import { NetworkKpiUniquePrivateIpsStrategyResponse } from './unique_private_ips';
 
-export enum NetworkKpiQueries {
+export const enum NetworkKpiQueries {
   dns = 'networkKpiDns',
   dnsEntities = 'networkKpiDnsEntities',
   networkEvents = 'networkKpiNetworkEvents',

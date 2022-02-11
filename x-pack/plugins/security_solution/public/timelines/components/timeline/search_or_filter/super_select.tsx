@@ -23,7 +23,7 @@ import {
 import React, { Component } from 'react';
 import classNames from 'classnames';
 
-enum ShiftDirection {
+const enum ShiftDirection {
   BACK = 'back',
   FORWARD = 'forward',
 }

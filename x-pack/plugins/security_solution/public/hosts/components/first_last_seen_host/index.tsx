@@ -13,7 +13,7 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { Direction, DocValueFields } from '../../../../common/search_strategy';
 
-export enum FirstLastSeenHostType {
+export const enum FirstLastSeenHostType {
   FIRST_SEEN = 'first-seen',
   LAST_SEEN = 'last-seen',
 }

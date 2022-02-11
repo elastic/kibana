@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum OperatingSystem {
+export const enum OperatingSystem {
   LINUX = 'linux',
   MAC = 'macos',
   WINDOWS = 'windows',

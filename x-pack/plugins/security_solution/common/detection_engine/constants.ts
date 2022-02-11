@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum RULE_PREVIEW_INVOCATION_COUNT {
+export const enum RULE_PREVIEW_INVOCATION_COUNT {
   HOUR = 20,
   DAY = 24,
   WEEK = 168,

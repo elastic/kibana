@@ -9,7 +9,7 @@ export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
 export const RULE_EXECUTION_LOG_PROVIDER = 'securitySolution.ruleExecution';
 
-export enum RuleExecutionLogAction {
+export const enum RuleExecutionLogAction {
   'status-change' = 'status-change',
   'execution-metrics' = 'execution-metrics',
 }

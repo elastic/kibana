@@ -23,7 +23,7 @@ export interface NavGroupTab {
   id: string;
   name: string;
 }
-export enum SecurityNavGroupKey {
+export const enum SecurityNavGroupKey {
   detect = 'detect',
   explore = 'explore',
   investigate = 'investigate',

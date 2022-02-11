@@ -49,7 +49,7 @@ export type EventViewId =
   | EventsViewType.jsonView
   | EventsViewType.summaryView
   | EventsViewType.threatIntelView;
-export enum EventsViewType {
+export const enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',

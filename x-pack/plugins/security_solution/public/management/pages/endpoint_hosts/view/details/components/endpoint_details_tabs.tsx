@@ -13,7 +13,7 @@ import { EndpointDetailsFlyoutHeader } from './flyout_header';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 
-export enum EndpointDetailsTabsTypes {
+export const enum EndpointDetailsTabsTypes {
   overview = 'details',
   activityLog = 'activity_log',
 }

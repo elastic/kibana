@@ -9,7 +9,7 @@ import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data
 import { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
 
-export enum NetworkDnsFields {
+export const enum NetworkDnsFields {
   dnsName = 'dnsName',
   queryCount = 'queryCount',
   uniqueDomains = 'uniqueDomains',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum DetectionEngineTab {
+export const enum DetectionEngineTab {
   signals = 'signals',
   alerts = 'alerts',
 }

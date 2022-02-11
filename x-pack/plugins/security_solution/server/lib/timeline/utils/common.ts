@@ -142,7 +142,7 @@ export const loadData = <T, U>(
   });
 };
 
-export enum TimelineStatusActions {
+export const enum TimelineStatusActions {
   create = 'create',
   createViaImport = 'createViaImport',
   update = 'update',

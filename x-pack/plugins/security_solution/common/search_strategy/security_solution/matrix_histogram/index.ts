@@ -28,7 +28,7 @@ export * from './preview';
 export const MatrixHistogramQuery = 'matrixHistogram';
 export const MatrixHistogramQueryEntities = 'matrixHistogramEntities';
 
-export enum MatrixHistogramType {
+export const enum MatrixHistogramType {
   authentications = 'authentications',
   authenticationsEntities = 'authenticationsEntities',
   anomalies = 'anomalies',

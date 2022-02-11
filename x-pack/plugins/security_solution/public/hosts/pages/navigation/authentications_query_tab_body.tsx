@@ -33,7 +33,7 @@ const authenticationsStackByOptions: MatrixHistogramOption[] = [
 ];
 const DEFAULT_STACK_BY = 'event.outcome';
 
-enum AuthenticationsMatrixDataGroup {
+const enum AuthenticationsMatrixDataGroup {
   authenticationsSuccess = 'success',
   authenticationsFailure = 'failure',
 }

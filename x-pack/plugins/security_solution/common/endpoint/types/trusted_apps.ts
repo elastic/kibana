@@ -67,13 +67,13 @@ export interface GetTrustedAppsSummaryResponse {
   linux: number;
 }
 
-export enum ConditionEntryField {
+export const enum ConditionEntryField {
   HASH = 'process.hash.*',
   PATH = 'process.executable.caseless',
   SIGNER = 'process.Ext.code_signature',
 }
 
-export enum OperatorFieldIds {
+export const enum OperatorFieldIds {
   is = 'is',
   matches = 'matches',
 }

@@ -16,7 +16,7 @@ export const EXISTS_OPERATOR = ':*';
 /** The operator applied to a field */
 export type QueryOperator = ':' | ':*';
 
-export enum DataProviderType {
+export const enum DataProviderType {
   default = 'default',
   template = 'template',
 }

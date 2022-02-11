@@ -150,7 +150,7 @@ interface EventInfo {
 /**
  * The valid ecs categories.
  */
-export enum ECSCategory {
+export const enum ECSCategory {
   Driver = 'driver',
   File = 'file',
   Network = 'network',
@@ -165,7 +165,7 @@ export enum ECSCategory {
 /**
  * High level categories for related events. These specify the type of related events that should be generated.
  */
-export enum RelatedEventCategory {
+export const enum RelatedEventCategory {
   /**
    * The Random category allows the related event categories to be chosen randomly
    */
@@ -390,7 +390,7 @@ const eventsDefaultDataStream = {
   namespace: 'default',
 };
 
-enum AlertTypes {
+const enum AlertTypes {
   MALWARE = 'MALWARE',
   MEMORY_SIGNATURE = 'MEMORY_SIGNATURE',
   MEMORY_SHELLCODE = 'MEMORY_SHELLCODE',

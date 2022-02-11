@@ -10,7 +10,7 @@ export * from './details';
 export * from './last_event_time';
 export * from './eql';
 
-export enum TimelineEventsQueries {
+export const enum TimelineEventsQueries {
   all = 'eventsAll',
   details = 'eventsDetails',
   kpi = 'eventsKpi',

@@ -417,7 +417,7 @@ export type AlertEvent = Partial<{
  * The status of the Endpoint Agent as reported by the Agent or the
  * Security Solution app using events from Fleet.
  */
-export enum EndpointStatus {
+export const enum EndpointStatus {
   /**
    * Agent is enrolled with Fleet
    */
@@ -432,7 +432,7 @@ export enum EndpointStatus {
 /**
  * The status of the host, which is mapped to the Elastic Agent status in Fleet
  */
-export enum HostStatus {
+export const enum HostStatus {
   /**
    * Default state of the host when no host information is present or host information cannot
    * be retrieved. e.g. API error
@@ -1036,7 +1036,7 @@ export interface SupportedFields {
 }
 
 /** Policy protection mode options */
-export enum ProtectionModes {
+export const enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
   off = 'off',
@@ -1071,7 +1071,7 @@ export type NewPolicyData = UpdatePackagePolicy & {
 /**
  * the possible status for actions, configurations and overall Policy Response
  */
-export enum HostPolicyResponseActionStatus {
+export const enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',

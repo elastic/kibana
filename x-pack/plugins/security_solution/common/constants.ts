@@ -76,7 +76,7 @@ export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 
-export enum SecurityPageName {
+export const enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
   authentications = 'authentications',

@@ -27,7 +27,7 @@ interface RulesTableToolbarProps {
   loading: boolean;
 }
 
-export enum AllRulesTabs {
+export const enum AllRulesTabs {
   rules = 'rules',
   monitoring = 'monitoring',
 }

@@ -54,7 +54,7 @@ export const mockFindExceptionListItemResponses = (
   });
 };
 
-export enum ManifestManagerMockType {
+export const enum ManifestManagerMockType {
   InitialSystemState,
   ListClientPromiseRejection,
   NormalFlow,

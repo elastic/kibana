@@ -15,7 +15,7 @@ export * from './risk_score';
 export * from './overview';
 export * from './uncommon_processes';
 
-export enum HostsQueries {
+export const enum HostsQueries {
   authentications = 'authentications',
   authenticationsEntities = 'authenticationsEntities',
   details = 'hostDetails',

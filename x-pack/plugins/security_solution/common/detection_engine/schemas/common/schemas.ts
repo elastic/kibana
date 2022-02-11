@@ -410,7 +410,7 @@ export const privilege = t.type({
 
 export type Privilege = t.TypeOf<typeof privilege>;
 
-export enum BulkAction {
+export const enum BulkAction {
   'enable' = 'enable',
   'disable' = 'disable',
   'export' = 'export',
@@ -421,7 +421,7 @@ export enum BulkAction {
 
 export const bulkAction = enumeration('BulkAction', BulkAction);
 
-export enum BulkActionEditType {
+export const enum BulkActionEditType {
   'add_tags' = 'add_tags',
   'delete_tags' = 'delete_tags',
   'set_tags' = 'set_tags',

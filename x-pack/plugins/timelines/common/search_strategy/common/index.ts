@@ -22,7 +22,7 @@ export interface Inspect {
   dsl: string[];
 }
 
-export enum Direction {
+export const enum Direction {
   asc = 'asc',
   desc = 'desc',
 }

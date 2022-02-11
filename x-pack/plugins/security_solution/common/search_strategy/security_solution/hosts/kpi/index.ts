@@ -15,7 +15,7 @@ import { HostsKpiAuthenticationsStrategyResponse } from './authentications';
 import { HostsKpiHostsStrategyResponse } from './hosts';
 import { HostsKpiUniqueIpsStrategyResponse } from './unique_ips';
 
-export enum HostsKpiQueries {
+export const enum HostsKpiQueries {
   kpiAuthentications = 'hostsKpiAuthentications',
   kpiAuthenticationsEntities = 'hostsKpiAuthenticationsEntities',
   kpiHosts = 'hostsKpiHosts',

@@ -12,7 +12,7 @@ import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../cti/constants';
 import { Inspect, Maybe, TimerangeInput } from '../../common';
 import { RequestBasicOptions } from '..';
 
-export enum CtiQueries {
+export const enum CtiQueries {
   eventEnrichment = 'eventEnrichment',
   dataSource = 'dataSource',
 }

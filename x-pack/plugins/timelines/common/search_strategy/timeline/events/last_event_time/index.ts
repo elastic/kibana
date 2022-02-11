@@ -9,7 +9,7 @@ import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestBasicOptions } from '../..';
 
-export enum LastEventIndexKey {
+export const enum LastEventIndexKey {
   hostDetails = 'hostDetails',
   hosts = 'hosts',
   ipDetails = 'ipDetails',

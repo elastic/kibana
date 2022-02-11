@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum CONSTANTS {
+export const enum CONSTANTS {
   appQuery = 'query',
   alertsPage = 'alerts.page',
   caseDetails = 'case.details',

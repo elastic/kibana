@@ -11,14 +11,14 @@ import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../.
 import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
 import { HostRiskSeverity } from '../kpi';
 
-export enum HostPolicyResponseActionStatus {
+export const enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
   unsupported = 'unsupported',
 }
 
-export enum HostsFields {
+export const enum HostsFields {
   lastSeen = 'lastSeen',
   hostName = 'hostName',
 }

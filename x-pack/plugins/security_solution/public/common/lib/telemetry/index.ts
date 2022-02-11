@@ -33,7 +33,7 @@ export const initTelemetry = (
   _track = usageCollection?.reportUiCounter?.bind(null, appId) ?? noop;
 };
 
-export enum TELEMETRY_EVENT {
+export const enum TELEMETRY_EVENT {
   // Detections
   SIEM_RULE_ENABLED = 'siem_rule_enabled',
   SIEM_RULE_DISABLED = 'siem_rule_disabled',

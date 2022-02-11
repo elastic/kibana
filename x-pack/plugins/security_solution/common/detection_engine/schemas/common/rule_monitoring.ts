@@ -16,7 +16,7 @@ import { enumeration, IsoDateString, PositiveInteger } from '@kbn/securitysoluti
  * used in the Alerting Framework. We merge our custom status with the
  * Framework's status to determine the resulting status of a rule.
  */
-export enum RuleExecutionStatus {
+export const enum RuleExecutionStatus {
   /**
    * @deprecated Replaced by the 'running' status but left for backwards compatibility
    * with rule execution events already written to Event Log in the prior versions of Kibana.

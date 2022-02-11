@@ -136,7 +136,7 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
-enum RuleDetailTabs {
+const enum RuleDetailTabs {
   alerts = 'alerts',
   failures = 'failures',
   exceptions = 'exceptions',

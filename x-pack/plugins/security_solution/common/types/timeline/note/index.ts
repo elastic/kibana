@@ -71,7 +71,7 @@ export const NoteSavedObjectToReturnRuntimeType = runtimeTypes.intersection([
 export interface NoteSavedObject
   extends runtimeTypes.TypeOf<typeof NoteSavedObjectToReturnRuntimeType> {}
 
-export enum SortFieldNote {
+export const enum SortFieldNote {
   updatedBy = 'updatedBy',
   updated = 'updated',
 }

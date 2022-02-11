@@ -16,7 +16,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ListItems } from './types';
 import { ML_JOB_STARTED, ML_JOB_STOPPED } from './translations';
 
-enum MessageLevels {
+const enum MessageLevels {
   info = 'info',
   warning = 'warning',
   error = 'error',

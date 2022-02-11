@@ -45,7 +45,7 @@ export interface EventEcs {
   type?: string[];
 }
 
-export enum EventCode {
+export const enum EventCode {
   // Malware Protection alert
   MALICIOUS_FILE = 'malicious_file',
   // Ransomware Protection alert
@@ -58,7 +58,7 @@ export enum EventCode {
   BEHAVIOR = 'behavior',
 }
 
-export enum EventCategory {
+export const enum EventCategory {
   PROCESS = 'process',
   FILE = 'file',
   NETWORK = 'network',

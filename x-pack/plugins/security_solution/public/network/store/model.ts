@@ -15,12 +15,12 @@ import {
   SortField,
 } from '../../../common/search_strategy';
 
-export enum NetworkType {
+export const enum NetworkType {
   page = 'page',
   details = 'details',
 }
 
-export enum NetworkTableType {
+export const enum NetworkTableType {
   alerts = 'alerts',
   dns = 'dns',
   http = 'http',
@@ -47,7 +47,7 @@ export type TopTlsTableType = NetworkDetailsTableType.tls | NetworkTableType.tls
 
 export type HttpTableType = NetworkDetailsTableType.http | NetworkTableType.http;
 
-export enum NetworkDetailsTableType {
+export const enum NetworkDetailsTableType {
   http = 'http',
   tls = 'tls',
   topCountriesDestination = 'topCountriesDestination',

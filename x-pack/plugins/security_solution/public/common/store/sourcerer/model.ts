@@ -15,7 +15,7 @@ import {
 } from '../../../../../timelines/common';
 import { SecuritySolutionDataViewBase } from '../../types';
 /** Uniquely identifies a Sourcerer Scope */
-export enum SourcererScopeName {
+export const enum SourcererScopeName {
   default = 'default',
   detections = 'detections',
   timeline = 'timeline',

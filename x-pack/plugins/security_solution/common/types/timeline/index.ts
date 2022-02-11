@@ -67,7 +67,7 @@ const SavedDataProviderQueryMatchRuntimeType = runtimeTypes.partial({
   queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
 });
 
-export enum DataProviderType {
+export const enum DataProviderType {
   default = 'default',
   template = 'template',
 }
@@ -185,7 +185,7 @@ export type Sort = runtimeTypes.TypeOf<typeof SavedSortRuntimeType>;
  *  Timeline Statuses
  */
 
-export enum TimelineStatus {
+export const enum TimelineStatus {
   active = 'active',
   draft = 'draft',
   immutable = 'immutable',
@@ -204,7 +204,7 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
 
-export enum RowRendererId {
+export const enum RowRendererId {
   alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
@@ -230,7 +230,7 @@ export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId
  * Timeline template type
  */
 
-export enum TemplateTimelineType {
+export const enum TemplateTimelineType {
   elastic = 'elastic',
   custom = 'custom',
 }
@@ -253,7 +253,7 @@ export type TemplateTimelineTypeLiteralWithNull = runtimeTypes.TypeOf<
  *  Timeline Types
  */
 
-export enum TimelineType {
+export const enum TimelineType {
   default = 'default',
   template = 'template',
 }
@@ -311,7 +311,7 @@ export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'sa
  *  Timeline IDs
  */
 
-export enum TimelineId {
+export const enum TimelineId {
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
@@ -473,7 +473,7 @@ export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimeli
 
 export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom' | 'eql';
 
-export enum TimelineTabs {
+export const enum TimelineTabs {
   query = 'query',
   graph = 'graph',
   notes = 'notes',
@@ -544,7 +544,7 @@ export const pageInfoTimeline = runtimeTypes.type({
   pageSize: runtimeTypes.number,
 });
 
-export enum SortFieldTimeline {
+export const enum SortFieldTimeline {
   title = 'title',
   description = 'description',
   updated = 'updated',

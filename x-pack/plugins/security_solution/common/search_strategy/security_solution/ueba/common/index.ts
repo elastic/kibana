@@ -7,7 +7,7 @@
 
 import { Maybe } from '../../../common';
 
-export enum RiskScoreFields {
+export const enum RiskScoreFields {
   hostName = 'host_name',
   riskKeyword = 'risk_keyword',
   riskScore = 'risk_score',
@@ -18,7 +18,7 @@ export interface RiskScoreItem {
   [RiskScoreFields.riskKeyword]: Maybe<string>;
   [RiskScoreFields.riskScore]: Maybe<number>;
 }
-export enum HostRulesFields {
+export const enum HostRulesFields {
   hits = 'hits',
   riskScore = 'risk_score',
   ruleName = 'rule_name',
@@ -31,13 +31,13 @@ export interface HostRulesItem {
   [HostRulesFields.ruleName]: Maybe<string>;
   [HostRulesFields.ruleType]: Maybe<string>;
 }
-export enum UserRulesFields {
+export const enum UserRulesFields {
   userName = 'user_name',
   riskScore = 'risk_score',
   rules = 'rules',
   ruleCount = 'rule_count',
 }
-export enum HostTacticsFields {
+export const enum HostTacticsFields {
   hits = 'hits',
   riskScore = 'risk_score',
   tactic = 'tactic',

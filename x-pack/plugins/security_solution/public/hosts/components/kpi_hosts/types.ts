@@ -18,7 +18,7 @@ export interface HostsKpiProps {
   skip: boolean;
 }
 
-export enum HostsKpiChartColors {
+export const enum HostsKpiChartColors {
   authenticationsSuccess = '#54B399',
   authenticationsFailure = '#E7664C',
   uniqueSourceIps = '#D36086',

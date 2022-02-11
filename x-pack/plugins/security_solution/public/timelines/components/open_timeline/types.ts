@@ -222,7 +222,7 @@ export type DispatchUpdateTimeline = ({
   ruleNote,
 }: UpdateTimeline) => () => void;
 
-export enum TimelineTabsStyle {
+export const enum TimelineTabsStyle {
   tab = 'tab',
   filter = 'filter',
 }

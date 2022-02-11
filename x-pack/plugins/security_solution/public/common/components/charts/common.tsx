@@ -77,7 +77,7 @@ WrappedByAutoSizerComponent.displayName = 'WrappedByAutoSizer';
 
 export const WrappedByAutoSizer = React.memo(WrappedByAutoSizerComponent);
 
-export enum SeriesType {
+export const enum SeriesType {
   BAR = 'bar',
   AREA = 'area',
   LINE = 'line',

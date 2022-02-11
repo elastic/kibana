@@ -45,7 +45,7 @@ export interface EuiBasicTableOnChange {
 
 export type RuleStatusType = 'passive' | 'active' | 'valid';
 
-export enum RuleStep {
+export const enum RuleStep {
   defineRule = 'define-rule',
   aboutRule = 'about-rule',
   scheduleRule = 'schedule-rule',

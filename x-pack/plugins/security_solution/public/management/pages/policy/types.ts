@@ -109,7 +109,7 @@ export interface PolicyArtifactsState {
   removeList: AsyncResourceState<PolicyRemoveTrustedApps>;
 }
 
-export enum OS {
+export const enum OS {
   windows = 'windows',
   mac = 'mac',
   linux = 'linux',

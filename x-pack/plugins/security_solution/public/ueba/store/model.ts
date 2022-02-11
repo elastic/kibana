@@ -14,12 +14,12 @@ import {
   UserRulesSortField,
 } from '../../../common/search_strategy';
 
-export enum UebaType {
+export const enum UebaType {
   page = 'page',
   details = 'details',
 }
 
-export enum UebaTableType {
+export const enum UebaTableType {
   riskScore = 'riskScore',
   hostRules = 'hostRules',
   hostTactics = 'hostTactics',

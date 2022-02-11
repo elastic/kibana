@@ -11,7 +11,7 @@ export * from './host_tactics';
 export * from './risk_score';
 export * from './user_rules';
 
-export enum UebaQueries {
+export const enum UebaQueries {
   hostRules = 'hostRules',
   hostTactics = 'hostTactics',
   riskScore = 'riskScore',

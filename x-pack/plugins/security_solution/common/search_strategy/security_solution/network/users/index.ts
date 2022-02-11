@@ -10,7 +10,7 @@ import { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../
 import { FlowTarget } from '../common';
 import { RequestOptionsPaginated } from '../..';
 
-export enum NetworkUsersFields {
+export const enum NetworkUsersFields {
   name = 'name',
   count = 'count',
 }
