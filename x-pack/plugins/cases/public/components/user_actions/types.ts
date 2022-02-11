@@ -8,7 +8,7 @@
 import { EuiCommentProps } from '@elastic/eui';
 import { SnakeToCamelCase } from '../../../common/types';
 import { ActionTypes, UserActionWithResponse } from '../../../common/api';
-import { Case, CaseUserActions, Ecs, Comment } from '../../containers/types';
+import { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { AddCommentRefObject } from '../add_comment';
 import { UserActionMarkdownRefObject } from './markdown_form';
@@ -31,7 +31,7 @@ export interface UserActionTreeProps {
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   statusActionButton: JSX.Element | null;
   updateCase: (newCase: Case) => void;
-  useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
+  useFetchAlertData: UseFetchAlertData;
   userCanCrud: boolean;
 }
 
@@ -52,7 +52,7 @@ export interface UserActionBuilderArgs {
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
   loadingAlertData: boolean;
-  alertData: Record<string, Ecs>;
+  alertData: Record<string, unknown>;
   handleOutlineComment: (id: string) => void;
   handleManageMarkdownEditId: (id: string) => void;
   handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
