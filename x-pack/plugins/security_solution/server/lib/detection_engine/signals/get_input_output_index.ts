@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_INDEX_KEY,
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
-} from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -42,9 +38,7 @@ export const getInputIndex = async ({
     if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];
     } else {
-      return experimentalFeatures.uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN;
+      return DEFAULT_INDEX_PATTERN;
     }
   }
 };
