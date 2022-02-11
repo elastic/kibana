@@ -192,15 +192,15 @@ function getFieldNamesFromProperties(properties = {}) {
   });
 }
 
-function loadLegacyTemplates(templatesObject = {}) {
+export function loadLegacyTemplates(templatesObject = {}) {
   legacyTemplates = Object.keys(templatesObject);
 }
 
-function loadIndexTemplates(data) {
+export function loadIndexTemplates(data) {
   indexTemplates = (data.index_templates ?? []).map(({ name }) => name);
 }
 
-function loadComponentTemplates(data) {
+export function loadComponentTemplates(data) {
   componentTemplates = (data.component_templates ?? []).map(({ name }) => name);
 }
 
