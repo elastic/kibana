@@ -13,13 +13,11 @@ import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_n
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { createApmApiClient } from '../../common/apm_api_supertest';
 import { getServiceNodeIds } from './get_service_node_ids';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
-  const apmApiSupertest = createApmApiClient(supertest);
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -35,9 +33,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
-          const response: Response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
+          const response = await apmApiClient.readUser({
+            endpoint:
+              'GET /internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics',
+            params: {
               query: {
                 latencyAggregationType: 'avg',
                 start,
@@ -45,13 +44,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 numBuckets: 20,
                 transactionType: 'request',
                 serviceNodeIds: JSON.stringify(
-                  await getServiceNodeIds({ apmApiSupertest, start, end })
+                  await getServiceNodeIds({ apmApiClient, start, end })
                 ),
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
               },
-            })
-          );
+            },
+          });
 
           expect(response.status).to.be(200);
           expect(response.body).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
@@ -69,13 +68,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let serviceNodeIds: string[];
 
         beforeEach(async () => {
-          serviceNodeIds = await getServiceNodeIds({ apmApiSupertest, start, end });
+          serviceNodeIds = await getServiceNodeIds({
+            apmApiClient,
+            start,
+            end,
+          });
         });
 
         beforeEach(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
+          response = await apmApiClient.readUser({
+            endpoint:
+              'GET /internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics',
+            params: {
               query: {
                 latencyAggregationType: 'avg',
                 start,
@@ -86,8 +90,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
               },
-            })
-          );
+            },
+          });
         });
 
         it('returns a service node item', () => {
@@ -123,13 +127,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let serviceNodeIds: string[];
 
         beforeEach(async () => {
-          serviceNodeIds = await getServiceNodeIds({ apmApiSupertest, start, end });
+          serviceNodeIds = await getServiceNodeIds({
+            apmApiClient,
+            start,
+            end,
+          });
         });
 
         beforeEach(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics`,
+          response = await apmApiClient.readUser({
+            endpoint:
+              'GET /internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics',
+            params: {
               query: {
                 latencyAggregationType: 'avg',
                 numBuckets: 20,
@@ -142,8 +151,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
               },
-            })
-          );
+            },
+          });
         });
 
         it('returns a service node item for current and previous periods', () => {
