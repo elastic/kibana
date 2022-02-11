@@ -33,6 +33,7 @@ import type {
   LensPublicStart,
   RangeIndexPatternColumn,
   PieVisualizationState,
+  MedianIndexPatternColumn,
 } from '../../../plugins/lens/public';
 import type { StartDependencies } from './plugin';
 import type { ActionExecutionContext } from '../../../../src/plugins/ui_actions/public';
@@ -49,7 +50,7 @@ function getInitialType(dataView: DataView) {
   return dataView.isTimeBased() ? 'date' : 'number';
 }
 
-function getColumnFor(type: RequiredType, fieldName: string) {
+function getColumnFor(type: RequiredType, fieldName: string, isBucketed: boolean = true) {
   if (type === 'string') {
     return {
       label: `Top values of ${fieldName}`,
@@ -66,20 +67,30 @@ function getColumnFor(type: RequiredType, fieldName: string) {
     } as TermsIndexPatternColumn;
   }
   if (type === 'number') {
+    if (isBucketed) {
+      return {
+        label: fieldName,
+        dataType: 'number',
+        operationType: 'range',
+        sourceField: fieldName,
+        isBucketed: true,
+        scale: 'interval',
+        params: {
+          type: 'histogram',
+          maxBars: 'auto',
+          format: undefined,
+          parentFormat: undefined,
+        },
+      } as RangeIndexPatternColumn;
+    }
     return {
-      label: fieldName,
+      label: `Median of ${fieldName}`,
       dataType: 'number',
-      operationType: 'range',
+      operationType: 'median',
       sourceField: fieldName,
-      isBucketed: true,
-      scale: 'interval',
-      params: {
-        type: 'histogram',
-        maxBars: 'auto',
-        format: undefined,
-        parentFormat: undefined,
-      },
-    } as RangeIndexPatternColumn;
+      isBucketed: false,
+      scale: 'ratio',
+    } as MedianIndexPatternColumn;
   }
   return {
     dataType: 'date',
@@ -92,7 +103,11 @@ function getColumnFor(type: RequiredType, fieldName: string) {
   } as DateHistogramIndexPatternColumn;
 }
 
-function getDataLayer(type: RequiredType, field: string): PersistedIndexPatternLayer {
+function getDataLayer(
+  type: RequiredType,
+  field: string,
+  isBucketed: boolean = true
+): PersistedIndexPatternLayer {
   return {
     columnOrder: ['col1', 'col2'],
     columns: {
@@ -104,7 +119,7 @@ function getDataLayer(type: RequiredType, field: string): PersistedIndexPatternL
         scale: 'ratio',
         sourceField: DOCUMENT_FIELD_NAME,
       },
-      col1: getColumnFor(type, field),
+      col1: getColumnFor(type, field, isBucketed),
     },
   };
 }
@@ -118,7 +133,7 @@ function getBaseAttributes(
   state: Omit<TypedLensByValueInput['attributes']['state'], 'visualization'>;
 } {
   const finalType = type ?? getInitialType(defaultIndexPattern);
-  const finalDataLayer = getDataLayer(finalType, fields[finalType]);
+  const finalDataLayer = dataLayer ?? getDataLayer(finalType, fields[finalType]);
   return {
     title: 'Prefilled from example app',
     references: [
@@ -263,11 +278,11 @@ function getLensAttributesGauge(
   defaultIndexPattern: DataView,
   fields: FieldsMap
 ): TypedLensByValueInput['attributes'] {
-  const dataLayer = getDataLayer('number', fields.number);
+  const dataLayer = getDataLayer('number', fields.number, false);
   const gaugeDataLayer = {
-    columnOrder: ['col2'],
+    columnOrder: ['col1'],
     columns: {
-      col2: dataLayer.columns.col2,
+      col1: dataLayer.columns.col1,
     },
   };
 
@@ -435,10 +450,10 @@ export const App = (props: {
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         data-test-subj="lns-example-change-color"
-                        isLoading={isLoading}
                         onClick={() => {
-                          // eslint-disable-next-line no-bitwise
-                          const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+                          const newColor = `rgb(${[1, 2, 3].map(() =>
+                            Math.floor(Math.random() * 256)
+                          )})`;
                           saveSO(
                             JSON.stringify(
                               getLensAttributes(
@@ -548,6 +563,9 @@ export const App = (props: {
                       >
                         {enableDefaultAction ? 'Disable default action' : 'Enable default action'}
                       </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <p>State: {isLoading ? 'Loading...' : 'Rendered'}</p>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                   <EuiFlexGroup>
