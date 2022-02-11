@@ -202,7 +202,7 @@ describe('Service Overview', () => {
       cy.wait(aliasNames);
     });
 
-    it.skip('when selecting a different time range and clicking the update button', () => {
+    it('when selecting a different time range and clicking the update button', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
       cy.selectAbsoluteTimeRange(
@@ -213,6 +213,18 @@ describe('Service Overview', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
       cy.contains('Refresh').click();
+      cy.wait(aliasNames, { requestTimeout: 10000 });
+    });
+
+    it('when selecting a different comparison window', () => {
+      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+
+      // selects another comparison type
+      cy.get('[data-test-subj="comparisonSelect"]').select('week');
+      cy.get('[data-test-subj="comparisonSelect"]').should(
+        'have.value',
+        'week'
+      );
       cy.wait(aliasNames, { requestTimeout: 10000 });
     });
   });
