@@ -403,13 +403,6 @@ export class KibanaTelemetryAdapter {
     return frequencies;
   }
 
-  private static getMonitorSteps(uniqueMonitors: any[] = []) {
-    const stepCounts: number[] = uniqueMonitors.map((monitor) => {
-      return monitor.check_groups?.buckets?.[0].doc_count as number;
-    });
-    return stepCounts;
-  }
-
   private static collector: UptimeTelemetryCollector = {};
 
   private static getReport() {
