@@ -28,18 +28,15 @@ import { i18n } from '@kbn/i18n';
 import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
 import { Loading } from '../../../../../shared/loading';
 
-import { CrawlerLogic } from '../../crawler_logic';
-
-import { CrawlCustomSettingsFlyoutContent } from './crawl_custom_settings_flyout_content';
+import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
+import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 export const CrawlCustomSettingsFlyout: React.FC = () => {
   const { isDataLoading, isFormSubmitting, isFlyoutVisible, selectedDomainUrls } = useValues(
     CrawlCustomSettingsFlyoutLogic
   );
-  const { hideFlyout } = useActions(CrawlCustomSettingsFlyoutLogic);
-
-  const { startCrawl } = useActions(CrawlerLogic);
+  const { hideFlyout, startCustomCrawl } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   if (!isFlyoutVisible) {
     return null;
@@ -71,7 +68,15 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {isDataLoading ? <Loading /> : <CrawlCustomSettingsFlyoutContent />}
+        {isDataLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <CrawlCustomSettingsFlyoutDomainsPanel />
+            <EuiSpacer />
+            <CrawlCustomSettingsFlyoutSeedUrlsPanel />
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
@@ -81,9 +86,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              onClick={() => {
-                startCrawl({ domain_allowlist: selectedDomainUrls });
-              }}
+              onClick={startCustomCrawl}
               disabled={isDataLoading || selectedDomainUrls.length === 0}
               isLoading={isFormSubmitting}
             >

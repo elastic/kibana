@@ -141,10 +141,26 @@ describe('crawler routes', () => {
       mockRouter.shouldValidate(request);
     });
 
-    it('validates correctly with overrides', () => {
+    it('validates correctly with domain urls', () => {
       const request = {
         params: { name: 'some-engine' },
         body: { overrides: { domain_allowlist: [] } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with sitemap urls', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { sitemap_urls: [] } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly when we set sitemap discovery', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { sitemap_discovery_disabled: true } },
       };
       mockRouter.shouldValidate(request);
     });

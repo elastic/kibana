@@ -14,14 +14,21 @@ import { EngineLogic } from '../../../engine';
 import { CrawlerLogic } from '../../crawler_logic';
 import { DomainConfig, DomainConfigFromServer } from '../../types';
 import { domainConfigServerToClient } from '../../utils';
+import { extractDomainAndEntryPointFromUrl } from '../add_domain/utils';
 
 export interface CrawlCustomSettingsFlyoutLogicValues {
   domainUrls: string[];
   domainConfigs: DomainConfig[];
+  domainConfigMap: {
+    [key: string]: DomainConfig;
+  };
+  includeRobotsTxt: boolean;
   isDataLoading: boolean;
   isFormSubmitting: boolean;
   isFlyoutVisible: boolean;
   selectedDomainUrls: string[];
+  selectedSitemapUrls: string[];
+  sitemapUrls: string[];
 }
 
 export interface CrawlCustomSettingsFlyoutLogicActions {
@@ -29,8 +36,23 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
   hideFlyout(): void;
   onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
   onSelectDomainUrls(domainUrls: string[]): { domainUrls: string[] };
+  onSelectSitemapUrls(sitemapUrls: string[]): { sitemapUrls: string[] };
   showFlyout(): void;
+  startCustomCrawl(): void;
+  toggleIncludeRobotsTxt(): void;
 }
+
+const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): string[] => {
+  const domainUrlMap = domainUrls.reduce(
+    (acc, domainUrl) => ({ ...acc, [domainUrl]: true }),
+    {} as { [key: string]: boolean }
+  );
+
+  return seedUrls.filter((seedUrl) => {
+    const { domain } = extractDomainAndEntryPointFromUrl(seedUrl);
+    return !!domainUrlMap[domain];
+  });
+};
 
 export const CrawlCustomSettingsFlyoutLogic = kea<
   MakeLogicType<CrawlCustomSettingsFlyoutLogicValues, CrawlCustomSettingsFlyoutLogicActions>
@@ -41,6 +63,9 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     hideFlyout: true,
     onRecieveDomainConfigData: (domainConfigs) => ({ domainConfigs }),
     onSelectDomainUrls: (domainUrls) => ({ domainUrls }),
+    onSelectSitemapUrls: (sitemapUrls) => ({ sitemapUrls }),
+    startCustomCrawl: true,
+    toggleIncludeRobotsTxt: true,
     showFlyout: true,
   }),
   reducers: () => ({
@@ -48,6 +73,13 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       [],
       {
         onRecieveDomainConfigData: (_, { domainConfigs }) => domainConfigs,
+      },
+    ],
+    includeRobotsTxt: [
+      true,
+      {
+        showFlyout: () => true,
+        toggleIncludeRobotsTxt: (includeRobotsTxt) => !includeRobotsTxt,
       },
     ],
     isDataLoading: [
@@ -79,14 +111,38 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         onSelectDomainUrls: (_, { domainUrls }) => domainUrls,
       },
     ],
+    selectedSitemapUrls: [
+      [],
+      {
+        showFlyout: () => [],
+        onSelectSitemapUrls: (_, { sitemapUrls }) => sitemapUrls,
+        onSelectDomainUrls: (selectedSitemapUrls, { domainUrls }) =>
+          filterSeedUrlsByDomainUrls(selectedSitemapUrls, domainUrls),
+      },
+    ],
   }),
   selectors: () => ({
     domainUrls: [
       (selectors) => [selectors.domainConfigs],
       (domainConfigs: DomainConfig[]) => domainConfigs.map((domainConfig) => domainConfig.name),
     ],
+    domainConfigMap: [
+      (selectors) => [selectors.domainConfigs],
+      (domainConfigs: DomainConfig[]) =>
+        domainConfigs.reduce(
+          (acc, domainConfig) => ({ ...acc, [domainConfig.name]: domainConfig }),
+          {} as { [key: string]: DomainConfig }
+        ),
+    ],
+    sitemapUrls: [
+      (selectors) => [selectors.domainConfigMap, selectors.selectedDomainUrls],
+      (domainConfigMap: { [key: string]: DomainConfig }, selectedDomainUrls: string[]): string[] =>
+        selectedDomainUrls.flatMap(
+          (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].sitemapUrls
+        ),
+    ],
   }),
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, values }) => ({
     fetchDomainConfigData: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
@@ -104,6 +160,13 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     },
     showFlyout: () => {
       actions.fetchDomainConfigData();
+    },
+    startCustomCrawl: () => {
+      CrawlerLogic.actions.startCrawl({
+        domain_allowlist: values.selectedDomainUrls,
+        sitemap_urls: values.selectedSitemapUrls,
+        sitemap_discovery_disabled: !values.includeRobotsTxt,
+      });
     },
   }),
 });

@@ -26,12 +26,16 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
 
   it('has expected default values', () => {
     expect(CrawlCustomSettingsFlyoutLogic.values).toEqual({
+      domainConfigMap: {},
+      domainConfigs: [],
+      domainUrls: [],
+      includeRobotsTxt: true,
       isDataLoading: true,
       isFlyoutVisible: false,
       isFormSubmitting: false,
-      domainConfigs: [],
-      domainUrls: [],
       selectedDomainUrls: [],
+      selectedSitemapUrls: [],
+      sitemapUrls: [],
     });
   });
 
@@ -111,31 +115,70 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
 
         CrawlCustomSettingsFlyoutLogic.actions.onSelectDomainUrls([
           'https://www.elastic.co',
-          'https://www.swiftype.com',
+          'https://swiftype.com',
         ]);
 
         expect(CrawlCustomSettingsFlyoutLogic.values.selectedDomainUrls).toEqual([
           'https://www.elastic.co',
-          'https://www.swiftype.com',
+          'https://swiftype.com',
+        ]);
+      });
+
+      it('filters selected sitemap urls by selected domains', () => {
+        mount({
+          selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
+          selectedSitemapUrls: [
+            'https://www.elastic.co/sitemap1.xml',
+            'https://swiftype.com/sitemap2.xml',
+          ],
+        });
+
+        CrawlCustomSettingsFlyoutLogic.actions.onSelectDomainUrls(['https://swiftype.com']);
+
+        expect(CrawlCustomSettingsFlyoutLogic.values.selectedSitemapUrls).toEqual([
+          'https://swiftype.com/sitemap2.xml',
+        ]);
+      });
+    });
+
+    describe('onSelectSitemapUrls', () => {
+      it('saves the urls', () => {
+        mount({
+          selectedSitemapUrls: [],
+        });
+
+        CrawlCustomSettingsFlyoutLogic.actions.onSelectSitemapUrls([
+          'https://www.elastic.co/sitemap1.xml',
+          'https://swiftype.com/sitemap2.xml',
+        ]);
+
+        expect(CrawlCustomSettingsFlyoutLogic.values.selectedSitemapUrls).toEqual([
+          'https://www.elastic.co/sitemap1.xml',
+          'https://swiftype.com/sitemap2.xml',
         ]);
       });
     });
 
     describe('showFlyout', () => {
-      it('shows the modal', () => {
-        CrawlCustomSettingsFlyoutLogic.actions.showFlyout();
-
-        expect(CrawlCustomSettingsFlyoutLogic.values.isFlyoutVisible).toBe(true);
-      });
-
-      it('resets the selected options', () => {
+      it('shows the modal and resets the form', () => {
         mount({
-          selectedDomainUrls: ['https://www.elastic.co', 'https://www.swiftype.com'],
+          isFlyoutVisible: false,
+          includeRobotsTxt: false,
+          isDataLoading: false,
+          selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
+          selectedSitemapUrls: [
+            'https://www.elastic.co/sitemap1.xml',
+            'https://swiftype.com/sitemap2.xml',
+          ],
         });
 
         CrawlCustomSettingsFlyoutLogic.actions.showFlyout();
 
+        expect(CrawlCustomSettingsFlyoutLogic.values.isFlyoutVisible).toBe(true);
+        expect(CrawlCustomSettingsFlyoutLogic.values.includeRobotsTxt).toEqual(true);
+        expect(CrawlCustomSettingsFlyoutLogic.values.isDataLoading).toEqual(true);
         expect(CrawlCustomSettingsFlyoutLogic.values.selectedDomainUrls).toEqual([]);
+        expect(CrawlCustomSettingsFlyoutLogic.values.selectedSitemapUrls).toEqual([]);
       });
 
       it('fetches the latest data', () => {
@@ -144,6 +187,52 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
         CrawlCustomSettingsFlyoutLogic.actions.showFlyout();
 
         expect(CrawlCustomSettingsFlyoutLogic.actions.fetchDomainConfigData).toHaveBeenCalled();
+      });
+    });
+
+    describe('startCustomCrawl', () => {
+      it('starts a custom crawl with the user set values', async () => {
+        mount({
+          includeRobotsTxt: true,
+          selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
+          selectedSitemapUrls: [
+            'https://www.elastic.co/sitemap1.xml',
+            'https://swiftype.com/sitemap2.xml',
+          ],
+        });
+        jest.spyOn(CrawlerLogic.actions, 'startCrawl');
+
+        CrawlCustomSettingsFlyoutLogic.actions.startCustomCrawl();
+        await nextTick();
+
+        expect(CrawlerLogic.actions.startCrawl).toHaveBeenCalledWith({
+          domain_allowlist: ['https://www.elastic.co', 'https://swiftype.com'],
+          sitemap_urls: [
+            'https://www.elastic.co/sitemap1.xml',
+            'https://swiftype.com/sitemap2.xml',
+          ],
+          sitemap_discovery_disabled: false,
+        });
+      });
+    });
+
+    describe('toggleIncludeRobotsTxt', () => {
+      it('toggles the flag', () => {
+        mount({
+          includeRobotsTxt: false,
+        });
+
+        CrawlCustomSettingsFlyoutLogic.actions.toggleIncludeRobotsTxt();
+
+        expect(CrawlCustomSettingsFlyoutLogic.values.includeRobotsTxt).toEqual(true);
+
+        mount({
+          includeRobotsTxt: true,
+        });
+
+        CrawlCustomSettingsFlyoutLogic.actions.toggleIncludeRobotsTxt();
+
+        expect(CrawlCustomSettingsFlyoutLogic.values.includeRobotsTxt).toEqual(false);
       });
     });
 
@@ -175,22 +264,61 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
   });
 
   describe('selectors', () => {
+    beforeEach(() => {
+      mount({
+        domainConfigs: [
+          {
+            name: 'https://www.elastic.co',
+            sitemapUrls: [
+              'https://www.elastic.co/sitemap1.xml',
+              'https://www.elastic.co/sitemap2.xml',
+            ],
+            seedUrls: ['https://www.elastic.co/guide'],
+          },
+          {
+            name: 'https://swiftype.com',
+            sitemapUrls: ['https://swiftype.com/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
+            seedUrls: ['swiftype.com/documentation'],
+          },
+        ],
+        selectedDomainUrls: ['https://swiftype.com'],
+      });
+    });
+
     describe('domainUrls', () => {
       it('contains all the domain urls from the domain config', () => {
-        mount({
-          domainConfigs: [
-            {
-              name: 'https://www.elastic.co',
-            },
-            {
-              name: 'https://swiftype.com',
-            },
-          ],
-        });
-
         expect(CrawlCustomSettingsFlyoutLogic.values.domainUrls).toEqual([
           'https://www.elastic.co',
           'https://swiftype.com',
+        ]);
+      });
+    });
+
+    describe('domainConfigMap', () => {
+      it('contains all the domain urls from the domain config', () => {
+        expect(CrawlCustomSettingsFlyoutLogic.values.domainConfigMap).toEqual({
+          'https://www.elastic.co': {
+            name: 'https://www.elastic.co',
+            sitemapUrls: [
+              'https://www.elastic.co/sitemap1.xml',
+              'https://www.elastic.co/sitemap2.xml',
+            ],
+            seedUrls: ['https://www.elastic.co/guide'],
+          },
+          'https://swiftype.com': {
+            name: 'https://swiftype.com',
+            sitemapUrls: ['https://swiftype.com/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
+            seedUrls: ['swiftype.com/documentation'],
+          },
+        });
+      });
+    });
+
+    describe('sitemapUrls', () => {
+      it('contains all the sitemap urls from selected domains', () => {
+        expect(CrawlCustomSettingsFlyoutLogic.values.sitemapUrls).toEqual([
+          'https://swiftype.com/sitemap1.xml',
+          'https://swiftype.com/sitemap2.xml',
         ]);
       });
     });

@@ -17,7 +17,8 @@ import { Loading } from '../../../../../shared/loading';
 import { rerender } from '../../../../../test_helpers';
 
 import { CrawlCustomSettingsFlyout } from './crawl_custom_settings_flyout';
-import { CrawlCustomSettingsFlyoutContent } from './crawl_custom_settings_flyout_content';
+import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
+import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic
@@ -25,16 +26,13 @@ const MOCK_VALUES = {
   isFormSubmitting: false,
   isFlyoutVisible: true,
   selectedDomainUrls: ['https://www.elastic.co'],
-  // CrawlerLogic
-  domains: [{ url: 'https://www.elastic.co' }, { url: 'https://www.swiftype.com' }],
 };
 
 const MOCK_ACTIONS = {
   // CrawlCustomSettingsFlyoutLogic
   hideFlyout: jest.fn(),
   onSelectDomainUrls: jest.fn(),
-  // CrawlerLogic
-  startCrawl: jest.fn(),
+  startCustomCrawl: jest.fn(),
 };
 
 describe('CrawlCustomSettingsFlyout', () => {
@@ -72,7 +70,8 @@ describe('CrawlCustomSettingsFlyout', () => {
 
   it('lets the user customize their crawl', () => {
     expect(wrapper.find(Loading)).toHaveLength(0);
-    expect(wrapper.find(CrawlCustomSettingsFlyoutContent)).toHaveLength(1);
+    expect(wrapper.find(CrawlCustomSettingsFlyoutDomainsPanel)).toHaveLength(1);
+    expect(wrapper.find(CrawlCustomSettingsFlyoutSeedUrlsPanel)).toHaveLength(1);
   });
 
   it('shows a loading state', () => {
@@ -84,7 +83,8 @@ describe('CrawlCustomSettingsFlyout', () => {
     rerender(wrapper);
 
     expect(wrapper.find(Loading)).toHaveLength(1);
-    expect(wrapper.find(CrawlCustomSettingsFlyoutContent)).toHaveLength(0);
+    expect(wrapper.find(CrawlCustomSettingsFlyoutDomainsPanel)).toHaveLength(0);
+    expect(wrapper.find(CrawlCustomSettingsFlyoutSeedUrlsPanel)).toHaveLength(0);
   });
 
   describe('submit button', () => {
@@ -135,9 +135,7 @@ describe('CrawlCustomSettingsFlyout', () => {
     it('starts a crawl and hides the modal', () => {
       wrapper.find(EuiFlyoutFooter).find(EuiButton).simulate('click');
 
-      expect(MOCK_ACTIONS.startCrawl).toHaveBeenCalledWith({
-        domain_allowlist: MOCK_VALUES.selectedDomainUrls,
-      });
+      expect(MOCK_ACTIONS.startCustomCrawl).toHaveBeenCalled();
     });
   });
 });
