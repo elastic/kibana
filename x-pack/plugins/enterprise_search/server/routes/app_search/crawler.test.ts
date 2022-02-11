@@ -144,7 +144,15 @@ describe('crawler routes', () => {
     it('validates correctly with domain urls', () => {
       const request = {
         params: { name: 'some-engine' },
-        body: { overrides: { domain_allowlist: [] } },
+        body: { overrides: { domain_allowlist: ['https://www.elastic.co'] } },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with seed urls', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        body: { overrides: { seed_urls: ['https://www.elastic.co/guide'] } },
       };
       mockRouter.shouldValidate(request);
     });
@@ -152,7 +160,7 @@ describe('crawler routes', () => {
     it('validates correctly with sitemap urls', () => {
       const request = {
         params: { name: 'some-engine' },
-        body: { overrides: { sitemap_urls: [] } },
+        body: { overrides: { sitemap_urls: ['https://www.elastic.co/sitemap1.xml'] } },
       };
       mockRouter.shouldValidate(request);
     });

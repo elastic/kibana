@@ -22,11 +22,13 @@ export interface CrawlCustomSettingsFlyoutLogicValues {
   domainConfigMap: {
     [key: string]: DomainConfig;
   };
+  entryPointUrls: string[];
   includeRobotsTxt: boolean;
   isDataLoading: boolean;
   isFormSubmitting: boolean;
   isFlyoutVisible: boolean;
   selectedDomainUrls: string[];
+  selectedEntryPointUrls: string[];
   selectedSitemapUrls: string[];
   sitemapUrls: string[];
 }
@@ -36,6 +38,7 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
   hideFlyout(): void;
   onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
   onSelectDomainUrls(domainUrls: string[]): { domainUrls: string[] };
+  onSelectEntryPointUrls(entryPointUrls: string[]): { entryPointUrls: string[] };
   onSelectSitemapUrls(sitemapUrls: string[]): { sitemapUrls: string[] };
   showFlyout(): void;
   startCustomCrawl(): void;
@@ -63,6 +66,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     hideFlyout: true,
     onRecieveDomainConfigData: (domainConfigs) => ({ domainConfigs }),
     onSelectDomainUrls: (domainUrls) => ({ domainUrls }),
+    onSelectEntryPointUrls: (entryPointUrls) => ({ entryPointUrls }),
     onSelectSitemapUrls: (sitemapUrls) => ({ sitemapUrls }),
     startCustomCrawl: true,
     toggleIncludeRobotsTxt: true,
@@ -111,6 +115,13 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         onSelectDomainUrls: (_, { domainUrls }) => domainUrls,
       },
     ],
+    selectedEntryPointUrls: [
+      [],
+      {
+        showFlyout: () => [],
+        onSelectEntryPointUrls: (_, { entryPointUrls }) => entryPointUrls,
+      },
+    ],
     selectedSitemapUrls: [
       [],
       {
@@ -132,6 +143,13 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         domainConfigs.reduce(
           (acc, domainConfig) => ({ ...acc, [domainConfig.name]: domainConfig }),
           {} as { [key: string]: DomainConfig }
+        ),
+    ],
+    entryPointUrls: [
+      (selectors) => [selectors.domainConfigMap, selectors.selectedDomainUrls],
+      (domainConfigMap: { [key: string]: DomainConfig }, selectedDomainUrls: string[]): string[] =>
+        selectedDomainUrls.flatMap(
+          (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].seedUrls
         ),
     ],
     sitemapUrls: [
@@ -164,6 +182,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     startCustomCrawl: () => {
       CrawlerLogic.actions.startCrawl({
         domain_allowlist: values.selectedDomainUrls,
+        seed_urls: values.selectedEntryPointUrls,
         sitemap_urls: values.selectedSitemapUrls,
         sitemap_discovery_disabled: !values.includeRobotsTxt,
       });

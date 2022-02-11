@@ -31,12 +31,18 @@ import { SimplifiedSelectable } from '../crawl_select_domains_modal/simplified_s
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
 export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
-  const { includeRobotsTxt, selectedSitemapUrls, sitemapUrls } = useValues(
+  const {
+    entryPointUrls,
+    includeRobotsTxt,
+    selectedEntryPointUrls,
+    selectedSitemapUrls,
+    sitemapUrls,
+  } = useValues(CrawlCustomSettingsFlyoutLogic);
+  const { onSelectEntryPointUrls, onSelectSitemapUrls, toggleIncludeRobotsTxt } = useActions(
     CrawlCustomSettingsFlyoutLogic
   );
-  const { onSelectSitemapUrls, toggleIncludeRobotsTxt } = useActions(
-    CrawlCustomSettingsFlyoutLogic
-  );
+
+  const totalSeedUrls = selectedEntryPointUrls.length + selectedSitemapUrls.length;
 
   return (
     <EuiPanel hasBorder>
@@ -64,11 +70,8 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
         }
         extraAction={
           <EuiFlexGroup alignItems="center" gutterSize="m">
-            <EuiNotificationBadge
-              size="m"
-              color={selectedSitemapUrls.length > 0 ? 'accent' : 'subdued'}
-            >
-              {selectedSitemapUrls.length}
+            <EuiNotificationBadge size="m" color={totalSeedUrls > 0 ? 'accent' : 'subdued'}>
+              {totalSeedUrls}
             </EuiNotificationBadge>
             <EuiFlexItem grow={false}>
               {i18n.translate(
@@ -117,6 +120,22 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                     onChange={onSelectSitemapUrls}
                   />
                 </>
+              ),
+            },
+            {
+              id: useGeneratedHtmlId({ prefix: 'entryPointsTab' }),
+              name: i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.entryPointsTabLabel',
+                {
+                  defaultMessage: 'Entry points',
+                }
+              ),
+              content: (
+                <SimplifiedSelectable
+                  options={entryPointUrls}
+                  selectedOptions={selectedEntryPointUrls}
+                  onChange={onSelectEntryPointUrls}
+                />
               ),
             },
           ]}

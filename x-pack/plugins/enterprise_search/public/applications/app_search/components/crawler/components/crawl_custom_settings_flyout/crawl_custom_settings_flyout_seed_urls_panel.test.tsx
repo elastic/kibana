@@ -20,21 +20,21 @@ import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_
 
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic
+  entryPointUrls: ['https://www.elastic.co/guide', 'https://swiftype.com/documentation'],
   sitemapUrls: [
     'https://www.elastic.co/sitemap1.xml',
     'https://www.elastic.co/sitemap2.xml',
-    'https://www.swiftype.com/sitemap1.xml',
-    'https://www.swiftype.com/sitemap2.xml',
+    'https://swiftype.com/sitemap1.xml',
+    'https://swiftype.com/sitemap2.xml',
   ],
-  selectedSitemapUrls: [
-    'https://www.elastic.co/sitemap1.xml',
-    'https://www.swiftype.com/sitemap2.xml',
-  ],
+  selectedEntryPointUrls: ['https://swiftype.com/documentation'],
+  selectedSitemapUrls: ['https://www.elastic.co/sitemap1.xml', 'https://swiftype.com/sitemap2.xml'],
   includeRobotsTxt: true,
 };
 
 const MOCK_ACTIONS = {
   // CrawlCustomSettingsFlyoutLogic
+  onSelectEntryPointUrls: jest.fn(),
   onSelectSitemapUrls: jest.fn(),
   toggleIncludeRobotsTxt: jest.fn(),
 };
@@ -82,14 +82,28 @@ describe('CrawlCustom', () => {
     });
   });
 
+  describe('entry points tab', () => {
+    it('allows the user to toggle whether to include robots.txt sitemaps', () => {
+      const tabs = wrapper.find(EuiTabbedContent).prop('tabs');
+      const entryPointsTab = shallow(<div>{tabs[1].content}</div>);
+
+      expect(entryPointsTab.find(SimplifiedSelectable).props()).toEqual({
+        options: MOCK_VALUES.entryPointUrls,
+        selectedOptions: MOCK_VALUES.selectedEntryPointUrls,
+        onChange: MOCK_ACTIONS.onSelectEntryPointUrls,
+      });
+    });
+  });
+
   it('indicates how many seed urls are selected', () => {
     let badge = getAccordionBadge(wrapper);
 
-    expect(badge.render().text()).toContain('2');
+    expect(badge.render().text()).toContain('3');
     expect(badge.prop('color')).toEqual('accent');
 
     setMockValues({
       ...MOCK_VALUES,
+      selectedEntryPointUrls: [],
       selectedSitemapUrls: [],
     });
 
