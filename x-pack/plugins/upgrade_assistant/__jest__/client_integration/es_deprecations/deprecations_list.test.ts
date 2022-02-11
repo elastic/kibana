@@ -44,6 +44,7 @@ describe('ES deprecations table', () => {
         aliases: [],
       },
     });
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
 
     await act(async () => {
       testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
@@ -103,6 +104,25 @@ describe('ES deprecations table', () => {
     expect(find('criticalDeprecationsCount').text()).toContain(criticalDeprecations.length);
 
     expect(find('warningDeprecationsCount').text()).toContain(warningDeprecations.length);
+  });
+
+  describe('remote clusters callout', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(['test_remote_cluster']);
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      });
+
+      testBed.component.update();
+    });
+
+    it('shows a warning message if a user has remote clusters configured', () => {
+      const { exists } = testBed;
+
+      // Verify warning exists
+      expect(exists('remoteClustersWarningCallout')).toBe(true);
+    });
   });
 
   describe('search bar', () => {
