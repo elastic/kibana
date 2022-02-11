@@ -1,4 +1,4 @@
-import path from 'path/posix';
+import path from 'path';
 import findUp from 'find-up';
 import { ConfigFileOptions } from '../ConfigOptions';
 import { readConfigFile } from '../config/readConfigFile';

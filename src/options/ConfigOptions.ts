@@ -69,6 +69,7 @@ export type ConfigFileOptions = Options &
     // yargs options
     help: boolean;
     version: boolean;
+    v: boolean;
 
     // only allowed in project config. Not allowed in CI and denoted in plural (historicalBranchLabelMappings) in options from Github
     branchLabelMapping: Record<string, string>;

@@ -14,7 +14,7 @@
     "branches",
     "branching"
   ],
-  "version": "7.0.0",
+  "version": "7.0.1",
   "main": "./dist/entrypoint.module.js",
   "types": "dist/entrypoint.module.d.ts",
   "bin": {
@@ -68,6 +68,7 @@
     "del": "^6.0.0",
     "dotenv": "^16.0.0",
     "find-up": "^5.0.0",
+    "graphql": "^16.3.0",
     "graphql-tag": "^2.12.6",
     "inquirer": "^8.2.0",
     "lodash": "^4.17.21",
@@ -98,7 +99,6 @@
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jest": "^26.1.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "graphql": "^16.3.0",
     "graphql-config": "^4.1.0",
     "husky": "^7.0.4",
     "jest": "^27.5.1",

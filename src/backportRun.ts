@@ -38,7 +38,7 @@ export async function backportRun(
   // don't show spinner for yargs commands that exit the process without stopping the spinner first
   const spinner = ora();
 
-  if (!argv.help && !argv.version) {
+  if (!argv.help && !argv.version && !argv.v) {
     spinner.start('Initializing...');
   }
 
