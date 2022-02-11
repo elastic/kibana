@@ -6,11 +6,65 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from 'kibana/server';
-import { IEsSearchRequest } from '../../../data/server';
-import { IEsSearchResponse } from '../../../data/common';
+import type { IRouter, KibanaResponseFactory } from 'kibana/server';
+import {
+  AggregationsHistogramBucket,
+  AggregationsMultiBucketAggregateBase,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRemoteRoutePaths } from '../../common';
+import { newProjectTimeQuery, autoHistogramSumCountOnGroupByField } from './mappings';
+
+export async function topNElasticSearchQuery(
+  context: DataRequestHandlerContext,
+  index: string,
+  projectID: string,
+  timeFrom: string,
+  timeTo: string,
+  searchField: string,
+  response: KibanaResponseFactory
+) {
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const resTopNStackTraces = await esClient.search({
+    index,
+    body: {
+      query: newProjectTimeQuery(projectID, timeFrom, timeTo),
+      aggs: {
+        histogram: autoHistogramSumCountOnGroupByField(searchField),
+      },
+    },
+  });
+
+  if (searchField === 'StackTraceID') {
+    const autoDateHistogram = resTopNStackTraces.body.aggregations
+      ?.histogram as AggregationsMultiBucketAggregateBase<AggregationsHistogramBucket>;
+
+    const docIDs: string[] = [];
+    autoDateHistogram.buckets?.forEach((timeInterval: any) => {
+      timeInterval.group_by.buckets.forEach((stackTraceItem: any) => {
+        docIDs.push(stackTraceItem.key);
+      });
+    });
+
+    const resTraceMetadata = await esClient.mget<any>({
+      index: 'profiling-stacktraces',
+      body: { ids: docIDs },
+    });
+
+    return response.ok({
+      body: {
+        topN: resTopNStackTraces.body.aggregations,
+        traceMetadata: resTraceMetadata.body.docs,
+      },
+    });
+  } else {
+    return response.ok({
+      body: {
+        topN: resTopNStackTraces.body.aggregations,
+      },
+    });
+  }
+}
 
 export function queryTopNCommon(
   router: IRouter<DataRequestHandlerContext>,
@@ -33,97 +87,15 @@ export function queryTopNCommon(
       const { index, projectID, timeFrom, timeTo } = request.query;
 
       try {
-        const resTopNStackTraces = await context
-          .search!.search(
-            {
-              params: {
-                index,
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            ProjectID: {
-                              value: projectID,
-                              boost: 1.0,
-                            },
-                          },
-                        },
-                        {
-                          range: {
-                            '@timestamp': {
-                              gte: timeFrom,
-                              lt: timeTo,
-                              format: 'epoch_second',
-                              boost: 1.0,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  aggs: {
-                    histogram: {
-                      auto_date_histogram: {
-                        field: '@timestamp',
-                        buckets: 100,
-                      },
-                      aggs: {
-                        group_by: {
-                          terms: {
-                            field: searchField,
-                            order: {
-                              Count: 'desc',
-                            },
-                            size: 100,
-                          },
-                          aggs: {
-                            Count: {
-                              sum: {
-                                field: 'Count',
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            } as IEsSearchRequest,
-            {}
-          )
-          .toPromise();
-
-        if (searchField === 'StackTraceID') {
-          const docIDs: string[] = [];
-          resTopNStackTraces.rawResponse.aggregations.histogram.buckets.forEach((timeInterval) => {
-            timeInterval.group_by.buckets.forEach((stackTraceItem: any) => {
-              docIDs.push(stackTraceItem.key);
-            });
-          });
-
-          const esClient = context.core.elasticsearch.client.asCurrentUser;
-
-          const resTraceMetadata = await esClient.mget<any>({
-            index: 'profiling-stacktraces',
-            body: { ids: docIDs },
-          });
-
-          return response.ok({
-            body: {
-              topN: (resTopNStackTraces as IEsSearchResponse).rawResponse.aggregations,
-              traceMetadata: resTraceMetadata.body.docs,
-            },
-          });
-        } else {
-          return response.ok({
-            body: {
-              topN: (resTopNStackTraces as IEsSearchResponse).rawResponse.aggregations,
-            },
-          });
-        }
+        return await topNElasticSearchQuery(
+          context,
+          index!,
+          projectID!,
+          timeFrom!,
+          timeTo!,
+          searchField,
+          response
+        );
       } catch (e) {
         return response.customError({
           statusCode: e.statusCode ?? 500,

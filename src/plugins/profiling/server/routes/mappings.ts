@@ -6,6 +6,93 @@
  * Side Public License, v 1.
  */
 
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+
+interface ProjectTimeQuery {
+  bool: {
+    must: Array<
+      | {
+          term: {
+            ProjectID: {
+              value: string;
+              boost: number;
+            };
+          };
+        }
+      | {
+          range: {
+            '@timestamp': {
+              gte: string;
+              lt: string;
+              format: string;
+              boost: number;
+            };
+          };
+        }
+    >;
+  };
+}
+
+export function newProjectTimeQuery(
+  projectID: string,
+  timeFrom: string,
+  timeTo: string
+): ProjectTimeQuery {
+  return {
+    bool: {
+      must: [
+        {
+          term: {
+            ProjectID: {
+              value: projectID,
+              boost: 1.0,
+            },
+          },
+        },
+        {
+          range: {
+            '@timestamp': {
+              gte: timeFrom,
+              lt: timeTo,
+              format: 'epoch_second',
+              boost: 1.0,
+            },
+          },
+        },
+      ],
+    },
+  } as ProjectTimeQuery;
+}
+
+export function autoHistogramSumCountOnGroupByField(
+  searchField: string
+): AggregationsAggregationContainer {
+  return {
+    auto_date_histogram: {
+      field: '@timestamp',
+      buckets: 100,
+    },
+    aggs: {
+      group_by: {
+        terms: {
+          field: searchField,
+          order: {
+            Count: 'desc',
+          },
+          size: 100,
+        },
+        aggs: {
+          Count: {
+            sum: {
+              field: 'Count',
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
 function getExeFileName(obj) {
   if (obj.ExeFileName === undefined) {
     return '';
