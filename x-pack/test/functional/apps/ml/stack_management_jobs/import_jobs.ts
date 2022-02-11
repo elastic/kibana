@@ -32,7 +32,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('import jobs', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/124747
+  describe.skip('import jobs', function () {
     this.tags(['mlqa']);
     before(async () => {
       await ml.api.cleanMlIndices();
