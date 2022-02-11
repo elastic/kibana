@@ -45,35 +45,7 @@ describe('AutoScale', () => {
     it('renders', () => {
       const Component = () => <h1>Hoi!</h1>;
       const WrappedComponent = withAutoScale(Component);
-      expect(mount(<WrappedComponent />)).toMatchInlineSnapshot(`
-        <Component>
-          <div
-            css={
-              Object {
-                "map": undefined,
-                "name": "1l2vzaf",
-                "next": undefined,
-                "styles": "display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5;",
-                "toString": [Function],
-              }
-            }
-          >
-            <div
-              style={
-                Object {
-                  "transform": "scale(0)",
-                }
-              }
-            >
-              <Component>
-                <h1>
-                  Hoi!
-                </h1>
-              </Component>
-            </div>
-          </div>
-        </Component>
-      `);
+      expect(mount(<WrappedComponent />)).toMatchSnapshot();
     });
   });
 });
