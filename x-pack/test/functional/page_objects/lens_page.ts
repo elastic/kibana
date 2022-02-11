@@ -574,11 +574,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const lastIndex = (
         await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
       ).length;
-      await testSubjects.click('indexPattern-terms-add-field');
-      // count the number of defined terms
-      const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
-      await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, field);
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-terms-add-field');
+        // count the number of defined terms
+        const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`, 1000);
+        await comboBox.openOptionsList(target);
+        await comboBox.setElement(target, field);
+      });
     },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
