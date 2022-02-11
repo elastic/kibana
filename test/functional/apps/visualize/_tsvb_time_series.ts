@@ -483,34 +483,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should display correct annotations data for machine.os.raw and memory fields', async () => {
             const expectedAnnotationsData = [
               {
-                dataValue: 1442721600000,
-                details: 'OS: win 7, memory: 0',
-                header: '2015-09-20 04:00',
-              },
-              {
-                dataValue: 1442743200000,
+                dataValue: 1442707200000,
                 details: 'OS: win xp, memory: 0',
-                header: '2015-09-20 10:00',
+                header: '2015-09-20 00:00',
               },
               {
-                dataValue: 1442772000000,
+                dataValue: 1442750400000,
                 details: 'OS: ios, memory: 246280',
-                header: '2015-09-20 18:00',
+                header: '2015-09-20 12:00',
               },
               {
-                dataValue: 1442815200000,
-                details: 'OS: ios, memory: 0',
-                header: '2015-09-21 06:00',
-              },
-              {
-                dataValue: 1442826000000,
+                dataValue: 1442793600000,
                 details: 'OS: win 8, memory: 0',
-                header: '2015-09-21 09:00',
+                header: '2015-09-21 00:00',
               },
               {
-                dataValue: 1442851200000,
+                dataValue: 1442836800000,
                 details: 'OS: win 7, memory: 0',
-                header: '2015-09-21 16:00',
+                header: '2015-09-21 12:00',
+              },
+              {
+                dataValue: 1442880000000,
+                details: 'OS: win 7, memory: 0',
+                header: '2015-09-22 00:00',
               },
             ];
             await visualBuilder.setAnnotationFilter('bytes = 0');
