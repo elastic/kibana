@@ -51,6 +51,7 @@ export const AlignOptions: React.FC<TitlePositionProps> = ({ state, setState }) 
         setState({ ...state, textAlign: id as MetricState['textAlign'] });
       }}
       isIconOnly
+      buttonSize="compressed"
     />
   );
 };

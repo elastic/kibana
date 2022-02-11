@@ -30,11 +30,11 @@ export const TextFormattingOptions: React.FC<TitlePositionProps> = ({ state, set
         </>
       }
     >
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <SizeOptions state={state} setState={setState} />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <AlignOptions state={state} setState={setState} />
         </EuiFlexItem>
       </EuiFlexGroup>

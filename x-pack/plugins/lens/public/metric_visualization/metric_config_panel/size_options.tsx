@@ -92,6 +92,7 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
       }}
       itemLayoutAlign="top"
       hasDividers
+      fullWidth
     />
   );
 };

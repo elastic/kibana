@@ -24,6 +24,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
   return (
     <EuiFormRow
       display="columnCompressed"
+      fullWidth
       label={
         <>
           {i18n.translate('xpack.lens.metricChart.titlePositionLabel', {
@@ -41,6 +42,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
         onChange={(value) => {
           setState({ ...state, titlePosition: value as MetricState['titlePosition'] });
         }}
+        buttonSize="compressed"
       />
     </EuiFormRow>
   );
