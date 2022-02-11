@@ -16,6 +16,7 @@ async function getDependencies(cwd: string, entries: string[]) {
   // Return the dependencies retrieve from the
   // provided code entries (sanitized) and
   // parseStrategy (dependencies one)
+  console.log('parse entries');
   return Object.keys(await parseEntries(cwd, entries, dependenciesParseStrategy, {}));
 }
 

@@ -17,7 +17,9 @@ export const CreatePackageJson: Task = {
 
   async run(config, log, build) {
     const pkg = config.getKibanaPkg();
+    console.log('transform deps');
     const transformedDeps = transformDependencies(pkg.dependencies as { [key: string]: string });
+    console.log('find used deps');
     const foundPkgDeps = await findUsedDependencies(
       transformedDeps,
       normalizePosixPath(build.resolvePath('.'))
@@ -44,6 +46,7 @@ export const CreatePackageJson: Task = {
       dependencies: foundPkgDeps,
     };
 
+    console.log('write new package');
     await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));
   },
 };

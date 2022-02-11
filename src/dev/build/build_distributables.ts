@@ -55,6 +55,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.ExtractNodeBuilds);
   }
 
+  // await run(Tasks.CreatePackageJson);
+
+  // return;
+
   /**
    * build example plugins
    */
@@ -71,11 +75,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.ReplaceFavicon);
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
-    await run(Tasks.BuildBazelPackages);
-    await run(Tasks.BuildPackages);
-    await run(Tasks.BuildKibanaPlatformPlugins);
-    await run(Tasks.TranspileBabel);
+    // await run(Tasks.BuildBazelPackages);
+    // await run(Tasks.BuildPackages);
+    // await run(Tasks.BuildKibanaPlatformPlugins);
+    // await run(Tasks.TranspileBabel);
     await run(Tasks.CreatePackageJson);
+    return;
     await run(Tasks.InstallDependencies);
     await run(Tasks.GeneratePackagesOptimizedAssets);
     await run(Tasks.CleanPackages);

@@ -68,9 +68,11 @@ export async function parseEntries(cwd, entries, strategy, results, wasParsed = 
   const sanitizedCwd = cwd || process.cwd();
 
   // Test each entry against canRequire function
+  console.log('canRequires');
   const entriesQueue = entries.map((entry) => canRequire(sanitizedCwd, entry));
 
   while (entriesQueue.length) {
+    console.log(`queue length ${entriesQueue.length} - ${entriesQueue[0]}`);
     // Get the first element in the queue as
     // select it as our current entry to parse
     const mainEntry = entriesQueue.shift();
