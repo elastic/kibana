@@ -34,28 +34,34 @@ function wrapEsClient(
   esClient: ElasticsearchClient,
   abortController: AbortController
 ): ElasticsearchClient {
-  return {
-    ...esClient,
-    search: async <
-      TDocument = unknown,
-      TAggregations = Record<AggregateName, AggregationsAggregate>,
-      TContext = unknown
-    >(
-      query?: SearchRequest | SearchRequestWithBody,
-      options?: TransportRequestOptions
-    ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, TContext>> => {
-      try {
-        const searchOptions = options ?? {};
-        return await esClient.search<TDocument, TAggregations, TContext>(query, {
-          ...searchOptions,
-          signal: abortController.signal,
-        });
-      } catch (e) {
-        if (abortController.signal.aborted) {
-          throw new Error('Search has been aborted due to cancelled execution');
-        }
-        throw e;
+  const wrappedClient: Record<string, unknown> = {};
+  for (const attr in esClient) {
+    if (!['search'].includes(attr)) {
+      wrappedClient[attr] = esClient[attr as keyof ElasticsearchClient];
+    }
+  }
+
+  wrappedClient.search = async <
+    TDocument = unknown,
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
+    TContext = unknown
+  >(
+    query?: SearchRequest | SearchRequestWithBody,
+    options?: TransportRequestOptions
+  ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, TContext>> => {
+    try {
+      const searchOptions = options ?? {};
+      return await esClient.search<TDocument, TAggregations, TContext>(query, {
+        ...searchOptions,
+        signal: abortController.signal,
+      });
+    } catch (e) {
+      if (abortController.signal.aborted) {
+        throw new Error('Search has been aborted due to cancelled execution');
       }
-    },
+      throw e;
+    }
   };
+
+  return wrappedClient as ElasticsearchClient;
 }
