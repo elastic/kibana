@@ -174,40 +174,50 @@ export class PdfMaker {
     });
   }
 
+  private async cleanupWorker(): Promise<void> {
+    if (this.worker) {
+      await this.worker.terminate();
+      this.worker = undefined;
+    }
+  }
+
   public async generate(): Promise<Uint8Array> {
     if (this.worker) throw new Error('PDF generation already in progress!');
 
-    return await new Promise<Uint8Array>((resolve, reject) => {
-      const { port1: myPort, port2: theirPort } = new MessageChannel();
-      this.worker = this.createWorker();
-      this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
-        if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
-          reject(new PdfWorkerOutOfMemoryError(workerError.message));
-        } else {
-          reject(workerError);
-        }
-      });
-      const generatePdfRequest: GeneratePdfRequest = {
-        port: theirPort,
-        data: this.getWorkerData(),
-      };
-      this.worker.postMessage(generatePdfRequest, [theirPort]);
+    try {
+      return await new Promise<Uint8Array>((resolve, reject) => {
+        const { port1: myPort, port2: theirPort } = new MessageChannel();
+        this.worker = this.createWorker();
+        this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
+          if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
+            reject(new PdfWorkerOutOfMemoryError(workerError.message));
+          } else {
+            reject(workerError);
+          }
+        });
 
-      // We expect one message from the work container the PDF buffer.
-      myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
-        if (error) {
-          reject(new Error(`PDF worker returned the following error: ${error}`));
-          return;
-        } else if (!data) {
-          reject(new Error(`Worker did not generate a PDF!`));
-          return;
-        }
-        resolve(data);
+        // Send the initial request
+        const generatePdfRequest: GeneratePdfRequest = {
+          port: theirPort,
+          data: this.getWorkerData(),
+        };
+        this.worker.postMessage(generatePdfRequest, [theirPort]);
+
+        // We expect one message from the work container the PDF buffer.
+        myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
+          if (error) {
+            reject(new Error(`PDF worker returned the following error: ${error}`));
+            return;
+          }
+          if (!data) {
+            reject(new Error(`Worker did not generate a PDF!`));
+            return;
+          }
+          resolve(data);
+        });
       });
-    }).finally(() => {
-      this.worker?.terminate().then(() => {
-        this.worker = undefined;
-      });
-    });
+    } finally {
+      await this.cleanupWorker();
+    }
   }
 }

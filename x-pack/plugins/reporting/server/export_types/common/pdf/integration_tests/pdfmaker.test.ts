@@ -51,13 +51,13 @@ describe('PdfMaker', () => {
     });
 
     it('restarts the PDF worker if it crashes', async () => {
-      const buggyWorker = new (class BuggyPdfMaker extends PdfMaker {
+      const buggyMaker = new (class BuggyPdfMaker extends PdfMaker {
         protected workerModulePath = path.resolve(__dirname, './buggy_worker.js');
       })(layout, undefined);
 
-      await expect(buggyWorker.generate()).rejects.toEqual(new Error('This is a bug'));
-      await expect(buggyWorker.generate()).rejects.toEqual(new Error('This is a bug'));
-      await expect(buggyWorker.generate()).rejects.toEqual(new Error('This is a bug'));
+      await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
+      await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
+      await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
     });
   });
 });
