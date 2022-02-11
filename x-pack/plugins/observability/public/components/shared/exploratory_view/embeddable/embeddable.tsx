@@ -21,23 +21,29 @@ import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/common';
 import { observabilityFeatureId } from '../../../../../common';
+import { SingleMetric } from './single_metric';
 
 export interface ExploratoryEmbeddableProps {
-  reportType: ReportViewType;
-  attributes: AllSeries;
+  appId?: 'security' | 'observability';
   appendTitle?: JSX.Element;
+  attributes?: AllSeries;
   title: string | JSX.Element;
   showCalculationMethod?: boolean;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
-  legendIsVisible?: boolean;
-  dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
-  owner?: string;
-  reportConfigMap?: ReportConfigMap;
-  withActions?: boolean | ActionTypes[];
-  appId?: 'security' | 'observability';
+  customHeight?: string | number;
   customLensAttrs?: any;
   customTimeRange?: { from: string; to: string };
-  onBrushEnd?: () => void;
+  dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
+  isSingleMetric?: boolean;
+  legendIsVisible?: boolean;
+  metricIcon?: string;
+  metricIconColor?: string;
+  metricPostfix?: string;
+  onBrushEnd?: (param: { range: number[] }) => void;
+  owner: string;
+  reportConfigMap?: ReportConfigMap;
+  reportType: ReportViewType;
+  withActions?: boolean | ActionTypes[];
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -47,22 +53,27 @@ export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddab
 
 // eslint-disable-next-line import/no-default-export
 export default function Embeddable({
-  reportType,
-  attributes,
-  title,
-  appendTitle,
-  indexPatterns,
-  lens,
   appId,
+  appendTitle,
+  attributes = [],
   axisTitlesVisibility,
-  legendIsVisible,
-  withActions = true,
-  reportConfigMap = {},
-  showCalculationMethod = false,
+  customHeight,
   customLensAttrs,
   customTimeRange,
+  indexPatterns,
+  isSingleMetric = false,
+  legendIsVisible,
+  lens,
+  metricIcon,
+  metricIconColor,
+  metricPostfix,
   onBrushEnd,
   owner = observabilityFeatureId,
+  reportConfigMap = {},
+  reportType,
+  showCalculationMethod = false,
+  title,
+  withActions = true,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -120,13 +131,15 @@ export default function Embeddable({
   }
 
   return (
-    <Wrapper>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
+    <Wrapper $customHeight={customHeight}>
+      <EuiFlexGroup alignItems="center" gutterSize="none">
+        {title && (
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>{title}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
         {showCalculationMethod && (
           <EuiFlexItem grow={false} style={{ minWidth: 150 }}>
             <OperationTypeComponent
@@ -139,16 +152,37 @@ export default function Embeddable({
         )}
         {appendTitle}
       </EuiFlexGroup>
-      <LensComponent
-        id="exploratoryView"
-        style={{ height: '100%' }}
-        timeRange={customTimeRange ?? series?.time}
-        attributes={attributesJSON}
-        onBrushEnd={onBrushEnd}
-        withDefaultActions={Boolean(withActions)}
-        extraActions={actions}
-        viewMode={ViewMode.VIEW}
-      />
+
+      {isSingleMetric && (
+        <SingleMetric
+          metricIcon={metricIcon}
+          metricIconColor={metricIconColor}
+          metricPostfix={metricPostfix}
+        >
+          <LensComponent
+            id="exploratoryView-singleMetric"
+            style={{ height: '100%' }}
+            timeRange={customTimeRange ?? series?.time}
+            attributes={attributesJSON}
+            onBrushEnd={onBrushEnd}
+            withDefaultActions={Boolean(withActions)}
+            extraActions={actions}
+            viewMode={ViewMode.VIEW}
+          />
+        </SingleMetric>
+      )}
+      {!isSingleMetric && (
+        <LensComponent
+          id="exploratoryView"
+          style={{ height: '100%' }}
+          timeRange={customTimeRange ?? series?.time}
+          attributes={attributesJSON}
+          onBrushEnd={onBrushEnd}
+          withDefaultActions={Boolean(withActions)}
+          extraActions={actions}
+          viewMode={ViewMode.VIEW}
+        />
+      )}
       {isSaveOpen && attributesJSON && (
         <LensSaveModalComponent
           initialInput={attributesJSON as unknown as LensEmbeddableInput}
@@ -170,11 +204,14 @@ export default function Embeddable({
   );
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{
+  $customHeight?: string | number;
+}>`
   height: 100%;
   &&& {
     > :nth-child(2) {
-      height: calc(100% - 32px);
+      height: ${(props) =>
+        props.$customHeight ? `${props.$customHeight};` : `calc(100% - 32px);`};
     }
     .embPanel--editing {
       border-style: initial !important;
