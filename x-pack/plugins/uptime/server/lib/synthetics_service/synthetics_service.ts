@@ -273,7 +273,7 @@ export class SyntheticsService {
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
-    const monitors: SyntheticsMonitorSavedObject = [];
+    const monitors: SyntheticsMonitorSavedObject[] = [];
 
     if (!savedObjectsClient?.find) {
       return [] as SyntheticsMonitorWithId[];

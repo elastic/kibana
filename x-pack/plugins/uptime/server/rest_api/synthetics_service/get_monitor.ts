@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
 import { MonitorFields, SyntheticsMonitor, ConfigKey } from '../../../common/runtime_types';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import {
@@ -17,7 +18,7 @@ import {
 } from '../../lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from './service_errors';
 
-export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
+export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
@@ -25,19 +26,11 @@ export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({
-    request,
-    response,
-    savedObjectsClient,
-    server: { encryptedSavedObjects },
-  }): Promise<any> => {
+  handler: async ({ request, response, server: { encryptedSavedObjects } }): Promise<any> => {
     const { monitorId } = request.params;
     const encryptedClient = encryptedSavedObjects.getClient();
     try {
-      return await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitor>(
-        syntheticsMonitor.name,
-        monitorId
-      );
+      return await libs.requests.getSyntheticsMonitor({ monitorId, encryptedClient });
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
