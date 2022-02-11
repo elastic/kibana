@@ -39,6 +39,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const owner = 'securitySolution';
+const withActions = ['save', 'addToCase', 'openInLens'];
 const panelHeight = '280px';
 const metricHeight = '70px';
 const attrsMapping = {
@@ -133,22 +134,20 @@ export const ExploratoryChartsComponents = ({
                     alignLnsMetric="flex-start"
                     appId="securitySolutionUI"
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="kpi-over-time"
+                    reportType="singleMetric"
                     attributes={[
                       {
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
                     customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiHostMetric}
                     customTimeRange={timerange}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     metricIcon="storage"
                     metricIconColor="#6092c0"
                     owner={owner}
+                    isSingleMetric={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -164,13 +163,10 @@ export const ExploratoryChartsComponents = ({
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
                     customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiHostArea}
                     customTimeRange={timerange}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     owner={owner}
                   />
                 </EuiFlexItem>
@@ -203,17 +199,15 @@ export const ExploratoryChartsComponents = ({
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
                     customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsMetricSuccess}
                     customTimeRange={timerange}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     metricIcon="check"
                     metricIconColor="#54B399"
                     metricPostfix="success"
                     owner={owner}
+                    isSingleMetric={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -229,13 +223,10 @@ export const ExploratoryChartsComponents = ({
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
                     customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsBar}
                     customTimeRange={timerange}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     owner={owner}
                   />
                 </EuiFlexItem>
@@ -254,17 +245,15 @@ export const ExploratoryChartsComponents = ({
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
                     customHeight="100%"
                     metricIcon="cross"
                     metricIconColor="#e7664c"
                     metricPostfix="fail"
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsMetricFailure}
                     customTimeRange={timerange}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     owner={owner}
+                    isSingleMetric={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -280,14 +269,11 @@ export const ExploratoryChartsComponents = ({
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
                     customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsArea}
                     customTimeRange={timerange}
                     onBrushEnd={onBrushEnd}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     owner={owner}
                   />
                 </EuiFlexItem>
@@ -314,23 +300,21 @@ export const ExploratoryChartsComponents = ({
                     alignLnsMetric="flex-start"
                     appId="securitySolutionUI"
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="kpi-over-time"
+                    reportType="singleMetric"
                     attributes={[
                       {
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
                     customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUniqueIpsSourceMetric}
                     customTimeRange={timerange}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     metricIcon="visMapCoordinate"
                     metricPostfix="source"
                     metricIconColor="#d36086"
                     owner={owner}
+                    isSingleMetric={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -346,13 +330,11 @@ export const ExploratoryChartsComponents = ({
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
+                    // compressed
                     customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUniqueIpsBar}
                     customTimeRange={timerange}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     owner={owner}
                   />
                 </EuiFlexItem>
@@ -365,23 +347,22 @@ export const ExploratoryChartsComponents = ({
                     alignLnsMetric="flex-start"
                     appId="securitySolutionUI"
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="kpi-over-time"
+                    reportType="singleMetric"
                     attributes={[
                       {
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
+                    // compressed
                     customHeight="100%"
                     metricIcon="visMapCoordinate"
                     metricIconColor="#9170b8"
                     metricPostfix="destination"
                     customLensAttrs={customLensAttrs.kpiUniqueIpsDestinationMetric}
                     customTimeRange={timerange}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     owner={owner}
+                    isSingleMetric={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -397,14 +378,11 @@ export const ExploratoryChartsComponents = ({
                         dataType: 'security',
                       },
                     ]}
-                    compressed
-                    disableBorder
-                    disableShadow
                     customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUniqueIpsArea}
                     customTimeRange={timerange}
                     onBrushEnd={onBrushEnd}
-                    withActions={['save', 'addToCase', 'openInLens']}
+                    withActions={withActions}
                     owner={owner}
                   />
                 </EuiFlexItem>

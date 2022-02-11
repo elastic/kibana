@@ -114,14 +114,15 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       dataType: 'security',
                     },
                   ]}
-                  compressed
                   disableBorder
                   disableShadow
                   customLensAttrs={customLensAttrs.kpiNetworkEvents}
                   customTimeRange={timerange}
                   customHeight="100%"
-                  withActions={['save', 'addToCase', 'openInLens']}
+                  isSingleMetric={true}
                   metricIconColor="#6092c0"
+                  onBrushEnd={onBrushEnd}
+                  withActions={['save', 'addToCase', 'openInLens']}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -138,14 +139,15 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       dataType: 'security',
                     },
                   ]}
-                  compressed
                   disableBorder
                   disableShadow
                   customHeight="100%"
                   customLensAttrs={customLensAttrs.kpiDnsQueries}
                   customTimeRange={timerange}
-                  withActions={['save', 'addToCase', 'openInLens']}
+                  isSingleMetric={true}
                   metricIconColor="#6092c0"
+                  onBrushEnd={onBrushEnd}
+                  withActions={['save', 'addToCase', 'openInLens']}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -165,14 +167,15 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       dataType: 'security',
                     },
                   ]}
-                  compressed
                   disableBorder
                   disableShadow
                   customHeight="100%"
                   customLensAttrs={customLensAttrs.kpiUniqueFlowIds}
                   customTimeRange={timerange}
-                  withActions={['save', 'addToCase', 'openInLens']}
+                  isSingleMetric={true}
                   metricIconColor="#6092c0"
+                  onBrushEnd={onBrushEnd}
+                  withActions={['save', 'addToCase', 'openInLens']}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -189,20 +192,21 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       dataType: 'security',
                     },
                   ]}
-                  compressed
                   disableBorder
                   disableShadow
                   customHeight="100%"
                   customLensAttrs={customLensAttrs.kpiTlsHandshakes}
                   customTimeRange={timerange}
-                  withActions={['save', 'addToCase', 'openInLens']}
+                  isSingleMetric={true}
                   metricIconColor="#6092c0"
+                  onBrushEnd={onBrushEnd}
+                  withActions={['save', 'addToCase', 'openInLens']}
                 />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} style={{ maxWidth: '50%' }}>
           <EuiPanel
             color="transparent"
             hasBorder
@@ -213,13 +217,12 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
               <h3>{'Unique private IPs'}</h3>
             </EuiTitle>
             <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
-              <EuiSplitPanel.Inner paddingSize="none">
+              <EuiSplitPanel.Inner paddingSize="none" style={{ width: '50%' }}>
                 <StyledEuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                     <ExploratoryViewEmbeddable
                       alignLnsMetric="flex-start"
                       appId="security"
-                      // title={'Unique private IPs'}
                       dataTypesIndexPatterns={patternList}
                       reportType="singleMetric"
                       attributes={[
@@ -227,7 +230,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                           dataType: 'security',
                         },
                       ]}
-                      compressed
                       disableBorder
                       disableShadow
                       customHeight="100%"
@@ -237,6 +239,8 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       metricIcon="visMapCoordinate"
                       metricPostfix="source"
                       metricIconColor="#d36086"
+                      onBrushEnd={onBrushEnd}
+                      isSingleMetric={true}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -252,23 +256,25 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                           dataType: 'security',
                         },
                       ]}
-                      compressed
                       disableBorder
                       disableShadow
                       customHeight="100%"
                       customLensAttrs={customLensAttrs.kpiUniquePrivateIpsBar}
                       customTimeRange={timerange}
+                      onBrushEnd={onBrushEnd}
                       withActions={['save', 'addToCase', 'openInLens']}
                     />
                   </EuiFlexItem>
                 </StyledEuiFlexGroup>
               </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner paddingSize="none">
+              <EuiSplitPanel.Inner paddingSize="none" style={{ width: '50%' }}>
                 <StyledEuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                     <ExploratoryViewEmbeddable
                       alignLnsMetric="flex-start"
                       appId="security"
+                      customLensAttrs={customLensAttrs.kpiUniquePrivateIpsDestinationMetric}
+                      customTimeRange={timerange}
                       dataTypesIndexPatterns={patternList}
                       reportType="singleMetric"
                       attributes={[
@@ -276,16 +282,15 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                           dataType: 'security',
                         },
                       ]}
-                      compressed
                       disableBorder
                       disableShadow
                       customHeight="100%"
                       metricIcon="visMapCoordinate"
                       metricIconColor="#9170b8"
                       metricPostfix="destination"
-                      customLensAttrs={customLensAttrs.kpiUniquePrivateIpsDestinationMetric}
-                      customTimeRange={timerange}
+                      onBrushEnd={onBrushEnd}
                       withActions={['save', 'addToCase', 'openInLens']}
+                      isSingleMetric={true}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -301,7 +306,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                           dataType: 'security',
                         },
                       ]}
-                      compressed
                       disableBorder
                       disableShadow
                       customHeight="100%"
