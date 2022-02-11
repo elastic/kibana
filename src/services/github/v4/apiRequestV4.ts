@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
-import gql from 'graphql-tag';
+import { DocumentNode } from 'graphql';
+import { print } from 'graphql/language/printer';
 import { HandledError } from '../../HandledError';
 import { logger } from '../../logger';
 
@@ -28,13 +29,13 @@ export async function apiRequestV4<DataResponse>({
 }: {
   githubApiBaseUrlV4?: string;
   accessToken: string;
-  query: string;
+  query: DocumentNode;
   variables?: Variables;
 }) {
   try {
     const response = await axios.post<GithubV4Response<DataResponse>>(
       githubApiBaseUrlV4,
-      { query, variables },
+      { query: print(query), variables },
       {
         headers: {
           'Content-Type': 'application/json',
@@ -87,12 +88,12 @@ function addDebugLogs({
   didSucceed,
 }: {
   githubApiBaseUrlV4: string;
-  query: string;
+  query: DocumentNode;
   variables?: Variables;
   axiosResponse: AxiosResponse;
   didSucceed: boolean;
 }) {
-  const gqlQueryName = getGqlQueryName(query);
+  const gqlQueryName = getQueryName(query);
   logger.info(
     `POST ${githubApiBaseUrlV4} (name:${gqlQueryName}, status: ${axiosResponse.status})`
   );
@@ -120,8 +121,7 @@ export class GithubV4Exception<DataResponse> extends Error {
   }
 }
 
-function getGqlQueryName(query: string) {
-  const ast = gql(query);
+export function getQueryName(query: DocumentNode): string {
   //@ts-expect-error
-  return ast.definitions[0].name.value;
+  return query.definitions[0].name?.value;
 }

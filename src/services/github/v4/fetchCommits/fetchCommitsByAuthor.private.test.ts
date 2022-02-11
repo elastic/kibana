@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { DocumentNode, print } from 'graphql';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import * as apiRequestV4Module from '../apiRequestV4';
@@ -20,7 +20,6 @@ describe('fetchCommitsByAuthor', () => {
       commits = await fetchCommitsByAuthor({
         accessToken: devAccessToken,
         author: 'sqren',
-        historicalBranchLabelMappings: [],
         maxNumber: 10,
         repoName: 'kibana',
         repoOwner: 'elastic',
@@ -33,11 +32,10 @@ describe('fetchCommitsByAuthor', () => {
 
     it('makes the right queries', () => {
       const queries = spy.mock.calls.reduce((acc, call) => {
-        const query = call[0].query;
-        const ast = gql(query);
+        const query = call[0].query as DocumentNode;
         //@ts-expect-error
-        const name = ast.definitions[0].name.value;
-        return { ...acc, [name]: query };
+        const name = query.definitions[0].name.value;
+        return { ...acc, [name]: print(query) };
       }, {});
 
       const queryNames = Object.keys(queries);
@@ -57,7 +55,6 @@ describe('fetchCommitsByAuthor', () => {
     const getOptions = () => ({
       accessToken: devAccessToken,
       author: 'sqren',
-      historicalBranchLabelMappings: [],
       maxNumber: 10,
       repoName: 'repo-with-different-commit-paths',
       repoOwner: 'backport-org',
@@ -144,7 +141,6 @@ describe('fetchCommitsByAuthor', () => {
       res = await fetchCommitsByAuthor({
         accessToken: devAccessToken,
         commitPaths: [],
-        historicalBranchLabelMappings: [],
         maxNumber: 10,
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
@@ -197,11 +193,13 @@ describe('fetchCommitsByAuthor', () => {
       ]);
     });
 
-    it('returns empty if there are no related PRs', async () => {
+    it('returns missing pull requests', async () => {
       const commitWithoutPRs = res.find(
         (commit) => commit.sourcePullRequest?.number === 8
       );
-      expect(commitWithoutPRs?.expectedTargetPullRequests).toEqual([]);
+      expect(commitWithoutPRs?.expectedTargetPullRequests).toEqual([
+        { branch: '7.x', state: 'MISSING' },
+      ]);
     });
   });
 });

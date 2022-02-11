@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../../options/options';
 import { apiRequestV4 } from './apiRequestV4';
 
@@ -13,7 +14,7 @@ export async function fetchPullRequestId(
 ) {
   const { accessToken, githubApiBaseUrlV4, repoName, repoOwner } = options;
 
-  const prQuery = /* GraphQL */ `
+  const prQuery = gql`
     query PullRequestId(
       $repoOwner: String!
       $repoName: String!

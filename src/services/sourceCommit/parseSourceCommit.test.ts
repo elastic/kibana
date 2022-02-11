@@ -86,7 +86,6 @@ describe('parseSourceCommit', () => {
             '^v6.4.0$': 'main',
             '^v(\\d+).(\\d+).\\d+$': '$1.$2',
           },
-          historicalBranchLabelMappings: [],
         } as unknown as ValidConfigOptions,
       });
 
@@ -117,6 +116,13 @@ describe('parseSourceCommit', () => {
     it('uses the historical branchLabelMapping from 2021-02-02', () => {
       const mockSourceCommit = getMockSourceCommit({
         sourceCommit: {
+          remoteConfig: {
+            branchLabelMapping: {
+              '^v6.3.0$': 'main',
+              '^v(\\d+).(\\d+).\\d+$': '$1.$2',
+            },
+            committedDate: '2021-02-02T00:00:00Z',
+          },
           message: 'My commit message (#66)',
           commitedDate: '2021-03-03T00:00:00Z',
         },
@@ -142,22 +148,6 @@ describe('parseSourceCommit', () => {
             '^v6.4.0$': 'main',
             '^v(\\d+).(\\d+).\\d+$': '$1.$2',
           },
-          historicalBranchLabelMappings: [
-            {
-              branchLabelMapping: {
-                '^v6.4.0$': 'main',
-                '^v(\\d+).(\\d+).\\d+$': '$1.$2',
-              },
-              committedDate: '2021-04-04T00:00:00Z',
-            },
-            {
-              branchLabelMapping: {
-                '^v6.3.0$': 'main',
-                '^v(\\d+).(\\d+).\\d+$': '$1.$2',
-              },
-              committedDate: '2021-02-02T00:00:00Z',
-            },
-          ],
         } as unknown as ValidConfigOptions,
       });
 

@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../../options/options';
 import { fetchPullRequestId } from './FetchPullRequestId';
 import { apiRequestV4 } from './apiRequestV4';
@@ -13,7 +14,7 @@ export async function disablePullRequestAutoMerge(
   const { accessToken, githubApiBaseUrlV4 } = options;
   const pullRequestId = await fetchPullRequestId(options, pullNumber);
 
-  const query = /* GraphQL */ `
+  const query = gql`
     mutation DisablePullRequestAutoMerge($pullRequestId: ID!) {
       disablePullRequestAutoMerge(input: { pullRequestId: $pullRequestId }) {
         pullRequest {

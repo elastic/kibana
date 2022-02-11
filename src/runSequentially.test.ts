@@ -62,7 +62,6 @@ describe('runSequentially', () => {
       gitHostname: 'github.com',
       githubApiBaseUrlV3: 'https://api.github.com',
       githubApiBaseUrlV4: 'http://localhost/graphql', // Using localhost to avoid CORS issues when making requests (related to nock and jsdom)
-      historicalBranchLabelMappings: [],
       mainline: undefined,
       maxNumber: 10,
       multipleBranches: false,

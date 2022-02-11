@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import nock from 'nock';
 import { mockGqlRequest } from '../../../test/nockHelpers';
 import { HandledError } from '../../HandledError';
@@ -15,28 +16,42 @@ describe('apiRequestV4', () => {
       commitsByAuthorCalls = mockGqlRequest<any>({
         name: 'MyQuery',
         statusCode: 200,
-        body: { data: { hello: 'world' } },
+        body: { data: { viewer: { login: 'sqren' } } },
       });
 
       res = await apiRequestV4({
         accessToken: 'myAccessToken',
         githubApiBaseUrlV4: 'http://localhost/graphql',
-        query: 'query MyQuery{ foo }',
+        query: gql`
+          query MyQuery {
+            viewer {
+              login
+            }
+          }
+        `,
         variables: { foo: 'bar' },
       });
     });
 
     it('should return correct response', async () => {
-      expect(res).toEqual({ hello: 'world' });
+      expect(res).toEqual({ viewer: { login: 'sqren' } });
     });
 
     it('should call with correct args', async () => {
-      expect(commitsByAuthorCalls).toEqual([
-        {
-          query: 'query MyQuery{ foo }',
-          variables: { foo: 'bar' },
-        },
-      ]);
+      expect(commitsByAuthorCalls).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "query": "query MyQuery {
+          viewer {
+            login
+          }
+        }",
+            "variables": Object {
+              "foo": "bar",
+            },
+          },
+        ]
+      `);
     });
   });
 
@@ -56,7 +71,13 @@ describe('apiRequestV4', () => {
         apiRequestV4({
           accessToken: 'myAccessToken',
           githubApiBaseUrlV4: 'http://localhost/graphql',
-          query: 'query MyQuery{ foo }',
+          query: gql`
+            query MyQuery {
+              viewer {
+                login
+              }
+            }
+          `,
           variables: {
             foo: 'bar',
           },
@@ -81,7 +102,13 @@ describe('apiRequestV4', () => {
         apiRequestV4({
           accessToken: 'myAccessToken',
           githubApiBaseUrlV4: 'http://localhost/graphql',
-          query: 'query MyQuery{ foo }',
+          query: gql`
+            query MyQuery {
+              viewer {
+                login
+              }
+            }
+          `,
           variables: {
             foo: 'bar',
           },

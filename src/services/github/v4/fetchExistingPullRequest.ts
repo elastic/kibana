@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../../options/options';
 import { PullRequestPayload } from '../v3/createPullRequest';
 import { apiRequestV4 } from './apiRequestV4';
@@ -10,7 +11,7 @@ export async function fetchExistingPullRequest({
   prPayload: PullRequestPayload;
 }) {
   const { githubApiBaseUrlV4, accessToken } = options;
-  const query = /* GraphQL */ `
+  const query = gql`
     query ExistingPullRequest(
       $repoOwner: String!
       $repoName: String!

@@ -1,5 +1,6 @@
-import ora from 'ora';
+import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../../options/options';
+import { ora } from '../../../ui/ora';
 import { logger } from '../../logger';
 import { fetchPullRequestId } from './FetchPullRequestId';
 import { apiRequestV4 } from './apiRequestV4';
@@ -19,14 +20,14 @@ export async function enablePullRequestAutoMerge(
   } = options;
   const text = `Enabling auto merging via ${options.autoMergeMethod}`;
   logger.info(text);
-  const spinner = ora(text).start();
+  const spinner = ora(options.ci, text).start();
 
   const pullRequestId = await fetchPullRequestId(
     options,
     targetPullRequestNumber
   );
 
-  const query = /* GraphQL */ `
+  const query = gql`
     mutation EnablePullRequestAutoMerge(
       $pullRequestId: ID!
       $mergeMethod: PullRequestMergeMethod!

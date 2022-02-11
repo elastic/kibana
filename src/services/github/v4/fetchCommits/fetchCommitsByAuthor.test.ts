@@ -12,7 +12,6 @@ const defaultOptions = {
   accessToken: 'myAccessToken',
   author: 'sqren',
   githubApiBaseUrlV4: 'http://localhost/graphql',
-  historicalBranchLabelMappings: [],
   maxNumber: 10,
   repoName: 'kibana',
   repoOwner: 'elastic',

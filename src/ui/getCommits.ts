@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import ora from 'ora';
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { getFirstLine, getShortSha } from '../services/github/commitFormatters';
@@ -8,6 +7,7 @@ import { fetchCommitBySha } from '../services/github/v4/fetchCommits/fetchCommit
 import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommits/fetchCommitsByAuthor';
 import { fetchPullRequestBySearchQuery } from '../services/github/v4/fetchCommits/fetchPullRequestBySearchQuery';
 import { promptForCommits } from '../services/prompts';
+import { ora } from './ora';
 
 function getOraPersistsOption(question: string, answer: string) {
   return {
@@ -17,7 +17,7 @@ function getOraPersistsOption(question: string, answer: string) {
 }
 
 export async function getCommits(options: ValidConfigOptions) {
-  const spinner = ora().start();
+  const spinner = ora(options.ci).start();
 
   try {
     if (options.sha) {

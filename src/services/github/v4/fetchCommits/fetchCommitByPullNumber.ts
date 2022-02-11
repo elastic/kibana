@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../../../options/options';
 import { HandledError } from '../../../HandledError';
 import {
@@ -12,7 +13,6 @@ export async function fetchCommitByPullNumber(options: {
   accessToken: string;
   branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
   githubApiBaseUrlV4?: string;
-  historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'];
   pullNumber: number;
   repoName: string;
   repoOwner: string;
@@ -26,7 +26,7 @@ export async function fetchCommitByPullNumber(options: {
     repoOwner,
   } = options;
 
-  const query = /* GraphQL */ `
+  const query = gql`
     query CommitByPullNumber(
       $repoOwner: String!
       $repoName: String!
@@ -41,7 +41,7 @@ export async function fetchCommitByPullNumber(options: {
       }
     }
 
-    ${sourceCommitWithTargetPullRequestFragment.source}
+    ${sourceCommitWithTargetPullRequestFragment}
   `;
 
   const res = await apiRequestV4<CommitByPullNumberResponse>({

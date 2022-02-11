@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { isEmpty } from 'lodash';
 import { ValidConfigOptions } from '../../../../options/options';
 import { HandledError } from '../../../HandledError';
@@ -23,7 +24,7 @@ export async function fetchPullRequestBySearchQuery(
     author,
   } = options;
 
-  const query = /* GraphQL */ `
+  const query = gql`
     query PullRequestBySearchQuery($query: String!, $maxNumber: Int!) {
       search(query: $query, type: ISSUE, first: $maxNumber) {
         nodes {
@@ -36,7 +37,7 @@ export async function fetchPullRequestBySearchQuery(
       }
     }
 
-    ${sourceCommitWithTargetPullRequestFragment.source}
+    ${sourceCommitWithTargetPullRequestFragment}
   `;
 
   const authorFilter = author ? ` author:${author}` : '';

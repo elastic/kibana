@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 import { isEmpty, difference } from 'lodash';
-import ora = require('ora');
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { exec } from '../services/child-process-promisified';
@@ -34,6 +33,7 @@ import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
 import { Commit } from '../services/sourceCommit/parseSourceCommit';
 import { getCommitsWithoutBackports } from './getCommitsWithoutBackports';
+import { ora } from './ora';
 
 export async function cherrypickAndCreateTargetPullRequest({
   options,
@@ -187,7 +187,7 @@ async function waitForCherrypick(
     (pr) => pr.state === 'MERGED' && pr.branch === targetBranch
   );
 
-  const cherrypickSpinner = ora(spinnerText).start();
+  const cherrypickSpinner = ora(options.ci, spinnerText).start();
 
   let conflictingFiles: ConflictingFiles;
   let unstagedFiles: string[];
@@ -216,6 +216,7 @@ async function waitForCherrypick(
   // resolve conflicts automatically
   if (options.autoFixConflicts) {
     const autoResolveSpinner = ora(
+      options.ci,
       'Attempting to resolve conflicts automatically'
     ).start();
 
@@ -283,7 +284,7 @@ async function waitForCherrypick(
   });
 
   // Conflicts should be resolved and files staged at this point
-  const stagingSpinner = ora(`Finalizing cherrypick`).start();
+  const stagingSpinner = ora(options.ci, `Finalizing cherrypick`).start();
   try {
     // Run `git commit`
     await commitChanges(commit, options);

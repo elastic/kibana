@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { maybe } from '../../../utils/maybe';
 import { getRepoInfoFromGitRemotes } from '../../git';
 import { logger } from '../../logger';
@@ -64,7 +65,7 @@ export interface RepoOwnerAndNameResponse {
       };
 }
 
-const query = /* GraphQL */ `
+const query = gql`
   query RepoOwnerAndName($repoOwner: String!, $repoName: String!) {
     repository(owner: $repoOwner, name: $repoName) {
       isFork

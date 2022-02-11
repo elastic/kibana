@@ -1,7 +1,8 @@
-export type RemoteConfig = {
-  committedDate: string;
-  file: { object: { text: string } };
-};
+import gql from 'graphql-tag';
+import {
+  RemoteConfigHistory,
+  RemoteConfigHistoryFragment,
+} from '../../../remoteConfig';
 
 export interface GithubConfigOptionsResponse {
   viewer: {
@@ -11,14 +12,12 @@ export interface GithubConfigOptionsResponse {
     illegalBackportBranch: { id: string } | null;
     defaultBranchRef: {
       name: string;
-      target: {
-        history: { edges: Array<{ remoteConfig: RemoteConfig }> };
-      };
+      target: RemoteConfigHistory;
     };
   };
 }
 
-export const query = /* GraphQL */ `
+export const query = gql`
   query GithubConfigOptions($repoOwner: String!, $repoName: String!) {
     viewer {
       login
@@ -31,26 +30,11 @@ export const query = /* GraphQL */ `
       defaultBranchRef {
         name
         target {
-          ... on Commit {
-            history(first: 20, path: ".backportrc.json") {
-              edges {
-                remoteConfig: node {
-                  committedDate
-                  file(path: ".backportrc.json") {
-                    ... on TreeEntry {
-                      object {
-                        ... on Blob {
-                          text
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          ...RemoteConfigHistory
         }
       }
     }
   }
+
+  ${RemoteConfigHistoryFragment}
 `;

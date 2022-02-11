@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { print } from 'graphql';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import * as apiRequestV4Module from '../apiRequestV4';
@@ -24,17 +24,14 @@ describe('fetchCommitByPullNumber', () => {
         accessToken: devAccessToken,
         pullNumber: 121633,
         sourceBranch: 'master',
-        historicalBranchLabelMappings: [],
       });
     });
 
     it('makes the right queries', () => {
       const queries = spy.mock.calls.reduce((acc, call) => {
         const query = call[0].query;
-        const ast = gql(query);
-        //@ts-expect-error
-        const name = ast.definitions[0].name.value;
-        return { ...acc, [name]: query };
+        const name = apiRequestV4Module.getQueryName(query);
+        return { ...acc, [name]: print(query) };
       }, {});
 
       const queryNames = Object.keys(queries);
@@ -58,7 +55,6 @@ describe('fetchCommitByPullNumber', () => {
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
         sourceBranch: 'main',
-        historicalBranchLabelMappings: [],
       };
 
       const expectedCommit: Commit = {
@@ -112,7 +108,6 @@ describe('fetchCommitByPullNumber', () => {
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
         sourceBranch: 'main',
-        historicalBranchLabelMappings: [],
       };
 
       await expect(fetchCommitByPullNumber(options)).rejects.toThrowError(
@@ -129,7 +124,6 @@ describe('fetchCommitByPullNumber', () => {
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
         sourceBranch: 'main',
-        historicalBranchLabelMappings: [],
       };
 
       await expect(fetchCommitByPullNumber(options)).rejects.toThrowError(

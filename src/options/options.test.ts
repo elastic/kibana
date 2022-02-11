@@ -132,6 +132,16 @@ describe('getOptions', () => {
     });
   });
 
+  it('reads options from remote config', async () => {
+    mockGithubConfigOptions({ hasRemoteConfig: true });
+    const options = await getOptions([], {});
+    expect(options.branchLabelMapping).toEqual({
+      '^v8.2.0$': 'option-from-remote',
+    });
+
+    expect(options.autoMergeMethod).toEqual('rebase');
+  });
+
   it('should ensure that "backport" branch does not exist', async () => {
     mockGithubConfigOptions({ hasBackportBranch: true });
     await expect(getOptions([], {})).rejects.toThrowError(
@@ -158,12 +168,6 @@ describe('getOptions', () => {
     mockGithubConfigOptions({
       viewerLogin: 'john.diller',
       defaultBranchRef: 'default-branch-from-github',
-      historicalMappings: [
-        {
-          committedDate: '2022-01-02T20:52:45.173Z',
-          branchLabelMapping: { foo: 'bar' },
-        },
-      ],
     });
     const options = await getOptions([], {});
 
@@ -176,9 +180,6 @@ describe('getOptions', () => {
       autoMerge: false,
       autoMergeMethod: 'merge',
       backportBinary: 'backport',
-      branchLabelMapping: {
-        foo: 'bar',
-      },
       cherrypickRef: true,
       ci: false,
       commitPaths: [],
@@ -190,12 +191,6 @@ describe('getOptions', () => {
       fork: true,
       gitHostname: 'github.com',
       githubApiBaseUrlV4: 'http://localhost/graphql',
-      historicalBranchLabelMappings: [
-        {
-          branchLabelMapping: { foo: 'bar' },
-          committedDate: '2022-01-02T20:52:45.173Z',
-        },
-      ],
       maxNumber: 10,
       multipleBranches: true,
       multipleCommits: false,
@@ -373,15 +368,12 @@ function mockGithubConfigOptions({
   viewerLogin = 'DO_NOT_USE-sqren',
   defaultBranchRef = 'DO_NOT_USE-default-branch-name',
   hasBackportBranch,
-  historicalMappings = [],
+  hasRemoteConfig,
 }: {
   viewerLogin?: string;
   defaultBranchRef?: string;
   hasBackportBranch?: boolean;
-  historicalMappings?: Array<{
-    committedDate: string;
-    branchLabelMapping: Record<string, string>;
-  }>;
+  hasRemoteConfig?: boolean;
 }) {
   return mockGqlRequest<GithubConfigOptionsResponse>({
     name: 'GithubConfigOptions',
@@ -396,23 +388,26 @@ function mockGithubConfigOptions({
           defaultBranchRef: {
             name: defaultBranchRef,
             target: {
-              history: {
-                edges: historicalMappings.map(
-                  ({ committedDate, branchLabelMapping }) => {
-                    return {
-                      remoteConfig: {
-                        committedDate,
-                        file: {
-                          object: {
-                            text: JSON.stringify({
-                              branchLabelMapping,
-                            }),
+              remoteConfigHistory: {
+                edges: hasRemoteConfig
+                  ? [
+                      {
+                        remoteConfig: {
+                          committedDate: '2020-08-15T00:00:00.000Z',
+                          file: {
+                            object: {
+                              text: JSON.stringify({
+                                autoMergeMethod: 'rebase',
+                                branchLabelMapping: {
+                                  '^v8.2.0$': 'option-from-remote',
+                                },
+                              } as ConfigFileOptions),
+                            },
                           },
                         },
                       },
-                    };
-                  }
-                ),
+                    ]
+                  : [],
               },
             },
           },

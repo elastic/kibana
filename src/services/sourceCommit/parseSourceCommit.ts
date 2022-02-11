@@ -1,5 +1,10 @@
-import { isEmpty } from 'lodash';
+import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../options/options';
+import {
+  parseRemoteConfig,
+  RemoteConfigHistory,
+  RemoteConfigHistoryFragment,
+} from '../remoteConfig';
 import {
   ExpectedTargetPullRequest,
   getExpectedTargetPullRequests,
@@ -79,6 +84,7 @@ interface TimelineIssueEdge {
 }
 
 export type SourceCommitWithTargetPullRequest = {
+  remoteConfigHistory: RemoteConfigHistory['remoteConfigHistory'];
   repository: {
     name: string;
     owner: { login: string };
@@ -98,7 +104,6 @@ export function parseSourceCommit({
   sourceCommit: SourceCommitWithTargetPullRequest;
   options: {
     branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
-    historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'];
     sourceBranch: string;
   };
 }): Commit {
@@ -108,11 +113,13 @@ export function parseSourceCommit({
   // use info from associated pull request if available. Fall back to commit info
 
   const sourceBranch = sourcePullRequest?.baseRefName ?? options.sourceBranch;
-  const branchLabelMapping = getBranchLabelMappingForCommit(
-    sourceCommit,
-    options.branchLabelMapping,
-    options.historicalBranchLabelMappings
-  );
+  const remoteConfig =
+    sourceCommit.remoteConfigHistory.edges?.[0]?.remoteConfig;
+
+  const branchLabelMapping = remoteConfig
+    ? parseRemoteConfig(remoteConfig)?.branchLabelMapping ??
+      options.branchLabelMapping
+    : options.branchLabelMapping;
 
   const expectedTargetPullRequests = getExpectedTargetPullRequests(
     sourceCommit,
@@ -140,72 +147,72 @@ export function parseSourceCommit({
   };
 }
 
-export const sourceCommitWithTargetPullRequestFragment = {
-  source: /* GraphQL */ `
-    fragment SourceCommitWithTargetPullRequest on Commit {
-      # Source Commit
-      repository {
-        name
-        owner {
-          login
-        }
+export const sourceCommitWithTargetPullRequestFragment = gql`
+  fragment SourceCommitWithTargetPullRequest on Commit {
+    ...RemoteConfigHistory
+
+    # Source Commit
+    repository {
+      name
+      owner {
+        login
       }
-      sha: oid
-      message
-      committedDate
+    }
+    sha: oid
+    message
+    committedDate
 
-      # Source pull request: PR where source commit was merged in
-      associatedPullRequests(first: 1) {
-        edges {
-          node {
-            url
-            number
-            labels(first: 50) {
-              nodes {
-                name
-              }
+    # Source pull request: PR where source commit was merged in
+    associatedPullRequests(first: 1) {
+      edges {
+        node {
+          url
+          number
+          labels(first: 50) {
+            nodes {
+              name
             }
-            baseRefName
+          }
+          baseRefName
 
-            # source merge commit (the commit that actually went into the source branch)
-            mergeCommit {
-              sha: oid
-              message
-            }
+          # source merge commit (the commit that actually went into the source branch)
+          mergeCommit {
+            sha: oid
+            message
+          }
 
-            # (possible) backport pull requests referenced in the source pull request
-            timelineItems(last: 20, itemTypes: CROSS_REFERENCED_EVENT) {
-              edges {
-                node {
-                  ... on CrossReferencedEvent {
-                    targetPullRequest: source {
-                      __typename
+          # (possible) backport pull requests referenced in the source pull request
+          timelineItems(last: 20, itemTypes: CROSS_REFERENCED_EVENT) {
+            edges {
+              node {
+                ... on CrossReferencedEvent {
+                  targetPullRequest: source {
+                    __typename
 
-                      # Target PRs (backport PRs)
-                      ... on PullRequest {
-                        # target merge commit: the backport commit that was merged into the target branch
-                        targetMergeCommit: mergeCommit {
-                          sha: oid
-                          message
+                    # Target PRs (backport PRs)
+                    ... on PullRequest {
+                      # target merge commit: the backport commit that was merged into the target branch
+                      targetMergeCommit: mergeCommit {
+                        sha: oid
+                        message
+                      }
+                      repository {
+                        name
+                        owner {
+                          login
                         }
-                        repository {
-                          name
-                          owner {
-                            login
-                          }
-                        }
-                        url
-                        title
-                        state
-                        baseRefName
-                        number
-                        commits(first: 20) {
-                          edges {
-                            node {
-                              targetCommit: commit {
-                                message
-                                sha: oid
-                              }
+                      }
+                      url
+                      title
+                      state
+                      baseRefName
+                      number
+                      commits(first: 20) {
+                        edges {
+                          node {
+                            targetCommit: commit {
+                              message
+                              sha: oid
                             }
                           }
                         }
@@ -219,25 +226,7 @@ export const sourceCommitWithTargetPullRequestFragment = {
         }
       }
     }
-  `,
-};
-
-function getBranchLabelMappingForCommit(
-  sourceCommit: SourceCommitWithTargetPullRequest,
-  branchLabelMapping?: ValidConfigOptions['branchLabelMapping'],
-  historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'] = []
-): Record<string, string> | undefined {
-  if (isEmpty(historicalBranchLabelMappings)) {
-    return branchLabelMapping;
   }
 
-  const match = historicalBranchLabelMappings.find(
-    (branchLabelMapping) =>
-      sourceCommit.committedDate > branchLabelMapping.committedDate
-  );
-
-  return (
-    match?.branchLabelMapping ??
-    historicalBranchLabelMappings[0].branchLabelMapping
-  );
-}
+  ${RemoteConfigHistoryFragment}
+`;

@@ -71,7 +71,7 @@ export type ConfigFileOptions = Options &
     version: boolean;
     v: boolean;
 
-    // only allowed in project config. Not allowed in CI and denoted in plural (historicalBranchLabelMappings) in options from Github
+    // only allowed in project config. Not allowed in CI mode
     branchLabelMapping: Record<string, string>;
 
     /**

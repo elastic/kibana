@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { DocumentNode, print } from 'graphql';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import * as apiRequestV4Module from '../apiRequestV4';
@@ -24,17 +24,15 @@ describe('fetchCommitBySha', () => {
         accessToken: devAccessToken,
         sha: 'd421ddcf6157150596581c7885afa3690cec6339',
         sourceBranch: 'main',
-        historicalBranchLabelMappings: [],
       });
     });
 
     it('makes the right queries', () => {
       const queries = spy.mock.calls.reduce((acc, call) => {
-        const query = call[0].query;
-        const ast = gql(query);
+        const query = call[0].query as DocumentNode;
         //@ts-expect-error
-        const name = ast.definitions[0].name.value;
-        return { ...acc, [name]: query };
+        const name = query.definitions[0].name.value;
+        return { ...acc, [name]: print(query) };
       }, {});
 
       const queryNames = Object.keys(queries);
@@ -86,7 +84,6 @@ describe('fetchCommitBySha', () => {
         accessToken: devAccessToken,
         sha: 'cb6fbc0',
         sourceBranch: 'master',
-        historicalBranchLabelMappings: [],
       })
     ).toEqual(expectedCommit);
   });
@@ -99,7 +96,6 @@ describe('fetchCommitBySha', () => {
         accessToken: devAccessToken,
         sha: 'fc22f59',
         sourceBranch: 'main',
-        historicalBranchLabelMappings: [],
       })
     ).rejects.toThrowError(
       'No commit found on branch "main" with sha "fc22f59"'
@@ -114,7 +110,6 @@ describe('fetchCommitBySha', () => {
         accessToken: devAccessToken,
         sha: 'myCommitSha',
         sourceBranch: 'main',
-        historicalBranchLabelMappings: [],
       })
     ).rejects.toThrowError(
       'No commit found on branch "main" with sha "myCommitSha"'

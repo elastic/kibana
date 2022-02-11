@@ -1,5 +1,10 @@
+import gql from 'graphql-tag';
 import { ConfigFileOptions } from '../../../entrypoint.module';
-import { withConfigMigrations } from '../../../options/config/readConfigFile';
+import {
+  parseRemoteConfig,
+  RemoteConfigHistory,
+  RemoteConfigHistoryFragment,
+} from '../../remoteConfig';
 import { apiRequestV4 } from './apiRequestV4';
 
 export async function fetchRemoteProjectConfig(options: {
@@ -8,11 +13,11 @@ export async function fetchRemoteProjectConfig(options: {
   repoName: string;
   repoOwner: string;
   sourceBranch: string;
-}): Promise<ConfigFileOptions> {
+}): Promise<ConfigFileOptions | undefined> {
   const { accessToken, githubApiBaseUrlV4, repoName, repoOwner, sourceBranch } =
     options;
 
-  const query = /* GraphQL */ `
+  const query = gql`
     query ProjectConfig(
       $repoOwner: String!
       $repoName: String!
@@ -21,27 +26,13 @@ export async function fetchRemoteProjectConfig(options: {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: $sourceBranch) {
           target {
-            ... on Commit {
-              history(first: 1, path: ".backportrc.json") {
-                edges {
-                  remoteConfig: node {
-                    file(path: ".backportrc.json") {
-                      ... on TreeEntry {
-                        object {
-                          ... on Blob {
-                            text
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            ...RemoteConfigHistory
           }
         }
       }
     }
+
+    ${RemoteConfigHistoryFragment}
   `;
 
   try {
@@ -56,11 +47,12 @@ export async function fetchRemoteProjectConfig(options: {
       },
     });
 
-    return withConfigMigrations(
-      JSON.parse(
-        res.repository.ref.target.history.edges[0].remoteConfig.file.object.text
-      )
-    ) as ConfigFileOptions;
+    const remoteConfig =
+      res.repository.ref.target.remoteConfigHistory.edges?.[0].remoteConfig;
+
+    if (remoteConfig) {
+      return parseRemoteConfig(remoteConfig);
+    }
   } catch (e) {
     throw new Error('Project config does not exist');
   }
@@ -69,19 +61,7 @@ export async function fetchRemoteProjectConfig(options: {
 interface GithubProjectConfig {
   repository: {
     ref: {
-      target: {
-        history: {
-          edges: Array<{
-            remoteConfig: {
-              file: {
-                object: {
-                  text: string;
-                };
-              };
-            };
-          }>;
-        };
-      };
+      target: RemoteConfigHistory;
     };
   };
 }

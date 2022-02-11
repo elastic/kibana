@@ -1,81 +1,68 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`fetchCommitBySha snapshot request/response makes the right queries: Query: CommitsBySha 1`] = `
-"
-    query CommitsBySha($repoOwner: String!, $repoName: String!, $sha: String!) {
-      repository(owner: $repoOwner, name: $repoName) {
-        object(expression: $sha) {
-          ...SourceCommitWithTargetPullRequest
-        }
-      }
+"query CommitsBySha($repoOwner: String!, $repoName: String!, $sha: String!) {
+  repository(owner: $repoOwner, name: $repoName) {
+    object(expression: $sha) {
+      ...SourceCommitWithTargetPullRequest
     }
+  }
+}
 
-    
-    fragment SourceCommitWithTargetPullRequest on Commit {
-      # Source Commit
-      repository {
-        name
-        owner {
-          login
+fragment SourceCommitWithTargetPullRequest on Commit {
+  ...RemoteConfigHistory
+  repository {
+    name
+    owner {
+      login
+    }
+  }
+  sha: oid
+  message
+  committedDate
+  associatedPullRequests(first: 1) {
+    edges {
+      node {
+        url
+        number
+        labels(first: 50) {
+          nodes {
+            name
+          }
         }
-      }
-      sha: oid
-      message
-      committedDate
-
-      # Source pull request: PR where source commit was merged in
-      associatedPullRequests(first: 1) {
-        edges {
-          node {
-            url
-            number
-            labels(first: 50) {
-              nodes {
-                name
-              }
-            }
-            baseRefName
-
-            # source merge commit (the commit that actually went into the source branch)
-            mergeCommit {
-              sha: oid
-              message
-            }
-
-            # (possible) backport pull requests referenced in the source pull request
-            timelineItems(last: 20, itemTypes: CROSS_REFERENCED_EVENT) {
-              edges {
-                node {
-                  ... on CrossReferencedEvent {
-                    targetPullRequest: source {
-                      __typename
-
-                      # Target PRs (backport PRs)
-                      ... on PullRequest {
-                        # target merge commit: the backport commit that was merged into the target branch
-                        targetMergeCommit: mergeCommit {
-                          sha: oid
-                          message
-                        }
-                        repository {
-                          name
-                          owner {
-                            login
-                          }
-                        }
-                        url
-                        title
-                        state
-                        baseRefName
-                        number
-                        commits(first: 20) {
-                          edges {
-                            node {
-                              targetCommit: commit {
-                                message
-                                sha: oid
-                              }
-                            }
+        baseRefName
+        mergeCommit {
+          sha: oid
+          message
+        }
+        timelineItems(last: 20, itemTypes: CROSS_REFERENCED_EVENT) {
+          edges {
+            node {
+              ... on CrossReferencedEvent {
+                targetPullRequest: source {
+                  __typename
+                  ... on PullRequest {
+                    targetMergeCommit: mergeCommit {
+                      sha: oid
+                      message
+                    }
+                    repository {
+                      name
+                      owner {
+                        login
+                      }
+                    }
+                    url
+                    title
+                    state
+                    baseRefName
+                    number
+                    commits(first: 20) {
+                      edges {
+                        node {
+                          targetCommit: commit {
+                            message
+                            sha: oid
                           }
                         }
                       }
@@ -88,8 +75,27 @@ exports[`fetchCommitBySha snapshot request/response makes the right queries: Que
         }
       }
     }
-  
-  "
+  }
+}
+
+fragment RemoteConfigHistory on Commit {
+  remoteConfigHistory: history(first: 1, path: \\".backportrc.json\\") {
+    edges {
+      remoteConfig: node {
+        committedDate
+        file(path: \\".backportrc.json\\") {
+          ... on TreeEntry {
+            object {
+              ... on Blob {
+                text
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}"
 `;
 
 exports[`fetchCommitBySha snapshot request/response returns the correct response 1`] = `

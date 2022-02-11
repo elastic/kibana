@@ -649,6 +649,11 @@
     tslib "~2.3.0"
     value-or-promise "1.0.11"
 
+"@graphql-typed-document-node/core@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.1.tgz#076d78ce99822258cf813ecc1e7fa460fa74d052"
+  integrity sha512-NQ17ii0rK1b34VZonlmT2QMJFI70m0TRwbknO/ihlbatXyaktDhN/98vBiUU6kNBPljqGqyIrl2T4nY2RpFANg==
+
 "@humanwhocodes/config-array@^0.9.2":
   version "0.9.2"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.9.2.tgz#68be55c737023009dfc5fe245d51181bb6476914"
@@ -1325,6 +1330,14 @@
   dependencies:
     "@typescript-eslint/types" "5.11.0"
     eslint-visitor-keys "^3.0.0"
+
+"@urql/core@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@urql/core/-/core-2.4.1.tgz#bae449dafe98fb4944f3be61eb8e70ba33f8a46d"
+  integrity sha512-HnS54oNwO4pAACKl/2/tNLbRrxAxKawVJuG9UPiixqeEVekiecUQQnCjb9SpOW4Qr54HYzCMDbr3c5px3hfEEg==
+  dependencies:
+    "@graphql-typed-document-node/core" "^3.1.1"
+    wonka "^4.0.14"
 
 abab@^2.0.3, abab@^2.0.5:
   version "2.0.5"
@@ -5089,6 +5102,11 @@ winston@^3.5.1:
     stack-trace "0.0.x"
     triple-beam "^1.3.0"
     winston-transport "^4.4.2"
+
+wonka@^4.0.14:
+  version "4.0.15"
+  resolved "https://registry.yarnpkg.com/wonka/-/wonka-4.0.15.tgz#9aa42046efa424565ab8f8f451fcca955bf80b89"
+  integrity sha512-U0IUQHKXXn6PFo9nqsHphVCE5m3IntqZNB9Jjn7EB1lrR7YTDY3YWgFvEvwniTzXSvOH/XMzAZaIfJF/LvHYXg==
 
 word-wrap@^1.2.3, word-wrap@~1.2.3:
   version "1.2.3"

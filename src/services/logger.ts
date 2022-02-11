@@ -3,15 +3,47 @@ import { redact } from '../utils/redact';
 import { getLogfilePath } from './env';
 
 export let logger: winston.Logger;
+let _accessToken: string | undefined;
+let _ci: boolean | undefined;
+
+export function initLogger({
+  ci,
+  accessToken,
+  logFilePath,
+}: {
+  ci: boolean | undefined;
+  accessToken?: string;
+  logFilePath?: string;
+}) {
+  const fileTransport = getFileTransport({ logFilePath });
+
+  if (accessToken) {
+    _accessToken = accessToken;
+  }
+
+  _ci = ci;
+
+  logger = winston.createLogger({
+    format: format.combine(
+      format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+      // Format the metadata object
+      format.metadata({
+        fillExcept: ['message', 'level', 'timestamp', 'label'],
+      })
+    ),
+    transports: fileTransport,
+  });
+
+  return logger;
+}
 
 // wrapper around console.log
 export function consoleLog(message: string) {
-  // eslint-disable-next-line no-console
-  console.log(redactAccessToken(message));
-  //process.stdout.write(message);
+  if (!_ci) {
+    // eslint-disable-next-line no-console
+    console.log(redactAccessToken(message));
+  }
 }
-
-let _accessToken: string | undefined;
 
 export function updateLogger({
   accessToken,
@@ -34,37 +66,6 @@ function redactAccessToken(str: string) {
   }
 
   return str;
-}
-
-export function initLogger({
-  ci,
-  accessToken,
-  logFilePath,
-}: {
-  ci?: boolean;
-  accessToken?: string;
-  logFilePath?: string;
-}) {
-  const fileTransport = getFileTransport({ logFilePath });
-
-  if (accessToken) {
-    _accessToken = accessToken;
-  }
-
-  logger = winston.createLogger({
-    format: format.combine(
-      format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-      // Format the metadata object
-      format.metadata({
-        fillExcept: ['message', 'level', 'timestamp', 'label'],
-      })
-    ),
-    transports: ci
-      ? [fileTransport, new winston.transports.Console()]
-      : [fileTransport],
-  });
-
-  return logger;
 }
 
 function getFileTransport({ logFilePath }: { logFilePath?: string }) {

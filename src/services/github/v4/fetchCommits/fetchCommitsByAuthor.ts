@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { isEmpty, uniqBy, orderBy } from 'lodash';
 import { ValidConfigOptions } from '../../../../options/options';
 import { filterNil } from '../../../../utils/filterEmpty';
@@ -40,7 +41,7 @@ function fetchByCommitPath({
     dateUntil,
   } = options;
 
-  const query = /* GraphQL */ `
+  const query = gql`
     query CommitsByAuthor(
       $repoOwner: String!
       $repoName: String!
@@ -74,7 +75,7 @@ function fetchByCommitPath({
       }
     }
 
-    ${sourceCommitWithTargetPullRequestFragment.source}
+    ${sourceCommitWithTargetPullRequestFragment}
   `;
 
   const variables = {
@@ -102,7 +103,6 @@ export async function fetchCommitsByAuthor(options: {
   branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
   commitPaths?: string[];
   githubApiBaseUrlV4?: string;
-  historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'];
   maxNumber?: number;
   repoName: string;
   repoOwner: string;

@@ -8,6 +8,7 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
           edges: [
             {
               node: {
+                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -22,6 +23,7 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
+                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -54,6 +56,7 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
+                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -123,6 +126,7 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
+                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },
@@ -137,6 +141,7 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
             },
             {
               node: {
+                remoteConfigHistory: { edges: [] },
                 repository: {
                   name: 'kibana',
                   owner: { login: 'elastic' },

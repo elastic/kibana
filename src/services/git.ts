@@ -1,7 +1,7 @@
 import { resolve as pathResolve } from 'path';
 import { uniq, isEmpty } from 'lodash';
-import ora from 'ora';
 import { ValidConfigOptions } from '../options/options';
+import { ora } from '../ui/ora';
 import { filterNil } from '../utils/filterEmpty';
 import { HandledError } from './HandledError';
 import { execAsCallback, exec } from './child-process-promisified';
@@ -354,7 +354,7 @@ export async function setCommitAuthor(
   options: ValidConfigOptions,
   author: string
 ) {
-  const spinner = ora(`Changing author to "${author}"`).start();
+  const spinner = ora(options.ci, `Changing author to "${author}"`).start();
   try {
     const res = await exec(
       `git commit --amend --no-edit --author "${author} <${author}@users.noreply.github.com>"`,
@@ -380,7 +380,7 @@ export async function createBackportBranch({
   targetBranch: string;
   backportBranch: string;
 }) {
-  const spinner = ora('Pulling latest changes').start();
+  const spinner = ora(options.ci, 'Pulling latest changes').start();
 
   try {
     const res = await exec(
@@ -413,7 +413,7 @@ export async function deleteBackportBranch({
   options: ValidConfigOptions;
   backportBranch: string;
 }) {
-  const spinner = ora().start();
+  const spinner = ora(options.ci).start();
 
   await exec(
     `git reset --hard && git checkout ${options.sourceBranch} && git branch -D ${backportBranch}`,
@@ -439,6 +439,7 @@ export async function pushBackportBranch({
 }) {
   const repoForkOwner = getRepoForkOwner(options);
   const spinner = ora(
+    options.ci,
     `Pushing branch "${repoForkOwner}:${backportBranch}"`
   ).start();
 

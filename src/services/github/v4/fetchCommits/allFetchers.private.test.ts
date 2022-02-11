@@ -16,7 +16,6 @@ describe('allFetchers', () => {
     const commitsByAuthor = await fetchCommitsByAuthor({
       accessToken: devAccessToken,
       author: 'sqren',
-      historicalBranchLabelMappings: [],
       maxNumber: 1,
       repoName: 'kibana',
       repoOwner: 'elastic',
@@ -40,7 +39,6 @@ describe('allFetchers', () => {
       accessToken: devAccessToken,
       pullNumber: commitByAuthor.sourcePullRequest.number,
       sourceBranch: 'master',
-      historicalBranchLabelMappings: [],
     });
 
     expect(commitByAuthor).toEqual(commitByPullNumber);
@@ -53,7 +51,6 @@ describe('allFetchers', () => {
       accessToken: devAccessToken,
       sha: commitByAuthor.sourceCommit.sha,
       sourceBranch: 'main',
-      historicalBranchLabelMappings: [],
     });
 
     expect(commitByAuthor).toEqual(commitBySha);

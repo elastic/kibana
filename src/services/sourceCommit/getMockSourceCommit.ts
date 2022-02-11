@@ -6,6 +6,10 @@ export function getMockSourceCommit({
   timelineItems = [],
 }: {
   sourceCommit: {
+    remoteConfig?: {
+      branchLabelMapping: Record<string, string>;
+      committedDate: string;
+    };
     sha?: string;
     message: string;
     commitedDate?: string;
@@ -29,7 +33,26 @@ export function getMockSourceCommit({
     'DO NOT USE: Default Pull Request Title';
   const defaultSourceCommitSha = 'DO NOT USE: default-source-commit-sha';
 
-  const baseMockCommit = {
+  const baseMockCommit: SourceCommitWithTargetPullRequest = {
+    remoteConfigHistory: sourceCommit.remoteConfig
+      ? {
+          edges: [
+            {
+              remoteConfig: {
+                committedDate: sourceCommit.remoteConfig.committedDate,
+                file: {
+                  object: {
+                    text: JSON.stringify({
+                      branchLabelMapping:
+                        sourceCommit.remoteConfig.branchLabelMapping,
+                    }),
+                  },
+                },
+              },
+            },
+          ],
+        }
+      : { edges: [] },
     repository: {
       name: 'kibana',
       owner: { login: 'elastic' },
@@ -37,15 +60,11 @@ export function getMockSourceCommit({
     committedDate: sourceCommit.commitedDate ?? '2021-12-22T00:00:00Z',
     sha: sourceCommit.sha ?? defaultSourceCommitSha,
     message: sourceCommit.message,
+    associatedPullRequests: { edges: null },
   };
 
   if (!sourcePullRequest) {
-    return {
-      ...baseMockCommit,
-      associatedPullRequests: {
-        edges: null,
-      },
-    };
+    return baseMockCommit;
   }
 
   return {

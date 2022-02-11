@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
-import ora from 'ora';
 import { ValidConfigOptions } from '../../../options/options';
+import { ora } from '../../../ui/ora';
 import { logger } from '../../logger';
 
 export async function addAssigneesToPullRequest(
@@ -10,6 +10,7 @@ export async function addAssigneesToPullRequest(
     repoOwner,
     accessToken,
     autoAssign,
+    ci,
   }: ValidConfigOptions,
   pullNumber: number,
   assignees: string[]
@@ -18,7 +19,7 @@ export async function addAssigneesToPullRequest(
     ? `Self-assigning to #${pullNumber}`
     : `Adding assignees to #${pullNumber}: ${assignees.join(', ')}`;
   logger.info(text);
-  const spinner = ora(text).start();
+  const spinner = ora(ci, text).start();
 
   try {
     const octokit = new Octokit({

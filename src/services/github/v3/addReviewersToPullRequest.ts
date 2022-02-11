@@ -1,16 +1,22 @@
 import { Octokit } from '@octokit/rest';
-import ora from 'ora';
 import { ValidConfigOptions } from '../../../options/options';
+import { ora } from '../../../ui/ora';
 import { logger } from '../../logger';
 
 export async function addReviewersToPullRequest(
-  { githubApiBaseUrlV3, repoName, repoOwner, accessToken }: ValidConfigOptions,
+  {
+    githubApiBaseUrlV3,
+    repoName,
+    repoOwner,
+    accessToken,
+    ci,
+  }: ValidConfigOptions,
   pullNumber: number,
   reviewers: string[]
 ) {
   const text = `Adding reviewers: ${reviewers}`;
   logger.info(text);
-  const spinner = ora(text).start();
+  const spinner = ora(ci, text).start();
 
   try {
     const octokit = new Octokit({

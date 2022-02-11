@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { ValidConfigOptions } from '../../../../options/options';
 import { HandledError } from '../../../HandledError';
 import {
@@ -12,7 +13,6 @@ export async function fetchCommitBySha(options: {
   accessToken: string;
   branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
   githubApiBaseUrlV4?: string;
-  historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'];
   repoName: string;
   repoOwner: string;
   sha: string;
@@ -27,7 +27,7 @@ export async function fetchCommitBySha(options: {
     sourceBranch,
   } = options;
 
-  const query = /* GraphQL */ `
+  const query = gql`
     query CommitsBySha($repoOwner: String!, $repoName: String!, $sha: String!) {
       repository(owner: $repoOwner, name: $repoName) {
         object(expression: $sha) {
@@ -36,7 +36,7 @@ export async function fetchCommitBySha(options: {
       }
     }
 
-    ${sourceCommitWithTargetPullRequestFragment.source}
+    ${sourceCommitWithTargetPullRequestFragment}
   `;
 
   const res = await apiRequestV4<CommitsByShaResponse>({

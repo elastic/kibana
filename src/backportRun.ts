@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import ora from 'ora';
 import yargsParser from 'yargs-parser';
 import { ConfigFileOptions } from './options/ConfigOptions';
 import { getOptions, ValidConfigOptions } from './options/options';
@@ -12,6 +11,7 @@ import { consoleLog, initLogger, logger } from './services/logger';
 import { Commit } from './services/sourceCommit/parseSourceCommit';
 import { getCommits } from './ui/getCommits';
 import { getTargetBranches } from './ui/getTargetBranches';
+import { ora } from './ui/ora';
 
 export type BackportResponse =
   | {
@@ -23,6 +23,7 @@ export type BackportResponse =
       status: 'failure';
       commits: Commit[];
       error: Error | HandledError;
+      errorMessage: string;
     };
 
 export async function backportRun(
@@ -36,7 +37,7 @@ export async function backportRun(
   initLogger({ ci, logFilePath });
 
   // don't show spinner for yargs commands that exit the process without stopping the spinner first
-  const spinner = ora();
+  const spinner = ora(ci);
 
   if (!argv.help && !argv.version && !argv.v) {
     spinner.start('Initializing...');
@@ -78,6 +79,7 @@ export async function backportRun(
       status: 'failure',
       commits,
       error: e,
+      errorMessage: e.message,
     };
 
     if (options) {

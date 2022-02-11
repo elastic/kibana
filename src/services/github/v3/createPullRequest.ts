@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
-import ora from 'ora';
 import { ValidConfigOptions } from '../../../options/options';
+import { ora } from '../../../ui/ora';
 import { PACKAGE_VERSION } from '../../../utils/packageVersion';
 import { HandledError } from '../../HandledError';
 import { logger } from '../../logger';
@@ -35,7 +35,7 @@ export async function createPullRequest({
   );
 
   const { accessToken, githubApiBaseUrlV3 } = options;
-  const spinner = ora(`Creating pull request`).start();
+  const spinner = ora(options.ci, `Creating pull request`).start();
 
   try {
     const octokit = new Octokit({

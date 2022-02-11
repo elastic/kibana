@@ -1,6 +1,4 @@
 import { ConfigFileOptions } from '../../../../options/ConfigOptions';
-import { withConfigMigrations } from '../../../../options/config/readConfigFile';
-import { filterNil } from '../../../../utils/filterEmpty';
 import { HandledError } from '../../../HandledError';
 import {
   getLocalConfigFileCommitDate,
@@ -8,9 +6,10 @@ import {
   isLocalConfigFileModified,
 } from '../../../git';
 import { logger } from '../../../logger';
+import { parseRemoteConfig } from '../../../remoteConfig';
 import { apiRequestV4, GithubV4Exception } from '../apiRequestV4';
 import { throwOnInvalidAccessToken } from '../throwOnInvalidAccessToken';
-import { GithubConfigOptionsResponse, query, RemoteConfig } from './query';
+import { GithubConfigOptionsResponse, query } from './query';
 
 // fetches the default source branch for the repo (normally "master")
 // startup checks:
@@ -57,44 +56,38 @@ export async function getOptionsFromGithub(options: {
     );
   }
 
-  const historicalRemoteConfigs =
-    res.repository.defaultBranchRef.target.history.edges;
-  const latestRemoteConfig = historicalRemoteConfigs[0]?.remoteConfig;
-  const skipRemoteConfig = await getSkipRemoteConfigFile(
+  const remoteConfig = await getRemoteConfigFileOptions(
+    res,
     options.cwd,
-    options.skipRemoteConfig,
-    latestRemoteConfig
+    options.skipRemoteConfig
   );
-
-  const remoteConfig = skipRemoteConfig
-    ? {}
-    : parseRemoteConfig(latestRemoteConfig);
 
   return {
     authenticatedUsername: options.username ?? res.viewer.login,
     sourceBranch: res.repository.defaultBranchRef.name,
     ...remoteConfig,
-    historicalBranchLabelMappings: skipRemoteConfig
-      ? []
-      : getHistoricalBranchLabelMappings(historicalRemoteConfigs),
   };
 }
 
-async function getSkipRemoteConfigFile(
+async function getRemoteConfigFileOptions(
+  res: GithubConfigOptionsResponse,
   cwd?: string,
-  skipRemoteConfig?: boolean,
-  remoteConfig?: RemoteConfig
-) {
+  skipRemoteConfig?: boolean
+): Promise<ConfigFileOptions | undefined> {
   if (skipRemoteConfig) {
     logger.info(
       'Skipping remote config: `--skip-remote-config` specified via config file or cli'
     );
-    return true;
+    return;
   }
+
+  const remoteConfig =
+    res.repository.defaultBranchRef.target.remoteConfigHistory.edges?.[0]
+      ?.remoteConfig;
 
   if (!remoteConfig) {
     logger.info("Skipping remote config: remote config doesn't exist");
-    return true;
+    return;
   }
 
   if (cwd) {
@@ -107,12 +100,12 @@ async function getSkipRemoteConfigFile(
 
     if (isLocalConfigUntracked) {
       logger.info('Skipping remote config: local config is new');
-      return true;
+      return;
     }
 
     if (isLocalConfigModified) {
       logger.info('Skipping remote config: local config is modified');
-      return true;
+      return;
     }
 
     if (
@@ -124,68 +117,22 @@ async function getSkipRemoteConfigFile(
           localCommitDate
         ).toISOString()} > ${remoteConfig.committedDate}`
       );
-      return true;
+      return;
     }
   }
 
-  return false;
+  return parseRemoteConfig(remoteConfig);
 }
 
-function parseRemoteConfig(remoteConfig?: RemoteConfig) {
-  if (!remoteConfig) {
-    return;
-  }
-
-  try {
-    logger.info('Using remote config');
-    return withConfigMigrations(
-      JSON.parse(remoteConfig.file.object.text)
-    ) as ConfigFileOptions;
-  } catch (e) {
-    logger.info('Parsing remote config failed', e);
-    return;
-  }
-}
-
-function getHistoricalBranchLabelMappings(
-  historicalRemoteConfigs: { remoteConfig: RemoteConfig }[]
-) {
-  return historicalRemoteConfigs
-    .map((edge) => {
-      try {
-        const remoteConfig = JSON.parse(
-          edge.remoteConfig.file.object.text
-        ) as ConfigFileOptions;
-
-        if (!remoteConfig.branchLabelMapping) {
-          return;
-        }
-
-        return {
-          branchLabelMapping: remoteConfig.branchLabelMapping,
-          committedDate: edge.remoteConfig.committedDate,
-        };
-      } catch (e) {
-        logger.info('Could not get historical remote config', e);
-        return;
-      }
-    })
-    .filter(filterNil);
-}
 function swallowErrorIfConfigFileIsMissing<T>(error: GithubV4Exception<T>) {
   const { data, errors } = error.axiosResponse.data;
 
-  const wasMissingConfigError = errors?.some((error) => {
-    const isMatch =
-      /^repository.defaultBranchRef.target.history.edges.\d+.remoteConfig.file$/.test(
-        error.path.join('.')
-      );
-
-    return isMatch && error.type === 'NOT_FOUND';
+  const missingConfigError = errors?.some((error) => {
+    return error.path.includes('remoteConfig') && error.type === 'NOT_FOUND';
   });
 
   // swallow error if it's just the config file that's missing
-  if (wasMissingConfigError && data != null) {
+  if (missingConfigError && data != null) {
     return data;
   }
 

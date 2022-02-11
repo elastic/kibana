@@ -30,9 +30,11 @@ function getMessage(errorContext: ErrorContext | string): string {
 export class HandledError extends Error {
   errorContext?: ErrorContext;
   constructor(errorContext: ErrorContext | string) {
-    super(getMessage(errorContext));
+    const message = getMessage(errorContext);
+    super(message);
     Error.captureStackTrace(this, HandledError);
     this.name = 'HandledError';
+    this.message = message;
 
     if (typeof errorContext !== 'string') {
       this.errorContext = errorContext;

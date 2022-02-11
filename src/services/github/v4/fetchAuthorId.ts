@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { apiRequestV4 } from './apiRequestV4';
 
 export interface AuthorIdResponse {
@@ -17,7 +18,7 @@ export async function fetchAuthorId({
     return null;
   }
 
-  const query = /* GraphQL */ `
+  const query = gql`
     query AuthorId($author: String!) {
       user(login: $author) {
         id
