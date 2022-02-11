@@ -1,9 +1,9 @@
 steps:
   - command: .buildkite/scripts/steps/timeout_test.sh
     label: 'Build Timeout Test'
-    parallelism: 100
+    parallelism: 200
     concurrency: 100
     concurrency_group: 'timeout-test'
     agents:
       queue: n2-2
-    timeout_in_minutes: 10
+    timeout_in_minutes: 30
