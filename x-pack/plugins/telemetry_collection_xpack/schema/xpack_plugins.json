@@ -8788,27 +8788,6 @@
                   "_meta": {
                     "description": "This field represents the number of unique configured fleet managed monitors"
                   }
-                },
-                "synthetics_service_enabled": {
-                  "type": "boolean",
-                  "_meta": {
-                    "description": "Whether or not the synthetics service is in use by this cluster"
-                  }
-                },
-                "synthetics_service_no_of_tests": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "The number of tests ran on the cluster in the last 24 hours"
-                  }
-                },
-                "synthetics_service_browser_steps": {
-                  "type": "array",
-                  "items": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "An array of the number of steps for each browser monitor"
-                    }
-                  }
                 }
               }
             }
