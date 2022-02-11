@@ -15,7 +15,7 @@ export function registerDynamicRoute({
   router,
   config,
   overallStatus$,
-  getMetrics,
+  getMetric,
 }: {
   router: IRouter;
   config: {
@@ -30,7 +30,7 @@ export function registerDynamicRoute({
     };
   };
   overallStatus$: Observable<ServiceStatus>;
-  getMetrics: (
+  getMetric: (
     type: string
   ) => Promise<Array<MetricResult<JsonObject>> | MetricResult<JsonObject> | undefined>;
 }) {
@@ -50,7 +50,7 @@ export function registerDynamicRoute({
     async (context, req, res) => {
       const type = req.params.type;
       const [data, clusterUuid, kibana] = await Promise.all([
-        getMetrics(type),
+        getMetric(type),
         getESClusterUuid(context.core.elasticsearch.client),
         getKibanaStats({ config, overallStatus$ }),
       ]);
