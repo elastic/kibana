@@ -59,6 +59,7 @@ import { elasticAgentManifest } from './elastic_agent_manifest';
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
+import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
@@ -424,14 +425,16 @@ class AgentPolicyService {
       options
     );
 
-    // Copy all package policies and append (copy) to their names
+    // Copy all package policies and append (copy n) to their names
     if (baseAgentPolicy.package_policies.length) {
-      const newPackagePolicies = (baseAgentPolicy.package_policies as PackagePolicy[]).map(
-        (packagePolicy: PackagePolicy) => {
+      const newPackagePolicies = await pMap(
+        baseAgentPolicy.package_policies as PackagePolicy[],
+        async (packagePolicy: PackagePolicy) => {
           const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
+
           const updatedPackagePolicy = {
             ...newPackagePolicy,
-            name: `${packagePolicy.name} (copy)`,
+            name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
           };
           return updatedPackagePolicy;
         }
