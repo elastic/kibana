@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from 'kibana/public';
@@ -51,6 +51,26 @@ const i18nTexts = {
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
     defaultMessage: 'Loading deprecation issues…',
   }),
+  remoteClustersDetectedTitle: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.remoteClustersDetectedTitle',
+    {
+      defaultMessage: 'Remote cluster compatibility',
+    }
+  ),
+  getRemoteClustersDetectedDescription: (remoteClustersCount: number) =>
+    i18n.translate('xpack.upgradeAssistant.esDeprecations.remoteClustersDetectedDescription', {
+      defaultMessage:
+        'You have {remoteClustersCount} {remoteClustersCount, plural, one {remote cluster} other {remote clusters}} configured. If you use cross-cluster search, note that 8.x can only search remote clusters running the previous minor version or later. If you use cross-cluster replication, a cluster that contains follower indices must run the same or newer version as the remote cluster.',
+      values: {
+        remoteClustersCount,
+      },
+    }),
+  remoteClustersLinkText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.remoteClustersLinkText',
+    {
+      defaultMessage: 'View remote clusters.',
+    }
+  ),
 };
 
 const getBatchReindexLink = (docLinks: DocLinksStart) => {
@@ -75,6 +95,22 @@ const getBatchReindexLink = (docLinks: DocLinksStart) => {
   );
 };
 
+const RemoteClustersAppLink: React.FunctionComponent = () => {
+  const {
+    plugins: { share },
+  } = useAppContext();
+
+  const remoteClustersUrl = share.url.locators
+    .get('REMOTE_CLUSTERS_LOCATOR')
+    ?.useUrl({ page: 'remoteClusters' });
+
+  return (
+    <EuiLink href={remoteClustersUrl} data-test-subj="remoteClustersLink">
+      {i18nTexts.remoteClustersLinkText}
+    </EuiLink>
+  );
+};
+
 export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   const {
     services: {
@@ -85,6 +121,7 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   } = useAppContext();
 
   const { data: esDeprecations, isLoading, error, resendRequest } = api.useLoadEsDeprecations();
+  const { data: remoteClusters } = api.useLoadRemoteClusters();
 
   const deprecationsCountByLevel: {
     warningDeprecations: number;
@@ -140,10 +177,29 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
           </>
         }
       >
-        <DeprecationCount
-          totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
-          totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
-        />
+        <>
+          {remoteClusters && remoteClusters.length > 0 && (
+            <>
+              <EuiCallOut
+                title={i18nTexts.remoteClustersDetectedTitle}
+                color="warning"
+                iconType="help"
+                data-test-subj="remoteClustersWarningCallout"
+              >
+                <p>
+                  {i18nTexts.getRemoteClustersDetectedDescription(remoteClusters.length)}{' '}
+                  <RemoteClustersAppLink />
+                </p>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+
+          <DeprecationCount
+            totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
+            totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
+          />
+        </>
       </EuiPageHeader>
 
       <EuiSpacer size="l" />
