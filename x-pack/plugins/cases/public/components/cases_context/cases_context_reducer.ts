@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CreateCaseFormProps } from '../create/form';
+import { CreateCaseFlyoutProps } from '../create/flyout';
 
 export const initialCasesContextState: CasesContextState = {
-  casesFlyout: {
+  createCaseFlyout: {
     isFlyoutOpen: false,
   },
 };
 
 export interface CasesContextState {
-  casesFlyout: {
+  createCaseFlyout: {
     isFlyoutOpen: boolean;
-    props?: CreateCaseFormProps;
+    props?: CreateCaseFlyoutProps;
   };
 }
 
@@ -27,7 +27,7 @@ export enum CasesContextStoreActionsList {
 export type CasesContextStoreAction =
   | {
       type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT;
-      payload: CreateCaseFormProps;
+      payload: CreateCaseFlyoutProps;
     }
   | { type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT };
 
@@ -41,7 +41,7 @@ export const casesContextReducer: React.Reducer<CasesContextState, CasesContextS
     case CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT: {
       return {
         ...state,
-        casesFlyout: {
+        createCaseFlyout: {
           isFlyoutOpen: true,
           props: action.payload,
         },

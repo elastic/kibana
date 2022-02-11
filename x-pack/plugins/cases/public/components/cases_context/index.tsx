@@ -17,6 +17,7 @@ import {
   initialCasesContextState,
 } from './cases_context_reducer';
 import { CasesContextFeatures, CasesFeatures } from '../../containers/types';
+import { getCreateCaseFlyoutLazyNoProvider } from '../../methods';
 
 export interface CasesContextValue {
   owner: string[];
@@ -78,7 +79,10 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
-      {value.state.casesFlyout.isFlyoutOpen ? <h1>{'OPEN THE FLYOUT!'}</h1> : null}
+      {/* TODO: Move this out */}
+      {value.state.createCaseFlyout.isFlyoutOpen && value.state.createCaseFlyout.props !== undefined
+        ? getCreateCaseFlyoutLazyNoProvider(value.state.createCaseFlyout.props)
+        : null}
       {children}
     </CasesContext.Provider>
   ) : null;
