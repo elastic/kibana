@@ -24,7 +24,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
 import { ACTIVE_PANEL } from '../../../timelines/components/side_panel/event_details';
 import { useKibana } from '../../../common/lib/kibana';
-import { OsqueryActionItem } from './osqueryActionItem';
+import { OsqueryActionItem } from './osquery_action_item';
 
 interface ActionsData {
   alertStatus: Status;

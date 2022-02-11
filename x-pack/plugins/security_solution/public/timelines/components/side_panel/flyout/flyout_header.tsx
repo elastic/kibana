@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EventDetailsBackToAlertDetailsLink } from '../event_details/back_link';
-import { ACTION_OSQUERY } from '../../../../detections/components/take_action_dropdown/osqueryActionItem';
+import { ACTION_OSQUERY } from '../../../../detections/components/take_action_dropdown/osquery_action_item';
 import {
   ISOLATE_HOST,
   UNISOLATE_HOST,
