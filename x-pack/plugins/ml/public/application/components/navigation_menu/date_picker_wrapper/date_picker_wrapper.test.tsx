@@ -138,7 +138,7 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     expect(displayWarningSpy).not.toHaveBeenCalled();
     const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
     expect(calledWith.isPaused).toBe(true);
-    expect(calledWith.refreshInterval).toBe(0);
+    expect(calledWith.refreshInterval).toBe(5000);
   });
 
   test('should show a warning when configured interval is too short', () => {
