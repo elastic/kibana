@@ -45,6 +45,7 @@ import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/us
 import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
+import { useRefresh } from '../use_refresh';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -110,11 +111,12 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
     useTimeSeriesExplorerUrlState();
   const [globalState, setGlobalState] = useUrlState('_g');
-  const [lastRefresh, setLastRefresh] = useState(0);
-  const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
+
+  const refresh = useRefresh();
+  const previousRefresh = usePrevious(refresh?.lastRefresh ?? 0);
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
@@ -241,7 +243,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   // Use a side effect to clear appState when changing jobs.
   useEffect(() => {
     if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
-      setLastRefresh(Date.now());
       appStateHandler(APP_STATE_ACTION.CLEAR);
     }
     const validatedJobId = validateJobSelection(
@@ -333,7 +334,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         autoZoomDuration,
         bounds,
         dateFormatTz,
-        lastRefresh,
+        lastRefresh: refresh?.lastRefresh ?? 0,
         previousRefresh,
         selectedJobId,
         selectedDetectorIndex,
