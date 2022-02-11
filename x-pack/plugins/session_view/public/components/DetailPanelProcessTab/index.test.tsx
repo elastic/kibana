@@ -19,6 +19,7 @@ const getLeaderDetail = (leader: string): DetailPanelProcessLeader => ({
   interactive: true,
   pid: 1234,
   entryMetaSourceIp: '10.132.0.50',
+  executable: '/usr/bin/bash',
 });
 
 const TEST_PROCESS_DETAIL: DetailPanelProcess = {

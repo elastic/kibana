@@ -36,43 +36,5 @@ describe('ProcessTree component', () => {
       expect(renderResult.queryByTestId('sessionViewProcessTree')).toBeTruthy();
       expect(renderResult.queryAllByTestId('processTreeNode')).toBeTruthy();
     });
-    describe('Orphaned childrens', () => {
-      const mockEvents = mockData[0].events;
-
-      const orphanedProcess = {
-        ...mockEvents[0],
-        process: {
-          ...mockEvents[0].process,
-          entity_id: 'orphaned-id',
-          args: ['orphaned'],
-          executable: 'orphaned',
-          pid: 123,
-          pgid: 123,
-          parent: {
-            ...mockEvents[0].process.parent,
-          },
-        },
-      } as unknown as typeof mockEvents[0];
-
-      // commented out until we get new UX for orphans treatment aka disjointed tree
-      // it('should render orphaned children under the session leader', () => {
-      //   mockEvents.push(orphanedProcess);
-
-      //   renderResult = mockedContext.render(
-      //     <ProcessTree
-      //       sessionEntityId="3d0192c6-7c54-5ee6-a110-3539a7cf42bc"
-      //       data={mockData}
-      //       isFetching={false}
-      //       fetchNextPage={() => true}
-      //       hasNextPage={false}
-      //       fetchPreviousPage={() => true}
-      //       hasPreviousPage={false}
-      //       onProcessSelected={jest.fn()}
-      //     />
-      //   );
-
-      //   expect(renderResult.queryByText('orphaned')).toBeTruthy();
-      // });
-    });
   });
 });
