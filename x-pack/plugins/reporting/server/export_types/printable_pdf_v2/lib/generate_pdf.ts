@@ -109,7 +109,10 @@ export function generatePdfObservable(
 
       return {
         buffer,
-        metrics,
+        metrics: {
+          ...metrics,
+          pdfPages: pdfOutput.getPageCount(),
+        },
         warnings: results.reduce((found, current) => {
           if (current.error) {
             found.push(current.error.message);

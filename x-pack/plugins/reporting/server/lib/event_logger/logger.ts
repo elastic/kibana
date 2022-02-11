@@ -30,6 +30,7 @@ export interface ExecutionCompleteMetrics {
   cpu?: number;
   csvRows?: number;
   memory?: number;
+  pdfPages?: number;
 }
 
 export interface IReportingEventLogger {
@@ -109,6 +110,7 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       cpu,
       csvRows,
       memory,
+      pdfPages,
     }: ExecutionCompleteMetrics): CompletedExecution {
       const message = `completed ${this.report.jobtype} execution`;
       this.completionLogger.stopTiming();
@@ -116,7 +118,14 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
         {
           message,
           kibana: {
-            reporting: { actionType: ActionType.EXECUTE_COMPLETE, byteSize, cpu, csvRows, memory },
+            reporting: {
+              actionType: ActionType.EXECUTE_COMPLETE,
+              byteSize,
+              cpu,
+              csvRows,
+              memory,
+              pdfPages,
+            },
           },
         } as Partial<CompletedExecution>,
         this.eventObj

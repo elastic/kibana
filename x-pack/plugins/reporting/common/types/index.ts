@@ -35,7 +35,12 @@ export interface ReportOutput extends TaskRunResult {
   size: number;
 }
 
-export type TaskRunMetrics = Partial<Required<ScreenshotResult>['metrics']>;
+export interface TaskRunMetrics extends Partial<Required<ScreenshotResult>['metrics']> {
+  /**
+   * A number of emitted pages in the generated PDF report.
+   */
+  pdfPages?: number;
+}
 
 export interface TaskRunResult {
   content_type: string | null;

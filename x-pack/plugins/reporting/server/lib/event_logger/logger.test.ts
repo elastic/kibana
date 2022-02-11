@@ -121,6 +121,7 @@ describe('Event Logger', () => {
       cpu: 0.1,
       csvRows: 440000,
       memory: 1024,
+      pdfPages: 5,
     });
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
@@ -135,6 +136,7 @@ describe('Event Logger', () => {
           "id": "12348",
           "jobType": "csv",
           "memory": 1024,
+          "pdfPages": 5,
         },
         "completed csv execution",
       ]

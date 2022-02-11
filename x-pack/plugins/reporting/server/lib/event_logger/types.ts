@@ -22,6 +22,7 @@ export interface ReportingAction<A extends ActionType> extends LogMeta {
       cpu?: number;
       csvRows?: number;
       memory?: number;
+      pdfPages?: number;
     };
     task?: { id?: string };
   };

@@ -66,6 +66,7 @@ export const mapping = {
       cpuInPercentage: { type: 'double' },
       memory: { type: 'long' },
       memoryInMegabytes: { type: 'double' },
+      pdfPages: { type: 'long' },
     },
   },
 } as const;
