@@ -6,10 +6,9 @@
  */
 import expect from '@kbn/expect';
 import { first } from 'lodash';
-import { Client } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { PrivilegeType } from '../../../../../plugins/apm/common/privilege_type';
-import { ApmApiError } from '../../../common/apm_api_supertest';
+import { ApmApiError, ApmApiSupertest } from '../../../common/apm_api_supertest';
 import { ApmUser } from '../../../common/authentication';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -18,51 +17,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const esClient = getService('es');
 
   const agentKeyName = 'test';
-  const roleWithAgentKeyApplicationPrivileges = 'apm_agent_key_application_privileges';
-  const apmManageOwnAgentKeysUser = ApmUser.apmManageOwnAgentKeys;
   const allApplicationPrivileges = [
     PrivilegeType.AGENT_CONFIG,
     PrivilegeType.EVENT,
     PrivilegeType.SOURCEMAP,
   ];
 
-  async function addRoleWithAppPrivileges(es: Client, privileges = allApplicationPrivileges) {
-    await es.security.putRole({
-      name: roleWithAgentKeyApplicationPrivileges,
-      body: {
-        applications: [
-          {
-            application: 'apm',
-            privileges,
-            resources: ['*'],
-          },
-        ],
-      },
-    });
-
-    const user = await es.security.getUser({ username: apmManageOwnAgentKeysUser });
-
-    await es.security.putUser({
-      ...user[apmManageOwnAgentKeysUser],
-      roles: [...user[apmManageOwnAgentKeysUser].roles, roleWithAgentKeyApplicationPrivileges],
-    });
-  }
-
-  async function removeRoleWithAppPrivileges(es: Client) {
-    await es.security.deleteRole({
-      name: roleWithAgentKeyApplicationPrivileges,
-    });
-  }
-
-  function getApiClient(useManageOwnApiKeyRole: boolean) {
-    return useManageOwnApiKeyRole ? apmApiClient.manageOwnAgentKeysUser : apmApiClient.writeUser;
-  }
-
-  async function createAgentKey(
-    useManageOwnApiKeyRole: boolean,
-    privileges = allApplicationPrivileges
-  ) {
-    const apiClient = getApiClient(useManageOwnApiKeyRole);
+  async function createAgentKey(apiClient: ApmApiSupertest, privileges = allApplicationPrivileges) {
     return await apiClient({
       endpoint: 'POST /api/apm/agent_keys',
       params: {
@@ -74,8 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  async function invalidateAgentKey(useManageOwnApiKeyRole: boolean, id: string) {
-    const apiClient = getApiClient(useManageOwnApiKeyRole);
+  async function invalidateAgentKey(apiClient: ApmApiSupertest, id: string) {
     return await apiClient({
       endpoint: 'POST /internal/apm/api_key/invalidate',
       params: {
@@ -84,8 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  async function getAgentKeys(useManageOwnApiKeyRole: boolean) {
-    const apiClient = getApiClient(useManageOwnApiKeyRole);
+  async function getAgentKeys(apiClient: ApmApiSupertest) {
     return await apiClient({ endpoint: 'GET /internal/apm/agent_keys' });
   }
 
@@ -95,18 +54,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('When the user does not have the required cluster privileges', () => {
         it('should return an error when creating an agent key', async () => {
-          const error = await expectToReject(() => createAgentKey(false));
+          const error = await expectToReject(() => createAgentKey(apmApiClient.writeUser));
           expect(error.res.status).to.be(500);
           expect(error.res.body.message).contain('is missing the following requested privilege');
         });
 
         it('should return an error when invalidating an agent key', async () => {
-          const error = await expectToReject(() => invalidateAgentKey(false, 'test'));
+          const error = await expectToReject(() =>
+            invalidateAgentKey(apmApiClient.writeUser, agentKeyName)
+          );
           expect(error.res.status).to.be(500);
         });
 
         it('should return an error when getting a list of agent keys', async () => {
-          const error = await expectToReject(() => getAgentKeys(false));
+          const error = await expectToReject(() => getAgentKeys(apmApiClient.writeUser));
           expect(error.res.status).to.be(500);
         });
       });
@@ -114,16 +75,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('When the user does not have the required application privileges', () => {
         allApplicationPrivileges.map((privilege) => {
           it(`should return an error when creating an agent key with ${privilege} privilege`, async () => {
-            await addRoleWithAppPrivileges(
-              esClient,
-              allApplicationPrivileges.filter((x) => x !== privilege)
+            const error = await expectToReject(() =>
+              createAgentKey(apmApiClient.manageOwnAgentKeysUser, [privilege])
             );
-
-            const error = await expectToReject(() => createAgentKey(true, [privilege]));
             expect(error.res.status).to.be(500);
             expect(error.res.body.message).contain('is missing the following requested privilege');
-
-            await removeRoleWithAppPrivileges(esClient);
           });
         });
       });
@@ -134,22 +90,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'When the user has the required privileges',
     { config: 'basic', archives: [] },
     () => {
-      before(async () => {
-        await addRoleWithAppPrivileges(esClient);
-      });
-
-      after(async () => {
-        await removeRoleWithAppPrivileges(esClient);
-      });
-
       afterEach(async () => {
         await esClient.security.invalidateApiKey({
-          username: apmManageOwnAgentKeysUser,
+          username: ApmUser.apmManageOwnAndCreateAgentKeys,
         });
       });
 
       it('should be able to create an agent key', async () => {
-        const { status, body } = await createAgentKey(true);
+        const { status, body } = await createAgentKey(apmApiClient.createAndAllAgentKeysUser);
         expect(status).to.be(200);
         expect(body).to.have.property('agentKey');
         expect(body.agentKey).to.have.property('id');
@@ -165,13 +113,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('should be able to invalidate an agent key', async () => {
         // Create
-        const { body: createAgentKeyBody } = await createAgentKey(true);
+        const { body: createAgentKeyBody } = await createAgentKey(
+          apmApiClient.createAndAllAgentKeysUser
+        );
         const {
           agentKey: { id },
         } = createAgentKeyBody;
 
         // Invalidate
-        const { status, body } = await invalidateAgentKey(true, id);
+        const { status, body } = await invalidateAgentKey(
+          apmApiClient.createAndAllAgentKeysUser,
+          id
+        );
         expect(status).to.be(200);
         expect(body).to.have.property('invalidatedAgentKeys');
         expect(body.invalidatedAgentKeys).to.eql([id]);
@@ -185,7 +138,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('should be able to get a list of agent keys', async () => {
         // Create
-        const { body: createAgentKeyBody } = await createAgentKey(true);
+        const { body: createAgentKeyBody } = await createAgentKey(
+          apmApiClient.createAndAllAgentKeysUser
+        );
         const {
           agentKey: { id },
         } = createAgentKeyBody;
@@ -194,7 +149,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const {
           status,
           body: { agentKeys },
-        } = await getAgentKeys(true);
+        } = await getAgentKeys(apmApiClient.createAndAllAgentKeysUser);
 
         expect(status).to.be(200);
         const agentKey = first(agentKeys);
