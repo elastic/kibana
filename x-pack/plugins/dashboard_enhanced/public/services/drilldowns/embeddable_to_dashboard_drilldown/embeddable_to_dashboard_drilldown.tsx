@@ -54,7 +54,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
   protected async getLocation(
     config: Config,
     context: Context,
-    useUrl: boolean
+    useUrlForState: boolean
   ): Promise<KibanaLocation> {
     const params: DashboardAppLocatorParams = {
       dashboardId: config.dashboardId,
@@ -93,7 +93,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
     }
 
     const location = await this.locator.getLocation(params);
-    if (useUrl) {
+    if (useUrlForState) {
       this.useUrlForState(location);
     }
 

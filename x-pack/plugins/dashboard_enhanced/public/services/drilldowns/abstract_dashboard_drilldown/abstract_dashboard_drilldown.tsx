@@ -48,7 +48,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   protected abstract getLocation(
     config: Config,
     context: Context,
-    useUrl: boolean
+    useUrlForState: boolean
   ): Promise<KibanaLocation>;
 
   public readonly order = 100;
