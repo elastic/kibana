@@ -190,6 +190,13 @@ export const lensActions = {
   setLayerDefaultDimension,
 };
 
+const buildAppliedState = (state: LensAppState) => {
+  return {
+    visualization: cloneDeep(state.visualization),
+    datasourceStates: cloneDeep(state.datasourceStates),
+  };
+};
+
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
   const { datasourceMap, visualizationMap } = storeDeps;
   return createReducer<LensAppState>(initialState, {
@@ -215,17 +222,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       delete state.appliedState;
     },
     [disableAutoApply.type]: (state) => {
-      state.appliedState = {
-        visualization: cloneDeep(state.visualization),
-        datasourceStates: cloneDeep(state.datasourceStates),
-      };
+      state.appliedState = buildAppliedState(state);
     },
     [applyChanges.type]: (state) => {
       if (state.appliedState) {
-        state.appliedState = {
-          visualization: cloneDeep(state.visualization),
-          datasourceStates: cloneDeep(state.datasourceStates),
-        };
+        state.appliedState = buildAppliedState(state);
       }
     },
     [updateState.type]: (
