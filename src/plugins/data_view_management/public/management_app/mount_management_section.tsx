@@ -39,7 +39,7 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   const [
-    { chrome, application, uiSettings, notifications, overlays, http, docLinks, theme },
+    { chrome, uiSettings, notifications, overlays, http, docLinks, theme },
     { data, dataViewFieldEditor, dataViewEditor, dataViews, fieldFormats },
     indexPatternManagementStart,
   ] = await getStartServices();
@@ -51,7 +51,6 @@ export async function mountManagementSection(
 
   const deps: IndexPatternManagmentContext = {
     chrome,
-    application,
     uiSettings,
     notifications,
     overlays,
