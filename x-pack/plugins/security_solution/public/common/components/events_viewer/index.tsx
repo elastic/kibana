@@ -113,6 +113,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const { timelines: timelinesUi } = useKibana().services;
   const {
     browserFields,
+    dataViewId,
     docValueFields,
     indexPattern,
     runtimeMappings,
@@ -190,6 +191,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             bulkActions,
             columns,
             dataProviders,
+            dataViewId,
             defaultCellActions,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
