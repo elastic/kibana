@@ -42,7 +42,7 @@ describe('PingList component', () => {
         type: 'io',
       },
       monitor: {
-        duration: { us: 1370 },
+        duration: { us: null },
         id: 'auto-tcp-0X81440A68E839814D',
         ip: '255.255.255.0',
         name: '',
@@ -162,7 +162,7 @@ describe('PingList component', () => {
               },
               "monitor": Object {
                 "duration": Object {
-                  "us": 1370,
+                  "us": null,
                 },
                 "id": "auto-tcp-0X81440A68E839814D",
                 "ip": "255.255.255.0",
@@ -183,6 +183,13 @@ describe('PingList component', () => {
         const ping = pings[0];
         ping.monitor.type = 'browser';
         expect(rowShouldExpand(ping)).toBe(true);
+      });
+    });
+
+    describe('duration column', () => {
+      it('shows -- when duration is null', () => {
+        const { getByTestId } = render(<PingList />);
+        expect(getByTestId('ping-list-duration-unavailable-tool-tip')).toBeInTheDocument();
       });
     });
 

@@ -91,7 +91,7 @@ export type Tls = t.TypeOf<typeof TlsType>;
 export const MonitorType = t.intersection([
   t.type({
     duration: t.type({
-      us: t.number,
+      us: t.union([t.number, t.null]),
     }),
     id: t.string,
     status: t.string,
