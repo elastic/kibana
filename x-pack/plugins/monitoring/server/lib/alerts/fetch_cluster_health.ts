@@ -79,8 +79,9 @@ export async function fetchClusterHealth(
   const response = await esClient.search<ElasticsearchSource>(params);
   return (response.hits?.hits ?? []).map((hit) => {
     return {
-      health: hit._source!.cluster_state?.status,
-      clusterUuid: hit._source!.cluster_uuid,
+      health:
+        hit._source!.cluster_state?.status || hit._source!.elasticsearch?.cluster?.stats?.status,
+      clusterUuid: hit._source!.cluster_uuid || hit._source!.elasticsearch?.cluster?.id,
       ccs: hit._index.includes(':') ? hit._index.split(':')[0] : undefined,
     } as AlertClusterHealth;
   });
