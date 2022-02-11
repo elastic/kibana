@@ -117,6 +117,8 @@ describe('useFetchAlertDetail', () => {
               "event.action": "active",
               "event.kind": "signal",
               "kibana.alert.duration.us": 13793555000,
+              "kibana.alert.evaluation.threshold": undefined,
+              "kibana.alert.evaluation.value": undefined,
               "kibana.alert.instance.id": "*",
               "kibana.alert.reason": "Document count reported no data in the last 1 hour for all hosts",
               "kibana.alert.rule.category": "Metric threshold",
@@ -138,7 +140,7 @@ describe('useFetchAlertDetail', () => {
               "tags": Array [],
             },
             "link": undefined,
-            "reason": "Document count reported no data in the last 1 hour for all hosts",
+            "reason": "A super rule",
             "start": 1643639463649,
           },
         ]
