@@ -41,17 +41,21 @@ export async function incrementPackagePolicyCopyName(
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${packageName}*`,
   });
 
-  const copyVersion =
-    packagePolicyData.items
-      .map((item) => {
-        const matches = item.name.match(/^(.*)\s\(copy\s?([0-9]*)\)$/);
-        if (matches) {
-          return parseInt(matches[2], 10) || 1;
-        }
+  const maxVersion =
+    packagePolicyData.items.length > 0
+      ? Math.max(
+          ...packagePolicyData.items.map((item) => {
+            const matches = item.name.match(/^(.*)\s\(copy\s?([0-9]*)\)$/);
+            if (matches) {
+              return parseInt(matches[2], 10) || 1;
+            }
 
-        return 0;
-      })
-      .sort((a, b) => b - a)[0] + 1 || 1;
+            return 0;
+          })
+        )
+      : 0;
+
+  const copyVersion = maxVersion + 1;
 
   if (copyVersion === 1) {
     return `${packageName} (copy)`;
