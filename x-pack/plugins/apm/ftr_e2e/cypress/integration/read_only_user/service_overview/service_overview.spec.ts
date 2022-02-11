@@ -18,7 +18,67 @@ const baseUrl = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
+const apiRequestsToIntercept = [
+  {
+    endpoint:
+      '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
+    aliasName: 'latencyRequest',
+  },
+  {
+    endpoint: '/internal/apm/services/opbeans-node/throughput?*',
+    aliasName: 'throughputRequest',
+  },
+  {
+    endpoint:
+      '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
+    aliasName: 'transactionsGroupsMainStadisticsRequest',
+  },
+  {
+    endpoint:
+      '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
+    aliasName: 'errorRateRequest',
+  },
+  {
+    endpoint:
+      '/internal/apm/services/opbeans-node/errors/groups/main_statistics?*',
+    aliasName: 'errorsGroupsMainStadisticsRequest',
+  },
+  {
+    endpoint:
+      '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
+    aliasName: 'transactionsBreakdownRequest',
+  },
+  {
+    endpoint: '/internal/apm/services/opbeans-node/dependencies?*',
+    aliasName: 'dependenciesRequest',
+  },
+  {
+    endpoint:
+      '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
+    aliasName: 'instancesMainStadisticsRequest',
+  },
+  {
+    endpoint:
+      '/internal/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
+    aliasName: 'transactionsGroupsDetailedStadisticsRequest',
+  },
+  {
+    endpoint:
+      '/internal/apm/services/opbeans-node/service_overview_instances/detailed_statistics?*',
+    aliasName: 'instancesDetailedStadisticsRequest',
+  },
+];
+
+const aliasNames = apiRequestsToIntercept.map(
+  ({ aliasName }) => `@${aliasName}`
+);
+
 describe('Service Overview', () => {
+  beforeEach(() => {
+    cy.loginAsReadOnlyUser();
+    cy.visit(baseUrl);
+  });
+
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -32,12 +92,7 @@ describe('Service Overview', () => {
     await synthtrace.clean();
   });
 
-  beforeEach(() => {
-    cy.loginAsReadOnlyUser();
-  });
-
   it('persists transaction type selected when clicking on Transactions tab', () => {
-    cy.visit(baseUrl);
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
       'have.value',
       'request'
@@ -55,7 +110,6 @@ describe('Service Overview', () => {
   });
 
   it('persists transaction type selected when clicking on View Transactions link', () => {
-    cy.visit(baseUrl);
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
       'have.value',
       'request'
@@ -71,6 +125,34 @@ describe('Service Overview', () => {
       'have.value',
       'Worker'
     );
+  });
+
+  it('renders transaction latency chart', () => {
+    cy.get('[data-test-subj="latencyChart"]');
+  });
+
+  it('renders throughput chart', () => {
+    cy.get('[data-test-subj="throughput"]');
+  });
+
+  it('renders transactions group table', () => {
+    cy.get('[data-test-subj="transactionsGroupTable"]');
+  });
+
+  it('renders error table', () => {
+    cy.get('[data-test-subj="serviceOverviewErrorsTable"]');
+  });
+
+  it('renders dependencies table', () => {
+    cy.get('[data-test-subj="dependenciesTable"]');
+  });
+
+  it('renders instances latency distribution chart', () => {
+    cy.get('[data-test-subj="instancesLatencyDistribution"]');
+  });
+
+  it('renders instances table', () => {
+    cy.get('[data-test-subj="serviceOverviewInstancesTable"]');
   });
 
   it('hides dependency tab when RUM service', () => {
@@ -93,6 +175,45 @@ describe('Service Overview', () => {
       elements.map((index, element) => {
         expect(element.innerText).to.not.equal('Dependencies');
       });
+    });
+  });
+
+  describe('Calls APIs', () => {
+    beforeEach(() => {
+      apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
+        cy.intercept('GET', endpoint).as(aliasName);
+      });
+    });
+
+    it('with the correct environment when changing the environment', () => {
+      cy.wait(aliasNames, { requestTimeout: 10000 });
+
+      cy.get('[data-test-subj="environmentFilter"]').select('production');
+
+      cy.expectAPIsToHaveBeenCalledWith({
+        apisIntercepted: aliasNames,
+        value: 'environment=production',
+      });
+    });
+
+    it('when clicking the refresh button', () => {
+      cy.wait(aliasNames, { requestTimeout: 10000 });
+      cy.contains('Refresh').click();
+      cy.wait(aliasNames);
+    });
+
+    it.skip('when selecting a different time range and clicking the update button', () => {
+      cy.wait(aliasNames, { requestTimeout: 10000 });
+
+      cy.selectAbsoluteTimeRange(
+        'Oct 10, 2021 @ 01:00:00.000',
+        'Oct 10, 2021 @ 01:30:00.000'
+      );
+      cy.contains('Update').click();
+      cy.wait(aliasNames, { requestTimeout: 10000 });
+
+      cy.contains('Refresh').click();
+      cy.wait(aliasNames, { requestTimeout: 10000 });
     });
   });
 });

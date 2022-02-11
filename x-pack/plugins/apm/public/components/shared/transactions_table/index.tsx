@@ -229,101 +229,103 @@ export function TransactionsTable({
   const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.apm.transactionsTable.title', {
-                  defaultMessage: 'Transactions',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {!hideViewTransactionsLink && (
+    <div data-test-subj="transactionsGroupTable">
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
-              <TransactionOverviewLink
-                serviceName={serviceName}
-                latencyAggregationType={latencyAggregationType}
-                transactionType={transactionType}
-              >
-                {i18n.translate('xpack.apm.transactionsTable.linkText', {
-                  defaultMessage: 'View transactions',
-                })}
-              </TransactionOverviewLink>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.apm.transactionsTable.title', {
+                    defaultMessage: 'Transactions',
+                  })}
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      {showAggregationAccurateCallout && !isAggregationAccurate && (
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.apm.transactionsTable.cardinalityWarning.title',
-              {
-                defaultMessage:
-                  'This view shows a subset of reported transactions.',
-              }
+            {!hideViewTransactionsLink && (
+              <EuiFlexItem grow={false}>
+                <TransactionOverviewLink
+                  serviceName={serviceName}
+                  latencyAggregationType={latencyAggregationType}
+                  transactionType={transactionType}
+                >
+                  {i18n.translate('xpack.apm.transactionsTable.linkText', {
+                    defaultMessage: 'View transactions',
+                  })}
+                </TransactionOverviewLink>
+              </EuiFlexItem>
             )}
-            color="danger"
-            iconType="alert"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.apm.transactionsTable.cardinalityWarning.body"
-                defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
-                values={{
-                  bucketSize,
-                  codeBlock: (
-                    <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>
-                  ),
-                }}
-              />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {showAggregationAccurateCallout && !isAggregationAccurate && (
+          <EuiFlexItem>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.apm.transactionsTable.cardinalityWarning.title',
+                {
+                  defaultMessage:
+                    'This view shows a subset of reported transactions.',
+                }
+              )}
+              color="danger"
+              iconType="alert"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.apm.transactionsTable.cardinalityWarning.body"
+                  defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
+                  values={{
+                    bucketSize,
+                    codeBlock: (
+                      <EuiCode>xpack.apm.ui.transactionGroupBucketSize</EuiCode>
+                    ),
+                  }}
+                />
 
-              <ElasticDocsLink
-                section="/kibana"
-                path="/troubleshooting.html#troubleshooting-too-many-transactions"
-              >
-                {i18n.translate(
-                  'xpack.apm.transactionsTable.cardinalityWarning.docsLink',
-                  { defaultMessage: 'Learn more in the docs' }
-                )}
-              </ElasticDocsLink>
-            </p>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>
+                <ElasticDocsLink
+                  section="/kibana"
+                  path="/troubleshooting.html#troubleshooting-too-many-transactions"
+                >
+                  {i18n.translate(
+                    'xpack.apm.transactionsTable.cardinalityWarning.docsLink',
+                    { defaultMessage: 'Learn more in the docs' }
+                  )}
+                </ElasticDocsLink>
+              </p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
-          <OverviewTableContainer
-            fixedHeight={fixedHeight}
-            isEmptyAndNotInitiated={
-              transactionGroupsTotalItems === 0 && isNotInitiated
-            }
-          >
-            <ManagedTable
-              isLoading={isLoading}
-              error={status === FETCH_STATUS.FAILURE}
-              columns={columns}
-              items={transactionGroups}
-              initialSortField="impact"
-              initialSortDirection="desc"
-              initialPageSize={numberOfTransactionsPerPage}
-              noItemsMessage={
-                isLoading
-                  ? i18n.translate('xpack.apm.transactionsTable.loading', {
-                      defaultMessage: 'Loading...',
-                    })
-                  : i18n.translate('xpack.apm.transactionsTable.noResults', {
-                      defaultMessage: 'No transaction groups found',
-                    })
+          <EuiFlexItem>
+            <OverviewTableContainer
+              fixedHeight={fixedHeight}
+              isEmptyAndNotInitiated={
+                transactionGroupsTotalItems === 0 && isNotInitiated
               }
-              hidePerPageOptions={hidePerPageOptions}
-            />
-          </OverviewTableContainer>
+            >
+              <ManagedTable
+                isLoading={isLoading}
+                error={status === FETCH_STATUS.FAILURE}
+                columns={columns}
+                items={transactionGroups}
+                initialSortField="impact"
+                initialSortDirection="desc"
+                initialPageSize={numberOfTransactionsPerPage}
+                noItemsMessage={
+                  isLoading
+                    ? i18n.translate('xpack.apm.transactionsTable.loading', {
+                        defaultMessage: 'Loading...',
+                      })
+                    : i18n.translate('xpack.apm.transactionsTable.noResults', {
+                        defaultMessage: 'No transaction groups found',
+                      })
+                }
+                hidePerPageOptions={hidePerPageOptions}
+              />
+            </OverviewTableContainer>
+          </EuiFlexItem>
         </EuiFlexItem>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </div>
   );
 }

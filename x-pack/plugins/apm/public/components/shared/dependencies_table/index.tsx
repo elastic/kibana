@@ -205,37 +205,39 @@ export function DependenciesTable(props: Props) {
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>{title}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {link && <EuiFlexItem grow={false}>{link}</EuiFlexItem>}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <OverviewTableContainer
-          fixedHeight={fixedHeight}
-          isEmptyAndNotInitiated={
-            items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
-          }
-        >
-          <ManagedTable
-            isLoading={status === FETCH_STATUS.LOADING}
-            error={status === FETCH_STATUS.FAILURE}
-            columns={columns}
-            items={items}
-            noItemsMessage={noItemsMessage}
-            initialSortField="impactValue"
-            initialSortDirection="desc"
-            pagination={true}
-            hidePerPageOptions={hidePerPageOptions}
-          />
-        </OverviewTableContainer>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div data-test-subj="dependenciesTable">
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h2>{title}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {link && <EuiFlexItem grow={false}>{link}</EuiFlexItem>}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <OverviewTableContainer
+            fixedHeight={fixedHeight}
+            isEmptyAndNotInitiated={
+              items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
+            }
+          >
+            <ManagedTable
+              isLoading={status === FETCH_STATUS.LOADING}
+              error={status === FETCH_STATUS.FAILURE}
+              columns={columns}
+              items={items}
+              noItemsMessage={noItemsMessage}
+              initialSortField="impactValue"
+              initialSortDirection="desc"
+              pagination={true}
+              hidePerPageOptions={hidePerPageOptions}
+            />
+          </OverviewTableContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 }
