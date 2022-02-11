@@ -15,10 +15,11 @@ import {
 import { ControlsServices } from '..';
 import { dataServiceFactory } from './data';
 import { overlaysServiceFactory } from './overlays';
-import { controlsServiceFactory } from './controls';
 import { dataViewsServiceFactory } from './data_views';
 import { httpServiceFactory } from '../stub/http';
+
 import { optionsListServiceFactory } from './options_list';
+import { controlsServiceFactory } from '../stub/controls';
 
 export type { ControlsServices } from '..';
 
