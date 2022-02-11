@@ -20,10 +20,10 @@
 
 import { DataViewEditorPlugin } from './plugin';
 
+export { indexPatternEditorPluginMock } from './mocks';
+
 export type { PluginStart as DataViewEditorStart, DataViewEditorProps } from './types';
 
 export function plugin() {
   return new DataViewEditorPlugin();
 }
-
-export { indexPatternEditorPluginMock } from './mocks';
