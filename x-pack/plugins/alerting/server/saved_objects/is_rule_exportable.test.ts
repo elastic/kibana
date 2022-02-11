@@ -34,21 +34,24 @@ beforeEach(() => {
 describe('isRuleExportable', () => {
   it('should return true if rule type isExportable is true', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register({
-      id: 'foo',
-      name: 'Foo',
-      actionGroups: [
-        {
-          id: 'default',
-          name: 'Default',
-        },
-      ],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      executor: jest.fn(),
-      producer: 'alerts',
-    });
+    registry.register(
+      {
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        producer: 'alerts',
+      },
+      '1m'
+    );
     expect(
       isRuleExportable(
         {
@@ -90,21 +93,24 @@ describe('isRuleExportable', () => {
 
   it('should return false and log warning if rule type isExportable is false', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register({
-      id: 'foo',
-      name: 'Foo',
-      actionGroups: [
-        {
-          id: 'default',
-          name: 'Default',
-        },
-      ],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: false,
-      executor: jest.fn(),
-      producer: 'alerts',
-    });
+    registry.register(
+      {
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: false,
+        executor: jest.fn(),
+        producer: 'alerts',
+      },
+      '1m'
+    );
     expect(
       isRuleExportable(
         {
@@ -149,21 +155,24 @@ describe('isRuleExportable', () => {
 
   it('should return false and log warning if rule type is not registered', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register({
-      id: 'foo',
-      name: 'Foo',
-      actionGroups: [
-        {
-          id: 'default',
-          name: 'Default',
-        },
-      ],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: false,
-      executor: jest.fn(),
-      producer: 'alerts',
-    });
+    registry.register(
+      {
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: false,
+        executor: jest.fn(),
+        producer: 'alerts',
+      },
+      '1m'
+    );
     expect(
       isRuleExportable(
         {

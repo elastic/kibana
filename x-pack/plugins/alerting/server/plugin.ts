@@ -346,37 +346,6 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
-    rulesClientFactory.initialize({
-      ruleTypeRegistry: ruleTypeRegistry!,
-      logger,
-      taskManager: plugins.taskManager,
-      securityPluginSetup: security,
-      securityPluginStart: plugins.security,
-      encryptedSavedObjectsClient,
-      spaceIdToNamespace,
-      getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request);
-      },
-      actions: plugins.actions,
-      eventLog: plugins.eventLog,
-      kibanaVersion: this.kibanaVersion,
-      authorization: alertingAuthorizationClientFactory,
-      eventLogger: this.eventLogger,
-    });
-
-    const getRulesClientWithRequest = (request: KibanaRequest) => {
-      if (isESOCanEncrypt !== true) {
-        throw new Error(
-          `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-        );
-      }
-      return rulesClientFactory!.create(request, core.savedObjects);
-    };
-
-    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
-      return alertingAuthorizationClientFactory!.create(request);
-    };
-
     this.config.then((config) => {
       taskRunnerFactory.initialize({
         logger,
@@ -396,7 +365,39 @@ export class AlertingPlugin {
         cancelAlertsOnRuleTimeout: config.cancelAlertsOnRuleTimeout,
         usageCounter: this.usageCounter,
       });
+
+      rulesClientFactory.initialize({
+        ruleTypeRegistry: ruleTypeRegistry!,
+        logger,
+        taskManager: plugins.taskManager,
+        securityPluginSetup: security,
+        securityPluginStart: plugins.security,
+        encryptedSavedObjectsClient,
+        spaceIdToNamespace,
+        getSpaceId(request: KibanaRequest) {
+          return plugins.spaces?.spacesService.getSpaceId(request);
+        },
+        actions: plugins.actions,
+        eventLog: plugins.eventLog,
+        kibanaVersion: this.kibanaVersion,
+        authorization: alertingAuthorizationClientFactory,
+        eventLogger: this.eventLogger,
+        minimumScheduleInterval: config.minimumScheduleInterval,
+      });
     });
+
+    const getRulesClientWithRequest = (request: KibanaRequest) => {
+      if (isESOCanEncrypt !== true) {
+        throw new Error(
+          `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        );
+      }
+      return rulesClientFactory!.create(request, core.savedObjects);
+    };
+
+    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
+      return alertingAuthorizationClientFactory!.create(request);
+    };
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
       const client = getRulesClientWithRequest(request);
