@@ -22,18 +22,15 @@ import {
   getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { isElasticRule } from '../../../../usage/detections';
 import { readRules } from '../../rules/read_rules';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
-jest.mock('../../../../usage/detections', () => ({ isElasticRule: jest.fn() }));
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
 
 describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
-  const isElasticRuleMock = isElasticRule as jest.Mock;
   const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -46,7 +43,6 @@ describe.each([
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    isElasticRuleMock.mockReturnValue(false);
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
     performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
   });

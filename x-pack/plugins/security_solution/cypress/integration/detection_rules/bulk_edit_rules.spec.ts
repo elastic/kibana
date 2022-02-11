@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { hasIndexPatterns } from '../../screens/rule_details';
-
 import {
   ELASTIC_RULES_BTN,
   CUSTOM_RULES_BTN,
@@ -40,6 +38,7 @@ import {
   testAllTagsBadges,
   typeTags,
 } from '../../tasks/alerts_detection_rules';
+import { hasIndexPatterns } from '../../tasks/rule_details';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
