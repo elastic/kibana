@@ -39,8 +39,9 @@ import type {
 import type {
   DatasourceMap,
   EditorFrameInstance,
-  VisualizationMap,
   VisualizeEditorContext,
+  LensTopNavMenuEntryGenerator,
+  VisualizationMap,
 } from '../types';
 import type { PresentationUtilPluginStart } from '../../../../../src/plugins/presentation_util/public';
 import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
@@ -68,6 +69,7 @@ export interface LensAppProps {
   visualizationMap: VisualizationMap;
   initialContext?: VisualizeEditorContext | VisualizeFieldContext;
   contextOriginatingApp?: string;
+  topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
 }
 
 export type RunSave = (
@@ -100,6 +102,8 @@ export interface LensTopNavMenuProps {
   goBackToOriginatingApp?: () => void;
   contextOriginatingApp?: string;
   initialContextIsEmbedded?: boolean;
+  topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }
 
 export interface HistoryLocationState {
