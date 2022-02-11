@@ -209,7 +209,7 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
 
-export const enum RowRendererId {
+export enum RowRendererId {
   alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',

@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
-import { DataProviderType } from '../../../common/types/timeline';
+import { DataProviderType } from '../../../common/types/timeline/data_provider';
 import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
 
 import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';

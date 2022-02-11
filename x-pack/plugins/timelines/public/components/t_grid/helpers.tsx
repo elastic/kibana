@@ -17,7 +17,8 @@ import {
   stopPropagationAndPreventDefault,
 } from '../../../common/utils/accessibility';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
-import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
+import { EXISTS_OPERATOR } from '../../../common/types/timeline';
+import { DataProviderType } from '../../../common/types/timeline/data_provider';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
