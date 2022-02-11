@@ -250,7 +250,7 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
     }
 
     public async assertPipelinesTabContent(expectVisible = true) {
-      await this.assertTabContent('stats', expectVisible);
+      await this.assertTabContent('pipelines', expectVisible);
     }
   })();
 }
