@@ -176,7 +176,7 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
     defaultMessage: 'Right',
   });
   if (axisMode === 'bottom') {
-    const options = [
+    return [
       {
         id: `${idPrefix}below`,
         label: isHorizontal ? leftLabel : bottomLabel,
@@ -189,14 +189,8 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
         'data-test-subj': 'lnsXY_referenceLine_markerPosition_above',
       },
     ];
-    // if (isHorizontal) {
-    //   // above -> below
-    //   // left -> right
-    //   options.reverse();
-    // }
-    return options;
   }
-  const options = [
+  return [
     {
       id: `${idPrefix}left`,
       label: isHorizontal ? bottomLabel : leftLabel,
@@ -209,12 +203,6 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
       'data-test-subj': 'lnsXY_referenceLine_markerPosition_right',
     },
   ];
-  // if (isHorizontal) {
-  //   // left -> right
-  //   // above -> below
-  //   options.reverse();
-  // }
-  return options;
 }
 
 export function hasIcon(icon: string | undefined): icon is string {
