@@ -52,7 +52,6 @@ export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   // TODO Because these callbacks are params, they are only set on the logic once (i.e., they are cached)
   // which makes using "useState" to back this really hard.
   onAdd(item: Item, onSuccess: () => void): void;
-  onChangeEditingItem?(item: Item): void;
   onDelete(item: Item, onSuccess: () => void): void;
   onReorder?(items: Item[], oldItems: Item[], onSuccess: () => void): void;
   onUpdate(item: Item, onSuccess: () => void): void;
@@ -137,15 +136,7 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
   listeners: ({
     values,
     actions,
-    props: {
-      onAdd,
-      onChangeEditingItem,
-      onDelete,
-      onReorder,
-      onUpdate,
-      transformItem,
-      validateItem,
-    },
+    props: { onAdd, onDelete, onReorder, onUpdate, transformItem, validateItem },
   }) => ({
     saveNewItem: () => {
       if (!values.editingItemValue) return;
@@ -176,11 +167,6 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
         actions.setFieldErrors(errors);
       } else {
         onUpdate(itemToSave, actions.doneEditing);
-      }
-    },
-    setEditingItemValue: ({ item }) => {
-      if (onChangeEditingItem) {
-        onChangeEditingItem(item);
       }
     },
   }),

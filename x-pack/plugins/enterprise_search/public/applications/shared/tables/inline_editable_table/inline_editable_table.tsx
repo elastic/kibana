@@ -44,7 +44,6 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
   props: InlineEditableTableProps<Item> & {
     instanceId: string;
     onAdd(item: Item, onSuccess: () => void): void;
-    onChangeEditingItem?(item: Item): void;
     onDelete(item: Item, onSuccess: () => void): void;
     onReorder?(items: Item[], oldItems: Item[], onSuccess: () => void): void;
     onUpdate(item: Item, onSuccess: () => void): void;
@@ -57,7 +56,6 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
     columns,
     defaultItem,
     onAdd,
-    onChangeEditingItem,
     onDelete,
     onReorder,
     onUpdate,
@@ -73,7 +71,6 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
         columns,
         defaultItem,
         onAdd,
-        onChangeEditingItem,
         onDelete,
         onReorder,
         onUpdate,
