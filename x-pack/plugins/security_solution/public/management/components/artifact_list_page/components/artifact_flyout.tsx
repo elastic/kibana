@@ -36,6 +36,7 @@ import { ExceptionsListApiClient } from '../../../services/exceptions_list/excep
 import { useToasts } from '../../../../common/lib/kibana';
 import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
 import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
+import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -106,7 +107,6 @@ export interface ArtifactFlyoutProps {
   item?: ExceptionListItemSchema;
   /** Any label overrides */
   labels?: Partial<typeof ARTIFACT_FLYOUT_LABELS>;
-  showExpiredLicenseBanner?: boolean;
   'data-test-subj'?: string;
   size?: EuiFlyoutSize;
 }
@@ -121,7 +121,6 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     FormComponent,
     onSuccess,
     labels: _labels = {},
-    showExpiredLicenseBanner = false, // FIXME:PT can can calculate this in here, right, rather than have a prop
     'data-test-subj': dataTestSubj,
     size = 'm',
   }) => {
@@ -130,7 +129,6 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
     const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
-
     const labels = useMemo<typeof ARTIFACT_FLYOUT_LABELS>(() => {
       return {
         ...ARTIFACT_FLYOUT_LABELS,
@@ -139,12 +137,13 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [_labels]);
 
     const isEditFlow = urlParams.show === 'edit';
+    const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
 
     const {
       isLoading: isSubmittingData,
       mutateAsync: submitData,
       error: submitError,
-    } = useWithArtifactSubmitData(apiClient, isEditFlow ? 'edit' : 'create');
+    } = useWithArtifactSubmitData(apiClient, formMode);
 
     const {
       isLoading: isLoadingItemForEdit,
@@ -155,6 +154,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     const [formState, setFormState] = useState<ArtifactFormComponentOnChangeCallbackProps>(
       createFormInitialState.bind(apiClient.listId, item)
     );
+    const showExpiredLicenseBanner = useIsArtifactAllowedPerPolicyUsage(formState.item, formMode);
 
     const hasItemDataForEdit = useMemo<boolean>(() => {
       // `item_id` will not be defined for a `create` flow, so we use it below to determine if we
@@ -235,7 +235,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        {showExpiredLicenseBanner && (
+        {!isInitializing && showExpiredLicenseBanner && (
           <EuiCallOut
             title={labels.flyoutDowngradedLicenseTitle}
             color="warning"
@@ -255,7 +255,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
               disabled={isSubmittingData}
               item={formState.item}
               error={submitError ?? undefined}
-              mode={(isEditFlow ? 'edit' : 'create') as ArtifactFormComponentProps['mode']}
+              mode={formMode}
             />
           )}
         </EuiFlyoutBody>
