@@ -7,6 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { findAccessorOrFail } from '../../../../visualizations/common/utils';
+import type { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import type { DatatableColumn } from '../../../../expressions';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -37,6 +40,25 @@ export const errors = {
       defaultMessage: `Invalid label major mode is specified. Supported label major modes: {labelMajorModes}`,
       values: { labelMajorModes: Object.values(GaugeLabelMajorModes).join(', ') },
     }),
+};
+
+const validateAccessor = (
+  accessor: string | undefined | ExpressionValueVisDimension,
+  columns: DatatableColumn[]
+) => {
+  if (accessor && typeof accessor === 'string') {
+    findAccessorOrFail(accessor, columns);
+  }
+};
+
+const validateOptions = (
+  value: string,
+  availableOptions: Record<string, string>,
+  getErrorMessage: () => string
+) => {
+  if (!Object.values(availableOptions).includes(value)) {
+    throw new Error(getErrorMessage());
+  }
 };
 
 export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
@@ -130,21 +152,15 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
   },
 
   fn(data, args, handlers) {
-    if (!Object.values(GaugeShapes).includes(args.shape)) {
-      throw new Error(errors.invalidShapeError());
-    }
+    validateOptions(args.shape, GaugeShapes, errors.invalidShapeError);
+    validateOptions(args.colorMode, GaugeColorModes, errors.invalidColorModeError);
+    validateOptions(args.ticksPosition, GaugeTicksPositions, errors.invalidTicksPositionError);
+    validateOptions(args.labelMajorMode, GaugeLabelMajorModes, errors.invalidLabelMajorModeError);
 
-    if (!Object.values(GaugeColorModes).includes(args.colorMode)) {
-      throw new Error(errors.invalidColorModeError());
-    }
-
-    if (!Object.values(GaugeTicksPositions).includes(args.ticksPosition)) {
-      throw new Error(errors.invalidTicksPositionError());
-    }
-
-    if (!Object.values(GaugeLabelMajorModes).includes(args.labelMajorMode)) {
-      throw new Error(errors.invalidLabelMajorModeError());
-    }
+    validateAccessor(args.metric, data.columns);
+    validateAccessor(args.min, data.columns);
+    validateAccessor(args.max, data.columns);
+    validateAccessor(args.goal, data.columns);
 
     return {
       type: 'render',

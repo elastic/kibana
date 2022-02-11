@@ -13,6 +13,7 @@ import {
   Datatable,
   DatatableColumn,
 } from '../../../expressions/common';
+import { findAccessorOrFail } from '../utils/accessors';
 
 export interface Arguments {
   accessor: string | number;
@@ -30,29 +31,6 @@ export type ExpressionValueVisDimension = ExpressionValueBoxed<
     };
   }
 >;
-
-const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
-  columns.length > accessor ? accessor : undefined;
-
-const getAccessorById = (accessor: DatatableColumn['id'], columns: Datatable['columns']) =>
-  columns.find((c) => c.id === accessor);
-
-export const findAccessor = (accessor: string | number, columns: DatatableColumn[]) => {
-  const foundAccessor =
-    typeof accessor === 'number'
-      ? getAccessorByIndex(accessor, columns)
-      : getAccessorById(accessor, columns);
-
-  if (foundAccessor === undefined) {
-    throw new Error(
-      i18n.translate('visualizations.function.visDimension.error.accessor', {
-        defaultMessage: 'Column name or index provided is invalid',
-      })
-    );
-  }
-
-  return foundAccessor;
-};
 
 export const visDimension = (): ExpressionFunctionDefinition<
   'visdimension',
@@ -90,7 +68,7 @@ export const visDimension = (): ExpressionFunctionDefinition<
     },
   },
   fn: (input, args) => {
-    const accessor = findAccessor(args.accessor, input.columns);
+    const accessor = findAccessorOrFail(args.accessor, input.columns);
     return {
       type: 'vis_dimension',
       accessor,

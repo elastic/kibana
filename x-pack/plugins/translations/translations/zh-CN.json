@@ -5963,7 +5963,6 @@
     "visualizations.function.range.help": "生成范围对象",
     "visualizations.function.range.to.help": "范围结束",
     "visualizations.function.visDimension.accessor.help": "要使用的数据集列（列索引或列名称）",
-    "visualizations.function.visDimension.error.accessor": "提供的列名称或索引无效",
     "visualizations.function.visDimension.format.help": "格式",
     "visualizations.function.visDimension.formatParams.help": "格式参数",
     "visualizations.function.visDimension.help": "生成 visConfig 维度对象",
