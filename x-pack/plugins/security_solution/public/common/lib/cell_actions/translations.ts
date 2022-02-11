@@ -28,6 +28,13 @@ export const VIEW_HOST_SUMMARY = i18n.translate(
   }
 );
 
+export const VIEW_USER_SUMMARY = i18n.translate(
+  'xpack.securitySolution.expandedValue.links.viewUserSummary',
+  {
+    defaultMessage: 'View user summary',
+  }
+);
+
 export const EXPAND_IP_DETAILS = i18n.translate(
   'xpack.securitySolution.expandedValue.links.expandIpDetails',
   {

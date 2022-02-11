@@ -475,7 +475,7 @@ export const setSelectedTimelineEvents = ({
 export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
   const { tabType, timelineId, ...expandedDetails } = action;
 
-  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail']);
+  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
   const expandedTabType = tabType ?? TimelineTabs.query;
   const newExpandDetails = {
     params: expandedDetails.params ? { ...expandedDetails.params } : {},
