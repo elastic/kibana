@@ -373,6 +373,10 @@ export class AlertingPlugin {
       return rulesClientFactory!.create(request, core.savedObjects);
     };
 
+    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
+      return alertingAuthorizationClientFactory!.create(request);
+    };
+
     taskRunnerFactory.initialize({
       logger,
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
@@ -391,10 +395,6 @@ export class AlertingPlugin {
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       usageCounter: this.usageCounter,
     });
-
-    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
-      return alertingAuthorizationClientFactory!.create(request);
-    };
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
       const client = getRulesClientWithRequest(request);
