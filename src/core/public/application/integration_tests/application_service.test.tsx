@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, MemoryHistory } from 'history';
@@ -16,7 +17,7 @@ import { httpServiceMock } from '../../http/http_service.mock';
 import { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { themeServiceMock } from '../../theme/theme_service.mock';
-import { AppMountParameters } from '../types';
+import { AppMountParameters, AppUpdater } from '../types';
 import { Observable } from 'rxjs';
 import { MountPoint } from 'kibana/public';
 
@@ -134,6 +135,42 @@ describe('ApplicationService', () => {
 
         expect(history.entries.map((entry) => entry.pathname)).toEqual(['/', '/app/app1/bar']);
       });
+
+      it('handles updated deepLinks', async () => {
+        const { register } = service.setup(setupDeps);
+
+        const updater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          deepLinks: [],
+          updater$,
+          mount: async ({}: AppMountParameters) => {
+            return () => undefined;
+          },
+        });
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        updater$.next(() => ({
+          deepLinks: [
+            {
+              id: 'deepLink',
+              title: 'Some deep link',
+              path: '/deep-link',
+            },
+          ],
+        }));
+
+        await navigateToApp('app1', { deepLinkId: 'deepLink' });
+
+        expect(history.entries.map((entry) => entry.pathname)).toEqual([
+          '/',
+          '/app/app1/deep-link',
+        ]);
+      });
+      ////
     });
   });
 
