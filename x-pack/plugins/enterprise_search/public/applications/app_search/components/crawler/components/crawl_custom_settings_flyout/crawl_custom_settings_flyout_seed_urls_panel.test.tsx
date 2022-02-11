@@ -17,9 +17,15 @@ import { rerender } from '../../../../../test_helpers';
 import { SimplifiedSelectable } from '../crawl_select_domains_modal/simplified_selectable';
 
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
+import { UrlComboBox } from './url_combo_box';
 
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic
+  customEntryPointUrls: ['https://www.elastic.co/custom-entry-point'],
+  customSitemapUrls: [
+    'https://www.elastic.co/custom-sitemap1.xml',
+    'https://swiftype.com/custom-sitemap2.xml',
+  ],
   entryPointUrls: ['https://www.elastic.co/guide', 'https://swiftype.com/documentation'],
   selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
   selectedEntryPointUrls: ['https://swiftype.com/documentation'],
@@ -35,6 +41,8 @@ const MOCK_VALUES = {
 
 const MOCK_ACTIONS = {
   // CrawlCustomSettingsFlyoutLogic
+  onSelectCustomEntryPointUrls: jest.fn(),
+  onSelectCustomSitemapUrls: jest.fn(),
   onSelectEntryPointUrls: jest.fn(),
   onSelectSitemapUrls: jest.fn(),
   toggleIncludeRobotsTxt: jest.fn(),
@@ -81,29 +89,53 @@ describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
         })
       );
     });
+
+    it('allows the user to add custom sitemap urls', () => {
+      expect(sitemapTab.find(UrlComboBox).props()).toEqual(
+        expect.objectContaining({
+          selectedUrls: MOCK_VALUES.customSitemapUrls,
+          onChange: MOCK_ACTIONS.onSelectCustomSitemapUrls,
+        })
+      );
+    });
   });
 
   describe('entry points tab', () => {
-    it('allows the user to select entry point urls', () => {
-      const tabs = wrapper.find(EuiTabbedContent).prop('tabs');
-      const entryPointsTab = shallow(<div>{tabs[1].content}</div>);
+    let entryPointsTab: ShallowWrapper;
 
+    beforeEach(() => {
+      const tabs = wrapper.find(EuiTabbedContent).prop('tabs');
+      entryPointsTab = shallow(<div>{tabs[1].content}</div>);
+    });
+
+    it('allows the user to select entry point urls', () => {
       expect(entryPointsTab.find(SimplifiedSelectable).props()).toEqual({
         options: MOCK_VALUES.entryPointUrls,
         selectedOptions: MOCK_VALUES.selectedEntryPointUrls,
         onChange: MOCK_ACTIONS.onSelectEntryPointUrls,
       });
     });
+
+    it('allows the user to add custom entry point urls', () => {
+      expect(entryPointsTab.find(UrlComboBox).props()).toEqual(
+        expect.objectContaining({
+          selectedUrls: MOCK_VALUES.customEntryPointUrls,
+          onChange: MOCK_ACTIONS.onSelectCustomEntryPointUrls,
+        })
+      );
+    });
   });
 
   it('indicates how many seed urls are selected', () => {
     let badge = getAccordionBadge(wrapper);
 
-    expect(badge.render().text()).toContain('3');
+    expect(badge.render().text()).toContain('6');
     expect(badge.prop('color')).toEqual('accent');
 
     setMockValues({
       ...MOCK_VALUES,
+      customEntryPointUrls: [],
+      customSitemapUrls: [],
       selectedEntryPointUrls: [],
       selectedSitemapUrls: [],
     });

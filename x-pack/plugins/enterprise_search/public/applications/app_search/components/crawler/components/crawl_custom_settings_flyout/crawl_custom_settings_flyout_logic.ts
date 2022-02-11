@@ -17,6 +17,8 @@ import { domainConfigServerToClient } from '../../utils';
 import { extractDomainAndEntryPointFromUrl } from '../add_domain/utils';
 
 export interface CrawlCustomSettingsFlyoutLogicValues {
+  customEntryPointUrls: string[];
+  customSitemapUrls: string[];
   domainUrls: string[];
   domainConfigs: DomainConfig[];
   domainConfigMap: {
@@ -38,6 +40,8 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
   fetchDomainConfigData(): void;
   hideFlyout(): void;
   onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
+  onSelectCustomEntryPointUrls(entryPointUrls: string[]): { entryPointUrls: string[] };
+  onSelectCustomSitemapUrls(sitemapUrls: string[]): { sitemapUrls: string[] };
   onSelectDomainUrls(domainUrls: string[]): { domainUrls: string[] };
   onSelectEntryPointUrls(entryPointUrls: string[]): { entryPointUrls: string[] };
   onSelectMaxCrawlDepth(maxCrawlDepth: number): { maxCrawlDepth: number };
@@ -67,6 +71,8 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     fetchDomainConfigData: true,
     hideFlyout: true,
     onRecieveDomainConfigData: (domainConfigs) => ({ domainConfigs }),
+    onSelectCustomEntryPointUrls: (entryPointUrls) => ({ entryPointUrls }),
+    onSelectCustomSitemapUrls: (sitemapUrls) => ({ sitemapUrls }),
     onSelectDomainUrls: (domainUrls) => ({ domainUrls }),
     onSelectEntryPointUrls: (entryPointUrls) => ({ entryPointUrls }),
     onSelectMaxCrawlDepth: (maxCrawlDepth) => ({ maxCrawlDepth }),
@@ -76,6 +82,20 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     showFlyout: true,
   }),
   reducers: () => ({
+    customEntryPointUrls: [
+      [],
+      {
+        showFlyout: () => [],
+        onSelectCustomEntryPointUrls: (_, { entryPointUrls }) => entryPointUrls,
+      },
+    ],
+    customSitemapUrls: [
+      [],
+      {
+        showFlyout: () => [],
+        onSelectCustomSitemapUrls: (_, { sitemapUrls }) => sitemapUrls,
+      },
+    ],
     domainConfigs: [
       [],
       {
@@ -193,8 +213,8 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       CrawlerLogic.actions.startCrawl({
         domain_allowlist: values.selectedDomainUrls,
         max_crawl_depth: values.maxCrawlDepth,
-        seed_urls: values.selectedEntryPointUrls,
-        sitemap_urls: values.selectedSitemapUrls,
+        seed_urls: [...values.selectedEntryPointUrls, ...values.customEntryPointUrls],
+        sitemap_urls: [...values.selectedSitemapUrls, ...values.customSitemapUrls],
         sitemap_discovery_disabled: !values.includeRobotsTxt,
       });
     },

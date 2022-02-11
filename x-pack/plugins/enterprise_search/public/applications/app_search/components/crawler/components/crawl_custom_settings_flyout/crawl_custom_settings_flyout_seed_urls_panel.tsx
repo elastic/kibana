@@ -14,6 +14,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiNotificationBadge,
   EuiPanel,
@@ -29,9 +30,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SimplifiedSelectable } from '../crawl_select_domains_modal/simplified_selectable';
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
+import { UrlComboBox } from './url_combo_box';
 
 export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
   const {
+    customEntryPointUrls,
+    customSitemapUrls,
     entryPointUrls,
     includeRobotsTxt,
     selectedDomainUrls,
@@ -39,11 +43,19 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
     selectedSitemapUrls,
     sitemapUrls,
   } = useValues(CrawlCustomSettingsFlyoutLogic);
-  const { onSelectEntryPointUrls, onSelectSitemapUrls, toggleIncludeRobotsTxt } = useActions(
-    CrawlCustomSettingsFlyoutLogic
-  );
+  const {
+    onSelectCustomEntryPointUrls,
+    onSelectCustomSitemapUrls,
+    onSelectEntryPointUrls,
+    onSelectSitemapUrls,
+    toggleIncludeRobotsTxt,
+  } = useActions(CrawlCustomSettingsFlyoutLogic);
 
-  const totalSeedUrls = selectedEntryPointUrls.length + selectedSitemapUrls.length;
+  const totalSeedUrls =
+    customEntryPointUrls.length +
+    customSitemapUrls.length +
+    selectedEntryPointUrls.length +
+    selectedSitemapUrls.length;
 
   return (
     <EuiPanel hasBorder>
@@ -130,6 +142,17 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                         : undefined
                     }
                   />
+                  <EuiHorizontalRule />
+                  <UrlComboBox
+                    label={i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.customSitemapUrlsTextboxLabel',
+                      {
+                        defaultMessage: 'Custom sitemap URLs',
+                      }
+                    )}
+                    onChange={onSelectCustomSitemapUrls}
+                    selectedUrls={customSitemapUrls}
+                  />
                 </>
               ),
             },
@@ -158,6 +181,17 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                           )
                         : undefined
                     }
+                  />
+                  <EuiHorizontalRule />
+                  <UrlComboBox
+                    label={i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.customEntryPointUrlsTextboxLabel',
+                      {
+                        defaultMessage: 'Custom entry point URLs',
+                      }
+                    )}
+                    onChange={onSelectCustomEntryPointUrls}
+                    selectedUrls={customEntryPointUrls}
                   />
                 </>
               ),

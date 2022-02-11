@@ -26,6 +26,8 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
 
   it('has expected default values', () => {
     expect(CrawlCustomSettingsFlyoutLogic.values).toEqual({
+      customEntryPointUrls: [],
+      customSitemapUrls: [],
       domainConfigMap: {},
       domainConfigs: [],
       domainUrls: [],
@@ -106,6 +108,42 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
           {
             name: 'https://www.elastic.co',
           },
+        ]);
+      });
+    });
+
+    describe('onSelectCustomSitemapUrls', () => {
+      it('saves the urls', () => {
+        mount({
+          customSitemapUrls: [],
+        });
+
+        CrawlCustomSettingsFlyoutLogic.actions.onSelectCustomSitemapUrls([
+          'https://www.elastic.co/custom-sitemap1.xml',
+          'https://swiftype.com/custom-sitemap2.xml',
+        ]);
+
+        expect(CrawlCustomSettingsFlyoutLogic.values.customSitemapUrls).toEqual([
+          'https://www.elastic.co/custom-sitemap1.xml',
+          'https://swiftype.com/custom-sitemap2.xml',
+        ]);
+      });
+    });
+
+    describe('onSelectCustomEntryPointUrls', () => {
+      it('saves the urls', () => {
+        mount({
+          customEntryPointUrls: [],
+        });
+
+        CrawlCustomSettingsFlyoutLogic.actions.onSelectCustomEntryPointUrls([
+          'https://www.elastic.co/custom-entry-point',
+          'https://swiftype.com/custom-entry-point',
+        ]);
+
+        expect(CrawlCustomSettingsFlyoutLogic.values.customEntryPointUrls).toEqual([
+          'https://www.elastic.co/custom-entry-point',
+          'https://swiftype.com/custom-entry-point',
         ]);
       });
     });
@@ -195,9 +233,17 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
     describe('showFlyout', () => {
       it('shows the modal and resets the form', () => {
         mount({
-          isFlyoutVisible: false,
+          customEntryPointUrls: [
+            'https://www.elastic.co/custom-entry-point',
+            'https://swiftype.com/custom-entry-point',
+          ],
+          customSitemapUrls: [
+            'https://www.elastic.co/custom-sitemap1.xml',
+            'https://swiftype.com/custom-sitemap2.xml',
+          ],
           includeRobotsTxt: false,
           isDataLoading: false,
+          isFlyoutVisible: false,
           selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
           selectedEntryPointUrls: [
             'https://www.elastic.co/guide',
@@ -211,12 +257,18 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
 
         CrawlCustomSettingsFlyoutLogic.actions.showFlyout();
 
-        expect(CrawlCustomSettingsFlyoutLogic.values.isFlyoutVisible).toBe(true);
-        expect(CrawlCustomSettingsFlyoutLogic.values.includeRobotsTxt).toEqual(true);
-        expect(CrawlCustomSettingsFlyoutLogic.values.isDataLoading).toEqual(true);
-        expect(CrawlCustomSettingsFlyoutLogic.values.selectedDomainUrls).toEqual([]);
-        expect(CrawlCustomSettingsFlyoutLogic.values.selectedEntryPointUrls).toEqual([]);
-        expect(CrawlCustomSettingsFlyoutLogic.values.selectedSitemapUrls).toEqual([]);
+        expect(CrawlCustomSettingsFlyoutLogic.values).toEqual(
+          expect.objectContaining({
+            customEntryPointUrls: [],
+            customSitemapUrls: [],
+            includeRobotsTxt: true,
+            isDataLoading: true,
+            isFlyoutVisible: true,
+            selectedDomainUrls: [],
+            selectedEntryPointUrls: [],
+            selectedSitemapUrls: [],
+          })
+        );
       });
 
       it('fetches the latest data', () => {
