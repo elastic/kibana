@@ -97,7 +97,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
 
   const [globalState] = useUrlState('_g');
-  const [lastRefresh] = useState(0);
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
@@ -113,6 +112,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const explorerState = useObservable(explorerService.state$);
 
   const refresh = useRefresh();
+  const lastRefresh = refresh?.lastRefresh ?? 0;
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
