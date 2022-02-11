@@ -74,6 +74,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={true}
       />
     );
@@ -104,6 +105,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -138,6 +140,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -174,6 +177,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -210,6 +214,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -247,6 +252,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={true}
       />
     );
@@ -284,6 +290,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={true}
       />
     );
@@ -320,6 +327,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -357,6 +365,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -414,6 +423,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -456,6 +466,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -496,6 +507,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -536,6 +548,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -576,6 +589,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -616,6 +630,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -662,6 +677,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -701,6 +717,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
+        setWarningsExist={jest.fn()}
         showLabel={false}
       />
     );
@@ -746,6 +763,7 @@ describe('BuilderEntryItem', () => {
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
         osTypes={['windows']}
         showLabel={false}
         isDisabled={true}

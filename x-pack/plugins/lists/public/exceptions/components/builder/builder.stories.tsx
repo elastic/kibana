@@ -236,6 +236,7 @@ Default.args = {
     errorExists: false,
     exceptionItems: [],
     exceptionsToDelete: [],
+    warningExists: false,
   }),
   ruleName: 'My awesome rule',
 };
@@ -288,6 +289,7 @@ SingleExceptionItem.args = {
     errorExists: false,
     exceptionItems: [sampleExceptionItem],
     exceptionsToDelete: [],
+    warningExists: false,
   }),
   ruleName: 'My awesome rule',
 };
@@ -313,6 +315,7 @@ MultiExceptionItems.args = {
     errorExists: false,
     exceptionItems: [sampleExceptionItem, sampleExceptionItem],
     exceptionsToDelete: [],
+    warningExists: false,
   }),
   ruleName: 'My awesome rule',
 };
@@ -338,6 +341,7 @@ WithNestedExceptionItem.args = {
     errorExists: false,
     exceptionItems: [sampleNestedExceptionItem, sampleExceptionItem],
     exceptionsToDelete: [],
+    warningExists: false,
   }),
   ruleName: 'My awesome rule',
 };

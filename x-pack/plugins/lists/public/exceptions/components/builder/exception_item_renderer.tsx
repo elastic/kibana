@@ -59,6 +59,7 @@ interface BuilderExceptionListItemProps {
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: boolean) => void;
+  setWarningsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
@@ -80,6 +81,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     onDeleteExceptionItem,
     onChangeExceptionItem,
     setErrorsExist,
+    setWarningsExist,
     onlyShowListOperators = false,
     isDisabled = false,
     operatorsList,
@@ -148,6 +150,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           onChange={handleEntryChange}
                           onlyShowListOperators={onlyShowListOperators}
                           setErrorsExist={setErrorsExist}
+                          setWarningsExist={setWarningsExist}
                           osTypes={osTypes}
                           isDisabled={isDisabled}
                           showLabel={

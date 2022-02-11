@@ -27,3 +27,11 @@ export const NUMBER_ERR = i18n.translate('autocomplete.invalidNumberError', {
 export const DATE_ERR = i18n.translate('autocomplete.invalidDateError', {
   defaultMessage: 'Not a valid date',
 });
+
+export const FILENAME_WILDCARD_WARNING = i18n.translate('autocomplete.filename.wildcardWarning', {
+  defaultMessage: `A wildcard in the filename will affect the endpoint's performance`,
+});
+
+export const FILEPATH_WARNING = i18n.translate('autocomplete.filename.pathWarning', {
+  defaultMessage: `Path may be formed incorrectly; verify value`,
+});

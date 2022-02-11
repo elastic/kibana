@@ -225,6 +225,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           onChange: handleOnBuilderChange,
           listTypeSpecificIndexPatternFilter: filterIndexPatterns,
           operatorsList: EVENT_FILTERS_OPERATORS,
+          osTypes: exception?.os_types,
         }),
       [data, handleOnBuilderChange, http, indexPatterns, exception]
     );

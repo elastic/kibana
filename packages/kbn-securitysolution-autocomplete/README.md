@@ -1,6 +1,6 @@
 # Autocomplete Fields
 
-Need an input that shows available index fields? Or an input that autocompletes based on a selected indexPattern field? Bingo! That's what these components are for. They are generalized enough so that they can be reused throughout and repurposed based on your needs.
+Need an input that shows available index fields? Or an input that auto-completes based on a selected indexPattern field? Bingo! That's what these components are for. They are generalized enough so that they can be reused throughout and repurposed based on your needs.
 
 All three of the available components rely on Eui's combo box.
 
@@ -137,5 +137,6 @@ The `onChange` handler is passed selected `string[]`.
   isClearable={false}
   indexPattern={indexPattern}
   onChange={handleFieldMatchAnyValueChange}
+  os='linux'
 />
 ```

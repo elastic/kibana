@@ -53,6 +53,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onChangeExceptionItem={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
+            setWarningsExist={jest.fn()}
           />
         </EuiThemeProvider>
       );
@@ -84,6 +85,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onChangeExceptionItem={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
+            setWarningsExist={jest.fn()}
           />
         </EuiThemeProvider>
       );
@@ -113,6 +115,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onChangeExceptionItem={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
+            setWarningsExist={jest.fn()}
           />
         </EuiThemeProvider>
       );
@@ -144,6 +147,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onChangeExceptionItem={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
+            setWarningsExist={jest.fn()}
           />
         </EuiThemeProvider>
       );
@@ -182,6 +186,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 
@@ -212,6 +217,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 
@@ -243,6 +249,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 
@@ -272,6 +279,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 
@@ -303,6 +311,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={mockOnDeleteExceptionItem}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 

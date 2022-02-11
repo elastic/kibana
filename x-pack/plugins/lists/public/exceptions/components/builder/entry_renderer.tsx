@@ -66,6 +66,7 @@ export interface EntryItemProps {
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: boolean) => void;
+  setWarningsExist: (arg: boolean) => void;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
 }
@@ -82,6 +83,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   onChange,
   onlyShowListOperators = false,
   setErrorsExist,
+  setWarningsExist,
   showLabel,
   isDisabled = false,
   operatorsList,
@@ -91,6 +93,12 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       setErrorsExist(err);
     },
     [setErrorsExist]
+  );
+  const handleWarning = useCallback(
+    (warn: boolean): void => {
+      setWarningsExist(warn);
+    },
+    [setWarningsExist]
   );
 
   const handleFieldChange = useCallback(
@@ -302,6 +310,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
+        let os: 'linux' | 'macos' | 'windows' = 'windows';
+        if (osTypes) {
+          [os] = osTypes;
+        }
         return (
           <AutocompleteFieldWildcardComponent
             autocompleteService={autocompleteService}
@@ -313,6 +325,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             indexPattern={indexPattern}
             onError={handleError}
             onChange={handleFieldWildcardValueChange}
+            onWarning={handleWarning}
+            os={os}
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             rowLabel={isFirst ? i18n.VALUE : undefined}
             selectedField={entry.correspondingKeywordField ?? entry.field}
