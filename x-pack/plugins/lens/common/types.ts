@@ -47,6 +47,8 @@ export interface ColorStop {
   stop: number;
 }
 
+export type SortingHint = 'version';
+
 export interface CustomPaletteParams {
   name?: string;
   reverse?: boolean;
