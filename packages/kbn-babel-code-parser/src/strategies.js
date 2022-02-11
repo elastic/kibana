@@ -53,6 +53,7 @@ export async function dependenciesParseStrategy(
     (dep) => !natives[dep]
   );
 
+  console.log('parsed, filtering');
   // Return the list of all the new entries found into
   // the current mainEntry that we could use to look for
   // new dependencies

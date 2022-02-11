@@ -30,6 +30,7 @@ function _parseAndTraverseFileContent(fileContent, visitorsGenerator) {
 
   // Loop through the code AST with
   // the defined visitors
+  console.log(`traversing ^`);
   traverse(ast, visitorsGenerator(results));
 
   return results;
@@ -43,6 +44,8 @@ export async function parseSingleFile(filePath, visitorsGenerator) {
 
   // Read the file
   const content = await read(filePath, { encoding: 'utf8' });
+
+  console.log(`parsing ${filePath}`);
 
   // return the results found on parse and traverse
   // the file content with the given visitors
