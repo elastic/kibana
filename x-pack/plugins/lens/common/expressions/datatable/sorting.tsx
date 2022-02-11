@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import versionCompare from 'compare-versions';
+import valid from 'semver/functions/valid';
 import ipaddr from 'ipaddr.js';
 import type { IPv4, IPv6 } from 'ipaddr.js';
 import type { FieldFormat } from '../../../../../../src/plugins/field_formats/common';
@@ -48,6 +50,25 @@ function getIPCriteria(sortBy: string, directionFactor: number) {
   };
 }
 
+function getVersionCriteria(sortBy: string, directionFactor: number) {
+  return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
+    const valueA = String(rowA[sortBy] ?? '');
+    const valueB = String(rowB[sortBy] ?? '');
+    const aInvalid = !valueA || !valid(valueA);
+    const bInvalid = !valueB || !valid(valueB);
+    if (aInvalid && bInvalid) {
+      return 0;
+    }
+    if (aInvalid) {
+      return 1;
+    }
+    if (bInvalid) {
+      return -1;
+    }
+    return directionFactor * versionCompare(valueA, valueB);
+  };
+}
+
 function getRangeCriteria(sortBy: string, directionFactor: number) {
   // fill missing fields with these open bounds to perform number sorting
   const openRange = { gte: -Infinity, lt: Infinity };
@@ -86,6 +107,9 @@ export function getSortingCriteria(
   // IP have a special sorting
   else if (type === 'ip') {
     criteria = getIPCriteria(sortBy, directionFactor);
+  } else if (type === 'version') {
+    // do not wrap in undefined behandler because of special invalid-case handling
+    return getVersionCriteria(sortBy, directionFactor);
   } else {
     // use a string sorter for the rest
     criteria = (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
