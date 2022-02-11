@@ -8,11 +8,9 @@
 import type { SavedObjectsClientContract } from 'kibana/server';
 import type {
   FoundExceptionListItemSchema,
+  MaxSizeOrUndefined,
   NamespaceTypeArray,
-  PageOrUndefined,
   PerPageOrUndefined,
-  PitOrUndefined,
-  SearchAfterOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -28,31 +26,29 @@ import { transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';
 import { getExceptionListsItemFilter } from './utils/get_exception_lists_item_filter';
 
-interface FindExceptionListItemsOptions {
+interface FindExceptionListItemsPointInTimeFinderOptions {
   listId: NonEmptyStringArrayDecoded;
   namespaceType: NamespaceTypeArray;
   savedObjectsClient: SavedObjectsClientContract;
   filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
-  pit: PitOrUndefined;
-  page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-  searchAfter: SearchAfterOrUndefined;
+  executeFunctionOnStream: (response: FoundExceptionListItemSchema) => void;
+  maxSize: MaxSizeOrUndefined;
 }
 
-export const findExceptionListsItem = async ({
+export const findExceptionListsItemPointInTimeFinder = async ({
   listId,
   namespaceType,
   savedObjectsClient,
+  executeFunctionOnStream,
+  maxSize,
   filter,
-  page,
-  pit,
   perPage,
-  searchAfter,
   sortField,
   sortOrder,
-}: FindExceptionListItemsOptions): Promise<FoundExceptionListItemSchema | null> => {
+}: FindExceptionListItemsPointInTimeFinderOptions): Promise<void> => {
   const savedObjectType = getSavedObjectTypes({ namespaceType });
   const exceptionLists = (
     await Promise.all(
@@ -66,21 +62,48 @@ export const findExceptionListsItem = async ({
       })
     )
   ).filter((list) => list != null);
-  if (exceptionLists.length === 0) {
-    return null;
-  } else {
-    const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
+  if (exceptionLists.length !== 0) {
+    const finder = savedObjectsClient.createPointInTimeFinder<ExceptionListSoSchema, never>({
       filter: getExceptionListsItemFilter({ filter, listId, savedObjectType }),
-      page,
       perPage,
-      pit,
-      searchAfter,
       sortField,
       sortOrder,
       type: savedObjectType,
     });
-    return transformSavedObjectsToFoundExceptionListItem({
-      savedObjectsFindResponse,
-    });
+
+    let count = 0;
+    for await (const savedObjectsFindResponse of finder.find()) {
+      count += savedObjectsFindResponse.saved_objects.length;
+      const exceptionListItem = transformSavedObjectsToFoundExceptionListItem({
+        savedObjectsFindResponse,
+      });
+      if (maxSize != null && count > maxSize) {
+        const diff = count - maxSize;
+        exceptionListItem.data = exceptionListItem.data.slice(
+          -exceptionListItem.data.length,
+          -diff
+        );
+        executeFunctionOnStream(exceptionListItem);
+        try {
+          finder.close();
+        } catch (exception) {
+          // This is just a pre-caution in case the finder does a throw we don't want to blow up
+          // the response. We have seen this within e2e test containers but nothing happen in normal
+          // operational conditions which is why this try/catch is here.
+        }
+        // early return since we are at our maxSize
+        return;
+      } else {
+        executeFunctionOnStream(exceptionListItem);
+      }
+    }
+
+    try {
+      finder.close();
+    } catch (exception) {
+      // This is just a pre-caution in case the finder does a throw we don't want to blow up
+      // the response. We have seen this within e2e test containers but nothing happen in normal
+      // operational conditions which is why this try/catch is here.
+    }
   }
 };

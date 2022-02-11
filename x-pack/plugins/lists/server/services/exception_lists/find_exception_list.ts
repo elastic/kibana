@@ -17,11 +17,12 @@ import type {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { SavedObjectType, getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
+import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectsToFoundExceptionList } from './utils';
+import { getExceptionListFilter } from './utils/get_exception_list_filter';
 
 interface FindExceptionListOptions {
   namespaceType: NamespaceTypeArray;
@@ -59,20 +60,4 @@ export const findExceptionList = async ({
   });
 
   return transformSavedObjectsToFoundExceptionList({ savedObjectsFindResponse });
-};
-
-export const getExceptionListFilter = ({
-  filter,
-  savedObjectTypes,
-}: {
-  filter: FilterOrUndefined;
-  savedObjectTypes: SavedObjectType[];
-}): string => {
-  const listTypesFilter = savedObjectTypes
-    .map((type) => `${type}.attributes.list_type: list`)
-    .join(' OR ');
-
-  if (filter != null) {
-    return `(${listTypesFilter}) AND ${filter}`;
-  } else return `(${listTypesFilter})`;
 };

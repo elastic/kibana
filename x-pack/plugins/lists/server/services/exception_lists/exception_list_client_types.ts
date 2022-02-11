@@ -23,6 +23,8 @@ import type {
   ExceptionListTypeOrUndefined,
   ExportExceptionDetails,
   FilterOrUndefined,
+  FoundExceptionListItemSchema,
+  FoundExceptionListSchema,
   Id,
   IdOrUndefined,
   Immutable,
@@ -32,6 +34,7 @@ import type {
   ItemIdOrUndefined,
   ListId,
   ListIdOrUndefined,
+  MaxSizeOrUndefined,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
@@ -281,4 +284,46 @@ export interface OpenPointInTimeOptions {
 
 export interface ClosePointInTimeOptions {
   pit: PitId;
+}
+
+export interface FindExceptionListItemPointInTimeFinderOptions {
+  listId: ListId;
+  namespaceType: NamespaceType;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+  executeFunctionOnStream: (response: FoundExceptionListItemSchema) => void;
+  maxSize: MaxSizeOrUndefined;
+}
+
+export interface FindExceptionListPointInTimeFinderOptions {
+  maxSize: MaxSizeOrUndefined;
+  namespaceType: NamespaceTypeArray;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+  executeFunctionOnStream: <T>(response: FoundExceptionListSchema) => T;
+}
+
+export interface FindExceptionListItemsPointInTimeFinderOptions {
+  listId: NonEmptyStringArrayDecoded;
+  namespaceType: NamespaceTypeArray;
+  filter: EmptyStringArrayDecoded;
+  perPage: PerPageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+  executeFunctionOnStream: (response: FoundExceptionListItemSchema) => void;
+  maxSize: MaxSizeOrUndefined;
+}
+
+export interface FindValueListExceptionListsItemsPointInTimeFinder {
+  valueListId: Id;
+  savedObjectsClient: SavedObjectsClientContract;
+  perPage: PerPageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+  executeFunctionOnStream: (response: FoundExceptionListItemSchema) => void;
+  maxSize: MaxSizeOrUndefined;
 }

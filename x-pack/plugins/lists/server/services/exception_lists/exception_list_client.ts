@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeResponse,
@@ -29,7 +29,7 @@ import type {
   ServerExtensionCallbackContext,
 } from '../extension_points';
 
-import {
+import type {
   ClosePointInTimeOptions,
   ConstructorOptions,
   CreateEndpointListItemOptions,
@@ -42,9 +42,13 @@ import {
   ExportExceptionListAndItemsOptions,
   FindEndpointListItemOptions,
   FindExceptionListItemOptions,
+  FindExceptionListItemPointInTimeFinderOptions,
+  FindExceptionListItemsPointInTimeFinderOptions,
   FindExceptionListOptions,
+  FindExceptionListPointInTimeFinderOptions,
   FindExceptionListsItemOptions,
   FindValueListExceptionListsItems,
+  FindValueListExceptionListsItemsPointInTimeFinder,
   GetEndpointListItemOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
@@ -71,10 +75,7 @@ import { deleteExceptionList } from './delete_exception_list';
 import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
-import {
-  findExceptionListsItem,
-  findValueListExceptionListItems,
-} from './find_exception_list_items';
+import { findExceptionListsItem } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
 import { PromiseFromStreams, importExceptions } from './import_exception_list_and_items';
@@ -89,6 +90,11 @@ import {
 } from './utils/import/create_exceptions_stream_logic';
 import { openPointInTime } from './open_point_in_time';
 import { closePointInTime } from './close_point_in_time';
+import { findExceptionListPointInTimeFinder } from './find_exception_list_point_in_time_finder';
+import { findValueListExceptionListItems } from './find_value_list_exception_list_items';
+import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
+import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_list_exception_list_items_point_in_time_finder';
+import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -931,6 +937,130 @@ export class ExceptionListClient {
     return closePointInTime({
       pit,
       savedObjectsClient,
+    });
+  };
+
+  // TODO: Add JSDoc
+  public findExceptionListItemPointInTimeFinder = async ({
+    executeFunctionOnStream,
+    filter,
+    listId,
+    maxSize,
+    namespaceType,
+    perPage,
+    sortField,
+    sortOrder,
+  }: FindExceptionListItemPointInTimeFinderOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return findExceptionListItemPointInTimeFinder({
+      executeFunctionOnStream,
+      filter,
+      listId,
+      maxSize,
+      namespaceType,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  /**
+   * Finds an exception list within a point in time (PIT) and then calls the function
+   * `executeFunctionOnStream` until the maxPerPage is reached and stops.
+   * NOTE: This is slightly different from the saved objects version in that it takes
+   * an injected function, so that we avoid doing additional plumbing with generators
+   * to try to keep the maintenance of this machinery simpler for now.
+   *
+   * If you want to stream all results up to 10k into memory for correlation this would be:
+   * @example
+   * ```ts
+   * const myResult: FoundExceptionListSchema[] = [];
+   * const executeFunctionOnStream = (response: FoundExceptionListSchema) => {
+   *   myResult.push(response);
+   * }
+   * await client.findExceptionListPointInTimeFinder({
+   *   filter,
+   *   executeFunctionOnStream,
+   *   namespaceType,
+   *   perPage: 100,
+   *   sortField,
+   *   sortOrder,
+   *   exe
+   * });
+   * ```
+   * @param filter {string} Your filter
+   * @param namespaceType {string} "agnostic" | "single" of your namespace
+   * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+   * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
+   * @param sortField {string} String of the field to sort against
+   * @param sortOrder "asc" | "desc" The order to sort against
+   */
+  public findExceptionListPointInTimeFinder = async ({
+    executeFunctionOnStream,
+    filter,
+    maxSize,
+    namespaceType,
+    perPage,
+    sortField,
+    sortOrder,
+  }: FindExceptionListPointInTimeFinderOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return findExceptionListPointInTimeFinder({
+      executeFunctionOnStream,
+      filter,
+      maxSize,
+      namespaceType,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  // TODO: Add JSDoc
+  public findExceptionListsItemPointInTimeFinder = async ({
+    listId,
+    namespaceType,
+    executeFunctionOnStream,
+    maxSize,
+    filter,
+    perPage,
+    sortField,
+    sortOrder,
+  }: FindExceptionListItemsPointInTimeFinderOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return findExceptionListsItemPointInTimeFinder({
+      executeFunctionOnStream,
+      filter,
+      listId,
+      maxSize,
+      namespaceType,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  // TODO: Add JSDoc
+  public findValueListExceptionListItemsPointInTimeFinder = async ({
+    valueListId,
+    executeFunctionOnStream,
+    perPage,
+    maxSize,
+    sortField,
+    sortOrder,
+  }: FindValueListExceptionListsItemsPointInTimeFinder): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return findValueListExceptionListItemsPointInTimeFinder({
+      executeFunctionOnStream,
+      maxSize,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+      valueListId,
     });
   };
 }

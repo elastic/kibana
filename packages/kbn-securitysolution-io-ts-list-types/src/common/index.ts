@@ -35,6 +35,7 @@ export * from './list_operator';
 export * from './list_type';
 export * from './lists';
 export * from './lists_default_array';
+export * from './max_size';
 export * from './meta';
 export * from './name';
 export * from './non_empty_entries_array';
