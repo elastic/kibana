@@ -79,6 +79,52 @@ describe('heatmap suggestions', () => {
       ).toEqual([]);
     });
 
+    test('when there is more than 1 metric', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'metric-column-1',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric 1',
+                },
+              },
+              {
+                columnId: 'metric-column-2',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric 2',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([]);
+    });
+
     test('when there are 3 or more buckets', () => {
       expect(
         getSuggestions({
@@ -182,6 +228,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -189,7 +237,7 @@ describe('heatmap suggestions', () => {
               type: LEGEND_FUNCTION,
             },
           },
-          title: 'Heatmap',
+          title: 'Heat map',
           hide: true,
           previewIcon: 'empty',
           score: 0,
@@ -233,6 +281,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -240,17 +290,15 @@ describe('heatmap suggestions', () => {
               type: LEGEND_FUNCTION,
             },
           },
-          title: 'Heatmap',
+          title: 'Heat map',
           hide: true,
           previewIcon: 'empty',
-          score: 0.3,
+          score: 0,
         },
       ]);
     });
-  });
 
-  describe('shows suggestions', () => {
-    test('when at least one axis and value accessor are available', () => {
+    test('when at least one axis has a date histogram', () => {
       expect(
         getSuggestions({
           table: {
@@ -297,6 +345,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -304,11 +354,150 @@ describe('heatmap suggestions', () => {
               type: LEGEND_FUNCTION,
             },
           },
-          title: 'Heatmap',
-          // Temp hide all suggestions while heatmap is in beta
+          title: 'Heat map',
           hide: true,
           previewIcon: 'empty',
+          score: 0.3,
+        },
+      ]);
+    });
+  });
+
+  describe('shows suggestions', () => {
+    test('when at least one axis and value accessor are available', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'number-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'number',
+                  scale: 'interval',
+                  label: 'AvgTicketPrice',
+                },
+              },
+              {
+                columnId: 'metric-column',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([
+        {
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            shape: 'heatmap',
+            xAccessor: 'number-column',
+            valueAccessor: 'metric-column',
+            gridConfig: {
+              type: HEATMAP_GRID_FUNCTION,
+              isCellLabelVisible: false,
+              isYAxisLabelVisible: true,
+              isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
+            },
+            legend: {
+              isVisible: true,
+              position: Position.Right,
+              type: LEGEND_FUNCTION,
+            },
+          },
+          title: 'Heat map',
+          hide: false,
+          previewIcon: 'empty',
           score: 0.6,
+        },
+      ]);
+    });
+
+    test('when there is a date histogram and a second bucket dimension', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'number-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'number',
+                  scale: 'interval',
+                  label: 'AvgTicketPrice',
+                },
+              },
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'metric-column',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([
+        {
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            shape: 'heatmap',
+            yAccessor: 'date-column',
+            xAccessor: 'number-column',
+            valueAccessor: 'metric-column',
+            gridConfig: {
+              type: HEATMAP_GRID_FUNCTION,
+              isCellLabelVisible: false,
+              isYAxisLabelVisible: true,
+              isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
+            },
+            legend: {
+              isVisible: true,
+              position: Position.Right,
+              type: LEGEND_FUNCTION,
+            },
+          },
+          title: 'Heat map',
+          hide: false,
+          previewIcon: 'empty',
+          score: 0.3,
         },
       ]);
     });
@@ -321,12 +510,12 @@ describe('heatmap suggestions', () => {
             isMultiRow: true,
             columns: [
               {
-                columnId: 'date-column',
+                columnId: 'number-column',
                 operation: {
                   isBucketed: true,
-                  dataType: 'date',
+                  dataType: 'number',
                   scale: 'interval',
-                  label: 'Date',
+                  label: 'AvgTicketPrice',
                 },
               },
               {
@@ -362,7 +551,7 @@ describe('heatmap suggestions', () => {
             layerId: 'first',
             layerType: layerTypes.DATA,
             shape: 'heatmap',
-            xAccessor: 'date-column',
+            xAccessor: 'number-column',
             yAccessor: 'group-column',
             valueAccessor: 'metric-column',
             gridConfig: {
@@ -370,6 +559,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -377,9 +568,8 @@ describe('heatmap suggestions', () => {
               type: LEGEND_FUNCTION,
             },
           },
-          title: 'Heatmap',
-          // Temp hide all suggestions while heatmap is in beta
-          hide: true,
+          title: 'Heat map',
+          hide: false,
           previewIcon: 'empty',
           score: 0.9,
         },

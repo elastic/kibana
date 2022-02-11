@@ -405,7 +405,7 @@ export const DataSourceStrings = {
       }),
     getIndexLabel: () =>
       i18n.translate('xpack.canvas.uis.dataSources.esdocs.indexLabel', {
-        defaultMessage: 'Enter an index name or select an index pattern',
+        defaultMessage: 'Enter an index name or select a data view',
       }),
     getQueryTitle: () =>
       i18n.translate('xpack.canvas.uis.dataSources.esdocs.queryTitle', {
@@ -692,6 +692,14 @@ export const ModelStrings = {
       i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisLabelVisibleLabel', {
         defaultMessage: 'Specifies whether or not the Y-axis labels are visible',
       }),
+    getIsYAxisTitleVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisTitleVisibleTile', {
+        defaultMessage: 'Show Y-axis title',
+      }),
+    getIsYAxisTitleVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisTitleVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the Y-axis title is visible',
+      }),
     getIsXAxisLabelVisibleDisplayName: () =>
       i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisLabelVisibleTile', {
         defaultMessage: 'Show X-axis labels',
@@ -699,6 +707,14 @@ export const ModelStrings = {
     getIsXAxisLabelVisibleHelp: () =>
       i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisLabelVisibleLabel', {
         defaultMessage: 'Specifies whether or not the X-axis labels are visible',
+      }),
+    getIsXAxisTitleVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisTitleVisibleTile', {
+        defaultMessage: 'Show X-axis title',
+      }),
+    getIsXAxisTitleVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisTitleVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the X-axis title is visible',
       }),
   },
 };

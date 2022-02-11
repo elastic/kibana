@@ -15,7 +15,7 @@ export const uploadLayerWizardConfig: LayerWizard = {
   order: 10,
   categories: [],
   description: i18n.translate('xpack.maps.fileUploadWizard.description', {
-    defaultMessage: 'Index GeoJSON data in Elasticsearch',
+    defaultMessage: 'Index GeoJSON and Shapefile data in Elasticsearch',
   }),
   disabledReason: i18n.translate('xpack.maps.fileUploadWizard.disabledDesc', {
     defaultMessage:
@@ -53,6 +53,6 @@ export const uploadLayerWizardConfig: LayerWizard = {
     return <ClientFileCreateSourceEditor {...renderWizardArguments} />;
   },
   title: i18n.translate('xpack.maps.fileUploadWizard.title', {
-    defaultMessage: 'Upload GeoJSON',
+    defaultMessage: 'Upload file',
   }),
 };

@@ -57,6 +57,7 @@ export {
   FilterValueLabel,
   SelectableUrlList,
   ExploratoryView,
+  DatePicker,
 } from './components/shared/';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
@@ -102,5 +103,8 @@ export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_
 export {
   ReportTypes,
   REPORT_METRIC_FIELD,
+  RECORDS_PERCENTAGE_FIELD,
+  RECORDS_FIELD,
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
+export { fromQuery, toQuery } from './utils/url';

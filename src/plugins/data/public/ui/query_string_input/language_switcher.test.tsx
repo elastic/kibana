@@ -10,7 +10,7 @@ import React from 'react';
 import { QueryLanguageSwitcher, QueryLanguageSwitcherProps } from './language_switcher';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButtonEmpty, EuiIcon, EuiPopover } from '@elastic/eui';
 const startMock = coreMock.createStart();
 

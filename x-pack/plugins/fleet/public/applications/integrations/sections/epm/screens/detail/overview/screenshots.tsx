@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState, useMemo, memo } from 'react';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiPagination } from '@elastic/eui';
@@ -17,6 +18,9 @@ interface ScreenshotProps {
   packageName: string;
   version: string;
 }
+const Pagination = styled(EuiPagination)`
+  max-width: 130px;
+`;
 
 export const Screenshots: React.FC<ScreenshotProps> = memo(({ images, packageName, version }) => {
   const { toPackageImage } = useLinks();
@@ -48,7 +52,7 @@ export const Screenshots: React.FC<ScreenshotProps> = memo(({ images, packageNam
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiPagination
+            <Pagination
               aria-label={i18n.translate('xpack.fleet.epm.screenshotPaginationAriaLabel', {
                 defaultMessage: '{packageName} screenshot pagination',
                 values: {

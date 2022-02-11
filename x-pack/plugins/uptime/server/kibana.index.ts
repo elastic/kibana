@@ -14,6 +14,8 @@ import { initUptimeServer } from './uptime_server';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from './lib/adapters/framework';
 import { umDynamicSettings } from './lib/saved_objects/uptime_settings';
 import { UptimeRuleRegistry } from './plugin';
+import { syntheticsMonitorType } from './lib/saved_objects/synthetics_monitor';
+import { syntheticsApiKeyObjectType } from './lib/saved_objects/service_api_key';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -58,7 +60,7 @@ export const initServerWithKibana = (
         catalogue: ['uptime'],
         api: ['uptime-read', 'uptime-write', 'lists-all'],
         savedObject: {
-          all: [umDynamicSettings.name, 'alert'],
+          all: [umDynamicSettings.name, syntheticsMonitorType, syntheticsApiKeyObjectType],
           read: [],
         },
         alerting: {
@@ -89,8 +91,8 @@ export const initServerWithKibana = (
         catalogue: ['uptime'],
         api: ['uptime-read', 'lists-read'],
         savedObject: {
-          all: ['alert'],
-          read: [umDynamicSettings.name],
+          all: [],
+          read: [umDynamicSettings.name, syntheticsMonitorType, syntheticsApiKeyObjectType],
         },
         alerting: {
           rule: {

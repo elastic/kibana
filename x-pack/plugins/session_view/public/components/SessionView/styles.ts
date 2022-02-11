@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
 interface StylesDeps {
@@ -14,33 +13,22 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ height = 500 }: StylesDeps) => {
-  const { euiTheme } = useEuiTheme();
-
   const cached = useMemo(() => {
     // const { colors, border, font, size } = euiTheme;
-    const padding = euiTheme.size.s;
 
     const processTree: CSSObject = {
       height: `${height}px`,
     };
 
-    const outerPanel: CSSObject = {
-      fontFamily: euiTheme.font.familyCode,
-      position: 'relative',
-      overflowX: 'hidden',
-    };
-
-    const treePanel: CSSObject = {
-      paddingTop: padding,
-      paddingLeft: padding,
+    const detailPanel: CSSObject = {
+      height: `${height}px`,
     };
 
     return {
       processTree,
-      outerPanel,
-      treePanel,
+      detailPanel,
     };
-  }, [height, euiTheme]);
+  }, [height]);
 
   return cached;
 };

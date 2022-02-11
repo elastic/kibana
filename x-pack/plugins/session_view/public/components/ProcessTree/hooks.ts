@@ -83,7 +83,7 @@ export class ProcessImpl implements Process {
   }
 
   hasExited() {
-    return !!this.events.find(({ event }) => event.action === EventAction.exit);
+    return !!this.events.find(({ event }) => event.action === EventAction.end);
   }
 
   getDetails() {

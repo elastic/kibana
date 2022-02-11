@@ -8,11 +8,16 @@
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreDeleteItemServerExtension } from '../../../../../lists/server';
-import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
+import {
+  TrustedAppValidator,
+  HostIsolationExceptionsValidator,
+  EventFilterValidator,
+} from '../validators';
 
+type ValidatorCallback = ExceptionsListPreDeleteItemServerExtension['callback'];
 export const getExceptionsPreDeleteItemHandler = (
-  endpointAppContext: EndpointAppContextService
-): ExceptionsListPreDeleteItemServerExtension['callback'] => {
+  endpointAppContextService: EndpointAppContextService
+): ValidatorCallback => {
   return async function ({ data, context: { request, exceptionListClient } }) {
     if (data.namespaceType !== 'agnostic') {
       return data;
@@ -29,12 +34,27 @@ export const getExceptionsPreDeleteItemHandler = (
       return data;
     }
 
+    const { list_id: listId } = exceptionItem;
+
+    // Validate Trusted Applications
+    if (TrustedAppValidator.isTrustedApp({ listId })) {
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreDeleteItem();
+      return data;
+    }
+
     // Host Isolation Exception
-    if (HostIsolationExceptionsValidator.isHostIsolationException(exceptionItem.list_id)) {
+    if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
       await new HostIsolationExceptionsValidator(
-        endpointAppContext,
+        endpointAppContextService,
         request
       ).validatePreDeleteItem();
+      return data;
+    }
+
+    // Event Filter validation
+    if (EventFilterValidator.isEventFilter({ listId })) {
+      await new EventFilterValidator(endpointAppContextService, request).validatePreDeleteItem();
+      return data;
     }
 
     return data;

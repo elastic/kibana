@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import {
-  sessionViewBasicProcessMock,
-  sessionViewAlertProcessMock,
-} from '../../../common/mocks/constants/session_view_process.mock';
+import { sessionViewBasicProcessMock } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionViewDetailPanel } from './index';
 
@@ -23,50 +20,27 @@ describe('SessionView component', () => {
   });
 
   describe('When SessionViewDetailPanel is mounted', () => {
-    it('should show session detail and server detail when no process is selected', async () => {
-      renderResult = mockedContext.render(
-        <SessionViewDetailPanel
-          isDetailMounted={true}
-          height={400}
-          selectedProcess={null}
-          setIsDetailOpen={() => jest.fn()}
-        />
-      );
-      // see if loader is present
-      expect(renderResult.queryByTestId('sessionViewDetailPanelCommandDetail')).toBeNull();
-      expect(renderResult.queryByTestId('sessionViewDetailPanelSessionDetail')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionViewDetailPanelServerDetail')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionViewDetailPanelAlertDetail')).toBeNull();
+    it('shows empty message', async () => {
+      renderResult = mockedContext.render(<SessionViewDetailPanel selectedProcess={null} />);
+
+      expect(renderResult.queryByText('Please select a process')).toBeVisible();
     });
 
-    it('should show command detail when selectedProcess is present', async () => {
+    it('shows process detail by default', async () => {
       renderResult = mockedContext.render(
-        <SessionViewDetailPanel
-          isDetailMounted={true}
-          height={400}
-          selectedProcess={sessionViewBasicProcessMock}
-          setIsDetailOpen={() => jest.fn()}
-        />
+        <SessionViewDetailPanel selectedProcess={sessionViewBasicProcessMock} />
       );
-      expect(renderResult.queryByTestId('sessionViewDetailPanelCommandDetail')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionViewDetailPanelSessionDetail')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionViewDetailPanelServerDetail')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionViewDetailPanelAlertDetail')).toBeNull();
+      expect(renderResult.queryByText('8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726')).toBeVisible();
     });
 
-    it('should show command and alerts detail if selectedProcess contains a signal event', async () => {
+    it('can switch tabs to show host details', async () => {
       renderResult = mockedContext.render(
-        <SessionViewDetailPanel
-          isDetailMounted={true}
-          height={400}
-          selectedProcess={sessionViewAlertProcessMock}
-          setIsDetailOpen={() => jest.fn()}
-        />
+        <SessionViewDetailPanel selectedProcess={sessionViewBasicProcessMock} />
       );
-      expect(renderResult.queryByTestId('sessionViewDetailPanelCommandDetail')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionViewDetailPanelSessionDetail')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionViewDetailPanelServerDetail')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionViewDetailPanelAlertDetail')).toBeTruthy();
+
+      renderResult.queryByText('Host')?.click();
+      expect(renderResult.queryByText('hostname')).toBeVisible();
+      expect(renderResult.queryAllByText('james-fleet-714-2')).toHaveLength(2);
     });
   });
 });

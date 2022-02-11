@@ -15,7 +15,7 @@ import { groups } from '../../__mocks__/groups.mock';
 import { users } from '../../__mocks__/users.mock';
 import { mockGroupsValues } from './__mocks__/groups_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { JSON_HEADER as headers } from '../../../../../common/constants';
 import { DEFAULT_META } from '../../../shared/constants';
@@ -51,9 +51,12 @@ describe('GroupsLogic', () => {
       it('sets reducers', () => {
         GroupsLogic.actions.onInitializeGroups({ contentSources, users });
 
-        expect(GroupsLogic.values.groupsDataLoading).toEqual(false);
-        expect(GroupsLogic.values.contentSources).toEqual(contentSources);
-        expect(GroupsLogic.values.users).toEqual(users);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          groupsDataLoading: false,
+          contentSources,
+          users,
+        });
       });
     });
 
@@ -61,10 +64,13 @@ describe('GroupsLogic', () => {
       it('sets reducers', () => {
         GroupsLogic.actions.setSearchResults(groupsResponse);
 
-        expect(GroupsLogic.values.groups).toEqual(groups);
-        expect(GroupsLogic.values.groupListLoading).toEqual(false);
-        expect(GroupsLogic.values.newGroupName).toEqual('');
-        expect(GroupsLogic.values.groupsMeta).toEqual(DEFAULT_META);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          groups,
+          groupListLoading: false,
+          newGroupName: '',
+          groupsMeta: DEFAULT_META,
+        });
       });
     });
 
@@ -74,7 +80,11 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.addFilteredSource('bar');
         GroupsLogic.actions.addFilteredSource('baz');
 
-        expect(GroupsLogic.values.filteredSources).toEqual(['bar', 'baz', 'foo']);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          hasFiltersSet: true,
+          filteredSources: ['bar', 'baz', 'foo'],
+        });
       });
     });
 
@@ -85,7 +95,11 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.addFilteredSource('baz');
         GroupsLogic.actions.removeFilteredSource('foo');
 
-        expect(GroupsLogic.values.filteredSources).toEqual(['bar', 'baz']);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          hasFiltersSet: true,
+          filteredSources: ['bar', 'baz'],
+        });
       });
     });
 
@@ -95,7 +109,11 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.addFilteredUser('bar');
         GroupsLogic.actions.addFilteredUser('baz');
 
-        expect(GroupsLogic.values.filteredUsers).toEqual(['bar', 'baz', 'foo']);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          hasFiltersSet: true,
+          filteredUsers: ['bar', 'baz', 'foo'],
+        });
       });
     });
 
@@ -106,7 +124,11 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.addFilteredUser('baz');
         GroupsLogic.actions.removeFilteredUser('foo');
 
-        expect(GroupsLogic.values.filteredUsers).toEqual(['bar', 'baz']);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          hasFiltersSet: true,
+          filteredUsers: ['bar', 'baz'],
+        });
       });
     });
 
@@ -114,8 +136,11 @@ describe('GroupsLogic', () => {
       it('sets reducers', () => {
         GroupsLogic.actions.setGroupUsers(users);
 
-        expect(GroupsLogic.values.allGroupUsersLoading).toEqual(false);
-        expect(GroupsLogic.values.allGroupUsers).toEqual(users);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          allGroupUsersLoading: false,
+          allGroupUsers: users,
+        });
       });
     });
 
@@ -123,8 +148,11 @@ describe('GroupsLogic', () => {
       it('sets reducer', () => {
         GroupsLogic.actions.setAllGroupLoading(true);
 
-        expect(GroupsLogic.values.allGroupUsersLoading).toEqual(true);
-        expect(GroupsLogic.values.allGroupUsers).toEqual([]);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          allGroupUsersLoading: true,
+          allGroupUsers: [],
+        });
       });
     });
 
@@ -132,7 +160,10 @@ describe('GroupsLogic', () => {
       it('sets reducer', () => {
         GroupsLogic.actions.setFilterValue('foo');
 
-        expect(GroupsLogic.values.filterValue).toEqual('foo');
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          filterValue: 'foo',
+        });
       });
     });
 
@@ -141,8 +172,11 @@ describe('GroupsLogic', () => {
         const NEW_NAME = 'new name';
         GroupsLogic.actions.setNewGroupName(NEW_NAME);
 
-        expect(GroupsLogic.values.newGroupName).toEqual(NEW_NAME);
-        expect(GroupsLogic.values.newGroupNameErrors).toEqual([]);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          newGroupName: NEW_NAME,
+          newGroupNameErrors: [],
+        });
       });
     });
 
@@ -150,12 +184,15 @@ describe('GroupsLogic', () => {
       it('sets reducer', () => {
         GroupsLogic.actions.setNewGroup(groups[0]);
 
-        expect(GroupsLogic.values.newGroupModalOpen).toEqual(false);
-        expect(GroupsLogic.values.newGroup).toEqual(groups[0]);
-        expect(GroupsLogic.values.newGroupNameErrors).toEqual([]);
-        expect(GroupsLogic.values.filteredSources).toEqual([]);
-        expect(GroupsLogic.values.filteredUsers).toEqual([]);
-        expect(GroupsLogic.values.groupsMeta).toEqual(DEFAULT_META);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          newGroupModalOpen: false,
+          newGroup: groups[0],
+          newGroupNameErrors: [],
+          filteredSources: [],
+          filteredUsers: [],
+          groupsMeta: DEFAULT_META,
+        });
       });
     });
 
@@ -164,7 +201,10 @@ describe('GroupsLogic', () => {
         const errors = ['this is an error'];
         GroupsLogic.actions.setNewGroupFormErrors(errors);
 
-        expect(GroupsLogic.values.newGroupNameErrors).toEqual(errors);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          newGroupNameErrors: errors,
+        });
       });
     });
 
@@ -172,9 +212,12 @@ describe('GroupsLogic', () => {
       it('sets reducer', () => {
         GroupsLogic.actions.closeNewGroupModal();
 
-        expect(GroupsLogic.values.newGroupModalOpen).toEqual(false);
-        expect(GroupsLogic.values.newGroupName).toEqual('');
-        expect(GroupsLogic.values.newGroupNameErrors).toEqual([]);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          newGroupNameErrors: [],
+          newGroupName: '',
+          newGroupModalOpen: false,
+        });
       });
     });
 
@@ -184,7 +227,10 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.toggleFilterSourcesDropdown();
         GroupsLogic.actions.closeFilterSourcesDropdown();
 
-        expect(GroupsLogic.values.filterSourcesDropdownOpen).toEqual(false);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          filterSourcesDropdownOpen: false,
+        });
       });
     });
 
@@ -194,7 +240,10 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.toggleFilterUsersDropdown();
         GroupsLogic.actions.closeFilterUsersDropdown();
 
-        expect(GroupsLogic.values.filterUsersDropdownOpen).toEqual(false);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          filterUsersDropdownOpen: false,
+        });
       });
     });
 
@@ -204,7 +253,11 @@ describe('GroupsLogic', () => {
         GroupsLogic.actions.setSearchResults(groupsResponse);
         GroupsLogic.actions.setGroupsLoading();
 
-        expect(GroupsLogic.values.groupListLoading).toEqual(true);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          groups,
+          groupListLoading: true,
+        });
       });
     });
 
@@ -212,7 +265,10 @@ describe('GroupsLogic', () => {
       it('sets reducer', () => {
         GroupsLogic.actions.resetGroups();
 
-        expect(GroupsLogic.values.newGroup).toEqual(null);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          newGroup: null,
+        });
       });
     });
   });
@@ -339,11 +395,14 @@ describe('GroupsLogic', () => {
         const activePage = 3;
         GroupsLogic.actions.setActivePage(activePage);
 
-        expect(GroupsLogic.values.groupsMeta).toEqual({
-          ...DEFAULT_META,
-          page: {
-            ...DEFAULT_META.page,
-            current: activePage,
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          groupsMeta: {
+            ...DEFAULT_META,
+            page: {
+              ...DEFAULT_META.page,
+              current: activePage,
+            },
           },
         });
 
@@ -355,8 +414,11 @@ describe('GroupsLogic', () => {
       it('sets reducer and clears flash messages', () => {
         GroupsLogic.actions.openNewGroupModal();
 
-        expect(GroupsLogic.values.newGroupModalOpen).toEqual(true);
-        expect(GroupsLogic.values.newGroup).toEqual(null);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          newGroupModalOpen: true,
+          newGroup: null,
+        });
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
@@ -365,10 +427,13 @@ describe('GroupsLogic', () => {
       it('sets reducer and clears flash messages', () => {
         GroupsLogic.actions.resetGroupsFilters();
 
-        expect(GroupsLogic.values.filteredSources).toEqual([]);
-        expect(GroupsLogic.values.filteredUsers).toEqual([]);
-        expect(GroupsLogic.values.filterValue).toEqual('');
-        expect(GroupsLogic.values.groupsMeta).toEqual(DEFAULT_META);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          filteredSources: [],
+          filteredUsers: [],
+          filterValue: '',
+          groupsMeta: DEFAULT_META,
+        });
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
@@ -377,7 +442,10 @@ describe('GroupsLogic', () => {
       it('sets reducer and clears flash messages', () => {
         GroupsLogic.actions.toggleFilterSourcesDropdown();
 
-        expect(GroupsLogic.values.filterSourcesDropdownOpen).toEqual(true);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          filterSourcesDropdownOpen: true,
+        });
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
@@ -386,7 +454,10 @@ describe('GroupsLogic', () => {
       it('sets reducer and clears flash messages', () => {
         GroupsLogic.actions.toggleFilterUsersDropdown();
 
-        expect(GroupsLogic.values.filterUsersDropdownOpen).toEqual(true);
+        expect(GroupsLogic.values).toEqual({
+          ...mockGroupsValues,
+          filterUsersDropdownOpen: true,
+        });
         expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
