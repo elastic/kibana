@@ -254,9 +254,33 @@ describe('AlertSummaryView', () => {
       },
       {
         category: 'kibana',
-        field: 'kibana.alert.threshold_result.terms',
-        values: ['{"field":"host.name","value":"Host-i120rdnmnw"}'],
-        originalValue: ['{"field":"host.name","value":"Host-i120rdnmnw"}'],
+        field: 'kibana.alert.threshold_result.terms.field',
+        values: ['host.name', 'host.id'],
+        originalValue: ['host.name', 'host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.value',
+        values: ['host-23084y2', '3084hf3n84p8934r8h'],
+        originalValue: ['host-23084y2', '3084hf3n84p8934r8h'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        values: ['host.name', 'host.id'],
+        originalValue: ['host.name', 'host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.value',
+        values: [9001],
+        originalValue: [9001],
       },
     ] as TimelineEventsDetailsItem[];
     const renderProps = {
@@ -269,7 +293,13 @@ describe('AlertSummaryView', () => {
       </TestProvidersComponent>
     );
 
-    ['Threshold Count', 'host.name [threshold]'].forEach((fieldId) => {
+    [
+      'Threshold Count',
+      'host.name [threshold]',
+      'host.id [threshold]',
+      'Threshold Cardinality',
+      'count(host.name) >= 9001',
+    ].forEach((fieldId) => {
       expect(getByText(fieldId));
     });
   });
