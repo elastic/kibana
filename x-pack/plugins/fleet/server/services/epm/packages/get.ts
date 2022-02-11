@@ -29,7 +29,6 @@ import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
 import { createInstallableFrom } from './index';
-import { getBundledPackages } from './get_bundled_packages';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
@@ -138,28 +137,6 @@ export async function getPackageInfoFromRegistry(options: {
   return createInstallableFrom(updated, savedObject);
 }
 
-async function fetchRegistryPackageWithFallbackToBundledPackages(
-  pkgName: string,
-  pkgVersion: string
-) {
-  return Registry.fetchFindLatestPackage(pkgName).catch(async (error) => {
-    const bundledPackages = await getBundledPackages();
-
-    const bundledPackage = bundledPackages.find(
-      (b) => b.name === pkgName && b.version === pkgVersion
-    );
-
-    // If we don't find a bundled package, re-throw the original error
-    if (!bundledPackage) {
-      throw error;
-    }
-    return {
-      name: bundledPackage.name,
-      version: bundledPackage.version,
-    };
-  });
-}
-
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -169,7 +146,7 @@ export async function getPackageInfo(options: {
 
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    fetchRegistryPackageWithFallbackToBundledPackages(pkgName, pkgVersion),
+    Registry.fetchFindLatestPackageWithFallbackToBundled(pkgName),
   ]);
 
   // If no package version is provided, use the installed version in the response

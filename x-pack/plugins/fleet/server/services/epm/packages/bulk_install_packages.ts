@@ -14,7 +14,6 @@ import type { InstallResult } from '../../../types';
 
 import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
-import { getBundledPackages } from './get_bundled_packages';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -33,28 +32,14 @@ export async function bulkInstallPackages({
   force,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
-  const bundledPackages = await getBundledPackages();
 
   const packagesResults = await Promise.allSettled(
-    packagesToInstall.map((pkg) => {
+    packagesToInstall.map(async (pkg) => {
       if (typeof pkg !== 'string') {
         return Promise.resolve(pkg);
       }
 
-      try {
-        return Registry.fetchFindLatestPackage(pkg);
-      } catch (error) {
-        const bundledPackage = bundledPackages.find((b) => b.name === pkg);
-
-        if (!bundledPackage) {
-          throw error;
-        }
-
-        return {
-          name: bundledPackage.name,
-          version: bundledPackage.version,
-        };
-      }
+      return Registry.fetchFindLatestPackageWithFallbackToBundled(pkg);
     })
   );
 

@@ -35,6 +35,8 @@ import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
 
+import { getBundledPackages } from '../packages/get_bundled_packages';
+
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
 
@@ -78,6 +80,23 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
   } else {
     throw new PackageNotFoundError(`${packageName} not found`);
   }
+}
+
+export async function fetchFindLatestPackageWithFallbackToBundled(pkgName: string) {
+  return fetchFindLatestPackage(pkgName).catch(async (error) => {
+    const bundledPackages = await getBundledPackages();
+    const bundledPackage = bundledPackages.find((b) => b.name === pkgName);
+
+    // If we don't find a bundled package, re-throw the original error
+    if (!bundledPackage) {
+      throw error;
+    }
+
+    return {
+      name: bundledPackage.name,
+      version: bundledPackage.version,
+    };
+  });
 }
 
 export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
