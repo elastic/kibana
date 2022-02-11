@@ -10,6 +10,7 @@ import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LensPublicStart } from '../../../plugins/lens/public';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import { mount } from './mount';
+import image from './image.jpg';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
@@ -44,6 +45,7 @@ export class TestingEmbeddedLensPlugin
           target: '_blank',
         },
       ],
+      image,
     });
   }
 
