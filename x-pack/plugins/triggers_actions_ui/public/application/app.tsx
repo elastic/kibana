@@ -39,7 +39,6 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
   storage?: Storage;
-  isCloud: boolean;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;

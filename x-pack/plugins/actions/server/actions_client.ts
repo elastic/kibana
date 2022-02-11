@@ -45,6 +45,10 @@ import {
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
 import { RunNowResult } from '../../task_manager/server';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
+import {
+  isCloudEmailService,
+  getCloudEmailServiceConfigAsOther,
+} from './builtin_action_types/email';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -152,6 +156,10 @@ export class ActionsClient {
       throw error;
     }
 
+    if (isCloudEmailService(config)) {
+      config = getCloudEmailServiceConfigAsOther();
+    }
+
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
@@ -221,11 +229,17 @@ export class ActionsClient {
       );
       throw error;
     }
+
     const { attributes, references, version } =
       await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = attributes;
-    const { name, config, secrets } = action;
+    const { name, config: configParm, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
+
+    const config = isCloudEmailService(configParm)
+      ? getCloudEmailServiceConfigAsOther()
+      : configParm;
+
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
     if (actionType.validate?.connector) {

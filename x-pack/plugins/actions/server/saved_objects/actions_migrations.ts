@@ -15,6 +15,10 @@ import {
 import { RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+import {
+  isCloudEmailService,
+  getCloudEmailServiceConfigAsOther,
+} from '../builtin_action_types/email';
 
 interface ActionsLogMeta extends LogMeta {
   migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };
@@ -78,12 +82,20 @@ export function getActionsMigrations(
     (doc) => doc // no-op
   );
 
+  const migrationActionsEightTwoZero = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      isCloudEmailService(doc.attributes.config),
+    pipeMigrations(changeCloudEmailToOther)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
     '7.16.0': executeMigrationWithErrorHandling(migrationActionsSixteen, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
+    '8.2.0': executeMigrationWithErrorHandling(migrationActionsEightTwoZero, '8.2.0'),
   };
 }
 
@@ -105,6 +117,22 @@ function executeMigrationWithErrorHandling(
       );
       throw ex;
     }
+  };
+}
+
+function changeCloudEmailToOther(
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> {
+  if (!isCloudEmailService(doc.attributes.config)) {
+    return doc;
+  }
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      config: getCloudEmailServiceConfigAsOther(),
+    },
   };
 }
 

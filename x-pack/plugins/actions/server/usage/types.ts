@@ -48,7 +48,6 @@ export const byServiceProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_ac
     exchange_server: { type: 'long' },
     gmail: { type: 'long' },
     outlook365: { type: 'long' },
-    elastic_cloud: { type: 'long' },
     other: { type: 'long' },
     ses: { type: 'long' },
   };

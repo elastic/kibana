@@ -66,7 +66,6 @@ export interface TriggersAndActionsUIPublicPluginStart {
 interface PluginsSetup {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
-  cloud?: { isCloudEnabled: boolean };
 }
 
 interface PluginsStart {
@@ -150,7 +149,6 @@ export class Plugin
           charts: pluginsStart.charts,
           alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,
-          isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           element: params.element,
           theme$: params.theme$,
           storage: new Storage(window.localStorage),

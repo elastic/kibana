@@ -18,6 +18,7 @@ import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from 
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
 import { AdditionalEmailServices } from '../../common';
+import { SavedObjectAttributes } from '../../../../../src/core/server';
 
 export type EmailActionType = ActionType<
   ActionTypeConfigType,
@@ -268,11 +269,6 @@ async function executor(
     transport.host = config.host!;
     transport.port = config.port!;
     transport.secure = getSecureValue(config.secure, config.port);
-  } else if (config.service === AdditionalEmailServices.ELASTIC_CLOUD) {
-    // use custom elastic cloud settings
-    transport.host = ELASTIC_CLOUD_SERVICE.host!;
-    transport.port = ELASTIC_CLOUD_SERVICE.port!;
-    transport.secure = ELASTIC_CLOUD_SERVICE.secure!;
   } else {
     // use nodemailer's well known service config
     transport.service = config.service;
@@ -322,10 +318,6 @@ async function executor(
 // utilities
 
 function getServiceNameHost(service: string): string | null {
-  if (service === AdditionalEmailServices.ELASTIC_CLOUD) {
-    return ELASTIC_CLOUD_SERVICE.host!;
-  }
-
   const serviceEntry = nodemailerGetService(service);
   if (serviceEntry === false) return null;
 
@@ -366,4 +358,17 @@ function getFooterMessage({
       link: `${publicBaseUrl}${kibanaFooterLink.path === '/' ? '' : kibanaFooterLink.path}`,
     },
   });
+}
+
+export function isCloudEmailService(config: SavedObjectAttributes): boolean {
+  return config.service === AdditionalEmailServices.ELASTIC_CLOUD;
+}
+
+export function getCloudEmailServiceConfigAsOther(): SavedObjectAttributes {
+  return {
+    service: AdditionalEmailServices.OTHER,
+    host: ELASTIC_CLOUD_SERVICE.host!,
+    port: ELASTIC_CLOUD_SERVICE.port!,
+    secure: ELASTIC_CLOUD_SERVICE.secure!,
+  };
 }

@@ -10,10 +10,9 @@ import { IRouter } from 'kibana/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { ILicenseState } from '../lib';
-import { AdditionalEmailServices, INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { ELASTIC_CLOUD_SERVICE } from '../builtin_action_types/email';
 
 const paramSchema = schema.object({
   service: schema.string(),
@@ -35,17 +34,13 @@ export const getWellKnownEmailServiceRoute = (
         const { service } = req.params;
 
         let response: SMTPConnection.Options = {};
-        if (service === AdditionalEmailServices.ELASTIC_CLOUD) {
-          response = ELASTIC_CLOUD_SERVICE;
-        } else {
-          const serviceEntry = nodemailerGetService(service);
-          if (serviceEntry) {
-            response = {
-              host: serviceEntry.host,
-              port: serviceEntry.port,
-              secure: serviceEntry.secure,
-            };
-          }
+        const serviceEntry = nodemailerGetService(service);
+        if (serviceEntry) {
+          response = {
+            host: serviceEntry.host,
+            port: serviceEntry.port,
+            secure: serviceEntry.secure,
+          };
         }
 
         return res.ok({
