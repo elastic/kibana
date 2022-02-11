@@ -41,6 +41,13 @@ export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
       capabilities,
       maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
     );
+
+    const { bucketSize: autoBucketSize, intervalString: autoIntervalString } = getBucketSize(
+      req,
+      'auto',
+      capabilities,
+      barTargetUiSettings
+    );
     const { from, to } = getTimerange(req);
     const { timezone } = capabilities;
 
@@ -52,7 +59,7 @@ export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
         min: from.valueOf(),
         max: to.valueOf() - bucketSize * 1000,
       },
-      ...dateHistogramInterval(intervalString),
+      ...dateHistogramInterval(autoBucketSize < bucketSize ? autoIntervalString : intervalString),
     });
     return next(doc);
   };
