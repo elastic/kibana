@@ -10,6 +10,10 @@ import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { GatlingTestRunner } from './runner';
 
+// These "secret" values are intentionally written in the source.
+const APM_SERVER_URL = 'https://142fea2d3047486e925eb8b223559cae.apm.europe-west1.gcp.cloud.es.io';
+const APM_PUBLIC_TOKEN = 'pWFFEym07AKBBhUE2i';
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
@@ -51,8 +55,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_SANITIZE_FIELD_NAMES:
           'password,passwd,pwd,secret,*key,*token*,*session*,*credit*,*card*,*auth*,set-cookie,pw,pass,connect.sid',
         ELASTIC_APM_ENVIRONMENT: process.env.CI ? 'ci' : 'development',
-        ELASTIC_APM_SERVER_URL: 'https://apm-testing.apm.us-central1.gcp.cloud.es.io',
-        ELASTIC_APM_SECRET_TOKEN: 'zjGna3Spgu30H5jX2L',
+        ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
+        ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
           simulation: process.env.GATLING_SIMULATIONS
             ? process.env.GATLING_SIMULATIONS
