@@ -5,7 +5,7 @@
   ],
   "description": "Identifies when an AWS Route Table has been created.",
   "false_positives": [
-    "Route Table being created may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Route Table being created from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.  Automated processes that uses Terraform may lead to false positives."
+    "Route Tables may be created by a system or network administrators. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Route Table creation by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule. Automated processes that use Terraform may lead to false positives."
   ],
   "from": "now-60m",
   "index": [
@@ -47,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects modifications in the AdminSDHolder object. Attackers can abuse the SDProp process to implement a persistent backdoor in Active Directory. SDProp compares the permissions on protected objects with those defined on the AdminSDHolder object. If the permissions on any of the protected accounts and groups do not match, the permissions on the protected accounts and groups are reset to match those of the domain's AdminSDHolder object, regaining their Administrative Privileges.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*",
+    "logs-system.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AdminSDHolder Backdoor",
+  "query": "event.action:\"Directory Service Changes\" and event.code:5136 and winlog.event_data.ObjectDN:CN=AdminSDHolder,CN=System*\n",
+  "references": [
+    "https://adsecurity.org/?p=1906",
+    "https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory#adminsdholder"
+  ],
+  "risk_score": 73,
+  "rule_id": "6e9130a5-9be6-48e5-943a-9628bfc74b18",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence",
+    "Active Directory"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}
