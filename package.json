@@ -74,7 +74,7 @@
     "yarn": "^1.21.1"
   },
   "resolutions": {
-    "**/@babel/runtime": "^7.16.7",
+    "**/@babel/runtime": "^7.17.2",
     "**/@types/node": "16.10.2",
     "**/chokidar": "^3.4.3",
     "**/deepmerge": "^4.2.2",
