@@ -227,8 +227,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
-  // This is used to re-trigger api rule status when user de/activate rule
-  const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
   const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
@@ -464,39 +462,31 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionDate = lastExecution?.date ?? '';
   const lastExecutionMessage = lastExecution?.message ?? '';
 
-  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
   const ruleStatusInfo = useMemo(() => {
     return ruleLoading ? (
       <EuiFlexItem>
         <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
       </EuiFlexItem>
     ) : (
-      <>
-        <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-          <EuiButtonIcon
-            data-test-subj="refreshButton"
-            color="primary"
-            onClick={refreshRule}
-            iconType="refresh"
-            aria-label={ruleI18n.REFRESH}
-            isDisabled={!isExistingRule}
-          />
-        </RuleStatus>
-      </>
+      <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
+        <EuiButtonIcon
+          data-test-subj="refreshButton"
+          color="primary"
+          onClick={refreshRule}
+          iconType="refresh"
+          aria-label={ruleI18n.REFRESH}
+          isDisabled={!isExistingRule}
+        />
+      </RuleStatus>
     );
   }, [lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
 
-  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
   const ruleError = useMemo(() => {
-    if (ruleLoading) {
-      return (
-        <EuiFlexItem>
-          <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-        </EuiFlexItem>
-      );
-    }
-
-    return (
+    return ruleLoading ? (
+      <EuiFlexItem>
+        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+      </EuiFlexItem>
+    ) : (
       <RuleStatusFailedCallOut
         status={lastExecutionStatus}
         date={lastExecutionDate}
@@ -522,14 +512,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [dispatch]
   );
 
-  const handleOnChangeEnabledRule = useCallback(
-    (enabled: boolean) => {
-      if (ruleEnabled == null || enabled !== ruleEnabled) {
-        setRuleEnabled(enabled);
-      }
-    },
-    [ruleEnabled, setRuleEnabled]
-  );
+  const handleOnChangeEnabledRule = useCallback((enabled: boolean) => {
+    setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
+  }, []);
 
   const goToEditRule = useCallback(
     (ev) => {

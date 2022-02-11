@@ -91,6 +91,11 @@ export const createThreatSignals = async ({
 
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
+  const threatListConfig = {
+    fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
+    _source: false,
+  };
+
   let threatList = await getThreatList({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
@@ -102,6 +107,7 @@ export const createThreatSignals = async ({
     logger,
     buildRuleMessage,
     perPage,
+    threatListConfig,
   });
 
   const threatEnrichment = buildThreatEnrichment({
@@ -180,6 +186,7 @@ export const createThreatSignals = async ({
       buildRuleMessage,
       logger,
       perPage,
+      threatListConfig,
     });
   }
 

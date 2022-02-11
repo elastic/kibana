@@ -87,7 +87,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
 
     mockedApis = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
     waitForAction = appTestContext.middlewareSpy.waitForAction;
-    componentRenderProps = {};
+    componentRenderProps = { policyId: '9f08b220-342d-4c8d-8971-4cf96adcac29', policyName: 'test' };
 
     render = async (waitForLoadedState: boolean = true) => {
       appTestContext.history.push(

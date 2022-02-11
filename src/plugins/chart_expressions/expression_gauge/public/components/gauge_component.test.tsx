@@ -11,7 +11,7 @@ import { chartPluginMock } from '../../../../charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
 import type { Datatable } from '../../../../expressions/public';
 import { DatatableColumn, DatatableRow } from 'src/plugins/expressions/common';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { GaugeRenderProps, GaugeArguments, GaugeLabelMajorMode, ColorStop } from '../../common';
 import GaugeComponent from './gauge_component';
 import { Chart, Goal } from '@elastic/charts';
@@ -212,7 +212,7 @@ describe('GaugeComponent', function () {
           stops: [10, 20, 30] as unknown as ColorStop[],
           range: 'number',
           rangeMin: 0,
-          rangeMax: 20,
+          rangeMax: 30,
         },
       };
       const customProps = {
@@ -253,8 +253,8 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 1, 2, 3, 10]);
-      expect(goal.prop('bands')).toEqual([0, 1, 2, 3, 10]);
+      expect(goal.prop('ticks')).toEqual([0, 1, 2, 3, 4, 10]);
+      expect(goal.prop('bands')).toEqual([0, 1, 2, 3, 4, 10]);
     });
     it('sets proper color bands and ticks on color bands if palette steps are smaller than minimum', () => {
       const palette = {
@@ -281,8 +281,8 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
-      expect(goal.prop('ticks')).toEqual([0, 10]);
-      expect(goal.prop('bands')).toEqual([0, 10]);
+      expect(goal.prop('ticks')).toEqual([0, 4, 10]);
+      expect(goal.prop('bands')).toEqual([0, 4, 10]);
     });
     it('sets proper color bands and ticks on color bands if percent palette steps are smaller than 0', () => {
       const palette = {
@@ -294,7 +294,7 @@ describe('GaugeComponent', function () {
           stops: [-20, -60, 80],
           range: 'percent',
           rangeMin: 0,
-          rangeMax: 4,
+          rangeMax: 100,
         },
       };
       const customProps = {
@@ -407,7 +407,7 @@ describe('GaugeComponent', function () {
           stops: [20, 60, 80],
           range: 'percent',
           rangeMin: 0,
-          rangeMax: 10,
+          rangeMax: 100,
         },
       };
       const customProps = {
