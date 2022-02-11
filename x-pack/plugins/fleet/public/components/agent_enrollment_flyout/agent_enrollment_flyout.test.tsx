@@ -21,6 +21,7 @@ import {
   sendGetFleetStatus,
   sendGetOneAgentPolicy,
   useGetAgents,
+  useGetAgentPolicies,
 } from '../../hooks/use_request';
 import { FleetStatusProvider, ConfigContext } from '../../hooks';
 
@@ -101,6 +102,10 @@ describe('<AgentEnrollmentFlyout />', () => {
       data: { items: [{ policy_id: 'fleet-server-policy' }] },
     });
 
+    (useGetAgentPolicies as jest.Mock).mockReturnValue?.({
+      data: { items: [{ id: 'fleet-server-policy' }] },
+    });
+
     await act(async () => {
       testBed = await setup({
         agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
@@ -139,6 +144,25 @@ describe('<AgentEnrollmentFlyout />', () => {
         const { exists } = testBed;
         expect(exists('agentEnrollmentFlyout')).toBe(true);
         expect(AgentPolicySelectionStep).not.toHaveBeenCalled();
+        expect(AgentEnrollmentKeySelectionStep).toHaveBeenCalled();
+      });
+    });
+
+    describe('with a specific policy when no agentPolicies set', () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        await act(async () => {
+          testBed = await setup({
+            agentPolicy: testAgentPolicy,
+            onClose: jest.fn(),
+          });
+          testBed.component.update();
+        });
+      });
+
+      it('should not show fleet server instructions', () => {
+        const { exists } = testBed;
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
         expect(AgentEnrollmentKeySelectionStep).toHaveBeenCalled();
       });
     });
