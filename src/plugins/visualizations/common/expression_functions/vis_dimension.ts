@@ -37,6 +37,23 @@ const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
 const getAccessorById = (accessor: DatatableColumn['id'], columns: Datatable['columns']) =>
   columns.find((c) => c.id === accessor);
 
+export const findAccessor = (accessor: string | number, columns: DatatableColumn[]) => {
+  const foundAccessor =
+    typeof accessor === 'number'
+      ? getAccessorByIndex(accessor, columns)
+      : getAccessorById(accessor, columns);
+
+  if (foundAccessor === undefined) {
+    throw new Error(
+      i18n.translate('visualizations.function.visDimension.error.accessor', {
+        defaultMessage: 'Column name or index provided is invalid',
+      })
+    );
+  }
+
+  return foundAccessor;
+};
+
 export const visDimension = (): ExpressionFunctionDefinition<
   'visdimension',
   Datatable,
@@ -73,19 +90,7 @@ export const visDimension = (): ExpressionFunctionDefinition<
     },
   },
   fn: (input, args) => {
-    const accessor =
-      typeof args.accessor === 'number'
-        ? getAccessorByIndex(args.accessor, input.columns)
-        : getAccessorById(args.accessor, input.columns);
-
-    if (accessor === undefined) {
-      throw new Error(
-        i18n.translate('visualizations.function.visDimension.error.accessor', {
-          defaultMessage: 'Column name or index provided is invalid',
-        })
-      );
-    }
-
+    const accessor = findAccessor(args.accessor, input.columns);
     return {
       type: 'vis_dimension',
       accessor,
