@@ -39,7 +39,7 @@ import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabi
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { createExploratoryViewUrl, HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { useLinkProps } from '../../hooks/use_link_props';
+import { useLinkProps } from '../../../../observability/public';
 import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
