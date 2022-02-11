@@ -113,7 +113,7 @@ export const SerialDiffAgg = (props) => {
             <EuiFieldNumber
               className="tvbAgg__input"
               placeholder={SERIAL_DIFF_DEFAULT_VALUE}
-              onChange={handleNumberChange('lag', { isOptional: true })}
+              onChange={handleNumberChange('lag', { isClearable: true })}
               value={model.lag}
               min={1}
             />

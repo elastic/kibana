@@ -197,7 +197,7 @@ export const MovingAverageAgg = (props) => {
           >
             <EuiFieldNumber
               className="tvbAgg__input"
-              onChange={handleNumberChange('window', { isOptional: true })}
+              onChange={handleNumberChange('window', { isClearable: true })}
               value={model.window}
               min={1}
               isInvalid={!model.window}

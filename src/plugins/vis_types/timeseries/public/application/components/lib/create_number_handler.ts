@@ -12,11 +12,11 @@ import { TimeseriesVisParams } from '../../../types';
 export const createNumberHandler = (
   handleChange: (partialModel: Partial<TimeseriesVisParams>) => void
 ) => {
-  return (name: keyof Metric, params?: { defaultValue?: string; isOptional?: boolean }) =>
+  return (name: keyof Metric, params?: { defaultValue?: string; isClearable?: boolean }) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
       handleChange?.({
         [name]:
-          params?.isOptional && !e.target.value
+          params?.isClearable && !e.target.value
             ? undefined
             : Number(e.target.value ?? params?.defaultValue),
       });
