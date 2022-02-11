@@ -5,20 +5,12 @@
  * 2.0.
  */
 
+import type { Filter, RangeFilter } from '@kbn/es-query';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
-import {
-  Filter,
-  FilterStateStore,
-  Query,
-  RangeFilter,
-  TimeRange,
-} from '../../../../../../../src/plugins/data/common';
-import {
-  ApplyGlobalFilterActionContext,
-  esFilters,
-} from '../../../../../../../src/plugins/data/public';
+import { FilterStateStore, Query, TimeRange } from '../../../../../../../src/plugins/data/common';
+import { ApplyGlobalFilterActionContext } from '../../../../../../../src/plugins/data/public';
 import {
   DashboardAppLocatorDefinition,
   DashboardAppLocatorParams,
@@ -318,7 +310,7 @@ describe('.execute() & getHref', () => {
 function getFilter(isPinned: boolean, queryKey: string): Filter {
   return {
     $state: {
-      store: isPinned ? esFilters.FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+      store: isPinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
     },
     meta: {
       index: 'logstash-*',
