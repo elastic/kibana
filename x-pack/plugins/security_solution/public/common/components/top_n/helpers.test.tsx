@@ -29,7 +29,6 @@ const otherTimelines = [
   TimelineId.hostsPageEvents,
   TimelineId.hostsPageExternalAlerts,
   TimelineId.networkPageExternalAlerts,
-  TimelineId.uebaPageExternalAlerts,
   TimelineId.active,
   TimelineId.casePage,
   TimelineId.test,

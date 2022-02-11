@@ -63,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
             });
 
           expect(response2.status).to.be(200);
+          expect(response2.body[config.serviceKey]).to.not.be.empty();
 
           const response3 = await supertest.get(
             `${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`
@@ -122,6 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
             config.serviceKey === 'index_pattern' ? response2.body.field : response2.body.fields[0];
 
           expect(response2.status).to.be(200);
+          expect(response2.body[config.serviceKey]).to.not.be.empty();
           expect(typeof field.runtimeField).to.be('object');
         });
       });
