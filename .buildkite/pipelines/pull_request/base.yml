@@ -6,4 +6,4 @@ steps:
     concurrency_group: 'timeout-test'
     agents:
       queue: n2-2
-    timeout_in_minutes: 12
+    timeout_in_minutes: 17
