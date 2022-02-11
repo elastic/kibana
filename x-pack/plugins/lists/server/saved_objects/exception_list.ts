@@ -99,6 +99,10 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
         id: {
           type: 'keyword',
         },
+        meta: {
+          dynamic: true,
+          type: 'object',
+        },
         updated_at: {
           type: 'keyword',
         },

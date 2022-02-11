@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
 
-  describe.only('import_rules', () => {
+  describe('import_rules', () => {
     describe('importing rules with an index', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);

@@ -13,6 +13,7 @@ export * from './created_by';
 export * from './cursor';
 export * from './default_namespace';
 export * from './default_namespace_array';
+export * from './default_import_comments_array';
 export * from './description';
 export * from './deserializer';
 export * from './endpoint';

@@ -133,11 +133,29 @@ export const manageExceptionComments = (
   if (comments == null || !comments.length) {
     return [];
   } else {
-    return comments.map(({ comment }) => {
-      return {
+    return comments.map(
+      ({
         comment,
-      };
-    });
+        meta,
+        created_by: createdBy,
+        created_at: createdAt,
+        updated_at: updatedAt,
+        updated_by: updatedBy,
+      }) => {
+        return {
+          comment,
+          meta: {
+            ...meta,
+            import_fields: {
+              created_at: createdAt,
+              created_by: createdBy,
+              updated_at: updatedAt,
+              updated_by: updatedBy,
+            },
+          },
+        };
+      }
+    );
   }
 };
 
@@ -228,7 +246,9 @@ export const validateExceptionsItems = (
   return items.map((item: ImportExceptionListItemSchema | Error) => {
     if (!(item instanceof Error)) {
       const itemWithUpdatedComments = { ...item, comments: manageExceptionComments(item.comments) };
+      console.log({ itemWithUpdatedComments });
       const decodedItem = importExceptionListItemSchema.decode(itemWithUpdatedComments);
+      console.log({ decodedItem: JSON.stringify(decodedItem) });
       const checkedItem = exactCheck(itemWithUpdatedComments, decodedItem);
 
       return pipe(checkedItem, fold(onLeft, onRight));

@@ -29,8 +29,8 @@ import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { ItemId } from '../../common/item_id';
 import { EntriesArray } from '../../common/entries';
-import { CreateCommentsArray } from '../../common/create_comment';
 import { DefaultImportCommentsArray } from '../../common/default_import_comments_array';
+import { ImportCommentsArray } from '../../common';
 
 /**
  * Differences from this and the createExceptionsListItemSchema are
@@ -78,7 +78,7 @@ export type ImportExceptionListItemSchemaDecoded = Omit<
   ImportExceptionListItemSchema,
   'tags' | 'item_id' | 'entries' | 'namespace_type' | 'comments'
 > & {
-  comments: CreateCommentsArray;
+  comments: ImportCommentsArray;
   tags: Tags;
   item_id: ItemId;
   entries: EntriesArray;
