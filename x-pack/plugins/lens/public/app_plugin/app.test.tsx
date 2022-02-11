@@ -33,7 +33,7 @@ import { SavedObjectReference } from '../../../../../src/core/types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import moment from 'moment';
 
-import { setState, LensAppState, VisualizationState } from '../state_management/index';
+import { setState, LensAppState } from '../state_management/index';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
