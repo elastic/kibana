@@ -5,7 +5,6 @@
     "githubTeam": "kibana-security"
   },
   "description": "This plugin provides encryption and decryption utilities for saved objects containing sensitive information.",
-  "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "encryptedSavedObjects"],
   "optionalPlugins": ["security"],

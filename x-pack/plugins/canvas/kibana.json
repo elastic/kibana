@@ -5,7 +5,6 @@
     "githubTeam": "kibana-presentation"
   },
   "description": "Adds Canvas application to Kibana",
-  "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "canvas"],
   "server": true,

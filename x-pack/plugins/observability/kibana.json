@@ -4,7 +4,6 @@
     "name": "Observability UI",
     "githubTeam": "observability-ui"
   },
-  "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": [
     "xpack",

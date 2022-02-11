@@ -5,7 +5,6 @@
     "githubTeam": "apm-ui"
   },
   "description": "The user interface for Elastic APM",
-  "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
     "data",

@@ -5,7 +5,6 @@
     "githubTeam": "kibana-presentation"
   },
   "description": "Adds Input Control visualization to Kibana",
-  "version": "8.0.0",
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,

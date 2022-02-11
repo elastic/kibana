@@ -5,7 +5,6 @@
     "githubTeam": "kibana-alerting-services"
   },
   "server": true,
-  "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "actions"],
   "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "eventLog", "features"],
