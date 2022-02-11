@@ -7,7 +7,6 @@
  */
 
 import React, { FC } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EmptyPlaceholder } from '../../../../charts/public';
 import { ChartTypes } from '../../common/types';
@@ -20,23 +19,23 @@ interface Props {
 
 export const VisualizationNoResults: FC<Props> = ({ hasNegativeValues = false, chartType }) => {
   if (hasNegativeValues) {
+    const message = (
+      <FormattedMessage
+        id="expressionPartitionVis.negativeValuesFound"
+        defaultMessage="{chartType} chart can't render with negative values."
+        values={{ chartType: `${chartType[0].toUpperCase()}${chartType.slice(1)}` }}
+      />
+    );
+
     return (
-      <EuiText
-        data-test-subj="partitionVisNegativeValues"
-        className="lnsChart__empty"
-        textAlign="center"
-        color="subdued"
-        size="xs"
-      >
-        <EuiIcon type="alert" color="warning" size="l" />
-        <EuiSpacer size="s" />
-        <FormattedMessage
-          id="expressionPartitionVis.negativeValuesFound"
-          defaultMessage="{chartType} chart can't render with negative values."
-          values={{ chartType: `${chartType[0].toUpperCase()}${chartType.slice(1)}` }}
-        />
-      </EuiText>
+      <EmptyPlaceholder
+        dataTestSubj="partitionVisNegativeValues"
+        icon="alert"
+        iconColor="warning"
+        message={message}
+      />
     );
   }
+
   return <EmptyPlaceholder dataTestSubj="partitionVisEmptyValues" icon={getIcon(chartType)} />;
 };
