@@ -24,6 +24,8 @@ import type {
   CasesOwners,
 } from './methods';
 import { GetCasesContextProps } from './methods/get_cases_context';
+import { CreateCaseFlyoutProps } from './components/create/flyout';
+import { UseCasesAddToNewCasesFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -82,10 +84,16 @@ export interface CasesUiStart {
    * @returns A react component that is a flyout for creating a case
    */
   getCreateCaseFlyout: (props: GetCreateCaseFlyoutProps) => ReactElement<GetCreateCaseFlyoutProps>;
+  getCreateCaseFlyoutNoProvider: (
+    props: CreateCaseFlyoutProps
+  ) => ReactElement<CreateCaseFlyoutProps>;
   /**
    * Get the recent cases component
    * @param props GetRecentCasesProps
    * @returns A react component for showing recent cases
    */
   getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
+  hooks: {
+    getUseCasesAddToNewCasesFlyout: () => UseCasesAddToNewCasesFlyout;
+  };
 }
