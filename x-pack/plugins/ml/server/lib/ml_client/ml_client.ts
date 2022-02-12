@@ -463,7 +463,7 @@ export function getMlClient(
             body.trained_model_configs,
             'model_id'
           );
-        return { body: { ...body, count: models.length, trained_model_configs: models } };
+        return { ...body, count: models.length, trained_model_configs: models };
       } catch (error) {
         if (error.statusCode === 404) {
           throw new MLModelNotFound(error.body.error.reason);
@@ -480,7 +480,7 @@ export function getMlClient(
             body.trained_model_stats,
             'model_id'
           );
-        return { body: { ...body, count: models.length, trained_model_stats: models } };
+        return { ...body, count: models.length, trained_model_stats: models };
       } catch (error) {
         if (error.statusCode === 404) {
           throw new MLModelNotFound(error.body.error.reason);
