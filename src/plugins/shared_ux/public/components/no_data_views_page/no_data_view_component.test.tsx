@@ -10,6 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButton } from '@elastic/eui';
 import { NoDataViewsComponent } from './no_data_views_component';
+import { EuiCard } from '@elastic/eui';
 
 describe('<NoDataViewsComponent />', () => {
   test('is rendered correctly', () => {
@@ -17,6 +18,8 @@ describe('<NoDataViewsComponent />', () => {
       <NoDataViewsComponent onClick={jest.fn()} canCreateNewDataView={true} />
     );
 
+    expect(component.find(EuiCard).length).toBe(1);
+    expect(component.find('.noResults__illustration').length).toBe(1);
     expect(component.find(EuiButton).length).toBe(1);
   });
 
