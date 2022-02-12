@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
@@ -31,7 +31,7 @@ describe('export_exception_list_and_items', () => {
         id: '123',
         listId: 'non-existent',
         namespaceType: 'single',
-        savedObjectsClient: {} as SavedObjectsClientContract,
+        savedObjectsClient: savedObjectsClientMock.create(),
       });
       expect(result).toBeNull();
     });
@@ -47,7 +47,7 @@ describe('export_exception_list_and_items', () => {
         id: '123',
         listId: 'non-existent',
         namespaceType: 'single',
-        savedObjectsClient: {} as SavedObjectsClientContract,
+        savedObjectsClient: savedObjectsClientMock.create(),
       });
       expect(result?.exportData).toEqual(
         `${JSON.stringify(getExceptionListSchemaMock())}\n${JSON.stringify(
