@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
 import type {
   FoundExceptionListItemSchema,
   Id,
@@ -20,7 +20,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 
 import { escapeQuotes } from '../utils/escape_query';
-import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectsToFoundExceptionListItem } from './utils';
 

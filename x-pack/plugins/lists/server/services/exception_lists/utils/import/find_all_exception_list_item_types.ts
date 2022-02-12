@@ -14,9 +14,9 @@ import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
 
 import { ExceptionListSoSchema } from '../../../../schemas/saved_objects';
+import { getExceptionListsItemFilter } from '../get_exception_lists_item_filter';
 import { CHUNK_PARSED_OBJECT_SIZE } from '../../import_exception_list_and_items';
 import { transformSavedObjectsToFoundExceptionListItem } from '..';
-import { getExceptionListsItemFilter } from '../get_exception_lists_item_filter';
 
 /**
  * Helper to build out a filter using item_ids
