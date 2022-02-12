@@ -290,8 +290,10 @@ export const getExceptions = async ({
         sortField: undefined,
       });
       return items;
-    } catch {
-      throw new Error('unable to fetch exception list items');
+    } catch (e) {
+      throw new Error(
+        `unable to fetch exception list items, message: ${e.message} full error: ${e}`
+      );
     }
   } else {
     return [];
