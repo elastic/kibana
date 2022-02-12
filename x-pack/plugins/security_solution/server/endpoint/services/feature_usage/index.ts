@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-export enum OperatingSystem {
-  LINUX = 'linux',
-  MAC = 'macos',
-  WINDOWS = 'windows',
-}
+import { FeatureUsageService } from './service';
+export { createFeatureUsageServiceMock, createMockPolicyData } from './mocks';
 
-// PolicyConfig uses mac instead of macos
-export enum PolicyOperatingSystem {
-  windows = 'windows',
-  mac = 'mac',
-  linux = 'linux',
-}
+export const featureUsageService = new FeatureUsageService();
