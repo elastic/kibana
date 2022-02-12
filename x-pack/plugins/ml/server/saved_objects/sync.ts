@@ -17,8 +17,6 @@ import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
 import { getSavedObjectClientError, getJobDetailsFromTrainedModel } from './util';
 
-import type { Datafeed } from '../../common/types/anomaly_detection_jobs';
-
 export interface JobSpaceOverrides {
   overrides: {
     [type in JobType]: { [jobId: string]: string[] };
@@ -39,7 +37,7 @@ export function syncSavedObjectsFactory(
       datafeedsRemoved: {},
     };
 
-    const [{ body: datafeeds }, { body: models }, status] = await Promise.all([
+    const [datafeeds, models, status] = await Promise.all([
       client.asInternalUser.ml.getDatafeeds<{
         datafeeds: Datafeed[];
       }>(),

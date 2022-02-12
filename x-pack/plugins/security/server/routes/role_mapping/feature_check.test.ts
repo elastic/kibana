@@ -41,8 +41,8 @@ describe('GET role mappings feature check', () => {
     {
       licenseCheckResult = { state: 'valid' },
       canManageRoleMappings = true,
-      nodeSettingsResponse = async () => ({}),
-      xpackUsageResponse = async () => defaultXpackUsageResponse,
+      nodeSettingsResponse = () => ({}),
+      xpackUsageResponse = () => defaultXpackUsageResponse,
       asserts,
     }: TestOptions
   ) => {
@@ -54,14 +54,13 @@ describe('GET role mappings feature check', () => {
       };
 
       mockContext.core.elasticsearch.client.asInternalUser.nodes.info.mockImplementation(
-        (async () => ({ body: await nodeSettingsResponse() })) as any
+        (async () => nodeSettingsResponse()) as any
       );
       mockContext.core.elasticsearch.client.asInternalUser.transport.request.mockImplementation(
-        (async () => ({ body: await xpackUsageResponse() })) as any
+        (async () => xpackUsageResponse()) as any
       );
-
       mockContext.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        body: { has_all_requested: canManageRoleMappings },
+        has_all_requested: canManageRoleMappings,
       } as any);
 
       defineRoleMappingFeatureCheckRoute(mockRouteDefinitionParams);
@@ -95,7 +94,7 @@ describe('GET role mappings feature check', () => {
   });
 
   getFeatureCheckTest('allows both script types when explicitly enabled', {
-    nodeSettingsResponse: async () => ({
+    nodeSettingsResponse: () => ({
       nodes: {
         someNodeId: {
           settings: {
@@ -118,7 +117,7 @@ describe('GET role mappings feature check', () => {
   });
 
   getFeatureCheckTest('disallows stored scripts when disabled', {
-    nodeSettingsResponse: async () => ({
+    nodeSettingsResponse: () => ({
       nodes: {
         someNodeId: {
           settings: {
@@ -141,7 +140,7 @@ describe('GET role mappings feature check', () => {
   });
 
   getFeatureCheckTest('disallows inline scripts when disabled', {
-    nodeSettingsResponse: async () => ({
+    nodeSettingsResponse: () => ({
       nodes: {
         someNodeId: {
           settings: {
@@ -164,7 +163,7 @@ describe('GET role mappings feature check', () => {
   });
 
   getFeatureCheckTest('indicates incompatible realms when only native and file are enabled', {
-    xpackUsageResponse: async () => ({
+    xpackUsageResponse: () => ({
       security: {
         realms: {
           native: {
@@ -202,10 +201,10 @@ describe('GET role mappings feature check', () => {
   getFeatureCheckTest(
     'falls back to allowing both script types if there is an error retrieving node settings',
     {
-      nodeSettingsResponse: async () => {
+      nodeSettingsResponse: () => {
         throw new Error('something bad happened');
       },
-      xpackUsageResponse: async () => {
+      xpackUsageResponse: () => {
         throw new Error('something bad happened');
       },
       asserts: {

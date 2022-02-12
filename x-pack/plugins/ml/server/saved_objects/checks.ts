@@ -70,15 +70,16 @@ export function checksFactory(
   jobSavedObjectService: JobSavedObjectService
 ) {
   async function checkStatus(): Promise<StatusResponse> {
+
     const [
       jobObjects,
       allJobObjects,
       modelObjects,
       allModelObjects,
-      { body: adJobs },
-      { body: datafeeds },
-      { body: dfaJobs },
-      { body: models },
+      adJobs,
+      datafeeds,
+      dfaJobs,
+      models,
     ] = await Promise.all([
       jobSavedObjectService.getAllJobObjects(undefined, false),
       jobSavedObjectService.getAllJobObjectsForAllSpaces(),
