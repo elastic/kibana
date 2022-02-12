@@ -580,6 +580,19 @@
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionHeatmap",
+            "id": "def-common.HeatmapArguments.ariaLabel",
+            "type": "string",
+            "tags": [],
+            "label": "ariaLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -807,7 +820,7 @@
             "section": "def-public.PersistedState",
             "text": "PersistedState"
           },
-          "; }"
+          "; interactive: boolean; }"
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
         "deprecated": false,
