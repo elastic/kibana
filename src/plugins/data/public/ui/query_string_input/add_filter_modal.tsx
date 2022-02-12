@@ -202,8 +202,9 @@ export function AddFilterModal({
       <EuiFormRow
         fullWidth
         display="columnCompressed"
-        label={i18n.translate('data.filter.filterEditor.indexPatternSelectLabel', {
-          defaultMessage: 'Index pattern',
+        className="kbnQueryBar__dataViewInput"
+        label={i18n.translate('data.filter.filterEditor.dataViewSelectLabel', {
+          defaultMessage: 'Data view',
         })}
       >
         <GenericComboBox
