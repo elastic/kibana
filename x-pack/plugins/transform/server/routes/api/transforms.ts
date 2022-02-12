@@ -221,7 +221,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
         await ctx.core.elasticsearch.client.asCurrentUser.transform
           .putTransform({
-          // @ts-expect-error
+            // @ts-expect-error
             body: req.body,
             transform_id: transformId,
           })
