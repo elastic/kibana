@@ -359,5 +359,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(rule.timeline_id).to.eql(timelineId);
       expect(rule.timeline_title).to.eql(timelineTitle);
     });
+
+    // TODO: auto_disabled_8.0.1 tests
   });
 };

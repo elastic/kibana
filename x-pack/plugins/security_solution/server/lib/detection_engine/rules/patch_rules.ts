@@ -21,6 +21,7 @@ import {
   calculateName,
   calculateVersion,
   maybeMute,
+  maybeRemoveAutoDisabledRuleTag,
   removeUndefined,
   transformToAlertThrottle,
   transformToNotifyWhen,
@@ -219,7 +220,10 @@ export const patchRules = async ({
     await rulesClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
     await rulesClient.enable({ id: rule.id });
-    // TODO: remove upgrade tag
+    const newUpdate = await maybeRemoveAutoDisabledRuleTag(rulesClient, rule.id, validated);
+    if (newUpdate != null) {
+      return newUpdate;
+    }
   } else {
     // enabled is null or undefined and we do not touch the rule
   }

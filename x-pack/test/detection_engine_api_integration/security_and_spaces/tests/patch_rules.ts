@@ -229,6 +229,105 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
+      it('should remove the auto_disabled_8.0.1 tag if present after enabling rule', async () => {
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          enabled: false,
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+        });
+
+        // patch a simple rule's enabled property to true
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: 'rule-1', enabled: true })
+          .expect(200);
+
+        const outputRule = {
+          ...getSimpleRuleOutput(),
+          enabled: true,
+          tags: ['tag1', 'tag2'],
+          version: 2,
+        };
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should preserve tags and version if auto_disabled tag_8.0.1 tag is not present after enabling rule', async () => {
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          enabled: false,
+          tags: ['tag1', 'tag2'],
+        });
+
+        // patch a simple rule's enabled property to true
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: 'rule-1', enabled: true })
+          .expect(200);
+
+        const outputRule = {
+          ...getSimpleRuleOutput(),
+          enabled: true,
+          tags: ['tag1', 'tag2'],
+          version: 1,
+        };
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should remove the auto_disabled_8.0.1 tag if it is the only tag present after enabling rule', async () => {
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          enabled: false,
+          tags: ['auto_disabled_8.0.1'],
+        });
+
+        // patch a simple rule's enabled property to true
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: 'rule-1', enabled: true })
+          .expect(200);
+
+        const outputRule = {
+          ...getSimpleRuleOutput(),
+          enabled: true,
+          tags: [],
+          version: 2,
+        };
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should not modify tags or version when disabling rule', async () => {
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+        });
+
+        // patch a simple rule's enabled property to true
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ rule_id: 'rule-1', enabled: false })
+          .expect(200);
+
+        const outputRule = {
+          ...getSimpleRuleOutput(),
+          enabled: false,
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+          version: 1,
+        };
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
       it('should give a 404 if it is given a fake id', async () => {
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)

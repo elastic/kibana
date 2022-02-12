@@ -14,6 +14,7 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getBulkActionEnableRequest,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
@@ -23,28 +24,33 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { readRules } from '../../rules/read_rules';
+import { maybeRemoveAutoDisabledRuleTag } from '../../rules/utils';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
+jest.mock('../../rules/utils', () => {
+  const originalUtils = jest.requireActual('../../rules/utils');
+  return {
+    ...originalUtils,
+    maybeRemoveAutoDisabledRuleTag: jest.fn(),
+  };
+});
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
+describe('perform_bulk_action', () => {
   const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const mockRule = getFindResultWithSingleHit(isRuleRegistryEnabled).data[0];
+  const mockRule = getFindResultWithSingleHit(true).data[0];
 
   beforeEach(() => {
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(true));
+    performBulkActionRoute(server.router, ml, logger, true);
   });
 
   describe('status codes', () => {
@@ -140,6 +146,48 @@ describe.each([
           },
         },
       });
+    });
+
+    it('returns error if enable rule throws error', async () => {
+      const findResult = getFindResultWithSingleHit(true);
+      clients.rulesClient.find.mockResolvedValue({
+        ...findResult,
+        data: [
+          {
+            ...findResult.data[0],
+            enabled: false,
+          },
+        ],
+      });
+      clients.rulesClient.enable.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getBulkActionEnableRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Bulk edit failed',
+        status_code: 500,
+        attributes: {
+          errors: [
+            {
+              message: 'Test error',
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+        },
+      });
+      expect(maybeRemoveAutoDisabledRuleTag).not.toHaveBeenCalled();
     });
 
     it('returns error if machine learning rule validation fails', async () => {

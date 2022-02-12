@@ -35,6 +35,7 @@ import { patchRules } from '../../rules/patch_rules';
 import { applyBulkActionEditToRule } from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
+import { maybeRemoveAutoDisabledRuleTag } from '../../rules/utils';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
@@ -296,6 +297,7 @@ export const performBulkActionRoute = (
                 if (!rule.enabled) {
                   throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
                   await rulesClient.enable({ id: rule.id });
+                  await maybeRemoveAutoDisabledRuleTag(rulesClient, rule.id, rule);
                 }
               },
               abortController.signal

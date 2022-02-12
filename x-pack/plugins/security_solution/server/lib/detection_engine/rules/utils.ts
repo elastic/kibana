@@ -56,7 +56,7 @@ import {
   NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
-import { RuleParams } from '../schemas/rule_schemas';
+import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
@@ -366,4 +366,24 @@ export const legacyMigrate = async ({
     return { id: rule.id, ...migratedRule };
   }
   return rule;
+};
+
+export const maybeRemoveAutoDisabledRuleTag = async (
+  rulesClient: RulesClient,
+  ruleId: string,
+  rule: InternalRuleUpdate
+) => {
+  if (rule.tags.includes('auto_disabled_8.0.1')) {
+    return rulesClient.update({
+      id: ruleId,
+      data: {
+        ...rule,
+        params: {
+          ...rule.params,
+          version: rule.params.version + 1,
+        },
+        tags: rule.tags.filter((tag) => tag !== 'auto_disabled_8.0.1'),
+      },
+    });
+  }
 };

@@ -39,6 +39,7 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import {
   getPerformBulkActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
+  getPerformBulkActionEnableSchemaMock,
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import {
   RuleExecutionEvent,
@@ -132,6 +133,13 @@ export const getBulkActionRequest = () =>
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
     body: getPerformBulkActionSchemaMock(),
+  });
+
+export const getBulkActionEnableRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformBulkActionEnableSchemaMock(),
   });
 
 export const getBulkActionEditRequest = () =>

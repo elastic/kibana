@@ -14,6 +14,12 @@ export const getPerformBulkActionSchemaMock = (): PerformBulkActionSchema => ({
   action: BulkAction.disable,
 });
 
+export const getPerformBulkActionEnableSchemaMock = (): PerformBulkActionSchema => ({
+  query: '',
+  ids: undefined,
+  action: BulkAction.enable,
+});
+
 export const getPerformBulkActionEditSchemaMock = (): PerformBulkActionSchema => ({
   query: '',
   ids: undefined,

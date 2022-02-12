@@ -461,6 +461,71 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ]);
       });
+
+      it('Should enable some rules and update tags and versions accordingly', async () => {
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          enabled: false,
+          tags: ['auto_disabled_8.0.1', 'tag1', 'tag2'],
+        });
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-2'),
+          enabled: false,
+          tags: ['auto_disabled_8.0.1'],
+        });
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-3'),
+          enabled: false,
+          tags: ['tag1'],
+        });
+
+        const updatedRule1 = {
+          ...getSimpleRuleUpdate('rule-1'),
+          enabled: true,
+          severity: 'low',
+          tags: ['auto_disabled_8.0.1', 'tag1', 'tag2'],
+        };
+
+        const updatedRule2 = {
+          ...getSimpleRuleUpdate('rule-2'),
+          enabled: false,
+          severity: 'low',
+          tags: ['auto_disabled_8.0.1'],
+        };
+
+        const updatedRule3 = {
+          ...getSimpleRuleUpdate('rule-3'),
+          enabled: true,
+          tags: ['tag1'],
+        };
+
+        const { body } = await supertest
+          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .set('kbn-xsrf', 'true')
+          .send([updatedRule1, updatedRule2, updatedRule3])
+          .expect(200);
+
+        expect(removeServerGeneratedProperties(body[0])).to.eql({
+          ...getSimpleRuleOutput(),
+          enabled: true,
+          severity: 'low',
+          tags: ['tag1', 'tag2'],
+          version: '3',
+        });
+        expect(removeServerGeneratedProperties(body[1])).to.eql({
+          ...getSimpleRuleOutput(),
+          enabled: false,
+          severity: 'low',
+          tags: ['auto_disabled_8.0.1'],
+          version: '2',
+        });
+        expect(removeServerGeneratedProperties(body[2])).to.eql({
+          ...getSimpleRuleOutput(),
+          enabled: true,
+          tags: ['tag1'],
+          version: '2',
+        });
+      });
     });
   });
 };

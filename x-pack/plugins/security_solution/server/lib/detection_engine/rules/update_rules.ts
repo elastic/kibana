@@ -15,7 +15,12 @@ import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
-import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
+import {
+  maybeMute,
+  maybeRemoveAutoDisabledRuleTag,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+} from './utils';
 
 class UpdateError extends Error {
   public readonly statusCode: number;
@@ -102,7 +107,10 @@ export const updateRules = async ({
     await rulesClient.disable({ id: existingRule.id });
   } else if (!existingRule.enabled && enabled === true) {
     await rulesClient.enable({ id: existingRule.id });
-    // TODO: remove upgrade tag
+    const newUpdate = await maybeRemoveAutoDisabledRuleTag(rulesClient, existingRule.id, validated);
+    if (newUpdate != null) {
+      return newUpdate;
+    }
   }
   return { ...update, enabled };
 };

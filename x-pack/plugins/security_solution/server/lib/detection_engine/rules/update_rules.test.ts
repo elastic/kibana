@@ -10,8 +10,16 @@ import { updateRules } from './update_rules';
 import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
 import { RulesClientMock } from '../../../../../alerting/server/rules_client.mock';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { maybeRemoveAutoDisabledRuleTag } from './utils';
 
-// Failing with rule registry enabled
+jest.mock('./utils', () => {
+  const originalUtils = jest.requireActual('./utils');
+  return {
+    ...originalUtils,
+    maybeRemoveAutoDisabledRuleTag: jest.fn(),
+  };
+});
+
 describe('updateRules', () => {
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock(true);
@@ -27,6 +35,7 @@ describe('updateRules', () => {
         id: rulesOptionsMock.ruleUpdate.id,
       })
     );
+    expect(maybeRemoveAutoDisabledRuleTag).not.toHaveBeenCalled();
   });
 
   it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
@@ -51,6 +60,7 @@ describe('updateRules', () => {
         id: rulesOptionsMock.ruleUpdate.id,
       })
     );
+    expect(maybeRemoveAutoDisabledRuleTag).toHaveBeenCalled();
   });
 
   it('calls the rulesClient with params', async () => {
