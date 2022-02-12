@@ -64,7 +64,7 @@ export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = () => {
             </EuiNotificationBadge>
             <EuiFlexItem grow={false}>
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.cralCustomSettingsFlyout.selectedDescriptor',
+                'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.selectedDescriptor',
                 {
                   defaultMessage: 'selected',
                 }
