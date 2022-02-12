@@ -26,9 +26,7 @@ export const registerFetchRoute = ({
       const { client } = context.core.elasticsearch;
 
       try {
-        const {
-          body: { patterns },
-        } = await client.asCurrentUser.ccr.getAutoFollowPattern();
+        const { patterns } = await client.asCurrentUser.ccr.getAutoFollowPattern();
         return response.ok({
           body: {
             // @ts-expect-error Once #98266 is merged, test this again.

@@ -122,7 +122,7 @@ async function getHostRiskData(
         hostNames,
       })
     );
-    return hostRiskResponse.body;
+    return hostRiskResponse;
   } catch (error) {
     if (error?.meta?.body?.error?.type !== 'index_not_found_exception') {
       throw error;
