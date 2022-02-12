@@ -292,7 +292,7 @@ export const getExceptions = async ({
       return items;
     } catch (e) {
       throw new Error(
-        `unable to fetch exception list items, message: ${e.message} full error: ${e}`
+        `unable to fetch exception list items, message: "${e.message}" full error: "${e}"`
       );
     }
   } else {

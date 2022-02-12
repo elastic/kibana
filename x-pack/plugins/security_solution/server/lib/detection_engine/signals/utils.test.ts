@@ -594,11 +594,11 @@ describe('utils', () => {
       expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
     });
 
-    test('it throws if "getExceptionListClient" fails', async () => {
+    test('it throws if "findExceptionListsItemPointInTimeFinder" fails anywhere', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
         ({
-          getExceptionList: jest.fn().mockRejectedValue(err),
+          findExceptionListsItemPointInTimeFinder: jest.fn().mockRejectedValue(err),
         } as unknown as ExceptionListClient);
 
       await expect(() =>
@@ -606,22 +606,9 @@ describe('utils', () => {
           client: listMock.getExceptionListClient(),
           lists: getListArrayMock(),
         })
-      ).rejects.toThrowError('unable to fetch exception list items');
-    });
-
-    test('it throws if "findExceptionListsItem" fails', async () => {
-      const err = new Error('error fetching list');
-      listMock.getExceptionListClient = () =>
-        ({
-          findExceptionListsItem: jest.fn().mockRejectedValue(err),
-        } as unknown as ExceptionListClient);
-
-      await expect(() =>
-        getExceptions({
-          client: listMock.getExceptionListClient(),
-          lists: getListArrayMock(),
-        })
-      ).rejects.toThrowError('unable to fetch exception list items');
+      ).rejects.toThrowError(
+        'unable to fetch exception list items, message: "error fetching list" full error: "Error: error fetching list"'
+      );
     });
 
     test('it returns empty array if "findExceptionListsItem" returns null', async () => {
