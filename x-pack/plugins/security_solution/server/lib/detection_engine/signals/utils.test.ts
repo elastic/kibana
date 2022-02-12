@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
@@ -46,7 +46,7 @@ import {
   isRACAlert,
   getField,
 } from './utils';
-import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
+import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
   sampleBulkResponse,
   sampleEmptyBulkResponse,
@@ -62,7 +62,7 @@ import {
   sampleAlertDocNoSortIdWithTimestamp,
   sampleAlertDocAADNoSortIdWithTimestamp,
 } from './__mocks__/es_results';
-import { ShardError } from '../../types';
+import type { ShardError } from '../../types';
 import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
 
 const buildRuleMessage = buildRuleMessageFactory({
@@ -568,12 +568,11 @@ describe('utils', () => {
     test('it successfully returns array of exception list items', async () => {
       listMock.getExceptionListClient = () =>
         ({
-          findExceptionListsItem: jest.fn().mockResolvedValue({
-            data: [getExceptionListItemSchemaMock()],
-            page: 1,
-            per_page: 10000,
-            total: 1,
-          }),
+          findExceptionListsItemPointInTimeFinder: jest
+            .fn()
+            .mockImplementationOnce(({ executeFunctionOnStream }) => {
+              executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
+            }),
         } as unknown as ExceptionListClient);
       const client = listMock.getExceptionListClient();
       const exceptions = await getExceptions({
@@ -581,15 +580,17 @@ describe('utils', () => {
         lists: getListArrayMock(),
       });
 
-      expect(client.findExceptionListsItem).toHaveBeenCalledWith({
-        listId: ['list_id_single', 'endpoint_list'],
-        namespaceType: ['single', 'agnostic'],
-        page: 1,
-        perPage: 10000,
-        filter: [],
-        sortOrder: undefined,
-        sortField: undefined,
-      });
+      expect(client.findExceptionListsItemPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          listId: ['list_id_single', 'endpoint_list'],
+          namespaceType: ['single', 'agnostic'],
+          perPage: 1_000,
+          filter: [],
+          maxSize: undefined,
+          sortOrder: undefined,
+          sortField: undefined,
+        })
+      );
       expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
     });
 
