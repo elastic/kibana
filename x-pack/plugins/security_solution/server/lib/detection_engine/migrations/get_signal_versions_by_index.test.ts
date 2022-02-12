@@ -16,9 +16,9 @@ describe('getSignalVersionsByIndex', () => {
   });
 
   it('properly transforms the elasticsearch aggregation', async () => {
-    esClient.search.mockResolvedValueOnce({
+    esClient.search.mockResponseOnce(
       // @ts-expect-error mocking only what we need
-      body: {
+      {
         aggregations: {
           signals_indices: {
             buckets: [
@@ -34,8 +34,8 @@ describe('getSignalVersionsByIndex', () => {
             ],
           },
         },
-      },
-    });
+      }
+    );
 
     const result = await getSignalVersionsByIndex({
       esClient,
