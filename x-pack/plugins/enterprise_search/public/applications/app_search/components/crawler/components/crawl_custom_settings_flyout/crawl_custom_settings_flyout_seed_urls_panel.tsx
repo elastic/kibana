@@ -71,7 +71,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
               <EuiTitle size="xs">
                 <h3>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.domainsAccordionButtonLabel',
+                    'xpack.enterpriseSearch.appSearch.crawler.crawlCustomSettingsFlyout.seedUrlsAccordionButtonLabel',
                     {
                       defaultMessage: 'Seed URLs',
                     }

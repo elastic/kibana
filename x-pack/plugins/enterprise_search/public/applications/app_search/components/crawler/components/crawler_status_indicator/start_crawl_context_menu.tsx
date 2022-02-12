@@ -81,7 +81,7 @@ export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }
             }}
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlSelectDomainsMenuLabel',
+              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlCustomSettingsMenuLabel',
               {
                 defaultMessage: 'Crawl with custom settings',
               }
