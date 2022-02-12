@@ -43,15 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('panel titles - by value', () => {
-      const clearUnsavedChanges = async () => {
-        await retry.try(async () => {
-          // avoid flaky test by surrounding in retry
-          await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-          await PageObjects.dashboard.clickQuickSave();
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
-        });
-      };
-
       it('new panel by value has empty title', async () => {
         await PageObjects.lens.createAndAddLensFromDashboard({});
         const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
@@ -60,14 +51,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('saving new panel with blank title clears "unsaved changes" badge', async () => {
         await dashboardPanelActions.setCustomPanelTitle('');
-        await clearUnsavedChanges();
+        await PageObjects.dashboard.clearUnsavedChanges();
       });
 
       it('custom title causes unsaved changes and saving clears it', async () => {
         await dashboardPanelActions.setCustomPanelTitle(CUSTOM_TITLE);
         const panelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
         expect(panelTitle).to.equal(CUSTOM_TITLE);
-        await clearUnsavedChanges();
+        await PageObjects.dashboard.clearUnsavedChanges();
       });
 
       it('resetting title on a by value panel sets it to the empty string', async () => {
@@ -77,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.resetCustomPanelTitle();
         const panelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
         expect(panelTitle).to.equal(EMPTY_TITLE);
-        await clearUnsavedChanges();
+        await PageObjects.dashboard.clearUnsavedChanges();
       });
 
       it('blank titles are hidden in view mode', async () => {

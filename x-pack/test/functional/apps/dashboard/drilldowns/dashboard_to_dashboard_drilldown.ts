@@ -45,7 +45,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await security.testUser.restoreDefaults();
+        await clearFilters(dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME);
+        await clearFilters(dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME);
       });
+
+      const clearFilters = async (dashboardName: string) => {
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        await filterBar.removeAllFilters();
+        await PageObjects.dashboard.clearUnsavedChanges();
+      };
 
       it('create dashboard to dashboard drilldown', async () => {
         await PageObjects.dashboard.gotoDashboardEditMode(
@@ -68,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(1);
 
         // save dashboard, navigate to view mode
+        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
         await PageObjects.dashboard.saveDashboard(
           dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME,
           {
@@ -76,6 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             exitFromEditMode: true,
           }
         );
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
 
       it('use dashboard to dashboard drilldown via onClick action', async () => {
@@ -85,7 +95,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('use dashboard to dashboard drilldown via getHref action', async () => {
-        await filterBar.removeAllFilters();
         await testDashboardDrilldown(
           dashboardDrilldownPanelActions.openHrefByText.bind(dashboardDrilldownPanelActions) // preserve 'this'
         );
@@ -130,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      async function testDashboardDrilldown(drilldownAction: (text: string) => Promise<void>) {
+      const testDashboardDrilldown = async (drilldownAction: (text: string) => Promise<void>) => {
         // trigger drilldown action by clicking on a pie and picking drilldown action by it's name
         await pieChart.clickOnPieSlice('40,000');
         await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
@@ -151,14 +160,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // check that we drilled-down with filter from pie chart
         expect(await filterBar.getFilterCount()).to.be(1);
-
         const originalTimeRangeDurationHours =
           await PageObjects.timePicker.getTimeDurationInHours();
+        await PageObjects.dashboard.clearUnsavedChanges();
 
         // brush area chart and drilldown back to pie chat dashboard
         await brushAreaChart();
         await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
-
         await navigateWithinDashboard(async () => {
           await drilldownAction(DRILLDOWN_TO_PIE_CHART_NAME);
         });
@@ -166,11 +174,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // because filters are preserved during navigation, we expect that only one slice is displayed (filter is still applied)
         expect(await filterBar.getFilterCount()).to.be(1);
         await pieChart.expectPieSliceCount(1);
-
         // check that new time range duration was applied
         const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);
-      }
+        await PageObjects.dashboard.clearUnsavedChanges();
+      };
     });
 
     describe('Copy to space', () => {
