@@ -8,15 +8,11 @@
 
 @include euiBreakpoint('xs', 's') {
 
-  .dscNoResults__illustration > svg {
+  .noResults__illustration > svg {
     width: $euiSize * 12;
     height: auto;
     margin: 0 auto;
 
-  }
-
-  .dscNoResults__title {
-    text-align: center;
   }
 
 }

@@ -36,10 +36,10 @@ export const NoDataViewsComponent = (props: NoDataViewsComponentProps) => {
       })}
       style={{ width: '50%', margin: 'auto', flexGrow: 0 }}
     >
-      <div className="dscNoResults__illustration">
+      <div className="noResults__illustration">
         <NoResultsIllustration />
       </div>
-      <div>{canCreateNewDataView ? button : undefined}</div>
+      <div>{canCreateNewDataView && button}</div>
     </EuiCard>
   );
 };
