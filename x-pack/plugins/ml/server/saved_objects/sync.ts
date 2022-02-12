@@ -38,9 +38,7 @@ export function syncSavedObjectsFactory(
     };
 
     const [datafeeds, models, status] = await Promise.all([
-      client.asInternalUser.ml.getDatafeeds<{
-        datafeeds: Datafeed[];
-      }>(),
+      client.asInternalUser.ml.getDatafeeds(),
       client.asInternalUser.ml.getTrainedModels(),
       checkStatus(),
     ]);
@@ -359,11 +357,10 @@ export function syncSavedObjectsFactory(
       if (simulate === true) {
         results.trainedModels = models.map(({ modelId }) => ({ id: modelId }));
       } else {
-        const {
-          body: { trained_model_configs: trainedModelConfigs },
-        } = await client.asInternalUser.ml.getTrainedModels({
-          model_id: models.map(({ modelId }) => modelId).join(','),
-        });
+        const { trained_model_configs: trainedModelConfigs } =
+          await client.asInternalUser.ml.getTrainedModels({
+            model_id: models.map(({ modelId }) => modelId).join(','),
+          });
         const jobDetails = trainedModelConfigs.reduce((acc, cur) => {
           const job = getJobDetailsFromTrainedModel(cur);
           if (job !== null) {

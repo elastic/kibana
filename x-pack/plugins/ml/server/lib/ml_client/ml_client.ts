@@ -457,7 +457,7 @@ export function getMlClient(
     async getTrainedModels(...p: Parameters<MlClient['getTrainedModels']>) {
       await modelIdsCheck(p);
       try {
-        const { body } = await mlClient.getTrainedModels(...p);
+        const body = await mlClient.getTrainedModels(...p);
         const models =
           await jobSavedObjectService.filterTrainedModelsForSpace<estypes.MlTrainedModelConfig>(
             body.trained_model_configs,
@@ -474,7 +474,7 @@ export function getMlClient(
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
       await modelIdsCheck(p);
       try {
-        const { body } = await mlClient.getTrainedModelsStats(...p);
+        const body = await mlClient.getTrainedModelsStats(...p);
         const models =
           await jobSavedObjectService.filterTrainedModelsForSpace<estypes.MlTrainedModelStats>(
             body.trained_model_stats,

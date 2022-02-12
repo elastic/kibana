@@ -70,7 +70,6 @@ export function checksFactory(
   jobSavedObjectService: JobSavedObjectService
 ) {
   async function checkStatus(): Promise<StatusResponse> {
-
     const [
       jobObjects,
       allJobObjects,
@@ -88,7 +87,7 @@ export function checksFactory(
       client.asInternalUser.ml.getJobs(),
       client.asInternalUser.ml.getDatafeeds(),
       client.asInternalUser.ml.getDataFrameAnalytics() as unknown as {
-        body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
+        data_frame_analytics: DataFrameAnalyticsConfig[];
       },
       client.asInternalUser.ml.getTrainedModels(),
     ]);

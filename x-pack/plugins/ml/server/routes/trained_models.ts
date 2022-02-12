@@ -176,8 +176,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
+        // defer_definition_decompression should be allowed in query !!!!!!!!!!!!!!!!!!!!!!!!!!!
         const { modelId } = request.params;
-        const { body } = await mlClient.putTrainedModel({
+        const body = await mlClient.putTrainedModel({
           model_id: modelId,
           body: request.body,
         });

@@ -651,9 +651,9 @@ export function jobSavedObjectServiceFactory(
     currentSpaceOnly: boolean = true
   ) {
     await isMlReady();
-    const {
-      body: { data_frame_analytics: jobs },
-    } = await client.asInternalUser.ml.getDataFrameAnalytics({ id: jobIds.join(',') });
+    const { data_frame_analytics: jobs } = await client.asInternalUser.ml.getDataFrameAnalytics({
+      id: jobIds.join(','),
+    });
 
     const searches = jobs.map((job) => {
       const createTime = job.create_time!;
