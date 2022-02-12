@@ -76,14 +76,21 @@ export async function createApmTelemetry({
     });
 
     const search: CollectTelemetryParams['search'] = (params) =>
-      unwrapEsResponse(esClient.asInternalUser.search(params)) as any;
+      unwrapEsResponse(
+        esClient.asInternalUser.search(params, { meta: true })
+      ) as any;
 
     const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
-      unwrapEsResponse(esClient.asInternalUser.indices.stats(params));
+      unwrapEsResponse(
+        esClient.asInternalUser.indices.stats(params, { meta: true })
+      );
 
     const transportRequest: CollectTelemetryParams['transportRequest'] = (
       params
-    ) => unwrapEsResponse(esClient.asInternalUser.transport.request(params));
+    ) =>
+      unwrapEsResponse(
+        esClient.asInternalUser.transport.request(params, { meta: true })
+      );
 
     const dataTelemetry = await collectDataTelemetry({
       search,

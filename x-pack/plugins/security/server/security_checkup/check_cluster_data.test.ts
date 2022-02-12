@@ -12,9 +12,7 @@ import { createClusterDataCheck } from './check_cluster_data';
 describe('checkClusterForUserData', () => {
   it('returns false if no data is found', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.cat.indices.mockResolvedValue(
-      elasticsearchServiceMock.createApiResponse({ body: [] })
-    );
+    esClient.cat.indices.mockResponse([]);
 
     const log = loggingSystemMock.createLogger();
 
@@ -25,24 +23,20 @@ describe('checkClusterForUserData', () => {
 
   it('returns false if data only exists in system indices', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.cat.indices.mockResolvedValue(
-      elasticsearchServiceMock.createApiResponse({
-        body: [
-          {
-            index: '.kibana',
-            'docs.count': '500',
-          },
-          {
-            index: 'kibana_sample_ecommerce_data',
-            'docs.count': '20',
-          },
-          {
-            index: '.somethingElse',
-            'docs.count': '20',
-          },
-        ],
-      })
-    );
+    esClient.cat.indices.mockResponse([
+      {
+        index: '.kibana',
+        'docs.count': '500',
+      },
+      {
+        index: 'kibana_sample_ecommerce_data',
+        'docs.count': '20',
+      },
+      {
+        index: '.somethingElse',
+        'docs.count': '20',
+      },
+    ]);
 
     const log = loggingSystemMock.createLogger();
 
@@ -53,20 +47,16 @@ describe('checkClusterForUserData', () => {
 
   it('returns true if data exists in non-system indices', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.cat.indices.mockResolvedValue(
-      elasticsearchServiceMock.createApiResponse({
-        body: [
-          {
-            index: '.kibana',
-            'docs.count': '500',
-          },
-          {
-            index: 'some_real_index',
-            'docs.count': '20',
-          },
-        ],
-      })
-    );
+    esClient.cat.indices.mockResponse([
+      {
+        index: '.kibana',
+        'docs.count': '500',
+      },
+      {
+        index: 'some_real_index',
+        'docs.count': '20',
+      },
+    ]);
 
     const log = loggingSystemMock.createLogger();
 
@@ -77,32 +67,20 @@ describe('checkClusterForUserData', () => {
   it('checks each time until the first true response is returned, then stops checking', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.cat.indices
-      .mockResolvedValueOnce(
-        elasticsearchServiceMock.createApiResponse({
-          body: [],
-        })
-      )
+      .mockResponseOnce([])
       .mockRejectedValueOnce(new Error('something terrible happened'))
-      .mockResolvedValueOnce(
-        elasticsearchServiceMock.createApiResponse({
-          body: [
-            {
-              index: '.kibana',
-              'docs.count': '500',
-            },
-          ],
-        })
-      )
-      .mockResolvedValueOnce(
-        elasticsearchServiceMock.createApiResponse({
-          body: [
-            {
-              index: 'some_real_index',
-              'docs.count': '20',
-            },
-          ],
-        })
-      );
+      .mockResponseOnce([
+        {
+          index: '.kibana',
+          'docs.count': '500',
+        },
+      ])
+      .mockResponseOnce([
+        {
+          index: 'some_real_index',
+          'docs.count': '20',
+        },
+      ]);
 
     const log = loggingSystemMock.createLogger();
 

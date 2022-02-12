@@ -33,7 +33,7 @@ export const searchListItemByValues = async ({
   // TODO: Will need to address this when we switch over to
   // using PIT, don't want it to get lost
   // https://github.com/elastic/kibana/issues/103944
-  const { body: response } = await esClient.search<SearchEsListItemSchema>({
+  const response = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {
         bool: {

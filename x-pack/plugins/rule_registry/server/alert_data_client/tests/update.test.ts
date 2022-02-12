@@ -73,52 +73,45 @@ beforeEach(() => {
 describe('update()', () => {
   test('calls ES client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    esClientMock.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          took: 5,
-          timed_out: false,
-          _shards: {
-            total: 1,
-            successful: 1,
-            failed: 0,
-            skipped: 0,
+    esClientMock.search.mockResponseOnce({
+      took: 5,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 1,
+        max_score: 999,
+        hits: [
+          {
+            // @ts-expect-error incorrect fields
+            found: true,
+            _type: 'alert',
+            _index: '.alerts-observability.apm.alerts',
+            _id: 'NoxgpHkBqbdrfX07MqXV',
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              message: 'hello world 1',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
           },
-          hits: {
-            total: 1,
-            max_score: 999,
-            hits: [
-              {
-                found: true,
-                _type: 'alert',
-                _index: '.alerts-observability.apm.alerts',
-                _id: 'NoxgpHkBqbdrfX07MqXV',
-                _source: {
-                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                  message: 'hello world 1',
-                  [ALERT_WORKFLOW_STATUS]: 'open',
-                  [ALERT_RULE_CONSUMER]: 'apm',
-                  [SPACE_IDS]: [DEFAULT_SPACE],
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
-    esClientMock.update.mockResolvedValueOnce(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          _index: '.alerts-observability.apm.alerts',
-          _id: 'NoxgpHkBqbdrfX07MqXV',
-          _version: 2,
-          result: 'updated',
-          _shards: { total: 2, successful: 1, failed: 0 },
-          _seq_no: 1,
-          _primary_term: 1,
-        },
-      })
-    );
+        ],
+      },
+    });
+    esClientMock.update.mockResponseOnce({
+      _index: '.alerts-observability.apm.alerts',
+      _id: 'NoxgpHkBqbdrfX07MqXV',
+      _version: 2,
+      result: 'updated',
+      _shards: { total: 2, successful: 1, failed: 0 },
+      _seq_no: 1,
+      _primary_term: 1,
+    });
     const result = await alertsClient.update({
       id: '1',
       status: 'closed',
@@ -159,52 +152,45 @@ describe('update()', () => {
 
   test('logs successful event in audit logger', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    esClientMock.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          took: 5,
-          timed_out: false,
-          _shards: {
-            total: 1,
-            successful: 1,
-            failed: 0,
-            skipped: 0,
+    esClientMock.search.mockResponseOnce({
+      took: 5,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 1,
+        max_score: 999,
+        hits: [
+          {
+            // @ts-expect-error incorrect fields
+            found: true,
+            _type: 'alert',
+            _index: '.alerts-observability.apm.alerts',
+            _id: 'NoxgpHkBqbdrfX07MqXV',
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              message: 'hello world 1',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
           },
-          hits: {
-            total: 1,
-            max_score: 999,
-            hits: [
-              {
-                found: true,
-                _type: 'alert',
-                _index: '.alerts-observability.apm.alerts',
-                _id: 'NoxgpHkBqbdrfX07MqXV',
-                _source: {
-                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                  message: 'hello world 1',
-                  [ALERT_WORKFLOW_STATUS]: 'open',
-                  [ALERT_RULE_CONSUMER]: 'apm',
-                  [SPACE_IDS]: [DEFAULT_SPACE],
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
-    esClientMock.update.mockResolvedValueOnce(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          _index: '.alerts-observability.apm.alerts',
-          _id: 'NoxgpHkBqbdrfX07MqXV',
-          _version: 2,
-          result: 'updated',
-          _shards: { total: 2, successful: 1, failed: 0 },
-          _seq_no: 1,
-          _primary_term: 1,
-        },
-      })
-    );
+        ],
+      },
+    });
+    esClientMock.update.mockResponseOnce({
+      _index: '.alerts-observability.apm.alerts',
+      _id: 'NoxgpHkBqbdrfX07MqXV',
+      _version: 2,
+      result: 'updated',
+      _shards: { total: 2, successful: 1, failed: 0 },
+      _seq_no: 1,
+      _primary_term: 1,
+    });
     await alertsClient.update({
       id: 'NoxgpHkBqbdrfX07MqXV',
       status: 'closed',
@@ -230,41 +216,38 @@ describe('update()', () => {
     // fakeRuleTypeId will cause authz to fail
     const fakeRuleTypeId = 'fake.rule';
     const alertsClient = new AlertsClient(alertsClientParams);
-    esClientMock.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          took: 5,
-          timed_out: false,
-          _shards: {
-            total: 1,
-            successful: 1,
-            failed: 0,
-            skipped: 0,
+    esClientMock.search.mockResponseOnce({
+      took: 5,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 1,
+        max_score: 999,
+        hits: [
+          {
+            // @ts-expect-error incorrect fields
+            found: true,
+            _type: 'alert',
+            _version: 1,
+            _seq_no: 362,
+            _primary_term: 2,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
           },
-          hits: {
-            total: 1,
-            max_score: 999,
-            hits: [
-              {
-                found: true,
-                _type: 'alert',
-                _version: 1,
-                _seq_no: 362,
-                _primary_term: 2,
-                _id: fakeAlertId,
-                _index: indexName,
-                _source: {
-                  [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
-                  [ALERT_RULE_CONSUMER]: 'apm',
-                  [ALERT_WORKFLOW_STATUS]: 'open',
-                  [SPACE_IDS]: [DEFAULT_SPACE],
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
+        ],
+      },
+    });
 
     await expect(
       alertsClient.update({
@@ -314,39 +297,36 @@ describe('update()', () => {
   test(`throws an error if ES client update fails`, async () => {
     const error = new Error('something went wrong on update');
     const alertsClient = new AlertsClient(alertsClientParams);
-    esClientMock.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createApiResponse({
-        body: {
-          took: 5,
-          timed_out: false,
-          _shards: {
-            total: 1,
-            successful: 1,
-            failed: 0,
-            skipped: 0,
+    esClientMock.search.mockResponseOnce({
+      took: 5,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 1,
+        max_score: 999,
+        hits: [
+          {
+            // @ts-expect-error incorrect fields
+            found: true,
+            _type: 'alert',
+            _index: '.alerts-observability.apm.alerts',
+            _id: 'NoxgpHkBqbdrfX07MqXV',
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              message: 'hello world 1',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
           },
-          hits: {
-            total: 1,
-            max_score: 999,
-            hits: [
-              {
-                found: true,
-                _type: 'alert',
-                _index: '.alerts-observability.apm.alerts',
-                _id: 'NoxgpHkBqbdrfX07MqXV',
-                _source: {
-                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                  message: 'hello world 1',
-                  [ALERT_WORKFLOW_STATUS]: 'open',
-                  [ALERT_RULE_CONSUMER]: 'apm',
-                  [SPACE_IDS]: [DEFAULT_SPACE],
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
+        ],
+      },
+    });
     esClientMock.update.mockRejectedValue(error);
 
     await expect(
@@ -371,56 +351,49 @@ describe('update()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      esClientMock.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createApiResponse({
-          body: {
-            took: 5,
-            timed_out: false,
-            _shards: {
-              total: 1,
-              successful: 1,
-              failed: 0,
-              skipped: 0,
+      esClientMock.search.mockResponseOnce({
+        took: 5,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+          skipped: 0,
+        },
+        hits: {
+          total: 1,
+          max_score: 999,
+          hits: [
+            {
+              // @ts-expect-error incorrect fields
+              found: true,
+              _type: 'alert',
+              _index: '.alerts-observability.apm.alerts',
+              _id: 'NoxgpHkBqbdrfX07MqXV',
+              _version: 2,
+              _seq_no: 362,
+              _primary_term: 2,
+              _source: {
+                [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                message: 'hello world 1',
+                [ALERT_RULE_CONSUMER]: 'apm',
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: [DEFAULT_SPACE],
+              },
             },
-            hits: {
-              total: 1,
-              max_score: 999,
-              hits: [
-                {
-                  found: true,
-                  _type: 'alert',
-                  _index: '.alerts-observability.apm.alerts',
-                  _id: 'NoxgpHkBqbdrfX07MqXV',
-                  _version: 2,
-                  _seq_no: 362,
-                  _primary_term: 2,
-                  _source: {
-                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                    message: 'hello world 1',
-                    [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_WORKFLOW_STATUS]: 'open',
-                    [SPACE_IDS]: [DEFAULT_SPACE],
-                  },
-                },
-              ],
-            },
-          },
-        })
-      );
+          ],
+        },
+      });
 
-      esClientMock.update.mockResolvedValueOnce(
-        elasticsearchClientMock.createApiResponse({
-          body: {
-            _index: '.alerts-observability.apm.alerts',
-            _id: 'NoxgpHkBqbdrfX07MqXV',
-            _version: 2,
-            result: 'updated',
-            _shards: { total: 2, successful: 1, failed: 0 },
-            _seq_no: 1,
-            _primary_term: 1,
-          },
-        })
-      );
+      esClientMock.update.mockResponseOnce({
+        _index: '.alerts-observability.apm.alerts',
+        _id: 'NoxgpHkBqbdrfX07MqXV',
+        _version: 2,
+        result: 'updated',
+        _shards: { total: 2, successful: 1, failed: 0 },
+        _seq_no: 1,
+        _primary_term: 1,
+      });
     });
 
     test('returns alert if user is authorized to update alert under the consumer', async () => {
