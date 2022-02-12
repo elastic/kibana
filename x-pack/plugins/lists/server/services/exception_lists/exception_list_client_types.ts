@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
 import type {
   KibanaRequest,
@@ -53,14 +53,14 @@ import type {
   UpdateCommentsArray,
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   EmptyStringArrayDecoded,
   NonEmptyStringArrayDecoded,
   Version,
   VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-types';
 
-import { ExtensionPointStorageClientInterface } from '../extension_points';
+import type { ExtensionPointStorageClientInterface } from '../extension_points';
 
 export interface ConstructorOptions {
   user: string;
@@ -304,7 +304,7 @@ export interface FindExceptionListPointInTimeFinderOptions {
   perPage: PerPageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-  executeFunctionOnStream: <T>(response: FoundExceptionListSchema) => T;
+  executeFunctionOnStream: (response: FoundExceptionListSchema) => void;
 }
 
 export interface FindExceptionListItemsPointInTimeFinderOptions {
@@ -320,7 +320,6 @@ export interface FindExceptionListItemsPointInTimeFinderOptions {
 
 export interface FindValueListExceptionListsItemsPointInTimeFinder {
   valueListId: Id;
-  savedObjectsClient: SavedObjectsClientContract;
   perPage: PerPageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;

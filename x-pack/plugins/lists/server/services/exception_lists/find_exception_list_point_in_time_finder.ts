@@ -43,15 +43,16 @@ interface FindExceptionListPointInTimeFinderOptions {
  * If you want to stream all results up to 10k into memory for correlation this would be:
  * @example
  * ```ts
- * const myResult: FoundExceptionListSchema[] = [];
+ * const exceptionList: ExceptionListSchema[] = [];
  * const executeFunctionOnStream = (response: FoundExceptionListSchema) => {
- *   myResult.push(response);
+ *   exceptionList = [...exceptionList, ...response.data];
  * }
  * await client.findExceptionListPointInTimeFinder({
  *   filter,
  *   executeFunctionOnStream,
  *   namespaceType,
- *   perPage: 100,
+ *   maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
+ *   perPage: 1_000,
  *   sortField,
  *   sortOrder,
  *   exe

@@ -34,6 +34,39 @@ interface FindValueListExceptionListsItemsPointInTimeFinder {
   maxSize: MaxSizeOrUndefined;
 }
 
+/**
+ * Finds value lists within exception lists within a point in time (PIT) and then calls the function
+ * `executeFunctionOnStream` until the maxPerPage is reached and stops.
+ * NOTE: This is slightly different from the saved objects version in that it takes
+ * an injected function, so that we avoid doing additional plumbing with generators
+ * to try to keep the maintenance of this machinery simpler for now.
+ *
+ * If you want to stream all results up to 10k into memory for correlation this would be:
+ * @example
+ * ```ts
+ * const exceptionList: ExceptionListItemSchema[] = [];
+ * const executeFunctionOnStream = (response: FoundExceptionListItemSchema) => {
+ *   exceptionList = [...exceptionList, ...response.data];
+ * }
+ * await client.findValueListExceptionListItemsPointInTimeFinder({
+ *   valueListId,
+ *   executeFunctionOnStream,
+ *   namespaceType,
+ *   maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
+ *   perPage: 1_000,
+ *   sortField,
+ *   sortOrder,
+ *   exe
+ * });
+ * ```
+ * @param valueListId {string} Your value list id
+ * @param namespaceType {string} "agnostic" | "single" of your namespace
+ * @param perPage {number} The number of items per page. Typical value should be 1_000 here. Never go above 10_000
+ * @param maxSize {number of undefined} If given a max size, this will not exceeded. Otherwise if undefined is passed down, all records will be processed.
+ * @param sortField {string} String of the field to sort against
+ * @param savedObjectsClient {object} The saved objects client
+ * @param sortOrder "asc" | "desc" The order to sort against
+ */
 export const findValueListExceptionListItemsPointInTimeFinder = async ({
   valueListId,
   executeFunctionOnStream,
