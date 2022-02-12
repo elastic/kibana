@@ -39,7 +39,7 @@ export const fetchHitsWithPit = async <T>({
       index,
       keep_alive: '5m',
     })
-  ).body.id;
+  ).id;
 
   let searchAfter: SortResults | undefined;
   let hits: Array<SearchHit<T>> = [];
@@ -56,7 +56,7 @@ export const fetchHitsWithPit = async <T>({
     logger.debug(
       `Getting hits with point in time (PIT) query of: ${JSON.stringify(ruleSearchOptions)}`
     );
-    const { body } = await esClient.search<T>(ruleSearchOptions);
+    const body = await esClient.search<T>(ruleSearchOptions);
     hits = [...hits, ...body.hits.hits];
     searchAfter =
       body.hits.hits.length !== 0 ? body.hits.hits[body.hits.hits.length - 1].sort : undefined;

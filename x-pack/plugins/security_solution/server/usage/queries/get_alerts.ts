@@ -11,6 +11,7 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from 'kibana/server';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { AlertBucket, AlertAggs } from '../types';
 
 export interface GetAlertsOptions {
@@ -37,7 +38,7 @@ export const getAlerts = async ({
       index: signalsIndex,
       keep_alive: keepAlive,
     })
-  ).body.id;
+  ).id;
 
   let after: AggregationsCompositeAggregation['after'];
   let buckets: AlertBucket[] = [];
@@ -52,7 +53,7 @@ export const getAlerts = async ({
               {
                 detectionAlerts: {
                   terms: {
-                    field: 'kibana.alert.rule.uuid',
+                    field: ALERT_RULE_UUID,
                   },
                 },
               },
@@ -83,7 +84,7 @@ export const getAlerts = async ({
     logger.debug(
       `Getting alerts with point in time (PIT) query: ${JSON.stringify(ruleSearchOptions)}`
     );
-    const { body } = await esClient.search<unknown, AlertAggs>(ruleSearchOptions);
+    const body = await esClient.search<unknown, AlertAggs>(ruleSearchOptions);
     if (body.aggregations?.buckets?.buckets != null) {
       buckets = [...buckets, ...body.aggregations.buckets.buckets];
     }
