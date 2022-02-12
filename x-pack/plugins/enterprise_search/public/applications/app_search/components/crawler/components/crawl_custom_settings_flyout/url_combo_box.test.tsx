@@ -34,7 +34,7 @@ const MOCK_VALUES = {
 };
 
 const MOCK_ACTIONS = {
-  // CrawlCustomSettingsFlyoutLogic
+  // UrlComboBoxLogic
   setIsInvalid: jest.fn(),
 };
 
