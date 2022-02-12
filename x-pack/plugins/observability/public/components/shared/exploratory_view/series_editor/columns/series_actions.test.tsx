@@ -36,7 +36,7 @@ describe('SeriesActions', function () {
     });
 
     it('should display a view transaction link', function () {
-      expect(screen.getByLabelText('View transaction in Discovers')).toBeVisible();
+      expect(screen.getByLabelText('View transaction in Discover')).toBeVisible();
     });
 
     it('should display a hide series link', function () {
