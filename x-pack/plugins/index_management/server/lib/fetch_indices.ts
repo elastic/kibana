@@ -17,7 +17,7 @@ async function fetchIndicesCall(
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
   // This call retrieves alias and settings (incl. hidden status) information about indices
-  const { body: indices } = await client.asCurrentUser.indices.get({
+  const indices = await client.asCurrentUser.indices.get({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
     // only get specified index properties from ES to keep the response under 536MB
@@ -39,9 +39,7 @@ async function fetchIndicesCall(
     return [];
   }
 
-  const {
-    body: { indices: indicesStats = {} },
-  } = await client.asCurrentUser.indices.stats({
+  const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
     forbid_closed_indices: false,

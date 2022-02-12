@@ -13,9 +13,7 @@ export const getCloudManagedTemplatePrefix = async (
   client: IScopedClusterClient
 ): Promise<string | undefined> => {
   try {
-    const {
-      body: { persistent, transient, defaults },
-    } = await client.asCurrentUser.cluster.getSettings({
+    const { persistent, transient, defaults } = await client.asCurrentUser.cluster.getSettings({
       filter_path: '*.*managed_index_templates',
       flat_settings: true,
       include_defaults: true,

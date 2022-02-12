@@ -138,7 +138,7 @@ export async function fetchMissingMonitoringData(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const clusterBuckets = get(
     response,
     'aggregations.clusters.buckets',

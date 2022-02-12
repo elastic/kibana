@@ -830,12 +830,8 @@ describe('Fields Provider', () => {
     beforeAll(() => {
       getFieldsForWildcardMock.mockResolvedValue([]);
 
-      esClientSearchMock.mockResolvedValue({
-        body: { hits: { total: { value: 123 } } },
-      });
-      esClientFieldCapsMock.mockResolvedValue({
-        body: { indices: ['value'] },
-      });
+      esClientSearchMock.mockResolvedValue({ hits: { total: { value: 123 } } });
+      esClientFieldCapsMock.mockResolvedValue({ indices: ['value'] });
       IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     });
 
@@ -925,9 +921,7 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValue({
-        body: { hits: { total: { value: 1 } } },
-      });
+      esClientSearchMock.mockResolvedValue({ hits: { total: { value: 1 } } });
       const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({

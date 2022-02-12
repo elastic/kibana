@@ -199,7 +199,7 @@ const getMetric: (
       );
       const compositeBuckets = (await getAllCompositeData(
         // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
-        (body) => esClient.search({ body, index }),
+        (body) => esClient.search({ body, index }, { meta: true }),
         searchBody,
         bucketSelector,
         afterKeyHandler
@@ -218,7 +218,7 @@ const getMetric: (
       }
       return groupedResults;
     }
-    const { body: result } = await esClient.search({
+    const result = await esClient.search({
       body: searchBody,
       index,
     });

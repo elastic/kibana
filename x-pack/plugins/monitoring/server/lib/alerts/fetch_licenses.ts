@@ -74,7 +74,7 @@ export async function fetchLicenses(
     // meh
   }
 
-  const { body: response } = await esClient.search<ElasticsearchSource>(params);
+  const response = await esClient.search<ElasticsearchSource>(params);
   return (
     response?.hits?.hits.map((hit) => {
       const rawLicense = hit._source!.license ?? {};

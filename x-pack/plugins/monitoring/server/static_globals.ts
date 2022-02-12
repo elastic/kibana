@@ -82,7 +82,7 @@ export class Globals {
           'cluster.getSettings': (p) => client.cluster.getSettings(p),
           'cluster.putSettings': (p) => client.cluster.putSettings(p),
         };
-        const { body } = await endpointMap[endpoint](params);
+        const body = await endpointMap[endpoint](params);
         return body;
       });
 

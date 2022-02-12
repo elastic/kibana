@@ -105,8 +105,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       delete params.body.key;
     }
 
-    const { body } = await asInternalUser.index(params);
-    return body;
+    return await asInternalUser.index(params);
   }
 
   async function getAnnotations({
@@ -283,7 +282,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     };
 
     try {
-      const { body } = await asInternalUser.search(params);
+      const body = await asInternalUser.search(params);
 
       // @ts-expect-error TODO fix search response types
       if (body.error !== undefined && body.message !== undefined) {
@@ -375,7 +374,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       },
     };
 
-    const { body } = await asInternalUser.search<Annotation>(params);
+    const body = await asInternalUser.search<Annotation>(params);
 
     const annotations = (
       (body.aggregations!.by_job as estypes.AggregationsTermsAggregateBase<AggByJob>)
@@ -401,7 +400,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       },
     };
 
-    const { body } = await asInternalUser.search(searchParams);
+    const body = await asInternalUser.search(searchParams);
     const totalCount =
       typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
 
@@ -417,8 +416,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       refresh: 'wait_for',
     };
 
-    const { body: deleteResponse } = await asInternalUser.delete(deleteParams);
-    return deleteResponse;
+    return await asInternalUser.delete(deleteParams);
   }
 
   return {

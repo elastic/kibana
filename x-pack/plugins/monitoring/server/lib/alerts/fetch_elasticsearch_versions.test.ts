@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchElasticsearchVersions } from './fetch_elasticsearch_versions';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -38,25 +36,23 @@ describe('fetchElasticsearchVersions', () => {
   const versions = ['8.0.0', '7.2.1'];
 
   it('fetch as expected', async () => {
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _index: `Monitoring:${index}`,
-              _source: {
-                cluster_uuid: 'cluster123',
-                cluster_stats: {
-                  nodes: {
-                    versions,
-                  },
+    esClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _index: `Monitoring:${index}`,
+            _source: {
+              cluster_uuid: 'cluster123',
+              cluster_stats: {
+                nodes: {
+                  versions,
                 },
               },
             },
-          ],
-        },
-      } as estypes.SearchResponse)
-    );
+          },
+        ],
+      },
+    } as estypes.SearchResponse);
 
     const result = await fetchElasticsearchVersions(esClient, clusters, size);
     expect(result).toEqual([
@@ -107,9 +103,7 @@ describe('fetchElasticsearchVersions', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        {} as estypes.SearchResponse
-      );
+      return Promise.resolve({} as estypes.SearchResponse);
     });
     await fetchElasticsearchVersions(esClient, clusters, size);
     // @ts-ignore

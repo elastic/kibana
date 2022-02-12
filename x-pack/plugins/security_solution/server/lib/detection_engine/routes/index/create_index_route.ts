@@ -141,7 +141,7 @@ const addFieldAliasesToIndices = async ({
   esClient: ElasticsearchClient;
   index: string;
 }) => {
-  const { body: indexMappings } = await esClient.indices.get({ index });
+  const indexMappings = await esClient.indices.get({ index });
   const indicesByVersion: Record<number, string[]> = {};
   const versions: Set<number> = new Set();
   for (const [indexName, mapping] of Object.entries(indexMappings)) {
@@ -182,7 +182,7 @@ const addIndexAliases = async ({
   index: string;
   aadIndexAliasName: string;
 }) => {
-  const { body: indices } = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
+  const indices = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
   const aliasActions = {
     actions: Object.keys(indices).map((concreteIndexName) => {
       return {

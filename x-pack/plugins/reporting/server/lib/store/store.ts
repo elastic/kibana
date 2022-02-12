@@ -110,7 +110,7 @@ export class ReportingStore {
 
   private async createIndex(indexName: string) {
     const client = await this.getClient();
-    const { body: exists } = await client.indices.exists({ index: indexName });
+    const exists = await client.indices.exists({ index: indexName });
 
     if (exists) {
       return exists;
@@ -166,9 +166,7 @@ export class ReportingStore {
       },
     };
     const client = await this.getClient();
-    const { body } = await client.index(doc);
-
-    return body;
+    return await client.index(doc);
   }
 
   /*
@@ -239,7 +237,7 @@ export class ReportingStore {
 
     try {
       const client = await this.getClient();
-      const { body: document } = await client.get<ReportSource>({
+      const document = await client.get<ReportSource>({
         index: taskJson.index,
         id: taskJson.id,
       });
@@ -283,16 +281,14 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = (
-        await client.update<ReportDocument>({
-          id: report._id,
-          index: report._index,
-          if_seq_no: report._seq_no,
-          if_primary_term: report._primary_term,
-          refresh: true,
-          body: { doc },
-        })
-      ).body;
+      body = await client.update<unknown, unknown, ReportDocument>({
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        refresh: true,
+        body: { doc },
+      });
     } catch (err) {
       this.logError(`Error in updating status to processing! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -321,16 +317,14 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = (
-        await client.update<ReportDocument>({
-          id: report._id,
-          index: report._index,
-          if_seq_no: report._seq_no,
-          if_primary_term: report._primary_term,
-          refresh: true,
-          body: { doc },
-        })
-      ).body;
+      body = await client.update<unknown, unknown, ReportDocument>({
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        refresh: true,
+        body: { doc },
+      });
     } catch (err) {
       this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -358,16 +352,14 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = (
-        await client.update<ReportDocument>({
-          id: report._id,
-          index: report._index,
-          if_seq_no: report._seq_no,
-          if_primary_term: report._primary_term,
-          refresh: true,
-          body: { doc },
-        })
-      ).body;
+      body = await client.update<unknown, unknown, ReportDocument>({
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        refresh: true,
+        body: { doc },
+      });
     } catch (err) {
       this.logError(`Error in updating status to complete! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -387,16 +379,14 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = (
-        await client.update<ReportDocument>({
-          id: report._id,
-          index: report._index,
-          if_seq_no: report._seq_no,
-          if_primary_term: report._primary_term,
-          refresh: true,
-          body: { doc },
-        })
-      ).body;
+      body = await client.update<unknown, unknown, ReportDocument>({
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        refresh: true,
+        body: { doc },
+      });
     } catch (err) {
       this.logError(`Error in clearing expiration and status for retry! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -430,7 +420,7 @@ export class ReportingStore {
       },
     };
 
-    const { body } = await client.search<ReportRecordTimeout['_source']>({
+    const body = await client.search<ReportRecordTimeout['_source']>({
       size: 1,
       index: this.indexPrefix + '-*',
       seq_no_primary_term: true,

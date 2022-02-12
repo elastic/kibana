@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchClusterHealth } from './fetch_cluster_health';
+
 jest.mock('../../static_globals', () => ({
   Globals: {
     app: {
@@ -28,23 +29,21 @@ describe('fetchClusterHealth', () => {
     const clusterUuid = 'sdfdsaj34434';
     const clusters = [{ clusterUuid, clusterName: 'foo' }];
     const status = 'green';
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _index: '.monitoring-es-7',
-              _source: {
-                cluster_state: {
-                  status,
-                },
-                cluster_uuid: clusterUuid,
+    esClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _index: '.monitoring-es-7',
+            _source: {
+              cluster_state: {
+                status,
               },
+              cluster_uuid: clusterUuid,
             },
-          ],
-        },
-      } as estypes.SearchResponse)
-    );
+          },
+        ],
+      },
+    } as estypes.SearchResponse);
 
     const health = await fetchClusterHealth(esClient, clusters);
     expect(health).toEqual([
@@ -101,7 +100,7 @@ describe('fetchClusterHealth', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
 
     await fetchClusterHealth(esClient, [{ clusterUuid: '1', clusterName: 'foo1' }]);

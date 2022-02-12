@@ -33,9 +33,7 @@ export function memoryOverviewServiceProvider(mlClient: MlClient) {
      * Retrieves memory consumed my started DFA jobs.
      */
     async getDFAMemoryOverview(): Promise<MlJobMemoryOverview[]> {
-      const {
-        body: { data_frame_analytics: dfaStats },
-      } = await mlClient.getDataFrameAnalyticsStats();
+      const { data_frame_analytics: dfaStats } = await mlClient.getDataFrameAnalyticsStats();
 
       const dfaMemoryReport = dfaStats
         .filter((dfa) => dfa.state === 'started')
@@ -52,9 +50,7 @@ export function memoryOverviewServiceProvider(mlClient: MlClient) {
 
       const dfaMemoryKeyByJobId = keyBy(dfaMemoryReport, 'job_id');
 
-      const {
-        body: { data_frame_analytics: startedDfaJobs },
-      } = await mlClient.getDataFrameAnalytics({
+      const { data_frame_analytics: startedDfaJobs } = await mlClient.getDataFrameAnalytics({
         id: dfaMemoryReport.map((v) => v.job_id).join(','),
       });
 
@@ -72,9 +68,7 @@ export function memoryOverviewServiceProvider(mlClient: MlClient) {
      * Retrieves memory consumed by opened Anomaly Detection jobs.
      */
     async getAnomalyDetectionMemoryOverview(): Promise<MlJobMemoryOverview[]> {
-      const {
-        body: { jobs: jobsStats },
-      } = await mlClient.getJobStats();
+      const { jobs: jobsStats } = await mlClient.getJobStats();
 
       return jobsStats
         .filter((v) => v.state === 'opened')

@@ -67,9 +67,9 @@ describe('fetchMissingMonitoringData', () => {
       },
     ];
 
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           clusters: {
             buckets: clusters.map((cluster) => ({
@@ -97,7 +97,7 @@ describe('fetchMissingMonitoringData', () => {
             })),
           },
         },
-      })
+      }
     );
     const result = await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(result).toEqual([
@@ -126,9 +126,9 @@ describe('fetchMissingMonitoringData', () => {
         clusterName: 'clusterName1',
       },
     ];
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           clusters: {
             buckets: clusters.map((cluster) => ({
@@ -147,7 +147,7 @@ describe('fetchMissingMonitoringData', () => {
             })),
           },
         },
-      })
+      }
     );
     const result = await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(result).toEqual([
@@ -172,7 +172,7 @@ describe('fetchMissingMonitoringData', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(params).toStrictEqual({
@@ -234,7 +234,7 @@ describe('fetchMissingMonitoringData', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     // @ts-ignore

@@ -110,20 +110,14 @@ describe('query_ranges', () => {
       ];
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              aggregations: {
-                logspace_ranges: {
-                  buckets: logspaceRangesBuckets,
-                },
+            aggregations: {
+              logspace_ranges: {
+                buckets: logspaceRangesBuckets,
               },
-            } as unknown as estypes.SearchResponse,
-          };
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

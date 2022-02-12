@@ -93,9 +93,9 @@ describe('fetchMemoryUsageNodeStats', () => {
   };
 
   it('fetch stats', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise(esRes)
+      esRes
     );
     const result = await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result).toEqual([
@@ -113,7 +113,7 @@ describe('fetchMemoryUsageNodeStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(params).toStrictEqual({
@@ -164,7 +164,7 @@ describe('fetchMemoryUsageNodeStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     // @ts-ignore

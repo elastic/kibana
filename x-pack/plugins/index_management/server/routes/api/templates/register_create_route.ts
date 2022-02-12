@@ -28,7 +28,7 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
         } = template;
 
         // Check that template with the same name doesn't already exist
-        const { body: templateExists } = await doesTemplateExist({
+        const templateExists = await doesTemplateExist({
           name: template.name,
           client,
           isLegacy,
@@ -48,7 +48,7 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
         }
 
         // Otherwise create new index template
-        const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
+        const responseBody = await saveTemplate({ template, client, isLegacy });
 
         return response.ok({ body: responseBody });
       } catch (error) {

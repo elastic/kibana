@@ -89,13 +89,15 @@ export function MachineLearningNavigationProvider({
     },
 
     async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled(tabSubject);
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected ML tab '${tabSubject}' to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
+      await retry.tryForTime(10000, async () => {
+        const isEnabled = await testSubjects.isEnabled(tabSubject);
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected ML tab '${tabSubject}' to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
     },
 
     async assertOverviewTabEnabled(expectedValue: boolean) {
