@@ -58,24 +58,22 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       if (dataView) {
         const closeFieldEditor = dataViewFieldEditor?.openEditor({
           ctx: { dataView },
-          onSave: async (fields: DataViewField[]) => {
+          onSave: async (field: DataViewField) => {
             // Fetch the updated list of fields
             await indexFieldsSearch(selectedDataViewId);
 
-            for (const field of fields) {
-              // Add the new field(s) to the event table
-              dispatch(
-                upsertColumn({
-                  column: {
-                    columnHeaderType: defaultColumnHeaderType,
-                    id: field.name,
-                    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-                  },
-                  id: timelineId,
-                  index: 0,
-                })
-              );
-            }
+            // Add the new field to the event table, after waiting for browserFields to be stored
+            dispatch(
+              upsertColumn({
+                column: {
+                  columnHeaderType: defaultColumnHeaderType,
+                  id: field.name,
+                  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+                },
+                id: timelineId,
+                index: 0,
+              })
+            );
           },
         });
         if (editorActionsRef) {
