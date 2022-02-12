@@ -109,12 +109,6 @@ export interface PolicyArtifactsState {
   removeList: AsyncResourceState<PolicyRemoveTrustedApps>;
 }
 
-export enum OS {
-  windows = 'windows',
-  mac = 'mac',
-  linux = 'linux',
-}
-
 export interface PolicyDetailsArtifactsPageListLocationParams {
   page_index: number;
   page_size: number;

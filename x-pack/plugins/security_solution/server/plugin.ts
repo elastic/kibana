@@ -94,6 +94,7 @@ import type {
 } from './plugin_contract';
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
+import { featureUsageService } from './endpoint/services/feature_usage';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -340,6 +341,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       taskManager: plugins.taskManager!,
     });
 
+    featureUsageService.setup(plugins.licensing);
+
     return {};
   }
 
@@ -402,6 +405,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       // License related start
       licenseService.start(this.licensing$);
+      featureUsageService.start(plugins.licensing);
       this.policyWatcher = new PolicyWatcher(
         plugins.fleet.packagePolicyService,
         core.savedObjects,
@@ -442,6 +446,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       licenseService,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
+      featureUsageService,
     });
 
     this.telemetryReceiver.start(
