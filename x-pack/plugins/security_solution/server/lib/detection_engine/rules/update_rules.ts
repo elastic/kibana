@@ -102,6 +102,7 @@ export const updateRules = async ({
     await rulesClient.disable({ id: existingRule.id });
   } else if (!existingRule.enabled && enabled === true) {
     await rulesClient.enable({ id: existingRule.id });
+    // TODO: remove upgrade tag
   }
   return { ...update, enabled };
 };

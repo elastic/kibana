@@ -219,6 +219,7 @@ export const patchRules = async ({
     await rulesClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
     await rulesClient.enable({ id: rule.id });
+    // TODO: remove upgrade tag
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
