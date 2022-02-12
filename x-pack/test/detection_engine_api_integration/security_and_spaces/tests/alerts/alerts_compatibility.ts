@@ -217,6 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hit._source?.kibana).to.eql(undefined);
         const {
           '@timestamp': timestamp,
+          'kibana.version': kibanaVersion,
           'kibana.alert.rule.created_at': createdAt,
           'kibana.alert.rule.updated_at': updatedAt,
           'kibana.alert.rule.execution.uuid': executionUuid,
@@ -224,7 +225,6 @@ export default ({ getService }: FtrProviderContext) => {
           ...source
         } = hit._source!;
         expect(source).to.eql({
-          'kibana.version': '8.2.0',
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',
           'kibana.alert.rule.name': 'Signal Testing Query',
@@ -418,6 +418,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hit._source?.kibana).to.eql(undefined);
         const {
           '@timestamp': timestamp,
+          'kibana.version': kibanaVersion,
           'kibana.alert.rule.created_at': createdAt,
           'kibana.alert.rule.updated_at': updatedAt,
           'kibana.alert.rule.execution.uuid': executionUuid,
@@ -425,7 +426,6 @@ export default ({ getService }: FtrProviderContext) => {
           ...source
         } = hit._source!;
         expect(source).to.eql({
-          'kibana.version': '8.2.0',
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',
           'kibana.alert.rule.name': 'Signal Testing Query',
