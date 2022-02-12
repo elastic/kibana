@@ -300,7 +300,7 @@ export async function fetchLogstashStats(
     },
   };
 
-  const { body: results } = await callCluster.search<LogstashStats>(params, {
+  const results = await callCluster.search<LogstashStats>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },
@@ -361,7 +361,7 @@ export async function fetchLogstashState(
     },
   };
 
-  const { body: results } = await callCluster.search<LogstashState>(params, {
+  const results = await callCluster.search<LogstashState>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },
