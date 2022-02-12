@@ -16,22 +16,16 @@ import {
 } from 'src/core/server';
 import { versionService } from './version';
 
-interface Nodes {
-  nodes: {
-    [nodeId: string]: { version: string };
-  };
-}
-
 /**
  * Returns an array of all the unique Elasticsearch Node Versions in the Elasticsearch cluster.
  */
 export const getAllNodeVersions = async (adminClient: IScopedClusterClient) => {
   // Get the version information for all nodes in the cluster.
-  const response = await adminClient.asInternalUser.nodes.info<Nodes>({
+  const response = await adminClient.asInternalUser.nodes.info({
     filter_path: 'nodes.*.version',
   });
 
-  const nodes = response.body.nodes;
+  const nodes = response.nodes;
 
   const versionStrings = Object.values(nodes).map(({ version }) => version);
 

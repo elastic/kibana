@@ -90,12 +90,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
       async (ctx, req, res) => {
         try {
-          const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform(
-            {
-              size: 1000,
-              ...req.params,
-            }
-          );
+          const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+            size: 1000,
+            ...req.params,
+          });
 
           if (ctx.alerting) {
             const transformHealthService = transformHealthServiceProvider(
@@ -132,7 +130,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
       try {
-        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+        const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
           transform_id: transformId,
         });
         return res.ok({ body });
@@ -154,7 +152,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
       async (ctx, req, res) => {
         try {
-          const { body } =
+          const body =
             await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
               size: 1000,
               transform_id: '_all',
@@ -184,10 +182,9 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
       try {
-        const { body } =
-          await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
-            transform_id: transformId,
-          });
+        const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
+          transform_id: transformId,
+        });
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -224,7 +221,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
         await ctx.core.elasticsearch.client.asCurrentUser.transform
           .putTransform({
-            // @ts-expect-error @elastic/elasticsearch group_by is expected to be optional in TransformPivot
+          // @ts-expect-error
             body: req.body,
             transform_id: transformId,
           })
@@ -266,12 +263,11 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         const { transformId } = req.params;
 
         try {
-          const { body } =
-            await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
-              // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
-              body: req.body,
-              transform_id: transformId,
-            });
+          const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
+            // @ts-expect-error
+            body: req.body,
+            transform_id: transformId,
+          });
           return res.ok({
             body,
           });
@@ -441,7 +437,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute(async (ctx, req, res) => {
       try {
-        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.search(req.body);
+        const body = await ctx.core.elasticsearch.client.asCurrentUser.search(req.body);
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -508,11 +504,9 @@ async function deleteTransforms(
       if (!shouldForceDelete) {
         // Grab destination index info to delete
         try {
-          const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform(
-            {
-              transform_id: transformId,
-            }
-          );
+          const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+            transform_id: transformId,
+          });
           const transformConfig = body.transforms[0];
           // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
           destinationIndex = Array.isArray(transformConfig.dest.index)
@@ -647,9 +641,8 @@ const previewTransformHandler: RequestHandler<
 > = async (ctx, req, res) => {
   try {
     const reqBody = req.body;
-    const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
-      // @ts-expect-error The ES client does not yet include the "composite" runtime type
-      // Once "composite" is added to the MappingRuntimeFieldType, those comments can be safely removed.
+    const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
+      // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {
@@ -660,10 +653,10 @@ const previewTransformHandler: RequestHandler<
         include_unmapped: false,
       });
 
-      const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.body.fields));
+      const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.fields));
 
       const fields = Object.entries(
-        fieldCapsResponse.body.fields as Record<string, Record<string, { type: string }>>
+        fieldCapsResponse.fields as Record<string, Record<string, { type: string }>>
       ).reduce((acc, [fieldName, fieldCaps]) => {
         const fieldDefinition = Object.values(fieldCaps)[0];
         const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
