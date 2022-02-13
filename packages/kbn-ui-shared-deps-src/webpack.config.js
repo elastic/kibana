@@ -11,6 +11,8 @@ const Path = require('path');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
+// @ts-expect-error
+const TerserPlugin = require('terser-webpack-plugin');
 
 const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
@@ -84,8 +86,23 @@ module.exports = {
   },
 
   optimization: {
-    minimize: false,
     noEmitOnErrors: true,
+    minimizer: [
+      new TerserPlugin({
+        cache: false,
+        sourceMap: false,
+        extractComments: false,
+        parallel: false,
+        terserOptions: {
+          compress: true,
+          keep_classnames: true,
+          mangle: true,
+          format: {
+            comments: /@license|@preserve/i,
+          },
+        },
+      }),
+    ],
   },
 
   performance: {
