@@ -39,7 +39,7 @@ export const registerUpdateRoute = ({
         // Verify pipeline exists; ES will throw 404 if it doesn't
         await clusterClient.asCurrentUser.ingest.getPipeline({ id: name });
 
-        const { body: response } = await clusterClient.asCurrentUser.ingest.putPipeline({
+        const response = await clusterClient.asCurrentUser.ingest.putPipeline({
           id: name,
           body: {
             description,

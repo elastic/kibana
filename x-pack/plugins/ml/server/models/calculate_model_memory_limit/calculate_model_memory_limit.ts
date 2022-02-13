@@ -10,7 +10,6 @@ import { IScopedClusterClient } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelMemoryEstimationResult {
@@ -153,7 +152,7 @@ export function calculateModelMemoryLimitProvider(
     allowMMLGreaterThanMax = false,
     datafeedConfig?: Datafeed
   ): Promise<ModelMemoryEstimationResult> {
-    const { body: info } = await mlClient.info<MlInfoResponse>();
+    const info = await mlClient.info();
     const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
     const effectiveMaxModelMemoryLimit =
       info.limits.effective_max_model_memory_limit?.toUpperCase();
@@ -168,7 +167,7 @@ export function calculateModelMemoryLimitProvider(
       datafeedConfig
     );
 
-    const { body } = await mlClient.estimateModelMemory<ModelMemoryEstimateResponse>({
+    const body = await mlClient.estimateModelMemory({
       body: {
         analysis_config: analysisConfig,
         overall_cardinality: overallCardinality,

@@ -11,11 +11,11 @@ export type {
   SavedObject,
   SavedObjectsStart,
   SavedObjectSaveOpts,
-  SavedObjectLoaderFindOptions,
 } from '../../../saved_objects/public';
 export {
   showSaveModal,
-  SavedObjectLoader,
   SavedObjectSaveModal,
   getSavedObjectFinder,
 } from '../../../saved_objects/public';
+export { SavedObjectLoader } from './saved_object_loader';
+export type { SavedObjectLoaderFindOptions } from './saved_object_loader';
