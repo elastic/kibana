@@ -89,6 +89,7 @@ export class Plugin implements PluginType {
         this.server.config.service
       );
 
+      this.syntheticService.registerServiceLocations();
       this.syntheticService.registerSyncTask(plugins.taskManager);
       this.telemetryEventsSender.setup(plugins.telemetry);
     }
