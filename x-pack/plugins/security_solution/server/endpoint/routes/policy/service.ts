@@ -53,9 +53,9 @@ export async function getPolicyResponseByAgentId(
   const query = getESQueryPolicyResponseByAgentID(agentID, index);
   const response = await dataClient.asCurrentUser.search<HostPolicyResponse>(query);
 
-  if (response.body.hits.hits.length > 0 && response.body.hits.hits[0]._source != null) {
+  if (response.hits.hits.length > 0 && response.hits.hits[0]._source != null) {
     return {
-      policy_response: response.body.hits.hits[0]._source,
+      policy_response: response.hits.hits[0]._source,
     };
   }
 

@@ -18,7 +18,7 @@ async function deletePipelines(client: ElasticsearchClient, pipelineIds: string[
       .deletePipeline({
         id: pipelineId,
       })
-      .then((response) => ({ success: response.body }))
+      .then((response) => ({ success: response }))
       .catch((error) => ({ error }));
   });
 

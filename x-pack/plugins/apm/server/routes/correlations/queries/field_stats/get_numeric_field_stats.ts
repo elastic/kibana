@@ -82,7 +82,7 @@ export const fetchNumericFieldStats = async (
     field.fieldName,
     termFilters
   );
-  const { body } = await esClient.search<unknown, StatsAggs>(request);
+  const body = await esClient.search<unknown, StatsAggs>(request);
 
   const aggregations = body.aggregations;
   const docCount = aggregations?.sampled_field_stats?.doc_count ?? 0;
