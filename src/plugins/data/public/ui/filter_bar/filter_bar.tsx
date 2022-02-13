@@ -277,13 +277,15 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   function onUpdateFilterGroup(
     updatedMultipleFilters: Filter[],
-    groupId: string,
+    groupIds: [],
     toggleNegate = false
   ) {
     const multipleFilters = [...props.multipleFilters];
+
     const notAffectedFilters = multipleFilters.filter(
-      (filter) => filter.groupId !== Number(groupId)
+      (filter) => !groupIds.includes(filter.groupId)
     );
+
     const finalMultipleFilters = [...notAffectedFilters, ...updatedMultipleFilters];
     props?.onMultipleFiltersUpdated?.(finalMultipleFilters);
     const filters = [...props.filters];

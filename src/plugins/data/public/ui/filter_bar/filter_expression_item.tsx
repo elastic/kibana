@@ -46,7 +46,7 @@ interface Props {
   groupedFilters: any;
   indexPatterns: IIndexPattern[];
   onClick: (filter: Filter) => void;
-  onRemove: () => void;
+  onRemove: (filter: Filter[] | unknown[]) => void;
   groupId: string;
   label?: string | undefined;
   filtersGroupsCount: number;
@@ -98,7 +98,7 @@ export const FilterExpressionItem: FC<Props> = ({
     const isNegated = groupedFilters[0].groupNegated;
     const multipleUpdatedFilters = groupedFilters?.map((filter: Filter) => {
       if (filter.meta.negate) {
-        return { ...filter, meta: { ...filter.meta, negate: false } }
+        return { ...filter, meta: { ...filter.meta, negate: false } };
       } else {
         return { ...filter, groupNegated: !isNegated };
       }
@@ -109,7 +109,7 @@ export const FilterExpressionItem: FC<Props> = ({
 
   function onToggleDisabled() {
     const multipleUpdatedFilters = groupedFilters?.map(toggleFilterDisabled);
-    onUpdate?.(multipleUpdatedFilters, groupId, true);
+    onUpdate?.(multipleUpdatedFilters, [...new Set(groupedFilters.map((filter) => filter.groupId))], true);
   }
 
   function getPanels() {
