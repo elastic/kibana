@@ -85,9 +85,13 @@ ts_project(
   tsconfig = ":tsconfig",
 )
 
+WEBPACK_DEPS = [
+  "@npm//terser-webpack-plugin",
+]
+
 webpack(
   name = "shared_built_assets",
-  data = RUNTIME_DEPS + [
+  data = RUNTIME_DEPS + WEBPACK_DEPS + [
     "//:package.json",
     ":srcs",
     ":tsconfig",

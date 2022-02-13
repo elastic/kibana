@@ -10,6 +10,8 @@ const Path = require('path');
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+// @ts-expect-error
+const TerserPlugin = require('terser-webpack-plugin');
 
 const UiSharedDepsNpm = require('./src/index');
 
@@ -146,8 +148,23 @@ module.exports = (_, argv) => {
     },
 
     optimization: {
-      minimize: false,
       noEmitOnErrors: true,
+      minimizer: [
+        new TerserPlugin({
+          cache: false,
+          sourceMap: false,
+          extractComments: false,
+          parallel: false,
+          terserOptions: {
+            compress: true,
+            keep_classnames: true,
+            mangle: true,
+            format: {
+              comments: /@license|@preserve/i,
+            },
+          },
+        }),
+      ],
     },
 
     performance: {

@@ -65,6 +65,7 @@ RUNTIME_DEPS = [
 
 WEBPACK_DEPS = [
   "@npm//clean-webpack-plugin",
+  "@npm//terser-webpack-plugin",
 ]
 
 TYPES_DEPS = [
