@@ -92,6 +92,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   browserFields: mockBrowserFields,
   columns: columnHeaders,
   dataProviders: mockDataProviders,
+  dataViewId: 'data-view-id',
   deletedEventIds: [],
   disabledCellActions: [],
   docValueFields: mockDocValueFields,

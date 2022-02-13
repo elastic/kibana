@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
@@ -32,14 +33,11 @@ jest.mock('../../routes/data_view/get_dynamic_data_view', () => ({
 }));
 
 function getMockResources() {
-  const esClientMock = {
-    asCurrentUser: {
-      search: jest.fn().mockResolvedValue({ body: {} }),
-    },
-    asInternalUser: {
-      search: jest.fn().mockResolvedValue({ body: {} }),
-    },
-  };
+  const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  // @ts-expect-error incomplete definition
+  esClientMock.asCurrentUser.search.mockResponse({});
+  // @ts-expect-error incomplete definition
+  esClientMock.asInternalUser.search.mockResponse({});
 
   const mockResources = {
     config: new Proxy(
@@ -135,6 +133,7 @@ describe('setupRequest', () => {
         },
         {
           signal: expect.any(Object),
+          meta: true,
         }
       );
     });
@@ -157,6 +156,7 @@ describe('setupRequest', () => {
         },
         {
           signal: expect.any(Object),
+          meta: true,
         }
       );
     });
@@ -177,6 +177,7 @@ describe('setupRequest', () => {
       const params =
         mockResources.context.core.elasticsearch.client.asCurrentUser.search
           .mock.calls[0][0];
+      // @ts-expect-error missing body definition
       expect(params.body).toEqual({
         query: {
           bool: {
@@ -205,6 +206,7 @@ describe('setupRequest', () => {
       const params =
         mockResources.context.core.elasticsearch.client.asCurrentUser.search
           .mock.calls[0][0];
+      // @ts-expect-error missing body definition
       expect(params.body).toEqual({
         query: {
           bool: {
@@ -235,6 +237,7 @@ describe('without a bool filter', () => {
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
         .calls[0][0];
+    // @ts-expect-error missing body definition
     expect(params.body).toEqual({
       query: {
         bool: {
@@ -266,6 +269,7 @@ describe('with includeFrozen=false', () => {
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
         .calls[0][0];
+    // @ts-expect-error missing body definition
     expect(params.ignore_throttled).toBe(undefined);
   });
 });
@@ -286,6 +290,7 @@ describe('with includeFrozen=true', () => {
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
         .calls[0][0];
+    // @ts-expect-error missing body definition
     expect(params.ignore_throttled).toBe(false);
   });
 });
