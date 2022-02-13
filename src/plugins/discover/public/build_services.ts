@@ -40,6 +40,7 @@ import { NavigationPublicPluginStart } from '../../navigation/public';
 import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
 import { FieldFormatsStart } from '../../field_formats/public';
 import { EmbeddableStart } from '../../embeddable/public';
+import { DiscoverAppLocator } from './locator';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
@@ -79,12 +80,14 @@ export interface DiscoverServices {
   storage: Storage;
   spaces?: SpacesApi;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  locator: DiscoverAppLocator;
 }
 
 export const buildServices = memoize(function (
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext
+  context: PluginInitializerContext,
+  locator: DiscoverAppLocator
 ): DiscoverServices {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
@@ -121,5 +124,6 @@ export const buildServices = memoize(function (
     spaces: plugins.spaces,
     dataViewEditor: plugins.dataViewEditor,
     triggersActionsUi: plugins.triggersActionsUi,
+    locator,
   };
 });

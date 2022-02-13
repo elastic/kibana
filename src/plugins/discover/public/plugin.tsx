@@ -353,7 +353,12 @@ export class DiscoverPlugin
         });
 
         const [coreStart, discoverStartPlugins] = await core.getStartServices();
-        const services = buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+        const services = buildServices(
+          coreStart,
+          discoverStartPlugins,
+          this.initializerContext,
+          this.locator!
+        );
 
         // make sure the index pattern list is up to date
         await discoverStartPlugins.data.indexPatterns.clearCache();
@@ -444,7 +449,7 @@ export class DiscoverPlugin
 
     const getDiscoverServices = async () => {
       const [coreStart, discoverStartPlugins] = await core.getStartServices();
-      return buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+      return buildServices(coreStart, discoverStartPlugins, this.initializerContext, this.locator!);
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServices);
