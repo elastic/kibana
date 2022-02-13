@@ -30,11 +30,15 @@ const createNewCopiesTestCases = () => {
   // for each outcome, if failureType !== undefined then we expect to receive
   // an error; otherwise, we expect to receive a success result
   return [
-    ...Object.entries(CASES).map(([, val]) => ({
-      ...val,
-      successParam: 'createNewCopies',
-      expectedNewId: uuidv4(),
-    })),
+    ...Object.values(CASES).map((testCase) => {
+      const newId = uuidv4();
+      return {
+        ...testCase,
+        successParam: 'createNewCopies',
+        destinationId: newId,
+        expectedNewId: newId,
+      };
+    }),
     { ...SPECIAL_TEST_CASES.HIDDEN, ...failUnsupportedType() }, // unsupported_type is an "unresolvable" error
     // Other special test cases are excluded here for simplicity and consistency with the resolveImportErrors "spaces_and_security" test
     // suite and the import test suites.
@@ -86,8 +90,18 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     // if we call _resolve_import_errors and don't specify overwrite, each of these will result in a conflict because an object with that
     // `expectedDestinationId` already exists
     { ...CASES.CONFLICT_2C_OBJ, ...failConflict(!overwrite), ...destinationId() }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
+    { ...CASES.CONFLICT_2D_OBJ, ...failConflict(!overwrite), ...destinationId() }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2b'
     { ...CASES.CONFLICT_3A_OBJ, ...failConflict(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
     { ...CASES.CONFLICT_4_OBJ, ...failConflict(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
+    {
+      ...SPECIAL_TEST_CASES.OUTBOUND_MISSING_REFERENCE_CONFLICT_1_OBJ,
+      ...failConflict(!overwrite),
+    },
+    {
+      ...SPECIAL_TEST_CASES.OUTBOUND_MISSING_REFERENCE_CONFLICT_2_OBJ,
+      ...failConflict(!overwrite),
+      ...destinationId(),
+    },
     { ...SPECIAL_TEST_CASES.OUTBOUND_REFERENCE_ORIGIN_MATCH_1_OBJ },
     { ...SPECIAL_TEST_CASES.OUTBOUND_REFERENCE_ORIGIN_MATCH_2_OBJ },
   ];

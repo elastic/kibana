@@ -72,24 +72,18 @@ describe('query_correlation', () => {
       const KsTestLess = 0.01;
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              aggregations: {
-                latency_ranges: {
-                  buckets: latencyRangesBuckets,
-                },
-                transaction_duration_correlation: {
-                  value: transactionDurationCorrelationValue,
-                },
-                ks_test: { less: KsTestLess },
+            aggregations: {
+              latency_ranges: {
+                buckets: latencyRangesBuckets,
               },
-            } as unknown as estypes.SearchResponse,
-          };
+              transaction_duration_correlation: {
+                value: transactionDurationCorrelationValue,
+              },
+              ks_test: { less: KsTestLess },
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

@@ -231,7 +231,7 @@ async function fetchIndexPatternStats({
 
   const scriptedFields = fields.filter((f) => f.isScript);
   const runtimeFields = fields.filter((f) => f.runtimeField);
-  const { body: result } = await client.search(
+  const result = await client.search(
     {
       index,
       ...(includeFrozen ? { ignore_throttled: false } : {}),

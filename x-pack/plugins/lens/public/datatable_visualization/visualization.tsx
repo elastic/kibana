@@ -24,6 +24,7 @@ import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 export interface DatatableVisualizationState {
@@ -83,6 +84,8 @@ export const getDatatableVisualization = ({
   },
 
   switchVisualizationType: (_, state) => state,
+
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
 
   initialize(addNewLayer, state) {
     return (
@@ -360,6 +363,7 @@ export const getDatatableVisualization = ({
                     : [],
                 reverse: false, // managed at UI level
               };
+              const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
 
               const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
 
@@ -385,6 +389,7 @@ export const getDatatableVisualization = ({
                       summaryLabel: hasNoSummaryRow
                         ? []
                         : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
+                      sortingHint: sortingHint ? [sortingHint] : [],
                     },
                   },
                 ],
