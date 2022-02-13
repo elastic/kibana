@@ -31,7 +31,6 @@ import {
   EuiTabs,
   EuiTab,
   EuiForm,
-  EuiSpacer,
   EuiHorizontalRule,
   EuiButtonIcon,
   EuiText,
@@ -112,7 +111,7 @@ export function EditFilterModal({
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
   initialAddFilterMode?: string;
-  onRemoveFilterGroup: (groupId: string) => void;
+  onRemoveFilterGroup: () => void;
   saveFilters: (savedQueryMeta: SavedQueryMeta) => void;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
@@ -124,7 +123,7 @@ export function EditFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(filter.groupCount !== undefined ? filter.groupCount : 0);
+  const [groupsCount, setGroupsCount] = useState<number>(filter.groupCount ?? 0);
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
       return [
@@ -420,8 +419,7 @@ export function EditFilterModal({
         const finalFilters = builtFilters.filter(
           (value) => typeof value !== 'undefined'
         ) as Filter[];
-        // onSubmit(finalFilters);
-        onMultipleFiltersSubmit(localFilters, finalFilters);
+        onMultipleFiltersSubmit(localFilters, finalFilters, groupsCount);
         if (alias) {
           saveFilters({
             title: customLabel,
@@ -442,13 +440,12 @@ export function EditFilterModal({
   };
 
   const onDeliteFilter = () => {
-    onRemoveFilterGroup(filter?.groupId);
+    onRemoveFilterGroup();
   };
 
   const renderGroupedFilters = () => {
     const groupedFiltersNew = groupBy(localFilters, 'groupId');
     const GroupComponent: JSX.Element[] = [];
-    // debugger
     for (const [groupId, groupedFilters] of Object.entries(groupedFiltersNew)) {
       const filtersInGroup = groupedFilters.length;
       const groupBySubgroups = groupBy(groupedFilters, 'subGroupId');
@@ -660,7 +657,12 @@ export function EditFilterModal({
   };
 
   return (
-    <EuiModal style={{ minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
+    <EuiModal
+      style={{ minWidth: 992 }}
+      maxWidth={992}
+      onClose={onCancel}
+      className="kbnQueryBar--addFilterModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>

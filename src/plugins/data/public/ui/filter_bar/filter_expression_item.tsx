@@ -46,7 +46,7 @@ interface Props {
   groupedFilters: any;
   indexPatterns: IIndexPattern[];
   onClick: (filter: Filter) => void;
-  onRemove: (groupId: string) => void;
+  onRemove: () => void;
   groupId: string;
   label?: string | undefined;
   filtersGroupsCount: number;
@@ -169,7 +169,7 @@ export const FilterExpressionItem: FC<Props> = ({
         icon: 'trash',
         onClick: () => {
           setIsPopoverOpen(false);
-          onRemove(groupId);
+          onRemove([...new Set(groupedFilters.map((filter) => filter.groupId))]);
         },
         'data-test-subj': 'deleteFilter',
       },
@@ -442,7 +442,7 @@ export const FilterExpressionItem: FC<Props> = ({
             ? 'globalFilterExpression-isDisabled'
             : ''
         }
-        iconOnClick={() => onRemove(groupId)}
+        iconOnClick={() => onRemove([...new Set(groupedFilters.map((filter) => filter.groupId))])}
         iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filteradgeIconAriaLabel', {
           defaultMessage: 'Remove {title}',
           values: { title: filterText },

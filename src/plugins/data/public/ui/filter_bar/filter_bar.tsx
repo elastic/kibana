@@ -67,7 +67,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     props.toggleEditFilterModal?.(true);
   };
 
-  const onDeleteFilterGroup = (groupId: string) => {
+  const onDeleteFilterGroup = () => {
     const multipleFilters = [...props.multipleFilters];
 
     const updatedMultipleFilters = multipleFilters.filter(
@@ -253,11 +253,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     groupRef.current?.focus();
   }
 
-  function onRemoveFilterGroup(groupId: string) {
+  function onRemoveFilterGroup(groupIds: []) {
     const multipleFilters = [...props.multipleFilters];
+
     const updatedMultipleFilters = multipleFilters.filter(
-      (filter) => filter.groupId !== Number(groupId)
+      (filter) => !groupIds.includes(filter.groupId)
     );
+
     const filters = [...props.filters];
     const updatedFilters: Filter[] = [];
 
