@@ -37,7 +37,7 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
         try {
           await depsStart.embeddableExamples.createSampleData();
         } catch (error) {
-          //eslint-disable-next-line no-console
+          // eslint-disable-next-line no-console
           console.error('Failed to create sample data', error);
         }
         return renderApp(
