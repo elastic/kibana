@@ -7,7 +7,7 @@
 import { HttpSetup } from 'kibana/public';
 import { pick } from 'lodash';
 import { BASE_ALERTING_API_PATH } from '../../constants';
-import { Alert, AlertUpdates } from '../../../types';
+import { Rule, AlertUpdates } from '../../../types';
 import { RewriteResponseCase, AsApiContract } from '../../../../../actions/common';
 import { transformAlert } from './common_transformations';
 
@@ -40,8 +40,8 @@ export async function updateAlert({
     'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'notifyWhen'
   >;
   id: string;
-}): Promise<Alert> {
-  const res = await http.put<AsApiContract<Alert>>(
+}): Promise<Rule> {
+  const res = await http.put<AsApiContract<Rule>>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
     {
       body: JSON.stringify(

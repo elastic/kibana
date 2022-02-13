@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { AgentClient } from '../../../../../../fleet/server';
 import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
 import { Agent } from '../../../../../../fleet/common/types/models';
@@ -35,7 +34,6 @@ export function buildStatusesKuery(statusesToFilter: string[]): string | undefin
 
 export async function findAgentIdsByStatus(
   agentClient: AgentClient,
-  esClient: ElasticsearchClient,
   statuses: string[],
   pageSize: number = 1000
 ): Promise<string[]> {

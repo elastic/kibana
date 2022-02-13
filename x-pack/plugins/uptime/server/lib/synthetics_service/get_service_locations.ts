@@ -9,12 +9,21 @@ import axios from 'axios';
 import {
   ManifestLocation,
   ServiceLocations,
-} from '../../../common/runtime_types/monitor_management';
+  ServiceLocationsApiResponse,
+} from '../../../common/runtime_types';
+import { UptimeServerSetup } from '../adapters/framework';
 
-export async function getServiceLocations({ manifestUrl }: { manifestUrl: string }) {
+export async function getServiceLocations(server: UptimeServerSetup) {
   const locations: ServiceLocations = [];
+
+  if (!server.config.service?.manifestUrl) {
+    return { locations };
+  }
+
   try {
-    const { data } = await axios.get<{ locations: Record<string, ManifestLocation> }>(manifestUrl);
+    const { data } = await axios.get<{ locations: Record<string, ManifestLocation> }>(
+      server.config.service!.manifestUrl!
+    );
 
     Object.entries(data.locations).forEach(([locationId, location]) => {
       locations.push({
@@ -25,10 +34,11 @@ export async function getServiceLocations({ manifestUrl }: { manifestUrl: string
       });
     });
 
-    return { locations };
+    return { locations } as ServiceLocationsApiResponse;
   } catch (e) {
+    server.logger.error(e);
     return {
       locations: [],
-    };
+    } as ServiceLocationsApiResponse;
   }
 }

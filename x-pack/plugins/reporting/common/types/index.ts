@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 } from './base';
+import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
-export type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 };
+export type { JobParamsPNGDeprecated } from './export_types/png';
+export type { JobParamsPNGV2 } from './export_types/png_v2';
+export type { JobAppParamsPDF, JobParamsPDFDeprecated } from './export_types/printable_pdf';
+export type { JobAppParamsPDFV2, JobParamsPDFV2 } from './export_types/printable_pdf_v2';
 export type {
   DownloadReportFn,
   IlmPolicyMigrationStatus,
@@ -16,7 +19,7 @@ export type {
   ManagementLinkFn,
   UrlOrUrlLocatorTuple,
 } from './url';
-export * from './export_types';
+export type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 };
 
 export interface ReportDocumentHead {
   _id: string;
@@ -33,6 +36,7 @@ export interface ReportOutput extends TaskRunResult {
 export interface TaskRunResult {
   content_type: string | null;
   csv_contains_formulas?: boolean;
+  csv_rows?: number;
   max_size_reached?: boolean;
   warnings?: string[];
 }
@@ -127,6 +131,7 @@ export interface JobSummary {
   title: ReportSource['payload']['title'];
   maxSizeReached: TaskRunResult['max_size_reached'];
   csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
+  csvRows: TaskRunResult['csv_rows'];
 }
 
 export interface JobSummarySet {

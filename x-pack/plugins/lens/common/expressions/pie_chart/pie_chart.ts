@@ -101,15 +101,30 @@ export const pie: ExpressionFunctionDefinition<
       help: '',
       types: ['palette'],
     },
+    emptySizeRatio: {
+      types: ['number'],
+      help: '',
+    },
+    ariaLabel: {
+      types: ['string'],
+      help: '',
+      required: false,
+    },
   },
   inputTypes: ['lens_multitable'],
-  fn(data: LensMultiTable, args: PieExpressionArgs) {
+  fn(data: LensMultiTable, args: PieExpressionArgs, handlers) {
     return {
       type: 'render',
       as: 'lens_pie_renderer',
       value: {
         data,
-        args,
+        args: {
+          ...args,
+          ariaLabel:
+            args.ariaLabel ??
+            (handlers.variables?.embeddableTitle as string) ??
+            handlers.getExecutionContext?.()?.description,
+        },
       },
     };
   },

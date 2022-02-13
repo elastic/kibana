@@ -12,10 +12,16 @@
  */
 import {
   ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
   ALERT_STATUS,
+  ALERT_UUID,
   TIMESTAMP,
-} from '@kbn/rule-data-utils/technical_field_names';
+  ALERT_START,
+} from '@kbn/rule-data-utils';
 
 import {
   EuiButtonIcon,
@@ -58,6 +64,7 @@ import { LazyAlertsFlyout } from '../../../..';
 import { parseAlert } from '../../components/parse_alert';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { translations, paths } from '../../../../config';
+import { addDisplayNames } from './add_display_names';
 
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
@@ -366,7 +373,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       casesOwner: observabilityFeatureId,
       casePermissions,
       type,
-      columns: tGridState?.columns ?? columns,
+      columns: (tGridState?.columns ?? columns).map(addDisplayNames),
       deletedEventIds,
       disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
@@ -395,7 +402,18 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           sortDirection,
         },
       ],
-
+      queryFields: [
+        ALERT_DURATION,
+        ALERT_EVALUATION_THRESHOLD,
+        ALERT_EVALUATION_VALUE,
+        ALERT_REASON,
+        ALERT_RULE_CATEGORY,
+        ALERT_RULE_NAME,
+        ALERT_STATUS,
+        ALERT_UUID,
+        ALERT_START,
+        TIMESTAMP,
+      ],
       leadingControlColumns,
       trailingControlColumns,
       unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),

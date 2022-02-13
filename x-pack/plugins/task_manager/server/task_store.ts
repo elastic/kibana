@@ -46,7 +46,7 @@ export interface StoreOpts {
 export interface SearchOpts {
   search_after?: Array<number | string>;
   size?: number;
-  sort?: estypes.SearchSort;
+  sort?: estypes.Sort;
   query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
 }
@@ -304,9 +304,7 @@ export class TaskStore {
 
     try {
       const {
-        body: {
-          hits: { hits: tasks },
-        },
+        hits: { hits: tasks },
       } = await this.esClient.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
@@ -336,7 +334,10 @@ export class TaskStore {
     query,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
-    const { body } = await this.esClient.search<ConcreteTaskInstance>({
+    const body = await this.esClient.search<
+      ConcreteTaskInstance,
+      Record<string, estypes.AggregationsAggregate>
+    >({
       index: this.index,
       ignore_unavailable: true,
       track_total_hits: true,
@@ -356,20 +357,18 @@ export class TaskStore {
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
-      const {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        body: { total, updated, version_conflicts },
-      } = await this.esClient.updateByQuery({
-        index: this.index,
-        ignore_unavailable: true,
-        refresh: true,
-        conflicts: 'proceed',
-        body: {
-          ...opts,
-          max_docs,
-          query,
-        },
-      });
+      const // eslint-disable-next-line @typescript-eslint/naming-convention
+        { total, updated, version_conflicts } = await this.esClient.updateByQuery({
+          index: this.index,
+          ignore_unavailable: true,
+          refresh: true,
+          conflicts: 'proceed',
+          body: {
+            ...opts,
+            max_docs,
+            query,
+          },
+        });
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
         updated,
@@ -388,6 +387,7 @@ export class TaskStore {
     }
   }
 }
+
 /**
  * When we run updateByQuery with conflicts='proceed', it's possible for the `version_conflicts`
  * to count against the specified `max_docs`, as per https://github.com/elastic/elasticsearch/issues/63671

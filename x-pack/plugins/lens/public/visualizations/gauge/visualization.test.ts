@@ -280,6 +280,87 @@ describe('gauge', () => {
         ],
       });
     });
+
+    test('resolves configuration when with group error when max < minimum', () => {
+      const state: GaugeVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        metricAccessor: 'metric-accessor',
+        minAccessor: 'min-accessor',
+        maxAccessor: 'max-accessor',
+        goalAccessor: 'goal-accessor',
+      };
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          columns: [],
+          rows: [{ 'min-accessor': 10, 'max-accessor': 0 }],
+        },
+      };
+
+      expect(
+        getGaugeVisualization({
+          paletteService,
+        }).getConfiguration({ state, frame, layerId: 'first' })
+      ).toEqual({
+        groups: [
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.METRIC,
+            groupLabel: 'Metric',
+            accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
+            filterOperations: isNumericDynamicMetric,
+            supportsMoreColumns: false,
+            required: true,
+            dataTestSubj: 'lnsGauge_metricDimensionPanel',
+            enableDimensionEditor: true,
+            supportFieldFormat: true,
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.MIN,
+            groupLabel: 'Minimum value',
+            accessors: [{ columnId: 'min-accessor' }],
+            filterOperations: isNumericMetric,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGauge_minDimensionPanel',
+            prioritizedOperation: 'min',
+            suggestedValue: expect.any(Function),
+            supportFieldFormat: false,
+            supportStaticValue: true,
+            invalid: true,
+            invalidMessage: 'Minimum value may not be greater than maximum value',
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.MAX,
+            groupLabel: 'Maximum value',
+            accessors: [{ columnId: 'max-accessor' }],
+            filterOperations: isNumericMetric,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGauge_maxDimensionPanel',
+            prioritizedOperation: 'max',
+            suggestedValue: expect.any(Function),
+            supportFieldFormat: false,
+            supportStaticValue: true,
+            invalid: true,
+            invalidMessage: 'Minimum value may not be greater than maximum value',
+          },
+          {
+            layerId: 'first',
+            groupId: GROUP_ID.GOAL,
+            groupLabel: 'Goal value',
+            accessors: [{ columnId: 'goal-accessor' }],
+            filterOperations: isNumericMetric,
+            supportsMoreColumns: false,
+            required: false,
+            dataTestSubj: 'lnsGauge_goalDimensionPanel',
+            supportFieldFormat: false,
+            supportStaticValue: true,
+          },
+        ],
+      });
+    });
   });
 
   describe('#setDimension', () => {

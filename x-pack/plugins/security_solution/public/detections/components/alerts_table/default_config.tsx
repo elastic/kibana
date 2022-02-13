@@ -9,7 +9,7 @@ import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_RULE_ID,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
 import { RowRendererId } from '../../../../common/types/timeline';
@@ -141,11 +141,10 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             alias: null,
             disabled: false,
             negate: false,
-            key: 'kibana.alert.rule.threat_mapping',
-            type: 'exists',
-            value: 'exists',
+            key: 'kibana.alert.rule.type',
+            type: 'term',
           },
-          query: { exists: { field: 'kibana.alert.rule.threat_mapping' } },
+          query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
         },
       ]
     : [];
@@ -163,14 +162,10 @@ export const requiredFieldsForActions = [
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.building_block_type',
-  'kibana.alert.rule.filters',
   'kibana.alert.rule.from',
-  'kibana.alert.rule.language',
-  'kibana.alert.rule.query',
   'kibana.alert.rule.name',
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
-  'kibana.alert.rule.index',
   'kibana.alert.rule.type',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',

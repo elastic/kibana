@@ -8,6 +8,7 @@
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { TopNavMenuData } from 'src/plugins/navigation/public';
 import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';
 import type {
@@ -17,7 +18,7 @@ import type {
   Datatable,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import type { DateRange, LayerType } from '../common';
+import type { DateRange, LayerType, SortingHint } from '../common';
 import type { Query } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
@@ -147,7 +148,10 @@ export type DropType =
   | 'swap_compatible'
   | 'replace_duplicate_incompatible'
   | 'duplicate_incompatible'
-  | 'swap_incompatible';
+  | 'swap_incompatible'
+  | 'field_combine'
+  | 'combine_compatible'
+  | 'combine_incompatible';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
@@ -280,7 +284,11 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * The frame calls this function to display warnings about visualization
    */
-  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+  getWarningMessages?: (
+    state: T,
+    frame: FramePublicAPI,
+    setState: StateSetter<T>
+  ) => React.ReactNode[] | undefined;
   /**
    * Checks if the visualization created is time based, for example date histogram
    */
@@ -289,6 +297,15 @@ export interface Datasource<T = unknown, P = unknown> {
    * Given the current state layer and a columnId will verify if the column configuration has errors
    */
   isValidColumn: (state: T, layerId: string, columnId: string) => boolean;
+  /**
+   * Are these datasources equivalent?
+   */
+  isEqual: (
+    persistableState1: P,
+    references1: SavedObjectReference[],
+    persistableState2: P,
+    references2: SavedObjectReference[]
+  ) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
@@ -343,6 +360,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  hideTooltip?: boolean;
   invalid?: boolean;
   invalidMessage?: string;
 };
@@ -418,6 +436,7 @@ export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataT
 export interface Operation extends OperationMetadata {
   // User-facing label for the operation
   label: string;
+  sortingHint?: SortingHint;
 }
 
 export interface OperationMetadata {
@@ -638,6 +657,10 @@ export interface Visualization<T = unknown> {
   getMainPalette?: (state: T) => undefined | PaletteOutput;
 
   /**
+   * Supported triggers of this visualization type when embedded somewhere
+   */
+  triggers?: string[];
+  /**
    * Visualizations must provide at least one type for the chart switcher,
    * but can register multiple subtypes
    */
@@ -856,3 +879,18 @@ export interface SharingSavedObjectProps {
   aliasTargetId?: string;
   sourceId?: string;
 }
+
+/**
+ * Configuration of a top nav entry which can be shown for specific scenarios given a certain combination of active datasource and visualization id.
+ * This function gets passed the currently active visualization id and state as well as the current datasource states.
+ *
+ * If it returns a top nav menu entry, it is rendered along with the native Lens menu entries
+ */
+export type LensTopNavMenuEntryGenerator = (props: {
+  visualizationId: string;
+  datasourceStates: Record<string, { state: unknown }>;
+  visualizationState: unknown;
+  query: Query;
+  filters: Filter[];
+  initialContext?: VisualizeFieldContext;
+}) => undefined | TopNavMenuData;

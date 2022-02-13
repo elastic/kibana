@@ -45,7 +45,6 @@ import {
   DefaultStringArray,
   DefaultBooleanTrue,
   OnlyFalseAllowed,
-  DefaultStringBooleanFalse,
 } from '@kbn/securitysolution-io-ts-types';
 import { DefaultListArray, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -201,17 +200,6 @@ export type ImportRulesSchemaDecoded = Omit<
   exceptions_list: ListArray;
   rule_id: RuleId;
   immutable: false;
-};
-
-export const importRulesQuerySchema = t.exact(
-  t.partial({
-    overwrite: DefaultStringBooleanFalse,
-  })
-);
-
-export type ImportRulesQuerySchema = t.TypeOf<typeof importRulesQuerySchema>;
-export type ImportRulesQuerySchemaDecoded = Omit<ImportRulesQuerySchema, 'overwrite'> & {
-  overwrite: boolean;
 };
 
 export const importRulesPayloadSchema = t.exact(

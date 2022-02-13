@@ -91,13 +91,16 @@ module.exports = {
         ...[
           '@elastic/eui/dist/eui_theme_light.json',
           '@elastic/eui/dist/eui_theme_dark.json',
-          '@elastic/eui/dist/eui_theme_amsterdam_light.json',
-          '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
         ].map(from => ({
           from,
           to: false,
-          disallowedMessage: `Use "@kbn/ui-shared-deps-src/theme" to access theme vars.`
+          disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`
         })),
+        {
+          from: '@kbn/test/jest',
+          to: '@kbn/test-jest-helpers',
+          disallowedMessage: `import from @kbn/test-jest-helpers instead`
+        },
       ],
     ],
 

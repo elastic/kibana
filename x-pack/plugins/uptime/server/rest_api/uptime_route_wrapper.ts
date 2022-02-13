@@ -13,6 +13,7 @@ import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
 import { KibanaResponse } from '../../../../../src/core/server/http/router';
 import { enableInspectEsQueries } from '../../../observability/common';
 import { syntheticsServiceApiKey } from '../lib/saved_objects/service_api_key';
+import { API_URLS } from '../../common/constants';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
@@ -22,7 +23,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
   handler: async (context, request, response) => {
     const { client: esClient } = context.core.elasticsearch;
     let savedObjectsClient: SavedObjectsClientContract;
-    if (server.config?.unsafe?.service?.enabled) {
+    if (server.config?.ui?.monitorManagement?.enabled) {
       savedObjectsClient = context.core.savedObjects.getClient({
         includedHiddenTypes: [syntheticsServiceApiKey.name],
       });
@@ -31,7 +32,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     }
 
     // specifically needed for the synthetics service api key generation
-    server.savedObjectsClient = savedObjectsClient;
+    server.authSavedObjectsClient = savedObjectsClient;
 
     const isInspectorEnabled = await context.core.uiSettings.client.get<boolean>(
       enableInspectEsQueries
@@ -42,6 +43,9 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
       savedObjectsClient,
       esClient: esClient.asCurrentUser,
     });
+
+    server.uptimeEsClient = uptimeEsClient;
+
     if (isInspectorEnabled) {
       inspectableEsQueriesMap.set(request, []);
     }
@@ -62,7 +66,9 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     return response.ok({
       body: {
         ...res,
-        ...(isInspectorEnabled ? { _inspect: inspectableEsQueriesMap.get(request) } : {}),
+        ...(isInspectorEnabled && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
+          ? { _inspect: inspectableEsQueriesMap.get(request) }
+          : {}),
       },
     });
   },

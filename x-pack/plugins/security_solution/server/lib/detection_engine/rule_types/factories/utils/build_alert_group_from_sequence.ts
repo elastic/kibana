@@ -10,7 +10,6 @@ import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { Logger } from 'kibana/server';
 
 import type { ConfigType } from '../../../../../config';
-import { buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { RACAlert, WrappedRACAlert } from '../../types';
 import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
@@ -99,9 +98,12 @@ export const buildAlertRoot = (
         (block2._source[ALERT_ORIGINAL_TIME] as number)
     )
     .map((alert) => alert._source[ALERT_ORIGINAL_TIME]);
-  const rule = buildRuleWithoutOverrides(completeRule);
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
-  const reason = buildReasonMessage({ rule, mergedDoc: mergedAlerts as SignalSourceHit });
+  const reason = buildReasonMessage({
+    name: completeRule.ruleConfig.name,
+    severity: completeRule.ruleParams.severity,
+    mergedDoc: mergedAlerts as SignalSourceHit,
+  });
   const doc = buildAlert(wrappedBuildingBlocks, completeRule, spaceId, reason);
   return {
     ...mergedAlerts,

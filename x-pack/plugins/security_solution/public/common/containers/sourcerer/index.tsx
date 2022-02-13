@@ -21,10 +21,10 @@ import {
   ALERTS_PATH,
   CASES_PATH,
   HOSTS_PATH,
+  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  UEBA_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -51,50 +51,75 @@ export const useInitSourcerer = (
     (state) => getDataViewsSelector(state)
   );
 
-  const { addError } = useAppToasts();
+  const { addError, addWarning } = useAppToasts();
 
   useEffect(() => {
     if (defaultDataView.error != null) {
-      addError(defaultDataView.error, {
+      addWarning({
         title: i18n.translate('xpack.securitySolution.sourcerer.permissions.title', {
           defaultMessage: 'Write role required to generate data',
         }),
-        toastMessage: i18n.translate('xpack.securitySolution.sourcerer.permissions.toastMessage', {
+        text: i18n.translate('xpack.securitySolution.sourcerer.permissions.toastMessage', {
           defaultMessage:
             'Users with write permission need to access the Elastic Security app to initialize the app source data.',
         }),
       });
     }
-  }, [addError, defaultDataView.error]);
+  }, [addWarning, defaultDataView.error]);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const activeTimeline = useDeepEqualSelector((state) =>
     getTimelineSelector(state, TimelineId.active)
   );
   const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
-  const { selectedDataViewId: scopeDataViewId } = useDeepEqualSelector((state) =>
-    scopeIdSelector(state, scopeId)
-  );
-  const { selectedDataViewId: timelineDataViewId } = useDeepEqualSelector((state) =>
-    scopeIdSelector(state, SourcererScopeName.timeline)
-  );
-  const activeDataViewIds = useMemo(
-    () => [...new Set([scopeDataViewId, timelineDataViewId])],
-    [scopeDataViewId, timelineDataViewId]
-  );
+  const {
+    selectedDataViewId: scopeDataViewId,
+    selectedPatterns,
+    missingPatterns,
+  } = useDeepEqualSelector((state) => scopeIdSelector(state, scopeId));
+  const {
+    selectedDataViewId: timelineDataViewId,
+    selectedPatterns: timelineSelectedPatterns,
+    missingPatterns: timelineMissingPatterns,
+  } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
 
+  /*
+   * Note for future engineer:
+   * we changed the logic to not fetch all the index fields for every data view on the loading of the app
+   * because user can have a lot of them and it can slow down the loading of the app
+   * and maybe blow up the memory of the browser. We decided to load this data view on demand,
+   * we know that will only have to load this dataview on default and timeline scope.
+   * We will use two conditions to see if we need to fetch and initialize the dataview selected.
+   * First, we will make sure that we did not already fetch them by using `searchedIds`
+   * and then we will init them if selectedPatterns and missingPatterns are empty.
+   */
   const searchedIds = useRef<string[]>([]);
-  useEffect(
-    () =>
-      activeDataViewIds.forEach((id) => {
-        if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
-          searchedIds.current = [...searchedIds.current, id];
-          indexFieldsSearch(id);
-        }
-      }),
-    [activeDataViewIds, indexFieldsSearch]
-  );
+  useEffect(() => {
+    const activeDataViewIds = [...new Set([scopeDataViewId, timelineDataViewId])];
+    activeDataViewIds.forEach((id) => {
+      if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
+        searchedIds.current = [...searchedIds.current, id];
+        indexFieldsSearch(
+          id,
+          id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
+          id === scopeDataViewId
+            ? selectedPatterns.length === 0 && missingPatterns.length === 0
+            : timelineDataViewId === id
+            ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
+            : false
+        );
+      }
+    });
+  }, [
+    indexFieldsSearch,
+    missingPatterns.length,
+    scopeDataViewId,
+    selectedPatterns.length,
+    timelineDataViewId,
+    timelineMissingPatterns.length,
+    timelineSelectedPatterns.length,
+  ]);
 
   // Related to timeline
   useEffect(() => {
@@ -334,12 +359,14 @@ export const useSourcererDataView = (
 
   const indicesExist = useMemo(
     () =>
-      checkIfIndicesExist({
-        scopeId,
-        signalIndexName,
-        patternList: sourcererDataView.patternList,
-      }),
-    [scopeId, signalIndexName, sourcererDataView]
+      loading || sourcererDataView.loading
+        ? true
+        : checkIfIndicesExist({
+            scopeId,
+            signalIndexName,
+            patternList: sourcererDataView.patternList,
+          }),
+    [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
   );
 
   return useMemo(
@@ -369,7 +396,7 @@ export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
   matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${UEBA_PATH}/:id`, `${CASES_PATH}/:detailName`],
+    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`],
     strict: false,
   }) == null
     ? SourcererScopeName.default
@@ -379,9 +406,9 @@ export const sourcererPaths = [
   ALERTS_PATH,
   `${RULES_PATH}/id/:id`,
   HOSTS_PATH,
+  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
-  UEBA_PATH,
 ];
 
 export const showSourcererByPath = (pathname: string): boolean =>

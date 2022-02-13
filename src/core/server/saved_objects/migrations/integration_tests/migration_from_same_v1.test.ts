@@ -35,7 +35,7 @@ function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id:
 }
 
 async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<any>({
+  const body = await esClient.search<any>({
     index,
     body: {
       query: {
@@ -94,6 +94,7 @@ describe('migrating from the same Kibana version that used v1 migrations', () =>
             {
               name: 'root',
               appenders: ['file'],
+              level: 'info',
             },
           ],
         },
@@ -178,7 +179,7 @@ describe('migrating from the same Kibana version that used v1 migrations', () =>
   });
 
   it('creates the new index and the correct aliases', async () => {
-    const { body } = await esClient.indices.get(
+    const body = await esClient.indices.get(
       {
         index: migratedIndex,
       },
@@ -205,7 +206,7 @@ describe('migrating from the same Kibana version that used v1 migrations', () =>
       },
       size: 10000,
     });
-    const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];
+    const allDocuments = res.hits.hits as SavedObjectsRawDoc[];
     allDocuments.forEach((doc) => {
       assertMigrationVersion(doc, expectedVersions);
     });

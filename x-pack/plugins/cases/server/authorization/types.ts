@@ -8,6 +8,7 @@
 import { EcsEventType, KibanaRequest } from 'kibana/server';
 import type { KueryNode } from '@kbn/es-query';
 import { Space } from '../../../spaces/server';
+import { CasesSupportedOperations } from '../../../security/server';
 
 /**
  * The tenses for describing the action performed by a API route
@@ -42,6 +43,7 @@ export enum ReadOperations {
   GetAlertsAttachedToCase = 'getAlertsAttachedToCase',
   GetAttachmentMetrics = 'getAttachmentMetrics',
   GetCaseMetrics = 'getCaseMetrics',
+  GetUserActionMetrics = 'getUserActionMetrics',
 }
 
 /**
@@ -75,7 +77,7 @@ export interface OperationDetails {
    * The name of the operation to authorize against for the privilege check.
    * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
    */
-  name: string;
+  name: CasesSupportedOperations;
   /**
    * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_fined
    */

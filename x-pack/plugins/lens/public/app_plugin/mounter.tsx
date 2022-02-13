@@ -19,7 +19,7 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
-import { EditorFrameStart } from '../types';
+import { EditorFrameStart, LensTopNavMenuEntryGenerator } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
@@ -103,9 +103,15 @@ export async function mountApp(
     createEditorFrame: EditorFrameStart['createInstance'];
     attributeService: LensAttributeService;
     getPresentationUtilContext: () => FC;
+    topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   }
 ) {
-  const { createEditorFrame, attributeService, getPresentationUtilContext } = mountProps;
+  const {
+    createEditorFrame,
+    attributeService,
+    getPresentationUtilContext,
+    topNavMenuEntryGenerators,
+  } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
   const instance = await createEditorFrame();
   const historyLocationState = params.history.location.state as HistoryLocationState;
@@ -186,9 +192,8 @@ export async function mountApp(
     embeddableEditorIncomingState,
     initialContext,
   };
-  const emptyState = getPreloadedState(storeDeps) as LensAppState;
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-    lens: emptyState,
+    lens: getPreloadedState(storeDeps) as LensAppState,
   } as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
@@ -208,7 +213,7 @@ export async function mountApp(
       if (!initialContext) {
         data.query.filterManager.setAppFilters([]);
       }
-      lensStore.dispatch(setState(emptyState));
+      lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
       lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
 
       return (
@@ -224,6 +229,8 @@ export async function mountApp(
             history={props.history}
             datasourceMap={datasourceMap}
             visualizationMap={visualizationMap}
+            topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+            initialContext={initialContext}
           />
         </Provider>
       );

@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
        When the api key is updated before / while the rule is executing, the alert
        executor no longer has access to a service to update the rule status
        saved object in Elasticsearch. Because of this, we cannot set the rule into
-       a 'failure' state, so the user ends up seeing 'going to run' as that is the
+       a 'failure' state, so the user ends up seeing 'running' as that is the
        last status set for the rule before it erupts in an error that cannot be
        recorded inside of the executor.
 

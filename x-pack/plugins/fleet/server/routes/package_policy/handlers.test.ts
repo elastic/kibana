@@ -16,13 +16,14 @@ import type {
   PackagePolicyServiceInterface,
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
+  FleetRequestHandlerContext,
 } from '../..';
 import type {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
 } from '../../types/rest_spec';
 import type { FleetAuthzRouter } from '../security';
-import type { FleetRequestHandler, FleetRequestHandlerContext } from '../../types';
+import type { FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
 import { registerRoutes } from './index';
@@ -89,7 +90,7 @@ jest.mock(
 jest.mock('../../services/epm/packages', () => {
   return {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
-    getPackageInfo: jest.fn(() => Promise.resolve()),
+    getPackageInfoFromRegistry: jest.fn(() => Promise.resolve()),
   };
 });
 

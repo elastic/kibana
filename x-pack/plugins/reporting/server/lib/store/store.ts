@@ -12,7 +12,7 @@ import { ReportingCore } from '../../';
 import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import { ReportTaskParams } from '../tasks';
-import { Report, ReportDocument, SavedReport } from './';
+import { IReport, Report, ReportDocument, SavedReport } from './';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
@@ -110,7 +110,7 @@ export class ReportingStore {
 
   private async createIndex(indexName: string) {
     const client = await this.getClient();
-    const { body: exists } = await client.indices.exists({ index: indexName });
+    const exists = await client.indices.exists({ index: indexName });
 
     if (exists) {
       return exists;
@@ -166,9 +166,7 @@ export class ReportingStore {
       },
     };
     const client = await this.getClient();
-    const { body } = await client.index(doc);
-
-    return body;
+    return await client.index(doc);
   }
 
   /*
@@ -216,8 +214,8 @@ export class ReportingStore {
 
       return report as SavedReport;
     } catch (err) {
-      this.logger.error(`Error in adding a report!`);
-      this.logger.error(err);
+      this.reportingCore.getEventLogger(report).logError(err);
+      this.logError(`Error in adding a report!`, err, report);
       throw err;
     }
   }
@@ -239,7 +237,7 @@ export class ReportingStore {
 
     try {
       const client = await this.getClient();
-      const { body: document } = await client.get<ReportSource>({
+      const document = await client.get<ReportSource>({
         index: taskJson.index,
         id: taskJson.id,
       });
@@ -266,6 +264,7 @@ export class ReportingStore {
           `[id: ${taskJson.id}] [index: ${taskJson.index}]`
       );
       this.logger.error(err);
+      this.reportingCore.getEventLogger({ _id: taskJson.id } as IReport).logError(err);
       throw err;
     }
   }
@@ -279,9 +278,10 @@ export class ReportingStore {
       status: statuses.JOB_STATUS_PROCESSING,
     });
 
+    let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      const { body } = await client.update<ReportDocument>({
+      body = await client.update<unknown, unknown, ReportDocument>({
         id: report._id,
         index: report._index,
         if_seq_no: report._seq_no,
@@ -289,15 +289,20 @@ export class ReportingStore {
         refresh: true,
         body: { doc },
       });
-
-      return body;
     } catch (err) {
-      this.logger.error(
-        `Error in updating status to processing! Report: ` + jobDebugMessage(report)
-      );
-      this.logger.error(err);
+      this.logError(`Error in updating status to processing! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
     }
+
+    this.reportingCore.getEventLogger(report).logClaimTask();
+
+    return body;
+  }
+
+  private logError(message: string, err: Error, report: Report) {
+    this.logger.error(message);
+    this.logger.error(err);
+    this.reportingCore.getEventLogger(report).logError(err);
   }
 
   public async setReportFailed(
@@ -309,9 +314,10 @@ export class ReportingStore {
       status: statuses.JOB_STATUS_FAILED,
     });
 
+    let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      const { body } = await client.update<ReportDocument>({
+      body = await client.update<unknown, unknown, ReportDocument>({
         id: report._id,
         index: report._index,
         if_seq_no: report._seq_no,
@@ -319,12 +325,14 @@ export class ReportingStore {
         refresh: true,
         body: { doc },
       });
-      return body;
     } catch (err) {
-      this.logger.error(`Error in updating status to failed! Report: ` + jobDebugMessage(report));
-      this.logger.error(err);
+      this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
     }
+
+    this.reportingCore.getEventLogger(report).logReportFailure();
+
+    return body;
   }
 
   public async setReportCompleted(
@@ -341,9 +349,10 @@ export class ReportingStore {
       status,
     } as ReportSource);
 
+    let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      const { body } = await client.update<ReportDocument>({
+      body = await client.update<unknown, unknown, ReportDocument>({
         id: report._id,
         index: report._index,
         if_seq_no: report._seq_no,
@@ -351,12 +360,14 @@ export class ReportingStore {
         refresh: true,
         body: { doc },
       });
-      return body;
     } catch (err) {
-      this.logger.error(`Error in updating status to complete! Report: ` + jobDebugMessage(report));
-      this.logger.error(err);
+      this.logError(`Error in updating status to complete! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
     }
+
+    this.reportingCore.getEventLogger(report).logReportSaved();
+
+    return body;
   }
 
   public async prepareReportForRetry(report: SavedReport): Promise<UpdateResponse<ReportDocument>> {
@@ -365,9 +376,10 @@ export class ReportingStore {
       process_expiration: null,
     });
 
+    let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      const { body } = await client.update<ReportDocument>({
+      body = await client.update<unknown, unknown, ReportDocument>({
         id: report._id,
         index: report._index,
         if_seq_no: report._seq_no,
@@ -375,14 +387,12 @@ export class ReportingStore {
         refresh: true,
         body: { doc },
       });
-      return body;
     } catch (err) {
-      this.logger.error(
-        `Error in clearing expiration and status for retry! Report: ` + jobDebugMessage(report)
-      );
-      this.logger.error(err);
+      this.logError(`Error in clearing expiration and status for retry! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
     }
+
+    return body;
   }
 
   /*
@@ -410,7 +420,7 @@ export class ReportingStore {
       },
     };
 
-    const { body } = await client.search<ReportRecordTimeout['_source']>({
+    const body = await client.search<ReportRecordTimeout['_source']>({
       size: 1,
       index: this.indexPrefix + '-*',
       seq_no_primary_term: true,

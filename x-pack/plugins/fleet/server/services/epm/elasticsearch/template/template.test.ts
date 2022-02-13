@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import { safeLoad } from 'js-yaml';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
@@ -839,21 +839,45 @@ describe('EPM template', () => {
   });
 
   describe('updateCurrentWriteIndices', () => {
-    it('update non replicated datastream', async () => {
+    it('update all the index matching, index template index pattern', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      esClient.indices.getDataStream.mockResolvedValue({
-        body: {
-          data_streams: [
-            { name: 'test-non-replicated' },
-            { name: 'test-replicated', replicated: true },
-          ],
-        },
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
         {
           templateName: 'test',
           indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+      expect(esClient.indices.getDataStream).toBeCalledWith({
+        name: 'test.*-*',
+      });
+      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+      expect(putMappingsCall).toHaveLength(1);
+      expect(putMappingsCall[0]).toBe('test.prefix1-default');
+    });
+    it('update non replicated datastream', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [
+          { name: 'test-non-replicated' },
+          { name: 'test-replicated', replicated: true },
+        ],
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-*'],
             template: {
               settings: { index: {} },
               mappings: { properties: {} },

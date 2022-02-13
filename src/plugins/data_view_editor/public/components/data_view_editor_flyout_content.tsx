@@ -10,9 +10,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
+import { DataViewField } from '../../../data_views/public';
 
 import {
-  IndexPatternSpec,
+  DataViewSpec,
   Form,
   useForm,
   useFormData,
@@ -50,7 +51,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (indexPatternSpec: IndexPatternSpec) => void;
+  onSave: (dataViewSpec: DataViewSpec) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -83,7 +84,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         return;
       }
 
-      const indexPatternStub: IndexPatternSpec = {
+      const indexPatternStub: DataViewSpec = {
         title: formData.title,
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
@@ -200,7 +201,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         }
 
         const fields = await ensureMinimumTime(dataViews.getFieldsForWildcard(getFieldsOptions));
-        timestampOptions = extractTimeFields(fields, requireTimestampField);
+        timestampOptions = extractTimeFields(fields as DataViewField[], requireTimestampField);
       }
       if (currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current) {
         setIsLoadingTimestampFields(false);

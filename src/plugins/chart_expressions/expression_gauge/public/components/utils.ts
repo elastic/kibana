@@ -40,7 +40,7 @@ function getNiceRange(min: number, max: number) {
   const tickSpacing = getNiceNumber(range / (maxTicks - 1));
   return {
     min: Math.floor(min / tickSpacing) * tickSpacing,
-    max: Math.ceil(offsetMax / tickSpacing) * tickSpacing,
+    max: Math.ceil(Math.ceil(offsetMax / tickSpacing) * tickSpacing),
   };
 }
 

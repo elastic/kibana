@@ -8,13 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { defaultUser, getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
-  createCaseAction,
-  createSubCase,
-  deleteAllCaseItems,
-  deleteCaseAction,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
@@ -27,8 +22,6 @@ import {
   superUserSpace1Auth,
   getCaseUserActions,
 } from '../../../../common/lib/utils';
-import { getSubCaseDetailsUrl } from '../../../../../../plugins/cases/common/api/helpers';
-import { CaseResponse } from '../../../../../../plugins/cases/common/api';
 import {
   secOnly,
   secOnlyRead,
@@ -92,81 +85,18 @@ export default ({ getService }: FtrProviderContext): void => {
       const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
       expect(creationUserAction).to.eql({
-        action_field: [
-          'description',
-          'status',
-          'tags',
-          'title',
-          'connector',
-          'settings',
-          'owner',
-          'comment',
-        ],
         action: 'delete',
-        action_by: defaultUser,
-        old_value: null,
-        new_value: null,
-        new_val_connector_id: null,
-        old_val_connector_id: null,
-        case_id: `${postedCase.id}`,
+        type: 'delete_case',
+        created_by: defaultUser,
+        case_id: postedCase.id,
         comment_id: null,
-        sub_case_id: '',
+        payload: {},
         owner: 'securitySolutionFixture',
       });
     });
 
     it('unhappy path - 404s when case is not there', async () => {
       await deleteCases({ supertest, caseIDs: ['fake-id'], expectedHttpCode: 404 });
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    describe.skip('sub cases', () => {
-      let actionID: string;
-      before(async () => {
-        actionID = await createCaseAction(supertest);
-      });
-      after(async () => {
-        await deleteCaseAction(supertest, actionID);
-      });
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
-      });
-
-      it('should delete the sub cases when deleting a collection', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        expect(caseInfo.subCases![0].id).to.not.eql(undefined);
-
-        const body = await deleteCases({ supertest, caseIDs: [caseInfo.id] });
-
-        expect(body).to.eql({});
-        await supertest
-          .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
-          .send()
-          .expect(404);
-      });
-
-      it(`should delete a sub case's comments when that case gets deleted`, async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        expect(caseInfo.subCases![0].id).to.not.eql(undefined);
-
-        // there should be two comments on the sub case now
-        const { body: patchedCaseWithSubCase }: { body: CaseResponse } = await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .query({ subCaseId: caseInfo.subCases![0].id })
-          .send(postCommentUserReq)
-          .expect(200);
-
-        const subCaseCommentUrl = `${CASES_URL}/${patchedCaseWithSubCase.id}/comments/${
-          patchedCaseWithSubCase.comments![1].id
-        }`;
-        // make sure we can get the second comment
-        await supertest.get(subCaseCommentUrl).set('kbn-xsrf', 'true').send().expect(200);
-
-        await deleteCases({ supertest, caseIDs: [caseInfo.id] });
-
-        await supertest.get(subCaseCommentUrl).set('kbn-xsrf', 'true').send().expect(404);
-      });
     });
 
     describe('rbac', () => {

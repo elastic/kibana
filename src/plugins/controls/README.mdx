@@ -1,0 +1,25 @@
+---
+id: controls
+slug: /kibana-dev-docs/controls
+title: Controls Plugin
+summary: Introduction to the Controls Plugin.
+date: 2020-01-12
+tags: ['kibana', 'controls', 'dashboard']
+related: []
+---
+
+## Introduction
+
+The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps.
+
+## The Control Group
+
+The Control group is an embeddable container which provides the ability to add, remove, reorder, and edit multiple types of control embeddable. In any implementation, the control group embeddable should be the main point of contact between the application and the controls. The list of filters it sends to its output observable should be considered the final output of the current state of the controls, and can then be sent to other embeddables, or combined with filters from other sources.
+
+## Control Types
+
+Multiple types of controls can be registered to work with the Control Group. The current implementations are as follows:
+
+### Options List
+
+The options list is the most basic, and most used control type. It allows the dashboard author to specify a data view and field, and create a searchable dropdown.

@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { ColorMode } from '../../../../../src/plugins/charts/common';
@@ -19,7 +19,7 @@ import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import type { MetricConfig, MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
-import { CUSTOM_PALETTE, getStopsForFixedMode, shiftPalette } from '../shared_components';
+import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
 
 const toExpression = (
@@ -146,11 +146,7 @@ export const getMetricVisualization = ({
                 {
                   columnId: props.state.accessor,
                   triggerIcon: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring
-                    ? props.state.palette?.params?.name === CUSTOM_PALETTE
-                      ? getStopsForFixedMode(stops, props.state.palette?.params.colorStops)
-                      : stops.map(({ color }) => color)
-                    : undefined,
+                  palette: hasColoring ? stops.map(({ color }) => color) : undefined,
                 },
               ]
             : [],

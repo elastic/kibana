@@ -77,7 +77,7 @@ export async function getDailyEvents(
     daily: {
       date_histogram: {
         field: 'lens-ui-telemetry.date',
-        calendar_interval: '1d',
+        calendar_interval: '1d' as const,
         min_doc_count: 1,
       },
       aggs: {
@@ -113,23 +113,23 @@ export async function getDailyEvents(
     },
   };
 
-  const { body: metrics } = await esClient.search<
-    ESSearchResponse<unknown, { body: { aggs: typeof aggs } }>
-  >({
-    index: kibanaIndex,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'lens-ui-telemetry' } },
-            { range: { 'lens-ui-telemetry.date': { gte: 'now-90d/d' } } },
-          ],
+  const metrics = await esClient.search<ESSearchResponse<unknown, { body: { aggs: typeof aggs } }>>(
+    {
+      index: kibanaIndex,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'lens-ui-telemetry' } },
+              { range: { 'lens-ui-telemetry.date': { gte: 'now-90d/d' } } },
+            ],
+          },
         },
+        aggs,
       },
-      aggs,
-    },
-    size: 0,
-  });
+      size: 0,
+    }
+  );
 
   const byDateByType: Record<string, Record<string, number>> = {};
   const suggestionsByDate: Record<string, Record<string, number>> = {};

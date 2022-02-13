@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
@@ -168,33 +165,22 @@ export const allowSorting = ({
     'kibana.alert.original_event.timezone',
     'kibana.alert.original_event.type',
     'kibana.alert.original_time',
-    'kibana.alert.parent.depth',
-    'kibana.alert.parent.id',
-    'kibana.alert.parent.index',
-    'kibana.alert.parent.rule',
-    'kibana.alert.parent.type',
     'kibana.alert.reason',
     'kibana.alert.rule.created_by',
     'kibana.alert.rule.description',
     'kibana.alert.rule.enabled',
     'kibana.alert.rule.false_positives',
-    'kibana.alert.rule.filters',
     'kibana.alert.rule.from',
     'kibana.alert.rule.uuid',
     'kibana.alert.rule.immutable',
-    'kibana.alert.rule.index',
     'kibana.alert.rule.interval',
-    'kibana.alert.rule.language',
     'kibana.alert.rule.max_signals',
     'kibana.alert.rule.name',
     'kibana.alert.rule.note',
-    'kibana.alert.rule.output_index',
-    'kibana.alert.rule.query',
     'kibana.alert.rule.references',
-    'kibana.alert.rule.risk_score',
+    'kibana.alert.risk_score',
     'kibana.alert.rule.rule_id',
-    'kibana.alert.rule.saved_id',
-    'kibana.alert.rule.severity',
+    'kibana.alert.severity',
     'kibana.alert.rule.size',
     'kibana.alert.rule.tags',
     'kibana.alert.rule.threat',

@@ -25,7 +25,7 @@ export function createLogThresholdRuleType(): ObservabilityRuleTypeModel<Partial
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.logsThreshold}`;
     },
-    alertParamsExpression: React.lazy(() => import('./components/expression_editor/editor')),
+    ruleParamsExpression: React.lazy(() => import('./components/expression_editor/editor')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
       'xpack.infra.logs.alerting.threshold.defaultActionMessage',

@@ -12,7 +12,7 @@ import {
   mockKibanaValues,
 } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { MetaEngineCreationLogic } from './meta_engine_creation_logic';
 

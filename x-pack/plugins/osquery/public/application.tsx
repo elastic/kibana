@@ -6,7 +6,7 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
@@ -15,7 +15,7 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
-import { useUiSetting$ } from '../../../../src/plugins/kibana_react/public';
+import { useUiSetting$, KibanaThemeProvider } from './shared_imports';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
@@ -44,32 +44,34 @@ const OsqueryAppContext = () => {
 export const renderApp = (
   core: CoreStart,
   services: AppPluginStartDependencies,
-  { element, history }: AppMountParameters,
+  { element, history, theme$ }: AppMountParameters,
   storage: Storage,
   kibanaVersion: string
 ) => {
   ReactDOM.render(
-    <KibanaContextProvider
-      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-      services={{
-        appName: PLUGIN_NAME,
-        kibanaVersion,
-        ...core,
-        ...services,
-        storage,
-      }}
-    >
-      <EuiErrorBoundary>
-        <Router history={history}>
-          <I18nProvider>
-            <QueryClientProvider client={queryClient}>
-              <OsqueryAppContext />
-              <ReactQueryDevtools initialIsOpen={false} />
-            </QueryClientProvider>
-          </I18nProvider>
-        </Router>
-      </EuiErrorBoundary>
-    </KibanaContextProvider>,
+    <KibanaThemeProvider theme$={theme$}>
+      <KibanaContextProvider
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        services={{
+          appName: PLUGIN_NAME,
+          kibanaVersion,
+          ...core,
+          ...services,
+          storage,
+        }}
+      >
+        <EuiErrorBoundary>
+          <Router history={history}>
+            <I18nProvider>
+              <QueryClientProvider client={queryClient}>
+                <OsqueryAppContext />
+                <ReactQueryDevtools initialIsOpen={false} />
+              </QueryClientProvider>
+            </I18nProvider>
+          </Router>
+        </EuiErrorBoundary>
+      </KibanaContextProvider>
+    </KibanaThemeProvider>,
     element
   );
 

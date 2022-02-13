@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
-import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
-import { IScopedSearchClient } from 'src/plugins/data/server';
-import { Datatable } from 'src/plugins/expressions/server';
-import { ReportingConfig } from '../../..';
+import { i18n } from '@kbn/i18n';
+import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
+import type { IScopedSearchClient } from 'src/plugins/data/server';
+import type { Datatable } from 'src/plugins/expressions/server';
+import type { Writable } from 'stream';
+import type { ReportingConfig } from '../../..';
+import type {
+  DataView,
+  ISearchSource,
+  ISearchStartSearchSource,
+} from '../../../../../../../src/plugins/data/common';
 import {
   cellHasFormulas,
   ES_SEARCH_STRATEGY,
-  IndexPattern,
-  ISearchSource,
-  ISearchStartSearchSource,
-  SearchFieldValue,
-  SearchSourceFields,
   tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
-import {
+import type {
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '../../../../../../../src/plugins/field_formats/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
-import { CancellationToken } from '../../../../common';
+import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import { LevelLogger } from '../../../lib';
-import { TaskRunResult } from '../../../lib/tasks';
-import { JobParamsCSV } from '../types';
+import type { LevelLogger } from '../../../lib';
+import type { TaskRunResult } from '../../../lib/tasks';
+import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
@@ -48,24 +48,7 @@ interface Dependencies {
   fieldFormatsRegistry: IFieldFormatsRegistry;
 }
 
-// Function to check if the field name values can be used as the header row
-function isPlainStringArray(
-  fields: SearchFieldValue[] | string | boolean | undefined
-): fields is string[] {
-  let result = true;
-  if (Array.isArray(fields)) {
-    fields.forEach((field) => {
-      if (typeof field !== 'string' || field === '*' || field === '_source') {
-        result = false;
-      }
-    });
-  }
-  return result;
-}
-
 export class CsvGenerator {
-  private _columns?: string[];
-  private _formatters?: Record<string, FieldFormat>;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -80,11 +63,7 @@ export class CsvGenerator {
     private stream: Writable
   ) {}
 
-  private async scan(
-    index: IndexPattern,
-    searchSource: ISearchSource,
-    settings: CsvExportSettings
-  ) {
+  private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
     const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
@@ -107,23 +86,17 @@ export class CsvGenerator {
 
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
     this.logger.debug(`executing scroll request`);
-    const results = (
-      await this.clients.es.asCurrentUser.scroll({
-        scroll: scrollSettings.duration,
-        scroll_id: scrollId,
-      })
-    ).body;
-    return results;
+
+    return await this.clients.es.asCurrentUser.scroll({
+      scroll: scrollSettings.duration,
+      scroll_id: scrollId,
+    });
   }
 
   /*
    * Load field formats for each field in the list
    */
   private getFormatters(table: Datatable) {
-    if (this._formatters) {
-      return this._formatters;
-    }
-
     // initialize field formats
     const formatters: Record<string, FieldFormat> = {};
     table.columns.forEach((c) => {
@@ -131,8 +104,7 @@ export class CsvGenerator {
       formatters[c.id] = fieldFormat;
     });
 
-    this._formatters = formatters;
-    return this._formatters;
+    return formatters;
   }
 
   private escapeValues(settings: CsvExportSettings) {
@@ -144,36 +116,10 @@ export class CsvGenerator {
     };
   }
 
-  private getColumns(searchSource: ISearchSource, table: Datatable) {
-    if (this._columns != null) {
-      return this._columns;
-    }
-
-    // if columns is not provided in job params,
-    // default to use fields/fieldsFromSource from the searchSource to get the ordering of columns
-    const getFromSearchSource = (): string[] => {
-      const fieldValues: Pick<SearchSourceFields, 'fields' | 'fieldsFromSource'> = {
-        fields: searchSource.getField('fields'),
-        fieldsFromSource: searchSource.getField('fieldsFromSource'),
-      };
-      const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-      this.logger.debug(`Getting columns from '${fieldSource}' in search source.`);
-
-      const fields = fieldValues[fieldSource];
-      // Check if field name values are string[] and if the fields are user-defined
-      if (isPlainStringArray(fields)) {
-        return fields;
-      }
-
-      // Default to using the table column IDs as the fields
-      const columnIds = table.columns.map((c) => c.id);
-      // Fields in the API response don't come sorted - they need to be sorted client-side
-      columnIds.sort();
-      return columnIds;
-    };
-    this._columns = this.job.columns?.length ? this.job.columns : getFromSearchSource();
-
-    return this._columns;
+  private getColumnsFromTabify(table: Datatable) {
+    const columnIds = table.columns.map((c) => c.id);
+    columnIds.sort();
+    return columnIds;
   }
 
   private formatCellValues(formatters: Record<string, FieldFormat>) {
@@ -387,9 +333,12 @@ export class CsvGenerator {
           break;
         }
 
-        // If columns exists in the job params, use it to order the CSV columns
-        // otherwise, get the ordering from the searchSource's fields / fieldsFromSource
-        const columns = this.getColumns(searchSource, table) || [];
+        let columns: string[];
+        if (this.job.columns && this.job.columns.length > 0) {
+          columns = this.job.columns;
+        } else {
+          columns = this.getColumnsFromTabify(table);
+        }
 
         if (first) {
           first = false;
@@ -436,7 +385,6 @@ export class CsvGenerator {
 
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
-    // FIXME: https://github.com/elastic/kibana/issues/112186 -- find root cause
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       this.logger.warning(
         `ES scroll returned fewer total hits than expected! ` +
@@ -447,6 +395,7 @@ export class CsvGenerator {
     return {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
+      csv_rows: this.csvRowCount,
       max_size_reached: this.maxSizeReached,
       warnings,
     };

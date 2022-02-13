@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export * from './reporting_api_client';
-
-export * from './hooks';
-
 export { InternalApiClientProvider, useInternalApiClient } from './context';
+export { useCheckIlmPolicyStatus } from './hooks';
+export type { DiagnoseResponse } from './reporting_api_client';
+export { ReportingAPIClient } from './reporting_api_client';

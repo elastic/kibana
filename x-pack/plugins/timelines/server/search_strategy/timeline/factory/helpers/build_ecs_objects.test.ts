@@ -33,7 +33,6 @@ describe('buildEcsObjects', () => {
         'host.ip': [],
         'host.name': ['test-name'],
       },
-      _type: '',
       sort: ['1610199700517'],
     };
 

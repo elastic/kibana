@@ -15,6 +15,7 @@ export { ColorFormatEditor, colorFormatEditorFactory } from './color';
 export { DateFormatEditor, dateFormatEditorFactory } from './date';
 export { DateNanosFormatEditor, dateNanosFormatEditorFactory } from './date_nanos';
 export { DurationFormatEditor, durationFormatEditorFactory } from './duration';
+export { GeoPointFormatEditor, geoPointFormatEditorFactory } from './geo_point';
 export { NumberFormatEditor, numberFormatEditorFactory } from './number';
 export { PercentFormatEditor, percentFormatEditorFactory } from './percent';
 export { StaticLookupFormatEditor, staticLookupFormatEditorFactory } from './static_lookup';

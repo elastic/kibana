@@ -9,7 +9,8 @@ import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
+import { DatatableRow } from 'src/plugins/expressions';
 import type { GaugeArguments } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
 import {
   GaugeShapes,
@@ -19,6 +20,7 @@ import {
   getGoalValue,
   getMaxValue,
   getMinValue,
+  getValueFromAccessor,
   GaugeIconVertical,
   GaugeIconHorizontal,
 } from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
@@ -27,7 +29,7 @@ import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../.
 import { getSuggestions } from './suggestions';
 import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
-import { applyPaletteParams, CUSTOM_PALETTE, getStopsForFixedMode } from '../../shared_components';
+import { applyPaletteParams, CUSTOM_PALETTE } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
@@ -73,11 +75,40 @@ function computePaletteParams(params: CustomPaletteParams) {
   };
 }
 
+const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizationState) => {
+  if (!row || !state) {
+    return;
+  }
+  const minValue = getValueFromAccessor('minAccessor', row, state);
+  const maxValue = getValueFromAccessor('maxAccessor', row, state);
+  if (maxValue != null && minValue != null) {
+    if (maxValue < minValue) {
+      return {
+        invalid: true,
+        invalidMessage: i18n.translate(
+          'xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax',
+          {
+            defaultMessage: 'Minimum value may not be greater than maximum value',
+          }
+        ),
+      };
+    }
+    if (maxValue === minValue) {
+      return {
+        invalid: true,
+        invalidMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
+          defaultMessage: 'Minimum and maximum values may not be equal',
+        }),
+      };
+    }
+  }
+};
+
 const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  attributes?: Partial<Omit<GaugeArguments, keyof GaugeVisualizationState>>
+  attributes?: Partial<Omit<GaugeArguments, keyof GaugeVisualizationState | 'ariaLabel'>>
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
 
@@ -192,8 +223,9 @@ export const getGaugeVisualization = ({
       const currentMinMax = { min: getMinValue(row, state), max: getMaxValue(row, state) };
 
       const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
-      palette = getStopsForFixedMode(displayStops, state?.palette?.params?.colorStops);
+      palette = displayStops.map(({ color }) => color);
     }
+    const invalidProps = checkInvalidConfiguration(row, state) || {};
 
     return {
       groups: [
@@ -238,6 +270,7 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_minDimensionPanel',
           prioritizedOperation: 'min',
           suggestedValue: () => (state.metricAccessor ? getMinValue(row, state) : undefined),
+          ...invalidProps,
         },
         {
           supportStaticValue: true,
@@ -253,6 +286,7 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_maxDimensionPanel',
           prioritizedOperation: 'max',
           suggestedValue: () => (state.metricAccessor ? getMaxValue(row, state) : undefined),
+          ...invalidProps,
         },
         {
           supportStaticValue: true,
@@ -401,7 +435,7 @@ export const getGaugeVisualization = ({
     }
 
     const row = frame?.activeData?.[state.layerId]?.rows?.[0];
-    if (!row) {
+    if (!row || checkInvalidConfiguration(row, state)) {
       return [];
     }
     const metricValue = row[metricAccessor];

@@ -152,7 +152,7 @@ describe('Initializing the store', () => {
     it('starts new searchSessionId', async () => {
       const { store } = await makeLensStore({ preloadedState });
       await act(async () => {
-        await store.dispatch(loadInitial(defaultProps));
+        await store.dispatch(loadInitial({ ...defaultProps, initialInput: undefined }));
       });
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
@@ -224,7 +224,7 @@ describe('Initializing the store', () => {
       });
 
       expect(deps.lensServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
-        { query: { match_phrase: { src: 'test' } } },
+        { query: { match_phrase: { src: 'test' } }, meta: { index: 'injected!' } },
       ]);
 
       expect(store.getState()).toEqual({

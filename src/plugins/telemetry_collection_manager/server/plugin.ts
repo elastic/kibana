@@ -69,7 +69,6 @@ export class TelemetryCollectionManagerPlugin
       setCollectionStrategy: this.setCollectionStrategy.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
-      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -80,7 +79,6 @@ export class TelemetryCollectionManagerPlugin
     return {
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
-      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -129,7 +127,7 @@ export class TelemetryCollectionManagerPlugin
     const soClient = this.getSavedObjectsClient(config);
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? config.request : void 0;
-    const refreshCache = !!config.refreshCache;
+    const refreshCache = config.unencrypted ? true : !!config.refreshCache;
 
     if (esClient && soClient) {
       return { usageCollection, esClient, soClient, kibanaRequest, refreshCache };
@@ -219,10 +217,6 @@ export class TelemetryCollectionManagerPlugin
     }
 
     return [];
-  }
-
-  private async areAllCollectorsReady() {
-    return await this.usageCollection?.areAllCollectorsReady();
   }
 
   private getOptInStatsForCollection = async (

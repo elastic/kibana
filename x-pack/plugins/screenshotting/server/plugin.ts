@@ -16,8 +16,9 @@ import type {
 } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './browsers';
-import { createConfig, ConfigType } from './config';
-import { getScreenshots, ScreenshotOptions } from './screenshots';
+import { ConfigType, createConfig } from './config';
+import { Screenshots } from './screenshots';
+import { getChromiumPackage } from './utils';
 
 interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;
@@ -38,7 +39,7 @@ export interface ScreenshottingStart {
    * @param options Screenshots session options.
    * @returns Observable with screenshotting results.
    */
-  getScreenshots(options: ScreenshotOptions): ReturnType<typeof getScreenshots>;
+  getScreenshots: Screenshots['getScreenshots'];
 }
 
 export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, SetupDeps> {
@@ -46,6 +47,7 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
   private logger: Logger;
   private screenshotMode!: ScreenshotModePluginSetup;
   private browserDriverFactory!: Promise<HeadlessChromiumDriverFactory>;
+  private screenshots!: Promise<Screenshots>;
 
   constructor(context: PluginInitializerContext<ConfigType>) {
     this.logger = context.logger.get();
@@ -59,16 +61,24 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
       const logger = this.logger.get('chromium');
       const [config, binaryPath] = await Promise.all([
         createConfig(this.logger, this.config),
-        install(paths, logger),
+        install(paths, logger, getChromiumPackage()),
       ]);
 
       return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);
     })();
-
     this.browserDriverFactory.catch((error) => {
       this.logger.error('Error in screenshotting setup, it may not function properly.');
       this.logger.error(error);
     });
+
+    this.screenshots = (async () => {
+      const browserDriverFactory = await this.browserDriverFactory;
+      const logger = this.logger.get('screenshot');
+
+      return new Screenshots(browserDriverFactory, logger, this.config);
+    })();
+    // Already handled in `browserDriverFactory`
+    this.screenshots.catch(() => {});
 
     return {};
   }
@@ -78,8 +88,8 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
       diagnose: () =>
         from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
       getScreenshots: (options) =>
-        from(this.browserDriverFactory).pipe(
-          switchMap((factory) => getScreenshots(factory, this.logger.get('screenshot'), options))
+        from(this.screenshots).pipe(
+          switchMap((screenshots) => screenshots.getScreenshots(options))
         ),
     };
   }

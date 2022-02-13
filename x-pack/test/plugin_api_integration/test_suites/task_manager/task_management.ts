@@ -689,14 +689,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ensureTasksIndexRefreshed();
 
-      // third run should fail
-      const failedRunNowResult = await runTaskNow({
-        id: originalTask.id,
-      });
+      // flaky: runTaskNow() sometimes fails with the following error, so retrying
+      // error: Failed to run task "<id>" as it is currently running
+      await retry.try(async () => {
+        const failedRunNowResult = await runTaskNow({
+          id: originalTask.id,
+        });
 
-      expect(failedRunNowResult).to.eql({
-        id: originalTask.id,
-        error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
+        expect(failedRunNowResult).to.eql({
+          id: originalTask.id,
+          error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
+        });
       });
 
       await retry.try(async () => {

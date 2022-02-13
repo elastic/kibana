@@ -243,17 +243,18 @@ describe('SIEM Super Date Picker', () => {
           .simulate('click');
         wrapper.update();
 
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
+          .first()
+          .find('button')
+          .simulate('click');
+        wrapper.update();
+
         const wrapperFixedEuiFieldSearch = wrapper.find(
           'input[data-test-subj="superDatePickerRefreshIntervalInput"]'
         );
 
         wrapperFixedEuiFieldSearch.simulate('change', { target: { value: '2' } });
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
-          .first()
-          .simulate('click');
         wrapper.update();
       });
 
@@ -275,6 +276,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper
           .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
           .first()
+          .find('button')
           .simulate('click');
         wrapper.update();
 

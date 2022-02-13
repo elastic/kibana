@@ -18,6 +18,7 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { EventFilterGenerator } from '../../../common/endpoint/data_generators/event_filter_generator';
+import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
 export const cli = () => {
   run(
@@ -70,16 +71,26 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
 
   await ensureCreateEndpointEventFiltersList(kbn);
 
+  const randomPolicyId = await randomPolicyIdGenerator(kbn, log);
+
   await pMap(
     Array.from({ length: flags.count as unknown as number }),
-    () =>
-      kbn
+    () => {
+      const body = eventGenerator.generate();
+      if (body.tags?.length && body.tags[0] !== 'policy:all') {
+        const nmExceptions = Math.floor(Math.random() * 3) || 1;
+        body.tags = Array.from({ length: nmExceptions }, () => {
+          return `policy:${randomPolicyId()}`;
+        });
+      }
+      return kbn
         .request({
           method: 'POST',
           path: EXCEPTION_LIST_ITEM_URL,
-          body: eventGenerator.generate(),
+          body,
         })
-        .catch((e) => handleThrowAxiosHttpError(e)),
+        .catch((e) => handleThrowAxiosHttpError(e));
+    },
     { concurrency: 10 }
   );
 };

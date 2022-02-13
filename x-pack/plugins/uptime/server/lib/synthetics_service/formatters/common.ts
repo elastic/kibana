@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import {
-  CommonFields,
-  ConfigKey,
-  MonitorFields,
-} from '../../../../common/runtime_types/monitor_management';
+import { CommonFields, ConfigKey, MonitorFields } from '../../../../common/runtime_types';
 
-export type Formatter =
-  | null
-  | ((
-      fields: Partial<MonitorFields>
-    ) => boolean | string | string[] | Record<string, string> | null);
+export type FormattedValue = boolean | string | string[] | Record<string, string> | null;
+
+export type Formatter = null | ((fields: Partial<MonitorFields>) => FormattedValue);
 
 export type CommonFormatMap = Record<keyof CommonFields, Formatter>;
 
@@ -29,7 +23,8 @@ export const commonFormatters: CommonFormatMap = {
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
   [ConfigKey.APM_SERVICE_NAME]: null,
   [ConfigKey.TAGS]: (fields) => arrayFormatter(fields[ConfigKey.TAGS]),
-  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT]),
+  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT] || undefined),
+  [ConfigKey.NAMESPACE]: null,
 };
 
 export const arrayFormatter = (value: string[] = []) => (value.length ? value : null);

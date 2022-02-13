@@ -13,13 +13,11 @@ import {
   search,
   ISearchSource,
 } from '../../../../../data/public';
-import { Adapters } from '../../../../../inspector';
 import { getChartAggConfigs, getDimensions } from './index';
 import { tabifyAggResponse } from '../../../../../data/common';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from './use_saved_search';
-import { AppState } from '../services/discover_state';
-import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
+import { FetchDeps } from './fetch_all';
 
 interface Result {
   totalHits: number;
@@ -35,13 +33,8 @@ export function fetchChart(
     data,
     inspectorAdapters,
     searchSessionId,
-  }: {
-    abortController: AbortController;
-    appStateContainer: ReduxLikeStateContainer<AppState>;
-    data: DataPublicPluginStart;
-    inspectorAdapters: Adapters;
-    searchSessionId: string;
-  }
+    savedSearch,
+  }: FetchDeps
 ): Promise<Result> {
   const interval = appStateContainer.getState().interval ?? 'auto';
   const chartAggConfigs = updateSearchSource(searchSource, interval, data);
@@ -51,7 +44,7 @@ export function fetchChart(
     name: 'discover',
     description: 'fetch chart data and total hits',
     url: window.location.pathname,
-    id: '',
+    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource

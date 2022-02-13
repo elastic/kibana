@@ -101,6 +101,7 @@ describe('DeprecationsService', () => {
           [
             {
               configPath: 'test',
+              level: 'critical',
               message: 'testMessage',
               documentationUrl: 'testDocUrl',
               correctiveActions: {

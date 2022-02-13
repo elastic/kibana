@@ -9,16 +9,11 @@ import moment from 'moment';
 import React from 'react';
 
 import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
-import {
-  ALERT_DURATION,
-  ALERT_REASON,
-  ALERT_RULE_SEVERITY,
-  ALERT_STATUS,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_DURATION, ALERT_REASON, ALERT_SEVERITY, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { Status } from '../../../components/status';
@@ -48,7 +43,7 @@ export const RenderCellValue: React.FC<
   timelineId,
 }) => {
   const value =
-    getMappedNonEcsValue({
+    useGetMappedNonEcsValue({
       data,
       fieldName: columnId,
     })?.reduce((x) => x[0]) ?? '';
@@ -61,7 +56,7 @@ export const RenderCellValue: React.FC<
     case ALERT_DURATION:
     case 'signal.duration.us':
       return <span data-test-subj="alert-duration">{moment().fromNow(true)}</span>;
-    case ALERT_RULE_SEVERITY:
+    case ALERT_SEVERITY:
     case 'signal.rule.severity':
       return <Severity data-test-subj="rule-severity" severity={value} />;
     case ALERT_REASON:

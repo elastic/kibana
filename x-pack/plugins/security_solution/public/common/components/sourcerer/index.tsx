@@ -28,6 +28,7 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
+import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -50,6 +51,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     },
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
 
+  const { pollForSignalIndex } = useSignalHelpers();
+
+  useEffect(() => {
+    if (pollForSignalIndex != null && (isTimelineSourcerer || isDetectionsSourcerer)) {
+      pollForSignalIndex();
+    }
+  }, [isDetectionsSourcerer, isTimelineSourcerer, pollForSignalIndex]);
+
   const { activePatterns, indicesExist, loading } = useSourcererDataView(scopeId);
   const [missingPatterns, setMissingPatterns] = useState<string[]>(
     activePatterns && activePatterns.length > 0
@@ -66,16 +75,30 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     isTimelineSourcerer && selectedPatterns.join() === signalIndexName
   );
 
+  const onUpdateDetectionAlertsChecked = useCallback(() => {
+    setIsOnlyDetectionAlertsChecked(
+      isTimelineSourcerer && selectedPatterns.join() === signalIndexName
+    );
+  }, [isTimelineSourcerer, selectedPatterns, signalIndexName]);
+
+  useEffect(() => {
+    onUpdateDetectionAlertsChecked();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPatterns]);
+
   const isOnlyDetectionAlerts: boolean =
     isDetectionsSourcerer || (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
+
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewId, setDataViewId] = useState<string | null>(selectedDataViewId);
 
   const {
     allOptions,
     dataViewSelectOptions,
+    loadingIndexPatterns,
     isModified,
-    onChangeCombo,
+    handleOutsideClick,
+    onChangeCombo: onChangeIndexPatterns,
     renderOption,
     selectedOptions,
     setIndexPatternsByDataView,
@@ -107,7 +130,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setPopoverIsOpen((prevState) => !prevState);
     setExpandAdvancedOptions(false); // we always want setExpandAdvancedOptions collapsed by default when popover opened
   }, []);
-  const onChangeDataView = useCallback(
+  const dispatchChangeDataView = useCallback(
     (
       newSelectedDataView: string,
       newSelectedPatterns: string[],
@@ -125,7 +148,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     [dispatch, scopeId]
   );
 
-  const onChangeSuper = useCallback(
+  const onChangeDataView = useCallback(
     (newSelectedOption) => {
       setDataViewId(newSelectedOption);
       setIndexPatternsByDataView(newSelectedOption);
@@ -143,10 +166,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const handleSaveIndices = useCallback(() => {
     const patterns = selectedOptions.map((so) => so.label);
     if (dataViewId != null) {
-      onChangeDataView(dataViewId, patterns);
+      dispatchChangeDataView(dataViewId, patterns);
     }
     setPopoverIsOpen(false);
-  }, [onChangeDataView, dataViewId, selectedOptions]);
+  }, [dispatchChangeDataView, dataViewId, selectedOptions]);
 
   const handleClosePopOver = useCallback(() => {
     setPopoverIsOpen(false);
@@ -159,9 +182,9 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     const patterns = selectedPatterns.filter((pattern) =>
       defaultDataView.patternList.includes(pattern)
     );
-    onChangeDataView(defaultDataView.id, patterns);
+    dispatchChangeDataView(defaultDataView.id, patterns);
     setPopoverIsOpen(false);
-  }, [defaultDataView.id, defaultDataView.patternList, onChangeDataView, selectedPatterns]);
+  }, [defaultDataView.id, defaultDataView.patternList, dispatchChangeDataView, selectedPatterns]);
 
   const onUpdateDeprecated = useCallback(() => {
     // are all the patterns in the default?
@@ -187,7 +210,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setPopoverIsOpen(false);
 
     if (isUiSettingsSuccess) {
-      onChangeDataView(
+      dispatchChangeDataView(
         defaultDataView.id,
         // to be at this stage, activePatterns is defined, the ?? selectedPatterns is to make TS happy
         activePatterns ?? selectedPatterns,
@@ -199,7 +222,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     activePatterns,
     defaultDataView.id,
     missingPatterns,
-    onChangeDataView,
+    dispatchChangeDataView,
     selectedPatterns,
     updateDataView,
   ]);
@@ -211,7 +234,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const onOutsideClick = useCallback(() => {
     setDataViewId(selectedDataViewId);
     setMissingPatterns(sourcererMissingPatterns);
-  }, [selectedDataViewId, sourcererMissingPatterns]);
+    onUpdateDetectionAlertsChecked();
+    handleOutsideClick();
+  }, [
+    handleOutsideClick,
+    onUpdateDetectionAlertsChecked,
+    selectedDataViewId,
+    sourcererMissingPatterns,
+  ]);
 
   const onExpandAdvancedOptionsClicked = useCallback(() => {
     setExpandAdvancedOptions((prevState) => !prevState);
@@ -280,9 +310,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                   <StyledFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
                     <EuiSuperSelect
                       data-test-subj="sourcerer-select"
+                      isLoading={loadingIndexPatterns}
                       disabled={isOnlyDetectionAlerts}
                       fullWidth
-                      onChange={onChangeSuper}
+                      onChange={onChangeDataView}
                       options={dataViewSelectOptions}
                       placeholder={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
                       valueOfSelected={dataViewId}
@@ -301,6 +332,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                 </StyledButton>
                 {expandAdvancedOptions && <EuiSpacer size="m" />}
                 <FormRow
+                  isDisabled={loadingIndexPatterns}
                   $expandAdvancedOptions={expandAdvancedOptions}
                   helpText={isOnlyDetectionAlerts ? undefined : i18n.INDEX_PATTERNS_DESCRIPTIONS}
                   label={i18n.INDEX_PATTERNS_LABEL}
@@ -308,8 +340,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                   <EuiComboBox
                     data-test-subj="sourcerer-combo-box"
                     fullWidth
-                    isDisabled={isOnlyDetectionAlerts}
-                    onChange={onChangeCombo}
+                    isDisabled={isOnlyDetectionAlerts || loadingIndexPatterns}
+                    onChange={onChangeIndexPatterns}
                     options={allOptions}
                     placeholder={i18n.PICK_INDEX_PATTERNS}
                     renderOption={renderOption}

@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, SavedObject, Logger } from 'src/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { AlertInstance } from '../../../../../alerting/server';
+import { Alert } from '../../../../../alerting/server';
 import { RuleParams } from '../schemas/rule_schemas';
 import { deconflictSignalsAndResults, getNotificationResultsLink } from '../notifications/utils';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
@@ -26,7 +26,7 @@ interface ScheduleThrottledNotificationActionsOptions {
   outputIndex: RuleParams['outputIndex'];
   ruleId: RuleParams['ruleId'];
   esClient: ElasticsearchClient;
-  alertInstance: AlertInstance;
+  alertInstance: Alert;
   notificationRuleParams: NotificationRuleTypeParams;
   signals: unknown[];
   logger: Logger;
@@ -98,7 +98,7 @@ export const scheduleThrottledNotificationActions = async ({
 
     // This will give us counts up to the max of 10k from tracking total hits.
     const signalsCountFromResults =
-      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
+      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value ?? 0;
 
     const resultsFlattened = results.hits.hits.map((hit) => {
       return {

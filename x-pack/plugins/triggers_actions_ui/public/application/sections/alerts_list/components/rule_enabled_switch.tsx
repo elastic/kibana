@@ -8,13 +8,13 @@
 import React, { useState, useEffect } from 'react';
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 
-import { Alert, AlertTableItem } from '../../../../types';
+import { Rule, AlertTableItem } from '../../../../types';
 
 export interface ComponentOpts {
   item: AlertTableItem;
   onAlertChanged: () => void;
-  enableAlert: (alert: Alert) => Promise<void>;
-  disableAlert: (alert: Alert) => Promise<void>;
+  enableAlert: (alert: Rule) => Promise<void>;
+  disableAlert: (alert: Rule) => Promise<void>;
 }
 
 export const RuleEnabledSwitch: React.FunctionComponent<ComponentOpts> = ({

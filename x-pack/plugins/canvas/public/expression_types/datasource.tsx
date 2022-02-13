@@ -7,8 +7,9 @@
 
 import React, { useEffect, useRef, useCallback, ReactPortal, useState, memo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import usePrevious from 'react-use/lib/usePrevious';
 import deepEqual from 'react-fast-compare';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { createPortal } from 'react-dom';
 import { BaseForm, BaseFormProps } from './base_form';
 import { ExpressionFormHandlers } from '../../common/lib';
@@ -58,6 +59,7 @@ const DatasourceWrapperComponent: React.FunctionComponent<DatasourceWrapperProps
   const [argument, setArgument] = useState<ReactPortal>();
 
   const { spec, datasourceProps, handlers } = props;
+  const prevSpec = usePrevious(spec);
 
   const onMount = useCallback((ref) => {
     datasourceRef.current = ref ?? undefined;
@@ -84,14 +86,24 @@ const DatasourceWrapperComponent: React.FunctionComponent<DatasourceWrapperProps
   }, [argument, callRenderFn]);
 
   useEffect(() => {
+    if (argument && prevSpec?.name !== spec?.name) {
+      setArgument(undefined);
+      datasourceRef.current = undefined;
+    }
+  }, [argument, prevSpec?.name, spec?.name]);
+
+  useEffect(() => {
     if (datasourceRef.current) {
       datasourceRef.current.updateProps(datasourceProps);
     }
   }, [datasourceProps]);
 
-  useEffectOnce(() => () => {
+  useEffectOnce(() => {
     datasourceRef.current = undefined;
-    handlers.destroy();
+    return () => {
+      datasourceRef.current = undefined;
+      handlers.destroy();
+    };
   });
 
   return (

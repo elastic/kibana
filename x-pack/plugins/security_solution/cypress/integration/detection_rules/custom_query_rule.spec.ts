@@ -56,7 +56,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -74,21 +73,14 @@ import {
 } from '../../screens/rule_details';
 
 import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import {
   changeRowsPerPageTo100,
   deleteFirstRule,
   deleteRuleFromDetailsPage,
   deleteSelectedRules,
   editFirstRule,
   filterByCustomRules,
-  goToCreateNewRule,
   goToRuleDetails,
   selectNumberOfRules,
-  waitForRulesTableToBeLoaded,
   waitForRulesTableToBeRefreshed,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
@@ -109,9 +101,9 @@ import {
 } from '../../tasks/create_new_rule';
 import { saveEditedRule, waitForKibana } from '../../tasks/edit_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { activatesRule } from '../../tasks/rule_details';
+import { activatesRule, getDetails } from '../../tasks/rule_details';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 describe('Custom detection rules creation', () => {
   const expectedUrls = getNewRule().referenceUrls.join('');
@@ -134,12 +126,7 @@ describe('Custom detection rules creation', () => {
   });
 
   it('Creates and activates a new rule', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
@@ -162,15 +149,11 @@ describe('Custom detection rules creation', () => {
 
     changeRowsPerPageTo100();
 
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
+    cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
 
     filterByCustomRules();
 
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-    });
+    cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', 1);
     cy.get(RULE_NAME).should('have.text', this.rule.name);
     cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
     cy.get(SEVERITY).should('have.text', this.rule.severity);
@@ -214,7 +197,9 @@ describe('Custom detection rules creation', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
+    cy.get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .should('match', /^[1-9].+$/); // Any number of alerts
     cy.get(ALERT_GRID_CELL).contains(this.rule.name);
   });
 });
@@ -223,9 +208,7 @@ describe('Custom detection rules deletion and edition', () => {
   context('Deletion', () => {
     beforeEach(() => {
       cleanKibana();
-      loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-      goToManageAlertsDetectionRules();
-      waitForAlertsIndexToBeCreated();
+      loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       createCustomRuleActivated(getNewRule(), 'rule1');
 
       createCustomRuleActivated(getNewOverrideRule(), 'rule2');
@@ -245,12 +228,9 @@ describe('Custom detection rules deletion and edition', () => {
           deleteFirstRule();
           waitForRulesTableToBeRefreshed();
 
-          cy.get(RULES_TABLE).then(($table) => {
-            cy.wrap($table.find(RULES_ROW).length).should(
-              'eql',
-              expectedNumberOfRulesAfterDeletion
-            );
-          });
+          cy.get(RULES_TABLE)
+            .find(RULES_ROW)
+            .should('have.length', expectedNumberOfRulesAfterDeletion);
           cy.get(SHOWING_RULES_TEXT).should(
             'have.text',
             `Showing ${expectedNumberOfRulesAfterDeletion} rules`
@@ -275,12 +255,9 @@ describe('Custom detection rules deletion and edition', () => {
           deleteSelectedRules();
           waitForRulesTableToBeRefreshed();
 
-          cy.get(RULES_TABLE).then(($table) => {
-            cy.wrap($table.find(RULES_ROW).length).should(
-              'eql',
-              expectedNumberOfRulesAfterDeletion
-            );
-          });
+          cy.get(RULES_TABLE)
+            .find(RULES_ROW)
+            .should('have.length', expectedNumberOfRulesAfterDeletion);
           cy.get(SHOWING_RULES_TEXT).should(
             'have.text',
             `Showing ${expectedNumberOfRulesAfterDeletion} rule`
@@ -306,12 +283,9 @@ describe('Custom detection rules deletion and edition', () => {
 
           cy.waitFor('@deleteRule').then(() => {
             cy.get(RULES_TABLE).should('exist');
-            cy.get(RULES_TABLE).then(($table) => {
-              cy.wrap($table.find(RULES_ROW).length).should(
-                'eql',
-                expectedNumberOfRulesAfterDeletion
-              );
-            });
+            cy.get(RULES_TABLE)
+              .find(RULES_ROW)
+              .should('have.length', expectedNumberOfRulesAfterDeletion);
             cy.get(SHOWING_RULES_TEXT).should(
               'have.text',
               `Showing ${expectedNumberOfRulesAfterDeletion} rules`
@@ -334,9 +308,7 @@ describe('Custom detection rules deletion and edition', () => {
 
     beforeEach(() => {
       cleanKibana();
-      loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-      goToManageAlertsDetectionRules();
-      waitForAlertsIndexToBeCreated();
+      loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       createCustomRuleActivated(getExistingRule(), 'rule1');
       reload();
     });

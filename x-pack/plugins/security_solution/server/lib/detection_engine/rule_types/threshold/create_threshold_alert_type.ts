@@ -21,6 +21,7 @@ export const createThresholdAlertType = (
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
+    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown): ThresholdRuleParams => {

@@ -15,15 +15,9 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { KbnClient } from '@kbn/test';
-import { AxiosError, AxiosResponse } from 'axios';
-import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import {
-  PACKAGE_POLICY_API_ROUTES,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common/constants';
+import { AxiosError } from 'axios';
 import { HostIsolationExceptionGenerator } from '../../../common/endpoint/data_generators/host_isolation_exception_generator';
-import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
+import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
 export const cli = () => {
   run(
@@ -74,36 +68,10 @@ const createHostIsolationException: RunFn = async ({ flags, log }) => {
   const exceptionGenerator = new HostIsolationExceptionGenerator();
   const kbn = new KbnClient({ log, url: flags.kibana as string });
 
-  log.info('Setting up fleet');
-  const fleetResponse = await setupFleetForEndpoint(kbn);
-
   log.info('Creating Host isolation exceptions list');
   await ensureCreateEndpointHostIsolationExceptionList(kbn);
 
-  // Setup a list of real endpoint policies and return a method to randomly select one
-  const randomPolicyId: () => string = await (async () => {
-    log.info('Generarting test policies...');
-    const randomN = (max: number): number => Math.floor(Math.random() * max);
-    const policyIds: string[] =
-      (await fetchEndpointPolicies(kbn)).data.items.map((policy) => policy.id) || [];
-
-    // If the number of existing policies is less than 5, then create some more policies
-    if (policyIds.length < 5) {
-      for (let i = 0, t = 5 - policyIds.length; i < t; i++) {
-        policyIds.push(
-          (
-            await indexFleetEndpointPolicy(
-              kbn,
-              `Policy for Host Isolation Exceptions assignment ${i + 1}`,
-              fleetResponse.endpointPackage.version
-            )
-          ).integrationPolicies[0].id
-        );
-      }
-    }
-
-    return () => policyIds[randomN(policyIds.length)];
-  })();
+  const randomPolicyId = await randomPolicyIdGenerator(kbn, log);
 
   log.info('Generating exceptions....');
   await Promise.all(
@@ -153,17 +121,4 @@ const ensureCreateEndpointHostIsolationExceptionList = async (kbn: KbnClient) =>
         handleThrowAxiosHttpError(e);
       }
     });
-};
-
-const fetchEndpointPolicies = (
-  kbnClient: KbnClient
-): Promise<AxiosResponse<GetPolicyListResponse>> => {
-  return kbnClient.request<GetPolicyListResponse>({
-    method: 'GET',
-    path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
-    query: {
-      perPage: 100,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-    },
-  });
 };

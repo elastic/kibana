@@ -93,6 +93,8 @@ export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
  * Builds the `kibana.alert.*` fields that are common across all alerts.
  * @param docs The parent alerts/events of the new alert to be built.
  * @param rule The rule that is generating the new alert.
+ * @param spaceId The space ID in which the rule was executed.
+ * @param reason Human readable string summarizing alert.
  */
 export const buildAlert = (
   docs: SimpleHit[],
@@ -158,8 +160,6 @@ export const buildAlert = (
       updated_by: updatedBy ?? '',
       type: completeRule.ruleParams.type,
       ...commonRuleParams,
-      severity: overrides?.severityOverride ?? completeRule.ruleParams.severity,
-      risk_score: overrides?.riskScoreOverride ?? completeRule.ruleParams.riskScore,
     }),
   } as unknown as RACAlert;
 };

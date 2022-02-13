@@ -8,18 +8,22 @@
 import { fetchDocuments } from './fetch_documents';
 import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '../../../../../inspector';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { IKibanaSearchResponse } from 'src/plugins/data/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { FetchDeps } from './fetch_all';
+import { fetchTotalHits } from './fetch_total_hits';
 
-const getDeps = () => ({
-  abortController: new AbortController(),
-  inspectorAdapters: { requests: new RequestAdapter() },
-  onResults: jest.fn(),
-  searchSessionId: '123',
-  services: discoverServiceMock,
-});
+const getDeps = () =>
+  ({
+    abortController: new AbortController(),
+    inspectorAdapters: { requests: new RequestAdapter() },
+    onResults: jest.fn(),
+    searchSessionId: '123',
+    services: discoverServiceMock,
+    savedSearch: savedSearchMock,
+  } as unknown as FetchDeps);
 
 describe('test fetchDocuments', () => {
   test('resolves with returned documents', async () => {
@@ -38,5 +42,26 @@ describe('test fetchDocuments', () => {
     expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual({
       msg: 'Oh noes!',
     });
+  });
+
+  test('fetch$ is called with execution context containing savedSearch id', async () => {
+    const fetch$Mock = jest.fn().mockReturnValue(
+      of({
+        rawResponse: { hits: { hits: [] } },
+      } as unknown as IKibanaSearchResponse<SearchResponse>)
+    );
+
+    savedSearchMockWithTimeField.searchSource.fetch$ = fetch$Mock;
+
+    await fetchTotalHits(savedSearchMockWithTimeField.searchSource, getDeps());
+    expect(fetch$Mock.mock.calls[0][0].executionContext).toMatchInlineSnapshot(`
+      Object {
+        "description": "fetch total hits",
+        "id": "the-saved-search-id",
+        "name": "discover",
+        "type": "application",
+        "url": "/",
+      }
+    `);
   });
 });

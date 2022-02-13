@@ -18,13 +18,14 @@ import {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
-import { CancellationToken } from '../../../common';
+import { CancellationToken } from '../../../common/cancellation_token';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
-import { ReportOutput } from '../../../common/types';
-import { ReportingConfigType } from '../../config';
-import { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
-import { Report, ReportDocument, ReportingStore, SavedReport } from '../store';
-import { ReportFailedFields, ReportProcessingFields } from '../store/store';
+import type { ReportOutput } from '../../../common/types';
+import type { ReportingConfigType } from '../../config';
+import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
+import type { ReportDocument, ReportingStore } from '../store';
+import { Report, SavedReport } from '../store';
+import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import {
   ReportingTask,
   ReportingTaskStatus,
@@ -220,6 +221,7 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.content_type = output.content_type || unknownMime;
       docOutput.max_size_reached = output.max_size_reached;
       docOutput.csv_contains_formulas = output.csv_contains_formulas;
+      docOutput.csv_rows = output.csv_rows;
       docOutput.size = output.size;
       docOutput.warnings =
         output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
@@ -332,6 +334,10 @@ export class ExecuteReportTask implements ReportingTask {
           );
           this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
+          const eventLog = this.reporting.getEventLogger(
+            new Report({ ...task, _id: task.id, _index: task.index })
+          );
+
           try {
             const jobContentEncoding = this.getJobContentEncoding(jobType);
             const stream = await getContentStream(
@@ -346,13 +352,22 @@ export class ExecuteReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
+
+            eventLog.logExecutionStart();
+
             const output = await this._performJob(task, cancellationToken, stream);
 
             stream.end();
+
             await promisify(finished)(stream, { readable: false });
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
+
+            eventLog.logExecutionComplete({
+              byteSize: stream.bytesWritten,
+              csvRows: output?.csv_rows,
+            });
 
             if (output) {
               this.logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
@@ -364,6 +379,8 @@ export class ExecuteReportTask implements ReportingTask {
             // untrack the report for concurrency awareness
             this.logger.debug(`Stopping ${jobId}.`);
           } catch (failedToExecuteErr) {
+            eventLog.logError(failedToExecuteErr);
+
             cancellationToken.cancel();
 
             if (attempts < maxAttempts) {

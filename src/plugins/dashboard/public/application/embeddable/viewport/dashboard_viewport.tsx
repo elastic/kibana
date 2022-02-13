@@ -13,11 +13,12 @@ import { DashboardContainer, DashboardReactContextValue } from '../dashboard_con
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupContainer } from '../../../../../presentation_util/public';
+import { ControlGroupContainer } from '../../../../../controls/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
+  controlsEnabled?: boolean;
 }
 
 interface State {
@@ -93,13 +94,15 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   public render() {
-    const { container } = this.props;
+    const { container, controlsEnabled } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
       this.state;
     return (
       <>
-        <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
+        {controlsEnabled ? (
+          <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
+        ) : null}
         <div
           data-shared-items-count={panelCount}
           data-shared-items-container

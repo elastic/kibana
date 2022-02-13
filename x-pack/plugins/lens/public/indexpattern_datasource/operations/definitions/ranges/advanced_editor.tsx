@@ -7,7 +7,7 @@
 
 import './advanced_editor.scss';
 
-import React, { useState, MouseEventHandler, useEffect } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -48,22 +48,19 @@ const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
 export const RangePopover = ({
   range,
   setRange,
-  Button,
-  initiallyOpen,
+  button,
+  triggerClose,
+  isOpen,
 }: {
   range: LocalRangeType;
   setRange: (newRange: LocalRangeType) => void;
-  Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  initiallyOpen: boolean;
+  button: React.ReactChild;
+  triggerClose: () => void;
+  isOpen: boolean;
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [tempRange, setTempRange] = useState(range);
-
-  // set popover open on start to work around EUI bug
-  useEffect(() => {
-    setIsPopoverOpen(initiallyOpen);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const labelRef = React.useRef<HTMLInputElement>();
+  const toRef = React.useRef<HTMLInputElement>();
 
   const saveRangeAndReset = (newRange: LocalRangeType, resetRange = false) => {
     if (resetRange) {
@@ -91,25 +88,13 @@ export const RangePopover = ({
     defaultMessage: 'Less than',
   });
 
-  const onSubmit = () => {
-    if (isPopoverOpen) {
-      setIsPopoverOpen(false);
-    }
-  };
-
   return (
     <EuiPopover
       display="block"
       ownFocus
-      isOpen={isPopoverOpen}
-      closePopover={onSubmit}
-      button={
-        <Button
-          onClick={() => {
-            setIsPopoverOpen((isOpen) => !isOpen);
-          }}
-        />
-      }
+      isOpen={isOpen}
+      closePopover={() => triggerClose()}
+      button={button}
       data-test-subj="indexPattern-ranges-popover"
     >
       <EuiFormRow>
@@ -131,9 +116,15 @@ export const RangePopover = ({
                   <EuiText size="s">{lteAppendLabel}</EuiText>
                 </EuiToolTip>
               }
+              onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
+                if (keys.ENTER === key && toRef.current) {
+                  toRef.current.focus();
+                }
+              }}
               compressed
               placeholder={FROM_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
+              step={1}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -143,6 +134,11 @@ export const RangePopover = ({
             <EuiFieldNumber
               className="lnsRangesOperation__popoverNumberField"
               value={isValidNumber(to) ? Number(to) : ''}
+              inputRef={(node) => {
+                if (toRef && node) {
+                  toRef.current = node;
+                }
+              }}
               onChange={({ target }) => {
                 const newRange = {
                   ...tempRange,
@@ -160,16 +156,18 @@ export const RangePopover = ({
               placeholder={TO_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
               onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
-                if (keys.ENTER === key && onSubmit) {
-                  onSubmit();
+                if (keys.ENTER === key && labelRef.current) {
+                  labelRef.current.focus();
                 }
               }}
+              step={1}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
       <EuiFormRow>
         <LabelInput
+          inputRef={labelRef}
           value={label || ''}
           onChange={(newLabel) => {
             const newRange = {
@@ -183,7 +181,9 @@ export const RangePopover = ({
             'xpack.lens.indexPattern.ranges.customRangeLabelPlaceholder',
             { defaultMessage: 'Custom label' }
           )}
-          onSubmit={onSubmit}
+          onSubmit={() => {
+            triggerClose();
+          }}
           compressed
           dataTestSubj="indexPattern-ranges-label"
         />
@@ -203,15 +203,11 @@ export const AdvancedRangeEditor = ({
   onToggleEditor: () => void;
   formatter: IFieldFormat;
 }) => {
+  const [activeRangeId, setActiveRangeId] = useState('');
   // use a local state to store ids with range objects
   const [localRanges, setLocalRanges] = useState<LocalRangeType[]>(() =>
     ranges.map((range) => ({ ...range, id: generateId() }))
   );
-  // we need to force the open state of the popover from the outside in some scenarios
-  // so we need an extra state here
-  const [isOpenByCreation, setIsOpenByCreation] = useState(false);
-
-  const lastIndex = localRanges.length - 1;
 
   // Update locally all the time, but bounce the parents prop function to avoid too many requests
   // Avoid to trigger on first render
@@ -225,15 +221,27 @@ export const AdvancedRangeEditor = ({
   );
 
   const addNewRange = () => {
+    const newRangeId = generateId();
+
     setLocalRanges([
       ...localRanges,
       {
-        id: generateId(),
+        id: newRangeId,
         from: localRanges[localRanges.length - 1].to,
         to: Infinity,
         label: '',
       },
     ]);
+
+    setActiveRangeId(newRangeId);
+  };
+
+  const changeActiveRange = (rangeId: string) => {
+    let newActiveRangeId = rangeId;
+    if (activeRangeId === rangeId) {
+      newActiveRangeId = ''; // toggle off
+    }
+    setActiveRangeId(newActiveRangeId);
   };
 
   return (
@@ -279,7 +287,8 @@ export const AdvancedRangeEditor = ({
             >
               <RangePopover
                 range={range}
-                initiallyOpen={idx === lastIndex && isOpenByCreation}
+                isOpen={range.id === activeRangeId}
+                triggerClose={() => changeActiveRange('')}
                 setRange={(newRange: LocalRangeType) => {
                   const newRanges = [...localRanges];
                   if (newRange.id === newRanges[idx].id) {
@@ -289,10 +298,10 @@ export const AdvancedRangeEditor = ({
                   }
                   setLocalRanges(newRanges);
                 }}
-                Button={({ onClick }: { onClick: MouseEventHandler }) => (
+                button={
                   <EuiLink
                     color="text"
-                    onClick={onClick}
+                    onClick={() => changeActiveRange(range.id)}
                     className="lnsRangesOperation__popoverButton"
                     data-test-subj="indexPattern-ranges-popover-trigger"
                   >
@@ -304,7 +313,7 @@ export const AdvancedRangeEditor = ({
                       {getBetterLabel(range, formatter)}
                     </EuiText>
                   </EuiLink>
-                )}
+                }
               />
             </DraggableBucketContainer>
           ))}
@@ -312,7 +321,6 @@ export const AdvancedRangeEditor = ({
         <NewBucketButton
           onClick={() => {
             addNewRange();
-            setIsOpenByCreation(true);
           }}
           label={i18n.translate('xpack.lens.indexPattern.ranges.addRange', {
             defaultMessage: 'Add range',

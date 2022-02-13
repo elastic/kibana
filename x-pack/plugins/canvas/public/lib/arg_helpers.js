@@ -6,7 +6,7 @@
  */
 
 import { includes } from 'lodash';
-import { getType } from '@kbn/interpreter/common';
+import { getType } from '@kbn/interpreter';
 
 /*
 

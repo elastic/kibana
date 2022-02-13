@@ -5,17 +5,28 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { PolicyData } from '../../../../../../../common/endpoint/types';
+import { usePolicyDetailsHostIsolationExceptionsNavigateCallback } from '../../policy_hooks';
+import { useGetLinkTo } from './use_policy_host_isolation_exceptions_empty_hooks';
 
 export const PolicyHostIsolationExceptionsEmptyUnassigned = ({
-  policyName,
-  toHostIsolationList,
+  policy,
 }: {
-  policyName: string;
-  toHostIsolationList: string;
+  policy: PolicyData;
 }) => {
+  const { onClickHandler, toRouteUrl } = useGetLinkTo(policy.id, policy.name);
+  const navigateCallback = usePolicyDetailsHostIsolationExceptionsNavigateCallback();
+  const onClickPrimaryButtonHandler = useCallback(
+    () =>
+      navigateCallback({
+        show: 'list',
+      }),
+    [navigateCallback]
+  );
+
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt
@@ -33,11 +44,23 @@ export const PolicyHostIsolationExceptionsEmptyUnassigned = ({
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unassigned.content"
             defaultMessage="There are currently no host isolation exceptions assigned to {policyName}. Assign exceptions now or add and manage them on the host isolation exceptions page."
-            values={{ policyName }}
+            values={{ policyName: policy.name }}
           />
         }
         actions={[
-          <EuiLink href={toHostIsolationList}>
+          <EuiButton
+            color="primary"
+            fill
+            onClick={onClickPrimaryButtonHandler}
+            data-test-subj="empty-assign-host-isolation-exceptions-button"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unassigned.primaryAction"
+              defaultMessage="Assign host isolation exceptions"
+            />
+          </EuiButton>,
+          // eslint-disable-next-line @elastic/eui/href-or-on-click
+          <EuiLink onClick={onClickHandler} href={toRouteUrl}>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unassigned.secondaryAction"
               defaultMessage="Manage host isolation exceptions"

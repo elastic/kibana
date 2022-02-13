@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     const histogramCharts: HistogramCharts = [

@@ -52,7 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardExpect.dataTableRowCount(5);
     await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
     // TODO add test for 'tsvb gauge' viz
-    // TODO add test for 'geo map' viz
     // This tests the presence of the two input control embeddables
     await dashboardExpect.inputControlItemCount(5);
     await dashboardExpect.tsvbTableCellCount(20);
@@ -135,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       visNames.push(await dashboardAddPanel.addVisualization('Filter Bytes Test: vega'));
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visNames);
-      expect(visNames.length).to.be.equal(26);
+      expect(visNames.length).to.be.equal(25);
       await PageObjects.dashboard.waitForRenderComplete();
     });
 
@@ -146,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visAndSearchNames);
-      expect(visAndSearchNames.length).to.be.equal(27);
+      expect(visAndSearchNames.length).to.be.equal(26);
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', {

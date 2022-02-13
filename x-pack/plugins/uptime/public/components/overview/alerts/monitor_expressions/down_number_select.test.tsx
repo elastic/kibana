@@ -6,20 +6,20 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { DownNoExpressionSelect } from './down_number_select';
 
 describe('DownNoExpressionSelect component', () => {
   it('should shallow renders against props', function () {
     const component = shallowWithIntl(
-      <DownNoExpressionSelect hasFilters={true} setAlertParams={jest.fn()} />
+      <DownNoExpressionSelect hasFilters={true} setRuleParams={jest.fn()} />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('should renders against props', function () {
     const component = renderWithIntl(
-      <DownNoExpressionSelect hasFilters={true} setAlertParams={jest.fn()} />
+      <DownNoExpressionSelect hasFilters={true} setRuleParams={jest.fn()} />
     );
     expect(component).toMatchSnapshot();
   });

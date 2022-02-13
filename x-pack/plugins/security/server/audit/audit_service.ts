@@ -26,11 +26,66 @@ export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 
 export interface AuditLogger {
+  /**
+   * Logs an {@link AuditEvent} and automatically adds meta data about the
+   * current user, space and correlation id.
+   *
+   * Guidelines around what events should be logged and how they should be
+   * structured can be found in: `/x-pack/plugins/security/README.md`
+   *
+   * @example
+   * ```typescript
+   * const auditLogger = securitySetup.audit.asScoped(request);
+   * auditLogger.log({
+   *   message: 'User is updating dashboard [id=123]',
+   *   event: {
+   *     action: 'saved_object_update',
+   *     outcome: 'unknown'
+   *   },
+   *   kibana: {
+   *     saved_object: { type: 'dashboard', id: '123' }
+   *   },
+   * });
+   * ```
+   */
   log: (event: AuditEvent | undefined) => void;
+
+  /**
+   * Indicates whether audit logging is enabled or not.
+   *
+   * Useful for skipping resource-intense operations that don't need to be performed when audit
+   * logging is disabled.
+   */
+  readonly enabled: boolean;
 }
 
 export interface AuditServiceSetup {
+  /**
+   * Creates an {@link AuditLogger} scoped to the current request.
+   *
+   * This audit logger logs events with all required user and session info and should be used for
+   * all user-initiated actions.
+   *
+   * @example
+   * ```typescript
+   * const auditLogger = securitySetup.audit.asScoped(request);
+   * auditLogger.log(event);
+   * ```
+   */
   asScoped: (request: KibanaRequest) => AuditLogger;
+
+  /**
+   * {@link AuditLogger} for background tasks only.
+   *
+   * This audit logger logs events without any user or session info and should never be used to log
+   * user-initiated actions.
+   *
+   * @example
+   * ```typescript
+   * securitySetup.audit.withoutRequest.log(event);
+   * ```
+   */
+  withoutRequest: AuditLogger;
 }
 
 interface AuditServiceSetupParams {
@@ -75,7 +130,8 @@ export class AuditService {
     );
 
     // Record feature usage at a regular interval if enabled and license allows
-    if (config.enabled && config.appender) {
+    const enabled = !!(config.enabled && config.appender);
+    if (enabled) {
       license.features$.subscribe((features) => {
         clearInterval(this.usageIntervalId!);
         if (features.allowAuditLogging) {
@@ -88,46 +144,25 @@ export class AuditService {
       });
     }
 
-    /**
-     * Creates an {@link AuditLogger} scoped to the current request.
-     *
-     * @example
-     * ```typescript
-     * const auditLogger = securitySetup.audit.asScoped(request);
-     * auditLogger.log(event);
-     * ```
-     */
-    const asScoped = (request: KibanaRequest): AuditLogger => {
-      /**
-       * Logs an {@link AuditEvent} and automatically adds meta data about the
-       * current user, space and correlation id.
-       *
-       * Guidelines around what events should be logged and how they should be
-       * structured can be found in: `/x-pack/plugins/security/README.md`
-       *
-       * @example
-       * ```typescript
-       * const auditLogger = securitySetup.audit.asScoped(request);
-       * auditLogger.log({
-       *   message: 'User is updating dashboard [id=123]',
-       *   event: {
-       *     action: 'saved_object_update',
-       *     outcome: 'unknown'
-       *   },
-       *   kibana: {
-       *     saved_object: { type: 'dashboard', id: '123' }
-       *   },
-       * });
-       * ```
-       */
-      const log: AuditLogger['log'] = async (event) => {
+    const log = (event: AuditEvent | undefined) => {
+      if (!event) {
+        return;
+      }
+      if (filterEvent(event, config.ignore_filters)) {
+        const { message, ...eventMeta } = event;
+        this.logger.info(message, eventMeta);
+      }
+    };
+
+    const asScoped = (request: KibanaRequest): AuditLogger => ({
+      log: async (event) => {
         if (!event) {
           return;
         }
         const spaceId = getSpaceId(request);
         const user = getCurrentUser(request);
         const sessionId = await getSID(request);
-        const meta: AuditEvent = {
+        log({
           ...event,
           user:
             (user && {
@@ -141,14 +176,10 @@ export class AuditService {
             ...event.kibana,
           },
           trace: { id: request.id },
-        };
-        if (filterEvent(meta, config.ignore_filters)) {
-          const { message, ...eventMeta } = meta;
-          this.logger.info(message, eventMeta);
-        }
-      };
-      return { log };
-    };
+        });
+      },
+      enabled,
+    });
 
     http.registerOnPostAuth((request, response, t) => {
       if (request.auth.isAuthenticated) {
@@ -157,7 +188,10 @@ export class AuditService {
       return t.next();
     });
 
-    return { asScoped };
+    return {
+      asScoped,
+      withoutRequest: { log, enabled },
+    };
   }
 
   stop() {

@@ -20,6 +20,7 @@ export interface SharedPieLayerState {
   showValuesInLegend?: boolean;
   nestedLegend?: boolean;
   percentDecimals?: number;
+  emptySizeRatio?: number;
   legendMaxLines?: number;
   truncateLegend?: boolean;
 }
@@ -41,6 +42,7 @@ export type PieExpressionArgs = SharedPieLayerState & {
   shape: PieChartTypes;
   hideLabels: boolean;
   palette: PaletteOutput;
+  ariaLabel?: string;
 };
 
 export interface PieExpressionProps {

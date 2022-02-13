@@ -15,9 +15,7 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const LiveQueriesPageComponent = () => {
-  const permissions = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('live_queries');
-  const newQueryLinkProps = useRouterNavigate('live_queries/new');
 
   const LeftColumn = useMemo(
     () => (
@@ -37,28 +35,35 @@ const LiveQueriesPageComponent = () => {
     []
   );
 
-  const RightColumn = useMemo(
-    () => (
-      <EuiButton
-        fill
-        {...newQueryLinkProps}
-        iconType="plusInCircle"
-        isDisabled={!(permissions.writeLiveQueries || permissions.runSavedQueries)}
-      >
-        <FormattedMessage
-          id="xpack.osquery.liveQueriesHistory.newLiveQueryButtonLabel"
-          defaultMessage="New live query"
-        />
-      </EuiButton>
-    ),
-    [permissions.writeLiveQueries, permissions.runSavedQueries, newQueryLinkProps]
-  );
-
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
+    <WithHeaderLayout
+      leftColumn={LeftColumn}
+      rightColumn={<NewLiveQueryButton />}
+      rightColumnGrow={false}
+    >
       <ActionsTable />
     </WithHeaderLayout>
   );
 };
 
 export const LiveQueriesPage = React.memo(LiveQueriesPageComponent);
+
+const NewLiveQueryButton = React.memo(() => {
+  const permissions = useKibana().services.application.capabilities.osquery;
+  const newQueryLinkProps = useRouterNavigate('live_queries/new');
+
+  return (
+    <EuiButton
+      fill
+      {...newQueryLinkProps}
+      iconType="plusInCircle"
+      isDisabled={!(permissions.writeLiveQueries || permissions.runSavedQueries)}
+    >
+      <FormattedMessage
+        id="xpack.osquery.liveQueriesHistory.newLiveQueryButtonLabel"
+        defaultMessage="New live query"
+      />
+    </EuiButton>
+  );
+});
+NewLiveQueryButton.displayName = 'NewLiveQueryButton';

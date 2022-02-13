@@ -45,7 +45,7 @@ The API returns the following:
 {
    "isSufficientlySecure":true,
    "hasPermanentEncryptionKey":true,
-   "alertingFrameworkHeath":{
+   "alertingFrameworkHealth":{
       "decryptionHealth":{
          "status":"ok",
          "timestamp":"2021-02-10T23:35:04.949Z"
@@ -73,12 +73,12 @@ The health API response contains the following properties:
 | `hasPermanentEncryptionKey`
 | Return the state `false` if Encrypted Saved Object plugin has not a permanent encryption Key.
 
-| `alertingFrameworkHeath`
+| `alertingFrameworkHealth`
 | This state property has three substates that identify the health of the alerting framework API: `decryptionHealth`, `executionHealth`, and `readHealth`.
 
 |===
 
-`alertingFrameworkHeath` consists of the following properties:
+`alertingFrameworkHealth` consists of the following properties:
 
 [cols="2*<"]
 |===

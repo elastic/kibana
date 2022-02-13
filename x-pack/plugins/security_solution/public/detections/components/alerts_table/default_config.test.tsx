@@ -48,15 +48,10 @@ describe('alerts default_config', () => {
             alias: null,
             disabled: false,
             negate: false,
-            key: 'kibana.alert.rule.threat_mapping',
-            type: 'exists',
-            value: 'exists',
+            key: 'kibana.alert.rule.type',
+            type: 'term',
           },
-          query: {
-            exists: {
-              field: 'kibana.alert.rule.threat_mapping',
-            },
-          },
+          query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
         };
         expect(filters).toHaveLength(1);
         expect(filters[0]).toEqual(expectedFilter);

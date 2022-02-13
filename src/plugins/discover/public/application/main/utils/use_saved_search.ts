@@ -23,12 +23,14 @@ import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from './get_fetch_observable';
 import { ElasticSearchHit } from '../../../types';
+import { SavedSearch } from '../../../services/saved_searches';
 
 export interface SavedSearchData {
   main$: DataMain$;
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
   charts$: DataCharts$;
+  availableFields$: AvailableFields$;
 }
 
 export interface TimechartBucketInterval {
@@ -41,6 +43,7 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
+export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
@@ -77,12 +80,17 @@ export interface DataChartsMessage extends DataMsg {
   chartData?: Chart;
 }
 
+export interface DataAvailableFieldsMsg extends DataMsg {
+  fields?: string[];
+}
+
 /**
  * This hook return 2 observables, refetch$ allows to trigger data fetching, data$ to subscribe
  * to the data fetching
  */
 export const useSavedSearch = ({
   initialFetchStatus,
+  savedSearch,
   searchSessionManager,
   searchSource,
   services,
@@ -90,6 +98,7 @@ export const useSavedSearch = ({
   useNewFieldsApi,
 }: {
   initialFetchStatus: FetchStatus;
+  savedSearch: SavedSearch;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
   services: DiscoverServices;
@@ -113,14 +122,19 @@ export const useSavedSearch = ({
 
   const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
 
+  const availableFields$: AvailableFields$ = useBehaviorSubject({
+    fetchStatus: initialFetchStatus,
+  });
+
   const dataSubjects = useMemo(() => {
     return {
       main$,
       documents$,
       totalHits$,
       charts$,
+      availableFields$,
     };
-  }, [main$, charts$, documents$, totalHits$]);
+  }, [main$, charts$, documents$, totalHits$, availableFields$]);
 
   /**
    * The observable to trigger data fetching in UI
@@ -172,9 +186,10 @@ export const useSavedSearch = ({
       await fetchAll(dataSubjects, searchSource, val === 'reset', {
         abortController: refs.current.abortController,
         appStateContainer: stateContainer.appStateContainer,
-        inspectorAdapters,
         data,
         initialFetchStatus,
+        inspectorAdapters,
+        savedSearch,
         searchSessionId: searchSessionManager.getNextSearchSessionId(),
         services,
         useNewFieldsApi,
@@ -200,6 +215,7 @@ export const useSavedSearch = ({
     inspectorAdapters,
     main$,
     refetch$,
+    savedSearch,
     searchSessionManager,
     searchSessionManager.newSearchSessionIdFromURL$,
     searchSource,

@@ -38,7 +38,13 @@ interface ChartRecord extends RecordForInfluencer {
 }
 
 export declare interface OverallSwimlaneData extends SwimlaneData {
+  /**
+   * Earliest timestampt in seconds
+   */
   earliest: number;
+  /**
+   * Latest timestampt in seconds
+   */
   latest: number;
 }
 

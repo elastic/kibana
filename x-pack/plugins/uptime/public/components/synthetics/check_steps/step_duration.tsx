@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MouseEvent } from 'react';
+
 import * as React from 'react';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { useMemo } from 'react';
@@ -14,6 +16,7 @@ import { StepFieldTrend } from './step_field_trend';
 import { microToSec } from '../../../lib/formatting';
 
 interface Props {
+  compactView?: boolean;
   step: JourneyStep;
   durationPopoverOpenIndex: number | null;
   setDurationPopoverOpenIndex: (val: number | null) => void;
@@ -23,6 +26,7 @@ export const StepDuration = ({
   step,
   durationPopoverOpenIndex,
   setDurationPopoverOpenIndex,
+  compactView = false,
 }: Props) => {
   const component = useMemo(
     () => (
@@ -42,7 +46,7 @@ export const StepDuration = ({
   const button = (
     <EuiButtonEmpty
       onMouseEnter={() => setDurationPopoverOpenIndex(step.synthetics.step?.index ?? null)}
-      iconType="visArea"
+      iconType={compactView ? undefined : 'visArea'}
     >
       {i18n.translate('xpack.uptime.synthetics.step.duration', {
         defaultMessage: '{value} seconds',
@@ -55,6 +59,7 @@ export const StepDuration = ({
 
   return (
     <EuiPopover
+      onClick={(evt: MouseEvent<HTMLDivElement>) => evt.stopPropagation()}
       isOpen={durationPopoverOpenIndex === step.synthetics.step?.index}
       button={button}
       closePopover={() => setDurationPopoverOpenIndex(null)}

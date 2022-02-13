@@ -16,17 +16,17 @@ import {
   ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
   SPACE_IDS,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
-} from '@kbn/rule-data-utils/technical_field_names';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
+} from '@kbn/rule-data-utils';
 import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getAlertAnnotations } from './get_alert_annotations';
 
 type Alert = ValuesType<
@@ -110,7 +110,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Alert - Experimental');
+      ).toEqual('Alert - Technical preview');
     });
 
     it('uses the reason in the annotation details', () => {
@@ -191,7 +191,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Warning Alert - Experimental');
+      ).toEqual('Warning Alert - Technical preview');
     });
   });
 
@@ -224,7 +224,7 @@ describe('getAlertAnnotations', () => {
           setSelectedAlertId,
           theme,
         })![0].props.dataValues[0].header
-      ).toEqual('Critical Alert - Experimental');
+      ).toEqual('Critical Alert - Technical preview');
     });
   });
 });

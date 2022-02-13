@@ -10,6 +10,7 @@ import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/typesW
 
 import { ESSearchRequest, ESSearchResponse } from 'src/core/types/elasticsearch';
 import { FieldDescriptor } from 'src/plugins/data/server';
+import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 
 export interface IRuleDataClient {
@@ -24,7 +25,9 @@ export interface IRuleDataClient {
 export interface IRuleDataReader {
   search<TSearchRequest extends ESSearchRequest>(
     request: TSearchRequest
-  ): Promise<ESSearchResponse<Partial<ParsedTechnicalFields>, TSearchRequest>>;
+  ): Promise<
+    ESSearchResponse<Partial<ParsedTechnicalFields & ParsedExperimentalFields>, TSearchRequest>
+  >;
 
   getDynamicIndexPattern(target?: string): Promise<{
     title: string;

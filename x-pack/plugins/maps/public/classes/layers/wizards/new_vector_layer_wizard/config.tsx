@@ -16,13 +16,14 @@ import { LAYER_WIZARD_CATEGORY } from '../../../../../common/constants';
 const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 
 export const newVectorLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
     defaultMessage: 'Draw shapes on the map and index in Elasticsearch',
   }),
   disabledReason: i18n.translate('xpack.maps.newVectorLayerWizard.disabledDesc', {
     defaultMessage:
-      'Unable to create index, you are missing the Kibana privilege "Index Pattern Management".',
+      'Unable to create index, you are missing the Kibana privilege "Data View Management".',
   }),
   getIsDisabled: async () => {
     const hasImportPermission = await getFileUpload().hasImportPermission({

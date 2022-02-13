@@ -36,7 +36,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { FieldButton } from '@kbn/react-field/field_button';
+import { FieldButton } from '@kbn/react-field';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { EuiHighlight } from '@elastic/eui';
 import { Filter, buildEsQuery } from '@kbn/es-query';

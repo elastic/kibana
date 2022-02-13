@@ -53,19 +53,22 @@ export const parsePoliciesToKQL = (
  * (string) and returns an unified KQL with and AND
  * The policy list can also contain "unassigned" and "global".
  * @param policies string[] a list of policies ids.
+ * @param excludedPolicies string[] a list of policies ids to exclude.
  * @param kuery string an existing KQL.
  */
 export const parsePoliciesAndFilterToKql = ({
-  policies,
+  policies = [],
+  excludedPolicies = [],
   kuery,
 }: {
   policies?: string[];
+  excludedPolicies?: string[];
   kuery?: string;
 }): string | undefined => {
-  if (!policies || !policies.length) {
+  if (policies?.length === 0 && excludedPolicies?.length === 0) {
     return kuery;
   }
 
-  const policiesKQL = parsePoliciesToKQL(policies, []);
+  const policiesKQL = parsePoliciesToKQL(policies, excludedPolicies);
   return `(${policiesKQL})${kuery ? ` AND (${kuery})` : ''}`;
 };

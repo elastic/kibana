@@ -95,9 +95,9 @@ describe('reindexService', () => {
     });
 
     it('calls security API with basic requirements', async () => {
-      clusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValueOnce(
+      clusterClient.asCurrentUser.security.hasPrivileges.mockResponse(
         // @ts-expect-error not full interface
-        asApiResponse({ has_all_requested: true })
+        { has_all_requested: true }
       );
 
       const hasRequired = await service.hasRequiredPrivileges('anIndex');
@@ -121,9 +121,9 @@ describe('reindexService', () => {
     });
 
     it('includes checking for permissions on the baseName which could be an alias', async () => {
-      clusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValueOnce(
+      clusterClient.asCurrentUser.security.hasPrivileges.mockResponse(
         // @ts-expect-error not full interface
-        asApiResponse({ has_all_requested: true })
+        { has_all_requested: true }
       );
 
       const hasRequired = await service.hasRequiredPrivileges(`reindexed-v${prevMajor}-anIndex`);
@@ -164,19 +164,23 @@ describe('reindexService', () => {
       });
 
       const reindexWarnings = await service.detectReindexWarnings(indexName);
-      expect(reindexWarnings).toEqual([]);
+      expect(reindexWarnings).toEqual([
+        {
+          warningType: 'replaceIndexWithAlias',
+        },
+      ]);
     });
 
     it('returns null if index does not exist', async () => {
       actions.getFlatSettings.mockResolvedValueOnce(null);
       const reindexWarnings = await service.detectReindexWarnings('myIndex');
-      expect(reindexWarnings).toBeNull();
+      expect(reindexWarnings).toBeUndefined();
     });
   });
 
   describe('createReindexOperation', () => {
     it('creates new reindex operation', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResolvedValueOnce(asApiResponse(true));
+      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
       actions.findReindexOperations.mockResolvedValueOnce({ total: 0 });
       actions.createReindexOp.mockResolvedValueOnce();
 
@@ -186,13 +190,13 @@ describe('reindexService', () => {
     });
 
     it('fails if index does not exist', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResolvedValueOnce(asApiResponse(false));
+      clusterClient.asCurrentUser.indices.exists.mockResponse(false);
       await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
       expect(actions.createReindexOp).not.toHaveBeenCalled();
     });
 
     it('deletes existing operation if it failed', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResolvedValueOnce(asApiResponse(true));
+      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
       actions.findReindexOperations.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.failed } }],
         total: 1,
@@ -208,7 +212,7 @@ describe('reindexService', () => {
     });
 
     it('deletes existing operation if it was cancelled', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResolvedValueOnce(asApiResponse(true));
+      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
       actions.findReindexOperations.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.cancelled } }],
         total: 1,
@@ -224,7 +228,7 @@ describe('reindexService', () => {
     });
 
     it('fails if existing operation did not fail', async () => {
-      clusterClient.asCurrentUser.indices.exists.mockResolvedValueOnce(asApiResponse(true));
+      clusterClient.asCurrentUser.indices.exists.mockResponse(true);
       actions.findReindexOperations.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.inProgress } }],
         total: 1,
@@ -384,7 +388,7 @@ describe('reindexService', () => {
       } as any);
 
       // @ts-expect-error not full interface
-      clusterClient.asCurrentUser.tasks.cancel.mockResolvedValueOnce(asApiResponse(true));
+      clusterClient.asCurrentUser.tasks.cancel.mockResponse(true);
 
       await service.cancelReindexing('myIndex');
       expect(clusterClient.asCurrentUser.tasks.cancel).toHaveBeenCalledWith({ task_id: '999333' });
@@ -455,9 +459,9 @@ describe('reindexService', () => {
       // The more intricate details of how the settings are chosen are test separately.
       it('creates new index with settings and mappings and updates lastCompletedStep', async () => {
         actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
-        clusterClient.asCurrentUser.indices.create.mockResolvedValueOnce(
+        clusterClient.asCurrentUser.indices.create.mockResponse(
           // @ts-expect-error not full interface
-          asApiResponse({ acknowledged: true })
+          { acknowledged: true }
         );
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
@@ -472,14 +476,14 @@ describe('reindexService', () => {
       });
 
       it('fails if create index is not acknowledged', async () => {
-        clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
+        clusterClient.asCurrentUser.indices.get.mockResponseOnce(
           // @ts-expect-error not full interface
-          asApiResponse({ myIndex: settingsMappings })
+          { myIndex: settingsMappings }
         );
 
-        clusterClient.asCurrentUser.indices.create.mockResolvedValueOnce(
+        clusterClient.asCurrentUser.indices.create.mockResponseOnce(
           // @ts-expect-error not full interface
-          asApiResponse({ acknowledged: false })
+          { acknowledged: false }
         );
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
@@ -489,16 +493,14 @@ describe('reindexService', () => {
       });
 
       it('fails if create index fails', async () => {
-        clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
+        clusterClient.asCurrentUser.indices.get.mockResponseOnce(
           // @ts-expect-error not full interface
-          asApiResponse({ myIndex: settingsMappings })
+          { myIndex: settingsMappings }
         );
 
         clusterClient.asCurrentUser.indices.create.mockRejectedValueOnce(new Error(`blah!`));
 
-        clusterClient.asCurrentUser.indices.putSettings.mockResolvedValueOnce(
-          asApiResponse({ acknowledged: true })
-        );
+        clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
 
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
@@ -531,7 +533,7 @@ describe('reindexService', () => {
       });
 
       it('starts reindex, saves taskId, and updates lastCompletedStep', async () => {
-        clusterClient.asCurrentUser.reindex.mockResolvedValueOnce(asApiResponse({ task: 'xyz' }));
+        clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
         expect(updatedOp.attributes.reindexTaskId).toEqual('xyz');
@@ -568,13 +570,11 @@ describe('reindexService', () => {
 
       describe('reindex task is not complete', () => {
         it('updates reindexTaskPercComplete', async () => {
-          clusterClient.asCurrentUser.tasks.get.mockResolvedValueOnce(
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
+            completed: false,
             // @ts-expect-error not full interface
-            asApiResponse({
-              completed: false,
-              task: { status: { created: 10, total: 100 } },
-            })
-          );
+            task: { status: { created: 10, total: 100 } },
+          });
 
           const updatedOp = await service.processNextStep(reindexOp);
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
@@ -584,26 +584,24 @@ describe('reindexService', () => {
 
       describe('reindex task is complete', () => {
         it('deletes task, updates reindexTaskPercComplete, updates lastCompletedStep', async () => {
-          clusterClient.asCurrentUser.tasks.get.mockResolvedValueOnce(
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
+            completed: true,
             // @ts-expect-error not full interface
-            asApiResponse({
-              completed: true,
-              task: { status: { created: 100, total: 100 } },
-            })
-          );
+            task: { status: { created: 100, total: 100 } },
+          });
 
-          clusterClient.asCurrentUser.count.mockResolvedValueOnce(
+          clusterClient.asCurrentUser.count.mockResponseOnce(
             // @ts-expect-error not full interface
-            asApiResponse({
+            {
               count: 100,
-            })
+            }
           );
 
-          clusterClient.asCurrentUser.delete.mockResolvedValueOnce(
+          clusterClient.asCurrentUser.delete.mockResponseOnce(
             // @ts-expect-error not full interface
-            asApiResponse({
+            {
               result: 'deleted',
-            })
+            }
           );
 
           const updatedOp = await service.processNextStep(reindexOp);
@@ -616,19 +614,17 @@ describe('reindexService', () => {
         });
 
         it('fails if docs created is less than count in source index', async () => {
-          clusterClient.asCurrentUser.tasks.get.mockResolvedValueOnce(
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
+            completed: true,
             // @ts-expect-error not full interface
-            asApiResponse({
-              completed: true,
-              task: { status: { created: 95, total: 95 } },
-            })
-          );
+            task: { status: { created: 95, total: 95 } },
+          });
 
-          clusterClient.asCurrentUser.count.mockResolvedValueOnce(
+          clusterClient.asCurrentUser.count.mockResponseOnce(
             // @ts-expect-error not full interface
-            asApiResponse({
+            {
               count: 100,
-            })
+            }
           );
 
           const updatedOp = await service.processNextStep(reindexOp);
@@ -641,17 +637,15 @@ describe('reindexService', () => {
 
       describe('reindex task is cancelled', () => {
         it('deletes task, updates status to cancelled', async () => {
-          clusterClient.asCurrentUser.tasks.get.mockResolvedValueOnce(
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
+            completed: true,
             // @ts-expect-error not full interface
-            asApiResponse({
-              completed: true,
-              task: { status: { created: 100, total: 100, canceled: 'by user request' } },
-            })
-          );
+            task: { status: { created: 100, total: 100, canceled: 'by user request' } },
+          });
 
-          clusterClient.asCurrentUser.delete.mockResolvedValue(
+          clusterClient.asCurrentUser.delete.mockResponseOnce(
             // @ts-expect-error not full interface
-            asApiResponse({ result: 'deleted' })
+            { result: 'deleted' }
           );
 
           const updatedOp = await service.processNextStep(reindexOp);
@@ -676,13 +670,8 @@ describe('reindexService', () => {
       } as ReindexSavedObject;
 
       it('switches aliases, sets as complete, and updates lastCompletedStep', async () => {
-        clusterClient.asCurrentUser.indices.getAlias.mockResolvedValue(
-          asApiResponse({ myIndex: { aliases: {} } })
-        );
-
-        clusterClient.asCurrentUser.indices.updateAliases.mockResolvedValue(
-          asApiResponse({ acknowledged: true })
-        );
+        clusterClient.asCurrentUser.indices.getAlias.mockResponseOnce({ myIndex: { aliases: {} } });
+        clusterClient.asCurrentUser.indices.updateAliases.mockResponseOnce({ acknowledged: true });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
         expect(clusterClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
@@ -696,20 +685,16 @@ describe('reindexService', () => {
       });
 
       it('moves existing aliases over to new index', async () => {
-        clusterClient.asCurrentUser.indices.getAlias.mockResolvedValue(
-          asApiResponse({
-            myIndex: {
-              aliases: {
-                myAlias: {},
-                myFilteredAlias: { filter: { term: { https: true } } },
-              },
+        clusterClient.asCurrentUser.indices.getAlias.mockResponseOnce({
+          myIndex: {
+            aliases: {
+              myAlias: {},
+              myFilteredAlias: { filter: { term: { https: true } } },
             },
-          })
-        );
+          },
+        });
 
-        clusterClient.asCurrentUser.indices.updateAliases.mockResolvedValue(
-          asApiResponse({ acknowledged: true })
-        );
+        clusterClient.asCurrentUser.indices.updateAliases.mockResponseOnce({ acknowledged: true });
 
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
@@ -732,9 +717,7 @@ describe('reindexService', () => {
       });
 
       it('fails if switching aliases is not acknowledged', async () => {
-        clusterClient.asCurrentUser.indices.updateAliases.mockResolvedValue(
-          asApiResponse({ acknowledged: false })
-        );
+        clusterClient.asCurrentUser.indices.updateAliases.mockResponseOnce({ acknowledged: false });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);

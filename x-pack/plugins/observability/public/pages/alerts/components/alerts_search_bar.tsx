@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { SearchBar, TimeHistory } from '../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -20,7 +20,7 @@ export function AlertsSearchBar({
   onQueryChange,
   query,
 }: {
-  dynamicIndexPatterns: IndexPatternBase[];
+  dynamicIndexPatterns: DataViewBase[];
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;

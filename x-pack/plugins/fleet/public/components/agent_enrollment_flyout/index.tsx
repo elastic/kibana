@@ -39,6 +39,7 @@ export interface Props extends BaseProps {
 }
 
 export * from './agent_policy_selection';
+export * from './agent_policy_select_create';
 export * from './managed_instructions';
 export * from './standalone_instructions';
 export * from './steps';
@@ -127,7 +128,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutBody
         banner={
           fleetStatus.isReady &&
-          !isFleetServerPolicySelected &&
           !isLoadingInitialRequest &&
           fleetServerHosts.length === 0 &&
           mode === 'managed' ? (

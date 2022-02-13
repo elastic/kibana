@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EVENT_KIND } from '@kbn/rule-data-utils/technical_field_names';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { IRuleDataClient } from '../../../../rule_registry/server';
 import {
   SERVICE_NAME,

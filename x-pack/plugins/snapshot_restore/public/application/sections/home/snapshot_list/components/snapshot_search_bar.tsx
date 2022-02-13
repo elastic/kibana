@@ -152,12 +152,13 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
         onChange={onSearchBarChange}
         toolsLeft={deleteButton}
         toolsRight={reloadButton}
-        box={{ schema: searchSchema, incremental: true }}
+        box={{ schema: searchSchema, incremental: true, 'data-test-subj': 'snapshotListSearch' }}
       />
       <EuiSpacer />
       {error ? (
         <>
           <EuiCallOut
+            data-test-subj="snapshotListSearchError"
             iconType="alert"
             color="danger"
             title={

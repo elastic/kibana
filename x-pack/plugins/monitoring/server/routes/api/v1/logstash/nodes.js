@@ -51,7 +51,7 @@ export function logstashNodesRoute(server) {
 
       try {
         const [clusterStatus, nodes] = await Promise.all([
-          getClusterStatus(req, lsIndexPattern, { clusterUuid }),
+          getClusterStatus(req, { clusterUuid }),
           getNodes(req, lsIndexPattern, { clusterUuid }),
         ]);
 

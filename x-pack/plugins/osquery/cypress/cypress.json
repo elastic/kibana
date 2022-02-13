@@ -4,7 +4,7 @@
   "execTimeout": 12000,
   "pageLoadTimeout": 12000,
   "retries": {
-    "runMode": 2
+    "runMode": 0
   },
   "screenshotsFolder": "../../../target/kibana-osquery/cypress/screenshots",
   "trashAssetsBeforeRuns": true,
@@ -12,5 +12,10 @@
   "videosFolder": "../../../target/kibana-osquery/cypress/videos",
   "viewportHeight": 900,
   "viewportWidth": 1440,
-  "experimentalStudio": true
+  "experimentalStudio": true,
+  "env": {
+    "cypress-react-selector": {
+      "root": "#osquery-app"
+    }
+  }
 }

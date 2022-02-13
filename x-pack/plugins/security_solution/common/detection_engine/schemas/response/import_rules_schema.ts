@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
 
 import { success, success_count } from '../common/schemas';
@@ -12,6 +13,9 @@ import { errorSchema } from './error_schema';
 
 export const importRulesSchema = t.exact(
   t.type({
+    exceptions_success: t.boolean,
+    exceptions_success_count: PositiveInteger,
+    exceptions_errors: t.array(errorSchema),
     success,
     success_count,
     errors: t.array(errorSchema),

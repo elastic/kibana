@@ -17,7 +17,7 @@ import { getDefaultConfigs } from '../configurations/default_configs';
 import { ReportTypesSelect } from './columns/report_type_select';
 import { ViewActions } from '../views/view_actions';
 import { Series } from './series';
-import { ReportConfigMap, useExploratoryView } from '../contexts/exploatory_view_config';
+import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
 
 export interface ReportTypeItem {
   id: string;

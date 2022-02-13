@@ -11,9 +11,6 @@ import {
   mockRawDocExistsInNamespace,
 } from './collect_multi_namespace_references.test.mock';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-
-import type { ElasticsearchClient } from '../../../elasticsearch';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
@@ -25,6 +22,7 @@ import {
 } from './collect_multi_namespace_references';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
+import { SavedObjectsErrorHelpers } from './errors';
 
 const SPACES = ['default', 'another-space'];
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
@@ -42,7 +40,7 @@ beforeEach(() => {
 });
 
 describe('collectMultiNamespaceReferences', () => {
-  let client: DeeplyMockedKeys<ElasticsearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `collectMultiNamespaceReferences` */
   function setup(
@@ -87,30 +85,28 @@ describe('collectMultiNamespaceReferences', () => {
       references?: Array<{ type: string; id: string }>;
     }>
   ) {
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        docs: results.map((x) => {
-          const references =
-            x.references?.map(({ type, id }) => ({ type, id, name: 'ref-name' })) ?? [];
-          return x.found
-            ? {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                _source: {
-                  namespaces: SPACES,
-                  references,
-                },
-                ...VERSION_PROPS,
-                found: true,
-              }
-            : {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                found: false,
-              };
-        }),
-      })
-    );
+    client.mget.mockResponseOnce({
+      docs: results.map((x) => {
+        const references =
+          x.references?.map(({ type, id }) => ({ type, id, name: 'ref-name' })) ?? [];
+        return x.found
+          ? {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              _source: {
+                namespaces: SPACES,
+                references,
+              },
+              ...VERSION_PROPS,
+              found: true,
+            }
+          : {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              found: false,
+            };
+      }),
+    });
   }
 
   /** Asserts that mget is called for the given objects */
@@ -283,6 +279,23 @@ describe('collectMultiNamespaceReferences', () => {
       { ...obj2, spaces: [], inboundReferences: [] },
       // obj3 is excluded from the results
     ]);
+  });
+  it(`handles 404 responses that don't come from Elasticsearch`, async () => {
+    const createEsUnavailableNotFoundError = () => {
+      return SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    };
+    const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
+    const params = setup([obj1]);
+    client.mget.mockReturnValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        { docs: [] },
+        { statusCode: 404 },
+        {}
+      )
+    );
+    await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrowError(
+      createEsUnavailableNotFoundError()
+    );
   });
 
   describe('legacy URL aliases', () => {

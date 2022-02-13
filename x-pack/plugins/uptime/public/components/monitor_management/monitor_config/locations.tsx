@@ -5,61 +5,68 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
 import { monitorManagementListSelector } from '../../../state/selectors';
-import { ServiceLocation } from '../../../../common/runtime_types/monitor_management';
+import { ServiceLocation } from '../../../../common/runtime_types';
 
 interface Props {
   selectedLocations: ServiceLocation[];
   setLocations: React.Dispatch<React.SetStateAction<ServiceLocation[]>>;
+  isInvalid: boolean;
 }
 
-export const ServiceLocations = ({ selectedLocations, setLocations }: Props) => {
-  const [locationsInputRef, setLocationsInputRef] = useState<HTMLInputElement | null>(null);
+export const ServiceLocations = ({ selectedLocations, setLocations, isInvalid }: Props) => {
   const [error, setError] = useState<string | null>(null);
+  const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
+    {}
+  );
   const { locations } = useSelector(monitorManagementListSelector);
 
-  const onLocationChange = (
-    selectedLocationOptions: Array<EuiComboBoxOptionOption<ServiceLocation>>
-  ) => {
-    setLocations(selectedLocationOptions as ServiceLocation[]);
+  const onLocationChange = (optionId: string) => {
+    const isSelected = !checkboxIdToSelectedMap[optionId];
+    const location = locations.find((loc) => loc.id === optionId);
+    if (isSelected) {
+      setLocations((prevLocations) => (location ? [...prevLocations, location] : prevLocations));
+    } else {
+      setLocations((prevLocations) => [...prevLocations].filter((loc) => loc.id !== optionId));
+    }
     setError(null);
   };
 
-  const onSearchChange = (value: string, hasMatchingOptions?: boolean) => {
-    setError(value.length === 0 || hasMatchingOptions ? null : `"${value}" is not a valid option`);
-  };
+  const errorMessage = error ?? (isInvalid ? VALIDATION_ERROR : null);
 
-  const onBlur = () => {
-    if (locationsInputRef) {
-      const { value } = locationsInputRef;
-      setError(value.length === 0 ? null : `"${value}" is not a valid option`);
-    }
-  };
+  useEffect(() => {
+    const newCheckboxIdToSelectedMap = selectedLocations.reduce<Record<string, boolean>>(
+      (acc, location) => {
+        acc[location.id] = true;
+        return acc;
+      },
+      {}
+    );
+    setCheckboxIdToSelectedMap(newCheckboxIdToSelectedMap);
+  }, [selectedLocations]);
 
   return (
-    <EuiFormRow label={LOCATIONS_LABEL} error={error} isInvalid={error !== null}>
-      <EuiComboBox
-        placeholder={PLACEHOLDER_LABEL}
-        options={locations}
-        selectedOptions={selectedLocations}
-        inputRef={setLocationsInputRef}
-        onChange={onLocationChange}
-        onSearchChange={onSearchChange}
-        onBlur={onBlur}
-        data-test-subj="syntheticsServiceLocationsComboBox"
+    <EuiFormRow label={LOCATIONS_LABEL} error={errorMessage} isInvalid={errorMessage !== null}>
+      <EuiCheckboxGroup
+        options={locations.map((location) => ({
+          ...location,
+          'data-test-subj': `syntheticsServiceLocation--${location.id}`,
+        }))}
+        idToSelectedMap={checkboxIdToSelectedMap}
+        onChange={(id) => onLocationChange(id)}
       />
     </EuiFormRow>
   );
 };
 
-const PLACEHOLDER_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.serviceLocationsPlaceholderLabel',
+const VALIDATION_ERROR = i18n.translate(
+  'xpack.uptime.monitorManagement.serviceLocationsValidationError',
   {
-    defaultMessage: 'Select one or locations to run your monitor.',
+    defaultMessage: 'At least one service location must be specified',
   }
 );
 

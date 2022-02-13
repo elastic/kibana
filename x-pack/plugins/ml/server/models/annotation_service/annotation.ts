@@ -71,6 +71,12 @@ export interface DeleteParams {
   id: string;
 }
 
+export interface AggByJob {
+  key: string;
+  doc_count: number;
+  latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
+}
+
 export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
@@ -99,8 +105,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       delete params.body.key;
     }
 
-    const { body } = await asInternalUser.index(params);
-    return body;
+    return await asInternalUser.index(params);
   }
 
   async function getAnnotations({
@@ -277,7 +282,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     };
 
     try {
-      const { body } = await asInternalUser.search(params);
+      const body = await asInternalUser.search(params);
 
       // @ts-expect-error TODO fix search response types
       if (body.error !== undefined && body.message !== undefined) {
@@ -369,15 +374,12 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       },
     };
 
-    const { body } = await asInternalUser.search<Annotation>(params);
+    const body = await asInternalUser.search<Annotation>(params);
 
     const annotations = (
-      body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
-        key: string;
-        doc_count: number;
-        latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
-      }>
-    ).buckets.map((bucket) => {
+      (body.aggregations!.by_job as estypes.AggregationsTermsAggregateBase<AggByJob>)
+        .buckets as AggByJob[]
+    ).map((bucket) => {
       return bucket.latest_delayed.hits.hits[0]._source!;
     });
 
@@ -398,9 +400,9 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       },
     };
 
-    const { body } = await asInternalUser.search(searchParams);
+    const body = await asInternalUser.search(searchParams);
     const totalCount =
-      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total.value;
+      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
 
     if (totalCount === 0) {
       throw Boom.notFound(`Cannot find annotation with ID ${id}`);
@@ -414,8 +416,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       refresh: 'wait_for',
     };
 
-    const { body: deleteResponse } = await asInternalUser.delete(deleteParams);
-    return deleteResponse;
+    return await asInternalUser.delete(deleteParams);
   }
 
   return {

@@ -12,7 +12,7 @@ import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import {
   ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   failedFleetActionErrorCode,
 } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
@@ -32,10 +32,12 @@ import {
 import { doesLogsEndpointActionsIndexExist } from '../utils';
 
 const actionsIndices = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_INDEX];
-const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX];
+// search all responses indices irrelevant of namespace
+const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN];
 export const logsEndpointActionsRegex = new RegExp(`(^\.ds-\.logs-endpoint\.actions-default-).+`);
+// matches index names like .ds-.logs-endpoint.action.responses-name_space---suffix-2022.01.25-000001
 export const logsEndpointResponsesRegex = new RegExp(
-  `(^\.ds-\.logs-endpoint\.action\.responses-default-).+`
+  `(^\.ds-\.logs-endpoint\.action\.responses-\\w+-).+`
 );
 const queryOptions = {
   headers: {
@@ -191,8 +193,8 @@ export const getActionRequestsResult = async ({
 
   let actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    actionRequests = await esClient.search(actionsSearchQuery, queryOptions);
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+    actionRequests = await esClient.search(actionsSearchQuery, { ...queryOptions, meta: true });
     const actionIds = actionRequests?.body?.hits?.hits?.map((e) => {
       return logsEndpointActionsRegex.test(e._index)
         ? (e._source as LogsEndpointAction).EndpointActions.action_id
@@ -231,7 +233,7 @@ export const getActionResponsesResult = async ({
   const hasLogsEndpointActionResponsesIndex = await doesLogsEndpointActionsIndexExist({
     context,
     logger,
-    indexName: ENDPOINT_ACTION_RESPONSES_INDEX,
+    indexName: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   });
 
   const responsesSearchQuery: SearchRequest = {
@@ -248,8 +250,8 @@ export const getActionResponsesResult = async ({
 
   let actionResponses: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    actionResponses = await esClient.search(responsesSearchQuery, queryOptions);
+    const esClient = context.core.elasticsearch.client.asInternalUser;
+    actionResponses = await esClient.search(responsesSearchQuery, { ...queryOptions, meta: true });
   } catch (error) {
     logger.error(error);
     throw error;

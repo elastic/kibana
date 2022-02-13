@@ -33,7 +33,7 @@ export const columns: Array<
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'kibana.alert.rule.severity',
+    id: 'kibana.alert.severity',
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
     initialWidth: 104,
   },

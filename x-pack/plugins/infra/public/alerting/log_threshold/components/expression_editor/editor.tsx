@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
   ForLastExpression,
 } from '../../../../../../triggers_actions_ui/public';
 import {
@@ -90,7 +90,7 @@ const createDefaultRatioRuleParams = (
 });
 
 export const ExpressionEditor: React.FC<
-  AlertTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
+  RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
 > = (props) => {
   const isInternal = props.metadata?.isInternal ?? false;
   const [sourceId] = useSourceId();
@@ -159,10 +159,10 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
   );
 };
 
-export const Editor: React.FC<
-  AlertTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
-> = (props) => {
-  const { setAlertParams, alertParams, errors } = props;
+export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>> = (
+  props
+) => {
+  const { setRuleParams, ruleParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceId, resolvedSourceConfiguration } = useLogSourceContext();
 
@@ -195,40 +195,40 @@ export const Editor: React.FC<
 
   const updateThreshold = useCallback(
     (thresholdParams) => {
-      const nextThresholdParams = { ...alertParams.count, ...thresholdParams };
-      setAlertParams('count', nextThresholdParams);
+      const nextThresholdParams = { ...ruleParams.count, ...thresholdParams };
+      setRuleParams('count', nextThresholdParams);
     },
-    [alertParams.count, setAlertParams]
+    [ruleParams.count, setRuleParams]
   );
 
   const updateCriteria = useCallback(
     (criteria: PartialCriteriaType) => {
-      setAlertParams('criteria', criteria);
+      setRuleParams('criteria', criteria);
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
-      setAlertParams('timeSize', ts);
+      setRuleParams('timeSize', ts);
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
       if (timeUnitRT.is(tu)) {
-        setAlertParams('timeUnit', tu);
+        setRuleParams('timeUnit', tu);
       }
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   const updateGroupBy = useCallback(
     (groups: string[]) => {
-      setAlertParams('groupBy', groups);
+      setRuleParams('groupBy', groups);
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   const defaultCountAlertParams = useMemo(
@@ -241,41 +241,41 @@ export const Editor: React.FC<
       const defaults =
         type === 'count' ? defaultCountAlertParams : createDefaultRatioRuleParams(supportedFields);
       // Reset properties that don't make sense switching from one context to the other
-      setAlertParams('count', defaults.count);
-      setAlertParams('criteria', defaults.criteria);
+      setRuleParams('count', defaults.count);
+      setRuleParams('criteria', defaults.criteria);
     },
-    [defaultCountAlertParams, setAlertParams, supportedFields]
+    [defaultCountAlertParams, setRuleParams, supportedFields]
   );
 
   useMount(() => {
-    const newAlertParams = { ...defaultCountAlertParams, ...alertParams };
+    const newAlertParams = { ...defaultCountAlertParams, ...ruleParams };
     for (const [key, value] of Object.entries(newAlertParams) as ObjectEntries<
       typeof newAlertParams
     >) {
-      setAlertParams(key, value);
+      setRuleParams(key, value);
     }
     setHasSetDefaults(true);
   });
 
   const shouldShowGroupByOptimizationWarning = useMemo(() => {
-    const hasSetGroupBy = alertParams.groupBy && alertParams.groupBy.length > 0;
+    const hasSetGroupBy = ruleParams.groupBy && ruleParams.groupBy.length > 0;
     return (
       hasSetGroupBy &&
-      alertParams.count &&
-      !isOptimizableGroupedThreshold(alertParams.count.comparator, alertParams.count.value)
+      ruleParams.count &&
+      !isOptimizableGroupedThreshold(ruleParams.count.comparator, ruleParams.count.value)
     );
-  }, [alertParams]);
+  }, [ruleParams]);
 
   // Wait until the alert param defaults have been set
   if (!hasSetDefaults) return null;
 
-  const criteriaComponent = alertParams.criteria ? (
+  const criteriaComponent = ruleParams.criteria ? (
     <Criteria
       fields={supportedFields}
-      criteria={alertParams.criteria}
+      criteria={ruleParams.criteria}
       defaultCriterion={defaultCountAlertParams.criteria[0]}
       errors={criteriaErrors}
-      ruleParams={alertParams}
+      ruleParams={ruleParams}
       sourceId={sourceId}
       updateCriteria={updateCriteria}
     />
@@ -283,32 +283,32 @@ export const Editor: React.FC<
 
   return (
     <>
-      <TypeSwitcher criteria={alertParams.criteria || []} updateType={updateType} />
+      <TypeSwitcher criteria={ruleParams.criteria || []} updateType={updateType} />
 
-      {alertParams.criteria && !isRatioRule(alertParams.criteria) && criteriaComponent}
+      {ruleParams.criteria && !isRatioRule(ruleParams.criteria) && criteriaComponent}
 
       <Threshold
-        comparator={alertParams.count?.comparator}
-        value={alertParams.count?.value}
+        comparator={ruleParams.count?.comparator}
+        value={ruleParams.count?.value}
         updateThreshold={updateThreshold}
         errors={thresholdErrors}
       />
 
       <ForLastExpression
-        timeWindowSize={alertParams.timeSize}
-        timeWindowUnit={alertParams.timeUnit}
+        timeWindowSize={ruleParams.timeSize}
+        timeWindowUnit={ruleParams.timeUnit}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         errors={{ timeWindowSize: timeWindowSizeErrors, timeSizeUnit: timeSizeUnitErrors }}
       />
 
       <GroupByExpression
-        selectedGroups={alertParams.groupBy}
+        selectedGroups={ruleParams.groupBy}
         onChange={updateGroupBy}
         fields={groupByFields}
       />
 
-      {alertParams.criteria && isRatioRule(alertParams.criteria) && criteriaComponent}
+      {ruleParams.criteria && isRatioRule(ruleParams.criteria) && criteriaComponent}
 
       {shouldShowGroupByOptimizationWarning && (
         <>

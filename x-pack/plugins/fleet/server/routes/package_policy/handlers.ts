@@ -19,6 +19,7 @@ import type {
   DeletePackagePoliciesRequestSchema,
   UpgradePackagePoliciesRequestSchema,
   DryRunPackagePoliciesRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import type {
   CreatePackagePolicyResponse,
@@ -80,15 +81,16 @@ export const getOnePackagePolicyHandler: RequestHandler<
   }
 };
 
-export const createPackagePolicyHandler: RequestHandler<
+export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
+  const spaceId = context.fleet.spaceId;
   try {
     const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
       soClient,
@@ -106,6 +108,7 @@ export const createPackagePolicyHandler: RequestHandler<
     const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
       user,
       force,
+      spaceId,
     });
     const body: CreatePackagePolicyResponse = { item: packagePolicy };
     return response.ok({

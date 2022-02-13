@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export * from './types';
 export * from './use_async';
 export * from './use_is_mounted';
 export * from './use_observable';

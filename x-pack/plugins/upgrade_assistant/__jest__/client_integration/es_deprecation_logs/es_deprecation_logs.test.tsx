@@ -16,6 +16,8 @@ import {
   DEPRECATION_LOGS_INDEX,
   DEPRECATION_LOGS_SOURCE_ID,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
+  APPS_WITH_DEPRECATION_LOGS,
+  DEPRECATION_LOGS_ORIGIN_FIELD,
 } from '../../../common/constants';
 
 // Once the logs team register the kibana locators in their app, we should be able
@@ -171,9 +173,15 @@ describe('ES deprecation logs', () => {
       component.update();
 
       expect(exists('viewObserveLogs')).toBe(true);
-      expect(find('viewObserveLogs').props().href).toBe(
-        `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:'${MOCKED_TIME}')`
+      const sourceId = DEPRECATION_LOGS_SOURCE_ID;
+      const logPosition = `(end:now,start:'${MOCKED_TIME}')`;
+      const logFilter = encodeURI(
+        `(language:kuery,query:'not ${DEPRECATION_LOGS_ORIGIN_FIELD} : (${APPS_WITH_DEPRECATION_LOGS.join(
+          ' or '
+        )})')`
       );
+      const queryParams = `sourceId=${sourceId}&logPosition=${logPosition}&logFilter=${logFilter}`;
+      expect(find('viewObserveLogs').props().href).toBe(`/app/logs/stream?${queryParams}`);
     });
 
     test(`Doesn't show observability app link if infra app is not available`, async () => {
@@ -197,8 +205,18 @@ describe('ES deprecation logs', () => {
 
       const decodedUrl = decodeURIComponent(find('viewDiscoverLogs').props().href);
       expect(decodedUrl).toContain('discoverUrl');
-      ['"language":"kuery"', '"query":"@timestamp+>'].forEach((param) => {
-        expect(decodedUrl).toContain(param);
+      [
+        '"language":"kuery"',
+        '"query":"@timestamp+>',
+        'filters=',
+        DEPRECATION_LOGS_ORIGIN_FIELD,
+        ...APPS_WITH_DEPRECATION_LOGS,
+      ].forEach((param) => {
+        try {
+          expect(decodedUrl).toContain(param);
+        } catch (e) {
+          throw new Error(`Expected [${param}] not found in ${decodedUrl}`);
+        }
       });
     });
   });

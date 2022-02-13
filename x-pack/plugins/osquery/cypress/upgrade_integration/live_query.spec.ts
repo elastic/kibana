@@ -17,7 +17,7 @@ describe('Run live query', () => {
   it('should run live query', () => {
     navigateTo('/app/osquery/live_queries/new');
     selectAllAgents();
-    inputQuery();
+    inputQuery('select * from uptime');
     submitQuery();
     checkResults();
   });

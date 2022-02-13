@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsSerializer } from '../../serialization';
 import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
+import { SavedObjectsErrorHelpers } from './errors';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { getRootFields } from './included_fields';
 import {
@@ -205,8 +207,17 @@ async function getObjectsAndReferences({
     }
     const bulkGetResponse = await client.mget(
       { body: { docs: makeBulkGetDocs(bulkGetObjects) } },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
+    // exit early if we can't verify a 404 response is from Elasticsearch
+    if (
+      isNotFoundFromUnsupportedServer({
+        statusCode: bulkGetResponse.statusCode,
+        headers: bulkGetResponse.headers,
+      })
+    ) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+    }
     const newObjectsToGet = new Set<string>();
     for (let i = 0; i < bulkGetObjects.length; i++) {
       // For every element in bulkGetObjects, there should be a matching element in bulkGetResponse.body.docs
