@@ -19,7 +19,7 @@ import {
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient
 ): Promise<ESUpgradeStatus> {
-  const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
+  const deprecations = await dataClient.asCurrentUser.migration.deprecations();
 
   const getCombinedDeprecations = async () => {
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
