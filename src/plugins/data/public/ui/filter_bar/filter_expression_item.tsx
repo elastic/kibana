@@ -87,11 +87,16 @@ export const FilterExpressionItem: FC<Props> = ({
   }
 
   function onDuplicate() {
+    debugger
+    const lastElement = groupedFilters[groupedFilters.length - 1];
+    let lastGroupId = lastElement.groupId;
+    let lastId = lastElement.id;
     const multipleUpdatedFilters = groupedFilters?.map((filter: Filter) => {
-      return { ...filter, groupId: filtersGroupsCount + 1 };
+      lastId = lastId + 1;
+      return { ...filter, groupId: lastGroupId + 1, id: lastId };
     });
-    const finalFilters = [...multipleUpdatedFilters, ...groupedFilters];
-    onUpdate?.(finalFilters, groupId, false);
+    const finalFilters = [...groupedFilters, ...multipleUpdatedFilters];
+    onUpdate?.(finalFilters, [...new Set(groupedFilters.map((filter) => filter.groupId))], false);
   }
 
   function onToggleNegated() {
