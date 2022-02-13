@@ -157,9 +157,6 @@
             "outlook365": {
               "type": "long"
             },
-            "elastic_cloud": {
-              "type": "long"
-            },
             "other": {
               "type": "long"
             },
