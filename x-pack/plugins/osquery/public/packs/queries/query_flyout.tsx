@@ -76,7 +76,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
-      if(!savedQuery) {
+      if (!savedQuery) {
         reset();
       }
 
