@@ -36,6 +36,7 @@ export interface ReportOutput extends TaskRunResult {
 export interface TaskRunResult {
   content_type: string | null;
   csv_contains_formulas?: boolean;
+  csv_rows?: number;
   max_size_reached?: boolean;
   warnings?: string[];
 }
@@ -130,6 +131,7 @@ export interface JobSummary {
   title: ReportSource['payload']['title'];
   maxSizeReached: TaskRunResult['max_size_reached'];
   csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
+  csvRows: TaskRunResult['csv_rows'];
 }
 
 export interface JobSummarySet {
