@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const omit = require('lodash/omit');
@@ -26,13 +27,15 @@ const createInstance = async (version = '7.15.0') => {
 
   let response;
   try {
-    response = await request.post('deployments?validate_only=false', {...getConfig(version), name: "Security Solution Cases"});
+    response = await request.post('deployments?validate_only=false', {
+      ...getConfig(version),
+      name: 'Security Solution Cases',
+    });
   } catch (error) {
     console.log('error', error);
     throw error;
     // throw new pRetry.AbortError(error);
   }
-
 
   if (response.status === 404) {
     throw new pRetry.AbortError(response.statusText);
@@ -71,7 +74,6 @@ const isInstanceReady = async ({ deploymentId }) => {
 const upgradeInstance = async ({ deploymentId }) => {
   console.log('upgradeInstance');
   const clusterInfo = await isInstanceReady({ deploymentId });
-
 
   const newConfig = {
     prune_orphans: false,
@@ -133,7 +135,7 @@ const upgradeInstance = async ({ deploymentId }) => {
   };
 
   const KIBANA_URL = `https://${credentials.username}:${credentials.password}@${resources.kibana}:9243`;
-  const ES_URL = `https://${credentials.username}:${credentials.password}@${resources.elasticsearch}:9243`
+  const ES_URL = `https://${credentials.username}:${credentials.password}@${resources.elasticsearch}:9243`;
 
   const baseCommand = `CYPRESS_BASE_URL=${KIBANA_URL} CYPRESS_ELASTICSEARCH_URL=${ES_URL} CYPRESS_ELASTICSEARCH_USERNAME=${credentials.username} CYPRESS_ELASTICSEARCH_PASSWORD=${credentials.password} yarn --cwd x-pack/plugins/security_solution`;
 
@@ -155,13 +157,9 @@ const upgradeInstance = async ({ deploymentId }) => {
 
   // ADD AUDITBEAT DOCUMENT
 
-  await execa.command(
-    `${baseCommand} cypress:run:upgrade`
-    ,
-    {
-      shell: true,
-    }
-  );
+  await execa.command(`${baseCommand} cypress:run:upgrade`, {
+    shell: true,
+  });
 
   await deleteInstance(deploymentId);
 })();

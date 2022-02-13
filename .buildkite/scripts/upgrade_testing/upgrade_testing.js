@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const omit = require('lodash/omit');
@@ -33,7 +34,6 @@ const createInstance = async () => {
     // throw new pRetry.AbortError(error);
   }
 
-
   if (response.status === 404) {
     throw new pRetry.AbortError(response.statusText);
   }
@@ -58,7 +58,6 @@ const isInstanceReady = async ({ deploymentId }) => {
 const upgradeInstance = async ({ deploymentId }) => {
   console.log('upgradeInstance');
   const clusterInfo = await isInstanceReady({ deploymentId });
-
 
   const newConfig = {
     prune_orphans: false,
@@ -132,22 +131,16 @@ const deleteInstance = async (deploymentId) => {
     kibana: clusterInfo.resources.kibana[0].info.metadata.endpoint,
   };
 
-  const baseCommand = `CYPRESS_BASE_URL=https://${credentials.username}:${credentials.password}@${resources.kibana}:9243 CYPRESS_ELASTICSEARCH_URL=https://${credentials.username}:${credentials.password}@${resources.elasticsearch}:9243 CYPRESS_ELASTICSEARCH_USERNAME=${credentials.username} CYPRESS_ELASTICSEARCH_PASSWORD=${credentials.password} yarn --cwd x-pack/plugins/osquery cypress:run`;
+  const baseCommand = `CYPRESS_BASE_URL=https://${credentials.username}:${credentials.password}@${resources.kibana}:9243 CYPRESS_ELASTICSEARCH_URL=https://${credentials.username}:${credentials.password}@${resources.elasticsearch}:9243 CYPRESS_ELASTICSEARCH_USERNAME=${credentials.username} CYPRESS_ELASTICSEARCH_PASSWORD=${credentials.password} yarn --cwd x-pack/plugins/security_solution cypress:run:cloud-upgrade`;
 
   console.log('command', baseCommand);
 
   try {
-    await execa.command(
-      `${baseCommand} --spec cypress/integration/trusted_apps_pre.spec.ts`,
-      {
-        shell: true,
-      }
-    );
+    await execa.command(`${baseCommand} --spec cypress/integration/trusted_apps_pre.spec.ts`, {
+      shell: true,
+    });
   } catch (error) {
-    console.error('error', error)
-    await execa.command(
-      `buildkite-agent artifact upload target/kibana-osquery/**/*`
-    );
+    console.error('error', error);
 
     await deleteInstance(deploymentId);
   }
@@ -160,17 +153,11 @@ const deleteInstance = async (deploymentId) => {
   });
 
   try {
-    await execa.command(
-      `${baseCommand} --spec cypress/integration/trusted_apps_post.spec.ts`,
-      {
-        shell: true,
-      }
-    );
+    await execa.command(`${baseCommand} --spec cypress/integration/trusted_apps_post.spec.ts`, {
+      shell: true,
+    });
   } catch (error) {
-    console.error('error', error)
-    await execa.command(
-      `buildkite-agent artifact upload target/kibana-osquery/**/*`
-    );
+    console.error('error', error);
 
     await deleteInstance(deploymentId);
   }

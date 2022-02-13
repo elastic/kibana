@@ -16,10 +16,10 @@ import {
   TRUSTED_APPLICATIONS_FLYOUT_SAVE_BUTTON,
   TRUSTED_APPLICATIONS_LIST_ITEM_EFFECT_SCOPE_MENU_BUTTON,
   TRUSTED_APPLICATIONS_LIST_ITEM_EFFECT_SCOPE_MENU,
-} from '../screens/trusted_apps';
+} from '../../screens/trusted_apps';
 
-import { login } from '../tasks/login';
-import { goToTrustedApplicationsList } from '../tasks/trusted_apps';
+import { login } from '../../tasks/login';
+import { goToTrustedApplicationsList } from '../../tasks/trusted_apps';
 
 describe('Check trusted apps after upgrade', () => {
   beforeEach(() => {

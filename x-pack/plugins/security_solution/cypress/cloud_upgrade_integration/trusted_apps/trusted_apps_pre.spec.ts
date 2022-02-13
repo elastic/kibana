@@ -11,18 +11,18 @@ import {
   TRUSTED_APPLICATIONS_FLYOUT_CONDITIONS_BUILDER_FIELD,
   TRUSTED_APPLICATIONS_FLYOUT_CONDITIONS_BUILDER_FIELD_PATH_OPTION,
   TRUSTED_APPLICATIONS_FLYOUT_CONDITIONS_BUILDER_VALUE,
-} from '../screens/trusted_apps';
-import { FLEET_AGENT_POLICIES, navigateTo } from '../tasks/navigation';
-import { goToTrustedApplicationsList } from '../tasks/trusted_apps';
-import { login } from '../tasks/login';
+} from '../../screens/trusted_apps';
+import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
+import { goToTrustedApplicationsList } from '../../tasks/trusted_apps';
+import { login } from '../../tasks/login';
 import {
   ADD_POLICY_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   DATA_COLLECTION_SETUP_STEP,
   PACKAGE_POLICY_NAME_INPUT,
   PACKAGE_POLICY_DESCRIPTION_INPUT,
-} from '../screens/integrations';
-import { closeModalIfVisible } from '../tasks/integrations';
+} from '../../screens/integrations';
+import { closeModalIfVisible } from '../../tasks/integrations';
 
 const INTEGRATION_PACKAGE_NAME = 'Endpoint Security';
 
