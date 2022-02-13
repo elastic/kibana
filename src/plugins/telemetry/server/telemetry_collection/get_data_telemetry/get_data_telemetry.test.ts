@@ -309,11 +309,11 @@ function mockEsClient(
         },
       ])
     );
-    return { body };
+    return body;
   });
   // @ts-expect-error
   esClient.indices.stats.mockImplementationOnce(async () => {
-    return { body: indexStats };
+    return indexStats;
   });
   return esClient;
 }

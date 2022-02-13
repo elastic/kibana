@@ -40,8 +40,8 @@ describe('GET /internal/security/fields/{query}', () => {
     const mockContext = {
       core: coreMock.createRequestHandlerContext(),
     };
-    mockContext.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping.mockImplementation(
-      (async () => ({ body: mockFieldMappingResponse })) as any
+    mockContext.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping.mockResponse(
+      mockFieldMappingResponse as any
     );
 
     defineGetFieldsRoutes(mockRouteDefinitionParams);

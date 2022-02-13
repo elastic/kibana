@@ -10,8 +10,17 @@ import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { Operation, DatasourcePublicAPI } from '../types';
 import { DEFAULT_PERCENT_DECIMALS, EMPTY_SIZE_RATIOS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
-import type { PieVisualizationState } from '../../common/expressions';
+import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
+
+export const getSortedGroups = (datasource: DatasourcePublicAPI, layer: PieLayerState) => {
+  const originalOrder = datasource
+    .getTableSpec()
+    .map(({ columnId }: { columnId: string }) => columnId)
+    .filter((columnId: string) => layer.groups.includes(columnId));
+  // When we add a column it could be empty, and therefore have no order
+  return Array.from(new Set(originalOrder.concat(layer.groups)));
+};
 
 export function toExpression(
   state: PieVisualizationState,
@@ -33,14 +42,15 @@ function expressionHelper(
 ): Ast | null {
   const layer = state.layers[0];
   const datasource = datasourceLayers[layer.layerId];
-  const operations = layer.groups
+  const groups = getSortedGroups(datasource, layer);
+
+  const operations = groups
     .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
   if (!layer.metric || !operations.length) {
     return null;
   }
-
   return {
     type: 'expression',
     chain: [
