@@ -90,10 +90,19 @@ export const MonitorStatusBar: React.FC = () => {
           />
         </MonListDescription>
         <MonListTitle>{URL_LABEL}</MonListTitle>
-        <MonListDescription>
-          <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank" external>
-            {full}
-          </EuiLink>
+        <MonListDescription data-test-subj="monitor-page-url">
+          {full ? (
+            <EuiLink
+              aria-label={labels.monitorUrlLinkAriaLabel}
+              href={full}
+              target="_blank"
+              external
+            >
+              {full}
+            </EuiLink>
+          ) : (
+            '--'
+          )}
         </MonListDescription>
         <MonListTitle>{MonitorIDLabel}</MonListTitle>
         <MonListDescription data-test-subj="monitor-page-title">{monitorId}</MonListDescription>

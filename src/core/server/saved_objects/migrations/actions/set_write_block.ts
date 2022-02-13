@@ -21,6 +21,7 @@ export interface SetWriteBlockParams {
   client: ElasticsearchClient;
   index: string;
 }
+
 /**
  * Sets a write block in place for the given index. If the response includes
  * `acknowledged: true` all in-progress writes have drained and no further
@@ -41,10 +42,7 @@ export const setWriteBlock =
   () => {
     return (
       client.indices
-        .addBlock<{
-          acknowledged: boolean;
-          shards_acknowledged: boolean;
-        }>(
+        .addBlock(
           {
             index,
             block: 'write',
@@ -52,8 +50,8 @@ export const setWriteBlock =
           { maxRetries: 0 /** handle retry ourselves for now */ }
         )
         // not typed yet
-        .then((res: any) => {
-          return res.body.acknowledged === true
+        .then((res) => {
+          return res.acknowledged === true
             ? Either.right('set_write_block_succeeded' as const)
             : Either.left({
                 type: 'retryable_es_client_error' as const,

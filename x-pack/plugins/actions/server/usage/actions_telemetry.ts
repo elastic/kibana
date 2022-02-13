@@ -41,7 +41,7 @@ export async function getTotalCount(
     },
   };
 
-  const { body: searchResult } = await esClient.search({
+  const searchResult = await esClient.search({
     index: kibanaIndex,
     size: 0,
     body: {
@@ -223,7 +223,7 @@ export async function getInUseTotalCount(
     });
   }
 
-  const { body: actionResults } = await esClient.search({
+  const actionResults = await esClient.search({
     index: kibanaIndex,
     size: 0,
     body: {
@@ -268,9 +268,7 @@ export async function getInUseTotalCount(
     // @ts-expect-error aggegation type is not specified
     actionResults.aggregations.preconfigured_actions?.preconfiguredActionRefIds.value;
 
-  const {
-    body: { hits: actions },
-  } = await esClient.search<{
+  const { hits: actions } = await esClient.search<{
     action: ActionResult;
     namespaces: string[];
   }>({
@@ -394,8 +392,8 @@ export async function getExecutionsPerDayCount(
     scripted_metric: {
       init_script: 'state.connectorTypes = [:];  state.total = 0;',
       map_script: `
-        if (doc['kibana.saved_objects.type'].value == 'action') { 
-          String connectorType = doc['kibana.saved_objects.type_id'].value; 
+        if (doc['kibana.saved_objects.type'].value == 'action') {
+          String connectorType = doc['kibana.saved_objects.type_id'].value;
           state.connectorTypes.put(connectorType, state.connectorTypes.containsKey(connectorType) ? state.connectorTypes.get(connectorType) + 1 : 1);
           state.total++;
         }
@@ -424,7 +422,7 @@ export async function getExecutionsPerDayCount(
     },
   };
 
-  const { body: actionResults } = await esClient.search({
+  const actionResults = await esClient.search({
     index: eventLogIndex,
     size: 0,
     body: {

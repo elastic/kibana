@@ -75,7 +75,7 @@ async function getUsersDeprecations(
 ): Promise<DeprecationsDetails[]> {
   let users: SecurityGetUserResponse;
   try {
-    users = (await client.security.getUser()).body;
+    users = await client.security.getUser();
   } catch (err) {
     if (getErrorStatusCode(err) === 403) {
       logger.warn(
@@ -139,7 +139,7 @@ async function getRoleMappingsDeprecations(
 ): Promise<DeprecationsDetails[]> {
   let roleMappings: SecurityGetRoleMappingResponse;
   try {
-    roleMappings = (await client.security.getRoleMapping()).body;
+    roleMappings = await client.security.getRoleMapping();
   } catch (err) {
     if (getErrorStatusCode(err) === 403) {
       logger.warn(
