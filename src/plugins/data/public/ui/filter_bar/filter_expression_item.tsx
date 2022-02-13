@@ -87,7 +87,6 @@ export const FilterExpressionItem: FC<Props> = ({
   }
 
   function onDuplicate() {
-    debugger
     const lastElement = groupedFilters[groupedFilters.length - 1];
     let lastGroupId = lastElement.groupId;
     let lastId = lastElement.id;
@@ -109,7 +108,7 @@ export const FilterExpressionItem: FC<Props> = ({
       }
     });
 
-    onUpdate?.(multipleUpdatedFilters, groupId, true);
+    onUpdate?.(multipleUpdatedFilters, [...new Set(groupedFilters.map((filter) => filter.groupId))], true);
   }
 
   function onToggleDisabled() {
