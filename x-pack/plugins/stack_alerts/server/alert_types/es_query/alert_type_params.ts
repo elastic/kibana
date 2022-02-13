@@ -20,28 +20,38 @@ export interface EsQueryAlertState extends AlertTypeState {
 }
 
 export const EsQueryAlertParamsSchemaProperties = {
-  index: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-  timeField: schema.string({ minLength: 1 }),
-
-  esQuery: schema.conditional(
-    schema.siblingRef('searchType'),
-    schema.literal(''),
-    schema.string({ minLength: 1 }),
-    schema.never()
-  ),
-  size: schema.conditional(
-    schema.siblingRef('searchType'),
-    schema.literal('esQuery'),
-    schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),
-    schema.never()
-  ),
-
+  size: schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),
   timeWindowSize: schema.number({ min: 1 }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   thresholdComparator: schema.string({ validate: validateComparator }),
   searchType: schema.oneOf([schema.literal('esQuery'), schema.literal('searchSource')]),
-  searchConfiguration: schema.object({}, { unknowns: 'allow' }),
+  // searchSource alert param only
+  searchConfiguration: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('searchSource'),
+    schema.object({}, { unknowns: 'allow' }),
+    schema.never()
+  ),
+  // esQuery alert params only
+  esQuery: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esQuery'),
+    schema.string({ minLength: 1 }),
+    schema.never()
+  ),
+  index: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esQuery'),
+    schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    schema.never()
+  ),
+  timeField: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esQuery'),
+    schema.string({ minLength: 1 }),
+    schema.never()
+  ),
 };
 
 export const EsQueryAlertParamsSchema = schema.object(EsQueryAlertParamsSchemaProperties, {

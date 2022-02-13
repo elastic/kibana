@@ -10,7 +10,7 @@ import 'brace';
 import { of } from 'rxjs';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import EsQueryAlertTypeExpression from './expression';
+import EsQueryAlertTypeExpression from '.';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import {
@@ -18,11 +18,11 @@ import {
   IKibanaSearchResponse,
   ISearchStart,
 } from 'src/plugins/data/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { EsQueryAlertParams } from './types';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { EsQueryAlertParams, SearchType } from '../types';
 
-jest.mock('../../../../../../src/plugins/kibana_react/public');
-jest.mock('../../../../../../src/plugins/es_ui_shared/public', () => ({
+jest.mock('../../../../../../../src/plugins/kibana_react/public');
+jest.mock('../../../../../../../src/plugins/es_ui_shared/public', () => ({
   XJson: {
     useXJsonMode: jest.fn().mockReturnValue({
       convertToJson: jest.fn(),
@@ -42,8 +42,8 @@ jest.mock('../../../../../../src/plugins/es_ui_shared/public', () => ({
     />
   ),
 }));
-jest.mock('../../../../triggers_actions_ui/public', () => {
-  const original = jest.requireActual('../../../../triggers_actions_ui/public');
+jest.mock('../../../../../triggers_actions_ui/public', () => {
+  const original = jest.requireActual('../../../../../triggers_actions_ui/public');
   return {
     ...original,
     getIndexPatterns: () => {
@@ -117,7 +117,7 @@ describe('EsQueryAlertTypeExpression', () => {
     });
   });
 
-  function getAlertParams(overrides = {}) {
+  function getAlertParams(overrides = {}): EsQueryAlertParams<SearchType.esQuery> {
     return {
       index: ['test-index'],
       timeField: '@timestamp',
@@ -127,10 +127,11 @@ describe('EsQueryAlertTypeExpression', () => {
       threshold: [0],
       timeWindowSize: 15,
       timeWindowUnit: 's',
+      searchType: SearchType.esQuery,
       ...overrides,
     };
   }
-  async function setup(alertParams: EsQueryAlertParams) {
+  async function setup(alertParams: EsQueryAlertParams<SearchType.esQuery>) {
     const errors = {
       index: [],
       esQuery: [],

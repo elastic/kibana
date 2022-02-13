@@ -14,15 +14,29 @@ export interface Comparator {
   requiredValues: number;
 }
 
-export interface EsQueryAlertParams extends AlertTypeParams {
-  index: string[];
-  timeField?: string;
-  esQuery: string;
+export enum SearchType {
+  esQuery = 'esQuery',
+  searchSource = 'searchSource',
+}
+
+export interface CommonAlertParams<T extends SearchType> extends AlertTypeParams {
   size: number;
   thresholdComparator?: string;
   threshold: number[];
   timeWindowSize: number;
   timeWindowUnit: string;
-  searchType: string;
+  searchType: T;
+}
+
+export type EsQueryAlertParams<T = SearchType> = T extends SearchType.esQuery
+  ? CommonAlertParams<SearchType.esQuery> & OnlyEsQueryAlertParams
+  : CommonAlertParams<SearchType.searchSource> & OnlySearchSourceAlertParams;
+
+export interface OnlyEsQueryAlertParams {
+  esQuery: string;
+  index: string[];
+  timeField: string;
+}
+export interface OnlySearchSourceAlertParams {
   searchConfiguration: SerializedSearchSourceFields;
 }

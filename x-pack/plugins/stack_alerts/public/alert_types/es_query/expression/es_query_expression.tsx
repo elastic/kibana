@@ -16,21 +16,21 @@ import { EuiButtonEmpty, EuiSpacer, EuiFormRow, EuiTitle, EuiLink, EuiText } fro
 import { DocLinksStart, HttpSetup } from 'kibana/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { XJson, EuiCodeEditor } from '../../../../../../src/plugins/es_ui_shared/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { XJson, EuiCodeEditor } from '../../../../../../../src/plugins/es_ui_shared/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   getFields,
   ValueExpression,
   RuleTypeParamsExpressionProps,
   ForLastExpression,
   ThresholdExpression,
-} from '../../../../triggers_actions_ui/public';
-import { validateExpression } from './validation';
-import { parseDuration } from '../../../../alerting/common';
-import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
-import { EsQueryAlertParams } from './types';
-import { IndexSelectPopover } from '../components/index_select_popover';
-import { DEFAULT_VALUES } from './constants';
+} from '../../../../../triggers_actions_ui/public';
+import { validateExpression } from '../validation';
+import { parseDuration } from '../../../../../alerting/common';
+import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
+import { EsQueryAlertParams, SearchType } from '../types';
+import { IndexSelectPopover } from '../../components/index_select_popover';
+import { DEFAULT_VALUES } from '../constants';
 
 function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
   return typeof total === 'number' ? total : total?.value ?? 0;
@@ -50,7 +50,7 @@ export const EsQueryExpression = ({
   setRuleProperty,
   errors,
   data,
-}: RuleTypeParamsExpressionProps<EsQueryAlertParams>) => {
+}: RuleTypeParamsExpressionProps<EsQueryAlertParams<SearchType.esQuery>>) => {
   const {
     index,
     timeField,
@@ -62,22 +62,18 @@ export const EsQueryExpression = ({
     timeWindowUnit,
   } = ruleParams;
 
-  const getDefaultParams = () => {
-    return {
-      ...ruleParams,
-      timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-      timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
-      thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      size: size ?? DEFAULT_VALUES.SIZE,
-      searchType: 'esQuery',
-      esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
-    };
-  };
-
-  const [currentAlertParams, setCurrentAlertParams] = useState<EsQueryAlertParams>(
-    getDefaultParams()
-  );
+  const [currentAlertParams, setCurrentAlertParams] = useState<
+    EsQueryAlertParams<SearchType.esQuery>
+  >({
+    ...ruleParams,
+    timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+    timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+    threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+    thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+    size: size ?? DEFAULT_VALUES.SIZE,
+    searchType: SearchType.esQuery,
+    esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
+  });
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {

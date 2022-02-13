@@ -6,26 +6,26 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import './search_source_threshold_expression.scss';
+import './search_source_expression.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
   EuiTitle,
   EuiExpression,
-  EuiPopover,
   EuiText,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import { Filter, ISearchSource } from '../../../../../../src/plugins/data/common';
-import { QueryStringInput } from '../../../../../../src/plugins/data/public';
-import { EsQueryAlertParams } from './types';
+import { i18n } from '@kbn/i18n';
+import { Filter, ISearchSource } from '../../../../../../../src/plugins/data/common';
+import { EsQueryAlertParams, SearchType } from '../types';
 import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
   ThresholdExpression,
-} from '../../../../triggers_actions_ui/public';
-import { DEFAULT_VALUES } from './constants';
+  ValueExpression,
+} from '../../../../../triggers_actions_ui/public';
+import { DEFAULT_VALUES } from '../constants';
 import { ReadOnlyFilterItems } from './read_only_filter_items';
 
 export const SearchSourceThresholdExpression = ({
@@ -34,23 +34,28 @@ export const SearchSourceThresholdExpression = ({
   setRuleProperty,
   data,
   errors,
-}: RuleTypeParamsExpressionProps<EsQueryAlertParams>) => {
-  const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit } = ruleParams;
+}: RuleTypeParamsExpressionProps<EsQueryAlertParams<SearchType.searchSource>>) => {
+  const {
+    searchConfiguration,
+    thresholdComparator,
+    threshold,
+    timeWindowSize,
+    timeWindowUnit,
+    size,
+  } = ruleParams;
+  const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
 
-  const getDefaultParams = () => {
-    const defaults = {
-      timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-      timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
-      thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-    };
-
-    return { ...ruleParams, ...defaults, searchType: 'searchSource' };
-  };
-
-  const [currentAlertParams, setCurrentAlertParams] = useState<EsQueryAlertParams>(
-    getDefaultParams()
-  );
+  const [currentAlertParams, setCurrentAlertParams] = useState<
+    EsQueryAlertParams<SearchType.searchSource>
+  >({
+    searchConfiguration,
+    searchType: SearchType.searchSource,
+    timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+    timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+    threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+    thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+    size: size ?? DEFAULT_VALUES.SIZE,
+  });
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -67,15 +72,6 @@ export const SearchSourceThresholdExpression = ({
     setRuleProperty('params', currentAlertParams);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
-
-  const { searchConfiguration } = ruleParams;
-
-  // Note that this PR contains a limited way to edit query and filter
-  // But it's out of scope for the MVP
-  const [showQueryBar, setShowQueryBar] = useState<boolean>(false);
-  const [showFilter, setShowFilter] = useState<boolean>(false);
 
   useEffect(() => {
     async function initSearchSource() {
@@ -109,7 +105,6 @@ export const SearchSourceThresholdExpression = ({
     ({ meta }) => !meta.disabled
   );
   const indexPatterns = [dataView];
-
   return (
     <Fragment>
       <EuiTitle size="xs">
@@ -122,41 +117,26 @@ export const SearchSourceThresholdExpression = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiExpression
+        className="dscExpressionParam"
         description={'Data view'}
         value={dataView.title}
         isActive={true}
         display="columns"
       />
-      <EuiPopover
-        button={
-          <EuiExpression
-            description={'Query'}
-            value={query.query}
-            isActive={true}
-            display="columns"
-          />
-        }
-        display="block"
-        isOpen={showQueryBar}
-        closePopover={() => setShowQueryBar(false)}
-      >
-        <QueryStringInput indexPatterns={indexPatterns} query={query} />
-      </EuiPopover>
-      <EuiSpacer size="s" />
-      <EuiPopover
-        button={
-          <EuiExpression
-            className="searchSourceAlertFilters"
-            title={'sas'}
-            description={'Filter'}
-            value={<ReadOnlyFilterItems filters={filters} indexPatterns={indexPatterns} />}
-            isActive={true}
-            display="columns"
-          />
-        }
-        display="block"
-        isOpen={showFilter}
-        closePopover={() => setShowFilter(false)}
+      <EuiExpression
+        className="dscExpressionParam"
+        description={'Query'}
+        value={query.query}
+        isActive={true}
+        display="columns"
+      />
+      <EuiExpression
+        className="dscExpressionParam searchSourceAlertFilters"
+        title={'sas'}
+        description={'Filter'}
+        value={<ReadOnlyFilterItems filters={filters} indexPatterns={indexPatterns} />}
+        isActive={true}
+        display="columns"
       />
       <EuiText size="xs">
         <FormattedMessage
@@ -164,6 +144,31 @@ export const SearchSourceThresholdExpression = ({
           defaultMessage="Note that data view, query, filter are currently not editable"
         />
       </EuiText>
+
+      <EuiSpacer size="s" />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.selectSizePrompt"
+            defaultMessage="Select a size"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <ValueExpression
+        description={i18n.translate('xpack.stackAlerts.esQuery.ui.sizeExpression', {
+          defaultMessage: 'Size',
+        })}
+        data-test-subj="sizeValueExpression"
+        value={size}
+        errors={errors.size}
+        display="fullWidth"
+        popupPosition={'upLeft'}
+        onChangeSelectedValue={(updatedValue) => {
+          setParam('size', updatedValue);
+        }}
+      />
+
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
         <h5>

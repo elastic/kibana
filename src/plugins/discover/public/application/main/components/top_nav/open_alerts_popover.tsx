@@ -52,12 +52,10 @@ export function AlertsPopover(props: AlertsPopoverProps) {
     });
 
     return {
-      index: [dataView?.id],
-      timeField: dataView?.timeFieldName,
       searchType: 'searchSource',
       searchConfiguration: nextSearchSource.getSerializedFields(),
     };
-  }, [searchSource, services, dataView]);
+  }, [searchSource, services]);
 
   const SearchThresholdAlertFlyout = useMemo(() => {
     if (!alertFlyoutVisible) {

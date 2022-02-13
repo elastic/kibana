@@ -11,31 +11,29 @@ import { i18n } from '@kbn/i18n';
 import 'brace/theme/github';
 
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { RuleTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
-import { EsQueryAlertParams } from './types';
-import { SearchSourceThresholdExpression } from './search_source_threshold_expression';
+import { RuleTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
+import { EsQueryAlertParams } from '../types';
+import { SearchSourceThresholdExpression } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
+import { isSearchSourceAlert } from '../util';
 
 const expressionFieldsWithValidation = [
   'index',
-  'esQuery',
   'size',
   'timeField',
   'threshold0',
   'threshold1',
   'timeWindowSize',
+  'searchType',
+  'esQuery',
+  'searchConfiguration',
 ];
 
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<EsQueryAlertParams>
 > = (props) => {
-  const {
-    ruleParams: { searchType },
-    ruleParams,
-    errors,
-  } = props;
-
-  const isIndexThreshold = searchType === 'searchSource';
+  const { ruleParams, errors } = props;
+  const isSearchSource = isSearchSourceAlert(ruleParams);
 
   const hasExpressionErrors = !!Object.keys(errors).find((errorKey) => {
     return (
@@ -62,14 +60,11 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         </Fragment>
       )}
 
-      {isIndexThreshold ? (
-        <SearchSourceThresholdExpression {...props} />
+      {isSearchSource ? (
+        <SearchSourceThresholdExpression {...props} ruleParams={ruleParams} />
       ) : (
-        <EsQueryExpression {...props} />
+        <EsQueryExpression {...props} ruleParams={ruleParams} />
       )}
     </Fragment>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export { EsQueryAlertTypeExpression as default };

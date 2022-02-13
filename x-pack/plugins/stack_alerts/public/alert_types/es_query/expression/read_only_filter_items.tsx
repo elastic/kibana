@@ -9,9 +9,12 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
 
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { FilterItem, getDisplayValueFromFilter } from '../../../../../../src/plugins/data/public';
-import { Filter, IIndexPattern } from '../../../../../../src/plugins/data/common';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  FilterItem,
+  getDisplayValueFromFilter,
+} from '../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 const FilterItemComponent = injectI18n(FilterItem);
 
