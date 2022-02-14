@@ -37,9 +37,10 @@ import {
   VisualizationMap,
   DatasourceMap,
   DatasourceFixAction,
+  Suggestion,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
-import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
+import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';

@@ -8,6 +8,7 @@
 
 import { Action } from 'history';
 import Boom from '@hapi/boom';
+import type { ButtonColor } from '@elastic/eui';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Client } from '@elastic/elasticsearch';
 import { ConfigPath } from '@kbn/config';
@@ -116,7 +117,11 @@ export enum AppLeaveActionType {
 // @public
 export interface AppLeaveConfirmAction {
     // (undocumented)
+    buttonColor?: ButtonColor;
+    // (undocumented)
     callback?: () => void;
+    // (undocumented)
+    confirmButtonText?: string;
     // (undocumented)
     text: string;
     // (undocumented)
