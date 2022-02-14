@@ -6,20 +6,21 @@
  */
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { parseDuration } from '../../../../../alerting/common/parse_duration';
 import {
   RuleTypeModel,
   Rule,
   IErrorObject,
   AlertAction,
-  RuleType,
   ValidationResult,
   ActionTypeRegistryContract,
+  TriggersActionsUiConfig,
 } from '../../../types';
 import { InitialAlert } from './alert_reducer';
 
 export function validateBaseProperties(
   alertObject: InitialAlert,
-  serverRuleType?: RuleType<string, string>
+  config: TriggersActionsUiConfig
 ): ValidationResult {
   const validationResult = { errors: {} };
   const errors = {
@@ -42,6 +43,19 @@ export function validateBaseProperties(
         defaultMessage: 'Check interval is required.',
       })
     );
+  } else if (config.minimumScheduleInterval) {
+    const duration = parseDuration(alertObject.schedule.interval);
+    const minimumDuration = parseDuration(config.minimumScheduleInterval);
+    if (duration < minimumDuration) {
+      errors.interval.push(
+        i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.belowMinimumText', {
+          defaultMessage: 'Interval is below minimum ({minimum}).',
+          values: {
+            minimum: config.minimumScheduleInterval,
+          },
+        })
+      );
+    }
   }
 
   if (!alertObject.alertTypeId) {
@@ -68,12 +82,12 @@ export function validateBaseProperties(
 export function getAlertErrors(
   alert: Rule,
   alertTypeModel: RuleTypeModel | null,
-  serverRuleType?: RuleType<string, string>
+  config: TriggersActionsUiConfig
 ) {
   const alertParamsErrors: IErrorObject = alertTypeModel
     ? alertTypeModel.validate(alert.params).errors
     : [];
-  const alertBaseErrors = validateBaseProperties(alert, serverRuleType).errors as IErrorObject;
+  const alertBaseErrors = validateBaseProperties(alert, config).errors as IErrorObject;
   const alertErrors = {
     ...alertParamsErrors,
     ...alertBaseErrors,

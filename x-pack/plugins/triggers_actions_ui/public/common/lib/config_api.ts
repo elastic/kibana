@@ -8,6 +8,6 @@
 import { HttpSetup } from 'kibana/public';
 import { BASE_TRIGGERS_ACTIONS_UI_API_PATH } from '../../../common';
 
-export async function triggersActionsUiHealth({ http }: { http: HttpSetup }): Promise<any> {
-  return await http.get(`${BASE_TRIGGERS_ACTIONS_UI_API_PATH}/_health`);
+export async function triggersActionsUiConfig({ http }: { http: HttpSetup }): Promise<any> {
+  return await http.get(`${BASE_TRIGGERS_ACTIONS_UI_API_PATH}/_config`);
 }

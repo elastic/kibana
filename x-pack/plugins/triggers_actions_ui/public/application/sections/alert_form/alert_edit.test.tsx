@@ -35,6 +35,10 @@ jest.mock('../../lib/alert_api', () => ({
   })),
 }));
 
+jest.mock('../../../common/lib/config_api', () => ({
+  triggersActionsUiConfig: jest.fn().mockResolvedValue({ minimumScheduleInterval: '1m' }),
+}));
+
 jest.mock('./alert_errors', () => ({
   getAlertActionErrors: jest.fn().mockImplementation(() => {
     return [];
@@ -220,11 +224,11 @@ describe('alert_edit', () => {
     );
   });
 
-  it('should pass in the server alert type into `getAlertErrors`', async () => {
+  it('should pass in the config into `getAlertErrors`', async () => {
     const { getAlertErrors } = jest.requireMock('./alert_errors');
     await setup();
     const lastCall = getAlertErrors.mock.calls[getAlertErrors.mock.calls.length - 1];
     expect(lastCall[2]).toBeDefined();
-    expect(lastCall[2].id).toBe('my-alert-type');
+    expect(lastCall[2]).toEqual({ minimumScheduleInterval: '1m' });
   });
 });

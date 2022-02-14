@@ -60,7 +60,7 @@ import {
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
 import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
-import { AlertingConfig } from './config';
+import { AlertingConfig, PublicAlertingConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
@@ -101,6 +101,7 @@ export interface PluginSetupContract {
     >
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;
+  getConfig: () => PublicAlertingConfig;
 }
 
 export interface PluginStartContract {
@@ -304,6 +305,11 @@ export class AlertingPlugin {
             return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
           }
         );
+      },
+      getConfig: () => {
+        return {
+          minimumScheduleInterval: alertingConfig.minimumScheduleInterval,
+        };
       },
     };
   }

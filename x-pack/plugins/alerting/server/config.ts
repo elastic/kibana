@@ -26,3 +26,4 @@ export const configSchema = schema.object({
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
+export type PublicAlertingConfig = Pick<AlertingConfig, 'minimumScheduleInterval'>;

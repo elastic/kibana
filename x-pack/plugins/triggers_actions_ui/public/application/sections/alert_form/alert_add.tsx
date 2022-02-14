@@ -18,6 +18,7 @@ import {
   IErrorObject,
   AlertAddProps,
   RuleTypeIndex,
+  TriggersActionsUiConfig,
 } from '../../../types';
 import { AlertForm } from './alert_form';
 import { getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_errors';
@@ -33,6 +34,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_ALERT_INTERVAL } from '../../constants';
+import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 
 const AlertAdd = ({
   consumer,
@@ -68,6 +70,7 @@ const AlertAdd = ({
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
   });
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
   const [initialAlertParams, setInitialAlertParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
@@ -92,6 +95,12 @@ const AlertAdd = ({
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
+
+  useEffect(() => {
+    (async () => {
+      setConfig(await triggersActionsUiConfig({ http }));
+    })();
+  }, [http]);
 
   useEffect(() => {
     if (alertTypeId) {
@@ -179,7 +188,7 @@ const AlertAdd = ({
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Rule,
     alertType,
-    alert.alertTypeId ? ruleTypeIndex?.get(alert.alertTypeId) : undefined
+    config
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this alert

@@ -99,6 +99,35 @@ describe('Alerting Plugin', () => {
       expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
     });
 
+    it(`exposes configured minimumScheduleInterval()`, async () => {
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
+        minimumScheduleInterval: '1m',
+      });
+      plugin = new AlertingPlugin(context);
+
+      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      const setupContract = plugin.setup(coreMock.createSetup(), {
+        licensing: licensingMock.createSetup(),
+        encryptedSavedObjects: encryptedSavedObjectsSetup,
+        taskManager: taskManagerMock.createSetup(),
+        eventLog: eventLogServiceMock.create(),
+        actions: actionsMock.createSetup(),
+        statusService: statusServiceMock.createSetupContract(),
+      });
+
+      expect(setupContract.getConfig()).toEqual({ minimumScheduleInterval: '1m' });
+    });
+
     describe('registerType()', () => {
       let setup: PluginSetupContract;
       const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {

@@ -30,6 +30,7 @@ import {
   AlertEditProps,
   IErrorObject,
   RuleType,
+  TriggersActionsUiConfig,
 } from '../../../types';
 import { AlertForm } from './alert_form';
 import { getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_errors';
@@ -41,6 +42,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConfirmAlertClose } from './confirm_alert_close';
 import { hasAlertChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
+import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 
 export const AlertEdit = ({
   initialAlert,
@@ -66,6 +68,7 @@ export const AlertEdit = ({
   const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
     props.ruleType
   );
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
 
   const {
     http,
@@ -76,6 +79,12 @@ export const AlertEdit = ({
   };
 
   const alertType = ruleTypeRegistry.get(alert.alertTypeId);
+
+  useEffect(() => {
+    (async () => {
+      setConfig(await triggersActionsUiConfig({ http }));
+    })();
+  }, [http]);
 
   useEffect(() => {
     (async () => {
@@ -102,7 +111,7 @@ export const AlertEdit = ({
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
     alert as Rule,
     alertType,
-    serverRuleType
+    config
   );
 
   const checkForChangesAndCloseFlyout = () => {

@@ -14,15 +14,16 @@ import {
   hasObjectErrors,
   isValidAlert,
 } from './alert_errors';
-import { Rule, RuleType, RuleTypeModel } from '../../../types';
+import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
+const config = { minimumScheduleInterval: '1m' };
 describe('alert_errors', () => {
   describe('validateBaseProperties()', () => {
     it('should validate the name', () => {
       const alert = mockAlert();
       alert.name = '';
-      const result = validateBaseProperties(alert);
+      const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: ['Name is required.'],
         interval: [],
@@ -34,7 +35,7 @@ describe('alert_errors', () => {
     it('should validate the interval', () => {
       const alert = mockAlert();
       alert.schedule.interval = '';
-      const result = validateBaseProperties(alert);
+      const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: [],
         interval: ['Check interval is required.'],
@@ -43,10 +44,22 @@ describe('alert_errors', () => {
       });
     });
 
+    it('should validate the minimumScheduleInterval', () => {
+      const alert = mockAlert();
+      alert.schedule.interval = '2s';
+      const result = validateBaseProperties(alert, config);
+      expect(result.errors).toStrictEqual({
+        name: [],
+        interval: ['Interval is below minimum (1m).'],
+        alertTypeId: [],
+        actionConnectors: [],
+      });
+    });
+
     it('should validate the alertTypeId', () => {
       const alert = mockAlert();
       alert.alertTypeId = '';
-      const result = validateBaseProperties(alert);
+      const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: [],
         interval: [],
@@ -67,7 +80,7 @@ describe('alert_errors', () => {
           },
         },
       ];
-      const result = validateBaseProperties(alert);
+      const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: [],
         interval: [],
@@ -90,7 +103,7 @@ describe('alert_errors', () => {
             },
           }),
         }),
-        mockserverRuleType()
+        config
       );
       expect(result).toStrictEqual({
         alertParamsErrors: { field: ['This is wrong'] },
@@ -201,31 +214,6 @@ describe('alert_errors', () => {
     });
   });
 });
-
-function mockserverRuleType(
-  overloads: Partial<RuleType<string, string>> = {}
-): RuleType<string, string> {
-  return {
-    actionGroups: [],
-    defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic',
-    recoveryActionGroup: {
-      id: 'recovery',
-      name: 'doRecovery',
-    },
-    id: 'myAppAlertType',
-    name: 'myAppAlertType',
-    producer: 'myApp',
-    authorizedConsumers: {},
-    enabledInLicense: true,
-    actionVariables: {
-      context: [],
-      state: [],
-      params: [],
-    },
-    ...overloads,
-  };
-}
 
 function mockAlertTypeModel(overloads: Partial<RuleTypeModel> = {}): RuleTypeModel {
   return {
