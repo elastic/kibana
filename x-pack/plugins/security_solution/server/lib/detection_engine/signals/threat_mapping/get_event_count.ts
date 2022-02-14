@@ -29,7 +29,7 @@ export const getEventCount = async ({
     timestampOverride,
     searchAfterSortIds: undefined,
   }).body.query;
-  const { body: response } = await esClient.count({
+  const response = await esClient.count({
     body: { query: eventSearchQueryBodyQuery },
     ignore_unavailable: true,
     index,
