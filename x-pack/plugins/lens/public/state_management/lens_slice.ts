@@ -12,16 +12,14 @@ import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
+import type { VisualizeEditorContext, Suggestion } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import { LensAppState, LensStoreDeps, VisualizationState } from './types';
 import { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType } from '../../common/types';
 import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
-import {
-  getVisualizeFieldSuggestions,
-  Suggestion,
-} from '../editor_frame_service/editor_frame/suggestion_helpers';
+import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 
 export const initialState: LensAppState = {
@@ -131,7 +129,7 @@ export const initEmpty = createAction(
     initialContext,
   }: {
     newState: Partial<LensAppState>;
-    initialContext?: VisualizeFieldContext;
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   }) {
     return { payload: { layerId: generateId(), newState, initialContext } };
   }
@@ -411,7 +409,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }: {
         payload: {
           newState: Partial<LensAppState>;
-          initialContext: VisualizeFieldContext | undefined;
+          initialContext: VisualizeFieldContext | VisualizeEditorContext | undefined;
           layerId: string;
         };
       }

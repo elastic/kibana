@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -22,7 +22,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useGetSettings, sendGetOneAgentPolicy, useFleetStatus } from '../../hooks';
+import {
+  useGetSettings,
+  sendGetOneAgentPolicy,
+  useFleetStatus,
+  useGetAgentPolicies,
+} from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy } from '../../types';
 
@@ -47,7 +52,6 @@ export * from './steps';
 export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentPolicy,
-  agentPolicies,
   viewDataStep,
   defaultMode = 'managed',
 }) => {
@@ -59,6 +63,24 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   const fleetStatus = useFleetStatus();
   const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
+
+  // loading the latest agentPolicies for add agent flyout
+  const {
+    data: agentPoliciesData,
+    isLoading: isLoadingAgentPolicies,
+    resendRequest: refreshAgentPolicies,
+  } = useGetAgentPolicies({
+    page: 1,
+    perPage: 1000,
+    full: true,
+  });
+
+  const agentPolicies = useMemo(() => {
+    if (!isLoadingAgentPolicies) {
+      return agentPoliciesData?.items;
+    }
+    return [];
+  }, [isLoadingAgentPolicies, agentPoliciesData?.items]);
 
   useEffect(() => {
     async function checkPolicyIsFleetServer() {
@@ -143,9 +165,14 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             agentPolicies={agentPolicies}
             viewDataStep={viewDataStep}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
+            refreshAgentPolicies={refreshAgentPolicies}
           />
         ) : (
-          <StandaloneInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
+          <StandaloneInstructions
+            agentPolicy={agentPolicy}
+            agentPolicies={agentPolicies}
+            refreshAgentPolicies={refreshAgentPolicies}
+          />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
