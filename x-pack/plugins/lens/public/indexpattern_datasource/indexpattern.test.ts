@@ -491,13 +491,13 @@ describe('IndexPattern Data Source', () => {
       `);
     });
 
-    it('should put all time fields used in date_histograms to the esaggs timeFields parameter', async () => {
+    it('should put all time fields used in date_histograms to the esaggs timeFields parameter if not ignoring global time range', async () => {
       const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
             indexPatternId: '1',
-            columnOrder: ['col1', 'col2', 'col3'],
+            columnOrder: ['col1', 'col2', 'col3', 'col4'],
             columns: {
               col1: {
                 label: 'Count of records',
@@ -524,6 +524,17 @@ describe('IndexPattern Data Source', () => {
                 sourceField: 'another_datefield',
                 params: {
                   interval: 'auto',
+                },
+              } as DateHistogramIndexPatternColumn,
+              col4: {
+                label: 'Date 3',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'yet_another_datefield',
+                params: {
+                  interval: '2d',
+                  ignoreTimeRange: true,
                 },
               } as DateHistogramIndexPatternColumn,
             },
