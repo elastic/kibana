@@ -82,6 +82,7 @@
     "**/handlebars/uglify-js": "^3.14.3",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/html-minifier/uglify-js": "^3.14.3",
+    "**/html-to-react/ramda": "0.28.0",
     "**/isomorphic-fetch/node-fetch": "^2.6.1",
     "**/istanbul-lib-coverage": "^3.2.0",
     "**/json-schema": "^0.4.0",
