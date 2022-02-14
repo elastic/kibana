@@ -14,8 +14,6 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await ml.trainedModels.createTestTrainedModels('classification', 15, true);
       await ml.trainedModels.createTestTrainedModels('regression', 15);
-      await ml.securityUI.loginAsMlPowerUser();
-      await ml.navigation.navigateToTrainedModels();
     });
 
     after(async () => {
@@ -46,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await ml.securityUI.loginAsMlPowerUser();
         await ml.navigation.navigateToTrainedModels();
+        await ml.commonUI.waitForRefreshButtonEnabled();
       });
 
       after(async () => {
@@ -173,6 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await ml.securityUI.loginAsMlViewer();
         await ml.navigation.navigateToTrainedModels();
+        await ml.commonUI.waitForRefreshButtonEnabled();
       });
 
       after(async () => {
