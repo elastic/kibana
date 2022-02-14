@@ -20,17 +20,12 @@ interface IProps {
   handleClick: () => void;
 }
 
-export const OsqueryActionItem = ({ handleClick }: IProps) => {
-  return useMemo(
-    () => (
-      <EuiContextMenuItem
-        key="osquery-action-item"
-        data-test-subj="osquery-action-item"
-        onClick={handleClick}
-      >
-        {ACTION_OSQUERY}
-      </EuiContextMenuItem>
-    ),
-    [handleClick]
-  );
-};
+export const OsqueryActionItem = React.memo(({ handleClick }: IProps) => (
+  <EuiContextMenuItem
+    key="osquery-action-item"
+    data-test-subj="osquery-action-item"
+    onClick={handleClick}
+  >
+    {ACTION_OSQUERY}
+  </EuiContextMenuItem>
+));
