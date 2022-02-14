@@ -19,7 +19,8 @@ When you use {kib} for the first time, you're presented with a new interactive
 UI that helps you securely set up and connect {kib} to {es}.
 Simply paste the enrollment token that you receive when you start
 {es}, and {kib} sets up all the security features
-and connects to {es} over TLS.
+and connects to {es} over TLS. Read
+https://www.elastic.co/blog/introducing-simplified-elastic-stack-security[the blog] for full details.
 
 [role="screenshot"]
 image::images/highlights-security.png[Configure Elastic to get started]
@@ -37,6 +38,8 @@ exactly as index patterns did in previous releases.
 
 Elastic offers full vector tile support, now generally available, in {kib} *Maps*.
 Enjoy faster performance and smooth navigation of your data at scale.
+Read more about
+https://www.elastic.co/blog/introducing-elasticsearch-vector-tile-search-api-for-geospatial[this feature].
 
 [role="screenshot"]
 image::images/highlights-maps.png[Three vector tile examples in Maps]
