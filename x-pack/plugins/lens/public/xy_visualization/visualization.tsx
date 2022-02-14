@@ -243,14 +243,14 @@ export const getXyVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
         icon: LensIconChartMixedXy,
       },
       {
         type: layerTypes.REFERENCELINE,
         label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
-          defaultMessage: 'Add reference layer',
+          defaultMessage: 'Reference lines',
         }),
         icon: LensIconChartBarReferenceLine,
         disabled:

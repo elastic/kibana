@@ -7,14 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonGroup,
-  EuiComboBox,
-  EuiFormRow,
-  EuiIcon,
-  EuiRange,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon, EuiRange } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState } from '../types';
@@ -28,7 +21,7 @@ import { TooltipWrapper, useDebouncedValue } from '../../shared_components';
 
 const icons = [
   {
-    value: 'none',
+    value: 'empty',
     label: i18n.translate('xpack.lens.xyChart.referenceLine.noIconLabel', {
       defaultMessage: 'None',
     }),
@@ -113,6 +106,7 @@ const IconSelect = ({
       singleSelection={{ asPlainText: true }}
       renderOption={IconView}
       compressed
+      prepend={hasIcon(selectedIcon.value) ? <EuiIcon type={selectedIcon.value} /> : undefined}
     />
   );
 };
@@ -161,15 +155,14 @@ function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
 }
 
 function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
-  const options = [
-    {
-      id: `${idPrefix}auto`,
-      label: i18n.translate('xpack.lens.xyChart.referenceLineMarker.auto', {
-        defaultMessage: 'Auto',
-      }),
-      'data-test-subj': 'lnsXY_referenceLine_markerPosition_auto',
-    },
-  ];
+  const autoOption = {
+    id: `${idPrefix}auto`,
+    label: i18n.translate('xpack.lens.xyChart.referenceLineMarker.auto', {
+      defaultMessage: 'Auto',
+    }),
+    'data-test-subj': 'lnsXY_referenceLine_markerPosition_auto',
+  };
+
   const topLabel = i18n.translate('xpack.lens.xyChart.markerPosition.above', {
     defaultMessage: 'Top',
   });
@@ -183,47 +176,37 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
     defaultMessage: 'Right',
   });
   if (axisMode === 'bottom') {
-    const bottomOptions = [
-      {
-        id: `${idPrefix}above`,
-        label: isHorizontal ? rightLabel : topLabel,
-        'data-test-subj': 'lnsXY_referenceLine_markerPosition_above',
-      },
+    return [
       {
         id: `${idPrefix}below`,
         label: isHorizontal ? leftLabel : bottomLabel,
         'data-test-subj': 'lnsXY_referenceLine_markerPosition_below',
       },
+      autoOption,
+      {
+        id: `${idPrefix}above`,
+        label: isHorizontal ? rightLabel : topLabel,
+        'data-test-subj': 'lnsXY_referenceLine_markerPosition_above',
+      },
     ];
-    if (isHorizontal) {
-      // above -> below
-      // left -> right
-      bottomOptions.reverse();
-    }
-    return [...options, ...bottomOptions];
   }
-  const yOptions = [
+  return [
     {
       id: `${idPrefix}left`,
       label: isHorizontal ? bottomLabel : leftLabel,
       'data-test-subj': 'lnsXY_referenceLine_markerPosition_left',
     },
+    autoOption,
     {
       id: `${idPrefix}right`,
       label: isHorizontal ? topLabel : rightLabel,
       'data-test-subj': 'lnsXY_referenceLine_markerPosition_right',
     },
   ];
-  if (isHorizontal) {
-    // left -> right
-    // above -> below
-    yOptions.reverse();
-  }
-  return [...options, ...yOptions];
 }
 
 export function hasIcon(icon: string | undefined): icon is string {
-  return icon != null && icon !== 'none';
+  return icon != null && icon !== 'empty';
 }
 
 export const ReferenceLinePanel = (
@@ -271,28 +254,46 @@ export const ReferenceLinePanel = (
     <>
       <EuiFormRow
         label={i18n.translate('xpack.lens.referenceLineMarker.textVisibility', {
-          defaultMessage: 'Show display name',
+          defaultMessage: 'Text decoration',
         })}
-        display="columnCompressedSwitch"
+        display="columnCompressed"
+        fullWidth
       >
-        <EuiSwitch
-          compressed
-          label={i18n.translate('xpack.lens.referenceLineMarker.textVisibility', {
-            defaultMessage: 'Show display name',
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.lens.referenceLineMarker.textVisibility', {
+            defaultMessage: 'Text decoration',
           })}
-          showLabel={false}
           data-test-subj="lns-referenceLineMaker-text-visibility"
-          checked={Boolean(currentYConfig?.textVisibility)}
-          onChange={() => {
-            setYConfig({ forAccessor: accessor, textVisibility: !currentYConfig?.textVisibility });
+          name="textVisibilityStyle"
+          buttonSize="compressed"
+          options={[
+            {
+              id: `${idPrefix}none`,
+              label: i18n.translate('xpack.lens.xyChart.referenceLineMarker.textVisibility.none', {
+                defaultMessage: 'None',
+              }),
+              'data-test-subj': 'lnsXY_reference_textVisibility_none',
+            },
+            {
+              id: `${idPrefix}name`,
+              label: i18n.translate('xpack.lens.xyChart.referenceLineMarker.textVisibility.name', {
+                defaultMessage: 'Name',
+              }),
+              'data-test-subj': 'lnsXY_reference_textVisibility_name',
+            },
+          ]}
+          idSelected={`${idPrefix}${Boolean(currentYConfig?.textVisibility) ? 'name' : 'none'}`}
+          onChange={(id) => {
+            setYConfig({ forAccessor: accessor, textVisibility: id === `${idPrefix}name` });
           }}
+          isFullWidth
         />
       </EuiFormRow>
       <EuiFormRow
         display="columnCompressed"
         fullWidth
         label={i18n.translate('xpack.lens.xyChart.referenceLineMarker.icon', {
-          defaultMessage: 'Icon',
+          defaultMessage: 'Icon decoration',
         })}
       >
         <IconSelect
@@ -302,55 +303,51 @@ export const ReferenceLinePanel = (
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
-        label={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
-          defaultMessage: 'Decoration position',
-        })}
-      >
-        <TooltipWrapper
-          tooltipContent={i18n.translate(
-            'xpack.lens.referenceLineMarker.positionRequirementTooltip',
-            {
-              defaultMessage:
-                'You must select an icon or show the display name in order to alter its position',
-            }
-          )}
-          condition={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
-          position="top"
-          delay="regular"
-          display="block"
+      {hasIcon(currentYConfig?.icon) || currentYConfig?.textVisibility ? (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
+          label={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
+            defaultMessage: 'Decoration position',
+          })}
         >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
-              defaultMessage: 'Decoration position',
-            })}
-            data-test-subj="lnsXY_markerPosition_referenceLine"
-            name="markerPosition"
-            isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
-            buttonSize="compressed"
-            options={getIconPositionOptions({
-              isHorizontal,
-              axisMode: currentYConfig!.axisMode,
-            })}
-            idSelected={`${idPrefix}${currentYConfig?.iconPosition || 'auto'}`}
-            onChange={(id) => {
-              const newMode = id.replace(idPrefix, '') as IconPosition;
-              setYConfig({ forAccessor: accessor, iconPosition: newMode });
-            }}
-          />
-        </TooltipWrapper>
-      </EuiFormRow>
-      <ColorPicker
-        {...props}
-        disableHelpTooltip
-        label={i18n.translate('xpack.lens.xyChart.referenceLineColor.label', {
-          defaultMessage: 'Color',
-        })}
-      />
+          <TooltipWrapper
+            tooltipContent={i18n.translate(
+              'xpack.lens.referenceLineMarker.positionRequirementTooltip',
+              {
+                defaultMessage:
+                  'You must select an icon or show the name in order to alter its position',
+              }
+            )}
+            condition={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
+            position="top"
+            delay="regular"
+            display="block"
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
+                defaultMessage: 'Decoration position',
+              })}
+              data-test-subj="lnsXY_markerPosition_referenceLine"
+              name="markerPosition"
+              isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
+              buttonSize="compressed"
+              options={getIconPositionOptions({
+                isHorizontal,
+                axisMode: currentYConfig!.axisMode,
+              })}
+              idSelected={`${idPrefix}${currentYConfig?.iconPosition || 'auto'}`}
+              onChange={(id) => {
+                const newMode = id.replace(idPrefix, '') as IconPosition;
+                setYConfig({ forAccessor: accessor, iconPosition: newMode });
+              }}
+            />
+          </TooltipWrapper>
+        </EuiFormRow>
+      ) : null}
+
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -433,6 +430,13 @@ export const ReferenceLinePanel = (
           }}
         />
       </EuiFormRow>
+      <ColorPicker
+        {...props}
+        disableHelpTooltip
+        label={i18n.translate('xpack.lens.xyChart.referenceLineColor.label', {
+          defaultMessage: 'Color',
+        })}
+      />
     </>
   );
 };
@@ -465,6 +469,7 @@ const LineThicknessSlider = ({
       min={minRange}
       max={maxRange}
       step={1}
+      append="px"
       compressed
       onChange={({ currentTarget: { value: newValue } }) => {
         setUnsafeValue(newValue);

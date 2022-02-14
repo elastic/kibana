@@ -622,13 +622,6 @@ export function DimensionEditor(
           buttonSize="compressed"
           options={[
             {
-              id: `${idPrefix}auto`,
-              label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
-                defaultMessage: 'Auto',
-              }),
-              'data-test-subj': 'lnsXY_axisSide_groups_auto',
-            },
-            {
               id: `${idPrefix}left`,
               label: isHorizontal
                 ? i18n.translate('xpack.lens.xyChart.axisSide.bottom', {
@@ -638,6 +631,13 @@ export function DimensionEditor(
                     defaultMessage: 'Left',
                   }),
               'data-test-subj': 'lnsXY_axisSide_groups_left',
+            },
+            {
+              id: `${idPrefix}auto`,
+              label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
+                defaultMessage: 'Auto',
+              }),
+              'data-test-subj': 'lnsXY_axisSide_groups_auto',
             },
             {
               id: `${idPrefix}right`,
