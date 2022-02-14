@@ -43,7 +43,7 @@ describe('Exceptions flyout', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule(getNewRule());
+    createCustomRule({ ...getNewRule(), index: ['exceptions-*'] });
     reload();
     goToRuleDetails();
 
