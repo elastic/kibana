@@ -4792,6 +4792,20 @@
           },
           {
             "parentPluginId": "timelines",
+            "id": "def-common.LastTimeDetails.userName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "userName",
+            "description": [],
+            "signature": [
+              "Maybe",
+              "<string> | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
             "id": "def-common.LastTimeDetails.ip",
             "type": "CompoundType",
             "tags": [],
