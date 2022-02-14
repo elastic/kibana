@@ -8,7 +8,6 @@
 import { Ensure, SerializableRecord } from '@kbn/utility-types';
 
 import { parentPort, isMainThread, MessagePort } from 'worker_threads';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import path from 'path';
 import Printer from 'pdfmake';
