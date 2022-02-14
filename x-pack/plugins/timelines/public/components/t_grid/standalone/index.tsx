@@ -86,6 +86,7 @@ export interface TGridStandaloneProps {
   } | null;
   afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
+  dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
@@ -130,6 +131,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   casesOwner,
   casePermissions,
   columns,
+  dataViewId = null,
   defaultCellActions,
   deletedEventIds,
   disabledCellActions,
@@ -224,6 +226,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { consumers, events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    dataViewId,
     docValueFields: [],
     entityType,
     excludeEcsData: true,

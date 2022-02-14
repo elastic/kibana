@@ -467,7 +467,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     immutable: false,
     type: 'query',
     language: 'kuery',
-    index: ['exceptions-*'],
+    index: getIndexPatterns(),
     query,
     throttle: 'no_actions',
     actions: [],
