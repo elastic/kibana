@@ -37,18 +37,49 @@ async function deleteIndices(indices: string[], client: Client) {
   }
 }
 
-async function addUser(esClient: Client) {
+interface UserInfo {
+  [k: string]: {
+    username: string;
+  };
+}
+
+async function addUser(esClient: Client): Promise<UserInfo[string] | undefined> {
+  const endpointUser = {
+    username: 'endpoint_user',
+    password: 'changeme',
+  };
+  const path = `_security/user/${endpointUser.username}`;
   try {
+    const userInfo = (await esClient.transport.request({
+      method: 'GET',
+      path,
+    })) as UserInfo;
+
+    if (userInfo[endpointUser.username].username) {
+      console.log(`User ${endpointUser.username} already exists!`);
+      return userInfo[endpointUser.username];
+    }
+  } catch (error) {
+    if (error.statusCode === 404) {
+      console.log(`User ${endpointUser.username} does not exist!`);
+    }
+  }
+  // add user if doesn't exist already
+  try {
+    console.log(`Adding ${endpointUser.username}...`);
     await esClient.transport.request({
       method: 'POST',
-      path: '_security/user/endpoint_user',
+      path,
       body: {
-        password: 'changeme',
+        password: endpointUser.password,
         roles: ['superuser', 'kibana_system'],
         full_name: 'endpoint user',
       },
     });
-    console.log('user endpoint_user added successfully!');
+    console.log('User endpoint_user added successfully!');
+    return {
+      username: endpointUser.username,
+    };
   } catch (error) {
     handleErr(error);
   }
@@ -230,17 +261,20 @@ async function main() {
   }
   let client = new Client(clientOptions);
   // add endpoint user
-  await addUser(client);
+  const user: UserInfo['string'] | undefined = await addUser(client);
 
-  // use endpoint user for Es and Kibana URLs
-  url = argv.kibana.replace('elastic', 'endpoint_user');
-  node = argv.node.replace('elastic', 'endpoint_user');
-  kbnClientOptions = {
-    ...kbnClientOptions,
-    url,
-  };
   // update client and kibana options before instantiating
-  client = new Client({ ...clientOptions, node });
+  if (user) {
+    // use endpoint user for Es and Kibana URLs
+    url = argv.kibana.replace('elastic', user.username);
+    node = argv.node.replace('elastic', user.username);
+    kbnClientOptions = {
+      ...kbnClientOptions,
+      url,
+    };
+    client = new Client({ ...clientOptions, node });
+  }
+  // instantiate kibana client
   const kbnClient = new KbnClient({ ...kbnClientOptions });
 
   if (argv.delete) {
