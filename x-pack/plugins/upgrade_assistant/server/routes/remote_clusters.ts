@@ -26,7 +26,7 @@ export function registerRemoteClustersRoute({ router, lib: { handleEsError } }: 
         response
       ) => {
         try {
-          const { body: clustersByName } = await client.asCurrentUser.cluster.remoteInfo();
+          const clustersByName = await client.asCurrentUser.cluster.remoteInfo();
 
           const remoteClusters = Object.keys(clustersByName);
 

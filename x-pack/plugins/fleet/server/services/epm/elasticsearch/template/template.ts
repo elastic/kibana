@@ -470,7 +470,7 @@ const getDataStreams = async (
 ): Promise<CurrentDataStream[] | undefined> => {
   const { indexTemplate } = template;
 
-  const { body } = await esClient.indices.getDataStream({
+  const body = await esClient.indices.getDataStream({
     name: indexTemplate.index_patterns.join(','),
   });
 
