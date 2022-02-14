@@ -103,6 +103,8 @@ class PackagePolicyService {
       overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
+    // trailing whitespace causes issues creating API keys
+    packagePolicy.name = packagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
       const existingPoliciesWithName = await this.list(soClient, {
         perPage: 1,
@@ -365,6 +367,7 @@ class PackagePolicyService {
     options?: { user?: AuthenticatedUser },
     currentVersion?: string
   ): Promise<PackagePolicy> {
+    packagePolicy.name = packagePolicy.name.trim();
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
