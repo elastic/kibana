@@ -25,10 +25,10 @@ export function TopNavMenuItem(props: TopNavMenuData) {
   function getButtonContainer() {
     if (props.badge) {
       return (
-        <div className="kbnTopNavMenu__betaBadgeWrapper">
+        <>
           <EuiBetaBadge className="kbnTopNavMenu__betaBadgeItem" {...props.badge} size="s" />
           {upperFirst(props.label || props.id!)}
-        </div>
+        </>
       );
     } else {
       return upperFirst(props.label || props.id!);

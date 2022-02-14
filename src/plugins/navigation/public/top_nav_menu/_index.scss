@@ -13,11 +13,15 @@
   margin-right: $euiSizeM;
 }
 
-.kbnTopNavMenu__betaBadgeWrapper {
-  display: flex;
-  align-items: center;
-}
-
 .kbnTopNavMenu__betaBadgeItem {
   margin-right: $euiSizeS;
+  vertical-align: middle;
+
+  button:hover &,
+  button:focus & {
+    text-decoration: underline;
+  }
+  button:hover & {
+    cursor: pointer;
+  }
 }
