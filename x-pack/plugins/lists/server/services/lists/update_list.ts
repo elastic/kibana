@@ -59,7 +59,7 @@ export const updateList = async ({
       updated_at: updatedAt,
       updated_by: user,
     };
-    const { body: response } = await esClient.update({
+    const response = await esClient.update({
       ...decodeVersion(_version),
       body: { doc },
       id,

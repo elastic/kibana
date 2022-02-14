@@ -235,7 +235,8 @@ describe('Action Log API', () => {
         hasFleetResponses?: boolean;
         hasResponses?: boolean;
       }) => {
-        esClientMock.asInternalUser.search = jest.fn().mockImplementationOnce(() => {
+        // @ts-expect-error incomplete types
+        esClientMock.asInternalUser.search.mockResponseImplementationOnce(() => {
           let actions: Results[] = [];
           let fleetActions: Results[] = [];
           let responses: Results[] = [];
@@ -276,12 +277,13 @@ describe('Action Log API', () => {
             ...fleetResponses,
           ]);
 
-          return Promise.resolve(results);
+          return results;
         });
       };
 
       havingErrors = () => {
-        esClientMock.asInternalUser.search = jest.fn().mockImplementationOnce(() =>
+        esClientMock.asInternalUser.search.mockImplementationOnce(() =>
+          // @ts-expect-error wrong definition
           Promise.resolve(() => {
             throw new Error();
           })
