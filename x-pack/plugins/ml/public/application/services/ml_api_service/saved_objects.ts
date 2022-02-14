@@ -15,6 +15,7 @@ import { HttpService } from '../http_service';
 import { basePath } from './index';
 import {
   JobType,
+  TrainedModelType,
   CanDeleteJobResponse,
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
@@ -66,7 +67,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       query: { simulate },
     });
   },
-  syncCheck(jobType?: JobType | 'trained-model') {
+  syncCheck(jobType?: JobType | TrainedModelType) {
     const body = JSON.stringify({ jobType });
     return httpService.http<SyncCheckResponse>({
       path: `${basePath()}/saved_objects/sync_check`,

@@ -18,7 +18,7 @@ import {
   jobTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { JobType } from '../../common/types/saved_objects';
+import type { JobType, TrainedModelType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -148,7 +148,7 @@ export function savedObjectsRoutes(
       try {
         const { jobType } = request.body;
         const { isSyncNeeded } = syncSavedObjectsFactory(client, jobSavedObjectService);
-        const result = await isSyncNeeded(jobType as JobType | 'trained-model');
+        const result = await isSyncNeeded(jobType as JobType | TrainedModelType);
 
         return response.ok({
           body: { result },

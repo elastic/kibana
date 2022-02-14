@@ -10,6 +10,7 @@ import type { IScopedClusterClient } from 'kibana/server';
 import type { JobObject, JobSavedObjectService, TrainedModelObject } from './service';
 import type {
   JobType,
+  TrainedModelType,
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
 } from '../../common/types/saved_objects';
@@ -415,7 +416,7 @@ export function syncSavedObjectsFactory(
     return results;
   }
 
-  async function isSyncNeeded(jobType?: JobType | 'trained-model') {
+  async function isSyncNeeded(jobType?: JobType | TrainedModelType) {
     const { jobs, datafeeds, trainedModels } = await initSavedObjects(true);
     const missingJobs =
       jobs.length > 0 && (jobType === undefined || jobs.some(({ type }) => type === jobType));

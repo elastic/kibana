@@ -8,15 +8,13 @@
 import React, { FC, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JobType } from '../../../../common/types/saved_objects';
+import type { JobType, TrainedModelType } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
 import { JobSpacesSyncFlyout } from '../../components/job_spaces_sync';
 import { checkPermission } from '../../capabilities/check_capabilities';
 
-type SOType = JobType | 'trained-model';
-
 interface Props {
-  jobType?: SOType;
+  jobType?: JobType | TrainedModelType;
   onCloseFlyout?: () => void;
   forceRefresh?: boolean;
 }
