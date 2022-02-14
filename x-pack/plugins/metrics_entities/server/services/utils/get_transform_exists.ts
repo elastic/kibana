@@ -12,9 +12,7 @@ export const getTransformExists = async (
   id: string
 ): Promise<boolean> => {
   try {
-    const {
-      body: { count },
-    } = await esClient.transform.getTransform({
+    const { count } = await esClient.transform.getTransform({
       size: 1000,
       transform_id: id,
     });
