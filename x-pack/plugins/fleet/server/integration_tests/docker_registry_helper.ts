@@ -49,13 +49,13 @@ export function useDockerRegistry() {
 
       await delay(3000);
     }
-    dockerProcess.kill();
 
     if (isExited && dockerProcess.exitCode !== 0) {
       throw new Error(`Unable to setup docker registry exit code ${dockerProcess.exitCode}`);
     }
 
-    throw new Error('Unable to setup docker registry after timeout');
+    dockerProcess.kill();
+    throw new pRetry.AbortError('Unable to setup docker registry after timeout');
   }
 
   async function cleanupDockerRegistryServer() {
@@ -69,13 +69,7 @@ export function useDockerRegistry() {
     jest.setTimeout(testTimeout);
     await pRetry(() => startDockerRegistryServer(), {
       retries: 3,
-      onFailedAttempt: (error) => {
-        if (error.message === 'Unable to setup docker registry after timeout') {
-          throw error;
-        }
-      },
     });
-    await startDockerRegistryServer();
   });
 
   afterAll(async () => {
