@@ -23,7 +23,7 @@ import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { useLinkProps } from '../../hooks/use_link_props';
+import { useLinkProps } from '../../../../observability/public';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 
 export const LogsPageContent: React.FunctionComponent = () => {

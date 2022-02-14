@@ -106,7 +106,7 @@ export class VegaBaseView {
       }
 
       if (this._parser.error) {
-        this._addMessage('err', this._parser.error);
+        this.onError(this._parser.error);
         return;
       }
 
@@ -235,7 +235,9 @@ export class VegaBaseView {
   }
 
   onError() {
-    this._addMessage('err', Utils.formatErrorToStr(...arguments));
+    const error = Utils.formatErrorToStr(...arguments);
+    this._addMessage('err', error);
+    this._parser.searchAPI.inspectorAdapters?.vega.setError(error);
   }
 
   onWarn() {
