@@ -181,6 +181,7 @@ export const ModelsList: FC = () => {
 
   useEffect(
     function updateOnTimerRefresh() {
+      if (!refresh) return;
       fetchModelsData();
     },
     [refresh]
