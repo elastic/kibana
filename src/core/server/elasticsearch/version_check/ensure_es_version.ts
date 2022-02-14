@@ -120,6 +120,7 @@ export function mapNodesVersionCompatibility(
     kibanaVersion,
   };
 }
+
 // Returns true if NodesVersionCompatibility nodesInfoRequestError is the same
 function compareNodesInfoErrorMessages(
   prev: NodesVersionCompatibility,
@@ -127,6 +128,7 @@ function compareNodesInfoErrorMessages(
 ): boolean {
   return prev.nodesInfoRequestError?.message === curr.nodesInfoRequestError?.message;
 }
+
 // Returns true if two NodesVersionCompatibility entries match
 function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompatibility) {
   const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
@@ -152,11 +154,10 @@ export const pollEsNodesVersion = ({
   return timer(0, healthCheckInterval).pipe(
     exhaustMap(() => {
       return from(
-        internalClient.nodes.info<NodesInfo>({
+        internalClient.nodes.info({
           filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
         })
       ).pipe(
-        map(({ body }) => body),
         catchError((nodesInfoRequestError) => {
           return of({ nodes: {}, nodesInfoRequestError });
         })
