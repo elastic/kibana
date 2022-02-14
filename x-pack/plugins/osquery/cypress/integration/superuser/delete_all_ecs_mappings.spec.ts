@@ -28,20 +28,16 @@ describe('SuperUser - Delete ECS Mappings', () => {
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
     }).click();
-    cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}').should(
-      'exist'
-    );
+    cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
     cy.react('EuiButtonIcon', { props: { id: 'labels-trash' } }).click();
     cy.react('EuiButton').contains('Update query').click();
-    cy.wait(1000);
+    cy.wait(5000);
 
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
     }).click();
-    cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}').should(
-      'not.exist'
-    );
+    cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');
   });
 });
