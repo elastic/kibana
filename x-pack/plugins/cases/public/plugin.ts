@@ -44,7 +44,7 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
       getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
       getCreateCaseFlyoutNoProvider: getCreateCaseFlyoutLazyNoProvider,
       hooks: {
-        getUseCasesAddToNewCasesFlyout: () => useCasesAddToNewCasesFlyout,
+        getUseCasesAddToNewCasesFlyout: useCasesAddToNewCasesFlyout,
       },
     };
   }

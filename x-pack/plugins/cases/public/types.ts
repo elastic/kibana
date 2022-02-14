@@ -94,6 +94,6 @@ export interface CasesUiStart {
    */
   getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
   hooks: {
-    getUseCasesAddToNewCasesFlyout: () => UseCasesAddToNewCasesFlyout;
+    getUseCasesAddToNewCasesFlyout: UseCasesAddToNewCasesFlyout;
   };
 }
