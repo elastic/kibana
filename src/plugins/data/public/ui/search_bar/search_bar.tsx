@@ -596,7 +596,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onQueryChange={this.onQueryBarChange}
         dateRangeFrom={this.state.dateRangeFrom}
         dateRangeTo={this.state.dateRangeTo}
-        onSubmit={this.onQueryBarSubmit}
         toggleAddFilterModal={this.toggleAddFilterModal}
         savedQueryService={this.savedQueryService}
         applySelectedQuery={this.applySelectedQuery}
