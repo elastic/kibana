@@ -33,7 +33,10 @@ import {
   fleetGetEndpointPackagePolicyListHttpMock,
   FleetGetEndpointPackagePolicyListHttpMockInterface,
 } from './fleet_mocks';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../common/endpoint/service/artifacts/constants';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  GLOBAL_ARTIFACT_TAG,
+} from '../../../../common/endpoint/service/artifacts/constants';
 
 interface FindExceptionListItemSchemaQueryParams
   extends Omit<FindExceptionListItemSchema, 'page' | 'per_page'> {
@@ -58,7 +61,11 @@ export const trustedAppsGetListHttpMocks =
         const generator = new ExceptionsListItemGenerator('seed');
         const perPage = apiQueryParams.per_page ?? 10;
         const data = Array.from({ length: Math.min(perPage, 50) }, () =>
-          generator.generate({ list_id: ENDPOINT_TRUSTED_APPS_LIST_ID, os_types: ['windows'] })
+          generator.generate({
+            list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+            os_types: ['windows'],
+            tags: [GLOBAL_ARTIFACT_TAG],
+          })
         );
 
         // FIXME: remove hard-coded IDs below adn get them from the new FleetPackagePolicyGenerator (#2262)
@@ -130,6 +137,7 @@ export const trustedAppsGetOneHttpMocks =
         const apiQueryParams = query as ReadExceptionListItemSchema;
         const exceptionItem = new ExceptionsListItemGenerator('seed').generate({
           os_types: ['windows'],
+          tags: [GLOBAL_ARTIFACT_TAG],
         });
 
         exceptionItem.item_id = apiQueryParams.item_id ?? exceptionItem.item_id;
@@ -157,7 +165,10 @@ export const trustedAppPostHttpMocks = httpHandlerMockFactory<TrustedAppPostHttp
         body as string
       ) as CreateExceptionListItemSchema;
       const response: ExceptionListItemSchema = {
-        ...new ExceptionsListItemGenerator('seed').generate({ os_types: ['windows'] }),
+        ...new ExceptionsListItemGenerator('seed').generate({
+          os_types: ['windows'],
+          tags: [GLOBAL_ARTIFACT_TAG],
+        }),
         ...updatedExceptionItem,
       };
       response.id = path.split('/').pop() ?? response.id;
