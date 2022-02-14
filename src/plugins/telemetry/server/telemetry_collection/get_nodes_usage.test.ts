@@ -37,14 +37,11 @@ const mockedNodesFetchResponse = {
 
 describe('get_nodes_usage', () => {
   it('returns a modified array of nodes usage data', async () => {
-    const response = Promise.resolve({ body: mockedNodesFetchResponse });
+    const response = Promise.resolve(mockedNodesFetchResponse);
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.nodes.usage.mockImplementationOnce(
-      // @ts-expect-error
-      async (_params = { timeout: TIMEOUT }) => {
-        return response;
-      }
-    );
+    esClient.nodes.usage.mockImplementationOnce(async (_params = { timeout: TIMEOUT }) => {
+      return response;
+    });
     const item = await getNodesUsage(esClient);
     expect(esClient.nodes.usage).toHaveBeenCalledWith({ timeout: TIMEOUT });
     expect(item).toStrictEqual({
