@@ -119,6 +119,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const {
     browserFields,
     docValueFields,
+    dataViewId,
     loading: loadingSourcerer,
     runtimeMappings,
     selectedPatterns,
@@ -187,6 +188,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       endDate: '',
       id: `pinned-${timelineId}`,
       indexNames: selectedPatterns,
+      dataViewId,
       fields: timelineQueryFields,
       limit: itemsPerPage,
       filterQuery,

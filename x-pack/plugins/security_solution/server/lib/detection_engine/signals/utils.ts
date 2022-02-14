@@ -193,21 +193,19 @@ export const checkPrivilegesFromEsClient = async (
   withSecuritySpan(
     'checkPrivilegesFromEsClient',
     async () =>
-      (
-        await esClient.transport.request({
-          path: '/_security/user/_has_privileges',
-          method: 'POST',
-          body: {
-            index: [
-              {
-                names: indices ?? [],
-                allow_restricted_indices: true,
-                privileges: ['read'],
-              },
-            ],
-          },
-        })
-      ).body as Privilege
+      (await esClient.transport.request({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: indices ?? [],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      })) as Privilege
   );
 
 export const getNumCatchupIntervals = ({

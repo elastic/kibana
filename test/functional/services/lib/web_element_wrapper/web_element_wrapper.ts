@@ -203,6 +203,18 @@ export class WebElementWrapper {
   }
 
   /**
+   * If possible, opens 'href' of this element directly through the URL
+   *
+   * @return {Promise<void>}
+   */
+  public async openHref() {
+    const href = await this.getAttribute('href');
+    if (href) {
+      await this.driver.get(href);
+    }
+  }
+
+  /**
    * Check if webelement wrapper has a specific class.
    *
    * @return {Promise<boolean>}
