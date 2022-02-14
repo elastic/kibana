@@ -10,8 +10,10 @@ import { monitorManagementPageProvider } from '../page_objects/monitor_managemen
 import { DataStream } from '../../common/runtime_types/monitor_management';
 import { byTestId } from './utils';
 
+const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
+
 const basicMonitorDetails = {
-  location: 'US Central',
+  location: customLocation || 'US Central',
   schedule: '@every 3m',
 };
 const httpName = 'http monitor';
