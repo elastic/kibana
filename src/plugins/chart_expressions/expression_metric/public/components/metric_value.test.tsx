@@ -11,6 +11,7 @@ import { shallow } from 'enzyme';
 
 import { MetricVisValue } from './metric_value';
 import { MetricOptions, MetricStyle, VisParams } from '../../common/types';
+import { LabelPosition } from '../../common/constants';
 
 const baseMetric: MetricOptions = { label: 'Foo', value: 'foo', lightText: false };
 const font: MetricStyle = {
@@ -26,7 +27,7 @@ const font: MetricStyle = {
 
 const labelConfig: VisParams['metric']['labels'] = {
   show: true,
-  position: 'bottom',
+  position: LabelPosition.BOTTOM,
   style: { spec: {}, type: 'style', css: '' },
 };
 

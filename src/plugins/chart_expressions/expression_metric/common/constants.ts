@@ -11,4 +11,4 @@ export const EXPRESSION_METRIC_NAME = 'metricVis';
 export const LabelPosition = {
   BOTTOM: 'bottom',
   TOP: 'top',
-};
+} as const;
