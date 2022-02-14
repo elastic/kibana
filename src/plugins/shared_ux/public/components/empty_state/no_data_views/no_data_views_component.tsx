@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCard } from '@elastic/eui';
-import { NoResultsIllustration } from './assets';
+import { NoResultsIllustration } from '../assets';
 
 interface NoDataViewsComponentProps {
   onClick?: () => void;

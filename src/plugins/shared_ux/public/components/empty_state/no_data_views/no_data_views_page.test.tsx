@@ -9,8 +9,8 @@
 import React from 'react';
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 
-import { ServicesProvider, SharedUXServices } from '../../services';
-import { servicesFactory } from '../../services/mocks';
+import { ServicesProvider, SharedUXServices } from '../../../services';
+import { servicesFactory } from '../../../services/mocks';
 import { NoDataViewsPage } from './no_data_views_page';
 import { EuiButton } from '@elastic/eui';
 

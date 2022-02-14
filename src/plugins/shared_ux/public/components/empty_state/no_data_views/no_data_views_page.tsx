@@ -8,8 +8,8 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import { NoDataViewsComponent } from './no_data_views_component';
-import { useServices } from '../../services';
-import { DataView } from '../../../../data_views/public';
+import { useServices } from '../../../services';
+import { DataView } from '../../../../../data_views/public';
 
 export interface NoDataViewsPageProps {
   onDataViewCreated: (dataView: DataView) => void;
