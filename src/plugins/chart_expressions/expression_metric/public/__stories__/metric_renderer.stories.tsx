@@ -258,4 +258,51 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
+  })
+  .add('With colorizing full container', () => {
+    return (
+      <Render
+        renderer={metricVisRenderer}
+        config={{
+          ...config,
+          visData: {
+            type: 'datatable',
+            rows: [{ 'col-0-1': 85 }],
+            columns: [
+              {
+                id: 'col-0-1',
+                name: 'Max products count',
+                meta: { type: 'number', params: {} },
+              },
+            ],
+          },
+          visConfig: {
+            ...config.visConfig,
+            metric: {
+              ...config.visConfig.metric,
+              palette,
+              metricColorMode: ColorMode.Background,
+              style: {
+                ...config.visConfig.metric.style,
+                bgColor: true,
+              },
+              colorFullBackground: true,
+            },
+            dimensions: {
+              metrics: [
+                {
+                  accessor: 0,
+                  format: {
+                    id: 'number',
+                    params: {},
+                  },
+                  type: 'vis_dimension',
+                },
+              ],
+            },
+          },
+        }}
+        {...containerSize}
+      />
+    );
   });

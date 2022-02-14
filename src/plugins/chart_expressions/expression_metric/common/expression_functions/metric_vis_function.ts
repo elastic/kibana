@@ -14,6 +14,32 @@ import { ColorMode } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
+const errors = {
+  severalRowsAndColorFullBackgroundSpecifiedError: () =>
+    i18n.translate(
+      'expressionMetricVis.function.errors.severalRowsAndColorFullBackgroundSpecified',
+      {
+        defaultMessage: 'Colorize full container can be applied only for one metric.',
+      }
+    ),
+  severalMetricsAndColorFullBackgroundSpecifiedError: () =>
+    i18n.translate(
+      'expressionMetricVis.function.errors.severalMetricsAndColorFullBackgroundSpecified',
+      {
+        defaultMessage:
+          'A several metrics and colorize full container are specified. Expression is supporting only one of them at once.',
+      }
+    ),
+  splitByBucketAndColorFullBackgroundSpecifiedError: () =>
+    i18n.translate(
+      'expressionMetricVis.function.errors.splitByBucketAndColorFullBackgroundSpecified',
+      {
+        defaultMessage:
+          'A bucket and colorize full container are specified. Expression is supporting only one of them at once.',
+      }
+    ),
+};
+
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
   type: 'render',
@@ -40,7 +66,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     colorFullBackground: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('expressionMetricVis.function.colorizeContainer.help', {
+      help: i18n.translate('expressionMetricVis.function.colorFullBackground.help', {
         defaultMessage:
           'Colorize full container with provided color from palette if color mode is background',
       }),
@@ -95,38 +121,15 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     // currently we can allow colorize full container only for one metric
     if (args.colorFullBackground) {
       if (args.bucket) {
-        throw new Error(
-          i18n.translate(
-            'expressionMetricVis.function.errors.splitByBucketAndColorFullBackgroundSpecified',
-            {
-              defaultMessage:
-                'A bucket and colorize full container are specified. Expression is supporting only one of them at once.',
-            }
-          )
-        );
+        throw new Error(errors.splitByBucketAndColorFullBackgroundSpecifiedError());
       }
 
       if (args.metric.length > 1) {
-        throw new Error(
-          i18n.translate(
-            'expressionMetricVis.function.errors.severalMetricsAndColorFullBackgroundSpecified',
-            {
-              defaultMessage:
-                'A several metrics and colorize full container are specified. Expression is supporting only one of them at once.',
-            }
-          )
-        );
+        throw new Error(errors.severalMetricsAndColorFullBackgroundSpecifiedError());
       }
 
       if (input.rows.length > 1) {
-        throw new Error(
-          i18n.translate(
-            'expressionMetricVis.function.errors.severalRowsAndColorFullBackgroundSpecified',
-            {
-              defaultMessage: 'Colorize full container can be applied only for one metric.',
-            }
-          )
-        );
+        throw new Error(errors.severalRowsAndColorFullBackgroundSpecifiedError());
       }
     }
 

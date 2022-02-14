@@ -79,4 +79,16 @@ describe('MetricVisValue', () => {
     component.simulate('click');
     expect(onFilter).toHaveBeenCalled();
   });
+
+  it('should add correct class name if colorFullBackground is true', () => {
+    const component = shallow(
+      <MetricVisValue
+        style={font}
+        metric={baseMetric}
+        onFilter={() => {}}
+        colorFullBackground={true}
+      />
+    );
+    expect(component.find('.mtrVis__container-isfull').exists()).toBe(true);
+  });
 });

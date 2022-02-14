@@ -93,3 +93,9 @@ Object {
   },
 }
 `;
+
+exports[`interpreter/functions#metric returns error if bucket and colorFullBackground specified 1`] = `"A bucket and colorize full container are specified. Expression is supporting only one of them at once."`;
+
+exports[`interpreter/functions#metric returns error if data includes several rows and colorFullBackground specified 1`] = `"Colorize full container can be applied only for one metric."`;
+
+exports[`interpreter/functions#metric returns error if several metrics and colorFullBackground specified 1`] = `"A several metrics and colorize full container are specified. Expression is supporting only one of them at once."`;
