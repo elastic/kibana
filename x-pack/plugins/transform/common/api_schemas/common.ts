@@ -71,28 +71,4 @@ export const runtimeMappingsSchema = schema.maybe(
       },
     }
   )
-  /*
-  schema.recordOf(
-     schema.string(),
-    schema.object({
-      type: schema.oneOf([
-        schema.literal('keyword'),
-        schema.literal('long'),
-        schema.literal('double'),
-        schema.literal('date'),
-        schema.literal('ip'),
-        schema.literal('boolean'),
-        schema.literal('geo_point'),
-        schema.literal('composite'),
-      ]),
-      script: schema.maybe(
-        schema.oneOf([
-          schema.string(),
-          schema.object({
-            source: schema.string(),
-          }),
-        ])
-      ),
-    })
-    */
 );
