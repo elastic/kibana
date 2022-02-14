@@ -211,6 +211,7 @@ export const ModelsList: FC<Props> = ({
 
   useEffect(
     function updateOnTimerRefresh() {
+      if (!refresh) return;
       fetchModelsData();
     },
     [refresh]
