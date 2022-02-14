@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useMemo } from 'react';
 import { merge } from 'lodash';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
@@ -48,18 +48,18 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 }) => {
   const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, initialCasesContextState);
-  const [value, setValue] = useState<CasesContextStateValue>(() => ({
-    owner,
-    userCanCrud,
-    basePath,
-    /**
-     * The empty object at the beginning avoids the mutation
-     * of the DEFAULT_FEATURES object
-     */
-    features: merge({}, DEFAULT_FEATURES, features),
-    state,
-    dispatch,
-  }));
+  const [baseValue, setBaseValue] = useState<Omit<CasesContextStateValue, 'state' | 'dispatch'>>(
+    () => ({
+      owner,
+      userCanCrud,
+      basePath,
+      /**
+       * The empty object at the beginning avoids the mutation
+       * of the DEFAULT_FEATURES object
+       */
+      features: merge({}, DEFAULT_FEATURES, features),
+    })
+  );
 
   /**
    * `userCanCrud` prop may change by the parent plugin.
@@ -68,7 +68,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
    */
   useEffect(() => {
     if (appId && appTitle) {
-      setValue((prev) => ({
+      setBaseValue((prev) => ({
         ...prev,
         appId,
         appTitle,
@@ -77,9 +77,13 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     }
   }, [appTitle, appId, userCanCrud]);
 
+  const value = useMemo(() => {
+    return { ...baseValue, state, dispatch };
+  }, [baseValue, state]);
+
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
-      {/* TODO: Move this out */}
+      {/* TODO: Move this out to a separate component */}
       {value.state.createCaseFlyout.isFlyoutOpen && value.state.createCaseFlyout.props !== undefined
         ? getCreateCaseFlyoutLazyNoProvider(value.state.createCaseFlyout.props)
         : null}

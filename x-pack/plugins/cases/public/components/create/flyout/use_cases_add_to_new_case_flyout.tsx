@@ -9,15 +9,30 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CreateCaseFlyoutProps } from './create_case_flyout';
 
-export const useCasesAddToNewCasesFlyout = () => {
+export const useCasesAddToNewCasesFlyout = (props: CreateCaseFlyoutProps) => {
   const context = useCasesContext();
+  const closeFlyout = () => {
+    context.dispatch({
+      type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
+    });
+  };
+  const openFlyout = () => {
+    context.dispatch({
+      type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
+      payload: {
+        ...props,
+        onClose: () => {
+          closeFlyout();
+          if (props.onClose) {
+            props.onClose();
+          }
+        },
+      },
+    });
+  };
   return {
-    open: (props: CreateCaseFlyoutProps) => {
-      context.dispatch({
-        type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
-        payload: props,
-      });
-    },
+    open: openFlyout,
+    close: closeFlyout,
   };
 };
 
