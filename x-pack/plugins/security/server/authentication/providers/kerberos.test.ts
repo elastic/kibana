@@ -45,8 +45,8 @@ describe('KerberosAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ headers: {} });
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-        securityMock.createApiResponse({ body: mockAuthenticatedUser() })
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(
+        mockAuthenticatedUser()
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -121,15 +121,13 @@ describe('KerberosAuthenticationProvider', () => {
         headers: { authorization: 'negotiate spnego' },
       });
 
-      mockOptions.client.asInternalUser.security.getToken.mockResolvedValue(
+      mockOptions.client.asInternalUser.security.getToken.mockResponse(
         // @ts-expect-error not full interface
-        securityMock.createApiResponse({
-          body: {
-            access_token: 'some-token',
-            refresh_token: 'some-refresh-token',
-            authentication: user,
-          },
-        })
+        {
+          access_token: 'some-token',
+          refresh_token: 'some-refresh-token',
+          authentication: user,
+        }
       );
 
       await expect(operation(request)).resolves.toEqual(
@@ -156,16 +154,14 @@ describe('KerberosAuthenticationProvider', () => {
         headers: { authorization: 'negotiate spnego' },
       });
 
-      mockOptions.client.asInternalUser.security.getToken.mockResolvedValue(
+      mockOptions.client.asInternalUser.security.getToken.mockResponse(
         // @ts-expect-error not full interface
-        securityMock.createApiResponse({
-          body: {
-            access_token: 'some-token',
-            refresh_token: 'some-refresh-token',
-            kerberos_authentication_response_token: 'response-token',
-            authentication: user,
-          },
-        })
+        {
+          access_token: 'some-token',
+          refresh_token: 'some-refresh-token',
+          kerberos_authentication_response_token: 'response-token',
+          authentication: user,
+        }
       );
 
       await expect(operation(request)).resolves.toEqual(
@@ -347,9 +343,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       const authorization = `Bearer ${tokenPair.accessToken}`;
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-        securityMock.createApiResponse({ body: user })
-      );
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(

@@ -15,9 +15,7 @@ export const getManagedPolicyNames = async (
   clusterClient: ElasticsearchClient
 ): Promise<string[]> => {
   try {
-    const {
-      body: { persistent, transient, defaults },
-    } = await clusterClient.cluster.getSettings({
+    const { persistent, transient, defaults } = await clusterClient.cluster.getSettings({
       filter_path: '*.*managed_policies',
       flat_settings: true,
       include_defaults: true,
