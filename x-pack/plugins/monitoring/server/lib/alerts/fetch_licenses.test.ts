@@ -5,8 +5,6 @@
  * 2.0.
  */
 import { fetchLicenses } from './fetch_licenses';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 jest.mock('../../static_globals', () => ({
@@ -33,20 +31,18 @@ describe('fetchLicenses', () => {
 
   it('return a list of licenses', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _source: {
-                license,
-                cluster_uuid: clusterUuid,
-              },
+    esClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _source: {
+              license,
+              cluster_uuid: clusterUuid,
             },
-          ],
-        },
-      } as any)
-    );
+          },
+        ],
+      },
+    } as any);
     const clusters = [{ clusterUuid, clusterName }];
     const result = await fetchLicenses(esClient, clusters);
     expect(result).toEqual([
@@ -79,7 +75,7 @@ describe('fetchLicenses', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);
@@ -122,7 +118,7 @@ describe('fetchLicenses', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);

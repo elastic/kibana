@@ -7,7 +7,7 @@
     "githubTeam": "security-asset-management"
   },
   "kibanaVersion": "kibana",
-  "optionalPlugins": ["fleet", "home", "usageCollection", "lens"],
+  "optionalPlugins": ["fleet", "home", "usageCollection", "lens", "telemetry"],
   "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact", "lens"],
   "requiredPlugins": [
     "actions",
@@ -16,6 +16,7 @@
     "discover",
     "features",
     "navigation",
+    "taskManager",
     "triggersActionsUi",
     "security"
   ],
