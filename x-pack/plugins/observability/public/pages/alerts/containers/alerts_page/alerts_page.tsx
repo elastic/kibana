@@ -13,7 +13,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
 
+import { observabilityFeatureId } from '../../../../../common';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
@@ -35,6 +38,7 @@ import {
 } from '../state_container';
 import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
+import { ObservabilityAppServices } from '../../../../application/types';
 
 interface RuleStatsState {
   total: number;
@@ -228,6 +232,10 @@ function AlertsPage() {
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
+  const kibana = useKibana<ObservabilityAppServices>();
+  const CasesContext = kibana.services.cases.getCasesContext();
+  const userPermissions = useGetUserCasesPermissions();
+
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
@@ -322,13 +330,18 @@ function AlertsPage() {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <AlertsTableTGrid
-            indexNames={indexNames}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            kuery={kuery}
-            setRefetch={setRefetch}
-          />
+          <CasesContext
+            owner={[observabilityFeatureId]}
+            userCanCrud={userPermissions?.crud ?? false}
+          >
+            <AlertsTableTGrid
+              indexNames={indexNames}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              kuery={kuery}
+              setRefetch={setRefetch}
+            />
+          </CasesContext>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
