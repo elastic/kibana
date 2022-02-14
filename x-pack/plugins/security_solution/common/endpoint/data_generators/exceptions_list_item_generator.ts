@@ -87,7 +87,10 @@ const exceptionItemToUpdateExceptionItem = (
   };
 };
 
-const EFFECTIVE_SCOPE: readonly string[] = [BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG];
+const EFFECTIVE_SCOPE: readonly string[] = [
+  `${BY_POLICY_ARTIFACT_TAG_PREFIX}123-456`, // Policy Specific
+  GLOBAL_ARTIFACT_TAG,
+];
 
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
