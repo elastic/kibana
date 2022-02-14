@@ -33,7 +33,7 @@ import {
   ServiceStatusLevels,
 } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import type { LicensingPluginStart, ILicense } from '../../licensing/server';
 import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
@@ -93,7 +93,7 @@ import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
 
 export interface FleetSetupDeps {
-  licensing: LicensingPluginSetup;
+  licensing: LicensingPluginStart;
   security: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;

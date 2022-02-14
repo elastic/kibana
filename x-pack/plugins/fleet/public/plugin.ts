@@ -39,7 +39,7 @@ import type {
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
+import type { LicensingPluginStart } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import {
@@ -82,7 +82,7 @@ export interface FleetStart {
 }
 
 export interface FleetSetupDeps {
-  licensing: LicensingPluginSetup;
+  licensing: LicensingPluginStart;
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
