@@ -72,9 +72,9 @@ export class UserProfileService {
               : { grant_type: 'access_token', access_token: grant.accessToken },
         });
 
-        logger.debug(`Successfully activated profile for "${response.body.user.username}".`);
+        logger.debug(`Successfully activated profile for "${response.user.username}".`);
 
-        return response.body;
+        return response;
       } catch (err) {
         logger.error(`Failed to activate user profile: ${getDetailedErrorMessage(err)}.`);
         throw err;
@@ -83,9 +83,7 @@ export class UserProfileService {
 
     async function get<T extends UserData>(uid: string, dataPath?: string) {
       try {
-        const { body } = await clusterClient.asInternalUser.transport.request<
-          GetProfileResponse<T>
-        >({
+        const body = await clusterClient.asInternalUser.transport.request<GetProfileResponse<T>>({
           method: 'GET',
           path: `_security/profile/${uid}${
             dataPath ? `?data=${KIBANA_DATA_ROOT}.${dataPath}` : ''

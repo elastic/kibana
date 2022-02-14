@@ -37,11 +37,9 @@ describe('UserProfileService', () => {
         },
       },
     });
-    mockStartParams.clusterClient.asInternalUser.transport.request.mockReturnValue(
-      elasticsearchServiceMock.createSuccessTransportRequestPromise({
-        [userProfile.uid]: userProfile,
-      })
-    );
+    mockStartParams.clusterClient.asInternalUser.transport.request.mockResolvedValue({
+      [userProfile.uid]: userProfile,
+    });
   });
 
   afterEach(() => {
@@ -63,20 +61,20 @@ describe('UserProfileService', () => {
     it('should get user profile', async () => {
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.get('UID')).resolves.toMatchInlineSnapshot(`
-                          Object {
-                            "data": Object {
-                              "avatar": "fun.gif",
-                            },
-                            "enabled": true,
-                            "uid": "UID",
-                            "user": Object {
-                              "active": true,
-                              "enabled": true,
-                              "roles": Array [],
-                              "username": "some-username",
-                            },
-                          }
-                      `);
+          Object {
+            "data": Object {
+              "avatar": "fun.gif",
+            },
+            "enabled": true,
+            "uid": "UID",
+            "user": Object {
+              "active": true,
+              "enabled": true,
+              "roles": Array [],
+              "username": "some-username",
+            },
+          }
+      `);
       expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '_security/profile/UID',
@@ -95,20 +93,20 @@ describe('UserProfileService', () => {
     it('should get user profile and application data scoped to Kibana', async () => {
       const startContract = userProfileService.start(mockStartParams);
       await expect(startContract.get('UID', '*')).resolves.toMatchInlineSnapshot(`
-                          Object {
-                            "data": Object {
-                              "avatar": "fun.gif",
-                            },
-                            "enabled": true,
-                            "uid": "UID",
-                            "user": Object {
-                              "active": true,
-                              "enabled": true,
-                              "roles": Array [],
-                              "username": "some-username",
-                            },
-                          }
-                      `);
+          Object {
+            "data": Object {
+              "avatar": "fun.gif",
+            },
+            "enabled": true,
+            "uid": "UID",
+            "user": Object {
+              "active": true,
+              "enabled": true,
+              "roles": Array [],
+              "username": "some-username",
+            },
+          }
+      `);
       expect(mockStartParams.clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '_security/profile/UID?data=kibana.*',
@@ -151,8 +149,8 @@ describe('UserProfileService', () => {
 
   describe('#activate', () => {
     beforeEach(() => {
-      mockStartParams.clusterClient.asInternalUser.transport.request.mockReturnValue(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise(userProfileMock.create())
+      mockStartParams.clusterClient.asInternalUser.transport.request.mockResolvedValue(
+        userProfileMock.create()
       );
     });
 
