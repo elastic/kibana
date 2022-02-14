@@ -1633,6 +1633,63 @@ describe('IndexPattern Data Source', () => {
       });
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
+    it('should return false if date histogram exists but is detached from global time range in every layer', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records2',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: ['bucket1', 'bucket2', 'metric2'],
+            columns: {
+              metric2: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+              bucket1: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: '1d',
+                  ignoreTimeRange: true,
+                },
+              } as DateHistogramIndexPatternColumn,
+              bucket2: {
+                label: 'Terms',
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'geo.src',
+                params: {
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  size: 10,
+                },
+              } as TermsIndexPatternColumn,
+            },
+          },
+        },
+      });
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+    });
     it('should return false if date histogram does not exist in any layer', () => {
       const state = enrichBaseState({
         currentIndexPatternId: '1',

@@ -68,7 +68,7 @@ import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/co
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
-import { getXDomain, XyEndzones } from './x_domain';
+import { getAppliedTimeRange, getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
 import {
   computeChartMargins,
@@ -106,7 +106,7 @@ export type XYChartRenderProps = XYChartProps & {
 export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
-  const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+  const isTimeViz = filteredLayers.every((l) => l.xScaleType === 'time');
   const xColumn = data.tables[filteredLayers[0].layerId].columns.find(
     (column) => column.id === filteredLayers[0].xAccessor
   );
@@ -318,7 +318,7 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => layer.splitAccessor);
 
-  const isTimeViz = Boolean(data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time'));
+  const isTimeViz = Boolean(filteredLayers.every((l) => l.xScaleType === 'time'));
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
@@ -542,7 +542,7 @@ export function XYChart({
 
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === filteredLayers[0].xAccessor);
 
-    const timeFieldName = isTimeViz ? table.columns[xAxisColumnIndex]?.meta?.field : undefined;
+    const timeFieldName = getAppliedTimeRange(filteredLayers, data)?.field;
 
     const context: LensBrushEvent['data'] = {
       range: [min, max],
