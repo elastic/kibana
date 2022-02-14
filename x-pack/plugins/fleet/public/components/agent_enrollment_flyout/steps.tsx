@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -90,6 +90,8 @@ export const AgentPolicySelectionStep = ({
   excludeFleetServer?: boolean;
   refreshAgentPolicies: () => void;
 }) => {
+  // storing the created agent policy id as the child component is being recreated
+  const [policyId, setPolicyId] = useState<string | undefined>(undefined);
   const regularAgentPolicies = useMemo(() => {
     return (agentPolicies ?? []).filter(
       (policy) =>
@@ -104,6 +106,7 @@ export const AgentPolicySelectionStep = ({
       }
       if (setSelectedPolicyId) {
         setSelectedPolicyId(key);
+        setPolicyId(key);
       }
     },
     [setSelectedPolicyId, refreshAgentPolicies]
@@ -122,6 +125,7 @@ export const AgentPolicySelectionStep = ({
           onKeyChange={setSelectedAPIKeyId}
           onAgentPolicyChange={onAgentPolicyChange}
           excludeFleetServer={excludeFleetServer}
+          policyId={policyId}
         />
       </>
     ),
