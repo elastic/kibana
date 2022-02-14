@@ -45,7 +45,7 @@ export const AllRules = React.memo<AllRulesProps>(
 
     return (
       <>
-        <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} />
+        <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} loading={loading} />
         <EuiSpacer />
         <RulesTables
           createPrePackagedRules={createPrePackagedRules}

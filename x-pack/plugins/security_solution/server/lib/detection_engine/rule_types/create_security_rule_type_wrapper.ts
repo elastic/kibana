@@ -159,13 +159,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
               if (!wroteWarningStatus) {
                 const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
-                  services.scopedClusterClient.asCurrentUser.fieldCaps({
-                    index,
-                    fields: hasTimestampOverride
-                      ? ['@timestamp', timestampOverride as string]
-                      : ['@timestamp'],
-                    include_unmapped: true,
-                  })
+                  services.scopedClusterClient.asCurrentUser.fieldCaps(
+                    {
+                      index,
+                      fields: hasTimestampOverride
+                        ? ['@timestamp', timestampOverride as string]
+                        : ['@timestamp'],
+                      include_unmapped: true,
+                    },
+                    { meta: true }
+                  )
                 );
                 wroteWarningStatus = await hasTimestampFields({
                   timestampField: hasTimestampOverride

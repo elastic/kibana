@@ -361,7 +361,7 @@ async function fetchBeatsByType(
     },
   };
 
-  const { body: results } = await callCluster.search<BeatsStats>(params);
+  const results = await callCluster.search<BeatsStats>(params);
   const hitsLength = results?.hits?.hits.length || 0;
   if (hitsLength > 0) {
     // further augment the clusters object with more stats

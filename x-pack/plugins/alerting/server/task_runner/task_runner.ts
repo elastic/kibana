@@ -477,34 +477,32 @@ export class TaskRunner<
 
       triggeredActions = concat(triggeredActions, scheduledActionsForRecoveredAlerts);
 
-      const alertsToExecute =
-        notifyWhen === 'onActionGroupChange'
-          ? Object.entries(alertsWithScheduledActions).filter(
-              ([alertName, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) => {
-                const shouldExecuteAction = alert.scheduledActionGroupOrSubgroupHasChanged();
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: alert is active but action group has not changed`
-                  );
-                }
-                return shouldExecuteAction;
-              }
-            )
-          : Object.entries(alertsWithScheduledActions).filter(
-              ([alertName, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) => {
-                const throttled = alert.isThrottled(throttle);
-                const muted = mutedAlertIdsSet.has(alertName);
-                const shouldExecuteAction = !throttled && !muted;
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: rule is ${
-                      muted ? 'muted' : 'throttled'
-                    }`
-                  );
-                }
-                return shouldExecuteAction;
-              }
+      const alertsToExecute = Object.entries(alertsWithScheduledActions).filter(
+        ([alertName, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) => {
+          const throttled = alert.isThrottled(throttle);
+          const muted = mutedAlertIdsSet.has(alertName);
+          let shouldExecuteAction = true;
+
+          if (throttled || muted) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: rule is ${
+                muted ? 'muted' : 'throttled'
+              }`
             );
+          } else if (
+            notifyWhen === 'onActionGroupChange' &&
+            !alert.scheduledActionGroupOrSubgroupHasChanged()
+          ) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: alert is active but action group has not changed`
+            );
+          }
+
+          return shouldExecuteAction;
+        }
+      );
 
       const allTriggeredActions = await Promise.all(
         alertsToExecute.map(

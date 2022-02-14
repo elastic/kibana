@@ -54,6 +54,7 @@ describe('ConfigSchema', () => {
             },
           ],
         },
+        "poolSize": 1,
       }
     `);
   });
@@ -105,6 +106,7 @@ describe('ConfigSchema', () => {
             },
           ],
         },
+        "poolSize": 1,
       }
     `);
   });
