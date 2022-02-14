@@ -51,16 +51,3 @@ export type RuleSearchResult = Omit<
   createdAt: string;
   updatedAt: string;
 };
-
-/**
- * Same as "RuleSearchResult" just a partial is applied. Useful for unit tests since these types aren't exact.
- */
-export type PartialRuleSearchResult = Omit<
-  SanitizedAlert<Partial<RuleParams>>,
-  'createdBy' | 'updatedBy' | 'createdAt' | 'updatedAt'
-> & {
-  createdBy: string | null;
-  updatedBy: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
