@@ -68,6 +68,7 @@ export const getDetectionRules = async ({
       responses = [...responses, ...response.saved_objects];
     }
   }
+
   try {
     finder.close();
   } catch (exception) {
@@ -75,6 +76,7 @@ export const getDetectionRules = async ({
     // the response. We have seen this within e2e test containers but nothing happen in normal
     // operational conditions which is why this try/catch is here.
   }
+
   logger.debug(`Returning cases response of length: "${responses.length}"`);
   return responses;
 };
