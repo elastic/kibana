@@ -49,12 +49,12 @@ export function useDockerRegistry() {
 
       await delay(3000);
     }
+    dockerProcess.kill();
 
     if (isExited && dockerProcess.exitCode !== 0) {
       throw new Error(`Unable to setup docker registry exit code ${dockerProcess.exitCode}`);
     }
 
-    dockerProcess.kill();
     throw new Error('Unable to setup docker registry after timeout');
   }
 
