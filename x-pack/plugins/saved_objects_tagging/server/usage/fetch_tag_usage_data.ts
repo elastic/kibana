@@ -36,7 +36,7 @@ export const fetchTagUsageData = async ({
   esClient: ElasticsearchClient;
   kibanaIndex: string;
 }): Promise<TaggingUsageData> => {
-  const { body } = await esClient.search({
+  const body = await esClient.search({
     index: [kibanaIndex],
     ignore_unavailable: true,
     filter_path: 'aggregations',

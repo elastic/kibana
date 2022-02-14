@@ -15,9 +15,7 @@ export const getManagedRepositoryName = async (
   client: ElasticsearchClient
 ): Promise<string | undefined> => {
   try {
-    const {
-      body: { persistent, transient, defaults },
-    } = await client.cluster.getSettings({
+    const { persistent, transient, defaults } = await client.cluster.getSettings({
       filter_path: '*.*managed_repository',
       flat_settings: true,
       include_defaults: true,
