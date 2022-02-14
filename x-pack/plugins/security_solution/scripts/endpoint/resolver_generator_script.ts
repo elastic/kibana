@@ -49,25 +49,11 @@ async function addUser(esClient: Client): Promise<UserInfo[string] | undefined> 
     password: 'changeme',
   };
   const path = `_security/user/${endpointUser.username}`;
-  try {
-    const userInfo = (await esClient.transport.request({
-      method: 'GET',
-      path,
-    })) as UserInfo;
 
-    if (userInfo[endpointUser.username].username) {
-      console.log(`User ${endpointUser.username} already exists!`);
-      return userInfo[endpointUser.username];
-    }
-  } catch (error) {
-    if (error.statusCode === 404) {
-      console.log(`User ${endpointUser.username} does not exist!`);
-    }
-  }
   // add user if doesn't exist already
   try {
     console.log(`Adding ${endpointUser.username}...`);
-    await esClient.transport.request({
+    const addedUser = await esClient.transport.request<Promise<{ created: boolean }>>({
       method: 'POST',
       path,
       body: {
@@ -76,7 +62,11 @@ async function addUser(esClient: Client): Promise<UserInfo[string] | undefined> 
         full_name: 'endpoint user',
       },
     });
-    console.log('User endpoint_user added successfully!');
+    if (addedUser.created) {
+      console.log(`User ${endpointUser.username} added successfully!`);
+    } else {
+      console.log(`User ${endpointUser.username} already exists!`);
+    }
     return {
       username: endpointUser.username,
     };
