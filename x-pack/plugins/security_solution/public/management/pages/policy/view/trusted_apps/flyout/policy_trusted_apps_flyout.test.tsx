@@ -106,7 +106,7 @@ describe('Policy trusted apps flyout', () => {
     });
 
     expect(component.getByTestId('confirmPolicyTrustedAppsFlyout')).not.toBeNull();
-    expect(component.getByTestId('Generated Exception (u6kh2)_checkbox')).not.toBeNull();
+    expect(component.getByTestId('Generated Exception (nng74)_checkbox')).not.toBeNull();
   });
 
   it('should confirm flyout action', async () => {
