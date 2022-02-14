@@ -10,6 +10,7 @@ import { DatasourcePublicAPI } from '../types';
 import { XYState } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '..';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -114,3 +115,9 @@ export function checkScaleOperation(
     );
   };
 }
+
+export const isDataLayer = (layer: Pick<XYLayerConfig, 'layerType'>) =>
+  layer.layerType === layerTypes.DATA;
+
+export const isReferenceLayer = (layer: Pick<XYLayerConfig, 'layerType'>) =>
+  layer?.layerType === layerTypes.REFERENCELINE;

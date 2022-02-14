@@ -42,6 +42,8 @@ import {
   checkScaleOperation,
   checkXAccessorCompatibility,
   getAxisName,
+  isDataLayer,
+  isReferenceLayer,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 
@@ -313,9 +315,7 @@ export const getXyVisualization = ({
     }
 
     const isHorizontal = isHorizontalChart(state.layers);
-    const isDataLayer = !layer.layerType || layer.layerType === layerTypes.DATA;
-
-    if (!isDataLayer) {
+    if (isReferenceLayer(layer)) {
       const idToIndex = sortedAccessors.reduce<Record<string, number>>((memo, id, index) => {
         memo[id] = index;
         return memo;
@@ -638,9 +638,7 @@ export const getXyVisualization = ({
         (id) => !groupsAvailable[id]
       )
     ) {
-      newLayers = newLayers.filter(
-        ({ layerType, accessors }) => layerType === layerTypes.DATA || accessors.length
-      );
+      newLayers = newLayers.filter((layer) => isDataLayer(layer) || layer.accessors.length);
     }
 
     return {

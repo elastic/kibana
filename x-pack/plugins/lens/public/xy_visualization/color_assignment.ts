@@ -11,8 +11,9 @@ import type { Datatable } from 'src/plugins/expressions';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { FormatFactory, LayerType, layerTypes } from '../../common';
+import { FormatFactory, LayerType } from '../../common';
 import type { XYLayerConfig } from '../../common/expressions';
+import { isDataLayer, isReferenceLayer } from './visualization_helpers';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -42,7 +43,7 @@ export function getColorAssignments(
   const layersPerPalette: Record<string, LayerColorConfig[]> = {};
 
   layers
-    .filter(({ layerType }) => layerType === layerTypes.DATA)
+    .filter((layer) => isDataLayer(layer))
     .forEach((layer) => {
       const palette = layer.palette?.name || 'default';
       if (!layersPerPalette[palette]) {
@@ -117,7 +118,7 @@ export function getAccessorColorConfig(
         triggerIcon: 'disabled',
       };
     }
-    if (layer.layerType === layerTypes.REFERENCELINE) {
+    if (isReferenceLayer(layer)) {
       return {
         columnId: accessor as string,
         triggerIcon: 'color',

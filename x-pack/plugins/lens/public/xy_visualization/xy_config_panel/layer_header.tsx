@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
 import type { VisualizationLayerWidgetProps } from '../../types';
 import { State, visualizationTypes } from '../types';
-import { layerTypes } from '../../../common';
 import { SeriesType } from '../../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
@@ -18,6 +17,7 @@ import { StaticHeader } from '../../shared_components';
 import { ToolbarButton } from '../../../../../../src/plugins/kibana_react/public';
 import { LensIconChartBarReferenceLine } from '../../assets/chart_bar_reference_line';
 import { updateLayer } from '.';
+import { isReferenceLayer } from '../visualization_helpers';
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -29,7 +29,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
     return null;
   }
   // if it's a reference line just draw a static text
-  if (layer.layerType === layerTypes.REFERENCELINE) {
+  if (isReferenceLayer(layer)) {
     return (
       <StaticHeader
         icon={LensIconChartBarReferenceLine}

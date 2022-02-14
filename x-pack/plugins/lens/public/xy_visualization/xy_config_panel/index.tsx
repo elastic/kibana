@@ -23,7 +23,7 @@ import type {
   FramePublicAPI,
 } from '../../types';
 import { State, visualizationTypes, XYState } from '../types';
-import { FormatFactory, layerTypes } from '../../../common';
+import { FormatFactory } from '../../../common';
 import {
   SeriesType,
   YAxisMode,
@@ -41,6 +41,7 @@ import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
 import { PalettePicker, TooltipWrapper } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
+import { isReferenceLayer } from '../visualization_helpers';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -597,7 +598,7 @@ export function DimensionEditor(
     );
   }
 
-  if (layer.layerType === layerTypes.REFERENCELINE) {
+  if (isReferenceLayer(layer)) {
     return <ReferenceLinePanel {...props} isHorizontal={isHorizontal} />;
   }
 
