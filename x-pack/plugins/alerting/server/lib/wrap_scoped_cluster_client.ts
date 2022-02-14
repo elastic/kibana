@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { TransportRequestOptions, TransportResult } from '@elastic/elasticsearch';
+import {
+  TransportRequestOptions,
+  TransportResult,
+  TransportRequestOptionsWithMeta,
+  TransportRequestOptionsWithOutMeta,
+} from '@elastic/elasticsearch';
 import type {
   SearchRequest,
   SearchResponse,
@@ -50,14 +55,19 @@ function wrapEsClient(
     TAggregations = Record<AggregateName, AggregationsAggregate>
   >(
     query?: SearchRequest | SearchRequestWithBody,
-    options?: TransportRequestOptions
-  ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>>> => {
+    options?:
+      | TransportRequestOptions
+      | TransportRequestOptionsWithMeta
+      | TransportRequestOptionsWithOutMeta
+  ): Promise<
+    | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
+    | SearchResponse<TDocument, TAggregations>
+  > => {
     try {
       const searchOptions = options ?? {};
       return await esClient.search<TDocument, TAggregations>(query, {
         ...searchOptions,
         signal: abortController.signal,
-        meta: true,
       });
     } catch (e) {
       if (abortController.signal.aborted) {

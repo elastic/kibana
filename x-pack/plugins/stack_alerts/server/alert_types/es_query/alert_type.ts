@@ -224,7 +224,7 @@ export function getAlertType(logger: Logger): RuleType<
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
 
-    const searchResult = await esClient.search(query);
+    const { body: searchResult } = await esClient.search(query, { meta: true });
 
     logger.debug(
       `alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`

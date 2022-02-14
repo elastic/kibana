@@ -71,9 +71,10 @@ export const singleSearchAfter = async ({
       });
 
       const start = performance.now();
-      const nextSearchAfterResult =
+      const { body: nextSearchAfterResult } =
         await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
-          searchAfterQuery as estypes.SearchRequest
+          searchAfterQuery as estypes.SearchRequest,
+          { meta: true }
         );
       const end = performance.now();
 
