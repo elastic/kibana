@@ -192,8 +192,8 @@ export const bucketTransform = {
       },
     };
     if (bucket.gap_policy) body.serial_diff.gap_policy = bucket.gap_policy;
-    if (bucket.lag) {
-      body.serial_diff.lag = /^([\d]+)$/.test(bucket.lag) ? bucket.lag : 0;
+    if (bucket.lag && /^([\d]+)$/.test(bucket.lag)) {
+      body.serial_diff.lag = bucket.lag;
     }
     return body;
   },

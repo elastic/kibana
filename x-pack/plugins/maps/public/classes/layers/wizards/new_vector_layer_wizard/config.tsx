@@ -23,7 +23,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
   }),
   disabledReason: i18n.translate('xpack.maps.newVectorLayerWizard.disabledDesc', {
     defaultMessage:
-      'Unable to create index, you are missing the Kibana privilege "Index Pattern Management".',
+      'Unable to create index, you are missing the Kibana privilege "Data View Management".',
   }),
   getIsDisabled: async () => {
     const hasImportPermission = await getFileUpload().hasImportPermission({

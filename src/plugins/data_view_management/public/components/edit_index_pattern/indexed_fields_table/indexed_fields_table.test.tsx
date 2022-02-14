@@ -97,6 +97,12 @@ const fields = [
   },
 ].map(mockFieldToIndexPatternField);
 
+const mockedServices = {
+  userEditPermission: false,
+  openModal: () => ({ onClose: new Promise<void>(() => {}), close: async () => {} }),
+  theme: {} as any,
+};
+
 describe('IndexedFieldsTable', () => {
   test('should render normally', async () => {
     const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
@@ -110,8 +116,9 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter={[]}
         schemaFieldTypeFilter={[]}
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
@@ -131,8 +138,9 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter={[]}
         schemaFieldTypeFilter={[]}
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ fieldFilter: 'Elast' });
@@ -153,8 +161,9 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter={[]}
         schemaFieldTypeFilter={[]}
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ indexedFieldTypeFilter: ['date'] });
@@ -175,8 +184,9 @@ describe('IndexedFieldsTable', () => {
         indexedFieldTypeFilter={[]}
         schemaFieldTypeFilter={[]}
         fieldFilter=""
+        {...mockedServices}
       />
-    ).dive();
+    );
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ schemaFieldTypeFilter: ['runtime'] });
@@ -198,8 +208,9 @@ describe('IndexedFieldsTable', () => {
           indexedFieldTypeFilter={[]}
           schemaFieldTypeFilter={[]}
           fieldFilter=""
+          {...mockedServices}
         />
-      ).dive();
+      );
 
       await new Promise((resolve) => process.nextTick(resolve));
       component.update();
