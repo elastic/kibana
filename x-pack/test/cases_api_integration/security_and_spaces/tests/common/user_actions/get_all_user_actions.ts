@@ -13,14 +13,10 @@ import {
   CaseStatuses,
   CommentType,
   ConnectorTypes,
+  getCaseUserActionUrl,
 } from '../../../../../../plugins/cases/common/api';
 import { CreateCaseUserAction } from '../../../../../../plugins/cases/common/api/cases/user_actions/create_case';
-import {
-  userActionPostResp,
-  postCaseReq,
-  postCommentUserReq,
-  getPostCaseRequest,
-} from '../../../../common/lib/mock';
+import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
@@ -31,6 +27,7 @@ import {
   createComment,
   updateComment,
   deleteComment,
+  extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -41,6 +38,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -60,13 +58,13 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(userActions.length).to.eql(1);
       expect(createCaseUserAction.action).to.eql('create');
       expect(createCaseUserAction.type).to.eql('create_case');
-      expect(createCaseUserAction.payload.description).to.eql(userActionPostResp.description);
+      expect(createCaseUserAction.payload.description).to.eql(postCaseReq.description);
       expect(createCaseUserAction.payload.status).to.eql('open');
-      expect(createCaseUserAction.payload.tags).to.eql(userActionPostResp.tags);
-      expect(createCaseUserAction.payload.title).to.eql(userActionPostResp.title);
-      expect(createCaseUserAction.payload.settings).to.eql(userActionPostResp.settings);
-      expect(createCaseUserAction.payload.owner).to.eql(userActionPostResp.owner);
-      expect(createCaseUserAction.payload.connector).to.eql(userActionPostResp.connector);
+      expect(createCaseUserAction.payload.tags).to.eql(postCaseReq.tags);
+      expect(createCaseUserAction.payload.title).to.eql(postCaseReq.title);
+      expect(createCaseUserAction.payload.settings).to.eql(postCaseReq.settings);
+      expect(createCaseUserAction.payload.owner).to.eql(postCaseReq.owner);
+      expect(createCaseUserAction.payload.connector).to.eql(postCaseReq.connector);
     });
 
     it('creates a delete case user action when a case is deleted', async () => {
@@ -358,6 +356,19 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+    });
+
+    describe('deprecations', () => {
+      it('should return a warning header', async () => {
+        const theCase = await createCase(supertest, postCaseReq);
+        const res = await supertest.get(getCaseUserActionUrl(theCase.id)).expect(200);
+        const warningHeader = res.header.warning;
+
+        assertWarningHeader(warningHeader);
+
+        const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+        expect(warningValue).to.be('Deprecated endpoint');
+      });
     });
   });
 };

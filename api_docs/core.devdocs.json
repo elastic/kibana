@@ -1671,7 +1671,7 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly settings: string; readonly elasticStackGetStarted: string; readonly upgrade: { readonly upgradingElasticStack: string; }; readonly apm: { readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; }; readonly canvas: { readonly guide: string; }; readonly cloud: { readonly indexManagement: string; }; readonly console: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly appSearch: { readonly apiRef: string; readonly apiClients: string; readonly apiKeys: string; readonly authentication: string; readonly crawlRules: string; readonly curations: string; readonly duplicateDocuments: string; readonly entryPoints: string; readonly guide: string; readonly indexingDocuments: string; readonly indexingDocumentsSchema: string; readonly logSettings: string; readonly metaEngines: string; readonly precisionTuning: string; readonly relevanceTuning: string; readonly resultSettings: string; readonly searchUI: string; readonly security: string; readonly synonyms: string; readonly webCrawler: string; readonly webCrawlerEventLogs: string; }; readonly enterpriseSearch: { readonly configuration: string; readonly licenseManagement: string; readonly mailService: string; readonly usersAccess: string; }; readonly workplaceSearch: { readonly apiKeys: string; readonly box: string; readonly confluenceCloud: string; readonly confluenceServer: string; readonly customSources: string; readonly customSourcePermissions: string; readonly documentPermissions: string; readonly dropbox: string; readonly externalIdentities: string; readonly gitHub: string; readonly gettingStarted: string; readonly gmail: string; readonly googleDrive: string; readonly indexingSchedule: string; readonly jiraCloud: string; readonly jiraServer: string; readonly oneDrive: string; readonly permissions: string; readonly salesforce: string; readonly security: string; readonly serviceNow: string; readonly sharePoint: string; readonly slack: string; readonly synch: string; readonly zendesk: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly terms_doc_count_error: string; readonly rare_terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: { readonly guide: string; readonly autocompleteSuggestions: string; }; readonly upgradeAssistant: { readonly overview: string; readonly batchReindex: string; readonly remoteReindex: string; }; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; }; readonly securitySolution: { readonly trustedApps: string; readonly eventFilters: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; multiSearch: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; searchPreference: string; simulatePipeline: string; timeUnits: string; unfreezeIndex: string; updateTransform: string; }>; readonly observability: Readonly<{ guide: string; infrastructureThreshold: string; logsThreshold: string; metricsThreshold: string; monitorStatus: string; monitorUptime: string; tlsCertificate: string; uptimeDurationAnomaly: string; }>; readonly alerting: Record<string, string>; readonly maps: Readonly<{ guide: string; importGeospatialPrivileges: string; gdalTutorial: string; }>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; elasticsearchEnableApiKeys: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly spaces: Readonly<{ kibanaLegacyUrlAliases: string; kibanaDisableLegacyUrlAliasesApi: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: { azureRepo: string; gcsRepo: string; hdfsRepo: string; s3Repo: string; snapshotRestoreRepos: string; mapperSize: string; }; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ beatsAgentComparison: string; guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; settingsFleetServerProxySettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; installElasticAgent: string; installElasticAgentStandalone: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; learnMoreBlog: string; apiKeysLearnMore: string; onPremRegistry: string; }>; readonly ecs: { readonly guide: string; }; readonly clients: { readonly guide: string; readonly goOverview: string; readonly javaIndex: string; readonly jsIntro: string; readonly netGuide: string; readonly perlGuide: string; readonly phpGuide: string; readonly pythonGuide: string; readonly rubyOverview: string; readonly rustGuide: string; }; readonly endpoints: { readonly troubleshooting: string; }; }"
+              "DocLinks"
             ],
             "path": "src/core/public/doc_links/doc_links_service.ts",
             "deprecated": false
@@ -1686,6 +1686,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -3986,6 +3989,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -7538,6 +7544,18 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.ElasticsearchConfig.compression",
+            "type": "boolean",
+            "tags": [],
+            "label": "compression",
+            "description": [
+              "\nWhether to use compression for communications with elasticsearch."
+            ],
+            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.ElasticsearchConfig.hosts",
             "type": "Array",
             "tags": [],
@@ -7746,7 +7764,7 @@
                 "label": "rawConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; healthCheck: Readonly<{} & { delay: moment.Duration; }>; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
+                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; compression: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; healthCheck: Readonly<{} & { delay: moment.Duration; }>; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
                 ],
                 "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
                 "deprecated": false,
@@ -8564,6 +8582,9 @@
         "description": [
           "\r\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\r\n"
         ],
+        "signature": [
+          "ConfigDeprecationContext"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -8655,6 +8676,9 @@
         "label": "ConfigDeprecationFactory",
         "description": [
           "\r\nProvides helpers to generates the most commonly used {@link ConfigDeprecation}\r\nwhen invoking a {@link ConfigDeprecationProvider}.\r\n\r\nSee methods documentation for more detailed examples.\r\n"
+        ],
+        "signature": [
+          "ConfigDeprecationFactory"
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
@@ -9183,6 +9207,27 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.CoreSetup.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [
+              "{@link DocLinksServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.DocLinksServiceSetup",
+                "text": "DocLinksServiceSetup"
+              }
+            ],
+            "path": "src/core/server/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.CoreSetup.elasticsearch",
             "type": "Object",
             "tags": [],
@@ -9456,6 +9501,27 @@
                 "docId": "kibCorePluginApi",
                 "section": "def-server.CapabilitiesStart",
                 "text": "CapabilitiesStart"
+              }
+            ],
+            "path": "src/core/server/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreStart.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [
+              "{@link DocLinksServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.DocLinksServiceSetup",
+                "text": "DocLinksServiceSetup"
               }
             ],
             "path": "src/core/server/index.ts",
@@ -10032,6 +10098,58 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.DocLinksServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocLinksServiceSetup",
+        "description": [],
+        "path": "src/core/server/doc_links/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.DocLinksServiceSetup.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "The branch/version the docLinks are pointing to"
+            ],
+            "path": "src/core/server/doc_links/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.DocLinksServiceSetup.elasticWebsiteUrl",
+            "type": "string",
+            "tags": [],
+            "label": "elasticWebsiteUrl",
+            "description": [
+              "The base url for the elastic website"
+            ],
+            "path": "src/core/server/doc_links/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.DocLinksServiceSetup.links",
+            "type": "Object",
+            "tags": [],
+            "label": "links",
+            "description": [
+              "A record of all registered doc links"
+            ],
+            "signature": [
+              "DocLinks"
+            ],
+            "path": "src/core/server/doc_links/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.ElasticsearchConfigPreboot",
         "type": "Interface",
         "tags": [],
@@ -10481,6 +10599,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -13162,9 +13283,12 @@
         "tags": [],
         "label": "Logger",
         "description": [
-          "\nLogger exposes all the necessary methods to log any type of information and\nthis is the interface used by the logging consumers including plugins.\n"
+          "\r\nLogger exposes all the necessary methods to log any type of information and\r\nthis is the interface used by the logging consumers including plugins.\r\n"
         ],
-        "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+        "signature": [
+          "Logger"
+        ],
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13174,28 +13298,16 @@
             "tags": [],
             "label": "trace",
             "description": [
-              "\nLog messages at the most detailed log level\n"
+              "\r\nLog messages at the most detailed log level\r\n"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(message: string, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13210,7 +13322,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13226,7 +13338,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13240,28 +13352,16 @@
             "tags": [],
             "label": "debug",
             "description": [
-              "\nLog messages useful for debugging and interactive investigation"
+              "\r\nLog messages useful for debugging and interactive investigation"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(message: string, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13276,7 +13376,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13292,7 +13392,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13306,28 +13406,16 @@
             "tags": [],
             "label": "info",
             "description": [
-              "\nLogs messages related to general application flow"
+              "\r\nLogs messages related to general application flow"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(message: string, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13342,7 +13430,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13358,7 +13446,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13372,28 +13460,16 @@
             "tags": [],
             "label": "warn",
             "description": [
-              "\nLogs abnormal or unexpected errors or messages"
+              "\r\nLogs abnormal or unexpected errors or messages"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13408,7 +13484,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13424,7 +13500,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13438,28 +13514,16 @@
             "tags": [],
             "label": "error",
             "description": [
-              "\nLogs abnormal or unexpected errors or messages that caused a failure in the application flow\n"
+              "\r\nLogs abnormal or unexpected errors or messages that caused a failure in the application flow\r\n"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13474,7 +13538,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13490,7 +13554,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13504,28 +13568,16 @@
             "tags": [],
             "label": "fatal",
             "description": [
-              "\nLogs abnormal or unexpected errors or messages that caused an unrecoverable failure\n"
+              "\r\nLogs abnormal or unexpected errors or messages that caused an unrecoverable failure\r\n"
             ],
             "signature": [
               "<Meta extends ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               " = ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LogMeta",
-                "text": "LogMeta"
-              },
+              "LogMeta",
               ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13540,7 +13592,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -13556,7 +13608,7 @@
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -13570,19 +13622,13 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\nReturns a new {@link Logger} instance extending the current logger context.\n"
+              "\r\nReturns a new {@link Logger} instance extending the current logger context.\r\n"
             ],
             "signature": [
               "(...childContextPaths: string[]) => ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13595,7 +13641,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -13667,9 +13713,12 @@
         "tags": [],
         "label": "LoggerFactory",
         "description": [
-          "\nThe single purpose of `LoggerFactory` interface is to define a way to\nretrieve a context-based logger instance.\n"
+          "\r\nThe single purpose of `LoggerFactory` interface is to define a way to\r\nretrieve a context-based logger instance.\r\n"
         ],
-        "path": "node_modules/@kbn/logging/target_types/logger_factory.d.ts",
+        "signature": [
+          "LoggerFactory"
+        ],
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -13679,19 +13728,13 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\nReturns a `Logger` instance for the specified context.\n"
+              "\r\nReturns a `Logger` instance for the specified context.\r\n"
             ],
             "signature": [
               "(...contextParts: string[]) => ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
-            "path": "node_modules/@kbn/logging/target_types/logger_factory.d.ts",
+            "path": "node_modules/@types/kbn__logging/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -13701,12 +13744,12 @@
                 "tags": [],
                 "label": "contextParts",
                 "description": [
-                  "- Parts of the context to return logger for. For example\nget('plugins', 'pid') will return a logger for the `plugins.pid` context."
+                  "- Parts of the context to return logger for. For example\r\nget('plugins', 'pid') will return a logger for the `plugins.pid` context."
                 ],
                 "signature": [
                   "string[]"
                 ],
-                "path": "node_modules/@kbn/logging/target_types/logger_factory.d.ts",
+                "path": "node_modules/@types/kbn__logging/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -14364,6 +14407,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -14733,13 +14779,7 @@
               "\n{@link LoggerFactory | logger factory} instance already bound to the plugin's logging context\n"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LoggerFactory",
-                "text": "LoggerFactory"
-              }
+              "LoggerFactory"
             ],
             "path": "src/core/server/plugins/types.ts",
             "deprecated": false
@@ -14756,13 +14796,13 @@
             "signature": [
               "{ legacy: { globalConfig$: ",
               "Observable",
-              "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isLessThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isEqualTo: (other: ",
               "ByteSizeValue",
-              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ByteSizeValueUnit | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ByteSizeValueUnit | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               "ByteSizeValue",
               ") => boolean; isLessThan: (other: ",
               "ByteSizeValue",
@@ -15034,13 +15074,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
             "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
             "deprecated": false
@@ -17243,88 +17277,37 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.DocLinksServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "DocLinksServiceStart",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.DocLinksServiceSetup",
+            "text": "DocLinksServiceSetup"
+          }
+        ],
+        "path": "src/core/server/doc_links/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.Ecs",
         "type": "Type",
         "tags": [],
         "label": "Ecs",
         "description": [
-          "\nRepresents the full ECS schema.\n"
+          "\r\nRepresents the full ECS schema.\r\n"
         ],
         "signature": [
-          "EcsBase",
-          " & ",
-          "EcsTracing",
-          " & { ecs: EcsField; agent?: ",
-          "EcsAgent",
-          " | undefined; as?: ",
-          "EcsAutonomousSystem",
-          " | undefined; client?: ",
-          "EcsClient",
-          " | undefined; cloud?: ",
-          "EcsCloud",
-          " | undefined; container?: ",
-          "EcsContainer",
-          " | undefined; data_stream?: ",
-          "EcsDataStream",
-          " | undefined; destination?: ",
-          "EcsDestination",
-          " | undefined; dns?: ",
-          "EcsDns",
-          " | undefined; email?: ",
-          "EcsEmail",
-          " | undefined; error?: ",
-          "EcsError",
-          " | undefined; event?: ",
-          "EcsEvent",
-          " | undefined; file?: ",
-          "EcsFile",
-          " | undefined; group?: ",
-          "EcsGroup",
-          " | undefined; host?: ",
-          "EcsHost",
-          " | undefined; http?: ",
-          "EcsHttp",
-          " | undefined; log?: ",
-          "EcsLog",
-          " | undefined; network?: ",
-          "EcsNetwork",
-          " | undefined; observer?: ",
-          "EcsObserver",
-          " | undefined; orchestrator?: ",
-          "EcsOrchestrator",
-          " | undefined; organization?: ",
-          "EcsOrganization",
-          " | undefined; package?: ",
-          "EcsPackage",
-          " | undefined; process?: ",
-          "EcsProcess",
-          " | undefined; registry?: ",
-          "EcsRegistry",
-          " | undefined; related?: ",
-          "EcsRelated",
-          " | undefined; rule?: ",
-          "EcsRule",
-          " | undefined; server?: ",
-          "EcsServer",
-          " | undefined; service?: ",
-          "EcsService",
-          " | undefined; source?: ",
-          "EcsSource",
-          " | undefined; threat?: ",
-          "EcsThreat",
-          " | undefined; tls?: ",
-          "EcsTls",
-          " | undefined; url?: ",
-          "EcsUrl",
-          " | undefined; user?: ",
-          "EcsUser",
-          " | undefined; user_agent?: ",
-          "EcsUserAgent",
-          " | undefined; vulnerability?: ",
-          "EcsVulnerability",
-          " | undefined; }"
+          "EcsBase & EcsTracing & { ecs: EcsField; agent?: EcsAgent | undefined; as?: EcsAutonomousSystem | undefined; client?: EcsClient | undefined; cloud?: EcsCloud | undefined; container?: EcsContainer | undefined; data_stream?: EcsDataStream | undefined; destination?: EcsDestination | undefined; dns?: EcsDns | undefined; email?: EcsEmail | undefined; error?: EcsError | undefined; event?: EcsEvent | undefined; file?: EcsFile | undefined; group?: EcsGroup | undefined; host?: EcsHost | undefined; http?: EcsHttp | undefined; log?: EcsLog | undefined; network?: EcsNetwork | undefined; observer?: EcsObserver | undefined; orchestrator?: EcsOrchestrator | undefined; organization?: EcsOrganization | undefined; package?: EcsPackage | undefined; process?: EcsProcess | undefined; registry?: EcsRegistry | undefined; related?: EcsRelated | undefined; rule?: EcsRule | undefined; server?: EcsServer | undefined; service?: EcsService | undefined; source?: EcsSource | undefined; threat?: EcsThreat | undefined; tls?: EcsTls | undefined; url?: EcsUrl | undefined; user?: EcsUser | undefined; user_agent?: EcsUserAgent | undefined; vulnerability?: EcsVulnerability | undefined; }"
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/index.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17338,7 +17321,7 @@
         "signature": [
           "\"database\" | \"package\" | \"network\" | \"web\" | \"host\" | \"session\" | \"file\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/event.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17352,7 +17335,7 @@
         "signature": [
           "\"alert\" | \"metric\" | \"event\" | \"state\" | \"signal\" | \"pipeline_error\""
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/event.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17366,7 +17349,7 @@
         "signature": [
           "\"unknown\" | \"success\" | \"failure\""
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/event.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17380,7 +17363,7 @@
         "signature": [
           "\"start\" | \"user\" | \"error\" | \"end\" | \"info\" | \"group\" | \"protocol\" | \"connection\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
-        "path": "node_modules/@kbn/logging/target_types/ecs/event.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -17426,7 +17409,7 @@
             "section": "def-server.ElasticsearchConfig",
             "text": "ElasticsearchConfig"
           },
-          ", \"username\" | \"hosts\" | \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; caFingerprint?: string | undefined; }"
+          ", \"username\" | \"hosts\" | \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"compression\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; caFingerprint?: string | undefined; }"
         ],
         "path": "src/core/server/elasticsearch/client/client_config.ts",
         "deprecated": false,
@@ -18312,78 +18295,12 @@
         "tags": [],
         "label": "LogMeta",
         "description": [
-          "\nRepresents the ECS schema with the following reserved keys excluded:\n- `ecs`\n- `@timestamp`\n- `message`\n- `log.level`\n- `log.logger`\n"
+          "\r\nRepresents the ECS schema with the following reserved keys excluded:\r\n- `ecs`\r\n- `@timestamp`\r\n- `message`\r\n- `log.level`\r\n- `log.logger`\r\n"
         ],
         "signature": [
-          "Omit<",
-          "EcsBase",
-          ", \"message\" | \"@timestamp\"> & ",
-          "EcsTracing",
-          " & { agent?: ",
-          "EcsAgent",
-          " | undefined; as?: ",
-          "EcsAutonomousSystem",
-          " | undefined; client?: ",
-          "EcsClient",
-          " | undefined; cloud?: ",
-          "EcsCloud",
-          " | undefined; container?: ",
-          "EcsContainer",
-          " | undefined; destination?: ",
-          "EcsDestination",
-          " | undefined; dns?: ",
-          "EcsDns",
-          " | undefined; error?: ",
-          "EcsError",
-          " | undefined; event?: ",
-          "EcsEvent",
-          " | undefined; file?: ",
-          "EcsFile",
-          " | undefined; group?: ",
-          "EcsGroup",
-          " | undefined; host?: ",
-          "EcsHost",
-          " | undefined; http?: ",
-          "EcsHttp",
-          " | undefined; log?: Omit<",
-          "EcsLog",
-          ", \"logger\" | \"level\"> | undefined; network?: ",
-          "EcsNetwork",
-          " | undefined; observer?: ",
-          "EcsObserver",
-          " | undefined; organization?: ",
-          "EcsOrganization",
-          " | undefined; package?: ",
-          "EcsPackage",
-          " | undefined; process?: ",
-          "EcsProcess",
-          " | undefined; registry?: ",
-          "EcsRegistry",
-          " | undefined; related?: ",
-          "EcsRelated",
-          " | undefined; rule?: ",
-          "EcsRule",
-          " | undefined; server?: ",
-          "EcsServer",
-          " | undefined; service?: ",
-          "EcsService",
-          " | undefined; source?: ",
-          "EcsSource",
-          " | undefined; threat?: ",
-          "EcsThreat",
-          " | undefined; tls?: ",
-          "EcsTls",
-          " | undefined; url?: ",
-          "EcsUrl",
-          " | undefined; user?: ",
-          "EcsUser",
-          " | undefined; user_agent?: ",
-          "EcsUserAgent",
-          " | undefined; vulnerability?: ",
-          "EcsVulnerability",
-          " | undefined; }"
+          "Omit<EcsBase, \"message\" | \"@timestamp\"> & EcsTracing & { agent?: EcsAgent | undefined; as?: EcsAutonomousSystem | undefined; client?: EcsClient | undefined; cloud?: EcsCloud | undefined; container?: EcsContainer | undefined; destination?: EcsDestination | undefined; dns?: EcsDns | undefined; error?: EcsError | undefined; event?: EcsEvent | undefined; file?: EcsFile | undefined; group?: EcsGroup | undefined; host?: EcsHost | undefined; http?: EcsHttp | undefined; log?: Omit<EcsLog, \"logger\" | \"level\"> | undefined; network?: EcsNetwork | undefined; observer?: EcsObserver | undefined; organization?: EcsOrganization | undefined; package?: EcsPackage | undefined; process?: EcsProcess | undefined; registry?: EcsRegistry | undefined; related?: EcsRelated | undefined; rule?: EcsRule | undefined; server?: EcsServer | undefined; service?: EcsService | undefined; source?: EcsSource | undefined; threat?: EcsThreat | undefined; tls?: EcsTls | undefined; url?: EcsUrl | undefined; user?: EcsUser | undefined; user_agent?: EcsUserAgent | undefined; vulnerability?: EcsVulnerability | undefined; }"
         ],
-        "path": "node_modules/@kbn/logging/target_types/log_meta.d.ts",
+        "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -18665,7 +18582,7 @@
         "label": "SharedGlobalConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+          "{ readonly elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
           "ByteSizeValue",
           ") => boolean; isLessThan: (other: ",
           "ByteSizeValue",

@@ -15,6 +15,7 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar, DimensionEditor } from './xy_config_panel';
 import { LayerHeader } from './xy_config_panel/layer_header';
@@ -177,6 +178,8 @@ export const getXyVisualization = ({
 
   getSuggestions,
 
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+
   initialize(addNewLayer, state) {
     return (
       state || {
@@ -240,14 +243,14 @@ export const getXyVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
         icon: LensIconChartMixedXy,
       },
       {
         type: layerTypes.REFERENCELINE,
         label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
-          defaultMessage: 'Add reference layer',
+          defaultMessage: 'Reference lines',
         }),
         icon: LensIconChartBarReferenceLine,
         disabled:

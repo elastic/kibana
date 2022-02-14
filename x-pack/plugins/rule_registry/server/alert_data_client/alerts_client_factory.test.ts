@@ -11,7 +11,7 @@ import { AlertsClientFactory, AlertsClientFactoryProps } from './alerts_client_f
 import { ElasticsearchClient, KibanaRequest } from 'src/core/server';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
-import { AuditLogger } from '../../../security/server';
+import { auditLoggerMock } from '../../../security/server/audit/mocks';
 import { alertingAuthorizationMock } from '../../../alerting/server/authorization/alerting_authorization.mock';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 
@@ -44,9 +44,7 @@ const fakeRequest = {
   },
 } as unknown as Request;
 
-const auditLogger = {
-  log: jest.fn(),
-} as jest.Mocked<AuditLogger>;
+const auditLogger = auditLoggerMock.create();
 
 describe('AlertsClientFactory', () => {
   beforeEach(() => {

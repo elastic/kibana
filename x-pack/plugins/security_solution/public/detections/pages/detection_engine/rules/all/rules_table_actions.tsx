@@ -16,7 +16,7 @@ import { NavigateToAppOptions } from '../../../../../../../../../src/core/public
 import { ActionToaster } from '../../../../../common/components/toasters';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { Rule } from '../../../../containers/detection_engine/rules';
-import { RulesTableActions } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { RulesTableActions } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
 import {
   deleteRulesAction,
@@ -32,7 +32,7 @@ export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<
 export const getRulesTableActions = (
   dispatchToaster: Dispatch<ActionToaster>,
   navigateToApp: NavigateToApp,
-  reFetchRules: RulesTableActions['reFetchRules'],
+  invalidateRules: () => void,
   actionsPrivileges: boolean,
   setLoadingRules: RulesTableActions['setLoadingRules']
 ): Array<DefaultItemAction<Rule>> => [
@@ -71,6 +71,7 @@ export const getRulesTableActions = (
         dispatchToaster,
         setLoadingRules
       );
+      invalidateRules();
       if (createdRules?.length) {
         editRuleAction(createdRules[0].id, navigateToApp);
       }
@@ -93,7 +94,7 @@ export const getRulesTableActions = (
     name: i18n.DELETE_RULE,
     onClick: async (rule: Rule) => {
       await deleteRulesAction([rule.id], dispatchToaster, setLoadingRules);
-      await reFetchRules();
+      invalidateRules();
     },
   },
 ];

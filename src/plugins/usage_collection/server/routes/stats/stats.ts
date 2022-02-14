@@ -63,7 +63,7 @@ export function registerStatsRoute({
   };
 
   const getClusterUuid = async (asCurrentUser: ElasticsearchClient): Promise<string> => {
-    const { body } = await asCurrentUser.info({ filter_path: 'cluster_uuid' });
+    const body = await asCurrentUser.info({ filter_path: 'cluster_uuid' });
     const { cluster_uuid: uuid } = body;
     return uuid;
   };

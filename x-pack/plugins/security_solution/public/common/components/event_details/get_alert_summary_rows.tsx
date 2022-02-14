@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getOr, find, isEmpty } from 'lodash/fp';
+import { getOr, find, isEmpty, uniqBy } from 'lodash/fp';
+import {
+  ALERT_RULE_NAMESPACE,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_DESCRIPTION,
+} from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -13,92 +18,200 @@ import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
-  ALERTS_HEADERS_RULE_NAME,
   ALERTS_HEADERS_TARGET_IMPORT_HASH,
   ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
-import {
-  AGENT_STATUS_FIELD_NAME,
-  IP_FIELD_TYPE,
-} from '../../../timelines/components/timeline/body/renderers/constants';
-import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
+import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
+import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { getEnrichedFieldInfo, SummaryRow } from './helpers';
 import { EventSummaryField } from './types';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
-import { EventCode } from '../../../../common/ecs/event';
+import { EventCode, EventCategory } from '../../../../common/ecs/event';
 
-const defaultDisplayFields: EventSummaryField[] = [
+/** Always show these fields */
+const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
-  { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
-  { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
-  { id: 'kibana.alert.threshold_result.count', label: ALERTS_HEADERS_THRESHOLD_COUNT },
-  { id: 'kibana.alert.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
-  { id: 'kibana.alert.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
 
-const processCategoryFields: EventSummaryField[] = [
-  ...defaultDisplayFields,
-  { id: 'process.name' },
-  { id: 'process.parent.name' },
-  { id: 'process.args' },
-];
+/**
+ * Get a list of fields to display based on the event's category
+ */
+function getFieldsByCategory({
+  primaryEventCategory,
+  allEventCategories,
+}: EventCategories): EventSummaryField[] {
+  switch (primaryEventCategory) {
+    case EventCategory.PROCESS:
+      return [{ id: 'process.name' }, { id: 'process.parent.name' }, { id: 'process.args' }];
+    case EventCategory.FILE:
+      return [
+        { id: 'file.name' },
+        { id: 'file.hash.sha256' },
+        { id: 'file.directory' },
+        { id: 'process.name' },
+      ];
+    case EventCategory.NETWORK:
+      return [
+        { id: 'destination.address' },
+        { id: 'destination.port' },
+        { id: 'source.address' },
+        { id: 'source.port' },
+        { id: 'process.name' },
+      ];
+    case EventCategory.DNS:
+      return [{ id: 'dns.query.name' }, { id: 'process.name' }];
+    case EventCategory.REGISTRY:
+      return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
+    case EventCategory.MALWARE:
+      // The details for malware events can be found in the file fields
+      return getFieldsByCategory({ primaryEventCategory: EventCategory.FILE, allEventCategories });
+    default:
+      let fields: EventSummaryField[] = [];
 
-const networkCategoryFields: EventSummaryField[] = [
-  ...defaultDisplayFields,
-  { id: 'destination.address' },
-  { id: 'destination.port' },
-  { id: 'process.name' },
-];
+      // If no primary category matches or hasn't been defined on purpose (e.g. in order to follow the source event)
+      // resolve more fields based on the other event categories.
+      if (allEventCategories?.includes(EventCategory.FILE)) {
+        fields = fields.concat(getFieldsByCategory({ primaryEventCategory: EventCategory.FILE }));
+      }
 
-const memoryShellCodeAlertFields: EventSummaryField[] = [
-  ...defaultDisplayFields,
-  { id: 'rule.name', label: ALERTS_HEADERS_RULE_NAME },
-  {
-    id: 'Target.process.thread.Ext.start_address_details.memory_pe.imphash',
-    label: ALERTS_HEADERS_TARGET_IMPORT_HASH,
-  },
-];
+      if (allEventCategories?.includes(EventCategory.PROCESS)) {
+        fields = fields.concat(
+          getFieldsByCategory({ primaryEventCategory: EventCategory.PROCESS })
+        );
+      }
+      return fields;
+  }
+}
 
-const behaviorAlertFields: EventSummaryField[] = [
-  ...defaultDisplayFields,
-  { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
-];
-
-const memorySignatureAlertFields: EventSummaryField[] = [
-  ...defaultDisplayFields,
-  { id: 'rule.name', label: ALERTS_HEADERS_RULE_NAME },
-];
-
-function getEventFieldsToDisplay({
-  eventCategory,
-  eventCode,
-}: {
-  eventCategory: string;
-  eventCode?: string;
-}): EventSummaryField[] {
+/**
+ * Gets the fields to display based on the event's code.
+ * Contains some enhancements to resolve more fields based on the event's categories.
+ * @param eventCode The event's code
+ * @param eventCategories The events categories
+ * @returns A list of fields to include
+ */
+function getFieldsByEventCode(
+  eventCode: string | undefined,
+  eventCategories: EventCategories
+): EventSummaryField[] {
   switch (eventCode) {
-    // memory protection fields
-    case EventCode.SHELLCODE_THREAD:
-      return memoryShellCodeAlertFields;
-    case EventCode.MEMORY_SIGNATURE:
-      return memorySignatureAlertFields;
     case EventCode.BEHAVIOR:
-      return behaviorAlertFields;
+      return [
+        { id: ALERT_RULE_DESCRIPTION, label: ALERTS_HEADERS_RULE_DESCRIPTION },
+        // Resolve more fields based on the source event
+        ...getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined }),
+      ];
+    case EventCode.SHELLCODE_THREAD:
+      return [
+        { id: 'Target.process.executable' },
+        {
+          id: 'Target.process.thread.Ext.start_address_detaiuls.memory_pe.imphash',
+          label: ALERTS_HEADERS_TARGET_IMPORT_HASH,
+        },
+        {
+          id: 'Memory_protection.unique_key_v1',
+        },
+      ];
+    case EventCode.MEMORY_SIGNATURE:
+    case EventCode.RANSOMWARE:
+      // Resolve more fields based on the source event
+      return getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined });
+    default:
+      return [];
+  }
+}
+
+/**
+ * Returns a list of fields based on the event's rule type
+ */
+function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
+  switch (ruleType) {
+    case 'threshold':
+      return [
+        { id: `${ALERT_THRESHOLD_RESULT}.count`, label: ALERTS_HEADERS_THRESHOLD_COUNT },
+        { id: `${ALERT_THRESHOLD_RESULT}.terms`, label: ALERTS_HEADERS_THRESHOLD_TERMS },
+        {
+          id: `${ALERT_THRESHOLD_RESULT}.cardinality`,
+          label: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
+        },
+      ];
+    case 'machine_learning':
+      return [
+        {
+          id: `${ALERT_RULE_NAMESPACE}.machine_learning_job_id`,
+        },
+        {
+          id: `${ALERT_RULE_NAMESPACE}.anomaly_threshold`,
+        },
+      ];
+    case 'threat_match':
+      return [
+        {
+          id: `${ALERT_RULE_NAMESPACE}.threat_index`,
+        },
+        {
+          id: `${ALERT_RULE_NAMESPACE}.index`,
+        },
+      ];
+    default:
+      return [];
+  }
+}
+
+/**
+ * Assembles a list of fields to display based on the event
+ */
+function getEventFieldsToDisplay({
+  eventCategories,
+  eventCode,
+  eventRuleType,
+}: {
+  eventCategories: EventCategories;
+  eventCode?: string;
+  eventRuleType?: string;
+}): EventSummaryField[] {
+  const fields = [
+    ...alwaysDisplayedFields,
+    ...getFieldsByCategory(eventCategories),
+    ...getFieldsByEventCode(eventCode, eventCategories),
+    ...getFieldsByRuleType(eventRuleType),
+  ];
+
+  // Filter all fields by their id to make sure there are no duplicates
+  return uniqBy('id', fields);
+}
+
+interface EventCategories {
+  primaryEventCategory?: string;
+  allEventCategories?: string[];
+}
+
+/**
+ * Extract the event's categories
+ * @param data The event details
+ * @returns The event's primary category and all other categories in case there is more than one
+ */
+function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
+  const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
+
+  let primaryEventCategory: string | undefined;
+  let allEventCategories: string[] | undefined;
+
+  if (Array.isArray(eventCategoryField?.originalValue)) {
+    primaryEventCategory = eventCategoryField?.originalValue[0];
+    allEventCategories = eventCategoryField?.originalValue;
+  } else {
+    primaryEventCategory = eventCategoryField?.originalValue;
+    if (primaryEventCategory) {
+      allEventCategories = [primaryEventCategory];
+    }
   }
 
-  switch (eventCategory) {
-    case 'network':
-      return networkCategoryFields;
-
-    case 'process':
-      return processCategoryFields;
-  }
-
-  return defaultDisplayFields;
+  return { primaryEventCategory, allEventCategories };
 }
 
 export const getSummaryRows = ({
@@ -114,11 +227,7 @@ export const getSummaryRows = ({
   eventId: string;
   isDraggable?: boolean;
 }) => {
-  const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
-
-  const eventCategory = Array.isArray(eventCategoryField?.originalValue)
-    ? eventCategoryField?.originalValue[0]
-    : eventCategoryField?.originalValue;
+  const eventCategories = getEventCategoriesFromData(data);
 
   const eventCodeField = find({ category: 'event', field: 'event.code' }, data);
 
@@ -126,7 +235,16 @@ export const getSummaryRows = ({
     ? eventCodeField?.originalValue?.[0]
     : eventCodeField?.originalValue;
 
-  const tableFields = getEventFieldsToDisplay({ eventCategory, eventCode });
+  const eventRuleTypeField = find({ category: 'kibana', field: ALERT_RULE_TYPE }, data);
+  const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
+    ? eventRuleTypeField?.originalValue?.[0]
+    : eventRuleTypeField?.originalValue;
+
+  const tableFields = getEventFieldsToDisplay({
+    eventCategories,
+    eventCode,
+    eventRuleType,
+  });
 
   return data != null
     ? tableFields.reduce<SummaryRow[]>((acc, field) => {
@@ -154,7 +272,7 @@ export const getSummaryRows = ({
           return acc;
         }
 
-        if (field.id === 'kibana.alert.threshold_result.terms') {
+        if (field.id === `${ALERT_THRESHOLD_RESULT}.terms`) {
           try {
             const terms = getOr(null, 'originalValue', item);
             const parsedValue = terms.map((term: string) => JSON.parse(term));
@@ -175,7 +293,7 @@ export const getSummaryRows = ({
           }
         }
 
-        if (field.id === 'kibana.alert.threshold_result.cardinality') {
+        if (field.id === `${ALERT_THRESHOLD_RESULT}.cardinality`) {
           try {
             const value = getOr(null, 'originalValue.0', field);
             const parsedValue = JSON.parse(value);

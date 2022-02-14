@@ -60,7 +60,7 @@ import {
 } from '../schemas/rule_schemas';
 import { RACAlert, WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
-import { IRuleExecutionLogger } from '../rule_execution_log';
+import { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface SortExceptionsReturn {
@@ -89,7 +89,7 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
-  ruleExecutionLogger: IRuleExecutionLogger;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<boolean> => {
   const { privileges, logger, buildRuleMessage, ruleExecutionLogger } = args;
 
@@ -122,7 +122,7 @@ export const hasTimestampFields = async (args: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
-  ruleExecutionLogger: IRuleExecutionLogger;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
 }): Promise<boolean> => {
@@ -193,21 +193,19 @@ export const checkPrivilegesFromEsClient = async (
   withSecuritySpan(
     'checkPrivilegesFromEsClient',
     async () =>
-      (
-        await esClient.transport.request({
-          path: '/_security/user/_has_privileges',
-          method: 'POST',
-          body: {
-            index: [
-              {
-                names: indices ?? [],
-                allow_restricted_indices: true,
-                privileges: ['read'],
-              },
-            ],
-          },
-        })
-      ).body as Privilege
+      (await esClient.transport.request({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: indices ?? [],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      })) as Privilege
   );
 
 export const getNumCatchupIntervals = ({

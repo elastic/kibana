@@ -27,7 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console']);
   const toasts = getService('toasts');
 
-  describe('console app', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/124104
+  describe.skip('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');

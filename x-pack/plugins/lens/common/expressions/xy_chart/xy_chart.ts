@@ -148,14 +148,27 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Show values in legend',
       }),
     },
+    ariaLabel: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.ariaLabel.help', {
+        defaultMessage: 'Specifies the aria label of the xy chart',
+      }),
+      required: false,
+    },
   },
-  fn(data: LensMultiTable, args: XYArgs) {
+  fn(data: LensMultiTable, args: XYArgs, handlers) {
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',
       value: {
         data,
-        args,
+        args: {
+          ...args,
+          ariaLabel:
+            args.ariaLabel ??
+            (handlers.variables?.embeddableTitle as string) ??
+            handlers.getExecutionContext?.()?.description,
+        },
       },
     };
   },

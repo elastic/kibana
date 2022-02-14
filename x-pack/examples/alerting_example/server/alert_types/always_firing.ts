@@ -65,8 +65,8 @@ export const alertType: RuleType<
     range(instances)
       .map(() => uuid.v4())
       .forEach((id: string) => {
-        services
-          .alertInstanceFactory(id)
+        services.alertFactory
+          .create(id)
           .replaceState({ triggerdOnCycle: count })
           .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds));
       });

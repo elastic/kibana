@@ -2891,6 +2891,7 @@ describe('Package policy service', () => {
         name: 'apache-1',
         inputs: [{ type: 'logfile', enabled: false }],
         package: { name: 'apache', version: '0.3.3' },
+        policy_id: '1',
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),
@@ -2967,6 +2968,7 @@ describe('Package policy service', () => {
         name: 'aws-1',
         inputs: [{ type: 'aws/metrics', policy_template: 'cloudwatch', enabled: true }],
         package: { name: 'aws', version: '1.0.0' },
+        policy_id: '1',
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),

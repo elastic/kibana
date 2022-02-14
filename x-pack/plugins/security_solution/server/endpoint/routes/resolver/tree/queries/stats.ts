@@ -123,13 +123,13 @@ export class StatsQuery {
     }
 
     // leaving unknown here because we don't actually need the hits part of the body
-    const response = await client.asCurrentUser.search({
+    const body = await client.asCurrentUser.search({
       body: this.query(nodes),
       index: this.indexPatterns,
     });
 
     // @ts-expect-error declare aggegations type explicitly
-    return response.body.aggregations?.ids?.buckets.reduce(
+    return body.aggregations?.ids?.buckets.reduce(
       (cummulative: Record<string, number>, bucket: CategoriesAgg) => ({
         ...cummulative,
         [bucket.key]: StatsQuery.getEventStats(bucket),

@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
-import { MAX_ALERTS_PER_SUB_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import { AlertInfo } from '../../common/types';
 import { UpdateAlertRequest } from '../../client/alerts/types';
@@ -42,12 +42,13 @@ export class AlertService {
 
       const res = await this.scopedClusterClient.search({
         index: indices,
+        ignore_unavailable: true,
         query: { ids: { values: ids } },
         size: 0,
         aggregations: builtAggs,
       });
 
-      return res.body.aggregations;
+      return res.aggregations;
     } catch (error) {
       const aggregationNames = aggregationBuilders.map((agg) => agg.getName());
 
@@ -183,7 +184,7 @@ export class AlertService {
     try {
       const docs = alertsInfo
         .filter((alert) => !AlertService.isEmptyAlert(alert))
-        .slice(0, MAX_ALERTS_PER_SUB_CASE)
+        .slice(0, MAX_ALERTS_PER_CASE)
         .map((alert) => ({ _id: alert.id, _index: alert.index }));
 
       if (docs.length <= 0) {
