@@ -13,12 +13,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const esClient = getService('es');
+
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
-  const defaultSettings = {
-    defaultIndex: 'logstash-*',
-  };
+  // const defaultSettings = {
+  //   defaultIndex: 'logstash-*',
+  // };
 
   const createDataView = async (dataViewName: string) => {
     await PageObjects.discover.clickIndexPatternActions();
@@ -32,23 +32,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
-      await esClient.cluster.putSettings({
-        persistent: {
-          cluster: {
-            remote: {
-              remote: {
-                skip_unavailable: 'true',
-                seeds: ['localhost:9300'],
-              },
-            },
-          },
-        },
-      });
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.uiSettings.replace(defaultSettings);
+      // await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
