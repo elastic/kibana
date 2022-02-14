@@ -163,7 +163,8 @@ export function DiscoverGridFlyout({
               <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    size="xs"
+                    size="s"
+                    iconSize="s"
                     iconType="documents"
                     flush="left"
                     {...surrDocsProps}
