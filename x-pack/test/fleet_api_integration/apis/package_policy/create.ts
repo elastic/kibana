@@ -405,7 +405,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should trim whitespace from policy name', async function () {
-      const nameWithWhitespace = '  pacakge-policy-required-variables-test-123  ';
+      const nameWithWhitespace = '  package-policy-with-whitespace-prefix-and-suffix  ';
       const { body } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
