@@ -17,7 +17,6 @@ import {
   initialCasesContextState,
 } from './cases_context_reducer';
 import { CasesContextFeatures, CasesFeatures } from '../../containers/types';
-import { getCreateCaseFlyoutLazyNoProvider } from '../../methods';
 import { CasesContextUI } from './cases_context_ui';
 
 export interface CasesContextValue {
