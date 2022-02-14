@@ -136,7 +136,7 @@ describe('alert_form', () => {
             <AlertForm
               alert={initialAlert}
               dispatch={() => {}}
-              errors={{ name: [], interval: [] }}
+              errors={{ name: [], 'schedule.interval': [] }}
               operation="create"
               actionTypeRegistry={actionTypeRegistry}
               ruleTypeRegistry={ruleTypeRegistry}
