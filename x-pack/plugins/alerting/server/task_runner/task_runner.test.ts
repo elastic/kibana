@@ -279,7 +279,6 @@ describe('Task Runner', () => {
         3,
         'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
-      // ruleExecutionStatus for test:1: {\"lastExecutionDate\":\"1970-01-01T00:00:00.000Z\",\"status\":\"error\",\"error\":{\"reason\":\"unknown\",\"message\":\"Cannot read property 'catch' of undefined\"}}
 
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
@@ -294,7 +293,7 @@ describe('Task Runner', () => {
         2,
         generateEventLog({
           duration: 0,
-          start: '1970-01-01T00:00:00.000Z',
+          start: DATE_1970,
           action: Actions.NEW_INSTANCE,
           actionSubgroup: 'subDefault',
           actionGroupId: 'default',
@@ -305,7 +304,7 @@ describe('Task Runner', () => {
         3,
         generateEventLog({
           duration: 0,
-          start: '1970-01-01T00:00:00.000Z',
+          start: DATE_1970,
           action: Actions.ACTIVE_INSTANCE,
           actionGroupId: 'default',
           actionSubgroup: 'subDefault',
@@ -395,7 +394,7 @@ describe('Task Runner', () => {
       2,
       generateEventLog({
         duration: 0,
-        start: '1970-01-01T00:00:00.000Z',
+        start: DATE_1970,
         action: Actions.NEW_INSTANCE,
         actionGroupId: 'default',
         instanceId: '1',
@@ -405,7 +404,7 @@ describe('Task Runner', () => {
       3,
       generateEventLog({
         duration: 0,
-        start: '1970-01-01T00:00:00.000Z',
+        start: DATE_1970,
         action: Actions.ACTIVE_INSTANCE,
         actionGroupId: 'default',
         instanceId: '1',
@@ -517,7 +516,7 @@ describe('Task Runner', () => {
                 },
                 state: {
                   bar: false,
-                  start: '1969-12-31T00:00:00.000Z',
+                  start: DATE_1969,
                   duration: 86400000000000,
                 },
               },
@@ -610,11 +609,11 @@ describe('Task Runner', () => {
           alertInstances: {
             '1': {
               meta: {
-                lastScheduledActions: { date: '1970-01-01T00:00:00.000Z', group: 'default' },
+                lastScheduledActions: { date: DATE_1970, group: 'default' },
               },
               state: {
                 bar: false,
-                start: '1969-12-31T00:00:00.000Z',
+                start: DATE_1969,
                 duration: 86400000000000,
               },
             },
@@ -645,7 +644,7 @@ describe('Task Runner', () => {
       2,
       generateEventLog({
         duration: 86400000000000,
-        start: '1969-12-31T00:00:00.000Z',
+        start: DATE_1969,
         action: Actions.ACTIVE_INSTANCE,
         actionGroupId: 'default',
         instanceId: '1',
@@ -869,7 +868,7 @@ describe('Task Runner', () => {
         2,
         generateEventLog({
           duration: 0,
-          start: '1970-01-01T00:00:00.000Z',
+          start: DATE_1970,
           action: Actions.NEW_INSTANCE,
           actionGroupId: 'default',
           instanceId: '1',
@@ -879,7 +878,7 @@ describe('Task Runner', () => {
         3,
         generateEventLog({
           duration: 0,
-          start: '1970-01-01T00:00:00.000Z',
+          start: DATE_1970,
           action: Actions.ACTIVE_INSTANCE,
           actionGroupId: 'default',
           instanceId: '1',
@@ -943,7 +942,7 @@ describe('Task Runner', () => {
                 meta: {},
                 state: {
                   bar: false,
-                  start: '1969-12-31T00:00:00.000Z',
+                  start: DATE_1969,
                   duration: 80000000000,
                 },
               },
@@ -1001,7 +1000,7 @@ describe('Task Runner', () => {
           duration: 64800000000000,
           instanceId: '2',
           start: '1969-12-31T06:00:00.000Z',
-          end: '1970-01-01T00:00:00.000Z',
+          end: DATE_1970,
         })
       );
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1010,7 +1009,7 @@ describe('Task Runner', () => {
           action: Actions.ACTIVE_INSTANCE,
           actionGroupId: 'default',
           duration: 86400000000000,
-          start: '1969-12-31T00:00:00.000Z',
+          start: DATE_1969,
           instanceId: '1',
         })
       );
@@ -1231,7 +1230,7 @@ describe('Task Runner', () => {
               meta: { lastScheduledActions: { group: 'default', date } },
               state: {
                 bar: false,
-                start: '1969-12-31T00:00:00.000Z',
+                start: DATE_1969,
                 duration: 80000000000,
               },
             },
@@ -1273,7 +1272,7 @@ describe('Task Runner', () => {
         duration: 64800000000000,
         instanceId: '2',
         start: '1969-12-31T06:00:00.000Z',
-        end: '1970-01-01T00:00:00.000Z',
+        end: DATE_1970,
       })
     );
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
@@ -1282,7 +1281,7 @@ describe('Task Runner', () => {
         action: Actions.ACTIVE_INSTANCE,
         actionGroupId: 'default',
         duration: 86400000000000,
-        start: '1969-12-31T00:00:00.000Z',
+        start: DATE_1969,
         instanceId: '1',
       })
     );
@@ -1629,7 +1628,7 @@ describe('Task Runner', () => {
 
   test(`doesn't change previousStartedAt when it fails to run`, async () => {
     const originalAlertSate = {
-      previousStartedAt: '1970-01-05T00:00:00.000Z',
+      previousStartedAt: DATE_1970,
     };
 
     ruleType.executor.mockImplementation(
@@ -1826,7 +1825,7 @@ describe('Task Runner', () => {
       2,
       generateEventLog({
         duration: 0,
-        start: '1970-01-01T00:00:00.000Z',
+        start: DATE_1970,
         action: Actions.NEW_INSTANCE,
         actionGroupId: 'default',
         instanceId: '1',
@@ -1836,7 +1835,7 @@ describe('Task Runner', () => {
       3,
       generateEventLog({
         duration: 0,
-        start: '1970-01-01T00:00:00.000Z',
+        start: DATE_1970,
         action: Actions.NEW_INSTANCE,
         actionGroupId: 'default',
         instanceId: '2',
@@ -1846,7 +1845,7 @@ describe('Task Runner', () => {
       4,
       generateEventLog({
         duration: 0,
-        start: '1970-01-01T00:00:00.000Z',
+        start: DATE_1970,
         action: Actions.ACTIVE_INSTANCE,
         actionGroupId: 'default',
         instanceId: '1',
@@ -1856,7 +1855,7 @@ describe('Task Runner', () => {
       5,
       generateEventLog({
         duration: 0,
-        start: '1970-01-01T00:00:00.000Z',
+        start: DATE_1970,
         action: Actions.ACTIVE_INSTANCE,
         actionGroupId: 'default',
         instanceId: '2',
@@ -1903,7 +1902,7 @@ describe('Task Runner', () => {
               meta: {},
               state: {
                 bar: false,
-                start: '1969-12-31T00:00:00.000Z',
+                start: DATE_1969,
                 duration: 80000000000,
               },
             },
@@ -1945,7 +1944,7 @@ describe('Task Runner', () => {
         action: Actions.ACTIVE_INSTANCE,
         actionGroupId: 'default',
         duration: 86400000000000,
-        start: '1969-12-31T00:00:00.000Z',
+        start: DATE_1969,
         instanceId: '1',
       })
     );
@@ -2072,7 +2071,7 @@ describe('Task Runner', () => {
               meta: {},
               state: {
                 bar: false,
-                start: '1969-12-31T00:00:00.000Z',
+                start: DATE_1969,
                 duration: 80000000000,
               },
             },
@@ -2112,8 +2111,8 @@ describe('Task Runner', () => {
       generateEventLog({
         action: Actions.RECOVERED_INSTANCE,
         duration: 86400000000000,
-        start: '1969-12-31T00:00:00.000Z',
-        end: '1970-01-01T00:00:00.000Z',
+        start: DATE_1969,
+        end: DATE_1970,
         instanceId: '1',
       })
     );
@@ -2123,7 +2122,7 @@ describe('Task Runner', () => {
         action: Actions.RECOVERED_INSTANCE,
         duration: 64800000000000,
         start: '1969-12-31T06:00:00.000Z',
-        end: '1970-01-01T00:00:00.000Z',
+        end: DATE_1970,
         instanceId: '2',
       })
     );
