@@ -460,7 +460,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
       expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
         username: user.username,
-        userProfileUid: 'some-profile-uid',
+        userProfileId: 'some-profile-uid',
         provider: mockSessVal.provider,
         state: { authorization },
       });
@@ -1340,7 +1340,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
       expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
         username: user.username,
-        userProfileUid: 'some-profile-uid',
+        userProfileId: 'some-profile-uid',
         provider: mockSessVal.provider,
         state: { authorization },
       });
@@ -1522,7 +1522,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
       expect(mockOptions.session.update).toHaveBeenCalledWith(request, {
         ...mockSessVal,
-        userProfileUid: 'new-profile-uid',
+        userProfileId: 'new-profile-uid',
         state: newState,
       });
       expect(mockOptions.session.create).not.toHaveBeenCalled();

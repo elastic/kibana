@@ -715,16 +715,16 @@ export class Authenticator {
 
     // If authentication result includes user profile grant, we should try to activate user profile for this user and
     // store user profile identifier in the session value.
-    let userProfileUid = existingSessionValue?.userProfileUid;
+    let userProfileId = existingSessionValue?.userProfileId;
     if (authenticationResult.userProfileGrant) {
       this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
-      userProfileUid = (
+      userProfileId = (
         await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
       ).uid;
 
       if (
-        existingSessionValue?.userProfileUid &&
-        existingSessionValue.userProfileUid !== userProfileUid
+        existingSessionValue?.userProfileId &&
+        existingSessionValue.userProfileId !== userProfileId
       ) {
         this.logger.warn(`User profile for "${authenticationResult.user?.username}" has changed.`);
       }
@@ -734,14 +734,14 @@ export class Authenticator {
     if (!existingSessionValue) {
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
-        userProfileUid,
+        userProfileId,
         provider,
         state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
       });
     } else if (authenticationResult.shouldUpdateState()) {
       newSessionValue = await this.session.update(request, {
         ...existingSessionValue,
-        userProfileUid,
+        userProfileId,
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSessionValue.state,

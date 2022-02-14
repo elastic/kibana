@@ -13,7 +13,7 @@ import { promisify } from 'util';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { KibanaRequest, Logger } from 'src/core/server';
 
-import type { AuthenticationProvider } from '../../common/model';
+import type { AuthenticationProvider } from '../../common';
 import type { ConfigType } from '../config';
 import type { SessionCookie } from './session_cookie';
 import type { SessionIndex, SessionIndexValue } from './session_index';
@@ -60,7 +60,7 @@ export interface SessionValue {
    * Unique identifier of the user profile, if any. Not all users that have session will have an associated user
    * profile, e.g. anonymous users won't have it.
    */
-  userProfileUid?: string;
+  userProfileId?: string;
 
   /**
    * Indicates whether user acknowledged access agreement or not.
@@ -82,7 +82,7 @@ export interface SessionOptions {
 
 export interface SessionValueContentToEncrypt {
   username?: string;
-  userProfileUid?: string;
+  userProfileId?: string;
   state: unknown;
 }
 
@@ -205,7 +205,7 @@ export class Session {
     sessionLogger.debug('Creating a new session.');
 
     const sessionExpirationInfo = this.calculateExpiry(sessionValue.provider);
-    const { username, userProfileUid, state, ...publicSessionValue } = sessionValue;
+    const { username, userProfileId, state, ...publicSessionValue } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -214,7 +214,7 @@ export class Session {
       ...sessionExpirationInfo,
       sid,
       usernameHash: username && Session.getUsernameHash(username),
-      content: await this.crypto.encrypt(JSON.stringify({ username, userProfileUid, state }), aad),
+      content: await this.crypto.encrypt(JSON.stringify({ username, userProfileId, state }), aad),
     });
 
     await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
@@ -223,7 +223,7 @@ export class Session {
 
     return Session.sessionIndexValueToSessionValue(sessionIndexValue, {
       username,
-      userProfileUid,
+      userProfileId,
       state,
     });
   }
@@ -245,7 +245,7 @@ export class Session {
       sessionValue.provider,
       sessionCookieValue.lifespanExpiration
     );
-    const { username, userProfileUid, state, metadata, ...publicSessionInfo } = sessionValue;
+    const { username, userProfileId, state, metadata, ...publicSessionInfo } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -255,7 +255,7 @@ export class Session {
       ...sessionExpirationInfo,
       usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(
-        JSON.stringify({ username, userProfileUid, state }),
+        JSON.stringify({ username, userProfileId, state }),
         sessionCookieValue.aad
       ),
     });
@@ -277,7 +277,7 @@ export class Session {
 
     return Session.sessionIndexValueToSessionValue(sessionIndexValue, {
       username,
-      userProfileUid,
+      userProfileId,
       state,
     });
   }
@@ -461,14 +461,14 @@ export class Session {
    */
   private static sessionIndexValueToSessionValue(
     sessionIndexValue: Readonly<SessionIndexValue>,
-    { username, userProfileUid, state }: SessionValueContentToEncrypt
+    { username, userProfileId, state }: SessionValueContentToEncrypt
   ): Readonly<SessionValue> {
     // Extract values that are specific to session index value.
     const { usernameHash, content, ...publicSessionValue } = sessionIndexValue;
     return {
       ...publicSessionValue,
       username,
-      userProfileUid,
+      userProfileId,
       state,
       metadata: { index: sessionIndexValue },
     };

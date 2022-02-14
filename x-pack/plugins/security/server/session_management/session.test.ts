@@ -81,7 +81,7 @@ describe('Session', () => {
       mockSessionIndex.get.mockResolvedValue(
         sessionIndexMock.createValue({
           content: await encryptContent(
-            { username: 'some-user', state: 'some-state', userProfileUid: 'uid' },
+            { username: 'some-user', state: 'some-state', userProfileId: 'uid' },
             mockAAD
           ),
         })
@@ -101,7 +101,7 @@ describe('Session', () => {
       mockSessionIndex.get.mockResolvedValue(
         sessionIndexMock.createValue({
           content: await encryptContent(
-            { username: 'some-user', state: 'some-state', userProfileUid: 'uid' },
+            { username: 'some-user', state: 'some-state', userProfileId: 'uid' },
             mockAAD
           ),
         })
@@ -123,7 +123,7 @@ describe('Session', () => {
       mockSessionIndex.get.mockResolvedValue(
         sessionIndexMock.createValue({
           content: await encryptContent(
-            { username: 'some-user', state: 'some-state', userProfileUid: 'uid' },
+            { username: 'some-user', state: 'some-state', userProfileId: 'uid' },
             mockAAD
           ),
         })
@@ -174,7 +174,7 @@ describe('Session', () => {
       mockSessionIndex.get.mockResolvedValue(
         sessionIndexMock.createValue({
           content: await encryptContent(
-            { username: 'some-user', state: 'some-state', userProfileUid: 'uid' },
+            { username: 'some-user', state: 'some-state', userProfileId: 'uid' },
             mockAAD
           ),
         })
@@ -198,7 +198,7 @@ describe('Session', () => {
         idleTimeoutExpiration: now - 1,
         lifespanExpiration: now + 1,
         content: await encryptContent(
-          { username: 'some-user', state: 'some-state', userProfileUid: 'uid' },
+          { username: 'some-user', state: 'some-state', userProfileId: 'uid' },
           mockAAD
         ),
       });
@@ -212,7 +212,7 @@ describe('Session', () => {
         sid: 'some-long-sid',
         state: 'some-state',
         username: 'some-user',
-        userProfileUid: 'uid',
+        userProfileId: 'uid',
       });
       expect(mockSessionCookie.clear).not.toHaveBeenCalled();
       expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
@@ -263,14 +263,14 @@ describe('Session', () => {
       await expect(
         session.create(mockRequest, {
           username: mockAuthenticatedUser().username,
-          userProfileUid: 'uid',
+          userProfileId: 'uid',
           provider: { type: 'basic', name: 'basic1' },
           state: 'some-state',
         })
       ).resolves.toEqual({
         sid: mockSID,
         username: 'user',
-        userProfileUid: 'uid',
+        userProfileId: 'uid',
         state: 'some-state',
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
@@ -283,7 +283,7 @@ describe('Session', () => {
       expect(mockSessionIndex.create).toHaveBeenCalledWith({
         sid: mockSID,
         content:
-          'AwABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9PgQAAQIDBAUGBwgJCgkUulf0CtiCpAYkb3p6SzSUpJsdgbWevIEfo6mN827f0lGcKDNPzN+vDMUIEe17v19POcGbCTrfrcZCnK/TW8JGvtOnYLRMj9UedPL3SvMt4j44Cz55PcmKbx3QmQ==',
+          'AwABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9PgQAAQIDBAUGBwgJChvXfqiKj6k6TtyXr4HA5s2UpJsdgbWevIEfo6mN827f0lGcKDNPzN+vDMUIEe17v19POcGbFTfn094k4vjPVvo4sKPZMbNZmsQnCuqRNKIx4DZwVTlsKNizEUKP',
         provider: { name: 'basic1', type: 'basic' },
         usernameHash: '8ac76453d769d4fd14b3f41ad4933f9bd64321972cd002de9b847e117435b08b',
         idleTimeoutExpiration: now + 123,
@@ -357,7 +357,7 @@ describe('Session', () => {
       mockSessionIndex.update.mockResolvedValue(
         sessionIndexMock.createValue({
           content: await encryptContent(
-            { username: 'some-user', state: 'some-state', userProfileUid: 'uid' },
+            { username: 'some-user', state: 'some-state', userProfileId: 'uid' },
             mockAAD
           ),
         })
@@ -402,7 +402,7 @@ describe('Session', () => {
           mockRequest,
           sessionMock.createValue({
             username: 'new-user',
-            userProfileUid: 'new-uid',
+            userProfileId: 'new-uid',
             state: 'new-state',
             idleTimeoutExpiration: now + 1,
             lifespanExpiration: now + 1,
@@ -411,7 +411,7 @@ describe('Session', () => {
       ).resolves.toEqual({
         sid: 'some-long-sid',
         username: 'new-user',
-        userProfileUid: 'new-uid',
+        userProfileId: 'new-uid',
         state: 'new-state',
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
@@ -424,7 +424,7 @@ describe('Session', () => {
       expect(mockSessionIndex.update).toHaveBeenCalledWith({
         sid: 'some-long-sid',
         content:
-          'AQABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9PgIAAQIDBAUGBwgJCj1nUHL2o8sy4pgcMHAJmKx967e9FpjmJgEIipe6nD20F47TtNIZnAuzd75zc8TLXffKtDq++EyWxIcNv0E+4dXSw3F0rKiGgdIu+GLqzHAePwN8JfpS2bZUZO5Z7sqQsTEW/GI=',
+          'AQABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9PgIAAQIDBAUGBwgJClC2bGDkxgH3vSXI2+oux3R967e9FpjmJgEIipe6nD20F47TtNIZnAuzd75zc8TLXffKtDq++EyWxJsAhz8mh6ueyGMu9LSLuawgiBy7y2ULLjoCPZwslb1GPrBe+9+BiE9Jow==',
         provider: { name: 'basic1', type: 'basic' },
         usernameHash: '35133597af273830c3f139c72501e676338f28a39dca8ff62d5c2b8bfba75f69',
         idleTimeoutExpiration: now + 123,
@@ -465,7 +465,7 @@ describe('Session', () => {
           mockRequest,
           sessionMock.createValue({
             username: undefined,
-            userProfileUid: undefined,
+            userProfileId: undefined,
             idleTimeoutExpiration: now + 1,
             lifespanExpiration: now + 1,
           })
