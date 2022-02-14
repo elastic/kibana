@@ -28,7 +28,7 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
       return `~${tableSubj} > ${subSelector}`;
     },
 
-    async parseEuiDataGrid(tableSubj: string, maxColumnsToParse?: number) {
+    async parseEuiDataGrid(tableSubj: string, maxColumnsToParse: number) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
 
@@ -58,12 +58,12 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
       return rows;
     },
 
-    async getDataGridRows(tableSubj: string) {
+    async getDataGridCells(tableSubj: string) {
       return (await testSubjects.find(tableSubj)).findAllByTestSubject('dataGridRowCell');
     },
 
     async assertEuiDataGridNotEmpty(tableSubj: string) {
-      const dataGridRows = await this.getDataGridRows(tableSubj);
+      const dataGridRows = await this.getDataGridCells(tableSubj);
       expect(dataGridRows.length).to.be.greaterThan(
         0,
         `EuiDataGrid '${tableSubj}' should have at least one row (got '${dataGridRows.length}')`
@@ -71,11 +71,24 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
     },
 
     async assertEuiDataGridEmpty(tableSubj: string) {
-      const dataGridRows = await this.getDataGridRows(tableSubj);
+      const dataGridRows = await this.getDataGridCells(tableSubj);
       expect(dataGridRows.length).to.eql(
         0,
         `EuiDataGrid '${tableSubj}' should be empty (got '${dataGridRows.length} rows')`
       );
+    },
+
+    async getEuiDataGridColumnUniqueValues(tableSubj: string, column: number) {
+      // get a 2D array of rows and cell values
+      // only parse columns up to the one we want to assert
+      const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
+
+      // reduce the rows data to an array of unique values in the specified column
+      const uniqueColumnValues = rows
+        .map((row) => row[column])
+        .flat()
+        .filter((v, i, a) => a.indexOf(v) === i);
+      return uniqueColumnValues;
     },
 
     async assertEuiDataGridColumnValues(
@@ -84,15 +97,10 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
       expectedColumnValues: string[]
     ) {
       await retry.tryForTime(20 * 1000, async () => {
-        // get a 2D array of rows and cell values
-        // only parse columns up to the one we want to assert
-        const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
+        const uniqueColumnValues = await this.getEuiDataGridColumnUniqueValues(
+          tableSubj,
+          column + 1
+        );
 
         uniqueColumnValues.sort();
         // check if the returned unique value matches the supplied filter value
@@ -105,16 +113,10 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
 
     async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
       await retry.tryForTime(20 * 1000, async () => {
-        // get a 2D array of rows and cell values
-        // only parse columns up to the one we want to assert
-        const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
-
+        const uniqueColumnValues = await this.getEuiDataGridColumnUniqueValues(
+          tableSubj,
+          column + 1
+        );
         uniqueColumnValues.forEach((value) => {
           // check if the returned unique value is not empty
           expect(value).to.not.eql('');
@@ -127,11 +129,11 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
 
       if (expectedState === true) {
         await testSubjects.existOrFail(popoverSelector, {
-          timeout: 30 * 1000,
+          timeout: 5 * 1000,
         });
       } else {
         await testSubjects.missingOrFail(popoverSelector, {
-          timeout: 30 * 1000,
+          timeout: 5 * 1000,
         });
       }
     },
@@ -169,11 +171,11 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
 
       if (expectedOpenState === true) {
         await testSubjects.existOrFail(popoverSelector, {
-          timeout: 30 * 1000,
+          timeout: 5 * 1000,
         });
       } else {
         await testSubjects.missingOrFail(popoverSelector, {
-          timeout: 30 * 1000,
+          timeout: 5 * 1000,
         });
       }
     },

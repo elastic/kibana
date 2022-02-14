@@ -96,32 +96,6 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await testSubjects.missingOrFail('transformPivotPreviewHistogramButton');
     },
 
-    async assertEuiDataGridColumnValues(
-      tableSubj: string,
-      column: number,
-      expectedColumnValues: string[]
-    ) {
-      await retry.tryForTime(20 * 1000, async () => {
-        // get a 2D array of rows and cell values
-        // only parse columns up to the one we want to assert
-        const rows = await ml.commonDataGrid.parseEuiDataGrid(tableSubj, column + 1);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
-
-        uniqueColumnValues.sort();
-
-        // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues).to.eql(
-          expectedColumnValues,
-          `Unique EuiDataGrid column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
-        );
-      });
-    },
-
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
       await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
