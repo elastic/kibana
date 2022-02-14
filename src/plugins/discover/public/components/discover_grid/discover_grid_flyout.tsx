@@ -189,7 +189,6 @@ export function DiscoverGridFlyout({
                     )}
                     type="questionInCircle"
                     color="subdued"
-                    size="s"
                     position="right"
                     iconProps={{
                       className: 'eui-alignTop',
