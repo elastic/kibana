@@ -127,9 +127,10 @@ steps:
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
+    parallelism: 2
     agents:
       queue: n2-4
-    timeout_in_minutes: 120
+    timeout_in_minutes: 90
     key: jest-integration
 
   - command: .buildkite/scripts/steps/test/api_integration.sh
