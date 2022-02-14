@@ -180,95 +180,91 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   });
 
   return (
-    <div data-test-subj="serviceOverviewErrorsTable">
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate(
-                    'xpack.apm.serviceOverview.errorsTableTitle',
-                    {
-                      defaultMessage: 'Errors',
-                    }
-                  )}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ErrorOverviewLink serviceName={serviceName}>
-                {i18n.translate(
-                  'xpack.apm.serviceOverview.errorsTableLinkText',
-                  {
-                    defaultMessage: 'View errors',
-                  }
-                )}
-              </ErrorOverviewLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <OverviewTableContainer
-            fixedHeight={true}
-            isEmptyAndNotInitiated={
-              totalItems === 0 && status === FETCH_STATUS.NOT_INITIATED
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="serviceOverviewErrorsTable"
+    >
+      <EuiFlexItem>
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate('xpack.apm.serviceOverview.errorsTableTitle', {
+                  defaultMessage: 'Errors',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ErrorOverviewLink serviceName={serviceName}>
+              {i18n.translate('xpack.apm.serviceOverview.errorsTableLinkText', {
+                defaultMessage: 'View errors',
+              })}
+            </ErrorOverviewLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <OverviewTableContainer
+          fixedHeight={true}
+          isEmptyAndNotInitiated={
+            totalItems === 0 && status === FETCH_STATUS.NOT_INITIATED
+          }
+        >
+          <EuiBasicTable
+            error={
+              status === FETCH_STATUS.FAILURE
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.errorsTable.errorMessage',
+                    { defaultMessage: 'Failed to fetch' }
+                  )
+                : ''
             }
-          >
-            <EuiBasicTable
-              error={
-                status === FETCH_STATUS.FAILURE
-                  ? i18n.translate(
-                      'xpack.apm.serviceOverview.errorsTable.errorMessage',
-                      { defaultMessage: 'Failed to fetch' }
-                    )
-                  : ''
-              }
-              noItemsMessage={
-                status === FETCH_STATUS.LOADING
-                  ? i18n.translate(
-                      'xpack.apm.serviceOverview.errorsTable.loading',
-                      { defaultMessage: 'Loading...' }
-                    )
-                  : i18n.translate(
-                      'xpack.apm.serviceOverview.errorsTable.noResults',
-                      { defaultMessage: 'No errors found' }
-                    )
-              }
-              columns={columns}
-              items={items}
-              pagination={{
-                pageIndex,
-                pageSize: PAGE_SIZE,
-                totalItemCount: totalItems,
-                pageSizeOptions: [PAGE_SIZE],
-                hidePerPageOptions: true,
-              }}
-              loading={status === FETCH_STATUS.LOADING}
-              onChange={(newTableOptions: {
-                page?: {
-                  index: number;
-                };
-                sort?: { field: string; direction: SortDirection };
-              }) => {
-                setTableOptions({
-                  pageIndex: newTableOptions.page?.index ?? 0,
-                  sort: newTableOptions.sort
-                    ? {
-                        field: newTableOptions.sort.field as SortField,
-                        direction: newTableOptions.sort.direction,
-                      }
-                    : DEFAULT_SORT,
-                });
-              }}
-              sorting={{
-                enableAllColumns: true,
-                sort,
-              }}
-            />
-          </OverviewTableContainer>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+            noItemsMessage={
+              status === FETCH_STATUS.LOADING
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.errorsTable.loading',
+                    { defaultMessage: 'Loading...' }
+                  )
+                : i18n.translate(
+                    'xpack.apm.serviceOverview.errorsTable.noResults',
+                    { defaultMessage: 'No errors found' }
+                  )
+            }
+            columns={columns}
+            items={items}
+            pagination={{
+              pageIndex,
+              pageSize: PAGE_SIZE,
+              totalItemCount: totalItems,
+              pageSizeOptions: [PAGE_SIZE],
+              hidePerPageOptions: true,
+            }}
+            loading={status === FETCH_STATUS.LOADING}
+            onChange={(newTableOptions: {
+              page?: {
+                index: number;
+              };
+              sort?: { field: string; direction: SortDirection };
+            }) => {
+              setTableOptions({
+                pageIndex: newTableOptions.page?.index ?? 0,
+                sort: newTableOptions.sort
+                  ? {
+                      field: newTableOptions.sort.field as SortField,
+                      direction: newTableOptions.sort.direction,
+                    }
+                  : DEFAULT_SORT,
+              });
+            }}
+            sorting={{
+              enableAllColumns: true,
+              sort,
+            }}
+          />
+        </OverviewTableContainer>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

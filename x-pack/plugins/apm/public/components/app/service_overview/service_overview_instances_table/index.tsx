@@ -145,53 +145,55 @@ export function ServiceOverviewInstancesTable({
   };
 
   return (
-    <div data-test-subj="serviceOverviewInstancesTable">
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h2>
-              {i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
-                defaultMessage: 'Instances',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
-          <OverviewTableContainer
-            fixedHeight={true}
-            isEmptyAndNotInitiated={mainStatsItemCount === 0 && isNotInitiated}
-          >
-            <EuiBasicTable
-              noItemsMessage={
-                isLoading
-                  ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
-                      defaultMessage: 'Loading…',
-                    })
-                  : i18n.translate('xpack.apm.serviceOverview.noResultsText', {
-                      defaultMessage: 'No instances found',
-                    })
-              }
-              data-test-subj="instancesTable"
-              loading={isLoading}
-              items={mainStatsItems}
-              columns={columns}
-              pagination={pagination}
-              sorting={{ sort: { field, direction } }}
-              onChange={onChangeTableOptions}
-              itemId="serviceNodeName"
-              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-              error={
-                status === FETCH_STATUS.FAILURE
-                  ? i18n.translate(
-                      'xpack.apm.serviceOverview.instancesTable.errorMessage',
-                      { defaultMessage: 'Failed to fetch' }
-                    )
-                  : ''
-              }
-            />
-          </OverviewTableContainer>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="serviceOverviewInstancesTable"
+    >
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h2>
+            {i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
+              defaultMessage: 'Instances',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem data-test-subj="serviceInstancesTableContainer">
+        <OverviewTableContainer
+          fixedHeight={true}
+          isEmptyAndNotInitiated={mainStatsItemCount === 0 && isNotInitiated}
+        >
+          <EuiBasicTable
+            noItemsMessage={
+              isLoading
+                ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
+                    defaultMessage: 'Loading…',
+                  })
+                : i18n.translate('xpack.apm.serviceOverview.noResultsText', {
+                    defaultMessage: 'No instances found',
+                  })
+            }
+            data-test-subj="instancesTable"
+            loading={isLoading}
+            items={mainStatsItems}
+            columns={columns}
+            pagination={pagination}
+            sorting={{ sort: { field, direction } }}
+            onChange={onChangeTableOptions}
+            itemId="serviceNodeName"
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            error={
+              status === FETCH_STATUS.FAILURE
+                ? i18n.translate(
+                    'xpack.apm.serviceOverview.instancesTable.errorMessage',
+                    { defaultMessage: 'Failed to fetch' }
+                  )
+                : ''
+            }
+          />
+        </OverviewTableContainer>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

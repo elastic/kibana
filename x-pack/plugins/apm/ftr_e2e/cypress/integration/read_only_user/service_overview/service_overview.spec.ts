@@ -21,22 +21,8 @@ const baseUrl = url.format({
 const apiRequestsToIntercept = [
   {
     endpoint:
-      '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
-    aliasName: 'latencyRequest',
-  },
-  {
-    endpoint: '/internal/apm/services/opbeans-node/throughput?*',
-    aliasName: 'throughputRequest',
-  },
-  {
-    endpoint:
       '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
     aliasName: 'transactionsGroupsMainStadisticsRequest',
-  },
-  {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
-    aliasName: 'errorRateRequest',
   },
   {
     endpoint:
@@ -52,10 +38,22 @@ const apiRequestsToIntercept = [
     endpoint: '/internal/apm/services/opbeans-node/dependencies?*',
     aliasName: 'dependenciesRequest',
   },
+];
+
+const apiRequestsToInterceptWithComparison = [
   {
     endpoint:
-      '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
-    aliasName: 'instancesMainStadisticsRequest',
+      '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
+    aliasName: 'latencyRequest',
+  },
+  {
+    endpoint: '/internal/apm/services/opbeans-node/throughput?*',
+    aliasName: 'throughputRequest',
+  },
+  {
+    endpoint:
+      '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
+    aliasName: 'errorRateRequest',
   },
   {
     endpoint:
@@ -64,21 +62,28 @@ const apiRequestsToIntercept = [
   },
   {
     endpoint:
+      '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
+    aliasName: 'instancesMainStadisticsRequest',
+  },
+
+  {
+    endpoint:
       '/internal/apm/services/opbeans-node/service_overview_instances/detailed_statistics?*',
     aliasName: 'instancesDetailedStadisticsRequest',
   },
 ];
 
-const aliasNames = apiRequestsToIntercept.map(
+const aliasNamesNoComparison = apiRequestsToIntercept.map(
   ({ aliasName }) => `@${aliasName}`
 );
 
-describe('Service Overview', () => {
-  beforeEach(() => {
-    cy.loginAsReadOnlyUser();
-    cy.visit(baseUrl);
-  });
+const aliasNamesWithComparison = apiRequestsToInterceptWithComparison.map(
+  ({ aliasName }) => `@${aliasName}`
+);
 
+const aliasNames = [...aliasNamesNoComparison, ...aliasNamesWithComparison];
+
+describe('Service Overview', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -92,95 +97,119 @@ describe('Service Overview', () => {
     await synthtrace.clean();
   });
 
-  it('persists transaction type selected when clicking on Transactions tab', () => {
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-      'have.value',
-      'request'
-    );
-    cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-      'have.value',
-      'Worker'
-    );
-    cy.contains('Transactions').click();
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-      'have.value',
-      'Worker'
-    );
+  describe('renders', () => {
+    before(() => {
+      cy.loginAsReadOnlyUser();
+      cy.visit(baseUrl);
+    });
+    it('transaction latency chart', () => {
+      cy.get('[data-test-subj="latencyChart"]');
+    });
+
+    it('throughput chart', () => {
+      cy.get('[data-test-subj="throughput"]');
+    });
+
+    it('transactions group table', () => {
+      cy.get('[data-test-subj="transactionsGroupTable"]');
+    });
+
+    it('error table', () => {
+      cy.get('[data-test-subj="serviceOverviewErrorsTable"]');
+    });
+
+    it('dependencies table', () => {
+      cy.get('[data-test-subj="dependenciesTable"]');
+    });
+
+    it('instances latency distribution chart', () => {
+      cy.get('[data-test-subj="instancesLatencyDistribution"]');
+    });
+
+    it('instances table', () => {
+      cy.get('[data-test-subj="serviceOverviewInstancesTable"]');
+    });
   });
 
-  it('persists transaction type selected when clicking on View Transactions link', () => {
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-      'have.value',
-      'request'
-    );
-    cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-      'have.value',
-      'Worker'
-    );
+  describe('transactions', () => {
+    beforeEach(() => {
+      cy.loginAsReadOnlyUser();
+      cy.visit(baseUrl);
+    });
 
-    cy.contains('View transactions').click();
-    cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-      'have.value',
-      'Worker'
-    );
+    it('persists transaction type selected when clicking on Transactions tab', () => {
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+        'have.value',
+        'request'
+      );
+      cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+        'have.value',
+        'Worker'
+      );
+      cy.contains('Transactions').click();
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+        'have.value',
+        'Worker'
+      );
+    });
+
+    it('persists transaction type selected when clicking on View Transactions link', () => {
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+        'have.value',
+        'request'
+      );
+      cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+        'have.value',
+        'Worker'
+      );
+
+      cy.contains('View transactions').click();
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
+        'have.value',
+        'Worker'
+      );
+    });
   });
 
-  it('renders transaction latency chart', () => {
-    cy.get('[data-test-subj="latencyChart"]');
-  });
+  describe('when RUM service', () => {
+    before(() => {
+      cy.loginAsReadOnlyUser();
+      cy.visit(
+        url.format({
+          pathname: '/app/apm/services/opbeans-rum/overview',
+          query: { rangeFrom: start, rangeTo: end },
+        })
+      );
+    });
 
-  it('renders throughput chart', () => {
-    cy.get('[data-test-subj="throughput"]');
-  });
-
-  it('renders transactions group table', () => {
-    cy.get('[data-test-subj="transactionsGroupTable"]');
-  });
-
-  it('renders error table', () => {
-    cy.get('[data-test-subj="serviceOverviewErrorsTable"]');
-  });
-
-  it('renders dependencies table', () => {
-    cy.get('[data-test-subj="dependenciesTable"]');
-  });
-
-  it('renders instances latency distribution chart', () => {
-    cy.get('[data-test-subj="instancesLatencyDistribution"]');
-  });
-
-  it('renders instances table', () => {
-    cy.get('[data-test-subj="serviceOverviewInstancesTable"]');
-  });
-
-  it('hides dependency tab when RUM service', () => {
-    cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as(
-      'agentRequest'
-    );
-    cy.visit(
-      url.format({
-        pathname: '/app/apm/services/opbeans-rum/overview',
-        query: { rangeFrom: start, rangeTo: end },
-      })
-    );
-    cy.contains('Overview');
-    cy.contains('Transactions');
-    cy.contains('Error');
-    cy.contains('Service Map');
-    // Waits until the agent request is finished to check the tab.
-    cy.wait('@agentRequest');
-    cy.get('.euiTabs .euiTab__content').then((elements) => {
-      elements.map((index, element) => {
-        expect(element.innerText).to.not.equal('Dependencies');
+    it('hides dependency tab when RUM service', () => {
+      cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as(
+        'agentRequest'
+      );
+      cy.contains('Overview');
+      cy.contains('Transactions');
+      cy.contains('Error');
+      cy.contains('Service Map');
+      // Waits until the agent request is finished to check the tab.
+      cy.wait('@agentRequest');
+      cy.get('.euiTabs .euiTab__content').then((elements) => {
+        elements.map((index, element) => {
+          expect(element.innerText).to.not.equal('Dependencies');
+        });
       });
     });
   });
 
   describe('Calls APIs', () => {
     beforeEach(() => {
+      cy.loginAsReadOnlyUser();
+      cy.visit(baseUrl);
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
+        cy.intercept('GET', endpoint).as(aliasName);
+      });
+      apiRequestsToInterceptWithComparison.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
       });
     });
@@ -197,9 +226,8 @@ describe('Service Overview', () => {
     });
 
     it('when clicking the refresh button', () => {
-      cy.wait(aliasNames, { requestTimeout: 10000 });
       cy.contains('Refresh').click();
-      cy.wait(aliasNames);
+      cy.wait(aliasNames, { requestTimeout: 10000 });
     });
 
     it('when selecting a different time range and clicking the update button', () => {
@@ -225,7 +253,10 @@ describe('Service Overview', () => {
         'have.value',
         'week'
       );
-      cy.wait(aliasNames, { requestTimeout: 10000 });
+      cy.expectAPIsToHaveBeenCalledWith({
+        apisIntercepted: aliasNamesWithComparison,
+        value: 'comparisonStart',
+      });
     });
   });
 });
