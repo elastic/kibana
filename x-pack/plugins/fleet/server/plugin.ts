@@ -14,7 +14,7 @@ import type {
   CoreStart,
   ElasticsearchServiceStart,
   Logger,
-  AsyncPlugin,
+  Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
@@ -175,7 +175,7 @@ export interface FleetStartContract {
 }
 
 export class FleetPlugin
-  implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps>
+  implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps>
 {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
