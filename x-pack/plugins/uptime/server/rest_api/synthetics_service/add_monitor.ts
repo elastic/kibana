@@ -27,28 +27,27 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    const newMonitor = await savedObjectsClient.create<SyntheticsMonitor>(
-      syntheticsMonitorType,
-      monitor
-    );
-
-    const { syntheticsService } = server;
-
-    const errors = await syntheticsService.pushConfigs(request, [
-      {
-        ...newMonitor.attributes,
-        id: newMonitor.id,
-        fields: {
-          config_id: newMonitor.id,
-        },
-        fields_under_root: true,
-      },
-    ]);
-
-    if (errors) {
-      return errors;
+    for (let i = 0; i < 500; i++) {
+      await savedObjectsClient.create<SyntheticsMonitor>(syntheticsMonitorType, monitor);
     }
 
-    return newMonitor;
+    // const { syntheticsService } = server;
+
+    // const errors = await syntheticsService.pushConfigs(request, [
+    //   {
+    //     ...newMonitor.attributes,
+    //     id: newMonitor.id,
+    //     fields: {
+    //       config_id: newMonitor.id,
+    //     },
+    //     fields_under_root: true,
+    //   },
+    // ]);
+
+    // if (errors) {
+    //   return errors;
+    // }
+
+    return [];
   },
 });
