@@ -34,7 +34,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       const store = await reporting.getStore();
 
       try {
-        const { body } = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        const body = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
           body: {
             index: [
               {

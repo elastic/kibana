@@ -122,6 +122,7 @@ export class ElasticsearchService {
    * Elasticsearch client used to check Elasticsearch connection status.
    */
   private connectionStatusClient?: ICustomClusterClient;
+
   constructor(private readonly logger: Logger, private kibanaVersion: string) {}
 
   public setup({
@@ -199,10 +200,13 @@ export class ElasticsearchService {
       try {
         enrollmentResponse = await enrollClient
           .asScoped(scopeableRequest)
-          .asCurrentUser.transport.request<EnrollKibanaResponse>({
-            method: 'GET',
-            path: '/_security/enroll/kibana',
-          });
+          .asCurrentUser.transport.request<EnrollKibanaResponse>(
+            {
+              method: 'GET',
+              path: '/_security/enroll/kibana',
+            },
+            { meta: true }
+          );
       } catch (err) {
         // We expect that all hosts belong to exactly same node and any non-connection error for one host would mean
         // that enrollment will fail for any other host and we should bail out.
@@ -357,10 +361,13 @@ export class ElasticsearchService {
     this.logger.debug(`Verifying that host "${host}" responds with Elastic product header`);
 
     try {
-      const response = await client.asInternalUser.transport.request({
-        method: 'OPTIONS',
-        path: '/',
-      });
+      const response = await client.asInternalUser.transport.request(
+        {
+          method: 'OPTIONS',
+          path: '/',
+        },
+        { meta: true }
+      );
       if (response.headers?.['x-elastic-product'] !== 'Elasticsearch') {
         throw new Error('Host did not respond with valid Elastic product header.');
       }

@@ -16,11 +16,10 @@ export async function sendBulkPayload(
   interval: number,
   payload: object[]
 ) {
-  const { body } = await esClient.monitoring.bulk({
+  return await esClient.monitoring.bulk({
     system_id: KIBANA_SYSTEM_ID,
     system_api_version: MONITORING_SYSTEM_API_VERSION,
     interval: interval + 'ms',
     body: payload,
   });
-  return body;
 }

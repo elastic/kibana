@@ -35,8 +35,6 @@ import {
 } from './authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { Logger } from 'kibana/server';
@@ -847,14 +845,14 @@ describe('getAll()', () => {
         ],
       };
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      scopedClusterClient.asInternalUser.search.mockResponse(
         // @ts-expect-error not full search response
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             '1': { doc_count: 6 },
             testPreconfigured: { doc_count: 2 },
           },
-        })
+        }
       );
 
       actionsClient = new ActionsClient({
@@ -924,14 +922,14 @@ describe('getAll()', () => {
           },
         ],
       });
-      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      scopedClusterClient.asInternalUser.search.mockResponse(
         // @ts-expect-error not full search response
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             '1': { doc_count: 6 },
             testPreconfigured: { doc_count: 2 },
           },
-        })
+        }
       );
 
       await actionsClient.getAll();
@@ -986,14 +984,14 @@ describe('getAll()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+    scopedClusterClient.asInternalUser.search.mockResponse(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           '1': { doc_count: 6 },
           testPreconfigured: { doc_count: 2 },
         },
-      })
+      }
     );
 
     actionsClient = new ActionsClient({
@@ -1063,14 +1061,14 @@ describe('getBulk()', () => {
           },
         ],
       });
-      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      scopedClusterClient.asInternalUser.search.mockResponse(
         // @ts-expect-error not full search response
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             '1': { doc_count: 6 },
             testPreconfigured: { doc_count: 2 },
           },
-        })
+        }
       );
 
       actionsClient = new ActionsClient({
@@ -1137,14 +1135,14 @@ describe('getBulk()', () => {
           },
         ],
       });
-      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      scopedClusterClient.asInternalUser.search.mockResponse(
         // @ts-expect-error not full search response
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+        {
           aggregations: {
             '1': { doc_count: 6 },
             testPreconfigured: { doc_count: 2 },
           },
-        })
+        }
       );
 
       await actionsClient.getBulk(['1']);
@@ -1196,14 +1194,14 @@ describe('getBulk()', () => {
         },
       ],
     });
-    scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+    scopedClusterClient.asInternalUser.search.mockResponse(
       // @ts-expect-error not full search response
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           '1': { doc_count: 6 },
           testPreconfigured: { doc_count: 2 },
         },
-      })
+      }
     );
 
     actionsClient = new ActionsClient({

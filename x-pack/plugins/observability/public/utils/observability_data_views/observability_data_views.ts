@@ -7,8 +7,11 @@
 
 import type { FieldFormat as IFieldFormat } from 'src/plugins/field_formats/common';
 import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import type { DataView, DataViewSpec } from '../../../../../../src/plugins/data/common';
+import type {
+  DataViewsPublicPluginStart,
+  DataView,
+  DataViewSpec,
+} from '../../../../../../src/plugins/data_views/public';
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../../components/shared/exploratory_view/configurations/synthetics/field_formats';
 import {
@@ -77,19 +80,19 @@ export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldForma
 }
 
 export class ObservabilityDataViews {
-  data?: DataPublicPluginStart;
+  dataViews?: DataViewsPublicPluginStart;
 
-  constructor(data: DataPublicPluginStart) {
-    this.data = data;
+  constructor(dataViews: DataViewsPublicPluginStart) {
+    this.dataViews = dataViews;
   }
 
   async createDataView(app: AppDataType, indices: string) {
-    if (!this.data) {
+    if (!this.dataViews) {
       throw new Error('data is not defined');
     }
 
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
-    return await this.data.dataViews.createAndSave({
+    return await this.dataViews.createAndSave({
       title: appIndicesPattern,
       id: getAppDataViewId(app, indices),
       timeFieldName: '@timestamp',
@@ -113,7 +116,7 @@ export class ObservabilityDataViews {
         }
       });
       if (isParamsDifferent) {
-        await this.data?.dataViews.updateSavedObject(dataView);
+        await this.dataViews?.updateSavedObject(dataView);
       }
     }
   }
@@ -142,7 +145,7 @@ export class ObservabilityDataViews {
   }
 
   async getDataView(app: AppDataType, indices?: string): Promise<DataView | undefined> {
-    if (!this.data) {
+    if (!this.dataViews) {
       throw new Error('data is not defined');
     }
     let appIndices = indices;
@@ -155,7 +158,7 @@ export class ObservabilityDataViews {
         const dataViewId = getAppDataViewId(app, appIndices);
         const dataViewTitle = getAppIndicesWithPattern(app, appIndices);
         // we will get the data view by id
-        const dataView = await this.data?.indexPatterns.get(dataViewId);
+        const dataView = await this.dataViews?.get(dataViewId);
 
         // and make sure title matches, otherwise, we will need to create it
         if (dataView.title !== dataViewTitle) {

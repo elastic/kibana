@@ -85,3 +85,5 @@ export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu
 export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
 export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-existing-case-menu-item"]';
+
+export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';

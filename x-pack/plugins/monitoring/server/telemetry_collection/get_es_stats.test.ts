@@ -31,7 +31,7 @@ describe('get_es_stats', () => {
 
   describe('getElasticsearchStats', () => {
     it('returns clusters', async () => {
-      searchMock.returns(Promise.resolve({ body }));
+      searchMock.returns(Promise.resolve(body));
 
       expect(await getElasticsearchStats(client, clusterUuids, maxBucketSize)).toStrictEqual(
         expectedClusters
@@ -41,7 +41,7 @@ describe('get_es_stats', () => {
 
   describe('fetchElasticsearchStats', () => {
     it('searches for clusters', async () => {
-      searchMock.returns({ body });
+      searchMock.returns(body);
 
       expect(await fetchElasticsearchStats(client, clusterUuids, maxBucketSize)).toStrictEqual(
         body
