@@ -136,9 +136,12 @@ const deleteInstance = async (deploymentId) => {
   console.log('command', baseCommand);
 
   try {
-    await execa.command(`${baseCommand} --spec cypress/integration/trusted_apps_pre.spec.ts`, {
-      shell: true,
-    });
+    await execa.command(
+      `${baseCommand} --spec cypress/cloud_upgrade_integration/trusted_apps/trusted_apps_pre.spec.ts`,
+      {
+        shell: true,
+      }
+    );
   } catch (error) {
     console.error('error', error);
 
@@ -153,9 +156,12 @@ const deleteInstance = async (deploymentId) => {
   });
 
   try {
-    await execa.command(`${baseCommand} --spec cypress/integration/trusted_apps_post.spec.ts`, {
-      shell: true,
-    });
+    await execa.command(
+      `${baseCommand} --spec cypress/cloud_upgrade_integration/trusted_apps/trusted_apps_post.spec.ts`,
+      {
+        shell: true,
+      }
+    );
   } catch (error) {
     console.error('error', error);
 
