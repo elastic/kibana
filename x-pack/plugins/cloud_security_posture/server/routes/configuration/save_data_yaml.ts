@@ -6,10 +6,9 @@
  */
 import { produce } from 'immer';
 import { schema as rt, TypeOf } from '@kbn/config-schema';
-import { filter, reduce, mapKeys, each, set, unset, uniq, map, has } from 'lodash';
+import { unset } from 'lodash';
 
 import type {
-  ElasticsearchClient,
   IRouter,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
@@ -22,17 +21,8 @@ import { CspConfigSchema } from 'x-pack/plugins/cloud_security_posture/common/sc
 import { CspAppContext } from '../../plugin';
 import { SAVE_DATA_YAML_ROUTE_PATH } from '../../../common/constants';
 import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
-import {
-  PackagePolicyServiceInterface,
-  AgentPolicyServiceInterface,
-  AgentService,
-} from '../../../../fleet/server';
-import {
-  GetAgentPoliciesResponseItem,
-  PackagePolicy,
-  AgentPolicy,
-  PackagePolicyConfigRecord,
-} from '../../../../fleet/common';
+import { PackagePolicyServiceInterface } from '../../../../fleet/server';
+import { PackagePolicy, PackagePolicyConfigRecord } from '../../../../fleet/common';
 import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 
 export const DEFAULT_FINDINGS_PER_PAGE = 20;
@@ -73,20 +63,6 @@ export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 export const getPackageNameQuery = (packageName: string): string => {
   return `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
 };
-
-// const updatePackagePolicy(esClient: ElasticsearchClient, soClient:SavedObjectsClientContract, packagePolicy: PackagePolicy, dataYaml:string){
-//   const configFile: PackagePolicyConfigRecord = {
-//     dataYaml: { type: 'config', value: dataYaml },
-//   };
-//   packagePolicy.vars = configFile;
-//   console.log(packagePolicy.vars);
-//   const newState = produce(packagePolicy, (draft) => {
-//     unset(draft, 'id');
-//     draft.vars = configFile;
-//   });
-
-//   await packagePolicyService?.update(soClient , esClient, packagePolicy.id, newState);
-// }
 
 const setVarToPackagePolicy = (packagePolicy: PackagePolicy, dataYaml: string): PackagePolicy => {
   const configFile: PackagePolicyConfigRecord = {
@@ -135,11 +111,10 @@ export const defineSaveDataYamlRoute = (router: IRouter, cspContext: CspAppConte
 
         const cspRules = await getCspRule(soClient);
         const config = await createConfig(cspRules);
-
-        const tmp = await soClient.create('csp_config', { config });
-        console.log({ tmp });
-
         const dataYaml = convertConfigToYaml(config);
+
+        // const tmp = await soClient.create('csp_config', { config });
+        // console.log({ tmp });
 
         const packagePolicyService = cspContext.service.packagePolicyService;
         const packagePolicies = await getPackagePolicies(
@@ -156,24 +131,6 @@ export const defineSaveDataYamlRoute = (router: IRouter, cspContext: CspAppConte
             updatedPackagePolicy
           );
         });
-
-        console.log(packagePolicies);
-        console.log(packagePolicies[0].inputs[0]);
-        console.log(packagePolicies[0].inputs[0].streams);
-        console.log(packagePolicies[0].inputs[0].streams[0]);
-        console.log(packagePolicies[0].inputs[0].streams[0].vars);
-        // const cats: PackagePolicyConfigRecord = {
-        //   dataYaml: { type: 'config', value: dataYaml },
-        // };
-        // packagePolicies[0].vars = cats;
-        // console.log(packagePolicies[0].vars);
-        // const newState = produce(packagePolicies[0], (draft) => {
-        //   unset(draft, 'id');
-        //   draft.vars = cats;
-        // });
-        // const updatePackagePolicy = { ...packagePolicies[0], vars: cats };
-
-        // await packagePolicyService?.update(soClient, esClient, packagePolicies[0].id, newState);
 
         return response.ok({ body: cspRules });
       } catch (err) {
