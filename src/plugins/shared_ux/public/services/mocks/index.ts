@@ -5,20 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { indexPatternEditorPluginMock } from './index_pattern_editor_plugin.mock';
-
 export type { MockPlatformServiceFactory } from './platform.mock';
 export { platformServiceFactory } from './platform.mock';
 
 import type { SharedUXServices } from '../.';
 import { PluginServiceFactory } from '../types';
 import { platformServiceFactory } from './platform.mock';
+import { userPermissionsServiceFactory } from './permissions.mock';
+import { editorsServiceFactory } from './editors.mock';
 
 /**
  * A factory function for creating a Jest-based implementation of `SharedUXServices`.
  */
 export const servicesFactory: PluginServiceFactory<SharedUXServices> = () => ({
   platform: platformServiceFactory(),
-  dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
+  permissions: userPermissionsServiceFactory(),
+  editors: editorsServiceFactory(),
 });

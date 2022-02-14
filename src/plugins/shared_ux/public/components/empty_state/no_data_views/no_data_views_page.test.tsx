@@ -20,9 +20,6 @@ describe('<NoDataViewsPageTest />', () => {
 
   beforeEach(() => {
     services = servicesFactory();
-    const mockEditDataView = jest.fn();
-    mockEditDataView.mockReturnValue(true);
-    services.dataViewEditor.userPermissions.editDataView = mockEditDataView;
     mount = (element: JSX.Element) =>
       enzymeMount(<ServicesProvider {...services}>{element}</ServicesProvider>);
   });
@@ -34,11 +31,11 @@ describe('<NoDataViewsPageTest />', () => {
   test('on dataView created', () => {
     const component = mount(<NoDataViewsPage onDataViewCreated={jest.fn()} />);
 
-    expect(services.dataViewEditor.openEditor).not.toHaveBeenCalled();
+    expect(services.editors.openDataViewEditor).not.toHaveBeenCalled();
     component.find(EuiButton).simulate('click');
 
     component.unmount();
 
-    expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
+    expect(services.editors.openDataViewEditor).toHaveBeenCalled();
   });
 });

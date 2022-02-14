@@ -8,7 +8,7 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import { NoDataViewsComponent } from './no_data_views_component';
-import { useServices } from '../../../services';
+import { useEditors, usePermissions } from '../../../services';
 import { DataView } from '../../../../../data_views/public';
 
 export interface NoDataViewsPageProps {
@@ -35,13 +35,13 @@ export const NoDataViewsPage = (props: NoDataViewsPageProps) => {
     closeDataViewEditor.current = ref;
   }, []);
 
-  const { dataViewEditor } = useServices();
-  const canCreateNewDataView = dataViewEditor.userPermissions.editDataView();
+  const { canCreateNewDataView } = usePermissions();
+  const { openDataViewEditor } = useEditors();
   const createNewDataView = useCallback(() => {
     if (!canCreateNewDataView) {
       return;
     }
-    const ref = dataViewEditor.openEditor({
+    const ref = openDataViewEditor({
       onSave: (dataView) => {
         onDataViewCreated(dataView);
       },
@@ -49,7 +49,7 @@ export const NoDataViewsPage = (props: NoDataViewsPageProps) => {
     if (setDataViewEditorRef) {
       setDataViewEditorRef(ref);
     }
-  }, [canCreateNewDataView, dataViewEditor, setDataViewEditorRef, onDataViewCreated]);
+  }, [canCreateNewDataView, openDataViewEditor, setDataViewEditorRef, onDataViewCreated]);
 
   return (
     <NoDataViewsComponent onClick={createNewDataView} canCreateNewDataView={canCreateNewDataView} />

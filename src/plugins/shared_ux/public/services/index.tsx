@@ -9,7 +9,8 @@
 import React, { FC, createContext, useContext } from 'react';
 import { SharedUXPlatformService } from './platform';
 import { servicesFactory } from './stub';
-import { DataViewEditorStart } from '../../../data_view_editor/public';
+import { SharedUXUserPermissionsService } from './permissions';
+import { SharedUXEditorsService } from './editors';
 
 /**
  * A collection of services utilized by SharedUX.  This serves as a thin
@@ -21,7 +22,8 @@ import { DataViewEditorStart } from '../../../data_view_editor/public';
  */
 export interface SharedUXServices {
   platform: SharedUXPlatformService;
-  dataViewEditor: DataViewEditorStart;
+  permissions: SharedUXUserPermissionsService;
+  editors: SharedUXEditorsService;
 }
 
 // The React Context used to provide the services to the SharedUX components.
@@ -47,3 +49,7 @@ export function useServices() {
  * React hook for accessing the pre-wired `SharedUXPlatformService`.
  */
 export const usePlatformService = () => useServices().platform;
+
+export const usePermissions = () => useServices().permissions;
+
+export const useEditors = () => useServices().editors;
