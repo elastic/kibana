@@ -91,7 +91,8 @@ export class TelemetryReceiver {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
-    return this.esClient.info();
+    const { body } = await this.esClient.info();
+    return body;
   }
 
   public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
@@ -100,13 +101,15 @@ export class TelemetryReceiver {
     }
 
     try {
-      const ret = (await this.esClient.transport.request({
-        method: 'GET',
-        path: '/_license',
-        querystring: {
-          local: true,
-        },
-      })) as { license: ESLicense };
+      const ret = (
+        await this.esClient.transport.request({
+          method: 'GET',
+          path: '/_license',
+          querystring: {
+            local: true,
+          },
+        })
+      ).body as Promise<{ license: ESLicense }>;
 
       return (await ret).license;
     } catch (err) {
