@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import {
   createAlertHistoryIndexTemplate,
   getAlertHistoryIndexTemplate,
@@ -17,19 +15,15 @@ type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
 
 describe('createAlertHistoryIndexTemplate', () => {
   let logger: MockedLogger;
-  let clusterClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let clusterClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    clusterClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
   test(`should create index template if it doesn't exist`, async () => {
-    // Response type for existsIndexTemplate is still TODO
-    clusterClient.indices.existsIndexTemplate.mockResolvedValue({
-      body: false,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    clusterClient.indices.existsIndexTemplate.mockResponse(false);
 
     await createAlertHistoryIndexTemplate({ client: clusterClient, logger });
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
@@ -40,11 +34,7 @@ describe('createAlertHistoryIndexTemplate', () => {
   });
 
   test(`shouldn't create index template if it already exists`, async () => {
-    // Response type for existsIndexTemplate is still TODO
-    clusterClient.indices.existsIndexTemplate.mockResolvedValue({
-      body: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    clusterClient.indices.existsIndexTemplate.mockResponse(true);
 
     await createAlertHistoryIndexTemplate({ client: clusterClient, logger });
     expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
