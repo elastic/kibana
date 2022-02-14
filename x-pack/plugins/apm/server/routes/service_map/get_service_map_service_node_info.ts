@@ -144,6 +144,7 @@ async function getFailedTransactionsRateStats({
       end,
       kuery: '',
       numBuckets,
+      transactionType: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
     });
     return {
       value: average,
