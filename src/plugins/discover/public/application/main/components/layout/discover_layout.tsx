@@ -34,6 +34,7 @@ import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverChart } from '../chart';
+import type { WindowParameters } from '../chart/get_window_parameters';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg } from '../../utils/use_saved_search';
@@ -46,6 +47,7 @@ import {
   useSavedSearchAliasMatchRedirect,
 } from '../../../../services/saved_searches';
 import { FieldStatisticsTable } from '../field_stats_table';
+import { SpikeAnalysisTable } from '../spike_analysis_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { hasActiveFilter } from './utils';
@@ -111,6 +113,8 @@ export function DiscoverLayout({
     },
     [trackUiMetric, stateContainer]
   );
+
+  const [spikeSelection, setSpikeSelection] = useState<WindowParameters | undefined>();
 
   const fetchCounter = useRef<number>(0);
   const dataState: DataMainMsg = useDataState(main$);
@@ -328,12 +332,13 @@ export function DiscoverLayout({
                       indexPattern={indexPattern}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
+                      setSpikeSelection={setSpikeSelection}
                       hideChart={state.hideChart}
                       interval={state.interval}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />
-                  {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+                  {viewMode === VIEW_MODE.DOCUMENT_LEVEL && (
                     <DiscoverDocuments
                       documents$={savedSearchData$.documents$}
                       expandedDoc={expandedDoc}
@@ -345,8 +350,24 @@ export function DiscoverLayout({
                       state={state}
                       stateContainer={stateContainer}
                     />
-                  ) : (
+                  )}
+                  {viewMode === VIEW_MODE.AGGREGATED_LEVEL && (
                     <FieldStatisticsTableMemoized
+                      availableFields$={savedSearchData$.availableFields$}
+                      savedSearch={savedSearch}
+                      indexPattern={indexPattern}
+                      query={state.query}
+                      filters={state.filters}
+                      columns={columns}
+                      stateContainer={stateContainer}
+                      onAddFilter={onAddFilter}
+                      trackUiMetric={trackUiMetric}
+                      savedSearchRefetch$={savedSearchRefetch$}
+                    />
+                  )}
+                  {viewMode === VIEW_MODE.SPIKE_LEVEL && spikeSelection !== undefined && (
+                    <SpikeAnalysisTable
+                      spikeSelection={spikeSelection}
                       availableFields$={savedSearchData$.availableFields$}
                       savedSearch={savedSearch}
                       indexPattern={indexPattern}

@@ -1,0 +1,291 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { useCallback, useEffect, useMemo, useState, FC } from 'react';
+import { orderBy } from 'lodash';
+
+import { EuiBasicTable, EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import type { WindowParameters } from '../chart/get_window_parameters';
+
+import { ImpactBar } from './impact_bar';
+import { useChangePointDetection, ChangePoint } from './use_change_point_detection';
+import type { BaseSpikeAnalysisTableProps } from './spike_analysis_table_embeddable';
+
+const loadingText = i18n.translate('xpack.apm.correlations.correlationsTable.loadingText', {
+  defaultMessage: 'Loading...',
+});
+
+const noDataText = i18n.translate('xpack.apm.correlations.correlationsTable.noDataText', {
+  defaultMessage: 'No data',
+});
+
+const errorMessage = i18n.translate('xpack.apm.correlations.correlationsTable.errorMessage', {
+  defaultMessage: 'Failed to fetch',
+});
+
+const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
+
+enum FETCH_STATUS {
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  FAILURE = 'failure',
+  NOT_INITIATED = 'not_initiated',
+}
+
+interface SpikeAnalysisTableProps extends BaseSpikeAnalysisTableProps {
+  spikeSelection: WindowParameters;
+}
+
+export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
+  indexPattern,
+  spikeSelection,
+}) => {
+  const failedTransactionsCorrelationsColumns: Array<EuiBasicTableColumn<ChangePoint>> =
+    useMemo(() => {
+      const percentageColumns: Array<EuiBasicTableColumn<ChangePoint>> = [
+        {
+          width: '100px',
+          field: 'pValue',
+          name: 'p-value',
+          render: (pValue: number) => pValue.toPrecision(3),
+          sortable: true,
+        },
+      ];
+
+      return [
+        {
+          width: '116px',
+          field: 'normalizedScore',
+          name: (
+            <>
+              {i18n.translate(
+                'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
+                {
+                  defaultMessage: 'Score',
+                }
+              )}
+            </>
+          ),
+          align: RIGHT_ALIGNMENT,
+          render: (_, { normalizedScore }) => {
+            return (
+              <>
+                <ImpactBar size="m" value={normalizedScore * 100} />
+              </>
+            );
+          },
+          sortable: true,
+        },
+        {
+          width: '116px',
+          field: 'pValue',
+          name: (
+            <>
+              {i18n.translate(
+                'xpack.apm.correlations.failedTransactions.correlationsTable.impactLabel',
+                {
+                  defaultMessage: 'Impact',
+                }
+              )}
+            </>
+          ),
+          render: (_, { pValue }) => {
+            return null;
+            // const label = getFailedTransactionsCorrelationImpactLabel(pValue);
+            // return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
+          },
+          sortable: true,
+        },
+        {
+          field: 'fieldName',
+          name: i18n.translate(
+            'xpack.apm.correlations.failedTransactions.correlationsTable.fieldNameLabel',
+            { defaultMessage: 'Field name' }
+          ),
+          sortable: true,
+        },
+        {
+          field: 'fieldValue',
+          name: i18n.translate(
+            'xpack.apm.correlations.failedTransactions.correlationsTable.fieldValueLabel',
+            { defaultMessage: 'Field value' }
+          ),
+          render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
+          sortable: true,
+        },
+        ...percentageColumns,
+        {
+          width: '100px',
+          actions: [
+            {
+              name: i18n.translate('xpack.apm.correlations.correlationsTable.filterLabel', {
+                defaultMessage: 'Filter',
+              }),
+              description: i18n.translate(
+                'xpack.apm.correlations.correlationsTable.filterDescription',
+                { defaultMessage: 'Filter by value' }
+              ),
+              icon: 'plusInCircle',
+              type: 'icon',
+              onClick: (term: ChangePoint) => {
+                // push(history, {
+                //   query: {
+                //     kuery: `${term.fieldName}:"${term.fieldValue}"`,
+                //   },
+                // });
+                // onFilter();
+                // trackApmEvent({ metric: 'correlations_term_include_filter' });
+              },
+            },
+            {
+              name: i18n.translate('xpack.apm.correlations.correlationsTable.excludeLabel', {
+                defaultMessage: 'Exclude',
+              }),
+              description: i18n.translate(
+                'xpack.apm.correlations.correlationsTable.excludeDescription',
+                { defaultMessage: 'Filter out value' }
+              ),
+              icon: 'minusInCircle',
+              type: 'icon',
+              onClick: (term: ChangePoint) => {
+                // push(history, {
+                //   query: {
+                //     kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
+                //   },
+                // });
+                // onFilter();
+                // trackApmEvent({ metric: 'correlations_term_exclude_filter' });
+              },
+            },
+          ],
+          name: i18n.translate('xpack.apm.correlations.correlationsTable.actionsLabel', {
+            defaultMessage: 'Filter',
+          }),
+          render: (_, { fieldName, fieldValue }) => {
+            return (
+              <>
+                {/* <EuiLink
+                  href={createHref(history, {
+                    query: {
+                      kuery: `${fieldName}:"${fieldValue}"`,
+                    },
+                  })}
+                >
+                  <EuiIcon type="magnifyWithPlus" />
+                </EuiLink>
+                &nbsp;/&nbsp;
+                <EuiLink
+                  href={createHref(history, {
+                    query: {
+                      kuery: `not ${fieldName}:"${fieldValue}"`,
+                    },
+                  })}
+                >
+                  <EuiIcon type="magnifyWithMinus" />
+                </EuiLink> */}
+              </>
+            );
+          },
+        },
+      ] as Array<EuiBasicTableColumn<ChangePoint>>;
+    }, []);
+
+  // return (
+  //   <CorrelationsTable<ChangePoint>
+  //     columns={failedTransactionsCorrelationsColumns}
+  //     setSelectedSignificantTerm={() => {}}
+  //     onTableChange={() => {}}
+  //     significantTerms={correlationTerms}
+  //     status={progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
+  //   />
+  // );
+
+  const { progress, response, startFetch } = useChangePointDetection(
+    indexPattern.title,
+    spikeSelection
+  );
+  const status = progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS;
+
+  useEffect(() => {
+    if (spikeSelection) {
+      startFetch();
+    }
+  }, [spikeSelection, startFetch]);
+
+  const significantTerms = useMemo(
+    () => orderBy(response.changePoints, 'normalizedScore', 'desc'),
+    [response.changePoints]
+  );
+
+  const columns = failedTransactionsCorrelationsColumns;
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  const { pagination, pageOfItems } = useMemo(() => {
+    const pageStart = pageIndex * pageSize;
+
+    const itemCount = significantTerms?.length ?? 0;
+    return {
+      pageOfItems: significantTerms?.slice(pageStart, pageStart + pageSize),
+      pagination: {
+        pageIndex,
+        pageSize,
+        totalItemCount: itemCount,
+        pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+      },
+    };
+  }, [pageIndex, pageSize, significantTerms]);
+
+  const onChange = useCallback((tableSettings) => {
+    const { index, size } = tableSettings.page;
+
+    setPageIndex(index);
+    setPageSize(size);
+
+    // onTableChange(tableSettings);
+  }, []);
+
+  return (
+    <EuiBasicTable
+      items={pageOfItems ?? []}
+      noItemsMessage={status === FETCH_STATUS.LOADING ? loadingText : noDataText}
+      loading={status === FETCH_STATUS.LOADING}
+      error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
+      columns={columns}
+      rowProps={(term) => {
+        return {
+          onClick: () => {
+            // if (setPinnedSignificantTerm) {
+            //   setPinnedSignificantTerm(term);
+            // }
+          },
+          onMouseEnter: () => {
+            // setSelectedSignificantTerm(term);
+          },
+          onMouseLeave: () => {
+            // setSelectedSignificantTerm(null);
+          },
+          // style:
+          //   selectedTerm &&
+          //   selectedTerm.fieldValue === term.fieldValue &&
+          //   selectedTerm.fieldName === term.fieldName
+          //     ? {
+          //         backgroundColor: euiTheme.eui.euiColorLightestShade,
+          //       }
+          //     : null,
+        };
+      }}
+      pagination={pagination}
+      onChange={onChange}
+      // sorting={sorting}
+    />
+  );
+};

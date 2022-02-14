@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-  SPIKE_LEVEL = 'spikes',
-}
+/** Telemetry related to spike analysis table **/
+export const SPIKE_ANALSIS_LOADED = 'spike_analysis_loaded';

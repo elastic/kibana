@@ -31,6 +31,7 @@ import {
   getVisualizeInformation,
   triggerVisualizeActions,
 } from '../sidebar/lib/visualize_trigger_utils';
+import type { WindowParameters } from './get_window_parameters';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
@@ -44,6 +45,7 @@ export function DiscoverChart({
   indexPattern,
   viewMode,
   setDiscoverViewMode,
+  setSpikeSelection,
   hideChart,
   interval,
 }: {
@@ -55,6 +57,7 @@ export function DiscoverChart({
   indexPattern: DataView;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  setSpikeSelection: (p: WindowParameters) => void;
   hideChart?: boolean;
   interval?: string;
 }) {
@@ -214,8 +217,10 @@ export function DiscoverChart({
           >
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}
+              spikeSelectionUpdateHandler={setSpikeSelection}
               timefilterUpdateHandler={timefilterUpdateHandler}
               stateContainer={stateContainer}
+              viewMode={viewMode}
             />
           </section>
           <EuiSpacer size="s" />

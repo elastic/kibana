@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-  SPIKE_LEVEL = 'spikes',
-}
+export { SpikeAnalysisTable } from './spike_analysis_table';

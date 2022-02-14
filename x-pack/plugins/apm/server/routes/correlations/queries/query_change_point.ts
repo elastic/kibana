@@ -10,7 +10,7 @@ import { ElasticsearchClient } from 'kibana/server';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import { CorrelationsParams } from '../../../../common/correlations/types';
 import { ChangePointParams } from '../../../../common/correlations/change_point/types';
-import { getCorrelationsFilters } from './get_filters';
+import { getQueryWithParams, getTermsQuery } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export const getChangePointRequest = (
@@ -23,31 +23,9 @@ export const getChangePointRequest = (
     deviationMax: number;
   }
 ): estypes.SearchRequest => {
-  const {
-    environment,
-    kuery,
-    serviceName,
-    transactionType,
-    transactionName,
-    start,
-    end,
-  } = params;
-
-  const correlationFilters = getCorrelationsFilters({
-    environment,
-    kuery,
-    serviceName,
-    transactionType,
-    transactionName,
-    start,
-    end,
+  const query = getQueryWithParams({
+    params,
   });
-
-  const query = {
-    bool: {
-      filter: [...correlationFilters] as estypes.QueryDslQueryContainer[],
-    },
-  };
 
   const filter = query.bool.filter.filter((d) => Object.keys(d)[0] !== 'range');
 

@@ -47,6 +47,24 @@ export const DocumentViewModeToggle = ({
           </div>
         ),
       },
+      {
+        id: VIEW_MODE.SPIKE_LEVEL,
+        label: (
+          <div className="fieldStatsButton" data-test-subj="dscViewModeSpikeAnalysisButton">
+            <FormattedMessage
+              id="discover.viewModes.spikeAnalysis.label"
+              defaultMessage="Spike analysis"
+            />
+            <EuiBetaBadge
+              label={i18n.translate('discover.viewModes.spikeAnalysis.betaTitle', {
+                defaultMessage: 'Beta',
+              })}
+              size="s"
+              className="fieldStatsBetaBadge"
+            />
+          </div>
+        ),
+      },
     ],
     []
   );

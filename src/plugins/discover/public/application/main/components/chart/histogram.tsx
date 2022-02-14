@@ -7,7 +7,7 @@
  */
 import './histogram.scss';
 import moment, { unitOfTime } from 'moment-timezone';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,11 +46,17 @@ import { DataCharts$, DataChartsMessage } from '../../utils/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../utils/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
+import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { MlBrush } from './brush';
+import { MlBrushAnnotation } from './brush_annotation';
+import { getWindowParameters, WindowParameters } from './get_window_parameters';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
+  spikeSelectionUpdateHandler: (d: WindowParameters) => void;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   stateContainer: GetStateReturn;
+  viewMode: VIEW_MODE;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -65,8 +71,10 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 
 export function DiscoverHistogram({
   savedSearchData$,
+  spikeSelectionUpdateHandler,
   timefilterUpdateHandler,
   stateContainer,
+  viewMode,
 }: DiscoverHistogramProps) {
   const { data, theme, uiSettings, fieldFormats } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
@@ -76,6 +84,18 @@ export function DiscoverHistogram({
 
   const timeZone = getTimezone(uiSettings);
   const { chartData, bucketInterval, fetchStatus, error } = dataState;
+
+  const [originalWindowParameters, setOriginalWindowParameters] = useState<
+    WindowParameters | undefined
+  >();
+  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+
+  useEffect(() => {
+    if (viewMode !== VIEW_MODE.SPIKE_LEVEL) {
+      setOriginalWindowParameters(undefined);
+      setWindowParameters(undefined);
+    }
+  }, [viewMode]);
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
@@ -98,10 +118,49 @@ export function DiscoverHistogram({
           to: startRange + xInterval,
         };
 
-        timefilterUpdateHandler(range);
+        if (viewMode !== VIEW_MODE.SPIKE_LEVEL) {
+          timefilterUpdateHandler(range);
+        } else {
+          if (
+            typeof startRange === 'number' &&
+            originalWindowParameters === undefined &&
+            windowParameters === undefined &&
+            chartData !== undefined
+          ) {
+            const domain = chartData.ordered;
+            const domainStart = domain.min.valueOf();
+            const domainEnd = domain.max.valueOf();
+
+            const xValues = chartData.xAxisOrderedValues;
+            const lastXValue = xValues[xValues.length - 1];
+
+            const domainMin = Math.min(chartData.values[0]?.x, domainStart);
+            const domainMax = Math.max(domainEnd - xInterval, lastXValue);
+
+            const wp = getWindowParameters(startRange, domainMin, domainMax + xInterval);
+            setOriginalWindowParameters(wp);
+            setWindowParameters(wp);
+            spikeSelectionUpdateHandler(wp);
+          }
+        }
       },
-    [timefilterUpdateHandler]
+    [
+      chartData,
+      originalWindowParameters,
+      spikeSelectionUpdateHandler,
+      timefilterUpdateHandler,
+      viewMode,
+      windowParameters,
+    ]
   );
+
+  function onWindowParametersChange(wp: WindowParameters) {
+    setWindowParameters(wp);
+    spikeSelectionUpdateHandler(wp);
+  }
+
+  const [mlBrushWidth, setMlBrushWidth] = useState<number>();
+  const [mlBrushMarginLeft, setMlBrushMarginLeft] = useState<number>();
 
   const { timefilter } = data.query.timefilter;
 
@@ -267,14 +326,35 @@ export function DiscoverHistogram({
     );
   }
 
+  const isBrushVisible =
+    originalWindowParameters && mlBrushMarginLeft && mlBrushWidth && mlBrushWidth > 0;
+
   return (
     <React.Fragment>
+      {isBrushVisible && (
+        <div className="dscHistogramBrushes">
+          <MlBrush
+            windowParameters={originalWindowParameters}
+            min={domainMin}
+            max={domainMax + xInterval}
+            onChange={onWindowParametersChange}
+            marginLeft={mlBrushMarginLeft}
+            width={mlBrushWidth}
+          />
+        </div>
+      )}
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
         <Chart size="100%">
           <Settings
             xDomain={xDomain}
-            onBrushEnd={onBrushEnd as BrushEndListener}
+            onBrushEnd={
+              viewMode !== VIEW_MODE.SPIKE_LEVEL ? (onBrushEnd as BrushEndListener) : undefined
+            }
             onElementClick={onElementClick(xInterval)}
+            onProjectionAreaChange={({ projection }) => {
+              setMlBrushMarginLeft(projection.left);
+              setMlBrushWidth(projection.width);
+            }}
             tooltip={tooltipProps}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
@@ -315,6 +395,20 @@ export function DiscoverHistogram({
             timeZone={timeZone}
             name={chartData.yAxisLabel}
           />
+          {windowParameters && (
+            <>
+              <MlBrushAnnotation
+                id="baseline"
+                min={windowParameters.baselineMin}
+                max={windowParameters.baselineMax}
+              />
+              <MlBrushAnnotation
+                id="deviation"
+                min={windowParameters.deviationMin}
+                max={windowParameters.deviationMax}
+              />
+            </>
+          )}
         </Chart>
       </div>
       {timeRange}

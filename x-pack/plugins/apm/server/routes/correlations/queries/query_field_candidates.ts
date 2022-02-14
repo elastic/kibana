@@ -61,13 +61,17 @@ export const fetchTransactionDurationFieldCandidates = async (
   params: CorrelationsParams
 ): Promise<{ fieldCandidates: string[] }> => {
   const { index } = params;
+  const isApmDefaultIndex = index === 'traces-apm*,apm-*';
+
   // Get all supported fields
   const respMapping = await esClient.fieldCaps({
     index,
     fields: '*',
   });
 
-  const finalFieldCandidates = new Set(FIELDS_TO_ADD_AS_CANDIDATE);
+  const finalFieldCandidates: Set<string> = isApmDefaultIndex
+    ? new Set(FIELDS_TO_ADD_AS_CANDIDATE)
+    : new Set();
   const acceptableFields: Set<string> = new Set();
 
   Object.entries(respMapping.fields).forEach(([key, value]) => {
@@ -99,6 +103,8 @@ export const fetchTransactionDurationFieldCandidates = async (
   });
 
   return {
-    fieldCandidates: [...finalFieldCandidates, 'http.request.method'],
+    fieldCandidates: isApmDefaultIndex
+      ? [...finalFieldCandidates, 'http.request.method']
+      : [...finalFieldCandidates],
   };
 };

@@ -27,13 +27,15 @@ export function getCorrelationsFilters({
   end,
 }: CorrelationsClientParams) {
   const correlationsFilters: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     ...(start && end ? rangeQuery(start, end) : []),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
 
   if (serviceName) {
+    correlationsFilters.push({
+      term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
+    });
     correlationsFilters.push({ term: { [SERVICE_NAME]: serviceName } });
   }
 

@@ -46,6 +46,7 @@ const fieldCandidatesRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([
       t.partial({
+        indexPatternTitle: t.string,
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
@@ -67,12 +68,14 @@ const fieldCandidatesRoute = createApmServerRoute({
     const esClient = (await resources.context.core).elasticsearch.client
       .asCurrentUser;
 
+    const { indexPatternTitle, ...paramsQuery } = resources.params.query;
+
     return withApmSpan(
       'get_correlations_field_candidates',
       async (): Promise<{ fieldCandidates: string[] }> =>
         await fetchTransactionDurationFieldCandidates(esClient, {
-          ...resources.params.query,
-          index: indices.transaction,
+          ...paramsQuery,
+          index: indexPatternTitle ?? indices.transaction,
         })
     );
   },
@@ -83,6 +86,7 @@ const fieldStatsRoute = createApmServerRoute({
   params: t.type({
     body: t.intersection([
       t.partial({
+        indexPatternTitle: t.string,
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
@@ -114,7 +118,8 @@ const fieldStatsRoute = createApmServerRoute({
     const esClient = (await resources.context.core).elasticsearch.client
       .asCurrentUser;
 
-    const { fieldsToSample, ...params } = resources.params.body;
+    const { fieldsToSample, indexPatternTitle, ...params } =
+      resources.params.body;
 
     return withApmSpan(
       'get_correlations_field_stats',
@@ -123,7 +128,7 @@ const fieldStatsRoute = createApmServerRoute({
           esClient,
           {
             ...params,
-            index: indices.transaction,
+            index: indexPatternTitle ?? indices.transaction,
           },
           fieldsToSample
         )
@@ -360,6 +365,7 @@ const changePointPValuesRoute = createApmServerRoute({
   params: t.type({
     body: t.intersection([
       t.partial({
+        indexPatternTitle: t.string,
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
@@ -392,12 +398,13 @@ const changePointPValuesRoute = createApmServerRoute({
       baselineMax,
       deviationMin,
       deviationMax,
+      indexPatternTitle,
       ...params
     } = resources.params.body;
 
     const paramsWithIndex = {
       ...params,
-      index: indices.transaction,
+      index: indexPatternTitle ?? indices.transaction,
     };
 
     return withApmSpan(
