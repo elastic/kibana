@@ -458,6 +458,7 @@ export class DataViewsService {
         spec.fields![name] = {
           name,
           type: castEsToKbnFieldTypeName(fieldType),
+          esTypes: [fieldType],
           runtimeField,
           aggregatable: true,
           searchable: true,

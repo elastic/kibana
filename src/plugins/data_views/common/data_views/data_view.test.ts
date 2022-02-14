@@ -37,6 +37,8 @@ const runtimeField = {
   name: 'runtime_field',
   runtimeField: runtimeFieldScript,
   scripted: false,
+  esTypes: ['keyword'],
+  type: 'string',
 };
 
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;

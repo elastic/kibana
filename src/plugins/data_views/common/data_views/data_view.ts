@@ -596,6 +596,7 @@ export class DataView implements IIndexPattern {
         name: fieldName,
         runtimeField: runtimeFieldSpec,
         type: castEsToKbnFieldTypeName(fieldType),
+        esTypes: [fieldType],
         aggregatable: true,
         searchable: true,
         count: config.popularity ?? 0,

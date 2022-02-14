@@ -8,9 +8,9 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { KbnFieldType, getKbnFieldType, castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { KbnFieldType, getKbnFieldType } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { RuntimeFieldSpec, RuntimeType } from '../types';
+import type { RuntimeFieldSpec } from '../types';
 import type { IFieldType } from './types';
 import { FieldSpec, DataView } from '..';
 import {
@@ -108,28 +108,10 @@ export class DataViewField implements IFieldType {
   }
 
   public get type() {
-    if (this.isRuntimeField) {
-      let type: RuntimeType = this.runtimeField?.type!;
-      if (this.isRuntimeCompositeSubField) {
-        const [, subFieldName] = this.name.split('.');
-        // We return the subField type (with fallback mechanism to "composite" type)
-        type = this.runtimeField?.fields![subFieldName]?.type ?? this.runtimeField?.type!;
-      }
-      return castEsToKbnFieldTypeName(type);
-    }
-
     return this.spec.type;
   }
 
   public get esTypes() {
-    if (this.isRuntimeField) {
-      if (this.isRuntimeCompositeSubField) {
-        const [, subFieldName] = this.name.split('.');
-        // We return the subField type (with fallback mechanism to "composite" type)
-        return [this.runtimeField?.fields![subFieldName]?.type ?? this.runtimeField?.type!];
-      }
-      return [this.runtimeField?.type!];
-    }
     return this.spec.esTypes;
   }
 
@@ -249,11 +231,8 @@ export class DataViewField implements IFieldType {
     };
   }
 
-  private get isRuntimeCompositeSubField(): boolean {
-    if (!this.isRuntimeField) {
-      return false;
-    }
-    return this.runtimeField!.type === 'composite';
+  public isRuntimeCompositeSubField() {
+    return this.runtimeField?.type === 'composite';
   }
 }
 
