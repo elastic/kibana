@@ -11,14 +11,13 @@ import { useParams } from 'react-router-dom';
 import { APP_ID } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
-import { CasesDeepLinkId, ICasesDeepLinkId } from './deep_links';
+import { ICasesDeepLinkId } from './deep_links';
 import {
   CASES_CONFIGURE_PATH,
   CASES_CREATE_PATH,
   CaseViewPathParams,
   generateCaseViewPath,
 } from './paths';
-import { useIsMainApplication } from '../hooks';
 
 export const useCaseViewParams = () => useParams<CaseViewPathParams>();
 
@@ -53,60 +52,33 @@ export const useCasesNavigation = ({
  * deep links.
  */
 const navigationMapping = {
-  all: { path: '/', deepLinkId: CasesDeepLinkId.cases },
-  create: { path: CASES_CREATE_PATH, deepLinkId: CasesDeepLinkId.casesCreate },
-  configure: { path: CASES_CONFIGURE_PATH, deepLinkId: CasesDeepLinkId.casesConfigure },
+  all: { path: '/' },
+  create: { path: CASES_CREATE_PATH },
+  configure: { path: CASES_CONFIGURE_PATH },
 };
-
-const getNavigationArguments = (
-  view: keyof typeof navigationMapping,
-  isMainApplication: boolean
-) => {
-  return {
-    /**
-     * Because the Cases application is a descendant of the stack management plugin
-     * we can use the deepLinkId to navigate within the main application. For that reason,
-     * the path attribute can be relative to the base path.
-     */
-    ...(isMainApplication && { path: navigationMapping[view].path, deepLinkId: APP_ID }),
-    /**
-     * Solutions that use cases navigate in cases only by using deepLinks
-     */
-    ...(!isMainApplication && { deepLinkId: navigationMapping[view].deepLinkId }),
-  };
-};
-
-const getAllCasesNavigationArguments = (isMainApplication: boolean) =>
-  getNavigationArguments('all', isMainApplication);
-
-const getCreateCaseNavigationArguments = (isMainApplication: boolean) =>
-  getNavigationArguments('create', isMainApplication);
-
-const getConfigureCaseNavigationArguments = (isMainApplication: boolean) =>
-  getNavigationArguments('configure', isMainApplication);
 
 export const useAllCasesNavigation = () => {
-  const isMainApplication = useIsMainApplication();
-  const navigationArguments = getAllCasesNavigationArguments(isMainApplication);
-
-  const [getAllCasesUrl, navigateToAllCases] = useCasesNavigation(navigationArguments);
+  const [getAllCasesUrl, navigateToAllCases] = useCasesNavigation({
+    path: navigationMapping.all.path,
+    deepLinkId: APP_ID,
+  });
 
   return { getAllCasesUrl, navigateToAllCases };
 };
 
 export const useCreateCaseNavigation = () => {
-  const isMainApplication = useIsMainApplication();
-  const navigationArguments = getCreateCaseNavigationArguments(isMainApplication);
-
-  const [getCreateCaseUrl, navigateToCreateCase] = useCasesNavigation(navigationArguments);
+  const [getCreateCaseUrl, navigateToCreateCase] = useCasesNavigation({
+    path: navigationMapping.create.path,
+    deepLinkId: APP_ID,
+  });
   return { getCreateCaseUrl, navigateToCreateCase };
 };
 
 export const useConfigureCasesNavigation = () => {
-  const isMainApplication = useIsMainApplication();
-  const navigationArguments = getConfigureCaseNavigationArguments(isMainApplication);
-
-  const [getConfigureCasesUrl, navigateToConfigureCases] = useCasesNavigation(navigationArguments);
+  const [getConfigureCasesUrl, navigateToConfigureCases] = useCasesNavigation({
+    path: navigationMapping.configure.path,
+    deepLinkId: APP_ID,
+  });
   return { getConfigureCasesUrl, navigateToConfigureCases };
 };
 
@@ -116,8 +88,7 @@ type NavigateToCaseView = (pathParams: CaseViewPathParams) => void;
 export const useCaseViewNavigation = () => {
   const { appId } = useCasesContext();
   const { navigateTo, getAppUrl } = useNavigation(appId);
-  const isMainApplication = useIsMainApplication();
-  const deepLinkId = isMainApplication ? APP_ID : CasesDeepLinkId.cases;
+  const deepLinkId = APP_ID;
 
   const getCaseViewUrl = useCallback<GetCaseViewUrl>(
     (pathParams, absolute) =>
