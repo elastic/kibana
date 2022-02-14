@@ -343,7 +343,7 @@
     "react-grid-layout": "^0.16.2",
     "react-intl": "^2.8.0",
     "react-is": "^16.8.0",
-    "react-markdown": "^4.3.1",
+    "react-markdown": "^8.0.0",
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "^0.41.2",
     "react-popper-tooltip": "^2.10.1",
