@@ -19,17 +19,19 @@ export interface MonitorStatusState {
   loading: boolean;
 }
 
-const initialState: MonitorStatusState = {
+export const initialState: MonitorStatusState = {
   status: null,
   loading: false,
 };
 
-type MonitorStatusPayload = QueryParams & Ping;
+export type MonitorStatusPayload = QueryParams & Ping;
 
 export const monitorStatusReducer = handleActions<MonitorStatusState, MonitorStatusPayload>(
   {
-    [String(getMonitorStatusAction)]: (state) => ({
+    [String(getMonitorStatusAction)]: (state, action) => ({
       ...state,
+      // reset state if monitorId changes
+      status: action.payload.monitorId === state?.status?.monitor?.id ? state.status : null,
       loading: true,
     }),
 

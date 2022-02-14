@@ -59,8 +59,8 @@ describe('fetch_all_from_scroll', () => {
         };
 
         mockScopedClusterClient.asCurrentUser.scroll
-          .mockResolvedValueOnce({ body: mockResponse1 })
-          .mockResolvedValueOnce({ body: mockResponse2 });
+          .mockResolvedValueOnce(mockResponse1)
+          .mockResolvedValueOnce(mockResponse2);
       });
 
       it('should return the hits from the response', () => {

@@ -20,7 +20,7 @@ import {
 // in the metadata of the indices they point to, so it's impossible to have an alias that doesn't point to any index.
 export async function isAnnotationsFeatureAvailable({ asInternalUser }: IScopedClusterClient) {
   try {
-    const { body: annotationsReadAliasExists } = await asInternalUser.indices.existsAlias({
+    const annotationsReadAliasExists = await asInternalUser.indices.existsAlias({
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       name: ML_ANNOTATIONS_INDEX_ALIAS_READ,
     });
@@ -29,7 +29,7 @@ export async function isAnnotationsFeatureAvailable({ asInternalUser }: IScopedC
       return false;
     }
 
-    const { body: annotationsWriteAliasExists } = await asInternalUser.indices.existsAlias({
+    const annotationsWriteAliasExists = await asInternalUser.indices.existsAlias({
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
       name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
     });

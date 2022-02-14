@@ -24,8 +24,8 @@ const mockSearchResponse = {
 
 const mlClusterClientFactory = (response: any): IScopedClusterClient => {
   const callAs = {
-    fieldCaps: () => Promise.resolve({ body: response.fieldCaps }),
-    search: () => Promise.resolve({ body: response.search }),
+    fieldCaps: () => Promise.resolve(response.fieldCaps),
+    search: () => Promise.resolve(response.search),
   };
   return {
     asCurrentUser: callAs,

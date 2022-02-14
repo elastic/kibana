@@ -23,7 +23,7 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       const template = request.body as TypeOf<typeof bodySchema>;
 
       try {
-        const { body: templatePreview } = await client.asCurrentUser.indices.simulateTemplate({
+        const templatePreview = await client.asCurrentUser.indices.simulateTemplate({
           body: {
             ...template,
             // Until ES fixes a bug on their side we need to send a fake index pattern
