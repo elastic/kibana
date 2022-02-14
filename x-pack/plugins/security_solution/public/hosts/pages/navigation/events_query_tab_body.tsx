@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { EuiFlexItem, EuiPanel, EuiSelect } from '@elastic/eui';
 import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { timelineActions } from '../../../timelines/store/timeline';
@@ -28,6 +29,10 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { getEventsHistogramCongifs } from '../../configs/events';
+import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
+import { STACK_BY } from '../../../common/components/matrix_histogram/translations';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -99,6 +104,44 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
+  const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
+    histogramConfigs.defaultStackByOption
+  );
+
+  const setSelectedChartOptionCallback = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedStackByOption(
+        histogramConfigs.stackByOptions.find((co) => co.value === event.target.value) ??
+          histogramConfigs.defaultStackByOption
+      );
+    },
+    []
+  );
+  const appendTitle = useMemo(
+    () => (
+      <EuiFlexItem grow={false}>
+        {histogramConfigs.stackByOptions.length > 1 && (
+          <EuiSelect
+            onChange={setSelectedChartOptionCallback}
+            options={histogramConfigs.stackByOptions}
+            prepend={STACK_BY}
+            value={selectedStackByOption?.value}
+            compressed={true}
+          />
+        )}
+      </EuiFlexItem>
+    ),
+    [selectedStackByOption?.value, setSelectedChartOptionCallback]
+  );
+  const { patternList, dataViewId } = useSourcererDataView();
+  const customLensAttrs = useMemo(() => {
+    const configs = getEventsHistogramCongifs({ stackByField: selectedStackByOption.value });
+    return {
+      ...configs,
+      references: configs.references.map((ref) => ({ ...ref, id: dataViewId })),
+    };
+  }, [dataViewId, selectedStackByOption.value]);
+
   return (
     <>
       {!globalFullScreen && (
@@ -111,6 +154,18 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
           indexNames={indexNames}
           {...histogramConfigs}
         />
+      )}
+      {!globalFullScreen && (
+        <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>
+          <EmbeddableHistogram
+            title={i18n.NAVIGATION_EVENTS_TITLE}
+            appendTitle={appendTitle}
+            dataTypesIndexPatterns={patternList?.join(',')}
+            customLensAttrs={customLensAttrs}
+            customTimeRange={{ from: startDate, to: endDate }}
+            isSingleMetric={false}
+          />
+        </EuiPanel>
       )}
       <StatefulEventsViewer
         defaultCellActions={defaultCellActions}
