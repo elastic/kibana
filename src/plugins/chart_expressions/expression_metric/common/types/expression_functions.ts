@@ -14,7 +14,7 @@ import {
 } from '../../../../expressions';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { ColorMode, CustomPaletteState, PaletteOutput } from '../../../../charts/common';
-import { VisParams, visType } from './expression_renderers';
+import { VisParams, visType, LabelPositionType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
@@ -24,7 +24,7 @@ export interface MetricArguments {
   palette?: PaletteOutput<CustomPaletteState>;
   font: Style;
   labelFont: Style;
-  labelPosition: 'bottom' | 'top';
+  labelPosition: LabelPositionType;
   metric: ExpressionValueVisDimension[];
   bucket?: ExpressionValueVisDimension;
   autoScale?: boolean;
