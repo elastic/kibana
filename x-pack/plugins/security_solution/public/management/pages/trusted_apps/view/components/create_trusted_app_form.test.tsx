@@ -302,7 +302,7 @@ describe('When using the Trusted App Form', () => {
 
       expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
       expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual('false');
-      expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual('true');
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-checked')).toEqual('true');
     });
     it('should show loader when setting `policies.isLoading` to true and scope is per-policy', () => {
       formProps.policies.isLoading = true;
