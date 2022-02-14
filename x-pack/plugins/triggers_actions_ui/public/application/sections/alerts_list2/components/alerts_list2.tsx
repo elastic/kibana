@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useState, useCallback } from 'react';
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBase, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { EuiDataGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -52,9 +52,10 @@ const AlertsListUI: React.FunctionComponent = () => {
 
   const streamData = useCallback(() => {
     const abortController = new AbortController();
+    const dsl = toElasticsearchQuery(fromKueryExpression(kuery));
     const request: RuleRegistrySearchRequest = {
       featureIds: visibleConsumers.map((c) => c.id),
-      query: kuery,
+      dsl,
     };
 
     data.search

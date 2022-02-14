@@ -109,6 +109,7 @@ export class RuleRegistryPlugin
         depsStart.data,
         this.ruleDataService!,
         depsStart.alerting,
+        logger,
         plugins.security,
         depsStart.spaces
       );

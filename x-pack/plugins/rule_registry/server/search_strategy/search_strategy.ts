@@ -5,45 +5,30 @@
  * 2.0.
  */
 import { map, mergeMap, catchError } from 'rxjs/operators';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Logger } from 'src/core/server';
 import { from } from 'rxjs';
-import { intersection } from 'lodash';
-import {
-  isValidFeatureId,
-  AlertConsumers,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_TYPE_ID,
-  SPACE_IDS,
-} from '@kbn/rule-data-utils';
+import { isValidFeatureId } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import { ISearchStrategy, PluginStart } from '../../../../../src/plugins/data/server';
 import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '../../common/search_strategy';
-import {
-  AlertingAuthorizationEntity,
-  AlertingAuthorizationFilterType,
-  PluginStartContract as AlertingPluginStartContract,
-} from '../../../alerting/server';
+import { ReadOperations, PluginStartContract as AlertingStart } from '../../../alerting/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { SpacesPluginStart } from '../../../spaces/server';
 import { IRuleDataService } from '..';
 import { Dataset } from '../rule_data_plugin_service/index_options';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '../';
-
-const USE_RBAC = [
-  AlertConsumers.APM,
-  AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.LOGS,
-  AlertConsumers.OBSERVABILITY,
-];
+import { getSpacesFilter, getAuthzFilter } from '../lib';
 
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
   ruleDataService: IRuleDataService,
-  alerting: AlertingPluginStartContract,
+  alerting: AlertingStart,
+  logger: Logger,
   security?: SecurityPluginSetup,
   spaces?: SpacesPluginStart
 ): ISearchStrategy<RuleRegistrySearchRequest, RuleRegistrySearchResponse> => {
@@ -52,51 +37,26 @@ export const ruleRegistrySearchStrategyProvider = (
   return {
     search: (request, options, deps) => {
       const securityAuditLogger = security?.audit.asScoped(deps.request);
-      const alertingAuthorizationClient = alerting.getAlertingAuthorizationWithRequest(
-        deps.request
-      );
       const getActiveSpace = async () => spaces?.spacesService.getActiveSpace(deps.request);
-      const getAuthFilter = async () =>
-        alertingAuthorizationClient.getFindAuthorizationFilter(AlertingAuthorizationEntity.Alert, {
-          type: AlertingAuthorizationFilterType.ESDSL,
-          // Not passing in values, these are the paths for these fields
-          fieldNames: {
-            consumer: ALERT_RULE_CONSUMER,
-            ruleTypeId: ALERT_RULE_TYPE_ID,
-            spaceIds: SPACE_IDS,
-          },
-        });
       const getAsync = async () => {
-        const promises: Array<Promise<any>> = [getActiveSpace()];
-        if (intersection(USE_RBAC, request.featureIds).length > 0) {
-          promises.push(getAuthFilter());
-        }
-        const [space, filter] = await Promise.all(promises);
-        return { filter, space };
+        const [space, authorization] = await Promise.all([
+          getActiveSpace(),
+          alerting.getAlertingAuthorizationWithRequest(deps.request),
+        ]);
+        const authzFilter = (await getAuthzFilter(
+          authorization,
+          ReadOperations.Find
+        )) as estypes.QueryDslQueryContainer;
+        return { space, authzFilter };
       };
       return from(getAsync()).pipe(
-        mergeMap(({ filter, space }) => {
-          let esQuery;
-          if (typeof request.query === 'string') {
-            esQuery = { query: request.query, language: 'kuery' };
-          } else if (request.query != null && typeof request.query === 'object') {
-            esQuery = [];
-          }
-
-          const filters: Filter[] = [];
-          if (filter) {
-            filters.push(filter.filter as unknown as Filter);
-          }
-
-          const query = buildEsQuery(
-            undefined,
-            esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
-            filters
-          );
-
+        mergeMap(({ space, authzFilter }) => {
           const indices: string[] = request.featureIds.reduce((accum: string[], featureId) => {
             if (!isValidFeatureId(featureId)) {
-              throw new Error('this is no good');
+              logger.warn(
+                `Found invalid feature '${featureId}' while using rule registry search strategy. No alert data from this feature will be searched.`
+              );
+              return accum;
             }
 
             return [
@@ -111,11 +71,32 @@ export const ruleRegistrySearchStrategyProvider = (
             ];
           }, []);
 
+          const filters = [];
+          if (authzFilter) {
+            filters.push(authzFilter);
+          }
+          if (space?.id) {
+            filters.push(getSpacesFilter(space.id) as estypes.QueryDslQueryContainer);
+          }
+          if (request.dsl?.bool?.filter) {
+            if (Array.isArray(request.dsl?.bool?.filter)) {
+              filters.push(...request.dsl?.bool?.filter);
+            } else {
+              filters.push(request.dsl?.bool?.filter);
+            }
+          }
+          const dsl: estypes.QueryDslQueryContainer = {
+            ...request.dsl,
+            bool: {
+              ...request.dsl?.bool,
+              filter: filters,
+            },
+          };
           const params = {
             index: indices,
             body: {
               size: MAX_ALERT_SEARCH_SIZE,
-              query,
+              query: dsl,
             },
           };
           return es.search({ ...request, params }, options, deps);

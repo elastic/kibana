@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { ValidFeatureId } from '@kbn/rule-data-utils';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IEsSearchRequest, IEsSearchResponse } from 'src/plugins/data/common';
 import { ParsedTechnicalFields } from '../';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];
-  query?: string;
+  dsl?: estypes.QueryDslQueryContainer;
 };
 export type RuleRegistrySearchResponse = IEsSearchResponse<ParsedTechnicalFields>;

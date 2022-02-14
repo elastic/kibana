@@ -6,17 +6,18 @@
  */
 import { of } from 'rxjs';
 import { merge } from 'lodash';
+import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ruleRegistrySearchStrategyProvider } from './search_strategy';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server';
 import { alertsMock } from '../../../alerting/server/mocks';
-import { alertingAuthorizationMock } from '../../../alerting/server/authorization/alerting_authorization.mock';
 import { securityMock } from '../../../security/server/mocks';
 import { spacesMock } from '../../../spaces/server/mocks';
 import { RuleRegistrySearchRequest } from '../../common/search_strategy';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
+import * as getAuthzFilterImport from '../lib/get_authz_filter';
 
 const getBasicResponse = (overwrites = {}) => {
   return merge(
@@ -48,9 +49,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   const data = dataPluginMock.createStartContract();
   const ruleDataService = ruleDataServiceMock.create();
   const alerting = alertsMock.createStart();
-  const alertingAuthorization = alertingAuthorizationMock.create();
   const security = securityMock.createSetup();
   const spaces = spacesMock.createStart();
+  const logger = loggerMock.create();
 
   const response = getBasicResponse({
     rawResponse: {
@@ -66,16 +67,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     },
   });
 
-  beforeEach(() => {
-    alerting.getAlertingAuthorizationWithRequest.mockImplementation(() => {
-      return {
-        ...alertingAuthorization,
-        getFindAuthorizationFilter: jest.fn().mockImplementation(() => {
-          return { filter: [] };
-        }),
-      };
-    });
+  let getAuthzFilterSpy: jest.SpyInstance;
 
+  beforeEach(() => {
     ruleDataService.findIndicesByFeature.mockImplementation(() => {
       return [];
     });
@@ -85,12 +79,18 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
         search: () => of(response),
       };
     });
+
+    getAuthzFilterSpy = jest
+      .spyOn(getAuthzFilterImport, 'getAuthzFilter')
+      .mockImplementation(async () => {
+        return {};
+      });
   });
 
   afterEach(() => {
-    alerting.getAlertingAuthorizationWithRequest.mockClear();
     ruleDataService.findIndicesByFeature.mockClear();
     data.search.getSearchStrategy.mockClear();
+    getAuthzFilterSpy.mockClear();
   });
 
   it('should handle a basic search request', async () => {
@@ -106,6 +106,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       data,
       ruleDataService,
       alerting,
+      logger,
       security,
       spaces
     );
@@ -114,40 +115,6 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
     expect(result).toBe(response);
-  });
-
-  it('should only apply auth filters when needed', async () => {
-    const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.SIEM],
-    };
-    const options = {};
-    const deps = {
-      request: {},
-    };
-
-    alerting.getAlertingAuthorizationWithRequest.mockImplementation(() => {
-      return {
-        ...alertingAuthorization,
-        getFindAuthorizationFilter: jest.fn().mockImplementation(() => {
-          throw new Error('This should not be called');
-        }),
-      };
-    });
-
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      security,
-      spaces
-    );
-
-    expect(
-      async () =>
-        await strategy
-          .search(request, options, deps as unknown as SearchStrategyDependencies)
-          .toPromise()
-    ).not.toThrow();
   });
 
   it('should use the active space in siem queries', async () => {
@@ -189,6 +156,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       data,
       ruleDataService,
       alerting,
+      logger,
       security,
       spaces
     );
