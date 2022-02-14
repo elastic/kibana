@@ -7,10 +7,12 @@
 
 import { CreateCaseFlyoutProps } from '../create/flyout';
 
-export const initialCasesContextState: CasesContextState = {
-  createCaseFlyout: {
-    isFlyoutOpen: false,
-  },
+export const initialCasesContextState = (): CasesContextState => {
+  return {
+    createCaseFlyout: {
+      isFlyoutOpen: false,
+    },
+  };
 };
 
 export interface CasesContextState {

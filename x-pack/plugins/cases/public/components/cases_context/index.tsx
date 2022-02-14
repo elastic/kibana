@@ -47,7 +47,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {} },
 }) => {
   const { appId, appTitle } = useApplication();
-  const [state, dispatch] = useReducer(casesContextReducer, initialCasesContextState);
+  const [state, dispatch] = useReducer(casesContextReducer, initialCasesContextState());
   const [baseValue, setBaseValue] = useState<Omit<CasesContextStateValue, 'state' | 'dispatch'>>(
     () => ({
       owner,
