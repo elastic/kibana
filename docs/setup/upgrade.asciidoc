@@ -42,7 +42,7 @@ complete the upgrade migration before bringing up the remaining instances.
 [[preventing-migration-failures]]
 === Preparing for migration
 
-There are extra steps you can follow to ensure you are ready for migration.
+Take these extra steps to ensure you are ready for migration.
 
 [float]
 ==== Ensure your {es} cluster is healthy
