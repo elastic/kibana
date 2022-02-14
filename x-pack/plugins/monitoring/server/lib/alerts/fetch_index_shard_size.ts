@@ -112,7 +112,7 @@ export async function fetchIndexShardSize(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   // @ts-expect-error declare aggegations type explicitly
   const { buckets: clusterBuckets } = response.aggregations?.clusters;
   const stats: IndexShardSizeStats[] = [];

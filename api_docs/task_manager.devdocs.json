@@ -414,12 +414,28 @@
           },
           {
             "parentPluginId": "taskManager",
+            "id": "def-server.ConcreteTaskInstance.interval",
+            "type": "string",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": true,
+            "references": []
+          },
+          {
+            "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.version",
             "type": "string",
             "tags": [],
             "label": "version",
             "description": [
-              "\nThe saved object version from the Elaticsearch document."
+              "\nThe saved object version from the Elasticsearch document."
             ],
             "signature": [
               "string | undefined"

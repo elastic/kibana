@@ -29,7 +29,7 @@ export const useBulkEditFormFlyout = () => {
       if ((await confirmForm()) === true) {
         return dataFormRef.current;
       } else {
-        throw Error('Form is cancelled');
+        return null;
       }
     },
     [confirmForm]

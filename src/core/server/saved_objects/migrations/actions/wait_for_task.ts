@@ -82,8 +82,7 @@ export const waitForTask =
         wait_for_completion: true,
         timeout,
       })
-      .then((res) => {
-        const body = res.body;
+      .then((body) => {
         const failures = body.response?.failures ?? [];
         return Either.right({
           completed: body.completed,
