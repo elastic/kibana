@@ -17,11 +17,9 @@ const paramsSchema = schema.object({
 });
 
 function deactivateWatch(dataClient: IScopedClusterClient, watchId: string) {
-  return dataClient.asCurrentUser.watcher
-    .deactivateWatch({
-      watch_id: watchId,
-    })
-    .then(({ body }) => body);
+  return dataClient.asCurrentUser.watcher.deactivateWatch({
+    watch_id: watchId,
+  });
 }
 
 export function registerDeactivateRoute({

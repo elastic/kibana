@@ -13,7 +13,45 @@ describe('fetchESUsage', () => {
   const index = '.monitoring-es-*';
   const callCluster = {
     search: jest.fn().mockImplementation(() => ({
-      body: {
+      hits: {
+        hits: [
+          {
+            _source: {
+              cluster_stats: {
+                nodes: {
+                  count: {
+                    total: 10,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      aggregations: {
+        indices: {
+          buckets: [
+            {
+              key: '.monitoring-es-2',
+            },
+          ],
+        },
+      },
+    })),
+  } as unknown as ElasticsearchClient;
+
+  it('should return usage data for Elasticsearch', async () => {
+    const result = await fetchESUsage(callCluster, clusterUuid, index);
+    expect(result).toStrictEqual({
+      count: 10,
+      enabled: true,
+      metricbeatUsed: false,
+    });
+  });
+
+  it('should handle some indices coming from Metricbeat', async () => {
+    const customCallCluster = {
+      search: jest.fn().mockImplementation(() => ({
         hits: {
           hits: [
             {
@@ -33,51 +71,9 @@ describe('fetchESUsage', () => {
           indices: {
             buckets: [
               {
-                key: '.monitoring-es-2',
+                key: '.monitoring-es-mb-2',
               },
             ],
-          },
-        },
-      },
-    })),
-  } as unknown as ElasticsearchClient;
-
-  it('should return usage data for Elasticsearch', async () => {
-    const result = await fetchESUsage(callCluster, clusterUuid, index);
-    expect(result).toStrictEqual({
-      count: 10,
-      enabled: true,
-      metricbeatUsed: false,
-    });
-  });
-
-  it('should handle some indices coming from Metricbeat', async () => {
-    const customCallCluster = {
-      search: jest.fn().mockImplementation(() => ({
-        body: {
-          hits: {
-            hits: [
-              {
-                _source: {
-                  cluster_stats: {
-                    nodes: {
-                      count: {
-                        total: 10,
-                      },
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          aggregations: {
-            indices: {
-              buckets: [
-                {
-                  key: '.monitoring-es-mb-2',
-                },
-              ],
-            },
           },
         },
       })),
@@ -93,10 +89,8 @@ describe('fetchESUsage', () => {
   it('should handle no monitoring data', async () => {
     const customCallCluster = {
       search: jest.fn().mockImplementation(() => ({
-        body: {
-          hits: {
-            hits: [],
-          },
+        hits: {
+          hits: [],
         },
       })),
     } as unknown as ElasticsearchClient;

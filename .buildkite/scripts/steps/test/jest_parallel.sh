@@ -10,10 +10,16 @@ JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 i=0
 exitCode=0
 
+if [[ "${1:-}" ]]; then
+  configs="$(find src x-pack packages -name "$1" -not -path "*/__fixtures__/*" | sort)"
+else 
+  configs="$(node .buildkite/scripts/steps/test/jest_sorted.js)"
+fi
+
 while read -r config; do
   if [ "$((i % JOB_COUNT))" -eq "$JOB" ]; then
     echo "--- $ node scripts/jest --config $config"
-    node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false
+    node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests
     lastCode=$?
 
     if [ $lastCode -ne 0 ]; then
@@ -25,6 +31,6 @@ while read -r config; do
 
   ((i=i+1))
 # uses heredoc to avoid the while loop being in a sub-shell thus unable to overwrite exitCode
-done <<< "$(node .buildkite/scripts/steps/test/jest_sorted.js)"
+done <<< "$configs"
 
 exit $exitCode
