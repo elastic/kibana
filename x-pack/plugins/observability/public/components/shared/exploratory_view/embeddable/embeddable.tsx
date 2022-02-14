@@ -40,7 +40,7 @@ export interface ExploratoryEmbeddableProps {
   metricIconColor?: string;
   metricPostfix?: string;
   onBrushEnd?: (param: { range: number[] }) => void;
-  owner: string;
+  owner?: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
   withActions?: boolean | ActionTypes[];
