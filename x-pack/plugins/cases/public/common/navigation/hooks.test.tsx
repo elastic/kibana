@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { APP_ID } from '../../../common/constants';
 import { useNavigation } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import {
@@ -46,7 +47,7 @@ describe('hooks', () => {
         getCasesUrl(false);
       });
 
-      expect(getAppUrl).toHaveBeenCalledWith({ absolute: false, deepLinkId: 'cases' });
+      expect(getAppUrl).toHaveBeenCalledWith({ absolute: false, deepLinkId: APP_ID });
     });
 
     it('it calls navigateToAllCases with correct arguments', () => {
@@ -62,7 +63,7 @@ describe('hooks', () => {
         navigateToCases();
       });
 
-      expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: 'cases' });
+      expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: APP_ID });
     });
   });
 
@@ -76,7 +77,7 @@ describe('hooks', () => {
         result.current.getAllCasesUrl(false);
       });
 
-      expect(getAppUrl).toHaveBeenCalledWith({ absolute: false, deepLinkId: 'cases' });
+      expect(getAppUrl).toHaveBeenCalledWith({ absolute: false, path: '/', deepLinkId: APP_ID });
     });
 
     it('it calls navigateToAllCases with correct arguments', () => {
@@ -88,7 +89,7 @@ describe('hooks', () => {
         result.current.navigateToAllCases();
       });
 
-      expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: 'cases' });
+      expect(navigateTo).toHaveBeenCalledWith({ path: '/', deepLinkId: APP_ID });
     });
   });
 
@@ -102,7 +103,11 @@ describe('hooks', () => {
         result.current.getCreateCaseUrl(false);
       });
 
-      expect(getAppUrl).toHaveBeenCalledWith({ absolute: false, deepLinkId: 'cases_create' });
+      expect(getAppUrl).toHaveBeenCalledWith({
+        absolute: false,
+        path: '/create',
+        deepLinkId: APP_ID,
+      });
     });
 
     it('it calls navigateToAllCases with correct arguments', () => {
@@ -114,7 +119,7 @@ describe('hooks', () => {
         result.current.navigateToCreateCase();
       });
 
-      expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: 'cases_create' });
+      expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: APP_ID, path: '/create' });
     });
   });
 
@@ -128,7 +133,11 @@ describe('hooks', () => {
         result.current.getConfigureCasesUrl(false);
       });
 
-      expect(getAppUrl).toHaveBeenCalledWith({ absolute: false, deepLinkId: 'cases_configure' });
+      expect(getAppUrl).toHaveBeenCalledWith({
+        absolute: false,
+        path: '/configure',
+        deepLinkId: APP_ID,
+      });
     });
 
     it('it calls navigateToAllCases with correct arguments', () => {
@@ -140,7 +149,7 @@ describe('hooks', () => {
         result.current.navigateToConfigureCases();
       });
 
-      expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: 'cases_configure' });
+      expect(navigateTo).toHaveBeenCalledWith({ path: '/configure', deepLinkId: APP_ID });
     });
   });
 
@@ -156,7 +165,7 @@ describe('hooks', () => {
 
       expect(getAppUrl).toHaveBeenCalledWith({
         absolute: false,
-        deepLinkId: 'cases',
+        deepLinkId: APP_ID,
         path: '/test',
       });
     });
@@ -170,7 +179,7 @@ describe('hooks', () => {
         result.current.navigateToCaseView({ detailName: 'test' });
       });
 
-      expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: 'cases', path: '/test' });
+      expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: APP_ID, path: '/test' });
     });
   });
 });
