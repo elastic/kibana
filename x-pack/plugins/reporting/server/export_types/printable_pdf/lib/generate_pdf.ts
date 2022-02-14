@@ -93,6 +93,8 @@ export function generatePdfObservable(
           warnings.push(
             'Failed to generate PDF due to low memory. Please consider generating a smaller PDF.'
           );
+        } else {
+          warnings.push(`Failed to generate PDF due to the following error: ${err.message}`);
         }
       }
 
