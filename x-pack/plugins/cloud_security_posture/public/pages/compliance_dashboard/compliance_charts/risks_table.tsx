@@ -21,11 +21,9 @@ import { allNavigationItems } from '../../../common/navigation/constants';
 import { encodeQuery } from '../../../common/navigation/query_utils';
 import { getFormattedNum } from '../../../common/utils/get_formatted_num';
 import * as TEXT from '../translations';
-import { RULE_FAILED } from '../../../../common/constants';
+import { INTERNAL_FEATURE_FLAGS, RULE_FAILED } from '../../../../common/constants';
 
-// TODO: remove this option after we get data from the beat
-const useMockData: boolean = false;
-const mock = [
+const mockData = [
   {
     resourceType: 'pods',
     totalFindings: 2,
@@ -119,7 +117,7 @@ export const RisksTable = ({ data: resourceTypesAggs }: RisksTableProps) => {
       },
       {
         field: 'totalFailed',
-        name: TEXT.FAILED_FINDINGS,
+        name: TEXT.FINDINGS,
         render: (totalFailed: ResourceTypeAgg['totalFailed'], resource: ResourceTypeAgg) => (
           <>
             <EuiText size="s" color="danger">{`${getFormattedNum(resource.totalFailed)}`}</EuiText>
@@ -138,7 +136,11 @@ export const RisksTable = ({ data: resourceTypesAggs }: RisksTableProps) => {
       <EuiFlexItem>
         <EuiBasicTable<ResourceTypeAgg>
           rowHeader="resourceType"
-          items={useMockData ? getTop5Risks(mock) : getTop5Risks(resourceTypesAggs)}
+          items={
+            INTERNAL_FEATURE_FLAGS.risksMock
+              ? getTop5Risks(mockData)
+              : getTop5Risks(resourceTypesAggs)
+          }
           columns={columns}
         />
       </EuiFlexItem>

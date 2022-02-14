@@ -7,18 +7,23 @@
 
 import React from 'react';
 import {
+  AreaSeries,
+  Axis,
   Chart,
   ElementClickListener,
+  niceTimeFormatByDay,
   Partition,
   PartitionElementEvent,
   PartitionLayout,
   Settings,
+  timeFormatter,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiText, EuiHorizontalRule, EuiFlexItem } from '@elastic/eui';
 import { statusColors } from '../../../common/constants';
 import type { Stats } from '../../../../common/types';
 import * as TEXT from '../translations';
 import { getFormattedNum } from '../../../common/utils/get_formatted_num';
+import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 
 interface CloudPostureScoreChartProps {
   data: Stats;
@@ -37,7 +42,7 @@ const ScoreChart = ({
   ];
 
   return (
-    <Chart size={{ height: 80, width: 90 }}>
+    <Chart size={{ height: 90, width: 90 }}>
       <Settings
         theme={{
           partition: {
@@ -85,7 +90,29 @@ const PercentageInfo = ({
   );
 };
 
-const ComplianceTrendChart = () => <div>Trend Placeholder</div>;
+const mockData = [
+  [0, 9],
+  [1000, 70],
+  [2000, 40],
+  [4000, 90],
+  [5000, 53],
+];
+
+const ComplianceTrendChart = () => (
+  <Chart>
+    <Settings showLegend={false} legendPosition="right" />
+    <AreaSeries
+      id="compliance_score"
+      // TODO: no api yet
+      data={INTERNAL_FEATURE_FLAGS.trendLineMock ? mockData : []}
+      xScaleType="time"
+      xAccessor={0}
+      yAccessors={[1]}
+    />
+    <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter(niceTimeFormatByDay(1))} />
+    <Axis ticks={3} id="left-axis" position="left" showGridLines domain={{ min: 0, max: 100 }} />
+  </Chart>
+);
 
 export const CloudPostureScoreChart = ({
   data,
@@ -94,8 +121,8 @@ export const CloudPostureScoreChart = ({
 }: CloudPostureScoreChartProps) => (
   <EuiFlexGroup direction="column" gutterSize="none">
     <EuiFlexItem grow={4}>
-      <EuiFlexGroup direction="row" style={{ margin: 0 }}>
-        <EuiFlexItem grow={false} style={{ justifyContent: 'flex-end' }}>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
           <ScoreChart {...{ id, data, partitionOnElementClick }} />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -103,7 +130,7 @@ export const CloudPostureScoreChart = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
-    <EuiHorizontalRule margin="m" />
+    <EuiHorizontalRule margin="xs" />
     <EuiFlexItem grow={6}>
       <ComplianceTrendChart />
     </EuiFlexItem>

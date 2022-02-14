@@ -18,6 +18,10 @@ export const RULE_FAILED = `failed`;
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
   benchmarks: false,
+  trendLineMock: false,
+  clusterMetaMock: false,
+  manageRulesMock: false,
+  risksMock: false,
 } as const;
 
 /** This Kibana Advanced Setting enables the `Cloud Security Posture` experimental feature */
