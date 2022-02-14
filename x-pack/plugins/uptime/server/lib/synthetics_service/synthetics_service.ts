@@ -64,6 +64,8 @@ export class SyntheticsService {
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
 
     this.locations = [];
+
+    this.registerServiceLocations();
   }
 
   public init() {
