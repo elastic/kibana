@@ -51,11 +51,7 @@ const result = {
 
 const callAs = {
   ml: {
-    getJobs: jest.fn(() =>
-      Promise.resolve({
-        body: { jobs },
-      })
-    ),
+    getJobs: jest.fn(() => Promise.resolve({ jobs })),
   },
 };
 

@@ -10,7 +10,6 @@ import { coreMock } from '../../../../core/server/mocks';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { TransportResult } from '@elastic/elasticsearch';
 import { termsAggSuggestions } from './terms_agg';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { duration } from 'moment';
@@ -25,14 +24,12 @@ const configMock = {
 
 // @ts-expect-error not full interface
 const mockResponse = {
-  body: {
-    aggregations: {
-      suggestions: {
-        buckets: [{ key: 'whoa' }, { key: 'amazing' }],
-      },
+  aggregations: {
+    suggestions: {
+      buckets: [{ key: 'whoa' }, { key: 'amazing' }],
     },
   },
-} as TransportResult<estypes.SearchResponse<any>>;
+} as estypes.SearchResponse<any>;
 
 jest.mock('../data_views');
 

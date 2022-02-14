@@ -6372,6 +6372,53 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-public.useExpressionRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "useExpressionRenderer",
+        "description": [],
+        "signature": [
+          "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }: ",
+          "ExpressionRendererParams",
+          ") => ExpressionRendererState"
+        ],
+        "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.useExpressionRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "nodeRef",
+            "description": [],
+            "signature": [
+              "React.RefObject<HTMLElement>"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.useExpressionRenderer.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }",
+            "description": [],
+            "signature": [
+              "ExpressionRendererParams"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -10055,16 +10102,11 @@
             "section": "def-public.ReactExpressionRendererProps",
             "text": "ReactExpressionRendererProps"
           },
-          " extends ",
-          {
-            "pluginId": "expressions",
-            "scope": "public",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-public.IExpressionLoaderParams",
-            "text": "IExpressionLoaderParams"
-          }
+          " extends Omit<",
+          "ExpressionRendererParams",
+          ", \"hasCustomErrorRenderer\">"
         ],
-        "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+        "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
         "deprecated": false,
         "children": [
           {
@@ -10077,7 +10119,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+            "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false
           },
           {
@@ -10090,27 +10132,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ReactExpressionRendererProps.expression",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "expression",
-            "description": [],
-            "signature": [
-              "string | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionAstExpression",
-                "text": "ExpressionAstExpression"
-              }
-            ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+            "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false
           },
           {
@@ -10131,7 +10153,7 @@
               },
               " | null | undefined) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactElement<any, string | React.JSXElementConstructor<any>>[]) | undefined"
             ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+            "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false,
             "children": [
               {
@@ -10144,7 +10166,7 @@
                 "signature": [
                   "string | null | undefined"
                 ],
-                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+                "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
                 "deprecated": false,
                 "isRequired": false
               },
@@ -10165,7 +10187,7 @@
                   },
                   " | null | undefined"
                 ],
-                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+                "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -10182,168 +10204,7 @@
             "signature": [
               "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | undefined"
             ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ReactExpressionRendererProps.onEvent",
-            "type": "Function",
-            "tags": [],
-            "label": "onEvent",
-            "description": [],
-            "signature": [
-              "((event: ",
-              {
-                "pluginId": "expressions",
-                "scope": "public",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-public.ExpressionRendererEvent",
-                "text": "ExpressionRendererEvent"
-              },
-              ") => void) | undefined"
-            ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ReactExpressionRendererProps.onEvent.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "event",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "public",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-public.ExpressionRendererEvent",
-                    "text": "ExpressionRendererEvent"
-                  }
-                ],
-                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ReactExpressionRendererProps.onData$",
-            "type": "Function",
-            "tags": [],
-            "label": "onData$",
-            "description": [],
-            "signature": [
-              "(<TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
-            ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ReactExpressionRendererProps.onData$.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "TData"
-                ],
-                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ReactExpressionRendererProps.onData$.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "adapters",
-                "description": [],
-                "signature": [
-                  "TInspectorAdapters | undefined"
-                ],
-                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-                "deprecated": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ReactExpressionRendererProps.onData$.$3",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "partial",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ReactExpressionRendererProps.reload$",
-            "type": "Object",
-            "tags": [],
-            "label": "reload$",
-            "description": [
-              "\nAn observable which can be used to re-run the expression without destroying the component"
-            ],
-            "signature": [
-              "Observable",
-              "<unknown> | undefined"
-            ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ReactExpressionRendererProps.onRender$",
-            "type": "Function",
-            "tags": [],
-            "label": "onRender$",
-            "description": [],
-            "signature": [
-              "((item: number) => void) | undefined"
-            ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "expressions",
-                "id": "def-public.ReactExpressionRendererProps.onRender$.$1",
-                "type": "number",
-                "tags": [],
-                "label": "item",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ReactExpressionRendererProps.debounce",
-            "type": "number",
-            "tags": [],
-            "label": "debounce",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+            "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false
           }
         ],
@@ -10776,7 +10637,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+        "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -11220,7 +11081,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/expressions/public/react_expression_renderer.tsx",
+        "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
