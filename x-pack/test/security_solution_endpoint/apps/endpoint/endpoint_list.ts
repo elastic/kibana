@@ -91,7 +91,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('when there is data,', () => {
       before(async () => {
         const endpointPackage = await policyTestResources.getEndpointPackage();
-        await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
         indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 3, 90000);

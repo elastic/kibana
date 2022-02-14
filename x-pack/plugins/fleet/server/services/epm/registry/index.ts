@@ -82,10 +82,14 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
   }
 }
 
-export async function fetchFindLatestPackageWithFallbackToBundled(pkgName: string) {
-  return fetchFindLatestPackage(pkgName).catch(async (error) => {
+export async function fetchFindLatestPackageWithFallbackToBundled(packageName: string) {
+  try {
+    const latestPackage = await fetchFindLatestPackage(packageName);
+
+    return latestPackage;
+  } catch (error) {
     const bundledPackages = await getBundledPackages();
-    const bundledPackage = bundledPackages.find((b) => b.name === pkgName);
+    const bundledPackage = bundledPackages.find((b) => b.name === packageName);
 
     // If we don't find a bundled package, re-throw the original error
     if (!bundledPackage) {
@@ -96,7 +100,7 @@ export async function fetchFindLatestPackageWithFallbackToBundled(pkgName: strin
       name: bundledPackage.name,
       version: bundledPackage.version,
     };
-  });
+  }
 }
 
 export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
