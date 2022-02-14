@@ -11,21 +11,21 @@ import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
-import { KbnClient } from '@kbn/test';
+import { KbnClient, KbnClientOptions } from '@kbn/test';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 
 main();
 
-async function deleteIndices(indices: string[], client: Client) {
-  const handleErr = (err: unknown) => {
-    if (err instanceof errors.ResponseError && err.statusCode !== 404) {
-      console.log(JSON.stringify(err, null, 2));
-      // eslint-disable-next-line no-process-exit
-      process.exit(1);
-    }
-  };
+const handleErr = (err: unknown) => {
+  if (err instanceof errors.ResponseError && err.statusCode !== 404) {
+    console.log(JSON.stringify(err, null, 2));
+    // eslint-disable-next-line no-process-exit
+    process.exit(1);
+  }
+};
 
+async function deleteIndices(indices: string[], client: Client) {
   for (const index of indices) {
     try {
       // The index could be a data stream so let's try deleting that first
@@ -34,6 +34,23 @@ async function deleteIndices(indices: string[], client: Client) {
     } catch (err) {
       handleErr(err);
     }
+  }
+}
+
+async function addUser(esClient: Client) {
+  try {
+    await esClient.transport.request({
+      method: 'POST',
+      path: '_security/user/endpoint_user',
+      body: {
+        password: 'changeme',
+        roles: ['superuser', 'kibana_system'],
+        full_name: 'endpoint user',
+      },
+    });
+    console.log('user endpoint_user added successfully!');
+  } catch (error) {
+    handleErr(error);
   }
 }
 
@@ -181,33 +198,50 @@ async function main() {
     },
   }).argv;
   let ca: Buffer;
-  let kbnClient: KbnClient;
+
   let clientOptions: ClientOptions;
+  let url: string;
+  let node: string;
+  const toolingLogOptions = {
+    log: new ToolingLog({
+      level: 'info',
+      writeTo: process.stdout,
+    }),
+  };
+
+  let kbnClientOptions: KbnClientOptions = {
+    ...toolingLogOptions,
+    url: argv.kibana,
+  };
 
   if (argv.ssl) {
     ca = fs.readFileSync(CA_CERT_PATH);
-    const url = argv.kibana.replace('http:', 'https:');
-    const node = argv.node.replace('http:', 'https:');
-    kbnClient = new KbnClient({
-      log: new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      }),
+    url = argv.kibana.replace('http:', 'https:');
+    node = argv.node.replace('http:', 'https:');
+    kbnClientOptions = {
+      ...kbnClientOptions,
       url,
       certificateAuthorities: [ca],
-    });
+    };
+
     clientOptions = { node, tls: { ca: [ca] } };
   } else {
-    kbnClient = new KbnClient({
-      log: new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      }),
-      url: argv.kibana,
-    });
     clientOptions = { node: argv.node };
   }
-  const client = new Client(clientOptions);
+  let client = new Client(clientOptions);
+  // add endpoint user
+  await addUser(client);
+
+  // use endpoint user for Es and Kibana URLs
+  url = argv.kibana.replace('elastic', 'endpoint_user');
+  node = argv.node.replace('elastic', 'endpoint_user');
+  kbnClientOptions = {
+    ...kbnClientOptions,
+    url,
+  };
+  // update client and kibana options before instantiating
+  client = new Client({ ...clientOptions, node });
+  const kbnClient = new KbnClient({ ...kbnClientOptions });
 
   if (argv.delete) {
     await deleteIndices(
