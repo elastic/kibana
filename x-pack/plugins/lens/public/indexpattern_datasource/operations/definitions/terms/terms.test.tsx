@@ -1713,6 +1713,30 @@ describe('terms', () => {
       ]);
     });
 
+    it('should disable rare ordering for floating point types', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={
+            { ...layer.columns.col1, sourceField: 'memory' } as TermsIndexPatternColumn
+          }
+        />
+      );
+
+      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
+
+      expect(select.prop('value')).toEqual('alphabetical');
+
+      expect(select.prop('options')!.map(({ value }) => value)).toEqual([
+        'column$$$col2',
+        'alphabetical',
+      ]);
+    });
+
     it('should update state with the order by value', () => {
       const updateLayerSpy = jest.fn();
       const instance = shallow(
