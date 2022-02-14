@@ -802,7 +802,9 @@ describe('loader', () => {
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
-      expect(setState.mock.calls[0][0](state)).toMatchObject({
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
+      expect(fn(state)).toMatchObject({
         currentIndexPatternId: '1',
         indexPatterns: {
           '1': {
@@ -1019,7 +1021,8 @@ describe('loader', () => {
       expect(fetchJson).toHaveBeenCalledTimes(3);
       expect(setState).toHaveBeenCalledTimes(1);
 
-      const [fn] = setState.mock.calls[0];
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
       const newState = fn({
         foo: 'bar',
         existingFields: {},
@@ -1103,7 +1106,8 @@ describe('loader', () => {
 
       await syncExistingFields(args);
 
-      const [fn] = setState.mock.calls[0];
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
       const newState = fn({
         foo: 'bar',
         existingFields: {},
@@ -1152,7 +1156,8 @@ describe('loader', () => {
 
       await syncExistingFields(args);
 
-      const [fn] = setState.mock.calls[0];
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
       const newState = fn({
         foo: 'bar',
         existingFields: {},
