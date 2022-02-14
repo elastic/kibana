@@ -13,6 +13,6 @@ export const getIcons = (type: GaugeShape) =>
   ({
     [GaugeShapes.HORIZONTAL_BULLET]: HorizontalBulletIcon,
     [GaugeShapes.VERTICAL_BULLET]: HorizontalBulletIcon,
-    [GaugeShapes.ARC]: HorizontalBulletIcon,
-    [GaugeShapes.CIRCLE]: HorizontalBulletIcon,
+    [GaugeShapes.ARC]: () => 'visGoal',
+    [GaugeShapes.CIRCLE]: 'visGoal',
   }[type]);
