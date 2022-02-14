@@ -47,8 +47,7 @@ function wrapEsClient(
 
   wrappedClient.search = async <
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>,
-    TContext = unknown
+    TAggregations = Record<AggregateName, AggregationsAggregate>
   >(
     query?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions
