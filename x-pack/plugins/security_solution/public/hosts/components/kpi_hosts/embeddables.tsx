@@ -16,8 +16,6 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../../types';
 
 import { TimeRange } from '../../../../../../../src/plugins/data/public';
 import { kpiHostArea } from '../../configs/kpi_host_area';
@@ -33,13 +31,12 @@ import { kpiUserAuthenticationsArea } from '../../configs/kpi_user_authenticatio
 import { kpiUserAuthenticationsBar } from '../../configs/kpi_user_authentications_bar';
 import { kpiUserAuthenticationsMetricSuccess } from '../../configs/kpi_user_authentications-metric_success';
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
 
-const owner = 'securitySolution';
-const withActions = ['save', 'addToCase', 'openInLens'];
 const panelHeight = '280px';
 const metricHeight = '70px';
 const attrsMapping = {
@@ -59,15 +56,9 @@ interface Props {
   from: string;
   to: string;
   inputsModelId?: InputsModelId;
-  indexNames: string[];
 }
 
-export const ExploratoryChartsComponents = ({
-  from,
-  to,
-  indexNames,
-  inputsModelId = 'global',
-}: Props) => {
+export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global' }: Props) => {
   const timerange = useMemo<TimeRange>(
     () => ({
       from: new Date(from).toISOString(),
@@ -78,9 +69,6 @@ export const ExploratoryChartsComponents = ({
   );
 
   const dispatch = useDispatch();
-  const { observability } = useKibana<StartServices>().services;
-
-  const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
 
   const { patternList, dataViewId } = useSourcererDataView();
 
@@ -130,23 +118,12 @@ export const ExploratoryChartsComponents = ({
             <EuiSplitPanel.Inner paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <ExploratoryViewEmbeddable
-                    alignLnsMetric="flex-start"
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="singleMetric"
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiHostMetric}
                     customTimeRange={timerange}
-                    withActions={withActions}
                     metricIcon="storage"
                     metricIconColor="#6092c0"
-                    owner={owner}
                     isSingleMetric={true}
                   />
                 </EuiFlexItem>
@@ -154,20 +131,11 @@ export const ExploratoryChartsComponents = ({
                   <EuiHorizontalRule margin="xs" />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <ExploratoryViewEmbeddable
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="kpi-over-time"
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiHostArea}
                     customTimeRange={timerange}
-                    withActions={withActions}
-                    owner={owner}
+                    isSingleMetric={false}
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
@@ -189,24 +157,13 @@ export const ExploratoryChartsComponents = ({
             <EuiSplitPanel.Inner paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <ExploratoryViewEmbeddable
-                    alignLnsMetric="flex-start"
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="kpi-over-time"
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsMetricSuccess}
                     customTimeRange={timerange}
-                    withActions={withActions}
                     metricIcon="check"
                     metricIconColor="#54B399"
                     metricPostfix="success"
-                    owner={owner}
                     isSingleMetric={true}
                   />
                 </EuiFlexItem>
@@ -214,20 +171,11 @@ export const ExploratoryChartsComponents = ({
                   <EuiHorizontalRule margin="xs" />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <ExploratoryViewEmbeddable
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="kpi-over-time"
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsBar}
                     customTimeRange={timerange}
-                    withActions={withActions}
-                    owner={owner}
+                    isSingleMetric={false}
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
@@ -235,24 +183,13 @@ export const ExploratoryChartsComponents = ({
             <EuiSplitPanel.Inner paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <ExploratoryViewEmbeddable
-                    alignLnsMetric="flex-start"
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="kpi-over-time"
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    customHeight="100%"
                     metricIcon="cross"
                     metricIconColor="#e7664c"
                     metricPostfix="fail"
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsMetricFailure}
                     customTimeRange={timerange}
-                    withActions={withActions}
-                    owner={owner}
                     isSingleMetric={true}
                   />
                 </EuiFlexItem>
@@ -260,21 +197,12 @@ export const ExploratoryChartsComponents = ({
                   <EuiHorizontalRule margin="xs" />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <ExploratoryViewEmbeddable
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType={'kpi-over-time'}
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsArea}
                     customTimeRange={timerange}
                     onBrushEnd={onBrushEnd}
-                    withActions={withActions}
-                    owner={owner}
+                    isSingleMetric={false}
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
@@ -296,24 +224,13 @@ export const ExploratoryChartsComponents = ({
             <EuiSplitPanel.Inner paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <ExploratoryViewEmbeddable
-                    alignLnsMetric="flex-start"
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="singleMetric"
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUniqueIpsSourceMetric}
                     customTimeRange={timerange}
-                    withActions={withActions}
                     metricIcon="visMapCoordinate"
                     metricPostfix="source"
                     metricIconColor="#d36086"
-                    owner={owner}
                     isSingleMetric={true}
                   />
                 </EuiFlexItem>
@@ -321,21 +238,11 @@ export const ExploratoryChartsComponents = ({
                   <EuiHorizontalRule margin="xs" />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <ExploratoryViewEmbeddable
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="kpi-over-time"
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    // compressed
-                    customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUniqueIpsBar}
                     customTimeRange={timerange}
-                    withActions={withActions}
-                    owner={owner}
+                    isSingleMetric={false}
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
@@ -343,25 +250,13 @@ export const ExploratoryChartsComponents = ({
             <EuiSplitPanel.Inner paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
-                  <ExploratoryViewEmbeddable
-                    alignLnsMetric="flex-start"
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType="singleMetric"
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    // compressed
-                    customHeight="100%"
                     metricIcon="visMapCoordinate"
                     metricIconColor="#9170b8"
                     metricPostfix="destination"
                     customLensAttrs={customLensAttrs.kpiUniqueIpsDestinationMetric}
                     customTimeRange={timerange}
-                    withActions={withActions}
-                    owner={owner}
                     isSingleMetric={true}
                   />
                 </EuiFlexItem>
@@ -369,21 +264,12 @@ export const ExploratoryChartsComponents = ({
                   <EuiHorizontalRule margin="xs" />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <ExploratoryViewEmbeddable
-                    appId="securitySolutionUI"
+                  <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    reportType={'kpi-over-time'}
-                    attributes={[
-                      {
-                        dataType: 'security',
-                      },
-                    ]}
-                    customHeight="100%"
                     customLensAttrs={customLensAttrs.kpiUniqueIpsArea}
                     customTimeRange={timerange}
                     onBrushEnd={onBrushEnd}
-                    withActions={withActions}
-                    owner={owner}
+                    isSingleMetric={false}
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>

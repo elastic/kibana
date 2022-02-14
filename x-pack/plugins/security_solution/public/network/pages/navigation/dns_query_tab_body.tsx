@@ -24,11 +24,10 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../../types';
 import { STACK_BY } from '../../../common/components/matrix_histogram/translations';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { dnsTopDomainsAttrs } from '../../configs/dns_top_domains';
+import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
@@ -68,8 +67,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     (state) => getNetworkDnsSelector(state).isPtrIncluded
   );
 
-  const { observability } = useKibana<StartServices>().services;
-  const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
   const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
     histogramConfigs.defaultStackByOption
   );
@@ -159,24 +156,14 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         {...dnsHistogramConfigs}
       />
       <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>
-        <ExploratoryViewEmbeddable
+        <EmbeddableHistogram
           appId="security"
           appendTitle={appendTitle}
           title={title}
           dataTypesIndexPatterns={patternList?.join(',')}
-          reportType="kpi-over-time"
-          attributes={[
-            {
-              dataType: 'security',
-            },
-          ]}
-          disableBorder
-          disableShadow
-          compressed
-          customHeight="100%"
           customLensAttrs={customLensAttrs}
           customTimeRange={{ from: startDate, to: endDate }}
-          withActions={['save', 'addToCase', 'openInLens']}
+          isSingleMetric={false}
         />
       </EuiPanel>
 
