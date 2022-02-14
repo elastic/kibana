@@ -13,7 +13,7 @@ describe('get_xpack', () => {
     it('uses esClient to get /_xpack/usage API', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       // @ts-expect-error we only care about the response body
-      esClient.xpack.usage.mockResolvedValue({ body: {} });
+      esClient.xpack.usage.mockResponse({});
       const result = await getXPackUsage(esClient);
       expect(result).toEqual({});
     });

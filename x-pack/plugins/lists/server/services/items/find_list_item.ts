@@ -74,7 +74,7 @@ export const findListItem = async ({
       sortOrder,
     });
 
-    const { body: respose } = await esClient.count({
+    const respose = await esClient.count({
       body: {
         query,
       },
@@ -86,7 +86,7 @@ export const findListItem = async ({
       // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
       // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
       // to explicitly define the type <T>.
-      const { body: response } = await esClient.search<SearchEsListItemSchema>({
+      const response = await esClient.search<SearchEsListItemSchema>({
         body: {
           query,
           search_after: scroll.searchAfter,

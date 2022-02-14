@@ -57,7 +57,7 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
       indicesOptions
     );
 
-    const { body } = await asCurrentUser.search(json);
+    const body = await asCurrentUser.search(json);
     return processSearchResults(
       body,
       aggFieldNamePairs.map((af) => af.field)
