@@ -15,6 +15,9 @@ export type EditorsServiceFactory = KibanaPluginServiceFactory<
   SharedUXPluginStartDeps
 >;
 
+/**
+ * A factory function for creating a Kibana-based implementation of `SharedUXEditorsService`.
+ */
 export const editorsServiceFactory: EditorsServiceFactory = ({ startPlugins }) => ({
   openDataViewEditor: startPlugins.dataViewEditor.openEditor,
 });
