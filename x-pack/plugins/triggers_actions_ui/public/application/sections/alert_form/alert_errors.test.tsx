@@ -26,7 +26,7 @@ describe('alert_errors', () => {
       const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: ['Name is required.'],
-        interval: [],
+        'schedule.interval': [],
         alertTypeId: [],
         actionConnectors: [],
       });
@@ -38,7 +38,7 @@ describe('alert_errors', () => {
       const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: [],
-        interval: ['Check interval is required.'],
+        'schedule.interval': ['Check interval is required.'],
         alertTypeId: [],
         actionConnectors: [],
       });
@@ -50,7 +50,7 @@ describe('alert_errors', () => {
       const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: [],
-        interval: ['Interval is below minimum (1m).'],
+        'schedule.interval': ['Interval is below minimum (1m).'],
         alertTypeId: [],
         actionConnectors: [],
       });
@@ -62,7 +62,7 @@ describe('alert_errors', () => {
       const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: [],
-        interval: [],
+        'schedule.interval': [],
         alertTypeId: ['Rule type is required.'],
         actionConnectors: [],
       });
@@ -83,7 +83,7 @@ describe('alert_errors', () => {
       const result = validateBaseProperties(alert, config);
       expect(result.errors).toStrictEqual({
         name: [],
-        interval: [],
+        'schedule.interval': [],
         alertTypeId: [],
         actionConnectors: ['Action for myActionType connector is required.'],
       });
@@ -109,14 +109,14 @@ describe('alert_errors', () => {
         alertParamsErrors: { field: ['This is wrong'] },
         alertBaseErrors: {
           name: ['Name is required.'],
-          interval: [],
+          'schedule.interval': [],
           alertTypeId: [],
           actionConnectors: [],
         },
         alertErrors: {
           name: ['Name is required.'],
           field: ['This is wrong'],
-          interval: [],
+          'schedule.interval': [],
           alertTypeId: [],
           actionConnectors: [],
         },

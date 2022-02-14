@@ -186,7 +186,7 @@ describe('alert_form', () => {
         <AlertForm
           alert={initialAlert}
           dispatch={() => {}}
-          errors={{ name: [], interval: [], alertTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
@@ -358,7 +358,7 @@ describe('alert_form', () => {
         <AlertForm
           alert={initialAlert}
           dispatch={() => {}}
-          errors={{ name: [], interval: [], alertTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
@@ -420,7 +420,7 @@ describe('alert_form', () => {
         <AlertForm
           alert={initialAlert}
           dispatch={() => {}}
-          errors={{ name: [], interval: [], alertTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}

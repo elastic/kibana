@@ -25,7 +25,7 @@ export function validateBaseProperties(
   const validationResult = { errors: {} };
   const errors = {
     name: new Array<string>(),
-    interval: new Array<string>(),
+    'schedule.interval': new Array<string>(),
     alertTypeId: new Array<string>(),
     actionConnectors: new Array<string>(),
   };
@@ -38,7 +38,7 @@ export function validateBaseProperties(
     );
   }
   if (alertObject.schedule.interval.length < 2) {
-    errors.interval.push(
+    errors['schedule.interval'].push(
       i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredIntervalText', {
         defaultMessage: 'Check interval is required.',
       })
@@ -47,7 +47,7 @@ export function validateBaseProperties(
     const duration = parseDuration(alertObject.schedule.interval);
     const minimumDuration = parseDuration(config.minimumScheduleInterval);
     if (duration < minimumDuration) {
-      errors.interval.push(
+      errors['schedule.interval'].push(
         i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.belowMinimumText', {
           defaultMessage: 'Interval is below minimum ({minimum}).',
           values: {

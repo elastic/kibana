@@ -667,15 +667,15 @@ export const AlertForm = ({
             fullWidth
             display="rowCompressed"
             label={labelForAlertChecked}
-            isInvalid={errors.interval.length > 0}
-            error={errors.interval}
+            isInvalid={errors['schedule.interval'].length > 0}
+            error={errors['schedule.interval']}
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <EuiFieldNumber
                   fullWidth
                   min={1}
-                  isInvalid={errors.interval.length > 0}
+                  isInvalid={errors['schedule.interval'].length > 0}
                   value={alertInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
