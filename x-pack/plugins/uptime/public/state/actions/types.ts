@@ -36,6 +36,7 @@ export interface QueryParams {
   filters?: string;
   statusFilter?: string;
   location?: string;
+  refresh?: boolean;
 }
 
 export interface MonitorDetailsActionPayload {

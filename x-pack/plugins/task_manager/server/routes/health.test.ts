@@ -36,10 +36,8 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockClusterClient = (response: any) => {
   const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-    body: response,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse(response as any);
 
   const mockClusterClient = elasticsearchServiceMock.createClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
