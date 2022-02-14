@@ -184,7 +184,7 @@ describe('When using EPM `get` services', () => {
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
       appContextService.start(mockContract);
-      MockRegistry.fetchFindLatestPackage.mockResolvedValue({
+      MockRegistry.fetchFindLatestPackageWithFallbackToBundled.mockResolvedValue({
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
