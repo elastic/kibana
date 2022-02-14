@@ -21,6 +21,7 @@ const NODE_ROLES = 'roles';
 interface NodesAttributes {
   roles: string[];
 }
+
 type Nodes = Record<string, NodesAttributes>;
 
 export const isNodes = (arg: unknown): arg is Nodes => {
@@ -50,23 +51,20 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
         // If security is enabled, check that the user has at least permission to
         // view transforms before calling the _nodes endpoint with the internal user.
         if (license.getStatus().isSecurityEnabled === true) {
-          const {
-            body: { has_all_requested: hasAllPrivileges },
-          } = await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
-            body: {
-              // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
-              cluster: NODES_INFO_PRIVILEGES,
-            },
-          });
+          const { has_all_requested: hasAllPrivileges } =
+            await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+              body: {
+                // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
+                cluster: NODES_INFO_PRIVILEGES,
+              },
+            });
 
           if (!hasAllPrivileges) {
             return res.customError(wrapError(new Boom.Boom('Forbidden', { statusCode: 403 })));
           }
         }
 
-        const {
-          body: { nodes },
-        } = await ctx.core.elasticsearch.client.asInternalUser.nodes.info({
+        const { nodes } = await ctx.core.elasticsearch.client.asInternalUser.nodes.info({
           filter_path: `nodes.*.${NODE_ROLES}`,
         });
 
