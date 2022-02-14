@@ -17,6 +17,32 @@ export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_API_URL = '/api/lens';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
 
+export const PieChartTypes = {
+  PIE: 'pie',
+  DONUT: 'donut',
+  TREEMAP: 'treemap',
+  MOSAIC: 'mosaic',
+  WAFFLE: 'waffle',
+} as const;
+
+export const CategoryDisplay = {
+  DEFAULT: 'default',
+  INSIDE: 'inside',
+  HIDE: 'hide',
+} as const;
+
+export const NumberDisplay = {
+  HIDDEN: 'hidden',
+  PERCENT: 'percent',
+  VALUE: 'value',
+} as const;
+
+export const LegendDisplay = {
+  DEFAULT: 'default',
+  SHOW: 'show',
+  HIDE: 'hide',
+} as const;
+
 export const layerTypes: Record<string, LayerType> = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',

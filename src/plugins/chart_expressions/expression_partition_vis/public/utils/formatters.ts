@@ -8,25 +8,16 @@
 
 import type { FieldFormat, FormatFactory } from '../../../../field_formats/common';
 import type { Datatable } from '../../../../expressions/public';
-import { BucketColumns, PartitionVisParams } from '../../common/types';
+import { BucketColumns } from '../../common/types';
 
-export const generateFormatters = (
-  visParams: PartitionVisParams,
-  visData: Datatable,
-  formatFactory: FormatFactory
-) => {
-  if (!visParams.labels.show) {
-    return {};
-  }
-
-  return visData.columns.reduce<Record<string, ReturnType<FormatFactory> | undefined>>(
+export const generateFormatters = (visData: Datatable, formatFactory: FormatFactory) =>
+  visData.columns.reduce<Record<string, ReturnType<FormatFactory> | undefined>>(
     (newFormatters, column) => ({
       ...newFormatters,
       [column.id]: column?.meta?.params ? formatFactory(column.meta.params) : undefined,
     }),
     {}
   );
-};
 
 export const getAvailableFormatter = (
   column: Partial<BucketColumns>,

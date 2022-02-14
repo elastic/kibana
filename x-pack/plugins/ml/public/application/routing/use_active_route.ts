@@ -28,7 +28,9 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     if (editFilterMatch) {
       return routesMap[editFilterMatch.path];
     }
-    return routesMap[pathname];
+    // Remove trailing slash from the pathname
+    const pathnameKey = pathname.replace(/\/$/, '');
+    return routesMap[pathnameKey];
   }, [pathname]);
 
   return activeRoute ?? routesMap['/overview'];
