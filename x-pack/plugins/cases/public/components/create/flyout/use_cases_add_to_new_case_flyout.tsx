@@ -21,6 +21,12 @@ export const useCasesAddToNewCasesFlyout = (props: CreateCaseFlyoutProps) => {
       type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
       payload: {
         ...props,
+        onClose: () => {
+          closeFlyout();
+          if (props.onClose) {
+            return props.onClose();
+          }
+        },
         afterCaseCreated: async (...args) => {
           closeFlyout();
           if (props.afterCaseCreated) {

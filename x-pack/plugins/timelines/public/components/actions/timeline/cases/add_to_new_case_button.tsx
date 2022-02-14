@@ -27,7 +27,7 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
   owner,
   onClose,
 }) => {
-  const { isDisabled, userCanCrud, caseAttachments } = useAddToCase({
+  const { isDisabled, userCanCrud, caseAttachments, onCaseSuccess, onCaseCreated } = useAddToCase({
     event,
     useInsertTimeline,
     casePermissions,
@@ -38,6 +38,8 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
   const { cases } = useKibana<TimelinesStartServices>().services;
   const createCaseFlyout = cases.hooks.getUseCasesAddToNewCasesFlyout({
     attachments: caseAttachments,
+    afterCaseCreated: onCaseCreated,
+    onSuccess: onCaseSuccess,
   });
 
   const handleClick = () => {
