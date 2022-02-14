@@ -34,3 +34,7 @@ export interface BaseProps {
 
   isFleetServerPolicySelected?: boolean;
 }
+
+export interface InstructionProps extends BaseProps {
+  refreshAgentPolicies: () => void;
+}

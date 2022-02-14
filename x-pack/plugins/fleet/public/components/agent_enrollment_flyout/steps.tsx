@@ -81,32 +81,32 @@ export const AgentPolicySelectionStep = ({
   selectedApiKeyId,
   setSelectedAPIKeyId,
   excludeFleetServer,
+  refreshAgentPolicies,
 }: {
   agentPolicies?: AgentPolicy[];
   setSelectedPolicyId?: (policyId?: string) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId?: (key?: string) => void;
   excludeFleetServer?: boolean;
+  refreshAgentPolicies: () => void;
 }) => {
-  const [agentPolicyList, setAgentPolicyList] = useState<AgentPolicy[]>(agentPolicies || []);
-
   const regularAgentPolicies = useMemo(() => {
-    return agentPolicyList.filter(
+    return (agentPolicies ?? []).filter(
       (policy) =>
         policy && !policy.is_managed && (!excludeFleetServer || !policyHasFleetServer(policy))
     );
-  }, [agentPolicyList, excludeFleetServer]);
+  }, [agentPolicies, excludeFleetServer]);
 
   const onAgentPolicyChange = useCallback(
     async (key?: string, policy?: AgentPolicy) => {
       if (policy) {
-        setAgentPolicyList([...agentPolicyList, policy]);
+        refreshAgentPolicies();
       }
       if (setSelectedPolicyId) {
         setSelectedPolicyId(key);
       }
     },
-    [setSelectedPolicyId, setAgentPolicyList, agentPolicyList]
+    [setSelectedPolicyId, refreshAgentPolicies]
   );
 
   return {
