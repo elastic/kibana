@@ -125,9 +125,9 @@ describe('fetchNodesFromClusterStats', () => {
   };
 
   it('fetch stats', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise(esRes)
+      esRes
     );
     const result = await fetchNodesFromClusterStats(esClient, clusters);
     expect(result).toEqual([
@@ -155,7 +155,7 @@ describe('fetchNodesFromClusterStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchNodesFromClusterStats(esClient, clusters);
     expect(params).toStrictEqual({
@@ -204,7 +204,7 @@ describe('fetchNodesFromClusterStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchNodesFromClusterStats(esClient, clusters);
     // @ts-ignore

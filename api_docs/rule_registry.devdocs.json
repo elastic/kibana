@@ -1118,13 +1118,7 @@
         "description": [],
         "signature": [
           "(logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "server",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
-            "text": "Logger"
-          },
+          "Logger",
           ", ruleDataClient: ",
           "PublicContract",
           "<",
@@ -1184,13 +1178,7 @@
             "label": "logger",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
             "deprecated": false,
@@ -1232,13 +1220,7 @@
         "description": [],
         "signature": [
           "({ logger, ruleDataClient }: { logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "server",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
-            "text": "Logger"
-          },
+          "Logger",
           "; ruleDataClient: ",
           {
             "pluginId": "ruleRegistry",
@@ -1302,13 +1284,7 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/logging",
-                    "scope": "server",
-                    "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.Logger",
-                    "text": "Logger"
-                  }
+                  "Logger"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
                 "deprecated": false
@@ -1355,13 +1331,7 @@
             "text": "IRuleDataClient"
           },
           "; logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "server",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
-            "text": "Logger"
-          },
+          "Logger",
           "; }) => <TParams extends ",
           {
             "pluginId": "alerting",
@@ -1476,13 +1446,7 @@
                 "text": "IRuleDataClient"
               },
               "; logger: ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              },
+              "Logger",
               "; }"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
@@ -1532,13 +1496,7 @@
             "label": "outcome",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.EcsEventOutcome",
-                "text": "EcsEventOutcome"
-              },
+              "EcsEventOutcome",
               " | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
@@ -2501,8 +2459,8 @@
                 "pluginId": "alerting",
                 "scope": "server",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.PublicAlertInstance",
-                "text": "PublicAlertInstance"
+                "section": "def-server.PublicAlert",
+                "text": "PublicAlert"
               },
               "<InstanceState, InstanceContext, ActionGroupIds>"
             ],
@@ -2745,13 +2703,7 @@
             "text": "IRuleDataClient"
           },
           "; logger: ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "server",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
-            "text": "Logger"
-          },
+          "Logger",
           "; }) => <TParams extends ",
           {
             "pluginId": "alerting",
@@ -2807,13 +2759,7 @@
                 "text": "IRuleDataClient"
               },
               "; logger: ",
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              },
+              "Logger",
               "; }"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
@@ -2867,8 +2813,8 @@
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
-            "section": "def-server.PublicAlertInstance",
-            "text": "PublicAlertInstance"
+            "section": "def-server.PublicAlert",
+            "text": "PublicAlert"
           },
           "<InstanceState, InstanceContext, ActionGroupIds>"
         ],
