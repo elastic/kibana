@@ -25,6 +25,7 @@ interface Props {
   selectedApiKeyId?: string;
   onKeyChange?: (key?: string) => void;
   isFleetServerPolicy?: boolean;
+  policyId?: string;
 }
 
 export const SelectCreateAgentPolicy: React.FC<Props> = ({
@@ -35,6 +36,7 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   selectedApiKeyId,
   onKeyChange,
   isFleetServerPolicy,
+  policyId,
 }) => {
   const [showCreatePolicy, setShowCreatePolicy] = useState(agentPolicies.length === 0);
 
@@ -42,7 +44,7 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
 
   const [newName, setNewName] = useState(incrementPolicyName(agentPolicies, isFleetServerPolicy));
 
-  const [selectedAgentPolicy, setSelectedAgentPolicy] = useState<string | undefined>(undefined);
+  const [selectedAgentPolicy, setSelectedAgentPolicy] = useState<string | undefined>(policyId);
 
   useEffect(() => {
     setShowCreatePolicy(agentPolicies.length === 0);
