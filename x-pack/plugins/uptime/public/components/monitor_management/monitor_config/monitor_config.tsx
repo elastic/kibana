@@ -20,7 +20,7 @@ import { MonitorFields } from './monitor_fields';
 import { TestNowMode, TestRun } from '../test_now_mode/test_now_mode';
 import { MonitorFields as MonitorFieldsType } from '../../../../common/runtime_types';
 
-export const MonitorConfig = () => {
+export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
   const { monitorType } = usePolicyConfigContext();
 
   /* raw policy config compatible with the UI. Save this to saved objects */
@@ -38,13 +38,24 @@ export const MonitorConfig = () => {
   });
 
   const [testRun, setTestRun] = useState<TestRun>();
+  const [isTestRunInProgress, setIsTestRunInProgress] = useState<boolean>(false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
 
-  const onTestNow = () => {
+  const handleTestNow = () => {
     if (config) {
       setTestRun({ id: uuidv4(), monitor: config as MonitorFieldsType });
+      setIsTestRunInProgress(true);
       setIsFlyoutOpen(true);
     }
+  };
+
+  const handleTestDone = () => {
+    setIsTestRunInProgress(false);
+  };
+
+  const handleFlyoutClose = () => {
+    handleTestDone();
+    setIsFlyoutOpen(false);
   };
 
   const flyout = isFlyoutOpen && config && (
@@ -54,13 +65,13 @@ export const MonitorConfig = () => {
       paddingSize="l"
       maxWidth="44%"
       aria-labelledby={TEST_RESULT}
-      onClose={() => setIsFlyoutOpen(false)}
+      onClose={handleFlyoutClose}
     >
       <EuiFlyoutHeader>
         <EuiSpacer size="xl" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <TestNowMode testRun={testRun} />
+        <TestNowMode testRun={testRun} isMonitorSaved={isEdit} onDone={handleTestDone} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
@@ -74,8 +85,9 @@ export const MonitorConfig = () => {
       <ActionBarPortal
         monitor={policyConfig[monitorType]}
         isValid={isValid}
-        onTestNow={onTestNow}
+        onTestNow={handleTestNow}
         testRun={testRun}
+        isTestRunInProgress={isTestRunInProgress}
       />
     </>
   );

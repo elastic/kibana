@@ -26,7 +26,15 @@ export interface TestRun {
   monitor: MonitorFields;
 }
 
-export function TestNowMode({ testRun }: { testRun?: TestRun }) {
+export function TestNowMode({
+  testRun,
+  isMonitorSaved,
+  onDone,
+}: {
+  testRun?: TestRun;
+  isMonitorSaved: boolean;
+  onDone: () => void;
+}) {
   const [serviceError, setServiceError] = useState<null | Error>(null);
 
   const { data, loading: isPushing } = useFetcher(() => {
@@ -55,6 +63,12 @@ export function TestNowMode({ testRun }: { testRun?: TestRun }) {
 
   const hasErrors = serviceError || (errors && errors?.length > 0);
 
+  useEffect(() => {
+    if (!isPushing && (!testRun || hasErrors)) {
+      onDone();
+    }
+  }, [testRun, hasErrors, isPushing, onDone]);
+
   if (!testRun) {
     return null;
   }
@@ -72,7 +86,12 @@ export function TestNowMode({ testRun }: { testRun?: TestRun }) {
       {testRun && !hasErrors && !isPushing && (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem key={testRun.id}>
-            <TestRunResult monitorId={testRun.id} monitor={testRun.monitor} />
+            <TestRunResult
+              monitorId={testRun.id}
+              monitor={testRun.monitor}
+              isMonitorSaved={isMonitorSaved}
+              onDone={onDone}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

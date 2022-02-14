@@ -37,11 +37,19 @@ export interface ActionBarProps {
   monitor: SyntheticsMonitor;
   isValid: boolean;
   testRun?: TestRun;
+  isTestRunInProgress: boolean;
   onSave?: () => void;
   onTestNow?: () => void;
 }
 
-export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: ActionBarProps) => {
+export const ActionBar = ({
+  monitor,
+  isValid,
+  onSave,
+  onTestNow,
+  testRun,
+  isTestRunInProgress,
+}: ActionBarProps) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const { basePath } = useContext(UptimeSettingsContext);
   const { locations } = useSelector(monitorManagementListSelector);
@@ -95,7 +103,7 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       });
       setIsSuccessful(true);
     } else if (hasErrors && !loading) {
-      Object.values(data).forEach((location) => {
+      Object.values(data!).forEach((location) => {
         const { status: responseStatus, reason } = location.error || {};
         kibanaService.toasts.addWarning({
           title: i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
@@ -168,7 +176,7 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
                     size="s"
                     color="success"
                     iconType="play"
-                    disabled={!isValid}
+                    disabled={!isValid || isTestRunInProgress}
                     data-test-subj={'monitorTestNowRunBtn'}
                     onClick={() => onTestNow()}
                     onMouseEnter={() => {
