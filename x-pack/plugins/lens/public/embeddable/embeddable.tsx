@@ -60,7 +60,11 @@ import {
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
-import { IBasePath, ThemeServiceStart } from '../../../../../src/core/public';
+import type {
+  IBasePath,
+  KibanaExecutionContext,
+  ThemeServiceStart,
+} from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
@@ -413,16 +417,20 @@ export class Embeddable
 
     this.renderComplete.dispatchInProgress();
 
-    const executionContext = {
-      ...this.input.executionContext,
-      child: {
-        type: 'lens',
-        name: this.savedVis.visualizationType ?? '',
-        id: this.id,
-        description: this.savedVis.title || this.input.title || '',
-        url: this.output.editUrl,
-      },
+    const parentContext = this.input.executionContext;
+    const child: KibanaExecutionContext = {
+      type: 'lens',
+      name: this.savedVis.visualizationType ?? '',
+      id: this.id,
+      description: this.savedVis.title || this.input.title || '',
+      url: this.output.editUrl,
     };
+    const executionContext = parentContext
+      ? {
+          ...parentContext,
+          child,
+        }
+      : child;
 
     const input = this.getInput();
 
