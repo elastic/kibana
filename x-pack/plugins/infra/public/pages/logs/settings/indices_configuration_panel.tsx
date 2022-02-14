@@ -7,7 +7,7 @@
 
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useUiTracker } from '../../../../../observability/public';
 import {
   logIndexNameReferenceRT,
@@ -25,7 +25,34 @@ export const IndicesConfigurationPanel = React.memo<{
   isReadOnly: boolean;
   indicesFormElement: FormElement<LogIndexReference | undefined, FormValidationError>;
 }>(({ isLoading, isReadOnly, indicesFormElement }) => {
-  const trackSwitchToIndexPatternReference = useUiTracker({ app: 'infra_logs' });
+  const trackChangeIndexSourceType = useUiTracker({ app: 'infra_logs' });
+
+  const changeToIndexPatternType = useCallback(() => {
+    if (indicesFormElement.initialValue?.type === 'index_pattern') {
+      indicesFormElement.updateValue(() => indicesFormElement.initialValue);
+    } else {
+      indicesFormElement.updateValue(() => undefined);
+    }
+
+    trackChangeIndexSourceType({
+      metric: 'configuration_switch_to_index_pattern_reference',
+    });
+  }, [indicesFormElement, trackChangeIndexSourceType]);
+
+  const changeToIndexNameType = useCallback(() => {
+    if (indicesFormElement.initialValue?.type === 'index_name') {
+      indicesFormElement.updateValue(() => indicesFormElement.initialValue);
+    } else {
+      indicesFormElement.updateValue(() => ({
+        type: 'index_name',
+        indexName: '',
+      }));
+    }
+
+    trackChangeIndexSourceType({
+      metric: 'configuration_switch_to_index_names_reference',
+    });
+  }, [indicesFormElement, trackChangeIndexSourceType]);
 
   return (
     <EuiFormFieldset
@@ -57,20 +84,7 @@ export const IndicesConfigurationPanel = React.memo<{
         name="dataView"
         value="dataView"
         checked={isIndexPatternFormElement(indicesFormElement)}
-        onChange={() => {
-          if (indicesFormElement.initialValue?.type === 'index_pattern') {
-            indicesFormElement.updateValue(() => indicesFormElement.initialValue);
-          } else {
-            indicesFormElement.updateValue(() => ({
-              type: 'index_pattern',
-              indexPatternId: '',
-            }));
-          }
-
-          trackSwitchToIndexPatternReference({
-            metric: 'configuration_switch_to_index_pattern_reference',
-          });
-        }}
+        onChange={changeToIndexPatternType}
         disabled={isReadOnly}
       >
         {isIndexPatternFormElement(indicesFormElement) && (
@@ -98,16 +112,7 @@ export const IndicesConfigurationPanel = React.memo<{
         name="indexNames"
         value="indexNames"
         checked={isIndexNamesFormElement(indicesFormElement)}
-        onChange={() => {
-          if (indicesFormElement.initialValue?.type === 'index_name') {
-            indicesFormElement.updateValue(() => indicesFormElement.initialValue);
-          } else {
-            indicesFormElement.updateValue(() => ({
-              type: 'index_name',
-              indexName: '',
-            }));
-          }
-        }}
+        onChange={changeToIndexNameType}
         disabled={isReadOnly}
       >
         {isIndexNamesFormElement(indicesFormElement) && (
@@ -118,7 +123,6 @@ export const IndicesConfigurationPanel = React.memo<{
           />
         )}
       </EuiCheckableCard>
-      <EuiSpacer size="m" />
     </EuiFormFieldset>
   );
 });
