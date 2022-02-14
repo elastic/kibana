@@ -80,7 +80,6 @@ export const useResultsViewConfig = (jobId: string) => {
             isRegressionAnalysis(jobConfigUpdate.analysis)
           ) {
             try {
-              // CHANGE THIS!!! this is dodgy, it could match unrelated jobs
               const inferenceModels = await trainedModelsApiService.getTrainedModels(`${jobId}*`, {
                 include: 'total_feature_importance',
               });

@@ -265,7 +265,7 @@ export function getMlClient(
       return mlClient.getCategories(...p);
     },
     async getDataFrameAnalytics(...p: Parameters<MlClient['getDataFrameAnalytics']>) {
-      await jobIdsCheck('data-frame-analytics', p, true);
+      await jobIdsCheck('data-frame-analytics', p, true); // CHECK THIS!!!!!!!!! should allow wildcards
       try {
         const [params, options = {}] = p;
         const meta = options.meta ?? false;
@@ -455,7 +455,7 @@ export function getMlClient(
       return mlClient.getRecords(...p);
     },
     async getTrainedModels(...p: Parameters<MlClient['getTrainedModels']>) {
-      await modelIdsCheck(p);
+      await modelIdsCheck(p, true);
       try {
         const body = await mlClient.getTrainedModels(...p);
         const models =
@@ -472,7 +472,7 @@ export function getMlClient(
       }
     },
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
-      await modelIdsCheck(p);
+      await modelIdsCheck(p, true);
       try {
         const body = await mlClient.getTrainedModelsStats(...p);
         const models =
