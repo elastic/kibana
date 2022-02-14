@@ -38,7 +38,7 @@ const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_POLICY_LABEL = i18n.translate(
 );
 
 const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_PATH_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableValueLabel',
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTablePathLabel',
   {
     defaultMessage: 'Path',
   }
