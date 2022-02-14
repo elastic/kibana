@@ -18,6 +18,7 @@ import {
   htmlIdGenerator,
   EuiButtonGroup,
 } from '@elastic/eui';
+import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
@@ -367,12 +368,21 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       (fields: string[]) => {
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
         const secondaryFields = fields.length > 1 ? fields.slice(1) : undefined;
+        const dataTypes = uniq(fields.map((field) => indexPattern.getFieldByName(field)?.type));
+        const newDataType = (dataTypes.length === 1 ? dataTypes[0] : 'string') || column.dataType;
+        const newParams = {
+          ...column.params,
+        };
+        if ('format' in newParams && newDataType !== 'number') {
+          delete newParams.format;
+        }
         updateLayer({
           ...layer,
           columns: {
             ...layer.columns,
             [columnId]: {
               ...column,
+              dataType: newDataType,
               sourceField: fields[0],
               label: ofName(
                 indexPattern.getFieldByName(fields[0])?.displayName,
@@ -380,10 +390,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 column.params.orderBy.type === 'rare'
               ),
               params: {
-                ...column.params,
+                ...newParams,
                 secondaryFields,
                 parentFormat: getParentFormatter({
-                  ...column.params,
+                  ...newParams,
                   secondaryFields,
                 }),
               },
