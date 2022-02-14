@@ -238,6 +238,7 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_URL}/summary`, {
         query: {
           filter: fakeQklFilter,
+          list_id: getFakeListId(),
           namespace_type: 'agnostic',
         },
       });
