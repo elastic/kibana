@@ -78,7 +78,11 @@ export const ResultsLinks: FC<Props> = ({
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
-      if (!discover.locator) return;
+      if (!discover.locator) {
+        // eslint-disable-next-line no-console
+        console.error('Discover locator not available');
+        return;
+      }
       const discoverUrl = await discover.locator.getUrl({
         indexPatternId,
         timeRange: globalState?.time ? globalState.time : undefined,
