@@ -64,7 +64,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
       return httpService.http<TrainedModelConfigResponse[]>({
-        path: `${apiBasePath}/trained_models${model && `/${model}`}`,
+        path: `${apiBasePath}/trained_models${model ? `/${model}` : ''}`,
         method: 'GET',
         ...(params ? { query: params as HttpFetchQuery } : {}),
       });
@@ -81,7 +81,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
       return httpService.http<InferenceStatsResponse>({
-        path: `${apiBasePath}/trained_models${model && `/${model}`}/_stats`,
+        path: `${apiBasePath}/trained_models${model ? `/${model}` : ''}/_stats`,
         method: 'GET',
       });
     },
