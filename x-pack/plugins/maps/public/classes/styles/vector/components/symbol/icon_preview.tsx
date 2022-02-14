@@ -10,7 +10,7 @@ import { EuiColorPicker, EuiFlexItem, EuiFormRow, EuiPanel, EuiSpacer } from '@e
 import { ResizeChecker } from '.././../../../../../../../../src/plugins/kibana_utils/public';
 import { mapboxgl, Map as MapboxMap } from '@kbn/mapbox-gl';
 // @ts-expect-error
-import { CUSTOM_ICON_PREFIX_SDF, createSdfIcon, getCustomIconId } from '../../symbol_utils';
+import { CUSTOM_ICON_PREFIX_SDF, CUSTOM_ICON_PIXEL_RATIO, createSdfIcon, getCustomIconId } from '../../symbol_utils';
 
 
 export interface Props {
@@ -76,7 +76,7 @@ export class IconPreview extends Component<Props, State> {
         // @ts-expect-error
         map.updateImage(IconPreview.iconId, imageData);
       } else {
-        map.addImage(IconPreview.iconId, imageData, { sdf: true });
+        map.addImage(IconPreview.iconId, imageData, { sdf: true, pixelRatio: CUSTOM_ICON_PIXEL_RATIO });
       }
       map.setLayoutProperty('icon-layer', 'icon-image', IconPreview.iconId);
       map.setLayoutProperty('icon-layer', 'icon-size', 6);

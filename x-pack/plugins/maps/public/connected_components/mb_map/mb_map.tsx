@@ -29,7 +29,13 @@ import {
   TileMetaFeature,
   Timeslice,
 } from '../../../common/descriptor_types';
-import { DECIMAL_DEGREES_PRECISION, RawValue, ZOOM_PRECISION } from '../../../common/constants';
+import {
+  CUSTOM_ICON_SIZE,
+  DECIMAL_DEGREES_PRECISION,
+  MAKI_ICON_SIZE,
+  RawValue,
+  ZOOM_PRECISION,
+} from '../../../common/constants';
 import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
@@ -40,7 +46,7 @@ import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
 import type { MapExtentState } from '../../reducers/map/types';
 // @ts-expect-error
-import { createSdfIcon } from '../../classes/styles/vector/symbol_utils';
+import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 
 export interface Props {
@@ -290,7 +296,7 @@ export class MbMap extends Component<Props, State> {
       const pixelRatio = Math.floor(window.devicePixelRatio);
       for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
         if (!mbMap.hasImage(symbolId)) {
-          const imageData = await createSdfIcon({ svg });
+          const imageData = await createSdfIcon({ renderSize: MAKI_ICON_SIZE, svg });
           mbMap.addImage(symbolId, imageData, {
             pixelRatio,
             sdf: true,
@@ -398,11 +404,17 @@ export class MbMap extends Component<Props, State> {
       this._prevCustomIcons = this.props.settings.customIcons;
       const mbMap = this.state.mbMap;
       for (const { symbolId, svg, cutoff, radius } of this.props.settings.customIcons) {
-        createSdfIcon({ svg, cutoff, radius }).then((imageData: ImageData) => {
-          // @ts-expect-error MapboxMap type is missing updateImage method
-          if (mbMap.hasImage(symbolId)) mbMap.updateImage(symbolId, imageData);
-          else mbMap.addImage(symbolId, imageData, { sdf: true });
-        });
+        createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
+          (imageData: ImageData) => {
+            // @ts-expect-error MapboxMap type is missing updateImage method
+            if (mbMap.hasImage(symbolId)) mbMap.updateImage(symbolId, imageData);
+            else
+              mbMap.addImage(symbolId, imageData, {
+                sdf: true,
+                pixelRatio: CUSTOM_ICON_PIXEL_RATIO,
+              });
+          }
+        );
       }
     }
 
