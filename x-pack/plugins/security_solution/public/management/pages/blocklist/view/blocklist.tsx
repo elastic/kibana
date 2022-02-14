@@ -38,40 +38,40 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.blocklist.pageTitle', {
     defaultMessage: 'Blocklist',
   }),
-  pageAboutInfo: i18n.translate('xpack.securitySolution.pageAboutInfo', {
+  pageAboutInfo: i18n.translate('xpack.securitySolution.blocklist.pageAboutInfo', {
     defaultMessage: '(DEV: temporarily using isolation exception api)', // FIXME: need wording from PM
   }),
-  pageAddButtonTitle: i18n.translate('xpack.securitySolution.pageAddButtonTitle', {
+  pageAddButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageAddButtonTitle', {
     defaultMessage: 'Add blocklist entry',
   }),
   getShowingCountLabel: (total) =>
-    i18n.translate('xpack.securitySolution.somepage.showingTotal', {
+    i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
       defaultMessage: 'Showing {total} {total, plural, one {blocklist} other {blocklists}}',
       values: { total },
     }),
-  cardActionEditLabel: i18n.translate('xpack.securitySolution.cardActionEditLabel', {
+  cardActionEditLabel: i18n.translate('xpack.securitySolution.blocklist.cardActionEditLabel', {
     defaultMessage: 'Edit blocklist',
   }),
-  cardActionDeleteLabel: i18n.translate('xpack.securitySolution.cardActionDeleteLabel', {
+  cardActionDeleteLabel: i18n.translate('xpack.securitySolution.blocklist.cardActionDeleteLabel', {
     defaultMessage: 'Delete blocklist',
   }),
-  flyoutCreateTitle: i18n.translate('xpack.securitySolution.flyoutCreateTitle', {
+  flyoutCreateTitle: i18n.translate('xpack.securitySolution.blocklist.flyoutCreateTitle', {
     defaultMessage: 'Add blocklist',
   }),
-  flyoutEditTitle: i18n.translate('xpack.securitySolution.flyoutEditTitle', {
+  flyoutEditTitle: i18n.translate('xpack.securitySolution.blocklist.flyoutEditTitle', {
     defaultMessage: 'Edit blocklist',
   }),
   flyoutCreateSubmitButtonLabel: i18n.translate(
-    'xpack.securitySolution.flyoutCreateSubmitButtonLabel',
+    'xpack.securitySolution.blocklist.flyoutCreateSubmitButtonLabel',
     { defaultMessage: 'Add blocklist' }
   ),
   flyoutCreateSubmitSuccess: ({ name }) =>
-    i18n.translate('xpack.securitySolution.flyoutCreateSubmitSuccess', {
+    i18n.translate('xpack.securitySolution.blocklist.flyoutCreateSubmitSuccess', {
       defaultMessage: '"{name}" has been added to your blocklist.', // FIXME: match this to design (needs count of items)
       values: { name },
     }),
   flyoutEditSubmitSuccess: ({ name }) =>
-    i18n.translate('xpack.securitySolution.flyoutEditSubmitSuccess', {
+    i18n.translate('xpack.securitySolution.blocklist.flyoutEditSubmitSuccess', {
       defaultMessage: '"{name}" has been updated.',
       values: { name },
     }),
@@ -99,19 +99,19 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
     // );
   },
   deleteActionSuccess: (itemName) =>
-    i18n.translate('xpack.securitySolution.some_page.deleteSuccess', {
+    i18n.translate('xpack.securitySolution.blocklist.deleteSuccess', {
       defaultMessage: '"{itemName}" has been removed from blocklist.',
       values: { itemName },
     }),
-  emptyStateTitle: i18n.translate('xpack.securitySolution.emptyStateTitle', {
+  emptyStateTitle: i18n.translate('xpack.securitySolution.blocklist.emptyStateTitle', {
     defaultMessage: 'Add your first blocklist',
   }),
   emptyStateInfo: i18n.translate(
-    'xpack.securitySolution.emptyStateInfo',
+    'xpack.securitySolution.blocklist.emptyStateInfo',
     { defaultMessage: 'Add a blocklist to prevent execution on the endpoint' } // FIXME: need wording here form PM
   ),
   emptyStatePrimaryButtonLabel: i18n.translate(
-    'xpack.securitySolution.emptyStatePrimaryButtonLabel',
+    'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add blocklist' }
   ),
 };

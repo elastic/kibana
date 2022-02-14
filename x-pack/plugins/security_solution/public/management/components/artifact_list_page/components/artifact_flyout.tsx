@@ -57,7 +57,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
     { defaultMessage: 'Add' }
   ),
   flyoutEditSubmitButtonLabel: i18n.translate(
-    'xpack.securitySolution.artifactListPage.flyoutCreateSubmitButtonLabel',
+    'xpack.securitySolution.artifactListPage.flyoutEditSubmitButtonLabel',
     { defaultMessage: 'Save' }
   ),
   flyoutDowngradedLicenseTitle: i18n.translate(
