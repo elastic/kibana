@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../..';
@@ -13,7 +20,6 @@ import { EmptySections } from '../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
-import { AlertsSection } from '../../components/app/section/alerts';
 import { DatePicker } from '../../components/shared/date_picker';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
@@ -33,6 +39,7 @@ import {
   alertsPageStateContainer,
   useAlertsPageStateContainer,
 } from '../alerts/containers/state_container';
+import { SectionContainer } from '../../components/app/section';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -110,21 +117,21 @@ function OverviewPage({ routeParams }: Props) {
           <ObservabilityHeaderMenu />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <EuiFlexGroup direction="column" gutterSize="s">
+              <SectionContainer
+                title={i18n.translate('xpack.observability.overview.alerts.title', {
+                  defaultMessage: 'Alerts',
+                })}
+                hasError={false}
+              >
                 {hasDataMap?.alert?.hasData && (
-                  <EuiFlexItem>
-                    <EuiPanel color="subdued">
-                      <AlertsTableTGrid
-                        setRefetch={() => {}}
-                        rangeFrom={rangeFrom}
-                        rangeTo={rangeTo}
-                        indexNames={indexNames}
-                      />
-                      <AlertsSection />
-                    </EuiPanel>
-                  </EuiFlexItem>
+                  <AlertsTableTGrid
+                    setRefetch={() => {}}
+                    rangeFrom={rangeFrom}
+                    rangeTo={rangeTo}
+                    indexNames={indexNames}
+                  />
                 )}
-              </EuiFlexGroup>
+              </SectionContainer>
             </EuiFlexItem>
             <EuiFlexItem>
               {/* Data sections */}
