@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  DESTINATION_CHART_LABEL,
+  SOURCE_CHART_LABEL,
+} from '../components/kpi_hosts/unique_ips/translations';
+
 export const kpiUniqueIpsArea = {
   description: '',
   state: {
@@ -30,7 +35,7 @@ export const kpiUniqueIpsArea = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: ' Src.',
+                label: SOURCE_CHART_LABEL,
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'source.ip',
@@ -48,7 +53,7 @@ export const kpiUniqueIpsArea = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Dest.',
+                label: DESTINATION_CHART_LABEL,
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'destination.ip',

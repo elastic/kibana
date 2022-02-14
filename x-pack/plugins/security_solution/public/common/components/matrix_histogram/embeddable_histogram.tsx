@@ -34,7 +34,7 @@ interface EmbeddableHistogramProps {
   metricIconColor?: string;
   metricPostfix?: string;
   onBrushEnd?: (param: { range: number[] }) => void;
-  title?: string;
+  title?: string | JSX.Element;
 }
 
 export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {

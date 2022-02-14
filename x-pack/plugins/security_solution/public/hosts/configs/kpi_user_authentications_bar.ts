@@ -4,6 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import {
+  FAIL_CHART_LABEL,
+  SUCCESS_CHART_LABEL,
+} from '../components/kpi_hosts/authentications/translations';
+
 export const kpiUserAuthenticationsBar = {
   title: '[Host] KPI User authentications - bar ',
   description: '',
@@ -120,7 +126,7 @@ export const kpiUserAuthenticationsBar = {
                         language: 'kuery',
                         query: 'event.outcome : "success" ',
                       },
-                      label: 'Succ.',
+                      label: SUCCESS_CHART_LABEL,
                     },
                   ],
                 },
@@ -129,7 +135,7 @@ export const kpiUserAuthenticationsBar = {
               '938b445a-a291-4bbc-84fe-4f47b69c20e4': {
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Succ.',
+                label: SUCCESS_CHART_LABEL,
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: '___records___',
@@ -155,7 +161,7 @@ export const kpiUserAuthenticationsBar = {
                 customLabel: true,
                 dataType: 'string',
                 isBucketed: true,
-                label: 'Fail',
+                label: FAIL_CHART_LABEL,
                 operationType: 'filters',
                 params: {
                   filters: [
@@ -164,7 +170,7 @@ export const kpiUserAuthenticationsBar = {
                         language: 'kuery',
                         query: 'event.outcome:"failure" ',
                       },
-                      label: 'Fail',
+                      label: FAIL_CHART_LABEL,
                     },
                   ],
                 },

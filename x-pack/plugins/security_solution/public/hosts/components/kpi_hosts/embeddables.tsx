@@ -32,6 +32,10 @@ import { kpiUserAuthenticationsBar } from '../../configs/kpi_user_authentication
 import { kpiUserAuthenticationsMetricSuccess } from '../../configs/kpi_user_authentications-metric_success';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
+import {
+  SOURCE_UNIT_LABEL,
+  DESTINATION_UNIT_LABEL,
+} from '../../../network/components/kpi_network/unique_private_ips/translations';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -229,7 +233,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                     customLensAttrs={customLensAttrs.kpiUniqueIpsSourceMetric}
                     customTimeRange={timerange}
                     metricIcon="visMapCoordinate"
-                    metricPostfix="source"
+                    metricPostfix={SOURCE_UNIT_LABEL}
                     metricIconColor="#d36086"
                     isSingleMetric={true}
                   />
@@ -254,7 +258,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
                     metricIcon="visMapCoordinate"
                     metricIconColor="#9170b8"
-                    metricPostfix="destination"
+                    metricPostfix={DESTINATION_UNIT_LABEL}
                     customLensAttrs={customLensAttrs.kpiUniqueIpsDestinationMetric}
                     customTimeRange={timerange}
                     isSingleMetric={true}

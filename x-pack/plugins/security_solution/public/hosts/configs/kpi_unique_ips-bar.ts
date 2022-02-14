@@ -4,6 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import {
+  SOURCE_CHART_LABEL,
+  DESTINATION_CHART_LABEL,
+} from '../components/kpi_hosts/unique_ips/translations';
+
 export const kpiUniqueIpsBar = {
   description: '',
   state: {
@@ -29,7 +35,9 @@ export const kpiUniqueIpsBar = {
                 isBucketed: true,
                 label: 'Filters',
                 operationType: 'filters',
-                params: { filters: [{ input: { language: 'kuery', query: '' }, label: 'Src.' }] },
+                params: {
+                  filters: [{ input: { language: 'kuery', query: '' }, label: SOURCE_CHART_LABEL }],
+                },
                 scale: 'ordinal',
               },
             },
@@ -53,7 +61,7 @@ export const kpiUniqueIpsBar = {
                 customLabel: true,
                 dataType: 'string',
                 isBucketed: true,
-                label: 'Dest.',
+                label: DESTINATION_CHART_LABEL,
                 operationType: 'filters',
                 params: {
                   filters: [{ input: { language: 'kuery', query: '' }, label: 'Dest.' }],

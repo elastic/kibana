@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  SOURCE_CHART_LABEL,
+  DESTINATION_CHART_LABEL,
+} from '../components/kpi_network/unique_private_ips/translations';
+
 export const kpiUniquePrivateIpsBar = {
   title: '[Network] KPI Unique private IPs - bar chart',
   description: '',
@@ -87,7 +92,7 @@ export const kpiUniquePrivateIpsBar = {
           'e406bf4f-942b-41ac-b516-edb5cef06ec8': {
             columns: {
               '5acd4c9d-dc3b-4b21-9632-e4407944c36d': {
-                label: ' Src.',
+                label: SOURCE_CHART_LABEL,
                 dataType: 'number',
                 operationType: 'unique_count',
                 scale: 'ratio',
@@ -113,7 +118,7 @@ export const kpiUniquePrivateIpsBar = {
                         query: '',
                         language: 'kuery',
                       },
-                      label: 'Src.',
+                      label: SOURCE_CHART_LABEL,
                     },
                   ],
                 },
@@ -128,7 +133,7 @@ export const kpiUniquePrivateIpsBar = {
           '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7': {
             columns: {
               'd27e0966-daf9-41f4-9033-230cf1e76dc9': {
-                label: 'Dest.',
+                label: DESTINATION_CHART_LABEL,
                 dataType: 'number',
                 operationType: 'unique_count',
                 scale: 'ratio',
@@ -154,7 +159,7 @@ export const kpiUniquePrivateIpsBar = {
                         query: '',
                         language: 'kuery',
                       },
-                      label: 'Dest.',
+                      label: DESTINATION_CHART_LABEL,
                     },
                   ],
                 },

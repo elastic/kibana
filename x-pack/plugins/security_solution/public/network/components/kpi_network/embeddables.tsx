@@ -18,6 +18,7 @@ import {
 
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NetworkKpiEmbessablesProps } from './types';
 import { TimeRange } from '../../../../../../../src/plugins/data/public';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
@@ -31,6 +32,14 @@ import { kpiDnsQueries } from '../../configs/kpi_dns_queries';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { kpiUniquePrivateIpsDestinationMetric } from '../../configs/kpi_unique_private_ips-destination_metric';
 import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
+import { DNS_QUERIES } from './dns/translations';
+import { UNIQUE_FLOW_IDS } from './unique_flows/translations';
+import { TLS_HANDSHAKES } from './tls_handshakes/translations';
+import {
+  UNIQUE_PRIVATE_IPS,
+  SOURCE_UNIT_LABEL,
+  DESTINATION_UNIT_LABEL,
+} from './unique_private_ips/translations';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -99,7 +108,12 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
             <EuiFlexItem style={{ height: panelHeight }}>
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <EmbeddableHistogram
-                  title={'Network events'}
+                  title={
+                    <FormattedMessage
+                      id="xpack.securitySolution.network.kpiNetworkEventsTitle"
+                      defaultMessage="Network events"
+                    />
+                  }
                   dataTypesIndexPatterns={dataTypesIndexPatterns}
                   customLensAttrs={customLensAttrs.kpiNetworkEvents}
                   customTimeRange={timerange}
@@ -112,7 +126,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
             <EuiFlexItem style={{ height: panelHeight }}>
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <EmbeddableHistogram
-                  title={'DNS queries'}
+                  title={DNS_QUERIES}
                   dataTypesIndexPatterns={dataTypesIndexPatterns}
                   customLensAttrs={customLensAttrs.kpiDnsQueries}
                   customTimeRange={timerange}
@@ -128,7 +142,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
             <EuiFlexItem style={{ height: panelHeight }}>
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <EmbeddableHistogram
-                  title={'Unique flow IDs'}
+                  title={UNIQUE_FLOW_IDS}
                   dataTypesIndexPatterns={dataTypesIndexPatterns}
                   customLensAttrs={customLensAttrs.kpiUniqueFlowIds}
                   customTimeRange={timerange}
@@ -141,7 +155,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
             <EuiFlexItem style={{ height: panelHeight }}>
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <EmbeddableHistogram
-                  title={'TLS handshakes'}
+                  title={TLS_HANDSHAKES}
                   dataTypesIndexPatterns={dataTypesIndexPatterns}
                   customLensAttrs={customLensAttrs.kpiTlsHandshakes}
                   customTimeRange={timerange}
@@ -161,7 +175,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
             paddingSize="m"
           >
             <EuiTitle size="xs">
-              <h3>{'Unique private IPs'}</h3>
+              <h3>{UNIQUE_PRIVATE_IPS}</h3>
             </EuiTitle>
             <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
               <EuiSplitPanel.Inner paddingSize="none" style={{ width: '50%' }}>
@@ -172,7 +186,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       customLensAttrs={customLensAttrs.kpiUniquePrivateIpsSourceMetric}
                       customTimeRange={timerange}
                       metricIcon="visMapCoordinate"
-                      metricPostfix="source"
+                      metricPostfix={SOURCE_UNIT_LABEL}
                       metricIconColor="#d36086"
                       onBrushEnd={onBrushEnd}
                       isSingleMetric={true}
@@ -201,7 +215,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       dataTypesIndexPatterns={dataTypesIndexPatterns}
                       metricIcon="visMapCoordinate"
                       metricIconColor="#9170b8"
-                      metricPostfix="destination"
+                      metricPostfix={DESTINATION_UNIT_LABEL}
                       onBrushEnd={onBrushEnd}
                       isSingleMetric={true}
                     />
