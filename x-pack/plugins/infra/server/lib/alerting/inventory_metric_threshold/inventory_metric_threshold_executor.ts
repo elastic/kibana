@@ -16,10 +16,7 @@ import {
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import {
-  AlertInstance as Alert,
-  AlertTypeState as RuleTypeState,
-} from '../../../../../alerting/server';
+import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';

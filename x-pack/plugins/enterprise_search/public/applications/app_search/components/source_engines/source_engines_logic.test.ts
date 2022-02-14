@@ -13,7 +13,7 @@ import {
 import { mockRecursivelyFetchEngines } from '../../__mocks__';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';

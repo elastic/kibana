@@ -35,6 +35,7 @@ Object {
   "type": "render",
   "value": Object {
     "args": Object {
+      "ariaLabel": undefined,
       "gridConfig": Object {
         "isCellLabelVisible": true,
         "isXAxisLabelVisible": true,

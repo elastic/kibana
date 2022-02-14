@@ -21,7 +21,7 @@ import {
   CommonAlertFilter,
   CCRReadExceptionsStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { RULE_CCR_READ_EXCEPTIONS, RULE_DETAILS } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -209,7 +209,7 @@ export class CCRReadExceptionsRule extends BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

@@ -8,7 +8,7 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { AlertDetails } from './alert_details';
 import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';

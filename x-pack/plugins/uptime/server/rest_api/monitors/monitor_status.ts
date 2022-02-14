@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
+import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 
 export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -20,14 +21,53 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
       dateEnd: schema.string(),
     }),
   },
-  handler: async ({ uptimeEsClient, request }): Promise<any> => {
+  handler: async ({ uptimeEsClient, request, server }): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
 
-    return await libs.requests.getLatestMonitor({
+    const latestMonitor = await libs.requests.getLatestMonitor({
       uptimeEsClient,
       monitorId,
       dateStart,
       dateEnd,
     });
+
+    if (latestMonitor.docId) {
+      return latestMonitor;
+    }
+
+    if (!server.savedObjectsClient) {
+      return null;
+    }
+
+    try {
+      const monitorSavedObject = await libs.requests.getSyntheticsMonitor({
+        monitorId,
+        savedObjectsClient: server.savedObjectsClient,
+      });
+
+      if (!monitorSavedObject) {
+        return null;
+      }
+
+      const {
+        [ConfigKey.URLS]: url,
+        [ConfigKey.NAME]: name,
+        [ConfigKey.HOSTS]: host,
+        [ConfigKey.MONITOR_TYPE]: type,
+      } = monitorSavedObject.attributes as MonitorFields;
+
+      return {
+        url: {
+          full: url || host,
+        },
+        monitor: {
+          name,
+          type,
+          id: monitorSavedObject.id,
+        },
+      };
+    } catch (e) {
+      server.logger.error(e);
+    }
   },
 });

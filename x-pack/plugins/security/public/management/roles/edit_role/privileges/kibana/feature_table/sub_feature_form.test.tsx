@@ -9,7 +9,7 @@ import { EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { KibanaFeature } from '../../../../../../../../features/public';
 import type { Role } from '../../../../../../../common/model';

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';

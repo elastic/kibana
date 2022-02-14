@@ -18,7 +18,7 @@ import {
   Storage,
 } from '../../../../kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
 import { QueryState } from './types';

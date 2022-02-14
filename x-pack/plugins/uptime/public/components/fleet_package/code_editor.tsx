@@ -38,6 +38,8 @@ export const CodeEditor = ({ ariaLabel, id, languageId, onChange, value }: Props
           options={{
             renderValidationDecorations: value ? 'on' : 'off',
           }}
+          isCopyable={true}
+          allowFullScreen={true}
         />
       </div>
     </CodeEditorContainer>
