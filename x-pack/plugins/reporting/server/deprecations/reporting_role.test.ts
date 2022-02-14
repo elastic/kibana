@@ -26,8 +26,10 @@ beforeEach(async () => {
 
   esClient = elasticsearchServiceMock.createScopedClusterClient();
   esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
-    body: { xyz: { username: 'normal_user', roles: ['data_analyst'] } },
+    xyz: { username: 'normal_user', roles: ['data_analyst'] },
   });
+  esClient.asCurrentUser.security.getRoleMapping = jest.fn().mockResolvedValue({});
+
   context = { esClient } as unknown as GetDeprecationsContext;
 });
 
@@ -38,7 +40,10 @@ test('logs no deprecations when setup has no issues', async () => {
 describe('users assigned to a deprecated role', () => {
   test('logs a deprecation when a user was found with a deprecated reporting_user role', async () => {
     esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
-      body: { reportron: { username: 'reportron', roles: ['kibana_admin', 'reporting_user'] } },
+      reportron: {
+        username: 'reportron',
+        roles: ['kibana_admin', 'reporting_user'],
+      },
     });
 
     reportingCore = await createMockReportingCore(createMockConfigSchema());
@@ -51,9 +56,7 @@ describe('users assigned to a deprecated role', () => {
       createMockConfigSchema({ roles: { allow: ['my_test_reporting_user'] } })
     );
     esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
-      body: {
-        reportron: { username: 'reportron', roles: ['kibana_admin', 'my_test_reporting_user'] },
-      },
+      reportron: { username: 'reportron', roles: ['kibana_admin', 'my_test_reporting_user'] },
     });
 
     expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
@@ -61,7 +64,10 @@ describe('users assigned to a deprecated role', () => {
 
   test('includes steps to remove the incompatible config, when applicable', async () => {
     esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
-      body: { reportron: { username: 'reportron', roles: ['kibana_admin', 'reporting_user'] } },
+      reportron: {
+        username: 'reportron',
+        roles: ['kibana_admin', 'reporting_user'],
+      },
     });
 
     reportingCore = await createMockReportingCore(
@@ -74,9 +80,9 @@ describe('users assigned to a deprecated role', () => {
 
 describe('roles mapped to a deprecated role', () => {
   test('logs a deprecation when a role was found that maps to the deprecated reporting_user role', async () => {
-    esClient.asCurrentUser.security.getRoleMapping = jest.fn().mockResolvedValue({
-      body: { dungeon_master: { roles: ['reporting_user'] } },
-    });
+    esClient.asCurrentUser.security.getRoleMapping = jest
+      .fn()
+      .mockResolvedValue({ dungeon_master: { roles: ['reporting_user'] } });
 
     reportingCore = await createMockReportingCore(createMockConfigSchema());
 
@@ -87,16 +93,19 @@ describe('roles mapped to a deprecated role', () => {
     reportingCore = await createMockReportingCore(
       createMockConfigSchema({ roles: { allow: ['my_test_reporting_user'] } })
     );
-    esClient.asCurrentUser.security.getRoleMapping = jest.fn().mockResolvedValue({
-      body: { dungeon_master: { roles: ['my_test_reporting_user'] } },
-    });
+    esClient.asCurrentUser.security.getRoleMapping = jest
+      .fn()
+      .mockResolvedValue({ dungeon_master: { roles: ['my_test_reporting_user'] } });
 
     expect(await getDeprecationsInfo(context, { reportingCore })).toMatchSnapshot();
   });
 
   test('includes steps to remove the incompatible config, when applicable', async () => {
     esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
-      body: { reportron: { username: 'reportron', roles: ['kibana_admin', 'reporting_user'] } },
+      reportron: {
+        username: 'reportron',
+        roles: ['kibana_admin', 'reporting_user'],
+      },
     });
 
     reportingCore = await createMockReportingCore(
