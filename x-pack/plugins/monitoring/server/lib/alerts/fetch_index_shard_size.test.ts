@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchIndexShardSize } from './fetch_index_shard_size';
 
@@ -121,9 +119,9 @@ describe('fetchIndexShardSize', () => {
     },
   };
   it('fetch as expected', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise(esRes)
+      esRes
     );
 
     const result = await fetchIndexShardSize(
@@ -206,7 +204,7 @@ describe('fetchIndexShardSize', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchIndexShardSize(esClient, clusters, threshold, shardIndexPatterns, size);
     // @ts-ignore

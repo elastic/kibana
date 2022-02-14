@@ -2074,10 +2074,10 @@
   resolved "https://registry.yarnpkg.com/@bazel/ibazel/-/ibazel-0.15.10.tgz#cf0cff1aec6d8e7bb23e1fc618d09fbd39b7a13f"
   integrity sha512-0v+OwCQ6fsGFa50r6MXWbUkSGuWOoZ22K4pMSdtWiL5LKFIE4kfmMmtQS+M7/ICNwk2EIYob+NRreyi/DGUz5A==
 
-"@bazel/typescript@^3.8.0":
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/@bazel/typescript/-/typescript-3.8.0.tgz#725d51a1c25e314a1d8cddb8b880ac05ba97acd4"
-  integrity sha512-4C1pLe4V7aidWqcPsWNqXFS7uHAB1nH5SUKG5uWoVv4JT9XhkNSvzzQIycMwXs2tZeCylX4KYNeNvfKrmkyFlw==
+"@bazel/typescript@4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@bazel/typescript/-/typescript-4.0.0.tgz#71a6f0f5e340c6b8516b21fbc0f0853e74055d0c"
+  integrity sha512-+Le9q+5IR9gEnSH8sXyxDB5dD6NJx2kbm6AL+cijYVat2MczpGV4sI1mu0mdLzYsEX5Tjt5iHkaNb7sFESjnYA==
   dependencies:
     protobufjs "6.8.8"
     semver "5.6.0"
@@ -9533,10 +9533,10 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-7.0.0.tgz#4eadfd5e7b7e0ae7b6d0fa951d51e7631cb4e320"
-  integrity sha512-jg+kGNyZTGrUdtY+YMJozw+yW3bALbB/VIpn5tChsiWEEd+H5c5/fCRo7BA7J9z1fEbnpW2oSpcrxpmkJlANWw==
+backport@7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-7.0.1.tgz#021f70db76b89699b2c7b826cb3040e9c1d991c9"
+  integrity sha512-f/7+NDzLFd307c85Tz60cfBzoRd4HlFlNOm3MYFynQwI4igMmKd4J9bFxLgc3KdToaVWDmZ37Gx9nRkYgMfUkA==
   dependencies:
     "@octokit/rest" "^18.12.0"
     axios "^0.25.0"
@@ -9544,6 +9544,7 @@ backport@7.0.0:
     del "^6.0.0"
     dotenv "^16.0.0"
     find-up "^5.0.0"
+    graphql "^16.3.0"
     graphql-tag "^2.12.6"
     inquirer "^8.2.0"
     lodash "^4.17.21"
@@ -13578,10 +13579,10 @@ elastic-apm-http-client@^10.4.0:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.28.0:
-  version "3.28.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.28.0.tgz#74bb0278a711549a45bd8c8b561c23e02e5865e3"
-  integrity sha512-6P6IAiozEIUDCZGMQ/Lul1c7a10p5uSIIYISxXd7ms+470fvTOL2pKDfE8ygeXyCvvzwjbvuTQC4y4PWKhj8rg==
+elastic-apm-node@^3.29.0:
+  version "3.29.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.29.0.tgz#3e828405adb9e91ed66bb30780268cc30703f46a"
+  integrity sha512-tPZKoeIJus8mCYXbIcr+jtsU56EQmmUJ+FvcCopp1zB9mCBLrsqdnJ1oXApLmwMAdWn3IpClO1DZi4gmuRNrEA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
@@ -16243,6 +16244,11 @@ graphql-tag@^2.12.6:
   integrity sha512-FdSNcu2QQcWnM2VNvSCCDCVS5PpPqpzgFT8+GXzqJuoDd0CBncxCY278u4mhRO7tMgo2JjgJA5aZ+nWSQ/Z+xg==
   dependencies:
     tslib "^2.1.0"
+
+graphql@^16.3.0:
+  version "16.3.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.3.0.tgz#a91e24d10babf9e60c706919bb182b53ccdffc05"
+  integrity sha512-xm+ANmA16BzCT5pLjuXySbQVFwH3oJctUVdy81w1sV0vBU0KgDdBGtxQOUd5zqOBk/JayAFeG8Dlmeq74rjm/A==
 
 grid-index@^1.1.0:
   version "1.1.0"

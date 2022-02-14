@@ -68,13 +68,16 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     },
   } = params;
   try {
-    return await callCluster.fieldCaps({
-      index: indices,
-      fields: '*',
-      ignore_unavailable: true,
-      index_filter: filter,
-      ...fieldCapsOptions,
-    });
+    return await callCluster.fieldCaps(
+      {
+        index: indices,
+        fields: '*',
+        ignore_unavailable: true,
+        index_filter: filter,
+        ...fieldCapsOptions,
+      },
+      { meta: true }
+    );
   } catch (error) {
     throw convertEsError(indices, error);
   }

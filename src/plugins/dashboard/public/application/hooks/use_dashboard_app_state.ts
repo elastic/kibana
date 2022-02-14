@@ -185,7 +185,7 @@ export const useDashboardAppState = ({
       // Backwards compatible way of detecting that we are taking a screenshot
       const legacyPrintLayoutDetected =
         screenshotModeService?.isScreenshotMode() &&
-        screenshotModeService.getScreenshotLayout() === 'print';
+        screenshotModeService.getScreenshotContext('layout') === 'print';
 
       const initialDashboardState = {
         ...savedDashboardState,

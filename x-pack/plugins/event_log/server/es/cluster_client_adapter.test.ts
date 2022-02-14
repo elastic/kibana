@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import {
   ClusterClientAdapter,
@@ -15,14 +14,12 @@ import {
 import { findOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { times } from 'lodash';
-import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { TransportResult } from '@elastic/elasticsearch';
 
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
 
 let logger: MockedLogger;
-let clusterClient: DeeplyMockedKeys<ElasticsearchClient>;
+let clusterClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 let clusterClientAdapter: IClusterClientAdapter;
 
 beforeEach(() => {
@@ -191,7 +188,7 @@ describe('doesIlmPolicyExist', () => {
 
 describe('createIlmPolicy', () => {
   test('should call cluster client with given policy', async () => {
-    clusterClient.transport.request.mockResolvedValue(asApiResponse({ success: true }));
+    clusterClient.transport.request.mockResolvedValue({ success: true });
     await clusterClientAdapter.createIlmPolicy('foo', { args: true });
     expect(clusterClient.transport.request).toHaveBeenCalledWith({
       method: 'PUT',
@@ -217,20 +214,20 @@ describe('doesIndexTemplateExist', () => {
   });
 
   test('should return true when call cluster to legacy template API returns true', async () => {
-    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(true));
-    clusterClient.indices.existsIndexTemplate.mockResolvedValue(asApiResponse(false));
+    clusterClient.indices.existsTemplate.mockResponse(true);
+    clusterClient.indices.existsIndexTemplate.mockResponse(false);
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
   });
 
   test('should return true when call cluster to index template API returns true', async () => {
-    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
-    clusterClient.indices.existsIndexTemplate.mockResolvedValue(asApiResponse(true));
+    clusterClient.indices.existsTemplate.mockResponse(false);
+    clusterClient.indices.existsIndexTemplate.mockResponse(true);
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
   });
 
   test('should return false when both call cluster calls returns false', async () => {
-    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
-    clusterClient.indices.existsIndexTemplate.mockResolvedValue(asApiResponse(false));
+    clusterClient.indices.existsTemplate.mockResponse(false);
+    clusterClient.indices.existsIndexTemplate.mockResponse(false);
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(false);
   });
 
@@ -265,8 +262,8 @@ describe('createIndexTemplate', () => {
 
   test(`should throw error if index template still doesn't exist after error is thrown`, async () => {
     clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(new Error('Fail'));
-    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse(false));
-    clusterClient.indices.existsIndexTemplate.mockResolvedValueOnce(asApiResponse(false));
+    clusterClient.indices.existsTemplate.mockResponseOnce(false);
+    clusterClient.indices.existsIndexTemplate.mockResponseOnce(false);
     await expect(
       clusterClientAdapter.createIndexTemplate('foo', { args: true })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating index template: Fail"`);
@@ -274,7 +271,7 @@ describe('createIndexTemplate', () => {
 
   test('should not throw error if index template exists after error is thrown', async () => {
     clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(new Error('Fail'));
-    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse(true));
+    clusterClient.indices.existsTemplate.mockResponseOnce(true);
     await clusterClientAdapter.createIndexTemplate('foo', { args: true });
   });
 });
@@ -300,9 +297,7 @@ describe('getExistingLegacyIndexTemplates', () => {
         aliases: {},
       },
     };
-    clusterClient.indices.getTemplate.mockResolvedValue(
-      asApiResponse<estypes.IndicesGetTemplateResponse>(response)
-    );
+    clusterClient.indices.getTemplate.mockResponse(response);
     await expect(clusterClientAdapter.getExistingLegacyIndexTemplates('foo*')).resolves.toEqual(
       response
     );
@@ -378,9 +373,7 @@ describe('getExistingIndices', () => {
         },
       },
     };
-    clusterClient.indices.getSettings.mockResolvedValue(
-      asApiResponse<estypes.IndicesGetSettingsResponse>(response)
-    );
+    clusterClient.indices.getSettings.mockResponse(response as estypes.IndicesGetSettingsResponse);
     await expect(clusterClientAdapter.getExistingIndices('foo*')).resolves.toEqual(response);
   });
 
@@ -436,9 +429,7 @@ describe('getExistingIndexAliases', () => {
         },
       },
     };
-    clusterClient.indices.getAlias.mockResolvedValue(
-      asApiResponse<estypes.IndicesGetAliasResponse>(response)
-    );
+    clusterClient.indices.getAlias.mockResponse(response as estypes.IndicesGetAliasResponse);
     await expect(clusterClientAdapter.getExistingIndexAliases('foo*')).resolves.toEqual(response);
   });
 
@@ -524,12 +515,12 @@ describe('doesAliasExist', () => {
   });
 
   test('should return true when call cluster returns true', async () => {
-    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse(true));
+    clusterClient.indices.existsAlias.mockResponse(true);
     await expect(clusterClientAdapter.doesAliasExist('foo')).resolves.toEqual(true);
   });
 
   test('should return false when call cluster returns false', async () => {
-    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse(false));
+    clusterClient.indices.existsAlias.mockResponse(false);
     await expect(clusterClientAdapter.doesAliasExist('foo')).resolves.toEqual(false);
   });
 
@@ -577,22 +568,20 @@ describe('queryEventsBySavedObject', () => {
   const DEFAULT_OPTIONS = findOptionsSchema.validate({});
 
   test('should call cluster with proper arguments with non-default namespace', async () => {
-    clusterClient.search.mockResolvedValue(
-      asApiResponse({
-        hits: {
-          hits: [],
-          total: { relation: 'eq', value: 0 },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          successful: 0,
-          total: 0,
-          skipped: 0,
-        },
-      })
-    );
+    clusterClient.search.mockResponse({
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
     await clusterClientAdapter.queryEventsBySavedObjects({
       index: 'index-name',
       namespace: 'namespace',
@@ -789,22 +778,20 @@ describe('queryEventsBySavedObject', () => {
   });
 
   test('should call cluster with proper arguments with default namespace', async () => {
-    clusterClient.search.mockResolvedValue(
-      asApiResponse({
-        hits: {
-          hits: [],
-          total: { relation: 'eq', value: 0 },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          successful: 0,
-          total: 0,
-          skipped: 0,
-        },
-      })
-    );
+    clusterClient.search.mockResponse({
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
     await clusterClientAdapter.queryEventsBySavedObjects({
       index: 'index-name',
       namespace: undefined,
@@ -908,22 +895,20 @@ describe('queryEventsBySavedObject', () => {
   });
 
   test('should call cluster with sort', async () => {
-    clusterClient.search.mockResolvedValue(
-      asApiResponse({
-        hits: {
-          hits: [],
-          total: { relation: 'eq', value: 0 },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          successful: 0,
-          total: 0,
-          skipped: 0,
-        },
-      })
-    );
+    clusterClient.search.mockResponse({
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
     await clusterClientAdapter.queryEventsBySavedObjects({
       index: 'index-name',
       namespace: 'namespace',
@@ -942,22 +927,20 @@ describe('queryEventsBySavedObject', () => {
   });
 
   test('supports open ended date', async () => {
-    clusterClient.search.mockResolvedValue(
-      asApiResponse({
-        hits: {
-          hits: [],
-          total: { relation: 'eq', value: 0 },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          successful: 0,
-          total: 0,
-          skipped: 0,
-        },
-      })
-    );
+    clusterClient.search.mockResponse({
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
 
     const start = '2020-07-08T00:52:28.350Z';
 
@@ -1069,22 +1052,20 @@ describe('queryEventsBySavedObject', () => {
   });
 
   test('supports optional date range', async () => {
-    clusterClient.search.mockResolvedValue(
-      asApiResponse({
-        hits: {
-          hits: [],
-          total: { relation: 'eq', value: 0 },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          successful: 0,
-          total: 0,
-          skipped: 0,
-        },
-      })
-    );
+    clusterClient.search.mockResponse({
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
 
     const start = '2020-07-08T00:52:28.350Z';
     const end = '2020-07-08T00:00:00.000Z';
@@ -1253,12 +1234,6 @@ type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;
 const RETRY_UNTIL_DEFAULT_WAIT = 1000; // milliseconds
-
-function asApiResponse<T>(body: T): TransportResult<T> {
-  return {
-    body,
-  } as TransportResult<T>;
-}
 
 async function retryUntil(
   label: string,

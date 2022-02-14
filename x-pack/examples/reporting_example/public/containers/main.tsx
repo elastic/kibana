@@ -40,7 +40,7 @@ import type {
   JobParamsPNGV2,
 } from '../../../../plugins/reporting/common/types';
 import type { ReportingStart } from '../../../../plugins/reporting/public';
-import { LayoutTypes } from '../../../../plugins/screenshotting/public';
+import { LayoutTypes } from '../../../../plugins/screenshotting/common';
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';
