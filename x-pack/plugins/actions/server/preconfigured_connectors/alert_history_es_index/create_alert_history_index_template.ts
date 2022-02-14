@@ -33,14 +33,11 @@ async function doesIndexTemplateExist({
   client: ElasticsearchClient;
   templateName: string;
 }) {
-  let result;
   try {
-    result = (await client.indices.existsIndexTemplate({ name: templateName })).body;
+    return await client.indices.existsIndexTemplate({ name: templateName });
   } catch (err) {
     throw new Error(`error checking existence of index template: ${err.message}`);
   }
-
-  return result;
 }
 
 async function createIndexTemplate({

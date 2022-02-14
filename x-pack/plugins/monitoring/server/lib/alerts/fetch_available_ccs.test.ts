@@ -6,8 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchAvailableCcs } from './fetch_available_ccs';
 
@@ -23,7 +21,7 @@ describe('fetchAvailableCcs', () => {
     const connectedRemote = 'myRemote';
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     esClient.cluster.remoteInfo.mockImplementation(() =>
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         [connectedRemote]: {
           connected: true,
         } as estypes.ClusterRemoteInfoClusterRemoteInfo,
@@ -38,7 +36,7 @@ describe('fetchAvailableCcs', () => {
     const disconnectedRemote = 'myRemote';
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     esClient.cluster.remoteInfo.mockImplementation(() =>
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         [disconnectedRemote]: {
           connected: false,
         } as estypes.ClusterRemoteInfoClusterRemoteInfo,

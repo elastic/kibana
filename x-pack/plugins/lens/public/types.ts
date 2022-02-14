@@ -18,7 +18,7 @@ import type {
   Datatable,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import type { DateRange, LayerType } from '../common';
+import type { DateRange, LayerType, SortingHint } from '../common';
 import type { Query } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
@@ -436,6 +436,7 @@ export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataT
 export interface Operation extends OperationMetadata {
   // User-facing label for the operation
   label: string;
+  sortingHint?: SortingHint;
 }
 
 export interface OperationMetadata {
