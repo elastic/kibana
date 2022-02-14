@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { groupBy } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
+import { groupBy, sortBy } from 'lodash';
 import classNames from 'classnames';
 import {
   Filter,
@@ -41,7 +41,7 @@ import {
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../kibana_react/public';
-import { getIndexPatternFromFilter } from '../../query';
+import { getIndexPatternFromFilter, SavedQuery, SavedQueryService } from '../../query';
 import {
   getFilterableFields,
   getOperatorOptions,
@@ -96,6 +96,7 @@ export function EditFilterModal({
   initialAddFilterMode,
   onRemoveFilterGroup,
   saveFilters,
+  savedQueryService,
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
@@ -109,6 +110,7 @@ export function EditFilterModal({
   initialAddFilterMode?: string;
   onRemoveFilterGroup: (groupId: string) => void;
   saveFilters: (savedQueryMeta: SavedQueryMeta) => void;
+  savedQueryService: SavedQueryService;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -120,6 +122,17 @@ export function EditFilterModal({
     convertFilterToFilterGroup(currentEditFilters)
   );
   const [groupsCount, setGroupsCount] = useState<number>(1);
+  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
+  const [submitDisabled, setSubmitDisabled] = useState(false);
+
+  useEffect(() => {
+    const fetchQueries = async () => {
+      const allSavedQueries = await savedQueryService.getAllSavedQueries();
+      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
+      setSavedQueries(sortedAllSavedQueries);
+    };
+    fetchQueries();
+  }, [savedQueryService]);
 
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
@@ -148,6 +161,14 @@ export function EditFilterModal({
       };
     });
   }
+
+  const isLabelDuplicated = useCallback(
+    () =>
+      !!savedQueries.find(
+        (existingSavedQuery) => existingSavedQuery.attributes.title === customLabel
+      ),
+    [savedQueries, customLabel]
+  );
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
@@ -391,6 +412,12 @@ export function EditFilterModal({
       return; // typescript validation
     }
     const alias = customLabel || null;
+    // validation for existence of saved filter with given alias
+    if (alias && isLabelDuplicated()) {
+      setSubmitDisabled(true);
+      return;
+    }
+
     if (addFilterMode === 'query_builder') {
       const { index, disabled = false, negate = false } = filter.meta;
       const newIndex = index || indexPatterns[0].id!;
@@ -736,10 +763,17 @@ export function EditFilterModal({
                   defaultMessage: 'Label (optional)',
                 })}
                 display="columnCompressed"
+                error={i18n.translate('data.search.searchBar.savedQueryForm.titleConflictText', {
+                  defaultMessage: 'Name conflicts with an existing saved query.',
+                })}
+                isInvalid={submitDisabled}
               >
                 <EuiFieldText
                   value={`${customLabel}`}
-                  onChange={(e) => setCustomLabel(e.target.value)}
+                  onChange={(e) => {
+                    setSubmitDisabled(false);
+                    setCustomLabel(e.target.value);
+                  }}
                   compressed
                 />
               </EuiFormRow>
@@ -774,6 +808,7 @@ export function EditFilterModal({
                   fill
                   onClick={onApplyChangesFilter}
                   data-test-subj="canvasCustomElementForm-submit"
+                  disabled={submitDisabled}
                 >
                   {i18n.translate('data.filter.addFilterModal.applyChangesFilterBtnLabel', {
                     defaultMessage: 'Apply changes',
