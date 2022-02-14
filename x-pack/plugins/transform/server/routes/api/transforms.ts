@@ -642,7 +642,6 @@ const previewTransformHandler: RequestHandler<
   try {
     const reqBody = req.body;
     const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
-      // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {
