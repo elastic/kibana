@@ -82,20 +82,19 @@ describe('allHosts search strategy', () => {
       );
       const mockedDeps = mockDeps();
 
-      (mockedDeps.esClient.asCurrentUser.search as jest.Mock).mockResolvedValue({
-        body: {
-          hits: {
-            hits: [
-              {
-                _source: {
-                  risk,
-                  host: {
-                    name: hostName,
-                  },
+      mockedDeps.esClient.asCurrentUser.search.mockResponse({
+        hits: {
+          hits: [
+            // @ts-expect-error incomplete type
+            {
+              _source: {
+                risk,
+                host: {
+                  name: hostName,
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       });
 
@@ -107,9 +106,8 @@ describe('allHosts search strategy', () => {
     test('should query host risk only for hostNames in the current page', async () => {
       const buildHostsRiskQuery = jest.spyOn(buildRiskQuery, 'buildHostsRiskScoreQuery');
       const mockedDeps = mockDeps();
-      (mockedDeps.esClient.asCurrentUser.search as jest.Mock).mockResolvedValue({
-        body: { hits: { hits: [] } },
-      });
+      // @ts-expect-error incomplete type
+      mockedDeps.esClient.asCurrentUser.search.mockResponse({ hits: { hits: [] } });
 
       const hostName: string = get(
         'aggregations.host_data.buckets[1].key',
@@ -135,20 +133,19 @@ describe('allHosts search strategy', () => {
       );
       const mockedDeps = mockDeps(false);
 
-      (mockedDeps.esClient.asCurrentUser.search as jest.Mock).mockResolvedValue({
-        body: {
-          hits: {
-            hits: [
-              {
-                _source: {
-                  risk,
-                  host: {
-                    name: hostName,
-                  },
+      mockedDeps.esClient.asCurrentUser.search.mockResponse({
+        hits: {
+          hits: [
+            // @ts-expect-error incomplete type
+            {
+              _source: {
+                risk,
+                host: {
+                  name: hostName,
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       });
 
@@ -159,7 +156,7 @@ describe('allHosts search strategy', () => {
 
     test("should not enhance data when index doesn't exist", async () => {
       const mockedDeps = mockDeps();
-      (mockedDeps.esClient.asCurrentUser.search as jest.Mock).mockImplementation(() => {
+      mockedDeps.esClient.asCurrentUser.search.mockImplementation(() => {
         throw new IndexNotFoundException();
       });
 

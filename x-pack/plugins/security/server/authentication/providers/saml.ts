@@ -365,17 +365,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/saml/authenticate`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      result = (
-        await this.options.client.asInternalUser.transport.request({
-          method: 'POST',
-          path: '/_security/saml/authenticate',
-          body: {
-            ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
-            content: samlResponse,
-            ...(providerRealm ? { realm: providerRealm } : {}),
-          },
-        })
-      ).body as any;
+      result = (await this.options.client.asInternalUser.transport.request({
+        method: 'POST',
+        path: '/_security/saml/authenticate',
+        body: {
+          ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
+          content: samlResponse,
+          ...(providerRealm ? { realm: providerRealm } : {}),
+        },
+      })) as any;
     } catch (err) {
       this.logger.debug(`Failed to log in with SAML response: ${getDetailedErrorMessage(err)}`);
 
@@ -580,13 +578,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         id: requestId,
         redirect,
         realm,
-      } = (
-        await this.options.client.asInternalUser.transport.request({
-          method: 'POST',
-          path: '/_security/saml/prepare',
-          body: preparePayload,
-        })
-      ).body as any;
+      } = (await this.options.client.asInternalUser.transport.request({
+        method: 'POST',
+        path: '/_security/saml/prepare',
+        body: preparePayload,
+      })) as any;
 
       this.logger.debug('Redirecting to Identity Provider with SAML request.');
 
@@ -612,13 +608,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // user usually doesn't have `cluster:admin/xpack/security/saml/logout`.
     // We can replace generic `transport.request` with a dedicated API method call once
     // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-    const { redirect } = (
-      await this.options.client.asInternalUser.transport.request({
-        method: 'POST',
-        path: '/_security/saml/logout',
-        body: { token: accessToken, refresh_token: refreshToken },
-      })
-    ).body as any;
+    const { redirect } = (await this.options.client.asInternalUser.transport.request({
+      method: 'POST',
+      path: '/_security/saml/logout',
+      body: { token: accessToken, refresh_token: refreshToken },
+    })) as any;
 
     this.logger.debug('User session has been successfully invalidated.');
 
@@ -641,17 +635,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
     // We can replace generic `transport.request` with a dedicated API method call once
     // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-    const { redirect } = (
-      await this.options.client.asInternalUser.transport.request({
-        method: 'POST',
-        path: '/_security/saml/invalidate',
-        // Elasticsearch expects `query_string` without leading `?`, so we should strip it with `slice`.
-        body: {
-          query_string: request.url.search ? request.url.search.slice(1) : '',
-          ...invalidatePayload,
-        },
-      })
-    ).body as any;
+    const { redirect } = (await this.options.client.asInternalUser.transport.request({
+      method: 'POST',
+      path: '/_security/saml/invalidate',
+      // Elasticsearch expects `query_string` without leading `?`, so we should strip it with `slice`.
+      body: {
+        query_string: request.url.search ? request.url.search.slice(1) : '',
+        ...invalidatePayload,
+      },
+    })) as any;
 
     this.logger.debug('User session has been successfully invalidated.');
 
