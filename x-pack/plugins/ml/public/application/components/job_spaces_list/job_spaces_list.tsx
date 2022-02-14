@@ -11,6 +11,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   JobType,
+  TrainedModelType,
   ML_JOB_SAVED_OBJECT_TYPE,
   SavedObjectResult,
 } from '../../../../common/types/saved_objects';
@@ -22,7 +23,7 @@ interface Props {
   spacesApi: SpacesPluginStart;
   spaceIds: string[];
   jobId: string;
-  jobType: JobType | 'model';
+  jobType: JobType | TrainedModelType;
   refresh(): void;
 }
 
@@ -45,7 +46,7 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
     const spacesToRemove = spacesToAdd.includes(ALL_SPACES_ID) ? [] : spacesToMaybeRemove;
 
     if (spacesToAdd.length || spacesToRemove.length) {
-      if (jobType === 'model') {
+      if (jobType === 'trained-model') {
         const resp = await ml.savedObjects.updateModelsSpaces([jobId], spacesToAdd, spacesToRemove);
         handleApplySpaces(resp);
       } else {

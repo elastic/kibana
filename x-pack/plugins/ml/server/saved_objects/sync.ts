@@ -113,8 +113,15 @@ export function syncSavedObjectsFactory(
           tasks.push(async () => {
             try {
               const mod = models.trained_model_configs.find((m) => m.model_id === modelId);
-              // CHANGE ME!!!!!!!!!!!! throw here if mod is undefined
-              const job = getJobDetailsFromTrainedModel(mod!);
+              if (mod === undefined) {
+                results.savedObjectsCreated[modelId] = {
+                  success: false,
+                  type,
+                  error: `trained model ${modelId} not found`,
+                };
+                return;
+              }
+              const job = getJobDetailsFromTrainedModel(mod);
               await jobSavedObjectService.createTrainedModel(modelId, job);
               results.savedObjectsCreated[modelId] = {
                 success: true,

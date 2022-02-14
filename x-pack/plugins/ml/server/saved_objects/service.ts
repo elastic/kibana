@@ -414,8 +414,8 @@ export function jobSavedObjectServiceFactory(
     return modelObject;
   }
 
-  async function createTrainedModel(modelId: string, job: TrainedModelJob | null, namespaces?: []) {
-    await _createTrainedModel(modelId, job, namespaces);
+  async function createTrainedModel(modelId: string, job: TrainedModelJob | null) {
+    await _createTrainedModel(modelId, job);
   }
 
   async function bulkCreateTrainedModel(models: TrainedModelObject[], namespaceFallback?: string) {
@@ -433,10 +433,6 @@ export function jobSavedObjectServiceFactory(
   async function getAllTrainedModelObjects(currentSpaceOnly: boolean = true) {
     return await _getTrainedModelObjects(undefined, currentSpaceOnly);
   }
-
-  // async function bulkCreateModels(jobs: Array<{ job: JobObject; namespaces: string[] }>) {
-  //   return await _bulkCreateJobs(jobs);
-  // }
 
   async function _getTrainedModelObjects(modelId?: string, currentSpaceOnly: boolean = true) {
     await isMlReady();
@@ -464,11 +460,7 @@ export function jobSavedObjectServiceFactory(
     return models.saved_objects;
   }
 
-  async function _createTrainedModel(
-    modelId: string,
-    job: TrainedModelJob | null,
-    namespaces?: []
-  ) {
+  async function _createTrainedModel(modelId: string, job: TrainedModelJob | null) {
     await isMlReady();
 
     const modelObject: TrainedModelObject = {
@@ -555,10 +547,6 @@ export function jobSavedObjectServiceFactory(
         .join(' OR ');
     }
 
-    // const { filter searchFields } = createSavedObjectFilter(
-    //   filterObject,
-    //   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
-    // );
     const options: SavedObjectsFindOptions = {
       type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
       perPage: 10000,
@@ -580,10 +568,6 @@ export function jobSavedObjectServiceFactory(
   }
 
   async function _forceDeleteTrainedModel(modelId: string, namespace: string) {
-    // const id = _jobSavedObjectId({
-    //   model_id: modelId,
-    // });
-
     // * space cannot be used in a delete call, so use undefined which
     // is the same as specifying the default space
     await internalSavedObjectsClient.delete(ML_TRAINED_MODEL_SAVED_OBJECT_TYPE, modelId, {

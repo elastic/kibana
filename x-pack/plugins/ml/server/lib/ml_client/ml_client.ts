@@ -265,7 +265,7 @@ export function getMlClient(
       return mlClient.getCategories(...p);
     },
     async getDataFrameAnalytics(...p: Parameters<MlClient['getDataFrameAnalytics']>) {
-      await jobIdsCheck('data-frame-analytics', p, true); // CHECK THIS!!!!!!!!! should allow wildcards
+      await jobIdsCheck('data-frame-analytics', p, true);
       try {
         const [params, options = {}] = p;
         const meta = options.meta ?? false;

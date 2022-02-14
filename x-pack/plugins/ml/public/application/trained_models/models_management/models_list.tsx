@@ -638,7 +638,7 @@ export const ModelsList: FC<Props> = ({
             spacesApi={spacesApi}
             spaceIds={spaces ?? []}
             jobId={id}
-            jobType="model"
+            jobType="trained-model"
             refresh={fetchModelsData}
           />
         );
