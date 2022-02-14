@@ -16,6 +16,9 @@ import {
 } from '../../../../../../src/plugins/screenshot_mode/server';
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
+import { stripUnsafeHeaders } from './strip_unsafe_headers';
+
+export type Headers = Record<string, string>;
 
 export interface ConditionalHeadersConditions {
   protocol: string;
@@ -25,7 +28,7 @@ export interface ConditionalHeadersConditions {
 }
 
 export interface ConditionalHeaders {
-  headers: Record<string, string>;
+  headers: Headers;
   conditions: ConditionalHeadersConditions;
 }
 
@@ -282,7 +285,7 @@ export class HeadlessChromiumDriver {
         const headers = map(
           {
             ...interceptedRequest.request.headers,
-            ...conditionalHeaders.headers,
+            ...stripUnsafeHeaders(conditionalHeaders.headers),
             [KBN_SCREENSHOT_MODE_HEADER]: 'true',
           },
           (value, name) => ({
