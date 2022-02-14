@@ -49,12 +49,11 @@ export function checksFactory(
     const jobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
 
     // load all non-space jobs and datafeeds
-    const { body: adJobs } = await client.asInternalUser.ml.getJobs();
-    const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds();
-    const { body: dfaJobs } =
-      (await client.asInternalUser.ml.getDataFrameAnalytics()) as unknown as {
-        body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
-      };
+    const adJobs = await client.asInternalUser.ml.getJobs();
+    const datafeeds = await client.asInternalUser.ml.getDatafeeds();
+    const dfaJobs = (await client.asInternalUser.ml.getDataFrameAnalytics()) as unknown as {
+      data_frame_analytics: DataFrameAnalyticsConfig[];
+    };
 
     const savedObjectsStatus: JobSavedObjectStatus[] = jobObjects.map(
       ({ attributes, namespaces }) => {

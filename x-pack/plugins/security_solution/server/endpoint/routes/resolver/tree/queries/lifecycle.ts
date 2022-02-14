@@ -91,7 +91,7 @@ export class LifecycleQuery {
       return [];
     }
 
-    const response = await client.asCurrentUser.search({
+    const body = await client.asCurrentUser.search({
       body: this.query(validNodes),
       index: this.indexPatterns,
     });
@@ -105,6 +105,6 @@ export class LifecycleQuery {
      * So the schema fields are flattened ('process.parent.entity_id')
      */
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    return response.body.hits.hits.map((hit) => hit.fields);
+    return body.hits.hits.map((hit) => hit.fields);
   }
 }

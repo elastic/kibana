@@ -74,7 +74,7 @@ async function fetchTemplates(
   const response = isLegacy
     ? await client.indices.getTemplate({}, options)
     : await client.indices.getIndexTemplate({}, options);
-  return response.body;
+  return response;
 }
 
 const querySchema = schema.object({
