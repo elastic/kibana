@@ -229,15 +229,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('saveAlertButton');
-      await testSubjects.existOrFail('confirmAlertSaveModal');
-      await testSubjects.click('confirmAlertSaveModal > confirmModalCancelButton');
-      await testSubjects.missingOrFail('confirmAlertSaveModal');
+      await testSubjects.existOrFail('confirmRuleSaveModal');
+      await testSubjects.click('confirmRuleSaveModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmRuleSaveModal');
       await find.existsByCssSelector('[data-test-subj="saveAlertButton"]:not(disabled)');
 
       await testSubjects.click('saveAlertButton');
-      await testSubjects.existOrFail('confirmAlertSaveModal');
-      await testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('confirmAlertSaveModal');
+      await testSubjects.existOrFail('confirmRuleSaveModal');
+      await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('confirmRuleSaveModal');
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
@@ -259,14 +259,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should show discard confirmation before closing flyout without saving', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.click('cancelSaveAlertButton');
-      await testSubjects.missingOrFail('confirmAlertCloseModal');
+      await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.setValue('intervalInput', '10');
       await testSubjects.click('cancelSaveAlertButton');
-      await testSubjects.existOrFail('confirmAlertCloseModal');
-      await testSubjects.click('confirmAlertCloseModal > confirmModalCancelButton');
-      await testSubjects.missingOrFail('confirmAlertCloseModal');
+      await testSubjects.existOrFail('confirmRuleCloseModal');
+      await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmRuleCloseModal');
     });
 
     it('should successfully test valid es_query alert', async () => {
@@ -282,8 +282,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('testQueryError');
 
       await testSubjects.click('cancelSaveAlertButton');
-      await testSubjects.existOrFail('confirmAlertCloseModal');
-      await testSubjects.click('confirmAlertCloseModal > confirmModalConfirmButton');
+      await testSubjects.existOrFail('confirmRuleCloseModal');
+      await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
     });
 
     it('should show error when es_query is invalid', async () => {

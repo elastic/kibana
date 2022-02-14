@@ -179,7 +179,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async saveAlert() {
       await testSubjects.click('saveAlertButton');
-      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmAlertSaveModal');
+      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmRuleSaveModal');
       expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
       await testSubjects.click('confirmModalConfirmButton');
     },

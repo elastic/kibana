@@ -108,7 +108,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('saveAlertButton');
     },
     async clickSaveAlertsConfirmButton() {
-      await testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton', 20000);
+      await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton', 20000);
     },
   };
 }
