@@ -159,10 +159,10 @@ export const getData = async (
       afterKey
     ),
   };
-  const { body } = await esClient.search<undefined, ResponseAggregations>(request);
-  if (body.aggregations) {
-    return handleResponse(body.aggregations, previousResults, body._shards.successful);
-  } else if (body._shards.successful) {
+  const { aggregations, _shards } = await esClient.search<undefined, ResponseAggregations>(request);
+  if (aggregations) {
+    return handleResponse(aggregations, previousResults, _shards.successful);
+  } else if (_shards.successful) {
     return previousResults;
   }
   return NO_DATA_RESPONSE;

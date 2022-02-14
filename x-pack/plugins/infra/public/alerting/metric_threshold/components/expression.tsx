@@ -253,11 +253,6 @@ export const Expressions: React.FC<Props> = (props) => {
     [onFilterChange]
   );
 
-  const areAllAggsRate = useMemo(
-    () => ruleParams.criteria?.every((c) => c.aggType === Aggregators.RATE),
-    [ruleParams.criteria]
-  );
-
   const hasGroupBy = useMemo(
     () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
     [ruleParams.groupBy]
