@@ -131,10 +131,8 @@ function setKibanaVersion(url: URL) {
   }
 
   const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
+  if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
 }
