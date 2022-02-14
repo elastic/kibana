@@ -34,11 +34,9 @@ describe('[CCR API] Update follower index', () => {
   it('should serialize the payload before sending it to Elasticsearch', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        followInfo: jest
-          .fn()
-          .mockResolvedValueOnce({ body: { follower_indices: [{ status: 'paused' }] } }),
+        followInfo: jest.fn().mockResolvedValueOnce({ follower_indices: [{ status: 'paused' }] }),
         // Just echo back what we send so we can inspect it.
-        resumeFollow: jest.fn().mockImplementation((payload) => ({ body: payload })),
+        resumeFollow: jest.fn().mockImplementation((payload) => payload),
       },
     });
 

@@ -43,7 +43,7 @@ const ruleTypeExecutionsWithDurationMetric = {
     init_script: 'state.ruleTypes = [:]; state.ruleTypesDuration = [:];',
     map_script: `
       String ruleType = doc['rule.category'].value;
-      long duration = doc['event.duration'].value / (1000 * 1000); 
+      long duration = doc['event.duration'].value / (1000 * 1000);
       state.ruleTypes.put(ruleType, state.ruleTypes.containsKey(ruleType) ? state.ruleTypes.get(ruleType) + 1 : 1);
       state.ruleTypesDuration.put(ruleType, state.ruleTypesDuration.containsKey(ruleType) ? state.ruleTypesDuration.get(ruleType) + duration : duration);
     `,
@@ -125,12 +125,12 @@ const ruleTypeFailureExecutionsMetric = {
   scripted_metric: {
     init_script: 'state.reasons = [:]',
     map_script: `
-      if (doc['event.outcome'].value == 'failure') { 
-        String reason = doc['event.reason'].value; 
-        String ruleType = doc['rule.category'].value; 
-        Map ruleTypes = state.reasons.containsKey(reason) ? state.reasons.get(reason) : [:]; 
-        ruleTypes.put(ruleType, ruleTypes.containsKey(ruleType) ? ruleTypes.get(ruleType) + 1 : 1); 
-        state.reasons.put(reason, ruleTypes); 
+      if (doc['event.outcome'].value == 'failure') {
+        String reason = doc['event.reason'].value;
+        String ruleType = doc['rule.category'].value;
+        Map ruleTypes = state.reasons.containsKey(reason) ? state.reasons.get(reason) : [:];
+        ruleTypes.put(ruleType, ruleTypes.containsKey(ruleType) ? ruleTypes.get(ruleType) + 1 : 1);
+        state.reasons.put(reason, ruleTypes);
       }
     `,
     // Combine script is executed per cluster, but we already have a key-value pair per cluster.
@@ -168,7 +168,7 @@ export async function getTotalCountAggregations(
     | 'count_rules_namespaces'
   >
 > {
-  const { body: results } = await esClient.search({
+  const results = await esClient.search({
     index: kibanaIndex,
     body: {
       size: 0,
@@ -182,13 +182,13 @@ export async function getTotalCountAggregations(
           type: 'long',
           script: {
             source: `
-              def alert = params._source['alert']; 
-              if (alert != null) { 
-                def actions = alert.actions; 
-                if (actions != null) { 
-                  emit(actions.length); 
-                } else { 
-                  emit(0); 
+              def alert = params._source['alert'];
+              if (alert != null) {
+                def actions = alert.actions;
+                if (actions != null) {
+                  emit(actions.length);
+                } else {
+                  emit(0);
                 }
               }`,
           },
@@ -331,7 +331,7 @@ export async function getTotalCountAggregations(
 }
 
 export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaIndex: string) {
-  const { body: searchResult } = await esClient.search({
+  const searchResult = await esClient.search({
     index: kibanaIndex,
     size: 0,
     body: {
@@ -367,7 +367,7 @@ export async function getExecutionsPerDayCount(
   esClient: ElasticsearchClient,
   eventLogIndex: string
 ) {
-  const { body: searchResult } = await esClient.search({
+  const searchResult = await esClient.search({
     index: eventLogIndex,
     size: 0,
     body: {
@@ -489,7 +489,7 @@ export async function getExecutionTimeoutsPerDayCount(
   esClient: ElasticsearchClient,
   eventLogIndex: string
 ) {
-  const { body: searchResult } = await esClient.search({
+  const searchResult = await esClient.search({
     index: eventLogIndex,
     size: 0,
     body: {
@@ -544,7 +544,7 @@ export async function getFailedAndUnrecognizedTasksPerDay(
   esClient: ElasticsearchClient,
   taskManagerIndex: string
 ) {
-  const { body: searchResult } = await esClient.search({
+  const searchResult = await esClient.search({
     index: taskManagerIndex,
     size: 0,
     body: {

@@ -164,18 +164,18 @@ describe('get_all_stats', () => {
 
       searchMock
         .onCall(0)
-        .returns(Promise.resolve({ body: esStatsResponse }))
+        .returns(Promise.resolve(esStatsResponse))
         .onCall(1)
-        .returns(Promise.resolve({ body: kibanaStatsResponse }))
+        .returns(Promise.resolve(kibanaStatsResponse))
         .onCall(2)
-        .returns(Promise.resolve({ body: logstashStatsResponse }))
-        .returns(Promise.resolve({ body: logstashStatsResponse }))
+        .returns(Promise.resolve(logstashStatsResponse))
+        .returns(Promise.resolve(logstashStatsResponse))
         .onCall(3)
-        .returns(Promise.resolve({ body: {} })) // Beats stats
+        .returns(Promise.resolve({})) // Beats stats
         .onCall(4)
-        .returns(Promise.resolve({ body: {} })) // Beats state
+        .returns(Promise.resolve({})) // Beats state
         .onCall(5)
-        .returns(Promise.resolve({ body: {} })); // Logstash state
+        .returns(Promise.resolve({})); // Logstash state
 
       expect(await getAllStats(['a'], callCluster, timestamp, 1)).toStrictEqual(allClusters);
     });
@@ -185,7 +185,7 @@ describe('get_all_stats', () => {
         aggregations: { cluster_uuids: { buckets: [] } },
       };
 
-      searchMock.returns(Promise.resolve({ body: clusterUuidsResponse }));
+      searchMock.returns(Promise.resolve(clusterUuidsResponse));
 
       expect(await getAllStats([], callCluster, timestamp, 1)).toStrictEqual([]);
     });

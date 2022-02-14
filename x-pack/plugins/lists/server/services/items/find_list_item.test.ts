@@ -19,42 +19,40 @@ describe('find_list_item', () => {
   test('should find a simple single list item', async () => {
     const options = getFindListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.count.mockReturnValue(
+    esClient.count.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ count: 1 })
+      { count: 1 }
     );
-    esClient.search.mockReturnValue(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        _scroll_id: '123',
-        _shards: getShardMock(),
-        hits: {
-          hits: [
-            {
-              _id: 'some-list-item-id',
-              _source: {
-                _version: 'undefined',
-                created_at: '2020-04-20T15:25:31.830Z',
-                created_by: 'some user',
-                date_range: '127.0.0.1',
-                deserializer: undefined,
-                list_id: 'some-list-id',
-                meta: {},
-                serializer: undefined,
-                tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
-                type: 'ip',
-                updated_at: '2020-04-20T15:25:31.830Z',
-                updated_by: 'some user',
-              },
+    esClient.search.mockResponse({
+      _scroll_id: '123',
+      _shards: getShardMock(),
+      hits: {
+        hits: [
+          // @ts-expect-error not full response interface
+          {
+            _id: 'some-list-item-id',
+            _source: {
+              _version: 'undefined',
+              created_at: '2020-04-20T15:25:31.830Z',
+              created_by: 'some user',
+              date_range: '127.0.0.1',
+              deserializer: undefined,
+              list_id: 'some-list-id',
+              meta: {},
+              serializer: undefined,
+              tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
+              type: 'ip',
+              updated_at: '2020-04-20T15:25:31.830Z',
+              updated_by: 'some user',
             },
-          ],
-          max_score: 0,
-          total: 1,
-        },
-        timed_out: false,
-        took: 10,
-      })
-    );
+          },
+        ],
+        max_score: 0,
+        total: 1,
+      },
+      timed_out: false,
+      took: 10,
+    });
     const item = await findListItem({ ...options, esClient });
     const expected = getFoundListItemSchemaMock();
     expect(item).toEqual(expected);
@@ -63,9 +61,7 @@ describe('find_list_item', () => {
   test('should return null if the list is null', async () => {
     const options = getFindListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySearchListMock())
-    );
+    esClient.search.mockResponse(getEmptySearchListMock());
     const item = await findListItem({ ...options, esClient });
     expect(item).toEqual(null);
   });
