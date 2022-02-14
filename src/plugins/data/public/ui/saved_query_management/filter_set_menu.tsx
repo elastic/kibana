@@ -103,14 +103,15 @@ export function FilterSetMenu({
     };
   };
 
-  const onQueryStringChange = (value: string) => {
+  const onQueryStringChange = (query) => {
     onQueryChange({
-      query: { query: value, language },
+      query,
       dateRange: getDateRange(),
     });
   };
 
   const onSelectLanguage = (lang: string) => {
+
     services.http.post('/api/kibana/kql_opt_in_stats', {
       body: JSON.stringify({ opt_in: lang === 'kuery' }),
     });
@@ -119,7 +120,7 @@ export function FilterSetMenu({
     services.storage.set(storageKey!, lang);
 
     const newQuery = { query: '', language: lang };
-    onQueryStringChange(newQuery.query);
+    onQueryStringChange(newQuery);
   };
 
   const luceneLabel = i18n.translate('data.query.queryBar.luceneLanguageName', {
