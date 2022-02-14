@@ -12,6 +12,7 @@ import type {
   Plugin,
   Logger,
 } from '../../../../src/core/server';
+import { CspAppService } from './lib/csp_app_services';
 import { createFindingsIndexTemplate } from './index_template/create_index_template';
 import type {
   CspServerPluginSetup,
@@ -23,6 +24,11 @@ import { defineRoutes } from './routes';
 import { initUiSettings } from './ui_settings';
 import { cspRuleAssetType } from './saved_objects/cis_1_4_1/csp_rule_type';
 import { initializeCspRules } from './saved_objects/cis_1_4_1/initialize_rules';
+
+export interface CspAppContext {
+  logger: Logger;
+  service: CspAppService;
+}
 
 export class CspPlugin
   implements
@@ -37,6 +43,7 @@ export class CspPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
+  private readonly CspAppService = new CspAppService();
 
   public setup(
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
@@ -44,12 +51,18 @@ export class CspPlugin
   ): CspServerPluginSetup {
     this.logger.debug('csp: Setup');
 
+    const cspAppContext: CspAppContext = {
+      logger: this.logger,
+      service: this.CspAppService,
+    };
+
     core.savedObjects.registerType(cspRuleAssetType);
 
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router, this.logger);
+    defineRoutes(router, cspAppContext);
+
     initUiSettings(core.uiSettings);
 
     return {};
@@ -57,6 +70,10 @@ export class CspPlugin
 
   public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
     this.logger.debug('csp: Started');
+    this.CspAppService.start({
+      ...plugins.fleet,
+    });
+
     createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser, this.logger).catch(
       this.logger.error
     );

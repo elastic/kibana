@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IRouter, Logger } from 'src/core/server';
+import type { ElasticsearchClient, IRouter } from 'src/core/server';
 import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import { number, UnknownRecord } from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -19,6 +19,7 @@ import {
 } from './stats_queries';
 import { RULE_FAILED, RULE_PASSED } from '../../constants';
 import { STATS_ROUTE_PATH } from '../../../common/constants';
+import { CspAppContext } from '../../plugin';
 
 // TODO: use a schema decoder
 function assertBenchmarkStats(v: unknown): asserts v is BenchmarkStats {
@@ -179,7 +180,7 @@ export const getResourceTypesAggs = async (
   });
 };
 
-export const defineGetStatsRoute = (router: IRouter, logger: Logger): void =>
+export const defineGetStatsRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: STATS_ROUTE_PATH,
