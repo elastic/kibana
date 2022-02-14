@@ -48,7 +48,7 @@ jest.mock('./alert_errors', () => ({
     alertBaseErrors: {},
     alertErrors: {
       name: new Array<string>(),
-      interval: new Array<string>(),
+      'schedule.interval': new Array<string>(),
       alertTypeId: new Array<string>(),
       actionConnectors: new Array<string>(),
     },
