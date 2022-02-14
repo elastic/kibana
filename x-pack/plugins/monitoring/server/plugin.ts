@@ -44,6 +44,7 @@ import {
   IBulkUploader,
   LegacyRequest,
   LegacyShimDependencies,
+  MonitoringConfigSchema,
   MonitoringCore,
   MonitoringLicenseService,
   MonitoringPluginSetup,
@@ -86,7 +87,7 @@ export class MonitoringPlugin
     this.initializerContext = initializerContext;
     this.log = initializerContext.logger.get(LOGGING_TAG);
     this.getLogger = (...scopes: string[]) => initializerContext.logger.get(LOGGING_TAG, ...scopes);
-    this.config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
+    this.config = createConfig(this.initializerContext.config.get<MonitoringConfigSchema>());
     this.legacyConfig = this.initializerContext.config.legacy.get();
   }
 
@@ -165,7 +166,7 @@ export class MonitoringPlugin
   }
 
   init(cluster: ICustomClusterClient, coreStart: CoreStart) {
-    const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
+    const config = createConfig(this.initializerContext.config.get<MonitoringConfigSchema>());
     const legacyConfig = this.initializerContext.config.legacy.get();
     const coreSetup = this.coreSetup!;
     const plugins = this.setupPlugins!;

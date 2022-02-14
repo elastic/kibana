@@ -10,11 +10,12 @@ import {
   config as ElasticsearchBaseConfig,
   ElasticsearchConfig,
 } from '../../../../src/core/server/';
+import { MonitoringConfigSchema } from './types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 const elasticsearchConfigSchema = ElasticsearchBaseConfig.elasticsearch.schema;
-type ElasticsearchConfigType = TypeOf<typeof elasticsearchConfigSchema>;
+export type ElasticsearchConfigType = TypeOf<typeof elasticsearchConfigSchema>;
 
 export const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.extends({
   logFetchCount: schema.number({ defaultValue: 10 }),
@@ -87,8 +88,19 @@ export class MonitoringElasticsearchConfig extends ElasticsearchConfig {
   }
 }
 
-export type MonitoringConfig = ReturnType<typeof createConfig>;
-export function createConfig(config: TypeOf<typeof configSchema>) {
+// Build MonitoringConfig type based on MonitoringConfigSchema (config input) but with ui.elasticsearch as a MonitoringElasticsearchConfig (instantiated class)
+type MonitoringConfigTypeOverriddenUI = Omit<MonitoringConfigSchema, 'ui'>;
+
+interface MonitoringConfigTypeOverriddenUIElasticsearch
+  extends Omit<MonitoringConfigSchema['ui'], 'elasticsearch'> {
+  elasticsearch: MonitoringElasticsearchConfig;
+}
+
+export interface MonitoringConfig extends MonitoringConfigTypeOverriddenUI {
+  ui: MonitoringConfigTypeOverriddenUIElasticsearch;
+}
+
+export function createConfig(config: MonitoringConfigSchema): MonitoringConfig {
   return {
     ...config,
     ui: {
