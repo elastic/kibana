@@ -9049,7 +9049,7 @@ var _ci_stats_config = __webpack_require__(218);
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
-/** Container for metadata that can be attached to different ci-stats objects */
+/** A ci-stats metric record */
 
 /** Object that helps report data to the ci-stats service */
 class CiStatsReporter {
