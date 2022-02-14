@@ -164,7 +164,7 @@ export const getMetricVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.metric.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];

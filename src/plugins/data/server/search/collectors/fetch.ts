@@ -15,7 +15,7 @@ interface SearchTelemetry {
 
 export function fetchProvider(kibanaIndex: string) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
-    const { body: esResponse } = await esClient.search<SearchTelemetry>(
+    const esResponse = await esClient.search<SearchTelemetry>(
       {
         index: kibanaIndex,
         body: {

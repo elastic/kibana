@@ -59,9 +59,9 @@ export async function registerPrivilegesWithCluster(
   try {
     // we only want to post the privileges when they're going to change as Elasticsearch has
     // to clear the role cache to get these changes reflected in the _has_privileges API
-    const { body: existingPrivileges } = await clusterClient.asInternalUser.security.getPrivileges<
-      Record<string, object>
-    >({ application });
+    const existingPrivileges = await clusterClient.asInternalUser.security.getPrivileges({
+      application,
+    });
     if (arePrivilegesEqual(existingPrivileges, expectedPrivileges)) {
       logger.debug(`Kibana Privileges already registered with Elasticsearch for ${application}`);
       return;
