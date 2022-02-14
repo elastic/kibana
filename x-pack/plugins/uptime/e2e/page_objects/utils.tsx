@@ -19,6 +19,12 @@ export function utilsPageProvider({ page }: { page: Page }) {
       }
     },
 
+    async dismissSyntheticsCallout() {
+      await page.click('[data-test-subj=uptimeDismissSyntheticsCallout]', {
+        timeout: 60 * 1000,
+      });
+    },
+
     async assertText({ text }: { text: string }) {
       await page.waitForSelector(`text=${text}`);
       expect(await page.$(`text=${text}`)).toBeTruthy();
@@ -30,6 +36,10 @@ export function utilsPageProvider({ page }: { page: Page }) {
 
     async selectByTestSubj(dataTestSubj: string, value: string) {
       await page.selectOption(`[data-test-subj=${dataTestSubj}]`, value);
+    },
+
+    async checkByTestSubj(dataTestSubj: string, value: string) {
+      await page.check(`[data-test-subj=${dataTestSubj}]`);
     },
 
     async clickByTestSubj(dataTestSubj: string) {

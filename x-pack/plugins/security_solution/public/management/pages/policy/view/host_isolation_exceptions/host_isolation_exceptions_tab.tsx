@@ -59,13 +59,6 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
     policies: [policyId, 'all'],
   });
 
-  const policySearchedExceptionsListRequest = useFetchHostIsolationExceptionsList({
-    filter: location.filter,
-    page: location.page_index,
-    perPage: location.page_size,
-    policies: [policyId, 'all'],
-  });
-
   const allExceptionsListRequest = useFetchHostIsolationExceptionsList({
     page: MANAGEMENT_DEFAULT_PAGE,
     perPage: MANAGEMENT_DEFAULT_PAGE_SIZE,
@@ -78,7 +71,7 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
 
   const subTitle = useMemo(() => {
     const link = (
-      <EuiLink href={getAppUrl({ appId: APP_UI_ID, path: toHostIsolationList })} target="_blank">
+      <EuiLink href={toHostIsolationList} target="_blank">
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.viewAllLinkLabel"
           defaultMessage="view all host isolation exceptions"
@@ -86,22 +79,17 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
       </EuiLink>
     );
 
-    return policySearchedExceptionsListRequest.data ? (
+    return allPolicyExceptionsListRequest.data ? (
       <FormattedMessage
         id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.about"
-        defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}"
+        defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {host isolation exception} other {host isolation exceptions}} associated with this policy. Click here to {link}"
         values={{
           count: allPolicyExceptionsListRequest.data?.total,
           link,
         }}
       />
     ) : null;
-  }, [
-    allPolicyExceptionsListRequest.data?.total,
-    getAppUrl,
-    policySearchedExceptionsListRequest.data,
-    toHostIsolationList,
-  ]);
+  }, [allPolicyExceptionsListRequest.data, toHostIsolationList]);
 
   const handleAssignButton = () => {
     history.push(
@@ -127,32 +115,24 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
     ) : null;
 
   const isLoading =
-    policySearchedExceptionsListRequest.isLoading ||
-    allPolicyExceptionsListRequest.isLoading ||
-    allExceptionsListRequest.isLoading ||
-    !policy;
+    allPolicyExceptionsListRequest.isLoading || allExceptionsListRequest.isLoading || !policy;
 
   // render non-existent or non-assigned messages
   if (!isLoading && (hasNoAssignedOrExistingExceptions || hasNoExistingExceptions)) {
     if (hasNoExistingExceptions) {
-      return (
-        <PolicyHostIsolationExceptionsEmptyUnexisting toHostIsolationList={toHostIsolationList} />
-      );
+      return <PolicyHostIsolationExceptionsEmptyUnexisting policy={policy} />;
     } else {
       return (
         <>
           {assignFlyout}
-          <PolicyHostIsolationExceptionsEmptyUnassigned
-            policy={policy}
-            toHostIsolationList={toHostIsolationList}
-          />
+          <PolicyHostIsolationExceptionsEmptyUnassigned policy={policy} />
         </>
       );
     }
   }
 
   // render header and list
-  return !isLoading && policySearchedExceptionsListRequest.data ? (
+  return !isLoading ? (
     <div data-test-subj={'policyHostIsolationExceptionsTab'}>
       {assignFlyout}
       <EuiPageHeader alignItems="center">
@@ -201,10 +181,7 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
         color="transparent"
         borderRadius="none"
       >
-        <PolicyHostIsolationExceptionsList
-          exceptions={policySearchedExceptionsListRequest.data}
-          policyId={policyId}
-        />
+        <PolicyHostIsolationExceptionsList policyId={policyId} policyName={policy.name} />
       </EuiPageContent>
     </div>
   ) : (

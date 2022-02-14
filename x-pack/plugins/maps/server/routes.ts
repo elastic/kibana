@@ -8,18 +8,18 @@
 import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
-import { CoreSetup, IRouter, Logger } from 'kibana/server';
+import { CoreSetup, CoreStart, IRouter, Logger } from 'kibana/server';
 import { INDEX_SETTINGS_API_PATH, FONTS_API_PATH } from '../common/constants';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 import { initMVTRoutes } from './mvt/mvt_routes';
 import { initIndexingRoutes } from './data_indexing/indexing_routes';
-import { StartDeps, SetupDeps } from './types';
+import { StartDeps } from './types';
 import { DataRequestHandlerContext } from '../../../../src/plugins/data/server';
 
-export async function initRoutes(core: CoreSetup, logger: Logger): Promise<void> {
-  const router: IRouter<DataRequestHandlerContext> = core.http.createRouter();
-  const [, { data: dataPlugin }]: [SetupDeps, StartDeps] =
-    (await core.getStartServices()) as unknown as [SetupDeps, StartDeps];
+export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<void> {
+  const router: IRouter<DataRequestHandlerContext> = coreSetup.http.createRouter();
+  const [coreStart, { data: dataPlugin }]: [CoreStart, StartDeps] =
+    (await coreSetup.getStartServices()) as unknown as [CoreStart, StartDeps];
 
   router.get(
     {
@@ -77,7 +77,7 @@ export async function initRoutes(core: CoreSetup, logger: Logger): Promise<void>
           index: query.indexPatternTitle,
         });
         const indexPatternSettings = getIndexPatternSettings(
-          resp.body as unknown as Record<string, string | number | boolean>
+          resp as unknown as Record<string, string | number | boolean>
         );
         return response.ok({
           body: indexPatternSettings,
@@ -94,6 +94,6 @@ export async function initRoutes(core: CoreSetup, logger: Logger): Promise<void>
     }
   );
 
-  initMVTRoutes({ router, logger });
+  initMVTRoutes({ router, logger, core: coreStart });
   initIndexingRoutes({ router, logger, dataPlugin });
 }

@@ -31,8 +31,8 @@ export type UrlStateType =
   | 'cases'
   | 'exceptions'
   | 'host'
+  | 'users'
   | 'network'
   | 'overview'
   | 'rules'
-  | 'timeline'
-  | 'ueba';
+  | 'timeline';

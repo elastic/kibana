@@ -35,7 +35,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   INDEX_PATTERNS_DETAILS,
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
@@ -110,10 +109,10 @@ import {
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { goBackToAllRulesTable } from '../../tasks/rule_details';
+import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
-const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {

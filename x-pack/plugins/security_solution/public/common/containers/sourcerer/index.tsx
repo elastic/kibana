@@ -21,10 +21,10 @@ import {
   ALERTS_PATH,
   CASES_PATH,
   HOSTS_PATH,
+  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  UEBA_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -51,21 +51,21 @@ export const useInitSourcerer = (
     (state) => getDataViewsSelector(state)
   );
 
-  const { addError } = useAppToasts();
+  const { addError, addWarning } = useAppToasts();
 
   useEffect(() => {
     if (defaultDataView.error != null) {
-      addError(defaultDataView.error, {
+      addWarning({
         title: i18n.translate('xpack.securitySolution.sourcerer.permissions.title', {
           defaultMessage: 'Write role required to generate data',
         }),
-        toastMessage: i18n.translate('xpack.securitySolution.sourcerer.permissions.toastMessage', {
+        text: i18n.translate('xpack.securitySolution.sourcerer.permissions.toastMessage', {
           defaultMessage:
             'Users with write permission need to access the Elastic Security app to initialize the app source data.',
         }),
       });
     }
-  }, [addError, defaultDataView.error]);
+  }, [addWarning, defaultDataView.error]);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const activeTimeline = useDeepEqualSelector((state) =>
@@ -396,7 +396,7 @@ export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
   matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${UEBA_PATH}/:id`, `${CASES_PATH}/:detailName`],
+    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`],
     strict: false,
   }) == null
     ? SourcererScopeName.default
@@ -406,9 +406,9 @@ export const sourcererPaths = [
   ALERTS_PATH,
   `${RULES_PATH}/id/:id`,
   HOSTS_PATH,
+  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
-  UEBA_PATH,
 ];
 
 export const showSourcererByPath = (pathname: string): boolean =>
