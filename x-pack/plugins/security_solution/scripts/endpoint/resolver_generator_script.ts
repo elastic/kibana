@@ -41,32 +41,30 @@ interface UserInfo {
   username: string;
 }
 
-async function addUser(esClient: Client): Promise<UserInfo | undefined> {
-  const endpointUser = {
-    username: 'endpoint_user',
-    password: 'changeme',
-  };
-  const path = `_security/user/${endpointUser.username}`;
-
+async function addUser(
+  esClient: Client,
+  user = { username: 'endpoint_user', password: 'changeme' }
+): Promise<UserInfo | undefined> {
+  const path = `_security/user/${user.username}`;
   // add user if doesn't exist already
   try {
-    console.log(`Adding ${endpointUser.username}...`);
+    console.log(`Adding ${user.username}...`);
     const addedUser = await esClient.transport.request<Promise<{ created: boolean }>>({
       method: 'POST',
       path,
       body: {
-        password: endpointUser.password,
+        password: user.password,
         roles: ['superuser', 'kibana_system'],
         full_name: 'endpoint user',
       },
     });
     if (addedUser.created) {
-      console.log(`User ${endpointUser.username} added successfully!`);
+      console.log(`User ${user.username} added successfully!`);
     } else {
-      console.log(`User ${endpointUser.username} already exists!`);
+      console.log(`User ${user.username} already exists!`);
     }
     return {
-      username: endpointUser.username,
+      username: user.username,
     };
   } catch (error) {
     handleErr(error);
@@ -222,6 +220,12 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    newUser: {
+      alias: 'nu',
+      describe: 'Adds a new user with username:password',
+      type: 'string',
+      default: 'endpoint_user:changeme',
+    },
   }).argv;
   let ca: Buffer;
 
@@ -256,7 +260,16 @@ async function main() {
   }
   let client = new Client(clientOptions);
   // add endpoint user
-  const user: UserInfo | undefined = await addUser(client);
+  const newUserCreds = argv.newUser ? argv.newUser.split(':') : undefined;
+  const user: UserInfo | undefined = await addUser(
+    client,
+    newUserCreds
+      ? {
+          username: newUserCreds[0],
+          password: newUserCreds[1],
+        }
+      : undefined
+  );
 
   // update client and kibana options before instantiating
   if (user) {
