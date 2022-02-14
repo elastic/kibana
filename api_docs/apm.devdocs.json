@@ -393,13 +393,7 @@
             "label": "logger",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false
@@ -4873,9 +4867,7 @@
           "TypeC",
           "<{ numBuckets: ",
           "Type",
-          "<number, unknown, unknown>; transactionType: ",
-          "StringC",
-          "; groupIds: ",
+          "<number, unknown, unknown>; groupIds: ",
           "Type",
           "<string[], string, unknown>; }>]>; }>, ",
           {
@@ -4935,11 +4927,7 @@
           "Type",
           "<number, string, unknown>; end: ",
           "Type",
-          "<number, string, unknown>; }>, ",
-          "TypeC",
-          "<{ transactionType: ",
-          "StringC",
-          "; }>]>; }>, ",
+          "<number, string, unknown>; }>]>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",

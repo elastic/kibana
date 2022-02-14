@@ -13,6 +13,7 @@ import type { collectSavedObjects } from './lib/collect_saved_objects';
 import type { regenerateIds } from './lib/regenerate_ids';
 import type { validateReferences } from './lib/validate_references';
 import type { checkConflicts } from './lib/check_conflicts';
+import type { checkOriginConflicts } from './lib/check_origin_conflicts';
 import type { getImportStateMapForRetries } from './lib/get_import_state_map_for_retries';
 import type { splitOverwrites } from './lib/split_overwrites';
 import type { createSavedObjects } from './lib/create_saved_objects';
@@ -53,6 +54,13 @@ jest.mock('./lib/validate_references', () => ({
 export const mockCheckConflicts = jest.fn() as jest.MockedFunction<typeof checkConflicts>;
 jest.mock('./lib/check_conflicts', () => ({
   checkConflicts: mockCheckConflicts,
+}));
+
+export const mockCheckOriginConflicts = jest.fn() as jest.MockedFunction<
+  typeof checkOriginConflicts
+>;
+jest.mock('./lib/check_origin_conflicts', () => ({
+  checkOriginConflicts: mockCheckOriginConflicts,
 }));
 
 export const mockGetImportStateMapForRetries = jest.fn() as jest.MockedFunction<

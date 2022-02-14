@@ -44,7 +44,7 @@ export const registerUpdateRoute = ({
       const body = serializeAutoFollowPattern(request.body as AutoFollowPattern);
 
       try {
-        const { body: responseBody } = await client.asCurrentUser.ccr.putAutoFollowPattern({
+        const responseBody = await client.asCurrentUser.ccr.putAutoFollowPattern({
           name: id,
           body,
         });
