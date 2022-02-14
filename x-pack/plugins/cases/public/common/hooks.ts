@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { APP_OWNER } from '../../common/constants';
+import { APP_PARENT_ID } from '../../common/constants';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 export const useIsMainApplication = () => {
-  const { owner } = useCasesContext();
+  const { appId } = useCasesContext();
 
-  if (owner.length === 0) {
-    return false;
-  }
-
-  return owner[0] === APP_OWNER;
+  return appId === APP_PARENT_ID;
 };
