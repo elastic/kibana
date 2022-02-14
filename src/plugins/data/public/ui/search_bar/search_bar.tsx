@@ -19,6 +19,7 @@ import { Query, Filter } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
+import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
@@ -87,6 +88,7 @@ export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
 interface State {
   isFiltersVisible: boolean;
   showSaveQueryModal: boolean;
+  openQueryBarMenu: boolean;
   showSaveNewQueryModal: boolean;
   showSavedQueryPopover: boolean;
   currentProps?: SearchBarProps;
@@ -169,6 +171,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showSaveQueryModal: false,
     showSaveNewQueryModal: false,
     showSavedQueryPopover: false,
+    openQueryBarMenu: false,
     currentProps: this.props,
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
@@ -347,8 +350,43 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   };
 
+  public toggleFilterBarMenuPopover = (value: boolean) => {
+    this.setState({
+      openQueryBarMenu: value,
+    });
+  };
+
   public render() {
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
+
+    const saveQueryFormComponent = (
+      <SaveQueryForm
+        savedQueryService={this.savedQueryService}
+        onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
+        onClose={() => this.setState({ openQueryBarMenu: false })}
+        showFilterOption={this.props.showFilterBar}
+        showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
+      />
+    );
+
+    const queryBarMenu = (
+      <QueryBarMenu
+        nonKqlMode={this.props.nonKqlMode}
+        nonKqlModeHelpText={this.props.nonKqlModeHelpText}
+        language={this.state.query!.language}
+        services={this.services}
+        onQueryChange={this.onQueryBarChange}
+        dateRangeFrom={this.state.dateRangeFrom}
+        dateRangeTo={this.state.dateRangeTo}
+        savedQueryService={this.savedQueryService}
+        applySelectedQuery={this.onLoadSavedQuery}
+        saveQueryFormComponent={saveQueryFormComponent}
+        toggleFilterBarMenuPopover={this.toggleFilterBarMenuPopover}
+        openQueryBarMenu={this.state.openQueryBarMenu}
+        onFiltersUpdated={this.props.onFiltersUpdated}
+        filters={this.props.filters}
+      />
+    );
 
     let queryBar;
     if (this.shouldRenderQueryBar()) {
@@ -370,6 +408,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
                 )
               : undefined
           }
+          // prepend={this.props.showFilterBar && this.state.query ? queryBarMenu : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}

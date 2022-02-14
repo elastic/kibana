@@ -12,12 +12,16 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLink,
+  EuiContextMenuItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   PopoverAnchorPosition,
+  EuiPopoverFooter,
+  toSentenceCase,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -76,6 +80,38 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       )}
     </EuiButtonEmpty>
   );
+
+  // return (
+  //   <div>
+  //     <EuiContextMenuItem
+  //       key="KQL"
+  //       icon={language === 'kuery' ? 'check' : 'empty'}
+  //       onClick={() => {
+  //         onSelectLanguage('kuery');
+  //       }}
+  //     >
+  //       KQL
+  //     </EuiContextMenuItem>
+  //     <EuiContextMenuItem
+  //       key={nonKqlMode}
+  //       icon={language === 'kuery' ? 'empty' : 'check'}
+  //       onClick={() => {
+  //         onSelectLanguage(nonKqlMode);
+  //       }}
+  //     >
+  //       {toSentenceCase(nonKqlMode)}
+  //     </EuiContextMenuItem>
+  //     <EuiHorizontalRule margin="none" />
+  //     <EuiContextMenuItem
+  //       key={'documentation'}
+  //       icon={'documentation'}
+  //       href={kueryQuerySyntaxDocs}
+  //       target="_blank"
+  //     >
+  //       Documentation
+  //     </EuiContextMenuItem>
+  //   </div>
+  // );
 
   return (
     <EuiPopover

@@ -17,30 +17,30 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Filter, Query, enableFilter, disableFilter, toggleFilterNegated } from '@kbn/es-query';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { useKibana } from '../../../../kibana_react/public';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
 import { IDataPluginServices } from '../../types';
-import { TimeRange, Query, SavedQueryService, SavedQuery } from '../..';
+import { TimeRange, SavedQueryService, SavedQuery } from '../..';
 import { KibanaReactContextValue } from '../../../../kibana_react/public';
 import { QueryLanguageSwitcher } from '../query_string_input/language_switcher';
 
 interface Props {
   language: string;
-  onEnableAll: () => void;
-  onDisableAll: () => void;
-  onToggleAllNegated: () => void;
-  onRemoveAll: () => void;
   onQueryChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
-  toggleFilterSetPopover: (value: boolean) => void;
-  openFilterSetPopover: boolean;
+  toggleFilterBarMenuPopover: (value: boolean) => void;
+  openQueryBarMenu: boolean;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
   services: KibanaReactContextValue<IDataPluginServices>['services'];
   dateRangeFrom?: string;
   dateRangeTo?: string;
-  toggleAddFilterModal?: (value: boolean, addFilterMode?: string) => void;
   savedQueryService: SavedQueryService;
   applySelectedQuery: (selectedSavedQuery: SavedQuery) => void;
   saveQueryFormComponent?: JSX.Element;
+  onFiltersUpdated?: (filters: Filter[]) => void;
+  filters?: Filter[];
 }
 
 export function QueryBarMenu({
@@ -50,20 +50,20 @@ export function QueryBarMenu({
   services,
   dateRangeFrom,
   dateRangeTo,
-  onEnableAll,
-  onDisableAll,
-  onToggleAllNegated,
-  onRemoveAll,
   onQueryChange,
-  toggleAddFilterModal,
   savedQueryService,
   applySelectedQuery,
   saveQueryFormComponent,
-  openFilterSetPopover,
-  toggleFilterSetPopover,
+  openQueryBarMenu,
+  toggleFilterBarMenuPopover,
+  onFiltersUpdated,
+  filters,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
+  const kibana = useKibana<IDataPluginServices>();
+  const { appName, usageCollection } = kibana.services;
+  const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
 
   useEffect(() => {
     const fetchSavedSearched = async () => {
@@ -79,20 +79,49 @@ export function QueryBarMenu({
 
       setSavedQueries(savedQueryItems.reverse().slice(0, 5));
     };
-    if (openFilterSetPopover) {
+    if (openQueryBarMenu) {
       fetchSavedSearched();
     }
-  }, [openFilterSetPopover, savedQueryService]);
+  }, [openQueryBarMenu, savedQueryService]);
 
   const normalContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'normalContextMenuPopover',
   });
   const onButtonClick = () => {
-    toggleFilterSetPopover(!openFilterSetPopover);
+    toggleFilterBarMenuPopover(!openQueryBarMenu);
   };
 
   const closePopover = () => {
-    toggleFilterSetPopover(false);
+    toggleFilterBarMenuPopover(false);
+  };
+
+  const onEnableAll = () => {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
+    const enabledFilters = filters?.map(enableFilter);
+    if (enabledFilters) {
+      onFiltersUpdated?.(enabledFilters);
+    }
+  };
+
+  const onDisableAll = () => {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:disable_all`);
+    const disabledFilters = filters?.map(disableFilter);
+    if (disabledFilters) {
+      onFiltersUpdated?.(disabledFilters);
+    }
+  };
+
+  const onToggleAllNegated = () => {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:invert_all`);
+    const negatedFilters = filters?.map(toggleFilterNegated);
+    if (negatedFilters) {
+      onFiltersUpdated?.(negatedFilters);
+    }
+  };
+
+  const onRemoveAll = () => {
+    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:remove_all`);
+    onFiltersUpdated?.([]);
   };
 
   const getDateRange = () => {
@@ -242,7 +271,6 @@ export function QueryBarMenu({
       {
         name: 'Load filter set...',
         onClick: () => {
-          toggleAddFilterModal!(true, 'saved_filters');
           closePopover();
         },
       },
@@ -271,7 +299,7 @@ export function QueryBarMenu({
       <EuiPopover
         id={normalContextMenuPopoverId}
         button={button}
-        isOpen={openFilterSetPopover}
+        isOpen={openQueryBarMenu}
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="rightUp"
