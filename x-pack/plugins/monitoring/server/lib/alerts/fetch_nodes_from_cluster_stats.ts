@@ -103,7 +103,7 @@ export async function fetchNodesFromClusterStats(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const nodes: AlertClusterStatsNodes[] = [];
   // @ts-expect-error declare type for aggregations explicitly
   const clusterBuckets = response.aggregations?.clusters?.buckets;

@@ -59,7 +59,7 @@ export function checkPrivilegesWithRequestFactory(
       ]);
 
       const clusterClient = await getClusterClient();
-      const { body } = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
+      const body = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
         body: {
           cluster: privileges.elasticsearch?.cluster as estypes.SecurityClusterPrivilege[],
           index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
