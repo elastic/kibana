@@ -311,7 +311,7 @@ export const getDatatableVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.datatable.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];
