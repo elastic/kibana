@@ -103,7 +103,7 @@ export function getMlClient(
     ...p: Parameters<MlClient['getJobStats']>
   ) {
     // similar to groupIdsCheck above, however we need to load the jobs first to get the groups information
-    const ids = getADJobIdsFromRequest(p);
+    const ids = filterAll(getADJobIdsFromRequest(p));
     if (ids.length) {
       const body = await mlClient.getJobs(...p);
       await groupIdsCheck(p, body.jobs, filteredJobIds);
@@ -128,7 +128,7 @@ export function getMlClient(
   }
 
   async function modelIdsCheck(p: MlClientParams, allowWildcards: boolean = false) {
-    const modelIds = getModelIdsFromRequest(p);
+    const modelIds = filterAll(getModelIdsFromRequest(p));
     if (modelIds.length) {
       await checkModelIds(modelIds, allowWildcards);
     }
@@ -665,4 +665,12 @@ function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
 function getJobIdFromBody(p: any): string | undefined {
   const [params] = p;
   return params?.body?.job_id;
+}
+
+function filterAll(ids: string[]) {
+  // if _all has been passed as the only id, remove it and assume it was
+  // an empty list, so all items are returned.
+  // if _all is one of many ids, the endpoint should look for
+  // something called _all, which will subsequently fail.
+  return ids.length === 1 && ids[0] === '_all' ? [] : ids;
 }

@@ -139,6 +139,7 @@ export const useExplorationResults = (
         (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis))
       ) {
         const jobId = jobConfig.id;
+        // CHANGE THIS!!! this is dodgy, it could match unrelated jobs
         const inferenceModels = await trainedModelsApiService.getTrainedModels(`${jobId}*`, {
           include: 'feature_importance_baseline',
         });

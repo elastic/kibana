@@ -101,6 +101,33 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.get(
     {
+      path: '/api/ml/trained_models/_stats',
+      validate: false,
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const body = await mlClient.getTrainedModelsStats();
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /api/ml/trained_models/:modelId/_stats Get stats of a trained model
+   * @apiName GetTrainedModelStats
+   * @apiDescription Retrieves usage information for trained models.
+   */
+  router.get(
+    {
       path: '/api/ml/trained_models/{modelId}/_stats',
       validate: {
         params: modelIdSchema,
