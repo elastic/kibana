@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import url from 'url';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -30,8 +29,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('handles empty state', async () => {
           const response = await apmApiClient.readUser({
             endpoint:
-              'GET /internal/apm/services/opbeans-java/service_overview_instances/details/foo',
+              'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
             params: {
+              path: { serviceName: 'opbeans-java', serviceNodeName: 'foo' },
               query: {
                 start,
                 end,
@@ -68,9 +68,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           response = await apmApiClient.readUser({
             endpoint:
-              'GET /internal/apm/services/opbeans-node/service_overview_instances/details/{serviceId}',
+              'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
             params: {
-              path: { serviceId: serviceNodeIds[0] },
+              path: { serviceName: 'opbeans-node', serviceNodeName: serviceNodeIds[0] },
               query: {
                 start,
                 end,
@@ -96,8 +96,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles empty state when instance id not found', async () => {
         const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/opbeans-java/service_overview_instances/details/foo`,
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
           params: {
+            path: { serviceName: 'opbeans-java', serviceNodeName: 'foo' },
             query: {
               start,
               end,
