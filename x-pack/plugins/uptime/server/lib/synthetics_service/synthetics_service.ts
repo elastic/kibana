@@ -203,7 +203,7 @@ export class SyntheticsService {
     this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
 
     try {
-      return await this.apiClient.post(data);
+      return [];
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -282,6 +282,7 @@ export class SyntheticsService {
     const { saved_objects: encryptedMonitors } = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
       namespaces: ['*'],
+      perPage: 500,
     });
 
     for (const monitor of encryptedMonitors) {
