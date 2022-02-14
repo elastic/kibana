@@ -23,18 +23,18 @@ import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
   AlertActionParam,
-  SanitizedAlert as SanitizedRule,
+  SanitizedAlert,
   ResolvedSanitizedRule,
-  AlertAction,
+  AlertAction as RuleAction,
   AlertAggregations,
   RuleTaskState,
   RuleTaskStateWithActions,
-  AlertSummary,
+  AlertSummary as RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType,
+  AlertNotifyWhenType as RuleNotifyWhenType,
   AlertTypeParams as RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
@@ -42,21 +42,32 @@ import {
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
+type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
+  SanitizedAlert<Params>,
+  'alertTypeId'
+> & {
+  ruleTypeId: SanitizedAlert['alertTypeId'];
+};
 type Rule = SanitizedRule<RuleTypeParams>;
-type ResolvedRule = ResolvedSanitizedRule<RuleTypeParams>;
+type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
+  ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
+};
+type RuleAggregations = Omit<AlertAggregations, 'alertExecutionStatus'> & {
+  ruleExecutionStatus: AlertAggregations['alertExecutionStatus'];
+};
 
 export type {
   Rule,
-  AlertAction,
-  AlertAggregations,
+  RuleAction,
+  RuleAggregations,
   RuleTaskState,
   RuleTaskStateWithActions,
-  AlertSummary,
+  RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedRule,
 };
@@ -95,7 +106,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   isEdit: boolean;
 }
 
-export enum AlertFlyoutCloseReason {
+export enum RuleFlyoutCloseReason {
   SAVED,
   CANCELED,
 }
@@ -232,10 +243,10 @@ export interface RuleType<
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
-export type AlertUpdates = Omit<Rule, 'id' | 'executionStatus'>;
+export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus'>;
 
-export interface AlertTableItem extends Rule {
-  alertType: RuleType['name'];
+export interface RuleTableItem extends Rule {
+  ruleType: RuleType['name'];
   index: number;
   actionsCount: number;
   isEditable: boolean;
@@ -250,7 +261,7 @@ export interface RuleTypeParamsExpressionProps<
   ruleParams: Params;
   ruleInterval: string;
   ruleThrottle: string;
-  alertNotifyWhen: AlertNotifyWhenType;
+  alertNotifyWhen: RuleNotifyWhenType;
   setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setRuleProperty: <Prop extends keyof Rule>(
     key: Prop,
@@ -303,28 +314,28 @@ export interface ConnectorEditFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
-export interface AlertEditProps<MetaData = Record<string, any>> {
-  initialAlert: Rule;
+export interface RuleEditProps<MetaData = Record<string, any>> {
+  initialRule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
+  reloadRules?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
 }
 
-export interface AlertAddProps<MetaData = Record<string, any>> {
+export interface RuleAddProps<MetaData = Record<string, any>> {
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
-  alertTypeId?: string;
+  onClose: (reason: RuleFlyoutCloseReason) => void;
+  ruleTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
+  reloadRules?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;

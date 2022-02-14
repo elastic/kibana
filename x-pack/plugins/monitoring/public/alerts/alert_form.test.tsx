@@ -23,7 +23,7 @@ import {
   GenericValidationResult,
   RuleTypeModel,
 } from '../../../triggers_actions_ui/public/types';
-import { AlertForm } from '../../../triggers_actions_ui/public/application/sections/alert_form/alert_form';
+import { RuleForm } from '../../../triggers_actions_ui/public/application/sections/rule_form/rule_form';
 import ActionForm from '../../../triggers_actions_ui/public/application/sections/action_connector_form/action_form';
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -133,8 +133,8 @@ describe('alert_form', () => {
       wrapper = mountWithIntl(
         <I18nProvider>
           <KibanaReactContext.Provider>
-            <AlertForm
-              alert={initialAlert}
+            <RuleForm
+              rule={initialAlert}
               dispatch={() => {}}
               errors={{ name: [], interval: [] }}
               operation="create"

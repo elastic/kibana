@@ -55,7 +55,10 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
     if (initialAlert) {
       return triggersActionsUi.getEditAlertFlyout({
         ...commonProps,
-        initialAlert,
+        initialRule: {
+          ...initialAlert,
+          ruleTypeId: initialAlert.alertTypeId,
+        },
       });
     }
 
@@ -63,7 +66,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
       ...commonProps,
       consumer: PLUGIN_ID,
       canChangeTrigger: false,
-      alertTypeId: ML_ALERT_TYPES.ANOMALY_DETECTION,
+      ruleTypeId: ML_ALERT_TYPES.ANOMALY_DETECTION,
       metadata: {},
       initialValues: {
         params: {

@@ -20,7 +20,7 @@ import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
 import { triggersActionsUiHealth } from '../../common/lib/health_api';
-import { alertingFrameworkHealth } from '../lib/alert_api';
+import { alertingFrameworkHealth } from '../lib/rule_api';
 
 interface Props {
   inFlyout?: boolean;
