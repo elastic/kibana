@@ -986,6 +986,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.runDFAJob(dfaConfig.id);
       await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
       await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED, timeout);
+      await this.syncSavedObjects();
     },
 
     async updateJobSpaces(
@@ -1024,7 +1025,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
-    async syncSavedObjects(simulate: boolean, space?: string) {
+    async syncSavedObjects(simulate: boolean = false, space?: string) {
       const { body } = await kbnSupertest
         .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/sync?simulate=${simulate}`)
         .set(COMMON_REQUEST_HEADERS)
