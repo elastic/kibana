@@ -11,13 +11,16 @@ import { ALERT_DETAILS } from './translations';
 
 interface IProps {
   primaryText: React.ReactElement;
-  onClick: () => void;
+  handleClick: () => void;
 }
 
-export const EventDetailsBackToAlertDetailsLink: React.FC<IProps> = ({ primaryText, onClick }) => {
+export const EventDetailsBackToAlertDetailsLink: React.FC<IProps> = ({
+  primaryText,
+  handleClick,
+}) => {
   return (
     <>
-      <EuiButtonEmpty iconType="arrowLeft" iconSide="left" flush="left" onClick={onClick}>
+      <EuiButtonEmpty iconType="arrowLeft" iconSide="left" flush="left" onClick={handleClick}>
         <EuiText size="xs">
           <p>{ALERT_DETAILS}</p>
         </EuiText>

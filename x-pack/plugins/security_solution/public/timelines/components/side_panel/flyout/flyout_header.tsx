@@ -39,14 +39,14 @@ const EventDetailsFlyoutHeaderComponent: React.FC<IProps> = ({
       return (
         <EventDetailsBackToAlertDetailsLink
           primaryText={<h2>{ACTION_OSQUERY}</h2>}
-          onClick={showAlertDetails}
+          handleClick={showAlertDetails}
         />
       );
     case ACTIVE_PANEL.HOST_ISOLATION:
       return (
         <EventDetailsBackToAlertDetailsLink
           primaryText={<h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>}
-          onClick={showAlertDetails}
+          handleClick={showAlertDetails}
         />
       );
     default:

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -17,17 +17,20 @@ export const ACTION_OSQUERY = i18n.translate(
 );
 
 interface IProps {
-  onClick: () => void;
+  handleClick: () => void;
 }
 
-export const OsqueryActionItem = ({ onClick }: IProps) => {
-  return (
-    <EuiContextMenuItem
-      key="osquery-action-item"
-      data-test-subj="osquery-action-item"
-      onClick={onClick}
-    >
-      {ACTION_OSQUERY}
-    </EuiContextMenuItem>
+export const OsqueryActionItem = ({ handleClick }: IProps) => {
+  return useMemo(
+    () => (
+      <EuiContextMenuItem
+        key="osquery-action-item"
+        data-test-subj="osquery-action-item"
+        onClick={handleClick}
+      >
+        {ACTION_OSQUERY}
+      </EuiContextMenuItem>
+    ),
+    [handleClick]
   );
 };

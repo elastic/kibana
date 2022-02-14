@@ -172,7 +172,7 @@ export const TakeActionDropdown = React.memo(
       // onClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
     });
     const osqueryActionItem = OsqueryActionItem({
-      onClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
+      handleClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
     });
 
     const alertsActionItems = useMemo(
