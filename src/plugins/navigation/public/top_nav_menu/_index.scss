@@ -13,6 +13,11 @@
   margin-right: $euiSizeM;
 }
 
+.kbnTopNavMenu__betaBadgeWrapper {
+  display: flex;
+  align-items: center;
+}
+
 .kbnTopNavMenu__betaBadgeItem {
-  margin-left: $euiSizeXS;
+  margin-right: $euiSizeS;
 }

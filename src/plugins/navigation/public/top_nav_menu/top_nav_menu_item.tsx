@@ -22,6 +22,19 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     return val!;
   }
 
+  function getButtonContainer() {
+    if (props.badge) {
+      return (
+        <div className="kbnTopNavMenu__betaBadgeWrapper">
+          <EuiBetaBadge className="kbnTopNavMenu__betaBadgeItem" {...props.badge} size="s" />
+          {upperFirst(props.label || props.id!)}
+        </div>
+      );
+    } else {
+      return upperFirst(props.label || props.id!);
+    }
+  }
+
   function handleClick(e: MouseEvent<HTMLButtonElement>) {
     if (isDisabled()) return;
     props.run(e.currentTarget);
@@ -37,23 +50,15 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     className: props.className,
   };
 
-  let btn = props.emphasize ? (
+  const btn = props.emphasize ? (
     <EuiButton size="s" {...commonButtonProps} fill>
-      {upperFirst(props.label || props.id!)}
+      {getButtonContainer()}
     </EuiButton>
   ) : (
     <EuiHeaderLink size="s" color="primary" {...commonButtonProps}>
-      {upperFirst(props.label || props.id!)}
+      {getButtonContainer()}
     </EuiHeaderLink>
   );
-
-  if (props.badge) {
-    btn = (
-      <div className="kbnTopNavMenu__badgeWrapper">
-        <EuiBetaBadge className="kbnTopNavMenu__betaBadgeItem" {...props.badge} size="s" /> {btn}
-      </div>
-    );
-  }
 
   const tooltip = getTooltip();
   if (tooltip) {
