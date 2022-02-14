@@ -29,14 +29,12 @@ describe('[Index management API Routes] Nodes info', () => {
 
     // Mock the response from the ES client ('nodes.info()')
     getNodesInfo.mockResolvedValue({
-      body: {
-        nodes: {
-          node1: {
-            plugins: [{ name: 'plugin-1' }, { name: 'plugin-2' }],
-          },
-          node2: {
-            plugins: [{ name: 'plugin-1' }, { name: 'plugin-3' }],
-          },
+      nodes: {
+        node1: {
+          plugins: [{ name: 'plugin-1' }, { name: 'plugin-2' }],
+        },
+        node2: {
+          plugins: [{ name: 'plugin-1' }, { name: 'plugin-3' }],
         },
       },
     });
