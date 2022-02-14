@@ -19,7 +19,6 @@ import { merge } from 'lodash';
 import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
-import type { MlInfoResponse } from '../../../common/types/ml_server_info';
 import type { MlClient } from '../../lib/ml_client';
 import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import type {
@@ -52,7 +51,6 @@ import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import type { MlJobsStatsResponse } from '../../../common/types/job_service';
 import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import type { JobSavedObjectService } from '../../saved_objects';
 import { isDefined } from '../../../common/types/guards';
@@ -289,7 +287,7 @@ export class DataRecognizer {
       query: moduleConfig.query,
     };
 
-    const { body } = await this._client.asCurrentUser.search({
+    const body = await this._client.asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -590,7 +588,7 @@ export class DataRecognizer {
 
       if (doJobsExist === true) {
         // Get the IDs of the jobs created from the module, and their earliest / latest timestamps.
-        const { body } = await this._mlClient.getJobStats<MlJobsStatsResponse>({
+        const body = await this._mlClient.getJobStats({
           job_id: jobIds.join(),
         });
         const jobStatsJobs: JobStat[] = [];
@@ -843,7 +841,7 @@ export class DataRecognizer {
     const result = { started: false } as DatafeedResponse;
     let opened = false;
     try {
-      const { body } = await this._mlClient.openJob({
+      const body = await this._mlClient.openJob({
         job_id: datafeed.config.job_id,
       });
       opened = body.opened;
@@ -867,12 +865,7 @@ export class DataRecognizer {
           duration.end = String(end);
         }
 
-        const {
-          body: { started, node },
-        } = await this._mlClient.startDatafeed<{
-          started: boolean;
-          node: string;
-        }>({
+        const { started, node } = await this._mlClient.startDatafeed({
           datafeed_id: datafeed.id,
           ...duration,
         });
@@ -1168,9 +1161,7 @@ export class DataRecognizer {
       }
     }
 
-    const {
-      body: { limits },
-    } = await this._mlClient.info<MlInfoResponse>();
+    const { limits } = await this._mlClient.info();
     const maxMml = limits.max_model_memory_limit;
 
     if (!maxMml) {
