@@ -25,6 +25,8 @@ import {
 import { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
 
 import type { GeneratePdfRequest, GeneratePdfResponse } from './worker';
+// Ensure that the worker and all dependencies are included in the release bundle.
+import './worker';
 
 export class PdfMaker {
   _layout: Layout;
