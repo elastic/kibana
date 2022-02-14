@@ -20,6 +20,7 @@ export const ACTIONS_FEATURE = {
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
+  order: 3000,
   management: {
     insightsAndAlerting: ['triggersActions'],
   },

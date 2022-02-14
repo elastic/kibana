@@ -19,7 +19,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
-  order: 2400,
+  order: 3100,
   management: {
     insightsAndAlerting: [APP_ID],
   },
@@ -36,7 +36,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
         all: [],
         read: [],
       },
-      ui: ['crud_cases', 'read_cases'], // uiCapabilities[APP_ID].crud_cases or read_cases
+      ui: ['crud_cases', 'read_cases'],
     },
     read: {
       cases: {
@@ -49,7 +49,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
         all: [],
         read: [],
       },
-      ui: ['read_cases'], // uiCapabilities[APP_ID].crud_cases or read_cases
+      ui: ['read_cases'],
     },
   },
 });
