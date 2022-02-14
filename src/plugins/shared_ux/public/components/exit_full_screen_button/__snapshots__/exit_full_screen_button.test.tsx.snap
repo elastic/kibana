@@ -2,13 +2,14 @@
 
 exports[`<ExitFullScreenButton /> is rendered 1`] = `
 <ServicesProvider
-  dataViewEditor={
+  editors={
     Object {
-      "IndexPatternEditorComponent": [MockFunction],
-      "openEditor": [MockFunction],
-      "userPermissions": Object {
-        "editDataView": [MockFunction],
-      },
+      "openDataViewEditor": [MockFunction],
+    }
+  }
+  permissions={
+    Object {
+      "canCreateNewDataView": true,
     }
   }
   platform={
