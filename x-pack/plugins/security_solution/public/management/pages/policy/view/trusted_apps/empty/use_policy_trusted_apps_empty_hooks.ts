@@ -11,16 +11,21 @@ import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/end
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { getPolicyTrustedAppsPath, getTrustedAppsListPath } from '../../../../../common/routing';
 import { APP_UI_ID } from '../../../../../../../common/constants';
+import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
 
-export const useGetLinkTo = (policyId: string, policyName: string) => {
+export const useGetLinkTo = (
+  policyId: string,
+  policyName: string,
+  location?: Partial<TrustedAppsListPageLocation>
+) => {
   const { getAppUrl } = useAppUrl();
   const { toRoutePath, toRouteUrl } = useMemo(() => {
-    const path = getTrustedAppsListPath();
+    const path = getTrustedAppsListPath(location);
     return {
       toRoutePath: path,
       toRouteUrl: getAppUrl({ path }),
     };
-  }, [getAppUrl]);
+  }, [getAppUrl, location]);
 
   const policyTrustedAppsPath = useMemo(() => getPolicyTrustedAppsPath(policyId), [policyId]);
   const policyTrustedAppRouteState = useMemo(() => {
@@ -55,5 +60,6 @@ export const useGetLinkTo = (policyId: string, policyName: string) => {
   return {
     onClickHandler,
     toRouteUrl,
+    state: policyTrustedAppRouteState,
   };
 };

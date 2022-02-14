@@ -27,13 +27,11 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
       const { client } = context.core.elasticsearch;
 
       try {
-        const {
-          body: { component_templates: componentTemplates },
-        } = await client.asCurrentUser.cluster.getComponentTemplate();
+        const { component_templates: componentTemplates } =
+          await client.asCurrentUser.cluster.getComponentTemplate();
 
-        const {
-          body: { index_templates: indexTemplates },
-        } = await client.asCurrentUser.indices.getIndexTemplate();
+        const { index_templates: indexTemplates } =
+          await client.asCurrentUser.indices.getIndexTemplate();
 
         const body = componentTemplates.map((componentTemplate: ComponentTemplateFromEs) => {
           const deserializedComponentTemplateListItem = deserializeComponentTemplateList(
@@ -63,15 +61,13 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
       const { name } = request.params;
 
       try {
-        const {
-          body: { component_templates: componentTemplates },
-        } = await client.asCurrentUser.cluster.getComponentTemplate({
-          name,
-        });
+        const { component_templates: componentTemplates } =
+          await client.asCurrentUser.cluster.getComponentTemplate({
+            name,
+          });
 
-        const {
-          body: { index_templates: indexTemplates },
-        } = await client.asCurrentUser.indices.getIndexTemplate();
+        const { index_templates: indexTemplates } =
+          await client.asCurrentUser.indices.getIndexTemplate();
 
         return response.ok({
           body: deserializeComponentTemplate(componentTemplates[0], indexTemplates),
