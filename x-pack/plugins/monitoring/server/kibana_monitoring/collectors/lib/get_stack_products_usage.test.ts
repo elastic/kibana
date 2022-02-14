@@ -18,10 +18,8 @@ describe('getStackProductsUsage', () => {
   const availableCcs = false;
   const callCluster = {
     search: jest.fn().mockImplementation(() => ({
-      body: {
-        hits: {
-          hits: [],
-        },
+      hits: {
+        hits: [],
       },
     })),
   } as unknown as ElasticsearchClient;
