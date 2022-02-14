@@ -146,7 +146,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
-        isFromSavedQuery: nextProps.query.isFromSavedQuery ?? false,
+        // isFromSavedQuery: nextProps.query.isFromSavedQuery ?? false,
       };
     } else if (
       nextProps.query &&
