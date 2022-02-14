@@ -255,7 +255,7 @@
         "tags": [],
         "label": "Props",
         "description": [],
-        "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+        "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
         "deprecated": false,
         "children": [
           {
@@ -265,7 +265,7 @@
             "tags": [],
             "label": "indexName",
             "description": [],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false
           },
           {
@@ -278,7 +278,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false
           },
           {
@@ -291,7 +291,7 @@
             "signature": [
               "(name: string, error?: string | undefined) => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
             "children": [
               {
@@ -304,7 +304,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+                "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -318,7 +318,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+                "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -335,7 +335,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -350,7 +350,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/file_upload/public/components/geojson_upload_form/index_name_form.tsx",
+            "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
             "children": [],
             "returnComment": []

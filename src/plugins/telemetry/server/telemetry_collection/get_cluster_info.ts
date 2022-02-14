@@ -16,6 +16,5 @@ import { ElasticsearchClient } from 'src/core/server';
  * @param {function} esClient The asInternalUser handler (exposed for testing)
  */
 export async function getClusterInfo(esClient: ElasticsearchClient) {
-  const { body } = await esClient.info();
-  return body;
+  return await esClient.info();
 }
