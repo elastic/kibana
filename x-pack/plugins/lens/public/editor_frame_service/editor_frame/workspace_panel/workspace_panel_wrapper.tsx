@@ -11,6 +11,7 @@ import React, { useCallback } from 'react';
 import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSwitch } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
@@ -87,7 +88,7 @@ export function WorkspacePanelWrapper({
   );
 
   const toggleAutoApply = useCallback(() => {
-    writeToStorage(new Storage(localStorage), 'autoApplyDisabled', String(!autoApplyEnabled));
+    writeToStorage(new Storage(localStorage), 'autoApplyDisabled', String(autoApplyEnabled));
     dispatchLens(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
   }, [dispatchLens, autoApplyEnabled]);
 
@@ -128,8 +129,8 @@ export function WorkspacePanelWrapper({
                 justifyContent="spaceBetween"
                 className="lnsWorkspacePanelWrapper__toolbar"
               >
-                <EuiFlexItem>
-                  <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="m" justifyContent="flexStart">
                     <EuiFlexItem grow={false}>
                       <ChartSwitch
                         data-test-subj="lnsChartSwitcher"
@@ -161,7 +162,9 @@ export function WorkspacePanelWrapper({
                   >
                     <EuiFlexItem grow={false}>
                       <EuiSwitch
-                        label="Auto-Apply" // TODO — translate
+                        label={i18n.translate('xpack.lens.editorFrame.autoApply', {
+                          defaultMessage: 'Auto-apply',
+                        })}
                         checked={autoApplyEnabled}
                         onChange={toggleAutoApply}
                         className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
@@ -177,7 +180,7 @@ export function WorkspacePanelWrapper({
                         size="s"
                       >
                         <FormattedMessage
-                          id="xpack.lens.app.applyChangesLabel"
+                          id="xpack.lens.editorFrame.applyChangesLabel"
                           defaultMessage="Apply"
                         />
                       </EuiButton>
