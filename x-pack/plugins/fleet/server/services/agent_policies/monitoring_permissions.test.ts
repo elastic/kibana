@@ -43,6 +43,15 @@ describe('getMonitoringPermissions', () => {
       );
       expect(permissions).toMatchSnapshot();
     });
+
+    it('should an empty valid permission entry if neither metrics and logs are enabled', async () => {
+      const permissions = await getMonitoringPermissions(
+        savedObjectsClientMock.create(),
+        { logs: false, metrics: false },
+        'testnamespace123'
+      );
+      expect(permissions).toEqual({ _elastic_agent_monitoring: { indices: [] } });
+    });
   });
 
   describe('With elastic agent package installed', () => {
