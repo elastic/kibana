@@ -31,9 +31,9 @@ describe('fetchCCReadExceptions', () => {
     },
   };
   const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-  esClient.search.mockReturnValue(
+  esClient.search.mockResponse(
     // @ts-expect-error not full response interface
-    elasticsearchClientMock.createSuccessTransportRequestPromise(esRes)
+    esRes
   );
   it('should call ES with correct query', async () => {
     await fetchCCRReadExceptions(esClient, 1643306331418, 1643309869056, 10000);
@@ -104,7 +104,7 @@ describe('fetchCCReadExceptions', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
 
     await fetchCCRReadExceptions(esClient, 1643306331418, 1643309869056, 10000);
