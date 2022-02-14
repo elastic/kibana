@@ -25,7 +25,7 @@ import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { getNodeDetailUrl } from '../../../../link_to';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
-import { createUptimeLink } from '../../lib/create_uptime_link';
+import { uptimeOverviewLocatorID } from '../../../../../../../observability/public';
 
 interface Props {
   isOpen: boolean;
@@ -49,7 +49,8 @@ export const NodeContextPopover = ({
   const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab, AnomaliesTab, OsqueryTab];
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
-  const uiCapabilities = useKibana().services.application?.capabilities;
+  const { application, share } = useKibana().services;
+  const uiCapabilities = application?.capabilities;
   const canCreateAlerts = useMemo(
     () => Boolean(uiCapabilities?.infrastructure?.save),
     [uiCapabilities]
@@ -91,7 +92,6 @@ export const NodeContextPopover = ({
       kuery: `${apmField}:"${node.id}"`,
     },
   });
-  const uptimeMenuItemLinkProps = useLinkProps(createUptimeLink(options, nodeType, node));
 
   if (!isOpen) {
     return null;
@@ -164,7 +164,11 @@ export const NodeContextPopover = ({
                   defaultMessage="APM"
                 />
               </EuiTab>
-              <EuiTab {...uptimeMenuItemLinkProps}>
+              <EuiTab
+                onClick={() =>
+                  share.url.locators.get(uptimeOverviewLocatorID).navigate({ [nodeType]: node.id })
+                }
+              >
                 <EuiIcon type="popout" />{' '}
                 <FormattedMessage
                   id="xpack.infra.infra.nodeDetails.updtimeTabLabel"
