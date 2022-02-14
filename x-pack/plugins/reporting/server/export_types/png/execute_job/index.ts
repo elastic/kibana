@@ -11,12 +11,7 @@ import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { PNG_JOB_TYPE, REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import {
-  decryptJobHeaders,
-  getConditionalHeaders,
-  getFullUrls,
-  generatePngObservable,
-} from '../../common';
+import { decryptJobHeaders, getFullUrls, generatePngObservable } from '../../common';
 import { TaskPayloadPNG } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
@@ -32,15 +27,14 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
       const jobLogger = parentLogger.clone([PNG_JOB_TYPE, 'execute', jobId]);
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-        map((decryptedHeaders) => getConditionalHeaders(config, decryptedHeaders)),
-        mergeMap((conditionalHeaders) => {
+        mergeMap((headers) => {
           const [url] = getFullUrls(config, job);
 
           apmGetAssets?.end();
           apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
 
           return generatePngObservable(reporting, jobLogger, {
-            conditionalHeaders,
+            headers,
             urls: [url],
             browserTimezone: job.browserTimezone,
             layout: job.layout,

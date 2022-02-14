@@ -26,7 +26,6 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
     },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
       const config = reporting.getConfig();
-      const decryptedHeaders = req.headers as Record<string, string>;
       const [basePath, protocol, hostname, port] = [
         config.kbnConfig.get('server', 'basePath'),
         config.get('kibanaServer', 'protocol'),
@@ -51,18 +50,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      const conditionalHeaders = {
-        headers: decryptedHeaders,
-        conditions: {
-          hostname,
-          port: +port,
-          basePath,
-          protocol,
-        },
-      };
-
       return generatePngObservable(reporting, logger, {
-        conditionalHeaders,
+        headers: req.headers,
         layout,
         browserTimezone: 'America/Los_Angeles',
         urls: [hashUrl],
