@@ -121,3 +121,4 @@ export { entries, ElasticsearchAssetType, KibanaAssetType, InstallStatus } from 
 export * from './intra_app_route_state';
 export * from './ui_extensions';
 export * from './in_memory_package_policy';
+export * from './start_plugins';

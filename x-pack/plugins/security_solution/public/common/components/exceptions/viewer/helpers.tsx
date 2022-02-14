@@ -14,6 +14,8 @@ import {
   BuilderEntry,
 } from '@kbn/securitysolution-list-utils';
 
+import React from 'react';
+import { EuiDescriptionListDescription, EuiText, EuiToolTip } from '@elastic/eui';
 import { formatOperatingSystems } from '../helpers';
 import type { FormattedEntry, DescriptionListItem } from '../types';
 import * as i18n from '../translations';
@@ -125,7 +127,38 @@ export const getDescriptionListContent = (
 
   return details.reduce<DescriptionListItem[]>((acc, { value, title }) => {
     if (value != null && value.trim() !== '') {
-      return [...acc, { title, description: value }];
+      const valueElement = (
+        <EuiToolTip content={value} anchorClassName="eventFiltersDescriptionListDescription">
+          <EuiDescriptionListDescription className="eui-fullWidth">
+            {value}
+          </EuiDescriptionListDescription>
+        </EuiToolTip>
+      );
+      if (title === i18n.DESCRIPTION) {
+        return [
+          ...acc,
+          {
+            title,
+            description:
+              value.length > 75 ? (
+                <EuiDescriptionListDescription style={{ height: 150, overflowY: 'hidden' }}>
+                  <EuiText
+                    tabIndex={0}
+                    role="region"
+                    aria-label=""
+                    className="eui-yScrollWithShadows"
+                    size="s"
+                  >
+                    {value}
+                  </EuiText>
+                </EuiDescriptionListDescription>
+              ) : (
+                valueElement
+              ),
+          },
+        ];
+      }
+      return [...acc, { title, description: valueElement }];
     } else {
       return acc;
     }
