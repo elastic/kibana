@@ -21,7 +21,9 @@ Next we will go over how to exactly enable the inspector for different aspects o
 
 You will need to run Jest directly from the Node script:
 
-`node --inspect-brk scripts/jest [TestPathPattern]`
+`node --inspect-brk node_modules/.bin/jest --runInBand --config [JestConfig] [TestPathPattern]`
+
+Additional information can be found in the [Jest troubleshooting documentation](https://jestjs.io/docs/troubleshooting).
 
 ### Functional Test Runner
 
