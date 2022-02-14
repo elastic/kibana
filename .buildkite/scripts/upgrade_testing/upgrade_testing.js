@@ -71,7 +71,7 @@ const upgradeInstance = async ({ deploymentId }) => {
 
         // return value
         acc[key] = resource.map((resourceItem) => ({
-          ...omit(resourceItem, ['info']),
+          ...omit(resourceItem, ['id', 'info']),
           plan: {
             ...resourceItem.info.plan_info.current.plan,
             [key]: {
