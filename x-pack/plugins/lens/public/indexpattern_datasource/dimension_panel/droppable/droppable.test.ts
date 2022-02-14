@@ -698,7 +698,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             'replace_duplicate_incompatible',
             'swap_incompatible',
           ],
-          nextLabel: 'Mininum',
+          nextLabel: 'Minimum',
         });
       });
 
