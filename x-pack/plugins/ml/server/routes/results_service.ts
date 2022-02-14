@@ -37,7 +37,7 @@ function getAnomaliesTableData(mlClient: MlClient, payload: any) {
     dateFormatTz,
     maxRecords,
     maxExamples,
-    influencersFilterQuery,
+    filterQuery,
     functionDescription,
   } = payload;
   return rs.getAnomaliesTableData(
@@ -51,7 +51,7 @@ function getAnomaliesTableData(mlClient: MlClient, payload: any) {
     dateFormatTz,
     maxRecords,
     maxExamples,
-    influencersFilterQuery,
+    filterQuery,
     functionDescription
   );
 }

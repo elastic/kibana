@@ -96,7 +96,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     dateFormatTz: string,
     maxRecords: number = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
     maxExamples: number = DEFAULT_MAX_EXAMPLES,
-    influencersFilterQuery?: any,
+    filterQuery?: any,
     functionDescription?: string
   ) {
     // Build the query to return the matching anomaly record results.
@@ -153,8 +153,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       });
     }
 
-    if (influencersFilterQuery !== undefined) {
-      boolCriteria.push(influencersFilterQuery);
+    if (filterQuery !== undefined) {
+      boolCriteria.push(filterQuery);
     }
 
     // Add a nested query to filter for each of the specified influencers.
@@ -224,6 +224,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       anomalies: [],
       interval: 'second',
     };
+
     // @ts-expect-error incorrect search response type
     if (body.hits.total.value > 0) {
       let records: AnomalyRecordDoc[] = [];
