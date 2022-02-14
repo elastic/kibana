@@ -35,18 +35,14 @@ export const casesContextReducer: React.Reducer<CasesContextState, CasesContextS
   state: CasesContextState,
   action: CasesContextStoreAction
 ): CasesContextState => {
-  console.log('I got this action', action);
-  console.log('the current state', state);
   switch (action.type) {
     case CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT: {
-      return {
-        ...state,
-        createCaseFlyout: {
-          isFlyoutOpen: true,
-          props: action.payload,
-        },
-      };
+      return { ...state, createCaseFlyout: { isFlyoutOpen: true, props: action.payload } };
     }
+    case CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT: {
+      return { ...state, createCaseFlyout: { isFlyoutOpen: false } };
+    }
+    default:
+      return state;
   }
-  return state;
 };
