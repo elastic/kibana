@@ -34,6 +34,8 @@ import { WorkspaceTitle } from './title';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
 import { writeToStorage } from '../../../settings_storage';
 
+export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
+
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
@@ -88,7 +90,11 @@ export function WorkspacePanelWrapper({
   );
 
   const toggleAutoApply = useCallback(() => {
-    writeToStorage(new Storage(localStorage), 'autoApplyDisabled', String(autoApplyEnabled));
+    writeToStorage(
+      new Storage(localStorage),
+      AUTO_APPLY_DISABLED_STORAGE_KEY,
+      String(autoApplyEnabled)
+    );
     dispatchLens(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
   }, [dispatchLens, autoApplyEnabled]);
 

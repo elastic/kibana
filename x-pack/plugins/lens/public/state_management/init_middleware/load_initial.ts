@@ -17,8 +17,6 @@ import { initializeDatasources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { Document } from '../../persistence';
-import { readFromStorage } from '../../settings_storage';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 export const getPersisted = async ({
   initialInput,
@@ -95,7 +93,8 @@ export function loadInitial(
     redirectCallback: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
     history?: History<unknown>;
-  }
+  },
+  autoApplyDisabled: boolean
 ) {
   const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
@@ -131,6 +130,9 @@ export function loadInitial(
             initialContext,
           })
         );
+        if (autoApplyDisabled) {
+          store.dispatch(disableAutoApply());
+        }
       })
       .catch((e: { message: string }) => {
         notifications.toasts.addDanger({
@@ -212,8 +214,6 @@ export function loadInitial(
                 })
               );
 
-              const autoApplyDisabled =
-                readFromStorage(new Storage(localStorage), 'autoApplyDisabled') === 'true';
               if (autoApplyDisabled) {
                 store.dispatch(disableAutoApply());
               }
