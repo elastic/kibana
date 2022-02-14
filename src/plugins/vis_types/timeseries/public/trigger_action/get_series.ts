@@ -72,7 +72,7 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
           const script = getFormulaEquivalent(currentMetric, layerMetricsArray);
           if (!script) return null;
           const variable = variables.find((v) => v.field === currentMetric.id);
-          finalScript = finalScript?.replace(`params.${variable?.name}`, script);
+          finalScript = finalScript?.replaceAll(`params.${variable?.name}`, script);
         }
       }
       const scripthasNoStaticNumber = isNaN(Number(finalScript));
