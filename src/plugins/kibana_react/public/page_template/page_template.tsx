@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 import './page_template.scss';
 
-import React, { FunctionComponent, useState } from 'react';
-import classNames from 'classnames';
+import React, { FunctionComponent } from 'react';
 
 import {
   EuiEmptyPrompt,
@@ -19,13 +17,15 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 
+import { useLocalStorage } from 'react-use/lib';
+import { getPageSideBarProps, getClasses } from './helpers/rendering_helper';
 import {
   KibanaPageTemplateSolutionNav,
   KibanaPageTemplateSolutionNavProps,
 } from './solution_nav/solution_nav';
 
 import { EmptyStatePage } from '../empty_state_page';
-import { NoDataPageProps, NO_DATA_PAGE_TEMPLATE_PROPS } from './no_data_page';
+import { NoDataPageProps } from './no_data_page';
 
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
@@ -67,66 +67,47 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
    */
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+  const isSideNavOpenOnDesktop = !useLocalStorage('solutionNavIsCollapsed');
+  const shouldApplyShrinkingClass =
+    isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop);
 
-  /**
-   * Create the solution nav component
-   */
-  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
-    JSON.parse(String(localStorage.getItem('solutionNavIsCollapsed'))) ? false : true
-  );
-  const toggleOpenOnDesktop = () => {
-    setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
-    // Have to store it as the opposite of the default we want
-    localStorage.setItem('solutionNavIsCollapsed', JSON.stringify(isSideNavOpenOnDesktop));
+  const getPageSideBar = () => {
+    if (!solutionNav) {
+      return pageSideBar;
+    }
+    return <KibanaPageTemplateSolutionNav {...solutionNav} />;
   };
-  let sideBarClasses = 'kbnPageTemplate__pageSideBar';
-  if (solutionNav) {
-    // Only apply shrinking classes if collapsibility is available through `solutionNav`
-    sideBarClasses = classNames(sideBarClasses, {
-      'kbnPageTemplate__pageSideBar--shrink':
-        isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
-    });
 
-    pageSideBar = (
-      <KibanaPageTemplateSolutionNav
-        isOpenOnDesktop={isSideNavOpenOnDesktop}
-        onCollapse={toggleOpenOnDesktop}
-        {...solutionNav}
-      />
-    );
+  const getEmptyStateTemplate = () => {
+    const emptyStateDefaultTemplate = pageSideBar ? 'centeredContent' : 'centeredBody';
+    let emptyStateTemplate = template ?? emptyStateDefaultTemplate;
+    if (pageHeader && !children) {
+      const { iconType, pageTitle, description, rightSideItems } = pageHeader;
+      pageHeader = undefined;
+      children = (
+        <EuiEmptyPrompt
+          iconType={iconType}
+          iconColor={''} // This is likely a solution or app logo, so keep it multi-color
+          title={pageTitle ? <h1>{pageTitle}</h1> : undefined}
+          body={description ? <p>{description}</p> : undefined}
+          actions={rightSideItems}
+        />
+      );
+    } else if (pageHeader && children) {
+      emptyStateTemplate = template ?? 'centeredContent';
+    } else if (!pageHeader) {
+      emptyStateTemplate = template ?? emptyStateDefaultTemplate;
+    }
+    return emptyStateTemplate;
+  };
+
+  if (isEmptyState) {
+    template = getEmptyStateTemplate();
   }
 
-  /**
-   * An easy way to create the right content for empty pages
-   */
-  const emptyStateDefaultTemplate = pageSideBar ? 'centeredContent' : 'centeredBody';
-  if (isEmptyState && pageHeader && !children) {
-    template = template ?? emptyStateDefaultTemplate;
-    const { iconType, pageTitle, description, rightSideItems } = pageHeader;
-    pageHeader = undefined;
-    children = (
-      <EuiEmptyPrompt
-        iconType={iconType}
-        iconColor={''} // This is likely a solution or app logo, so keep it multi-color
-        title={pageTitle ? <h1>{pageTitle}</h1> : undefined}
-        body={description ? <p>{description}</p> : undefined}
-        actions={rightSideItems}
-      />
-    );
-  } else if (isEmptyState && pageHeader && children) {
-    template = template ?? 'centeredContent';
-  } else if (isEmptyState && !pageHeader) {
-    template = template ?? emptyStateDefaultTemplate;
+  if (noDataConfig) {
+    template = 'centeredBody';
   }
-
-  // Set the template before the classes
-  template = noDataConfig ? NO_DATA_PAGE_TEMPLATE_PROPS.template : template;
-
-  const classes = classNames(
-    'kbnPageTemplate',
-    { [`kbnPageTemplate--${template}`]: template },
-    className
-  );
 
   /**
    * If passing the custom template of `noDataConfig`
@@ -136,13 +117,9 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       <EmptyStatePage
         data-test-subj={rest['data-test-subj']}
         template={template}
-        classes={classes}
+        className={className}
         pageSideBar={pageSideBar}
-        pageSideBarProps={{
-          paddingSize: solutionNav ? 'none' : 'l',
-          ...pageSideBarProps,
-          className: classNames(sideBarClasses, pageSideBarProps?.className),
-        }}
+        pageSideBarProps={pageSideBarProps}
         noDataConfig={noDataConfig}
       />
     );
@@ -151,15 +128,15 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   return (
     <EuiPageTemplate
       template={template}
-      className={classes}
+      className={getClasses(template, className)}
       restrictWidth={restrictWidth}
       pageHeader={pageHeader}
-      pageSideBar={pageSideBar}
-      pageSideBarProps={{
-        paddingSize: solutionNav ? 'none' : 'l',
-        ...pageSideBarProps,
-        className: classNames(sideBarClasses, pageSideBarProps?.className),
-      }}
+      pageSideBar={getPageSideBar()}
+      pageSideBarProps={getPageSideBarProps(
+        Boolean(solutionNav),
+        shouldApplyShrinkingClass,
+        pageSideBarProps
+      )}
       {...rest}
     >
       {children}

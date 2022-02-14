@@ -7,7 +7,7 @@
  */
 import './solution_nav.scss';
 
-import React, { FunctionComponent, useState, Fragment } from 'react';
+import React, { FunctionComponent, useState, Fragment, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -63,6 +63,18 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
 
   // This is used for both the EuiSideNav and EuiFlyout toggling
   const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
+  /**
+   * Create the solution nav component
+   */
+  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
+    !JSON.parse(String(localStorage.getItem('solutionNavIsCollapsed')))
+  );
+  const toggleOpenOnDesktop = useCallback(() => {
+    setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
+    // Have to store it as the opposite of the default we want
+    localStorage.setItem('solutionNavIsCollapsed', JSON.stringify(isSideNavOpenOnDesktop));
+  }, [localStorage]);
+
   const toggleOpenOnMobile = () => {
     setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
   };
@@ -151,7 +163,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
           {sideNav}
           <KibanaPageTemplateSolutionNavCollapseButton
             isCollapsed={!isOpenOnDesktop}
-            onClick={onCollapse}
+            onClick={toggleOpenOnDesktop}
           />
         </Fragment>
       )}
