@@ -13,13 +13,10 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { useAlertIndexNames } from '../../hooks/use_alert_indexNames';
 import { RouteParams } from '../../routes';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
 import { ObservabilityStatus } from '../../components/app/observability_status';
-import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
-import { useAlertsPageStateContainer } from '../alerts/containers/state_container';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -34,8 +31,6 @@ export function OverviewPage({ routeParams }: Props) {
       }),
     },
   ]);
-  const { rangeFrom, rangeTo } = useAlertsPageStateContainer();
-  const indexNames = useAlertIndexNames();
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
@@ -80,12 +75,6 @@ export function OverviewPage({ routeParams }: Props) {
           : undefined
       }
     >
-      <AlertsTableTGrid
-        setRefetch={() => {}}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
-        indexNames={indexNames}
-      />
       {hasData && (
         <>
           <EuiButton onClick={() => setIsFlyoutVisible(true)}>Show observability status</EuiButton>
