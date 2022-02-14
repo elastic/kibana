@@ -31,7 +31,7 @@ function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id:
 }
 
 async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
-  const { body } = await esClient.search<any>({
+  const body = await esClient.search<any>({
     index,
     body: {
       query: {
@@ -95,7 +95,7 @@ describe('migration v2', () => {
     // wait a bit for the count to settle.
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    const esClient: ElasticsearchClient = esServer.es.getKibanaEsClient();
+    const esClient: ElasticsearchClient = esServer.es.getClient();
 
     // assert that the docs from the original index have been migrated rather than comparing a doc count after startup
     const originalDocs = await fetchDocuments(esClient, '.kibana_7.14.0_001');
