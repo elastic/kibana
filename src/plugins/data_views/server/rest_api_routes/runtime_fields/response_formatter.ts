@@ -7,7 +7,7 @@
  */
 
 import { DataView, DataViewField } from 'src/plugins/data_views/common';
-import { SERVICE_KEY_LEGACY, SERVICE_KEY_TYPE } from '../../constants';
+import { SERVICE_KEY_LEGACY, SERVICE_KEY_TYPE, SERVICE_KEY } from '../../constants';
 
 interface ResponseFormatterArgs {
   serviceKey: SERVICE_KEY_TYPE;
@@ -19,13 +19,13 @@ export const responseFormatter = ({ serviceKey, field, dataView }: ResponseForma
   const response = {
     body: {
       fields: [field.toSpec()],
-      SERVICE_KEY: dataView.toSpec(),
+      [SERVICE_KEY]: dataView.toSpec(),
     },
   };
 
   const legacyResponse = {
     body: {
-      SERVICE_KEY_LEGACY: dataView.toSpec(),
+      [SERVICE_KEY_LEGACY]: dataView.toSpec(),
       field: field.toSpec(),
     },
   };
