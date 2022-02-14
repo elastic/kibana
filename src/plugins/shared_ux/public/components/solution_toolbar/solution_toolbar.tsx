@@ -29,10 +29,15 @@ interface NamedSlots {
 
 export interface Props {
   isDarkModeEnabled?: boolean;
+  id?: string;
   children: NamedSlots;
 }
 
-export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
+export const SolutionToolbar = ({
+  isDarkModeEnabled,
+  children,
+  id = `kbnPresentationToolbar__solutionToolbar`,
+}: Props) => {
   const {
     primaryActionButton,
     quickButtonGroup,
@@ -53,7 +58,7 @@ export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
       className={`solutionToolbar ${
         isDarkModeEnabled ? 'solutionToolbar--dark' : 'solutionToolbar--light'
       }`}
-      id={`kbnPresentationToolbar__solutionToolbar`}
+      id={id}
       gutterSize="s"
     >
       <EuiFlexItem grow={false}>{primaryActionButton}</EuiFlexItem>
