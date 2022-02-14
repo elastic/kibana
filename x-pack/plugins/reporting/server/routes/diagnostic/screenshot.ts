@@ -24,7 +24,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       path: `${API_DIAGNOSE_URL}/screenshot`,
       validate: {},
     },
-    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
+    authorizedUserPreRouting(reporting, async (_user, _context, request, res) => {
       const config = reporting.getConfig();
       const [basePath, protocol, hostname, port] = [
         config.kbnConfig.get('server', 'basePath'),
@@ -51,8 +51,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       };
 
       return generatePngObservable(reporting, logger, {
-        headers: req.headers,
         layout,
+        request,
         browserTimezone: 'America/Los_Angeles',
         urls: [hashUrl],
       })

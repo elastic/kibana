@@ -60,7 +60,7 @@ export interface ScreenshotObservableOptions {
   /**
    * Custom headers to be sent with each request.
    */
-  headers: Headers;
+  headers?: Headers;
 
   /**
    * Timeouts for each phase of the screenshot.
@@ -177,7 +177,7 @@ export class ScreenshotObservableHandler {
         index,
         url,
         { ...(context ?? {}), layout: this.layout.id },
-        this.options.headers
+        this.options.headers ?? {}
       );
     }).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
   }
