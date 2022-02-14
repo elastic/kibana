@@ -7,4 +7,4 @@
  */
 
 export { SolutionToolbar } from './solution_toolbar';
-export * from './items';
+export { SolutionToolbarButton } from './items';

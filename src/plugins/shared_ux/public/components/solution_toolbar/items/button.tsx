@@ -10,8 +10,6 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
-import './button.scss';
-
 export interface Props
   extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType' | 'iconSide' | 'className'> {
   label: string;

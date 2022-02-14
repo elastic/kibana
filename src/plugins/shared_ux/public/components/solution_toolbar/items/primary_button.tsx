@@ -10,8 +10,6 @@ import React from 'react';
 
 import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from './button';
 
-import './primary_button.scss';
-
 export interface Props extends Omit<SolutionToolbarButtonProps, 'primary'> {
   isDarkModeEnabled?: boolean;
 }

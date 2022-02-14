@@ -12,8 +12,6 @@ import { ComponentStrings } from '../../../i18n/components';
 
 const { QuickButtonGroup: strings } = ComponentStrings;
 
-import './quick_group.scss';
-
 export interface QuickButtonProps extends Pick<EuiButtonGroupOptionProps, 'iconType'> {
   createType: string;
   onClick: () => void;

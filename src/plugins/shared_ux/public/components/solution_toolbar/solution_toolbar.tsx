@@ -18,8 +18,6 @@ import {
   SolutionToolbarPopover,
 } from './items';
 
-import './solution_toolbar.scss';
-
 interface NamedSlots {
   primaryActionButton: ReactElement<typeof PrimaryActionButton | typeof PrimaryActionPopover>;
   quickButtonGroup?: ReactElement<typeof QuickButtonGroup>;
