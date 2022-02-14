@@ -169,12 +169,14 @@ export class SavedSearchEmbeddable
 
     this.updateOutput({ loading: true, error: undefined });
     const executionContext = {
-      type: this.type,
-      name: 'discover',
-      id: this.savedSearch.id!,
-      description: this.output.title || this.output.defaultTitle || '',
-      url: this.output.editUrl,
-      parent: this.input.executionContext,
+      ...this.input.executionContext!,
+      child: {
+        type: this.type,
+        name: 'discover',
+        id: this.savedSearch.id!,
+        description: this.output.title || this.output.defaultTitle || '',
+        url: this.output.editUrl,
+      },
     };
 
     try {

@@ -399,12 +399,14 @@ export class VisualizeEmbeddable
 
   private async updateHandler() {
     const context = {
-      type: 'visualization',
-      name: this.vis.type.title,
-      id: this.vis.id ?? 'an_unsaved_vis',
-      description: this.vis.title || this.input.title || this.vis.type.name,
-      url: this.output.editUrl,
-      parent: this.parent?.getInput().executionContext,
+      ...this.parent?.getInput().executionContext,
+      child: {
+        type: 'visualization',
+        name: this.vis.type.title,
+        id: this.vis.id ?? 'an_unsaved_vis',
+        description: this.vis.title || this.input.title || this.vis.type.name,
+        url: this.output.editUrl,
+      },
     };
 
     const expressionParams: IExpressionLoaderParams = {

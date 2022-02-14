@@ -22,9 +22,9 @@ export type KibanaExecutionContext = {
   /** unique value to identify the source */
   readonly id: string;
   /** human readable description. For example, a vis title, action name */
-  readonly description: string;
+  readonly description?: string;
   /** in browser - url to navigate to a current page, on server - endpoint path, for task: task SO url */
   readonly url?: string;
-  /** a context that spawned the current context. */
-  parent?: KibanaExecutionContext;
+  /** an inner context spawned from the current context. */
+  child?: KibanaExecutionContext;
 };

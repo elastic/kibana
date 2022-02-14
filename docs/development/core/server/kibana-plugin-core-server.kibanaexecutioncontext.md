@@ -13,8 +13,8 @@ export declare type KibanaExecutionContext = {
     readonly type: string;
     readonly name: string;
     readonly id: string;
-    readonly description: string;
+    readonly description?: string;
     readonly url?: string;
-    parent?: KibanaExecutionContext;
+    child?: KibanaExecutionContext;
 };
 ```
