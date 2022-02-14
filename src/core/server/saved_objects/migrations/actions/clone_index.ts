@@ -83,7 +83,7 @@ export const cloneIndex = ({
         },
         { maxRetries: 0 /** handle retry ourselves for now */ }
       )
-      .then((res) => {
+      .then((response) => {
         /**
          * - acknowledged=false, we timed out before the cluster state was
          *   updated with the newly created index, but it probably will be
@@ -93,8 +93,8 @@ export const cloneIndex = ({
          * - acknowledged=true, shards_acknowledged=true, cloning complete
          */
         return Either.right({
-          acknowledged: res.body.acknowledged,
-          shardsAcknowledged: res.body.shards_acknowledged,
+          acknowledged: response.acknowledged,
+          shardsAcknowledged: response.shards_acknowledged,
         });
       })
       .catch((error: EsErrors.ResponseError) => {

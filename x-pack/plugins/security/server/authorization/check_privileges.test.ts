@@ -24,9 +24,7 @@ const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockClusterClient = (response: any) => {
   const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-    body: response,
-  } as any);
+  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse(response as any);
 
   const mockClusterClient = elasticsearchServiceMock.createClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);

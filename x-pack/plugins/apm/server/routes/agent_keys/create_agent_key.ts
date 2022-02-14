@@ -7,24 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { ApmPluginRequestHandlerContext } from '../typings';
-import { CreateApiKeyResponse } from '../../../common/agent_key_types';
-import { PrivilegeType } from '../../../common/privilege_type';
 
 const resource = '*';
-
-interface SecurityHasPrivilegesResponse {
-  application: {
-    apm: {
-      [resource]: {
-        [PrivilegeType.SOURCEMAP]: boolean;
-        [PrivilegeType.EVENT]: boolean;
-        [PrivilegeType.AGENT_CONFIG]: boolean;
-      };
-    };
-  };
-  has_all_requested: boolean;
-  username: string;
-}
 
 export async function createAgentKey({
   context,
@@ -46,12 +30,10 @@ export async function createAgentKey({
   // Elasticsearch will allow a user without the right apm privileges to create API keys, but the keys won't validate
   // check first whether the user has the right privileges, and bail out early if not
   const {
-    body: {
-      application: userApplicationPrivileges,
-      username,
-      has_all_requested: hasRequiredPrivileges,
-    },
-  } = await context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges<SecurityHasPrivilegesResponse>(
+    application: userApplicationPrivileges,
+    username,
+    has_all_requested: hasRequiredPrivileges,
+  } = await context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges(
     {
       body: {
         application: [application],
@@ -97,8 +79,8 @@ export async function createAgentKey({
     },
   };
 
-  const { body: agentKey } =
-    await context.core.elasticsearch.client.asCurrentUser.security.createApiKey<CreateApiKeyResponse>(
+  const agentKey =
+    await context.core.elasticsearch.client.asCurrentUser.security.createApiKey(
       {
         body,
       }
