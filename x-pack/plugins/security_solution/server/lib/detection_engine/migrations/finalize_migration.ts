@@ -48,7 +48,7 @@ export const finalizeMigration = async ({
 
   const { destinationIndex, sourceIndex, taskId } = migration.attributes;
 
-  const { body: task } = await esClient.tasks.get<{ completed: boolean }>({ task_id: taskId });
+  const task = await esClient.tasks.get({ task_id: taskId });
   if (!task.completed) {
     return migration;
   }

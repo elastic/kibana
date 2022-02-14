@@ -473,13 +473,7 @@
             "label": "logger",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
-                "text": "Logger"
-              },
+              "Logger",
               " | Console"
             ],
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
