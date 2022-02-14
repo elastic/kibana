@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
 import { find } from 'lodash';
 import { useKibana } from '../../common/lib/kibana';
@@ -18,21 +18,26 @@ interface IProps {
 
 export const useIsOsqueryAvailableSimple = ({ agentId }: IProps) => {
   const { http } = useKibana().services;
-  return useCallback(async () => {
-    try {
-      const { item: agentInfo }: { item: FleetServerAgent } = await http.get(
-        `/internal/osquery/fleet_wrapper/agents/${agentId}`
-      );
-      const { item: packageInfo }: { item: AgentPolicy } = await http.get(
-        `/internal/osquery/fleet_wrapper/agent_policies/${agentInfo.policy_id}/`
-      );
-      const osqueryPackageInstalled = find(packageInfo?.package_policies, [
-        'package.name',
-        OSQUERY_INTEGRATION_NAME,
-      ]) as NewPackagePolicy;
-      return osqueryPackageInstalled.enabled;
-    } catch (err) {
-      return false;
-    }
+  const [isAvailable, setIsAvailable] = useState(false);
+  useEffect(() => {
+    (async () => {
+      try {
+        const { item: agentInfo }: { item: FleetServerAgent } = await http.get(
+          `/internal/osquery/fleet_wrapper/agents/${agentId}`
+        );
+        const { item: packageInfo }: { item: AgentPolicy } = await http.get(
+          `/internal/osquery/fleet_wrapper/agent_policies/${agentInfo.policy_id}/`
+        );
+        const osqueryPackageInstalled = find(packageInfo?.package_policies, [
+          'package.name',
+          OSQUERY_INTEGRATION_NAME,
+        ]) as NewPackagePolicy;
+        setIsAvailable(osqueryPackageInstalled.enabled);
+      } catch (err) {
+        return;
+      }
+    })();
   }, [agentId, http]);
+
+  return isAvailable;
 };

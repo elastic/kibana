@@ -42,7 +42,7 @@ describe('UseIsOsqueryAvailableSimple', () => {
     });
   });
   it('should expect response from API and return enabled flag', async () => {
-    const { result } = renderHook(
+    const { result, waitForValueToChange } = renderHook(
       () =>
         useIsOsqueryAvailableSimple({
           agentId: '3242332',
@@ -50,6 +50,8 @@ describe('UseIsOsqueryAvailableSimple', () => {
       { wrapper: WrappedHelper }
     );
 
-    expect(await result.current()).toBe(true);
+    await waitForValueToChange(() => result.current);
+
+    expect(result.current).toBe(true);
   });
 });
