@@ -185,7 +185,7 @@ describe('metric_suggestions', () => {
         "previewIcon": [Function],
         "score": 0.1,
         "state": Object {
-          "accessor": "bytes",
+          "accessor": "id",
           "layerId": "l1",
           "layerType": "data",
         },
