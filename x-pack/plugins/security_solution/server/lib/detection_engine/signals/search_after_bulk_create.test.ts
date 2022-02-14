@@ -86,20 +86,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -107,20 +105,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -128,20 +124,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -149,20 +143,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -213,20 +205,18 @@ describe('searchAfterAndBulkCreate', () => {
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
       )
     );
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -234,20 +224,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -255,20 +243,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -319,35 +305,36 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-          {
-            create: {
-              status: 201,
-            },
+        },
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-          {
-            create: {
-              status: 201,
-            },
+        },
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-          {
-            create: {
-              status: 201,
-            },
+        },
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -452,42 +439,40 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success when empty string sortId present', async () => {
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              _id: someGuids[0],
-              _index: 'myfakeindex',
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          create: {
+            _id: someGuids[0],
+            _index: 'myfakeindex',
+            status: 201,
           },
-          {
-            create: {
-              _id: someGuids[1],
-              _index: 'myfakeindex',
-              status: 201,
-            },
+        },
+        {
+          create: {
+            _id: someGuids[1],
+            _index: 'myfakeindex',
+            status: 201,
           },
-          {
-            create: {
-              _id: someGuids[2],
-              _index: 'myfakeindex',
-              status: 201,
-            },
+        },
+        {
+          create: {
+            _id: someGuids[2],
+            _index: 'myfakeindex',
+            status: 201,
           },
-          {
-            create: {
-              _id: someGuids[3],
-              _index: 'myfakeindex',
-              status: 201,
-            },
+        },
+        {
+          create: {
+            _id: someGuids[3],
+            _index: 'myfakeindex',
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
     mockService.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -594,35 +579,36 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-          {
-            create: {
-              status: 201,
-            },
+        },
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-          {
-            create: {
-              status: 201,
-            },
+        },
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-          {
-            create: {
-              status: 201,
-            },
+        },
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.entries = [
@@ -667,35 +653,36 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-          {
-            create: {
-              status: 201,
-            },
+        },
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-          {
-            create: {
-              status: 201,
-            },
+        },
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-          {
-            create: {
-              status: 201,
-            },
+        },
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -908,9 +895,7 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(bulkItem)
-    ); // adds the response with errors we are testing
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce(bulkItem); // adds the response with errors we are testing
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -918,20 +903,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -939,20 +922,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -960,20 +941,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -1013,20 +992,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -1034,20 +1011,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -1055,20 +1030,18 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
 
-    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
-      // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          // @ts-expect-error not full response interface
+          create: {
+            status: 201,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(

@@ -52,12 +52,13 @@ function wrapEsClient(
   >(
     query?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions
-  ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, TContext>> => {
+  ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>>> => {
     try {
       const searchOptions = options ?? {};
-      return await esClient.search<TDocument, TAggregations, TContext>(query, {
+      return await esClient.search<TDocument, TAggregations>(query, {
         ...searchOptions,
         signal: abortController.signal,
+        meta: true,
       });
     } catch (e) {
       if (abortController.signal.aborted) {

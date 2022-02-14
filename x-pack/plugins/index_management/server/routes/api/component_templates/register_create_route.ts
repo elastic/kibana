@@ -32,11 +32,10 @@ export const registerCreateRoute = ({
 
       try {
         // Check that a component template with the same name doesn't already exist
-        const {
-          body: { component_templates: componentTemplates },
-        } = await client.asCurrentUser.cluster.getComponentTemplate({
-          name,
-        });
+        const { component_templates: componentTemplates } =
+          await client.asCurrentUser.cluster.getComponentTemplate({
+            name,
+          });
 
         if (componentTemplates.length) {
           return response.conflict({
@@ -55,7 +54,7 @@ export const registerCreateRoute = ({
       }
 
       try {
-        const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
+        const responseBody = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
           // @ts-expect-error ComponentTemplateSerialized conflicts with @elastic/elasticsearch ClusterPutComponentTemplateRequest
           body: serializedComponentTemplate,

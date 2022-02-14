@@ -15,6 +15,7 @@ import { TypedLensByValueInput, PersistedIndexPatternLayer } from '../../../plug
 import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
 import { getRotatingNumberVisualization } from './visualization';
 import { RotatingNumberState } from '../common/types';
+import image from './image.png';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
@@ -38,7 +39,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
         label: 'Count of records',
         operationType: 'count',
         scale: 'ratio',
-        sourceField: 'Records',
+        sourceField: '___records___',
       },
     },
   };
@@ -111,10 +112,11 @@ export class EmbeddedLensExamplePlugin
       appId: 'third_party_lens_vis_example',
       title: 'Third party Lens visualization',
       description: 'Add custom visualization types to the Lens editor',
+      image,
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_lens_vis_example',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_vis_lens_example',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
