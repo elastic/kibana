@@ -85,6 +85,13 @@ async function addUser(esClient: Client): Promise<UserInfo[string] | undefined> 
   }
 }
 
+async function deleteUser(esClient: Client, username: string): Promise<{ found: boolean }> {
+  return esClient.transport.request({
+    method: 'DELETE',
+    path: `_security/user/${username}`,
+  });
+}
+
 async function main() {
   const argv = yargs.help().options({
     seed: {
@@ -317,5 +324,13 @@ async function main() {
       alertsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.alertIndex),
     }
   );
+  // delete endpoint_user after
+
+  if (user) {
+    const deleted = await deleteUser(client, user.username);
+    if (deleted.found) {
+      console.log(`user ${user.username} deleted successfully!`);
+    }
+  }
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
 }
