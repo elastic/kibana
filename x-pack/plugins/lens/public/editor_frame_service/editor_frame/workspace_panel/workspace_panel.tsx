@@ -339,7 +339,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderVisualization = () => {
-    if (!expressionExists) {
+    if (expression === null) {
       return renderEmptyWorkspace();
     }
     return (
