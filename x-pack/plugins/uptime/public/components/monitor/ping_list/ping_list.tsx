@@ -177,7 +177,8 @@ export const PingList = () => {
           formatDuration(duration)
         ) : (
           <span data-test-subj="ping-list-duration-unavailable-tool-tip">{'--'}</span>
-        ),    },
+        ),
+    },
     {
       field: 'error.type',
       name: ERROR_LABEL,
