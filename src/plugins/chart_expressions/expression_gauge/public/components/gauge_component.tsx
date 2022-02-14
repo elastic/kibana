@@ -17,10 +17,18 @@ import {
   GaugeLabelMajorModes,
   GaugeColorModes,
 } from '../../common';
-import { GaugeShapes, GaugeTicksPositions } from '../../common';
-import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
-import { getAccessorsFromArgs, getMaxValue, getMinValue, getValueFromAccessor } from './utils';
+import { GaugeTicksPositions } from '../../common';
+import {
+  getAccessorsFromArgs,
+  getIcons,
+  getMaxValue,
+  getMinValue,
+  getValueFromAccessor,
+  getSubtypeByGaugeType,
+  getGoalConfig,
+} from './utils';
 import './index.scss';
+
 declare global {
   interface Window {
     /**
@@ -152,7 +160,7 @@ function getTicks(
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
   ({ data, args, formatFactory, chartsThemeService }) => {
     const {
-      shape: subtype,
+      shape: gaugeType,
       palette,
       colorMode,
       labelMinor,
@@ -179,8 +187,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     const metricValue = args.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
 
-    const icon =
-      subtype === GaugeShapes.HORIZONTAL_BULLET ? GaugeIconHorizontal : GaugeIconVertical;
+    const icon = getIcons(gaugeType);
 
     if (typeof metricValue !== 'number') {
       return <EmptyPlaceholder icon={icon} />;
@@ -235,7 +242,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     // TODO: format in charts
     const formattedActual = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
-
+    const goalConfig = getGoalConfig(gaugeType);
     return (
       <Chart>
         <Settings
@@ -246,7 +253,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
         />
         <Goal
           id="goal"
-          subtype={subtype}
+          subtype={getSubtypeByGaugeType(gaugeType)}
           base={bands[0]}
           target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
           actual={formattedActual}
@@ -267,6 +274,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           }
           labelMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
           labelMinor={labelMinor ? labelMinor + '  ' : ''} // added extra space for nice rendering
+          {...goalConfig}
         />
       </Chart>
     );
