@@ -42,6 +42,7 @@ import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
+  getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
 import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
@@ -61,7 +62,7 @@ import {
 import { DataPublicPluginStart, ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
-import { Datasource, StateSetter } from '../types';
+import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
@@ -150,7 +151,7 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext,
+      initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       options?: InitializationOptions
     ) {
       return loadInitialState({
@@ -485,6 +486,7 @@ export function getIndexPatternDatasource({
     },
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
+    getDatasourceSuggestionsForVisualizeCharts,
 
     getErrorMessages(state) {
       if (!state) {
