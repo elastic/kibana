@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { AllSeries, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
@@ -24,7 +24,6 @@ import { SingleMetric } from './single_metric';
 
 export interface ExploratoryEmbeddableProps {
   appId?: 'security' | 'observability';
-  appendHeader?: JSX.Element;
   appendTitle?: JSX.Element;
   attributes?: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
@@ -38,7 +37,7 @@ export interface ExploratoryEmbeddableProps {
   metricIconColor?: string;
   metricPostfix?: string;
   onBrushEnd?: (param: { range: number[] }) => void;
-  owner: string;
+  owner?: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
   showCalculationMethod?: boolean;

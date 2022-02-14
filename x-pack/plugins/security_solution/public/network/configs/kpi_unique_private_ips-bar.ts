@@ -187,8 +187,4 @@ export const kpiUniquePrivateIpsBar = {
       name: 'indexpattern-datasource-layer-38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7',
     },
   ],
-  migrationVersion: {
-    lens: '8.1.0',
-  },
-  coreMigrationVersion: '8.2.0',
 };

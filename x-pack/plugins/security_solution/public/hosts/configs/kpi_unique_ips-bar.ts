@@ -123,7 +123,4 @@ export const kpiUniqueIpsBar = {
       type: 'tag',
     },
   ],
-  type: 'lens',
-  updated_at: '2022-02-09T17:50:24.648Z',
-  version: 'WzI5MTU1MSwzXQ==',
 };

@@ -105,7 +105,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <ExploratoryViewEmbeddable
                   alignLnsMetric="flex-start"
-                  appId="security"
+                  appid="securitySolutionUI"
                   title={'Network events'}
                   dataTypesIndexPatterns={dataTypesIndexPatterns}
                   reportType="singleMetric"
@@ -130,7 +130,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <ExploratoryViewEmbeddable
                   alignLnsMetric="flex-start"
-                  appId="security"
+                  appid="securitySolutionUI"
                   title={'DNS queries'}
                   dataTypesIndexPatterns={dataTypesIndexPatterns}
                   reportType="singleMetric"
@@ -158,7 +158,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <ExploratoryViewEmbeddable
                   alignLnsMetric="flex-start"
-                  appId="security"
+                  appid="securitySolutionUI"
                   title={'Unique flow IDs'}
                   dataTypesIndexPatterns={dataTypesIndexPatterns}
                   reportType="singleMetric"
@@ -183,7 +183,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
               <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <ExploratoryViewEmbeddable
                   alignLnsMetric="flex-start"
-                  appId="security"
+                  appid="securitySolutionUI"
                   title={'TLS handshakes'}
                   dataTypesIndexPatterns={dataTypesIndexPatterns}
                   reportType="singleMetric"
@@ -222,7 +222,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                     <ExploratoryViewEmbeddable
                       alignLnsMetric="flex-start"
-                      appId="security"
+                      appid="securitySolutionUI"
                       dataTypesIndexPatterns={patternList}
                       reportType="singleMetric"
                       attributes={[
@@ -248,7 +248,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <ExploratoryViewEmbeddable
-                      appId="security"
+                      appid="securitySolutionUI"
                       dataTypesIndexPatterns={patternList}
                       reportType="unique_private_ip"
                       attributes={[
@@ -272,7 +272,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                     <ExploratoryViewEmbeddable
                       alignLnsMetric="flex-start"
-                      appId="security"
+                      appid="securitySolutionUI"
                       customLensAttrs={customLensAttrs.kpiUniquePrivateIpsDestinationMetric}
                       customTimeRange={timerange}
                       dataTypesIndexPatterns={patternList}
@@ -298,7 +298,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <ExploratoryViewEmbeddable
-                      appId="security"
+                      appid="securitySolutionUI"
                       dataTypesIndexPatterns={patternList}
                       reportType={ReportTypes.KPI}
                       attributes={[

@@ -55,7 +55,4 @@ export const kpiUniquePrivateIpsDestinationMetric = {
       type: 'index-pattern',
     },
   ],
-  type: 'lens',
-  updated_at: '2022-02-08T15:45:43.713Z',
-  version: 'WzI0NzM3MywzXQ==',
 };
