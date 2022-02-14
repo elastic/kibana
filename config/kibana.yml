@@ -64,7 +64,7 @@
 
 # Specifies whether Kibana should use compression for communications with elasticsearch
 # Defaults to `false`.
-#elasticsearch.compression: false
+elasticsearch.compression: true
 
 # List of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
 # headers, set this value to [] (an empty list).
