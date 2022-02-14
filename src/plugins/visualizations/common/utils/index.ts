@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
-
-/** @public types */
-export * from './types';
-export * from './utils';
-export * from './expression_functions';
+export { prepareLogTable } from './prepare_log_table';
+export type { Dimension } from './prepare_log_table';
+export { findAccessorOrFail, getAccessorByDimension } from './accessors';

@@ -7,7 +7,7 @@
  */
 
 import type { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import { getAccessorByDimension } from '../../../../visualizations/common/utils';
 import { Accessors, GaugeArguments } from '../../common';
 
 export const getValueFromAccessor = (
@@ -103,17 +103,6 @@ export const getGoalValue = (row?: DatatableRow, accessors?: Accessors) => {
   return Math.round((maxValue - minValue) * 0.75 + minValue);
 };
 
-const getAccessor = (value: string | ExpressionValueVisDimension, columns: DatatableColumn[]) => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  const accessor = value.accessor;
-  if (typeof accessor === 'number') {
-    return columns[accessor].id;
-  }
-  return accessor.id;
-};
-
 export const getAccessorsFromArgs = (
   args: GaugeArguments,
   columns: DatatableColumn[]
@@ -124,9 +113,9 @@ export const getAccessorsFromArgs = (
   }
 
   return {
-    min: min ? getAccessor(min, columns) : undefined,
-    max: max ? getAccessor(max, columns) : undefined,
-    goal: goal ? getAccessor(goal, columns) : undefined,
-    metric: metric ? getAccessor(metric, columns) : undefined,
+    min: min ? getAccessorByDimension(min, columns) : undefined,
+    max: max ? getAccessorByDimension(max, columns) : undefined,
+    goal: goal ? getAccessorByDimension(goal, columns) : undefined,
+    metric: metric ? getAccessorByDimension(metric, columns) : undefined,
   };
 };

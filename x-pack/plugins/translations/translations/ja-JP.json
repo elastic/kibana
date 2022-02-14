@@ -6162,7 +6162,6 @@
     "visualizations.function.range.help": "範囲オブジェクトを生成します",
     "visualizations.function.range.to.help": "範囲の終了",
     "visualizations.function.visDimension.accessor.help": "使用するデータセット内の列（列インデックスまたは列名）",
-    "visualizations.function.visDimension.error.accessor": "入力された列名またはインデックスが無効です",
     "visualizations.function.visDimension.format.help": "フォーマット",
     "visualizations.function.visDimension.formatParams.help": "フォーマットパラメーター",
     "visualizations.function.visDimension.help": "visConfig ディメンションオブジェクトを生成します",
