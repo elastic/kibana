@@ -145,7 +145,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
     latestMs: number,
     fieldsConfig: FieldsConfig = {}
   ) {
-    const { body: jobsResponse } = await mlClient.getJobs({ job_id: jobId });
+    const jobsResponse = await mlClient.getJobs({ job_id: jobId });
     if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
     }
@@ -219,7 +219,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
       },
     };
 
-    const { body } = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         size: 0,
         body: requestBody,

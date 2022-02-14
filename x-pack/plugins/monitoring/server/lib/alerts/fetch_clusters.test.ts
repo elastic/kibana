@@ -6,8 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchClusters } from './fetch_clusters';
 
@@ -30,20 +28,19 @@ describe('fetchClusters', () => {
 
   it('return a list of clusters', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _source: {
-                cluster_uuid: clusterUuid,
-                cluster_name: clusterName,
-              },
+    esClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _source: {
+              cluster_uuid: clusterUuid,
+              cluster_name: clusterName,
             },
-          ],
-        },
-      } as estypes.SearchResponse)
-    );
+          },
+        ],
+      },
+    } as estypes.SearchResponse);
+
     const result = await fetchClusters(esClient);
     expect(result).toEqual([{ clusterUuid, clusterName }]);
   });
@@ -51,27 +48,25 @@ describe('fetchClusters', () => {
   it('return the metadata name if available', async () => {
     const metadataName = 'custom-monitoring';
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _source: {
-                cluster_uuid: clusterUuid,
-                cluster_name: clusterName,
-                cluster_settings: {
-                  cluster: {
-                    metadata: {
-                      display_name: metadataName,
-                    },
+    esClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _source: {
+              cluster_uuid: clusterUuid,
+              cluster_name: clusterName,
+              cluster_settings: {
+                cluster: {
+                  metadata: {
+                    display_name: metadataName,
                   },
                 },
               },
             },
-          ],
-        },
-      } as estypes.SearchResponse)
-    );
+          },
+        ],
+      },
+    } as estypes.SearchResponse);
     const result = await fetchClusters(esClient);
     expect(result).toEqual([{ clusterUuid, clusterName: metadataName }]);
   });
@@ -123,7 +118,7 @@ describe('fetchClusters', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     await fetchClusters(esClient);
     // @ts-ignore

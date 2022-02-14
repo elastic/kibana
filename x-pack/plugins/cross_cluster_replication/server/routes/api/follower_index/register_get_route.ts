@@ -34,9 +34,9 @@ export const registerGetRoute = ({
       const { id } = request.params;
 
       try {
-        const {
-          body: { follower_indices: followerIndices },
-        } = await client.asCurrentUser.ccr.followInfo({ index: id });
+        const { follower_indices: followerIndices } = await client.asCurrentUser.ccr.followInfo({
+          index: id,
+        });
 
         const followerIndexInfo = followerIndices && followerIndices[0];
 
@@ -55,9 +55,9 @@ export const registerGetRoute = ({
             }),
           });
         } else {
-          const {
-            body: { indices: followerIndicesStats },
-          } = await client.asCurrentUser.ccr.followStats({ index: id });
+          const { indices: followerIndicesStats } = await client.asCurrentUser.ccr.followStats({
+            index: id,
+          });
 
           return response.ok({
             // @ts-expect-error Once #98266 is merged, test this again.

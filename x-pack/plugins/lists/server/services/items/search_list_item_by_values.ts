@@ -30,7 +30,7 @@ export const searchListItemByValues = async ({
   type,
   value,
 }: SearchListItemByValuesOptions): Promise<SearchListItemArraySchema> => {
-  const { body: response } = await esClient.search<SearchEsListItemSchema>({
+  const response = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {
         bool: {
