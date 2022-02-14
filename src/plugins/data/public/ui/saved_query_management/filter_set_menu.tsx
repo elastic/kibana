@@ -111,7 +111,6 @@ export function FilterSetMenu({
   };
 
   const onSelectLanguage = (lang: string) => {
-
     services.http.post('/api/kibana/kql_opt_in_stats', {
       body: JSON.stringify({ opt_in: lang === 'kuery' }),
     });
@@ -176,7 +175,7 @@ export function FilterSetMenu({
           icon: 'crossInACircleFilled',
           onClick: () => {
             closePopover();
-            onQueryStringChange('');
+            onQueryStringChange({ query: '', language: 'kuery' });
             onRemoveAll();
           },
         },
