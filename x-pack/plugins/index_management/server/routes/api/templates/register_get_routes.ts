@@ -26,10 +26,9 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
 
-        const { body: legacyTemplatesEs } = await client.asCurrentUser.indices.getTemplate();
-        const {
-          body: { index_templates: templatesEs },
-        } = await client.asCurrentUser.indices.getIndexTemplate();
+        const legacyTemplatesEs = await client.asCurrentUser.indices.getTemplate();
+        const { index_templates: templatesEs } =
+          await client.asCurrentUser.indices.getIndexTemplate();
 
         const legacyTemplates = deserializeLegacyTemplateList(
           legacyTemplatesEs,
@@ -74,7 +73,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
 
         if (isLegacy) {
-          const { body: indexTemplateByName } = await client.asCurrentUser.indices.getTemplate({
+          const indexTemplateByName = await client.asCurrentUser.indices.getTemplate({
             name,
           });
 
@@ -87,9 +86,8 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
             });
           }
         } else {
-          const {
-            body: { index_templates: indexTemplates },
-          } = await client.asCurrentUser.indices.getIndexTemplate({ name });
+          const { index_templates: indexTemplates } =
+            await client.asCurrentUser.indices.getIndexTemplate({ name });
 
           if (indexTemplates.length > 0) {
             return response.ok({
