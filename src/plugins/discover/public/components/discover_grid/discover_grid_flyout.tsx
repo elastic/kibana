@@ -148,7 +148,8 @@ export function DiscoverGridFlyout({
             </EuiHideFor>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                size="xs"
+                size="s"
+                iconSize="s"
                 iconType="document"
                 flush="left"
                 data-test-subj="docTableRowAction"
