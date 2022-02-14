@@ -298,16 +298,14 @@ it('uses the scrollId to page all the data', async () => {
     })
   );
   mockEsClient.asCurrentUser.scroll = jest.fn().mockResolvedValue({
-    body: {
-      hits: {
-        hits: range(0, HITS_TOTAL / 10).map(() => ({
-          fields: {
-            date: ['2020-12-31T00:14:28.000Z'],
-            ip: ['110.135.176.89'],
-            message: ['hit from a subsequent scroll'],
-          },
-        })),
-      },
+    hits: {
+      hits: range(0, HITS_TOTAL / 10).map(() => ({
+        fields: {
+          date: ['2020-12-31T00:14:28.000Z'],
+          ip: ['110.135.176.89'],
+          message: ['hit from a subsequent scroll'],
+        },
+      })),
     },
   });
 

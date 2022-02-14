@@ -59,8 +59,7 @@ export async function fetchLicenses(
     },
   };
 
-  const { body: response } = await callCluster.search<ESClusterStatsWithLicense>(params);
-  return response;
+  return await callCluster.search<ESClusterStatsWithLicense>(params);
 }
 
 export interface ESClusterStatsWithLicense {
