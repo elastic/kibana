@@ -78,7 +78,6 @@ export async function registerMetricThresholdRuleType(
           sourceId: schema.string(),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
-          shouldDropPartialBuckets: schema.maybe(schema.boolean()),
         },
         { unknowns: 'allow' }
       ),

@@ -13940,7 +13940,6 @@
     "xpack.infra.metrics.alertFlyout.outsideRangeLabel": "不介于",
     "xpack.infra.metrics.alertFlyout.removeCondition": "删除条件",
     "xpack.infra.metrics.alertFlyout.removeWarningThreshold": "移除警告阈值",
-    "xpack.infra.metrics.alertFlyout.shouldDropPartialBuckets": "评估数据时丢弃部分存储桶",
     "xpack.infra.metrics.alertFlyout.warningThreshold": "警告",
     "xpack.infra.metrics.alerting.alertStateActionVariableDescription": "告警的当前状态",
     "xpack.infra.metrics.alerting.anomaly.defaultActionMessage": "\\{\\{alertName\\}\\} 处于 \\{\\{context.alertState\\}\\} 状态\n\n\\{\\{context.metric\\}\\} 在 \\{\\{context.timestamp\\}\\}比正常\\{\\{context.summary\\}\\}\n\n典型值：\\{\\{context.typical\\}\\}\n实际值：\\{\\{context.actual\\}\\}\n",

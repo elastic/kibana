@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { first, isEqual, last } from 'lodash';
+import { first, isEqual } from 'lodash';
 import moment from 'moment';
 import {
   ActionGroupIdsOf,
@@ -20,7 +20,6 @@ import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
-  buildErrorAlertReason,
   buildFiredAlertReason,
   buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
@@ -135,7 +134,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       params as EvaluatedRuleParams,
       config,
       prevGroups,
-      compositeSize
+      compositeSize,
+      alertOnGroupDisappear
     );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
@@ -147,19 +147,13 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = alertResults.every((result) =>
-        // Grab the result of the most recent bucket
-        last(result[group].shouldFire)
-      );
-      const shouldAlertWarn = alertResults.every((result) => last(result[group].shouldWarn));
+      const shouldAlertFire = alertResults.every((result) => result[group].shouldFire);
+      const shouldAlertWarn = alertResults.every((result) => result[group].shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => last(result[group].isNoData));
-      const isError = alertResults.some((result) => result[group].isError);
+      const isNoData = alertResults.some((result) => result[group].isNoData);
 
-      const nextState = isError
-        ? AlertStates.ERROR
-        : isNoData
+      const nextState = isNoData
         ? AlertStates.NO_DATA
         : shouldAlertFire
         ? AlertStates.ALERT
@@ -211,11 +205,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           reason = alertResults
             .filter((result) => result[group].isNoData)
             .map((result) => buildNoDataAlertReason({ ...result[group], group }))
-            .join('\n');
-        } else if (nextState === AlertStates.ERROR) {
-          reason = alertResults
-            .filter((result) => result[group].isError)
-            .map((result) => buildErrorAlertReason(result[group].metric))
             .join('\n');
         }
       }
@@ -278,7 +267,7 @@ const mapToConditionsLookup = (
 const formatAlertResult = <AlertResult>(
   alertResult: {
     metric: string;
-    currentValue: number;
+    currentValue: number | null;
     threshold: number[];
     comparator: Comparator;
     warningThreshold?: number[];

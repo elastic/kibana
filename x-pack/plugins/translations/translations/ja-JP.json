@@ -13988,7 +13988,6 @@
     "xpack.infra.metrics.alertFlyout.outsideRangeLabel": "is not between",
     "xpack.infra.metrics.alertFlyout.removeCondition": "条件を削除",
     "xpack.infra.metrics.alertFlyout.removeWarningThreshold": "warningThresholdを削除",
-    "xpack.infra.metrics.alertFlyout.shouldDropPartialBuckets": "データを評価するときに部分バケットを破棄",
     "xpack.infra.metrics.alertFlyout.warningThreshold": "警告",
     "xpack.infra.metrics.alerting.alertStateActionVariableDescription": "現在のアラートの状態",
     "xpack.infra.metrics.alerting.anomaly.defaultActionMessage": "\\{\\{alertName\\}\\}は\\{\\{context.alertState\\}\\}の状態です\n\n\\{\\{context.metric\\}\\}は\\{\\{context.timestamp\\}\\}で標準を超える\\{\\{context.summary\\}\\}でした\n\n標準の値：\\{\\{context.typical\\}\\}\n実際の値：\\{\\{context.actual\\}\\}\n",
