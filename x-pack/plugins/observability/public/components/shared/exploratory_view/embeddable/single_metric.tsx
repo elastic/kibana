@@ -95,7 +95,7 @@ const LensWrapper = styled(EuiFlexGroup)<{
   ${(props) =>
     props.$alignLnsMetric
       ? `.lnsMetricExpression__container {
-    align-items: ${props.$alignLnsMetric};
+    align-items: ${props.$alignLnsMetric ?? 'flex-start'};
   }`
       : ''}
 `;
