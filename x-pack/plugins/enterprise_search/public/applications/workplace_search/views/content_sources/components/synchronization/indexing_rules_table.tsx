@@ -19,28 +19,58 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../../../shared/doc_links';
 import { clearFlashMessages } from '../../../../../shared/flash_messages';
 import { InlineEditableTable } from '../../../../../shared/tables/inline_editable_table/inline_editable_table';
 import { InlineEditableTableColumn } from '../../../../../shared/tables/inline_editable_table/types';
 
-import {
-  SOURCE_ASSETS_AND_OBJECTS_ADD_RULE_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_DESCRIPTION,
-  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_EXCLUDE_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_FILE_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_INCLUDE_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_ITEM_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_PATH_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_POLICY_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_RULE_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_VALUE_LABEL,
-  SOURCE_ASSETS_AND_OBJECTS_SYNC_RULES_LEARN_MORE_LINK,
-} from '../../constants';
 import { SourceLogic } from '../../source_logic';
 
 import { EditableIndexingRule, SynchronizationLogic } from './synchronization_logic';
+
+const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_POLICY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTablePolicyLabel',
+  {
+    defaultMessage: 'Policy',
+  }
+);
+
+const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_PATH_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableValueLabel',
+  {
+    defaultMessage: 'Path',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_ITEM_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableItemLabel',
+  {
+    defaultMessage: 'Item',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_FILE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableFileLabel',
+  {
+    defaultMessage: 'File type',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_INCLUDE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableIncludeLabel',
+  {
+    defaultMessage: 'Include',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_EXCLUDE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableExcludeLabel',
+  {
+    defaultMessage: 'Exclude',
+  }
+);
 
 export const IndexingRulesTable: React.FC = () => {
   const { contentSource } = useValues(SourceLogic);
@@ -53,10 +83,22 @@ export const IndexingRulesTable: React.FC = () => {
 
   const description = (
     <EuiText size="s" color="default">
-      {SOURCE_ASSETS_AND_OBJECTS_OBJECTS_DESCRIPTION(contentSource.name)}
+      {i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsDescription',
+        {
+          defaultMessage:
+            'Include or exclude high level items, file types and (file or folder) paths to synchronize from {contentSourceName}. Everything is included by default. Each document is tested against the rules below and the first rule that matches will be applied.',
+          values: { contentSourceName: contentSource.name },
+        }
+      )}
       <EuiSpacer />
       <EuiLink href={docLinks.workplaceSearchSynch} external>
-        {SOURCE_ASSETS_AND_OBJECTS_SYNC_RULES_LEARN_MORE_LINK}
+        {i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsSyncLearnMoreLink',
+          {
+            defaultMessage: 'Learn more about sync rules.',
+          }
+        )}
       </EuiLink>
     </EuiText>
   );
@@ -124,7 +166,12 @@ export const IndexingRulesTable: React.FC = () => {
       render: (indexingRule) => (
         <EuiText size="s">{filterTypeToString(indexingRule.filterType)}</EuiText>
       ),
-      name: SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_RULE_LABEL,
+      name: i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableRuleLabel',
+        {
+          defaultMessage: 'Rule',
+        }
+      ),
       field: 'filterType',
     },
     {
@@ -145,14 +192,22 @@ export const IndexingRulesTable: React.FC = () => {
         </EuiFlexGroup>
       ),
       render: (indexingRule) => <EuiText size="s">{indexingRule.value}</EuiText>,
-      name: SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_VALUE_LABEL,
+      name: i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableValueLabel',
+        {
+          defaultMessage: 'Value',
+        }
+      ),
       field: 'value',
     },
   ];
 
   return (
     <InlineEditableTable
-      addButtonText={SOURCE_ASSETS_AND_OBJECTS_ADD_RULE_LABEL}
+      addButtonText={i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsAddRuleLabel',
+        { defaultMessage: 'Add indexing rule' }
+      )}
       columns={columns}
       defaultItem={{
         valueType: 'include',
