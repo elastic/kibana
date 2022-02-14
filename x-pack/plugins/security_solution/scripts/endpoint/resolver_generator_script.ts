@@ -38,12 +38,10 @@ async function deleteIndices(indices: string[], client: Client) {
 }
 
 interface UserInfo {
-  [k: string]: {
-    username: string;
-  };
+  username: string;
 }
 
-async function addUser(esClient: Client): Promise<UserInfo[string] | undefined> {
+async function addUser(esClient: Client): Promise<UserInfo | undefined> {
   const endpointUser = {
     username: 'endpoint_user',
     password: 'changeme',
@@ -258,7 +256,7 @@ async function main() {
   }
   let client = new Client(clientOptions);
   // add endpoint user
-  const user: UserInfo['string'] | undefined = await addUser(client);
+  const user: UserInfo | undefined = await addUser(client);
 
   // update client and kibana options before instantiating
   if (user) {
