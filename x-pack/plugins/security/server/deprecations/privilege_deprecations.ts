@@ -15,7 +15,7 @@ import type {
   PrivilegeDeprecationsRolesByFeatureIdResponse,
 } from '../../common/model';
 import { transformElasticsearchRoleToRole } from '../authorization';
-import type { AuthorizationServiceSetupInternal, ElasticsearchRole } from '../authorization';
+import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
 export const getPrivilegeDeprecationsService = ({
@@ -41,9 +41,9 @@ export const getPrivilegeDeprecationsService = ({
     }
     let kibanaRoles;
     try {
-      const [features, { body: elasticsearchRoles }] = await Promise.all([
+      const [features, elasticsearchRoles] = await Promise.all([
         getFeatures(),
-        context.esClient.asCurrentUser.security.getRole<Record<string, ElasticsearchRole>>(),
+        context.esClient.asCurrentUser.security.getRole(),
       ]);
       kibanaRoles = Object.entries(elasticsearchRoles).map(([roleName, elasticsearchRole]) =>
         transformElasticsearchRoleToRole(

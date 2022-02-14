@@ -6,4 +6,5 @@
  */
 
 export type { PrivilegesService } from './privileges';
+export type { CasesSupportedOperations } from './feature_privilege_builder';
 export { privilegesFactory } from './privileges';
