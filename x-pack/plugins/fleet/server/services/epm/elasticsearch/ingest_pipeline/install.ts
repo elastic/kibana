@@ -262,7 +262,7 @@ export async function ensureFleetFinalPipelineIsInstalled(
   };
   const res = await esClient.ingest.getPipeline(
     { id: FLEET_FINAL_PIPELINE_ID },
-    esClientRequestOptions
+    { ...esClientRequestOptions, meta: true }
   );
 
   const installedVersion = res?.body[FLEET_FINAL_PIPELINE_ID]?.version;

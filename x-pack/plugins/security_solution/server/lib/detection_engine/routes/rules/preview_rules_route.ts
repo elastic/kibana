@@ -34,7 +34,7 @@ import {
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
-import { Alert } from '../../../../../../alerting/server';
+import { Alert, createAbortableEsClientFactory } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
@@ -182,7 +182,10 @@ export const previewRulesRoute = async (
                 shouldStopExecution: () => false,
                 alertFactory,
                 // Just use es client always for preview
-                search: context.core.elasticsearch.client,
+                search: createAbortableEsClientFactory({
+                  scopedClusterClient: context.core.elasticsearch.client,
+                  abortController: new AbortController(),
+                }),
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
               },

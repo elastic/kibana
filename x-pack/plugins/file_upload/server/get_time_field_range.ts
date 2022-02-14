@@ -22,9 +22,7 @@ export async function getTimeFieldRange(
 }> {
   const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-  const {
-    body: { aggregations },
-  } = await client.asCurrentUser.search({
+  const { aggregations } = await client.asCurrentUser.search({
     index,
     size: 0,
     body: {

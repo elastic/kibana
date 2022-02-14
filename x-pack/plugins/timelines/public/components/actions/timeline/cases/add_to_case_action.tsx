@@ -7,7 +7,16 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { CaseStatuses, StatusAll, CasesFeatures } from '../../../../../../cases/common';
+import {
+  GetAllCasesSelectorModalProps,
+  GetCreateCaseFlyoutProps,
+} from '../../../../../../cases/public';
+import {
+  CaseStatuses,
+  StatusAll,
+  CasesFeatures,
+  CommentType,
+} from '../../../../../../cases/common';
 import { TimelineItem } from '../../../../../common/search_strategy';
 import { useAddToCase, normalizedEventFields } from '../../../../hooks/use_add_to_case';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -43,12 +52,12 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const {
     onCaseClicked,
     onCaseSuccess,
-    attachAlertToCase,
+    onCaseCreated,
     isAllCaseModalOpen,
     isCreateCaseFlyoutOpen,
   } = useAddToCase({ event, casePermissions, appId, owner, onClose });
 
-  const allCasesSelectorModalProps = useMemo(() => {
+  const allCasesSelectorModalProps: GetAllCasesSelectorModalProps = useMemo(() => {
     const { ruleId, ruleName } = normalizedEventFields(event);
     return {
       alertData: {
@@ -86,23 +95,40 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     dispatch(setOpenAddToNewCase({ id: eventId, isOpen: false }));
   }, [dispatch, eventId]);
 
-  const createCaseFlyoutProps = useMemo(() => {
+  const createCaseFlyoutProps: GetCreateCaseFlyoutProps = useMemo(() => {
+    const { ruleId, ruleName } = normalizedEventFields(event);
+    const attachments = [
+      {
+        alertId: eventId,
+        index: eventIndex ?? '',
+        rule: {
+          id: ruleId,
+          name: ruleName,
+        },
+        owner,
+        type: CommentType.alert as const,
+      },
+    ];
     return {
-      afterCaseCreated: attachAlertToCase,
+      afterCaseCreated: onCaseCreated,
       onClose: closeCaseFlyoutOpen,
       onSuccess: onCaseSuccess,
       useInsertTimeline,
       owner: [owner],
       userCanCrud: casePermissions?.crud ?? false,
       features: casesFeatures,
+      attachments,
     };
   }, [
-    attachAlertToCase,
+    event,
+    eventId,
+    eventIndex,
+    owner,
+    onCaseCreated,
     closeCaseFlyoutOpen,
     onCaseSuccess,
     useInsertTimeline,
-    owner,
-    casePermissions,
+    casePermissions?.crud,
     casesFeatures,
   ]);
 
@@ -113,6 +139,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     </>
   );
 };
+AddToCaseActionComponent.displayName = 'AddToCaseAction';
 
 export const AddToCaseAction = memo(AddToCaseActionComponent);
 
