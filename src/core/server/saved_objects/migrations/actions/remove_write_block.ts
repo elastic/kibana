@@ -19,6 +19,7 @@ export interface RemoveWriteBlockParams {
   client: ElasticsearchClient;
   index: string;
 }
+
 /**
  * Removes a write block from an index
  */
@@ -32,10 +33,7 @@ export const removeWriteBlock =
   > =>
   () => {
     return client.indices
-      .putSettings<{
-        acknowledged: boolean;
-        shards_acknowledged: boolean;
-      }>(
+      .putSettings(
         {
           index,
           // Don't change any existing settings
@@ -49,7 +47,7 @@ export const removeWriteBlock =
         { maxRetries: 0 /** handle retry ourselves for now */ }
       )
       .then((res) => {
-        return res.body.acknowledged === true
+        return res.acknowledged === true
           ? Either.right('remove_write_block_succeeded' as const)
           : Either.left({
               type: 'retryable_es_client_error' as const,
