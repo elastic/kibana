@@ -16,7 +16,20 @@ import {
 
 describe('KibanaExecutionContext', () => {
   describe('constructor', () => {
-    it.skip('allows context to define parent explicitly', () => {
+    it('allows context be defined without a parent', () => {
+      const parentContext: KibanaExecutionContext = {
+        type: 'test-type',
+        name: 'test-name',
+        id: '42',
+        description: 'parent-descripton',
+      };
+      const container = new ExecutionContextContainer(parentContext);
+
+      const value = container.toJSON();
+      expect(value.child).toBeUndefined();
+    });
+
+    it('allows context to be called with parent explicitly', () => {
       const parentContext: KibanaExecutionContext = {
         type: 'test-type',
         name: 'test-name',
@@ -39,7 +52,8 @@ describe('KibanaExecutionContext', () => {
       };
 
       const value = new ExecutionContextContainer(context, parentContainer).toJSON();
-      expect(value).toEqual(context);
+      expect(value.id).toEqual(parentContext.id);
+      expect(value.child).toEqual(context);
     });
   });
 
