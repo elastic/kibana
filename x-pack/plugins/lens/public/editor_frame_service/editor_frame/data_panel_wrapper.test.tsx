@@ -10,43 +10,78 @@ import { DataPanelWrapper } from './data_panel_wrapper';
 import { Datasource, DatasourceDataPanelProps } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { mountWithProvider } from '../../mocks';
+import { mockStoreDeps, mountWithProvider } from '../../mocks';
+import { disableAutoApply } from '../../state_management/lens_slice';
 
 describe('Data Panel Wrapper', () => {
-  it('sets up setState correctly', async () => {
-    const renderDataPanel = jest.fn();
+  describe('Datasource data panel properties', () => {
+    let datasourceDataPanelProps: DatasourceDataPanelProps;
+    let lensStore: Awaited<ReturnType<typeof mountWithProvider>>['lensStore'];
+    beforeEach(async () => {
+      const renderDataPanel = jest.fn();
 
-    const { lensStore } = await mountWithProvider(
-      <DataPanelWrapper
-        datasourceMap={{
-          activeDatasource: {
-            renderDataPanel,
-          } as unknown as Datasource,
-        }}
-        showNoDataPopover={() => {}}
-        core={{} as DatasourceDataPanelProps['core']}
-        dropOntoWorkspace={(field: DragDropIdentifier) => {}}
-        hasSuggestionForField={(field: DragDropIdentifier) => true}
-        plugins={{ uiActions: {} as UiActionsStart }}
-      />,
-      {
-        preloadedState: {
-          activeDatasourceId: 'activeDatasource',
-          datasourceStates: {
-            activeDatasource: {
-              isLoading: false,
-              state: {
-                internalState1: '',
+      const datasourceMap = {
+        activeDatasource: {
+          renderDataPanel,
+        } as unknown as Datasource,
+      };
+
+      const mountResult = await mountWithProvider(
+        <DataPanelWrapper
+          datasourceMap={datasourceMap}
+          showNoDataPopover={() => {}}
+          core={{} as DatasourceDataPanelProps['core']}
+          dropOntoWorkspace={(field: DragDropIdentifier) => {}}
+          hasSuggestionForField={(field: DragDropIdentifier) => true}
+          plugins={{ uiActions: {} as UiActionsStart }}
+        />,
+        {
+          preloadedState: {
+            activeDatasourceId: 'activeDatasource',
+            datasourceStates: {
+              activeDatasource: {
+                isLoading: false,
+                state: {
+                  age: 'old',
+                },
               },
             },
           },
-        },
-      }
-    );
+          storeDeps: mockStoreDeps({ datasourceMap }),
+        }
+      );
 
-    const datasourceDataPanelProps = renderDataPanel.mock.calls[0][1] as DatasourceDataPanelProps;
+      lensStore = mountResult.lensStore;
 
-    datasourceDataPanelProps.setState({ activeDatasourceId: 'lolz' }, { applyImmediately: true });
-    console.log(lensStore.getState().lens);
+      datasourceDataPanelProps = renderDataPanel.mock.calls[0][1] as DatasourceDataPanelProps;
+    });
+
+    describe('setState', () => {
+      it('applies state immediately when option true', async () => {
+        lensStore.dispatch(disableAutoApply());
+
+        const newDatasourceState = { age: 'new' };
+        datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+
+        const lensState = lensStore.getState().lens;
+        expect(lensState.datasourceStates.activeDatasource.state).toEqual(newDatasourceState);
+        expect(lensState.appliedState?.datasourceStates.activeDatasource.state).toEqual(
+          newDatasourceState
+        );
+      });
+
+      it('does not apply state immediately when option false', async () => {
+        lensStore.dispatch(disableAutoApply());
+
+        const newDatasourceState = { age: 'new' };
+        datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: false });
+
+        const lensState = lensStore.getState().lens;
+        expect(lensState.datasourceStates.activeDatasource.state).toEqual(newDatasourceState);
+        expect(lensState.appliedState?.datasourceStates.activeDatasource.state).not.toEqual(
+          newDatasourceState
+        );
+      });
+    });
   });
 });
