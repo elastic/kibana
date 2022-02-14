@@ -130,7 +130,8 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.get).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
         query: {
-          id: fakeItemId,
+          item_id: fakeItemId,
+          id: undefined,
           namespace_type: 'agnostic',
         },
       });
@@ -187,7 +188,8 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
         query: {
-          id: fakeItemId,
+          item_id: fakeItemId,
+          id: undefined,
           namespace_type: 'agnostic',
         },
       });
