@@ -343,7 +343,7 @@ export function SuggestionPanel({
     <EuiPanel
       hasBorder
       hasShadow={false}
-      className={classNames('lnsSuggestionPanel__applyChangesPrompt')}
+      className="lnsSuggestionPanel__applyChangesPrompt"
       paddingSize="m"
     >
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
@@ -361,6 +361,7 @@ export function SuggestionPanel({
             size="s"
             className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
             onClick={() => dispatchLens(applyChanges())}
+            data-test-subj="lnsSuggestionApplyChanges"
           >
             <FormattedMessage
               id="xpack.lens.suggestions.applyChangesLabel"
@@ -373,7 +374,7 @@ export function SuggestionPanel({
   );
 
   const suggestionsUI = (
-    <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
+    <>
       {currentVisualization.activeId && !hideSuggestions && (
         <SuggestionPreview
           preview={{
@@ -417,7 +418,7 @@ export function SuggestionPanel({
             />
           );
         })}
-    </div>
+    </>
   );
 
   return (
@@ -461,7 +462,9 @@ export function SuggestionPanel({
           )
         }
       >
-        {changesApplied ? suggestionsUI : applyChangesPrompt}
+        <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
+          {changesApplied ? suggestionsUI : applyChangesPrompt}
+        </div>
       </EuiAccordion>
     </div>
   );
