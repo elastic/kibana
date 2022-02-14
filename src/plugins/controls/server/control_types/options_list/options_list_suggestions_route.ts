@@ -88,14 +88,14 @@ export const setupOptionsListSuggestionsRoute = (
     const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
 
     // parse raw ES response into OptionsListSuggestionResponse
-    const totalCardinality = get(rawEsResult.body, 'aggregations.unique_terms.value');
+    const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
 
-    const suggestions = get(rawEsResult.body, 'aggregations.suggestions.buckets')?.map(
+    const suggestions = get(rawEsResult, 'aggregations.suggestions.buckets')?.map(
       (suggestion: { key: string; key_as_string: string }) =>
         fieldSpec?.type === 'string' ? suggestion.key : suggestion.key_as_string
     );
 
-    const rawInvalidSuggestions = get(rawEsResult.body, 'aggregations.validation.buckets') as {
+    const rawInvalidSuggestions = get(rawEsResult, 'aggregations.validation.buckets') as {
       [key: string]: { doc_count: number };
     };
     const invalidSelections =
