@@ -24,6 +24,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     clearLayer: jest.fn((state, _layerId) => state),
     getDatasourceSuggestionsForField: jest.fn((_state, _item, filterFn) => []),
     getDatasourceSuggestionsForVisualizeField: jest.fn((_state, _indexpatternId, _fieldName) => []),
+    getDatasourceSuggestionsForVisualizeCharts: jest.fn((_state, _context) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
     getPersistableState: jest.fn((x) => ({
       state: x,

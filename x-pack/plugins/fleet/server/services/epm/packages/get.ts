@@ -98,6 +98,45 @@ export async function getPackageSavedObjects(
 
 export const getInstallations = getPackageSavedObjects;
 
+export async function getPackageInfoFromRegistry(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  pkgVersion: string;
+}): Promise<PackageInfo> {
+  const { savedObjectsClient, pkgName, pkgVersion } = options;
+  const [savedObject, latestPackage] = await Promise.all([
+    getInstallationObject({ savedObjectsClient, pkgName }),
+    Registry.fetchFindLatestPackage(pkgName),
+  ]);
+
+  // If no package version is provided, use the installed version in the response
+  let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
+  // If no installed version of the given package exists, default to the latest version of the package
+  if (!responsePkgVersion) {
+    responsePkgVersion = latestPackage.version;
+  }
+  const packageInfo = await Registry.fetchInfo(pkgName, responsePkgVersion);
+
+  // Fix the paths
+  const paths =
+    packageInfo?.assets?.map((path) =>
+      path.replace(`/package/${pkgName}/${pkgVersion}`, `${pkgName}-${pkgVersion}`)
+    ) ?? [];
+
+  // add properties that aren't (or aren't yet) on the package
+  const additions: EpmPackageAdditions = {
+    latestVersion: latestPackage.version,
+    title: packageInfo.title || nameAsTitle(packageInfo.name),
+    assets: Registry.groupPathsByService(paths || []),
+    removable: true,
+    notice: Registry.getNoticePath(paths || []),
+    keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
+  };
+  const updated = { ...packageInfo, ...additions };
+
+  return createInstallableFrom(updated, savedObject);
+}
+
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;

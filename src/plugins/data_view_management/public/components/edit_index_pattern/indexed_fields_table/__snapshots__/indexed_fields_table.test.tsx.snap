@@ -161,6 +161,8 @@ exports[`IndexedFieldsTable IndexedFieldsTable with rollup index pattern should 
         },
       ]
     }
+    openModal={[Function]}
+    theme={Object {}}
   />
 </div>
 `;
@@ -196,6 +198,8 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
         },
       ]
     }
+    openModal={[Function]}
+    theme={Object {}}
   />
 </div>
 `;
@@ -233,6 +237,8 @@ exports[`IndexedFieldsTable should filter based on the schema filter 1`] = `
         },
       ]
     }
+    openModal={[Function]}
+    theme={Object {}}
   />
 </div>
 `;
@@ -267,6 +273,8 @@ exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
         },
       ]
     }
+    openModal={[Function]}
+    theme={Object {}}
   />
 </div>
 `;
@@ -366,6 +374,8 @@ exports[`IndexedFieldsTable should render normally 1`] = `
         },
       ]
     }
+    openModal={[Function]}
+    theme={Object {}}
   />
 </div>
 `;

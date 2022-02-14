@@ -86,13 +86,11 @@ export class CsvGenerator {
 
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
     this.logger.debug(`executing scroll request`);
-    const results = (
-      await this.clients.es.asCurrentUser.scroll({
-        scroll: scrollSettings.duration,
-        scroll_id: scrollId,
-      })
-    ).body;
-    return results;
+
+    return await this.clients.es.asCurrentUser.scroll({
+      scroll: scrollSettings.duration,
+      scroll_id: scrollId,
+    });
   }
 
   /*
@@ -397,6 +395,7 @@ export class CsvGenerator {
     return {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
+      csv_rows: this.csvRowCount,
       max_size_reached: this.maxSizeReached,
       warnings,
     };

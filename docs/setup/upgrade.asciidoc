@@ -1,34 +1,72 @@
 [[upgrade]]
 == Upgrade {kib}
 
-To upgrade from 7.16 or earlier to {version}, 
-**you must first upgrade to {prev-major-last}**.
-This enables you to use the Upgrade Assistant to
-{stack-ref}/upgrading-elastic-stack.html#prepare-to-upgrade[prepare to upgrade].
-You must resolve all critical issues identified by the Upgrade Assistant
-before proceeding with the upgrade. 
+To upgrade from 7.16.0 or earlier to {version},
+**you must first upgrade to {prev-major-last}**, which enables you to use the *Upgrade Assistant* to
+{stack-ref}/upgrading-elastic-stack.html#prepare-to-upgrade[prepare for the upgrade].
+Before you upgrade, you must resolve all critical issues identified by the *Upgrade Assistant*.
 
-{kib} does not support rolling upgrades. 
-You must shut down all {kib} instances, install the new software, and restart {kib}.
+Rolling upgrades are unsupported in {kib}. To upgrade,
+you must shut down all {kib} instances, install the new software, and restart {kib}.
 Upgrading while older {kib} instances are running can cause data loss or upgrade failures.
 
 [WARNING]
 ====
-{kib} automatically runs <<saved-object-migrations, saved object migrations>> 
-when required. 
+When required, {kib} automatically migrates <<saved-object-migrations, saved objects>>.
 In case of an upgrade failure, you can roll back to an
 earlier version of {kib}. To roll back, you **must** have a
 {ref}/snapshot-restore.html[backup snapshot] that includes the `kibana` feature
-state. Snapshots include this feature state by default.
+state. By default, snapshots include the `kibana` feature state.
 ====
 
-For more information about upgrading, 
+For more information about upgrading,
 refer to {stack-ref}/upgrading-elastic-stack.html[Upgrading to Elastic {version}.]
 
-IMPORTANT: You can upgrade to pre-release versions for testing, 
-but upgrading from a pre-release to the General Available version is not supported.
-Pre-releases should only be used for testing in a temporary environment.
+IMPORTANT: You can upgrade to pre-release versions for testing,
+but upgrading from a pre-release to the General Available version is unsupported.
+You should use pre-release versions only for testing in a temporary environment.
 
-include::upgrade/upgrade-migrations.asciidoc[leveloffset=-1]
+[float]
+=== Upgrading multiple {kib} instances
+When upgrading several {kib} instances connected to the same {es} cluster,
+ensure that all outdated instances are shut down before starting the upgrade.
 
-include::upgrade/logging-configuration-changes.asciidoc[]
+Rolling upgrades are unsupported in {kib}. However, when outdated instances are shut down, you can start all upgraded instances in parallel,
+which allows all instances to participate in the upgrade migration in parallel.
+
+For large deployments with more than 10 {kib} instances, and more than 10,000 saved objects,
+you can reduce the upgrade downtime by bringing up a single {kib} instance and waiting for it to
+complete the upgrade migration before bringing up the remaining instances.
+
+[float]
+[[preventing-migration-failures]]
+=== Preparing for migration
+
+Take these extra steps to ensure you are ready for migration.
+
+[float]
+==== Ensure your {es} cluster is healthy
+Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensure that your cluster has:
+
+ * Enough free disk space, at least twice the amount of storage taken up by the `.kibana` and `.kibana_task_manager` indices
+ * Sufficient heap size
+ * A "green" cluster status
+
+[float]
+==== Ensure that all {kib} instances are the same
+When you perform an upgrade migration of different {kib} versions, the migration can fail.
+Ensure that all {kib} instances are running the same version, configuration, and plugins.
+
+[float]
+==== Back up your data
+Be sure to have a {ref}/snapshot-restore.html[snapshot] of all your data before attempting a migration.
+If something goes wrong during migration, you can restore from the snapshot and try again.
+
+Review the <<resolve-migrations-failures,common causes of {kib} upgrade failures>> and how to prevent them.
+
+
+include::upgrade/saved-objects-migration.asciidoc[]
+
+include::upgrade/resolving-migration-failures.asciidoc[]
+
+include::upgrade/rollback-migration.asciidoc[]
