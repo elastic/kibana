@@ -238,10 +238,12 @@ describe('Service Overview', () => {
         'Oct 10, 2021 @ 01:30:00.000'
       );
       cy.contains('Update').click();
-      cy.wait(aliasNames, { requestTimeout: 10000 });
 
-      cy.contains('Refresh').click();
-      cy.wait(aliasNames, { requestTimeout: 10000 });
+      cy.expectAPIsToHaveBeenCalledWith({
+        apisIntercepted: aliasNames,
+        value:
+          'start=2021-10-10T00%3A00%3A00.000Z&end=2021-10-10T00%3A30%3A00.000Z',
+      });
     });
 
     it('when selecting a different comparison window', () => {
