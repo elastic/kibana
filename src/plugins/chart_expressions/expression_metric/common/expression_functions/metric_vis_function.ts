@@ -71,6 +71,13 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'bucket dimension configuration',
       }),
     },
+    autoScale: {
+      types: ['boolean'],
+      help: i18n.translate('expressionMetricVis.function.autoScale.help', {
+        defaultMessage: 'Enable auto scale',
+      }),
+      required: false,
+    },
   },
   fn(input, args, handlers) {
     if (args.percentageMode && !args.palette?.params) {
@@ -117,6 +124,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               labelColor: args.colorMode === ColorMode.Labels,
               ...args.font,
             },
+            autoScale: args.autoScale,
           },
           dimensions: {
             metrics: args.metric,
