@@ -37,7 +37,12 @@ export default function ({ getService }: FtrProviderContext) {
             start: moment().subtract(25, 'minutes').valueOf(),
             end: moment().valueOf(),
           };
-          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), timeframe, 100);
+          const searchBody = getElasticsearchMetricQuery(
+            getSearchParams(aggType),
+            timeframe,
+            100,
+            true
+          );
           const result = await client.search({
             index,
             body: searchBody,
@@ -58,7 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
           getSearchParams('avg'),
           timeframe,
           100,
-          undefined,
+          true,
+          void 0,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
         const result = await client.search({
@@ -81,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
             getSearchParams(aggType),
             timeframe,
             100,
+            true,
             'agent.id'
           );
           const result = await client.search({
@@ -101,6 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
           getSearchParams('avg'),
           timeframe,
           100,
+          true,
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
