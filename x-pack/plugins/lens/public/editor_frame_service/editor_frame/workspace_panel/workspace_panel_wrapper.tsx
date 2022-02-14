@@ -8,8 +8,10 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import { EuiPageContent, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSwitch } from '@elastic/eui';
 import classNames from 'classnames';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
 import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
@@ -20,8 +22,16 @@ import {
   DatasourceStates,
   VisualizationState,
   updateDatasourceState,
+  useLensSelector,
+  selectChangesApplied,
+  applyChanges,
+  enableAutoApply,
+  disableAutoApply,
+  selectAutoApplyEnabled,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
+import { writeToStorage } from '../../../settings_storage';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
@@ -45,6 +55,9 @@ export function WorkspacePanelWrapper({
   isFullscreen,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
+
+  const changesApplied = useLensSelector(selectChangesApplied);
+  const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
@@ -72,6 +85,12 @@ export function WorkspacePanelWrapper({
     },
     [dispatchLens]
   );
+
+  const toggleAutoApply = useCallback(() => {
+    writeToStorage(new Storage(localStorage), 'autoApplyDisabled', String(!autoApplyEnabled));
+    dispatchLens(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
+  }, [dispatchLens, autoApplyEnabled]);
+
   const warningMessages: React.ReactNode[] = [];
   if (activeVisualization?.getWarningMessages) {
     warningMessages.push(
@@ -93,41 +112,78 @@ export function WorkspacePanelWrapper({
       <div>
         <EuiFlexGroup
           alignItems="center"
-          gutterSize="m"
+          gutterSize="none"
           direction="row"
           responsive={false}
           wrap={true}
           justifyContent="spaceBetween"
         >
           {!isFullscreen ? (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={true}>
               <EuiFlexGroup
                 gutterSize="m"
                 direction="row"
                 responsive={false}
                 wrap={true}
+                justifyContent="spaceBetween"
                 className="lnsWorkspacePanelWrapper__toolbar"
               >
-                <EuiFlexItem grow={false}>
-                  <ChartSwitch
-                    data-test-subj="lnsChartSwitcher"
-                    visualizationMap={visualizationMap}
-                    datasourceMap={datasourceMap}
-                    framePublicAPI={framePublicAPI}
-                  />
+                <EuiFlexItem>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <ChartSwitch
+                        data-test-subj="lnsChartSwitcher"
+                        visualizationMap={visualizationMap}
+                        datasourceMap={datasourceMap}
+                        framePublicAPI={framePublicAPI}
+                      />
+                    </EuiFlexItem>
+                    {activeVisualization && activeVisualization.renderToolbar && (
+                      <EuiFlexItem grow={false}>
+                        <NativeRenderer
+                          render={activeVisualization.renderToolbar}
+                          nativeProps={{
+                            frame: framePublicAPI,
+                            state: visualizationState,
+                            setState: setVisualizationState,
+                          }}
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
                 </EuiFlexItem>
-                {activeVisualization && activeVisualization.renderToolbar && (
-                  <EuiFlexItem grow={false}>
-                    <NativeRenderer
-                      render={activeVisualization.renderToolbar}
-                      nativeProps={{
-                        frame: framePublicAPI,
-                        state: visualizationState,
-                        setState: setVisualizationState,
-                      }}
-                    />
-                  </EuiFlexItem>
-                )}
+                <EuiFlexItem>
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="s"
+                    responsive={true}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        label="Auto-Apply" // TODO — translate
+                        checked={autoApplyEnabled}
+                        onChange={toggleAutoApply}
+                        className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        disabled={autoApplyEnabled || changesApplied}
+                        fill
+                        className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+                        iconType="play"
+                        onClick={() => dispatchLens(applyChanges())}
+                        size="s"
+                      >
+                        <FormattedMessage
+                          id="xpack.lens.app.applyChangesLabel"
+                          defaultMessage="Apply"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           ) : null}

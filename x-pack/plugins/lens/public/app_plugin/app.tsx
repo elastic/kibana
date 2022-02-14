@@ -91,7 +91,6 @@ export function App({
     sharingSavedObjectProps,
     isLinkedToOriginatingApp,
     searchSessionId,
-    appliedState,
     isLoading,
     isSaveable,
   } = useLensSelector((state) => state.lens);
@@ -304,16 +303,6 @@ export function App({
     ]
   );
 
-  const autoApplyEnabled = !Boolean(appliedState);
-  const toggleAutoApply = useCallback(() => {
-    writeToStorage(
-      new Storage(localStorage),
-      'autoApplyDisabled',
-      String(typeof appliedState === 'undefined')
-    );
-    dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
-  }, [dispatch, appliedState, autoApplyEnabled]);
-
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp">
@@ -329,9 +318,6 @@ export function App({
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
-          autoApplyEnabled={autoApplyEnabled}
-          onToggleAutoApply={toggleAutoApply}
-          onApplyChanges={() => dispatch(applyChanges())}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
         />

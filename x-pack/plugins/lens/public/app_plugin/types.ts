@@ -97,9 +97,6 @@ export interface LensTopNavMenuProps {
   datasourceMap: DatasourceMap;
   title?: string;
   lensInspector: LensInspector;
-  autoApplyEnabled: boolean;
-  onToggleAutoApply: () => void;
-  onApplyChanges: () => void;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext;
 }

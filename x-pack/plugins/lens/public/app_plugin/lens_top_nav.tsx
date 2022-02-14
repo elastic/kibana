@@ -7,8 +7,6 @@
 
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import {
@@ -28,10 +26,8 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
-  selectChangesApplied,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../editor_frame_service/editor_frame/config_panel/dimension_container';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -155,9 +151,6 @@ export const LensTopNavMenu = ({
   redirectToOrigin,
   datasourceMap,
   title,
-  autoApplyEnabled,
-  onToggleAutoApply,
-  onApplyChanges,
   topNavMenuEntryGenerators,
   initialContext,
 }: LensTopNavMenuProps) => {
@@ -192,7 +185,6 @@ export const LensTopNavMenu = ({
     filters,
   } = useLensSelector((state) => state.lens);
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
-  const changesApplied = useLensSelector(selectChangesApplied);
 
   useEffect(() => {
     const activeDatasource =
@@ -479,37 +471,6 @@ export const LensTopNavMenu = ({
         screenTitle={'lens'}
         appName={'lens'}
       />
-
-      <EuiPanel grow={false} paddingSize="s">
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="flexEnd"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label="Auto-Apply"
-              checked={autoApplyEnabled}
-              onChange={onToggleAutoApply}
-              className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              // data-test-subj="visualizeEditorRenderButton"
-              disabled={autoApplyEnabled || changesApplied}
-              fill
-              className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-              iconType="play"
-              onClick={onApplyChanges}
-              size="s"
-            >
-              <FormattedMessage id="xpack.lens.app.applyChangesLabel" defaultMessage="Apply" />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
     </>
   );
 };

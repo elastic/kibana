@@ -38,6 +38,11 @@ export const selectChangesApplied = createSelector(
   }
 );
 
+export const selectAutoApplyEnabled = createSelector(
+  [selectAppliedState],
+  (appliedState) => !Boolean(appliedState)
+);
+
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],
   (query, filters, dateRange) => ({
