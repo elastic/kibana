@@ -14,11 +14,9 @@ const paramsSchema = schema.object({
 });
 
 function deleteWatch(dataClient: IScopedClusterClient, watchId: string) {
-  return dataClient.asCurrentUser.watcher
-    .deleteWatch({
-      id: watchId,
-    })
-    .then(({ body }) => body);
+  return dataClient.asCurrentUser.watcher.deleteWatch({
+    id: watchId,
+  });
 }
 
 export function registerDeleteRoute({

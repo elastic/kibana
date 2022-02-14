@@ -115,10 +115,10 @@ const registerPrivilegesWithClusterTest = (
 
       // ES returns an empty object if we don't have any privileges
       if (!existingPrivileges) {
-        return { body: {} };
+        return {};
       }
 
-      return { body: existingPrivileges };
+      return existingPrivileges;
     }) as any);
     mockClusterClient.asInternalUser.security.putPrivileges.mockImplementation((async () => {
       if (throwErrorWhenPuttingPrivileges) {

@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
 
-import {
+import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   PieVisualizationState,
