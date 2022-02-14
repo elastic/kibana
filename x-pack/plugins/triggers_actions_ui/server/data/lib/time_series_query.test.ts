@@ -38,7 +38,7 @@ describe('timeSeriesQuery', () => {
   };
 
   it('fails as expected when the callCluster call fails', async () => {
-    esClient.search = jest.fn().mockRejectedValue(new Error('woopsie'));
+    esClient.search.mockRejectedValue(new Error('woopsie'));
     await timeSeriesQuery(params);
     expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

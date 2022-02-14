@@ -163,7 +163,7 @@ export function getAlertType(logger: Logger): RuleType<
     const { alertFactory, scopedClusterClient } = services;
     const previousTimestamp = state.latestTimestamp;
 
-    const abortableEsClient = scopedClusterClient.asCurrentUser;
+    const esClient = scopedClusterClient.asCurrentUser;
     const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -224,7 +224,7 @@ export function getAlertType(logger: Logger): RuleType<
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
 
-    const { body: searchResult } = await abortableEsClient.search(query);
+    const searchResult = await esClient.search(query);
 
     logger.debug(
       `alert ${ES_QUERY_ID}:${alertId} "${name}" result - ${JSON.stringify(searchResult)}`
