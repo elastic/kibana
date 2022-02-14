@@ -357,7 +357,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
-  // TODO WIP
   const casesPermissions = useGetUserCasesPermissions();
   const CasesContext = kibana.services.cases.getCasesContext();
 
