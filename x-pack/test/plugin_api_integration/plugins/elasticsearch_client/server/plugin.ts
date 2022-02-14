@@ -15,7 +15,7 @@ export class ElasticsearchClientXPack implements Plugin {
     router.get(
       { path: '/api/elasticsearch_client_xpack/context/user', validate: false },
       async (context, req, res) => {
-        const { body } = await context.core.elasticsearch.client.asCurrentUser.security.getUser();
+        const body = await context.core.elasticsearch.client.asCurrentUser.security.getUser();
         return res.ok({ body });
       }
     );
@@ -24,7 +24,7 @@ export class ElasticsearchClientXPack implements Plugin {
       { path: '/api/elasticsearch_client_xpack/contract/user', validate: false },
       async (context, req, res) => {
         const [coreStart] = await core.getStartServices();
-        const { body } = await coreStart.elasticsearch.client
+        const body = await coreStart.elasticsearch.client
           .asScoped(req)
           .asCurrentUser.security.getUser();
         return res.ok({ body });
@@ -33,5 +33,6 @@ export class ElasticsearchClientXPack implements Plugin {
   }
 
   public start() {}
+
   public stop() {}
 }

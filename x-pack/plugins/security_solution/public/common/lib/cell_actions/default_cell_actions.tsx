@@ -25,6 +25,7 @@ import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { useKibana } from '../kibana';
 import { getLinkColumnDefinition } from './helpers';
 import { getField, getFieldKey } from '../../../helpers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 /** a noop required by the filter in / out buttons */
 const onFilterAdded = () => {};
@@ -59,8 +60,9 @@ const useFormattedFieldProps = ({
   pageSize: number;
 }) => {
   const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
   const ecs = ecsData[pageRowIndex];
-  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
+  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField, usersEnabled);
   const linkField = header?.linkField ? header?.linkField : link?.linkField;
   const linkValues = header && getOr([], linkField ?? '', ecs);
   const eventId = (header && get('_id' ?? '', ecs)) || '';
@@ -82,7 +84,8 @@ const useFormattedFieldProps = ({
     const normalizedLink = getLinkColumnDefinition(
       normalizedColumnId,
       header?.type,
-      normalizedLinkField
+      normalizedLinkField,
+      usersEnabled
     );
     return {
       pageRowIndex,
