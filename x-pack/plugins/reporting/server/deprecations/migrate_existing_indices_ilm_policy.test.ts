@@ -17,8 +17,6 @@ type ScopedClusterClientMock = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient
 >;
 
-const { createApiResponse } = elasticsearchServiceMock;
-
 describe("Migrate existing indices' ILM policy deprecations", () => {
   let esClient: ScopedClusterClientMock;
   let deprecationsCtx: GetDeprecationsContext;
@@ -43,14 +41,10 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
   });
 
   it('returns deprecation information when reporting indices are not using the reporting ILM policy', async () => {
-    esClient.asInternalUser.indices.getSettings.mockResolvedValueOnce(
-      createApiResponse({
-        body: {
-          indexA: createIndexSettings('not-reporting-lifecycle'),
-          indexB: createIndexSettings('kibana-reporting'),
-        },
-      })
-    );
+    esClient.asInternalUser.indices.getSettings.mockResponse({
+      indexA: createIndexSettings('not-reporting-lifecycle'),
+      indexB: createIndexSettings('kibana-reporting'),
+    });
 
     expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(`
       Array [
@@ -73,24 +67,16 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
   });
 
   it('does not return deprecations when all reporting indices are managed by the provisioned ILM policy', async () => {
-    esClient.asInternalUser.indices.getSettings.mockResolvedValueOnce(
-      createApiResponse({
-        body: {
-          indexA: createIndexSettings('kibana-reporting'),
-          indexB: createIndexSettings('kibana-reporting'),
-        },
-      })
-    );
+    esClient.asInternalUser.indices.getSettings.mockResponse({
+      indexA: createIndexSettings('kibana-reporting'),
+      indexB: createIndexSettings('kibana-reporting'),
+    });
 
     expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(
       `Array []`
     );
 
-    esClient.asInternalUser.indices.getSettings.mockResolvedValueOnce(
-      createApiResponse({
-        body: {},
-      })
-    );
+    esClient.asInternalUser.indices.getSettings.mockResponse({});
 
     expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(
       `Array []`

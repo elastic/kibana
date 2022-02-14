@@ -97,36 +97,28 @@ describe('query_field_candidates', () => {
   describe('fetchTransactionDurationFieldCandidates', () => {
     it('returns field candidates and total hits', async () => {
       const esClientFieldCapsMock = jest.fn(() => ({
-        body: {
-          fields: {
-            myIpFieldName: { ip: {} },
-            myKeywordFieldName: { keyword: {} },
-            myUnpopulatedKeywordFieldName: { keyword: {} },
-            myNumericFieldName: { number: {} },
-          },
+        fields: {
+          myIpFieldName: { ip: {} },
+          myKeywordFieldName: { keyword: {} },
+          myUnpopulatedKeywordFieldName: { keyword: {} },
+          myNumericFieldName: { number: {} },
         },
       }));
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              hits: {
-                hits: [
-                  {
-                    fields: {
-                      myIpFieldName: '1.1.1.1',
-                      myKeywordFieldName: 'myKeywordFieldValue',
-                      myNumericFieldName: 1234,
-                    },
+            hits: {
+              hits: [
+                {
+                  fields: {
+                    myIpFieldName: '1.1.1.1',
+                    myKeywordFieldName: 'myKeywordFieldValue',
+                    myNumericFieldName: 1234,
                   },
-                ],
-              },
-            } as unknown as estypes.SearchResponse,
-          };
+                },
+              ],
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 
