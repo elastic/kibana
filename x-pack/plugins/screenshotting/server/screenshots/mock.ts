@@ -7,11 +7,11 @@
 
 import { of, NEVER } from 'rxjs';
 import { createMockLayout } from '../layouts/mock';
-import type { getScreenshots, ScreenshotResult } from '.';
+import type { Screenshots, ScreenshotResult } from '.';
 
-export function createMockScreenshots(): jest.Mocked<{ getScreenshots: typeof getScreenshots }> {
+export function createMockScreenshots(): jest.Mocked<Screenshots> {
   return {
-    getScreenshots: jest.fn((driverFactory, logger, options) =>
+    getScreenshots: jest.fn((options) =>
       of({
         layout: createMockLayout(),
         metrics$: NEVER,
@@ -27,5 +27,5 @@ export function createMockScreenshots(): jest.Mocked<{ getScreenshots: typeof ge
         })),
       } as ScreenshotResult)
     ),
-  };
+  } as unknown as jest.Mocked<Screenshots>;
 }

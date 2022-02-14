@@ -138,13 +138,11 @@
 # Uptime
 /x-pack/plugins/uptime @elastic/uptime
 /x-pack/plugins/ux @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime

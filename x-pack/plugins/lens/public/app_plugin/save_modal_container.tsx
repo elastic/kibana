@@ -16,7 +16,6 @@ import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, checkForDuplicateTitle } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { FilterManager } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import type { LensAppState } from '../state_management';
@@ -169,11 +168,10 @@ const redirectToDashboard = ({
 const getDocToSave = (
   lastKnownDoc: Document,
   saveProps: SaveProps,
-  references: SavedObjectReference[],
-  injectFilterReferences: FilterManager['inject']
+  references: SavedObjectReference[]
 ) => {
   const docToSave = {
-    ...injectDocFilterReferences(injectFilterReferences, removePinnedFilters(lastKnownDoc))!,
+    ...removePinnedFilters(lastKnownDoc)!,
     references,
   };
 
@@ -201,7 +199,6 @@ export const runSaveLensVisualization = async (
 ): Promise<Partial<LensAppState> | undefined> => {
   const {
     chrome,
-    data,
     initialInput,
     originatingApp,
     lastKnownDoc,
@@ -242,12 +239,7 @@ export const runSaveLensVisualization = async (
     );
   }
 
-  const docToSave = getDocToSave(
-    lastKnownDoc,
-    saveProps,
-    references,
-    data.query.filterManager.inject
-  );
+  const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
 
   // Required to serialize filters in by value mode until
   // https://github.com/elastic/kibana/issues/77588 is fixed
@@ -357,20 +349,6 @@ export const runSaveLensVisualization = async (
     throw e;
   }
 };
-
-export function injectDocFilterReferences(
-  injectFilterReferences: FilterManager['inject'],
-  doc?: Document
-) {
-  if (!doc) return undefined;
-  return {
-    ...doc,
-    state: {
-      ...doc.state,
-      filters: injectFilterReferences(doc.state?.filters || [], doc.references),
-    },
-  };
-}
 
 export function removePinnedFilters(doc?: Document) {
   if (!doc) return undefined;

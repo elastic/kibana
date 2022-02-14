@@ -221,6 +221,7 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.content_type = output.content_type || unknownMime;
       docOutput.max_size_reached = output.max_size_reached;
       docOutput.csv_contains_formulas = output.csv_contains_formulas;
+      docOutput.csv_rows = output.csv_rows;
       docOutput.size = output.size;
       docOutput.warnings =
         output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
@@ -363,7 +364,10 @@ export class ExecuteReportTask implements ReportingTask {
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
 
-            eventLog.logExecutionComplete({ byteSize: stream.bytesWritten });
+            eventLog.logExecutionComplete({
+              byteSize: stream.bytesWritten,
+              csvRows: output?.csv_rows,
+            });
 
             if (output) {
               this.logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);

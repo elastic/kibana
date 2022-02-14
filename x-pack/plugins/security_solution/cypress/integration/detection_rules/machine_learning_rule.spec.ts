@@ -24,7 +24,6 @@ import {
   ANOMALY_SCORE_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   MACHINE_LEARNING_JOB_ID,
   MACHINE_LEARNING_JOB_STATUS,
@@ -40,6 +39,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
+import { getDetails } from '../../tasks/rule_details';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,

@@ -7,6 +7,7 @@
 
 import { navigateTo } from '../tasks/navigation';
 import { UPDATE_PACKAGE_BTN } from '../screens/integrations';
+import { AGENT_POLICY_SAVE_INTEGRATION } from '../screens/fleet';
 
 describe('Add Integration - Mock API', () => {
   describe('upgrade package and upgrade package policy', () => {
@@ -141,7 +142,7 @@ describe('Add Integration - Mock API', () => {
       );
 
       cy.getBySel('toastCloseButton').click();
-      cy.getBySel('saveIntegration').click();
+      cy.getBySel(AGENT_POLICY_SAVE_INTEGRATION).click();
 
       cy.wait('@updateApachePolicy').then((interception) => {
         expect(interception.request.body.package.version).to.equal(newVersion);

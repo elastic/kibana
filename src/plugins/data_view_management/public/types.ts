@@ -8,7 +8,6 @@
 
 import {
   ChromeStart,
-  ApplicationStart,
   IUiSettingsClient,
   OverlayStart,
   NotificationsStart,
@@ -27,7 +26,6 @@ import { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
-  application: ApplicationStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
   overlays: OverlayStart;

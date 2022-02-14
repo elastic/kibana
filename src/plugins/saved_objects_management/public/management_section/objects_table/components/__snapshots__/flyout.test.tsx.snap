@@ -378,6 +378,7 @@ exports[`Flyout should render import step 1`] = `
         <EuiButton
           data-test-subj="importSavedObjectsImportBtn"
           fill={true}
+          isDisabled={true}
           isLoading={false}
           onClick={[Function]}
           size="s"

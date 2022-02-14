@@ -50,6 +50,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
 
   const formatDate = createDateFormatter(uiSettings.get('dateFormat'), timezone);
 
+  const hasCsvRows = info.csv_rows != null;
   const hasScreenshot = USES_HEADLESS_JOB_TYPES.includes(info.jobtype);
 
   const outputInfo = [
@@ -93,6 +94,12 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
         defaultMessage: 'Size in bytes',
       }),
       description: info.size?.toString() || NA,
+    },
+    hasCsvRows && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.csvRows', {
+        defaultMessage: 'CSV rows',
+      }),
+      description: info.csv_rows?.toString() || NA,
     },
 
     hasScreenshot && {
