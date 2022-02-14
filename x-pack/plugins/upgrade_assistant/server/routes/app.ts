@@ -52,18 +52,17 @@ export function registerAppRoutes({
         }
 
         try {
-          const {
-            body: { has_all_requested: hasAllPrivileges, index },
-          } = await client.asCurrentUser.security.hasPrivileges({
-            body: {
-              index: [
-                {
-                  names: [DEPRECATION_LOGS_INDEX],
-                  privileges: ['read'],
-                },
-              ],
-            },
-          });
+          const { has_all_requested: hasAllPrivileges, index } =
+            await client.asCurrentUser.security.hasPrivileges({
+              body: {
+                index: [
+                  {
+                    names: [DEPRECATION_LOGS_INDEX],
+                    privileges: ['read'],
+                  },
+                ],
+              },
+            });
 
           if (!hasAllPrivileges) {
             privilegesResult.missingPrivileges.index = extractMissingPrivileges(index);

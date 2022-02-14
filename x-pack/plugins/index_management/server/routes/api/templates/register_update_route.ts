@@ -35,14 +35,14 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
         } = template;
 
         // Verify the template exists (ES will throw 404 if not)
-        const { body: templateExists } = await doesTemplateExist({ name, client, isLegacy });
+        const templateExists = await doesTemplateExist({ name, client, isLegacy });
 
         if (!templateExists) {
           return response.notFound();
         }
 
         // Next, update index template
-        const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
+        const responseBody = await saveTemplate({ template, client, isLegacy });
 
         return response.ok({ body: responseBody });
       } catch (error) {
