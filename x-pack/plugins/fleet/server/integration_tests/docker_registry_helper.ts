@@ -8,6 +8,7 @@
 import { spawn } from 'child_process';
 import type { ChildProcess } from 'child_process';
 
+import pRetry from 'p-retry';
 import fetch from 'node-fetch';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,8 +50,12 @@ export function useDockerRegistry() {
       await delay(3000);
     }
 
+    if (isExited && dockerProcess.exitCode !== 0) {
+      throw new Error(`Unable to setup docker registry exit code ${dockerProcess.exitCode}`);
+    }
+
     dockerProcess.kill();
-    throw new Error('Unable to setup docker registry');
+    throw new Error('Unable to setup docker registry after timeout');
   }
 
   async function cleanupDockerRegistryServer() {
@@ -60,7 +65,16 @@ export function useDockerRegistry() {
   }
 
   beforeAll(async () => {
-    jest.setTimeout(5 * 60 * 1000); // 5 minutes timeout
+    const testTimeout = 5 * 60 * 1000; // 5 minutes timeout
+    jest.setTimeout(testTimeout);
+    await pRetry(() => startDockerRegistryServer(), {
+      retries: 3,
+      onFailedAttempt: (error) => {
+        if (error.message === 'Unable to setup docker registry after timeout') {
+          throw error;
+        }
+      },
+    });
     await startDockerRegistryServer();
   });
 
