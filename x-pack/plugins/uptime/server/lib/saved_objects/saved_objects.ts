@@ -89,7 +89,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       const config = savedObjectsAdapter.config;
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         if (config?.index) {
-          return { ...DYNAMIC_SETTINGS_DEFAULTS, heartbeatIndices: ConfigKey.index };
+          return { ...DYNAMIC_SETTINGS_DEFAULTS, heartbeatIndices: config.index };
         }
         return DYNAMIC_SETTINGS_DEFAULTS;
       }
