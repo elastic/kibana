@@ -154,7 +154,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
             value: agentPolicy.id,
             text: agentPolicy.name,
           }))}
-          value={selectedAgentPolicyId || undefined}
+          value={selectedAgentPolicyId}
           onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
           aria-label={i18n.translate(
             'xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel',
