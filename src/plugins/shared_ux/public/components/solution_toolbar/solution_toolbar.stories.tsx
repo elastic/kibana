@@ -16,6 +16,43 @@ import { SolutionToolbarPopover } from './items';
 import { AddFromLibraryButton, PrimaryActionButton, QuickButtonGroup } from './items';
 import mdx from './solution_toolbar.mdx';
 
+export default {
+  title: 'Solution Toolbar',
+  description: 'A universal toolbar for solutions maintained by the Presentation Team.',
+  component: SolutionToolbar,
+  argTypes: {
+    quickButtonCount: {
+      defaultValue: 2,
+      control: {
+        type: 'number',
+        min: 0,
+        max: 5,
+        step: 1,
+      },
+    },
+    showAddFromLibraryButton: {
+      defaultValue: true,
+      control: {
+        type: 'boolean',
+      },
+    },
+    solution: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  // https://github.com/storybookjs/storybook/issues/11543#issuecomment-684130442
+  parameters: {
+    docs: {
+      page: mdx,
+      source: {
+        type: 'code',
+      },
+    },
+  },
+};
+
 const quickButtons = [
   {
     createType: 'Text',
@@ -123,37 +160,6 @@ const extraButtonConfigs = {
       )}
     </SolutionToolbarPopover>,
   ],
-};
-
-export default {
-  title: 'Solution Toolbar',
-  description: 'A universal toolbar for solutions maintained by the Presentation Team.',
-  component: SolutionToolbar,
-  argTypes: {
-    quickButtonCount: {
-      defaultValue: 2,
-      control: {
-        type: 'number',
-        min: 0,
-        max: 5,
-        step: 1,
-      },
-    },
-    showAddFromLibraryButton: {
-      defaultValue: true,
-      control: {
-        type: 'boolean',
-      },
-    },
-    solution: {
-      table: {
-        disable: true,
-      },
-    },
-  },
-  parameters: {
-    docs: { page: mdx },
-  },
 };
 
 const Template: Story<{
