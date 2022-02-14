@@ -30,6 +30,7 @@ interface Props {
   onToggleAllNegated: () => void;
   onRemoveAll: () => void;
   onQueryChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   toggleFilterSetPopover: (value: boolean) => void;
   openFilterSetPopover: boolean;
   nonKqlMode?: 'lucene' | 'text';
@@ -61,6 +62,7 @@ export function FilterSetMenu({
   saveQueryFormComponent,
   openFilterSetPopover,
   toggleFilterSetPopover,
+  onSubmit
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
@@ -104,10 +106,12 @@ export function FilterSetMenu({
   };
 
   const onQueryStringChange = (query) => {
-    onQueryChange({
+    const newQuery = {
       query,
       dateRange: getDateRange(),
-    });
+    };
+    onQueryChange(newQuery);
+    onSubmit(newQuery);
   };
 
   const onSelectLanguage = (lang: string) => {
@@ -176,6 +180,7 @@ export function FilterSetMenu({
           onClick: () => {
             closePopover();
             onQueryStringChange({ query: '', language: 'kuery' });
+
             onRemoveAll();
           },
         },
