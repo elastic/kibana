@@ -96,8 +96,7 @@ interface ExplorerUrlStateManagerProps {
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
 
-  const [globalState, setGlobalState] = useUrlState('_g');
-  const [lastRefresh, setLastRefresh] = useState(0);
+  const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
@@ -113,21 +112,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const explorerState = useObservable(explorerService.state$);
 
   const refresh = useRefresh();
-
-  useEffect(() => {
-    if (refresh !== undefined && lastRefresh !== refresh.lastRefresh) {
-      setLastRefresh(refresh?.lastRefresh);
-
-      if (refresh.timeRange !== undefined) {
-        const { start, end } = refresh.timeRange;
-        setGlobalState('time', {
-          from: start,
-          to: end,
-          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
-        });
-      }
-    }
-  }, [refresh?.lastRefresh, lastRefresh, setLastRefresh, setGlobalState]);
+  const lastRefresh = refresh?.lastRefresh ?? 0;
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
@@ -138,10 +123,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       if (globalState.time.mode === 'invalid') {
         setInValidTimeRangeError(true);
       }
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
     }
   }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 

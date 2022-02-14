@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiTitle,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -151,9 +152,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     [stats.deployment_stats]
   );
 
-  const tabs = [
+  const tabs: EuiTabbedContentTab[] = [
     {
       id: 'details',
+      'data-test-subj': 'mlTrainedModelDetails',
       name: (
         <FormattedMessage
           id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTabLabel"
@@ -161,7 +163,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         />
       ),
       content: (
-        <>
+        <div data-test-subj={'mlTrainedModelDetailsContent'}>
           <EuiSpacer size={'s'} />
           <EuiFlexGrid columns={2} gutterSize={'m'}>
             <EuiFlexItem>
@@ -203,13 +205,14 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               </EuiFlexItem>
             ) : null}
           </EuiFlexGrid>
-        </>
+        </div>
       ),
     },
     ...(inferenceConfig
       ? [
           {
             id: 'config',
+            'data-test-subj': 'mlTrainedModelInferenceConfig',
             name: (
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.expandedRow.configTabLabel"
@@ -217,7 +220,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               />
             ),
             content: (
-              <>
+              <div data-test-subj={'mlTrainedModelInferenceConfigContent'}>
                 <EuiSpacer size={'s'} />
                 <EuiFlexGrid columns={2} gutterSize={'m'}>
                   <EuiFlexItem>
@@ -261,7 +264,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                     </EuiFlexItem>
                   )}
                 </EuiFlexGrid>
-              </>
+              </div>
             ),
           },
         ]
@@ -270,6 +273,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       ? [
           {
             id: 'stats',
+            'data-test-subj': 'mlTrainedModelStats',
             name: (
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel"
@@ -277,7 +281,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               />
             ),
             content: (
-              <>
+              <div data-test-subj={'mlTrainedModelStatsContent'}>
                 <EuiSpacer size={'s'} />
 
                 <EuiFlexGrid columns={2} gutterSize={'m'}>
@@ -317,8 +321,29 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                       </EuiPanel>
                     </EuiFlexItem>
                   ) : null}
+                  {isPopulatedObject(stats.model_size_stats) &&
+                  !isPopulatedObject(stats.inference_stats) ? (
+                    <EuiFlexItem>
+                      <EuiPanel>
+                        <EuiTitle size={'xs'}>
+                          <h5>
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.modelsList.expandedRow.modelSizeStatsTitle"
+                              defaultMessage="Model size stats"
+                            />
+                          </h5>
+                        </EuiTitle>
+                        <EuiSpacer size={'m'} />
+                        <EuiDescriptionList
+                          compressed={true}
+                          type="column"
+                          listItems={formatToListItems(stats.model_size_stats)}
+                        />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  ) : null}
                 </EuiFlexGrid>
-              </>
+              </div>
             ),
           },
         ]
@@ -327,6 +352,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       ? [
           {
             id: 'pipelines',
+            'data-test-subj': 'mlTrainedModelPipelines',
             name: (
               <>
                 <FormattedMessage
@@ -337,10 +363,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               </>
             ),
             content: (
-              <>
+              <div data-test-subj={'mlTrainedModelPipelinesContent'}>
                 <EuiSpacer size={'s'} />
                 <ModelPipelines pipelines={pipelines!} ingestStats={stats.ingest} />
-              </>
+              </div>
             ),
           },
         ]
@@ -355,6 +381,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       initialSelectedTab={tabs[0]}
       autoFocus="selected"
       onTabClick={(tab) => {}}
+      data-test-subj={'mlTrainedModelRowDetails'}
     />
   );
 };
