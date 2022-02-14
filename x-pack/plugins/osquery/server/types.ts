@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { ActionsPlugin } from '../../actions/server';
-import {
+import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
+import type { ActionsPlugin } from '../../actions/server';
+import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
-import { FleetStartContract } from '../../fleet/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { PluginSetupContract } from '../../features/server';
-import { SecurityPluginStart } from '../../security/server';
+import type { FleetStartContract } from '../../fleet/server';
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import type { PluginSetupContract } from '../../features/server';
+import type { SecurityPluginStart } from '../../security/server';
+import {
+  TaskManagerSetupContract as TaskManagerPluginSetup,
+  TaskManagerStartContract as TaskManagerPluginStart,
+} from '../../task_manager/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
@@ -26,10 +31,14 @@ export interface SetupPlugins {
   data: DataPluginSetup;
   features: PluginSetupContract;
   security: SecurityPluginStart;
+  taskManager?: TaskManagerPluginSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export interface StartPlugins {
   actions: ActionsPlugin['start'];
   data: DataPluginStart;
   fleet?: FleetStartContract;
+  taskManager?: TaskManagerPluginStart;
+  telemetry?: TelemetryPluginStart;
 }

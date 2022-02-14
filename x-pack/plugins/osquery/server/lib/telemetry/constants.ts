@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-export { pie } from './pie_chart';
+export const TELEMETRY_MAX_BUFFER_SIZE = 100;
 
-export type {
-  SharedPieLayerState,
-  PieLayerState,
-  PieVisualizationState,
-  PieExpressionArgs,
-  PieExpressionProps,
-} from './types';
+export const MAX_PACK_TELEMETRY_BATCH = 100;
+
+export const TELEMETRY_CHANNEL_PACKS = 'osquery-packs';
+
+export const TELEMETRY_CHANNEL_SAVED_QUERIES = 'osquery-saved-queries';
