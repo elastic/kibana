@@ -66,7 +66,8 @@ export const searchAfterAndBulkCreate = async ({
       try {
         let mergedSearchResults = createSearchResultReturnType();
         logger.debug(buildRuleMessage(`sortIds: ${sortIds}`));
-
+        logger.debug(`WHAT ARE THE INDEX PATTERNS ${inputIndexPattern}`);
+        logger.debug(`WHAT ARE THE filters ${JSON.stringify(filter, null, 2)}`);
         if (hasSortId) {
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,

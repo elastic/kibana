@@ -140,16 +140,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   setForm,
 }) => {
   const {
-    browserFields,
-    docValueFields,
+    // browserFields,
+    // docValueFields,
     indexPattern,
-    runtimeMappings,
+    // runtimeMappings,
     selectedPatterns,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView();
-  console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
-  console.log('docValueFields', JSON.stringify(runtimeMappings, null, 2));
+  // console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
+  // console.log('docValueFields', JSON.stringify(runtimeMappings, null, 2));
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -196,6 +196,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'anomalyThreshold',
     ],
   });
+  const thing = indexPattern;
 
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
@@ -205,7 +206,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
   const isPreviewRouteEnabled = useMemo(() => ruleType !== 'threat_match', [ruleType]);
-  // const [indexPatternsLoading, { indexPatterns }] = useFetchIndex(index);
+  const [
+    indexPatternsLoading,
+    {
+      browserFields,
+      // indexPatterns,
+    },
+  ] = useFetchIndex(index);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {
       return {
@@ -443,10 +450,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   component={QueryBarDefineRule}
                   componentProps={{
                     browserFields,
-                    docValueFields,
-                    runtimeMappings,
+                    // docValueFields,
+                    // runtimeMappings,
                     idAria: 'detectionEngineStepDefineRuleQueryBar',
-                    indexPattern,
+                    indexPattern: indexPattern,
                     isDisabled: isLoading,
                     isLoading: isLoadingIndexPattern,
                     dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
