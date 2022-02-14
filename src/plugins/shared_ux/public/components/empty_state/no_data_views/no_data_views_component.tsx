@@ -9,6 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCard } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { NoResultsIllustration } from '../assets';
 
 interface NoDataViewsComponentProps {
@@ -16,25 +17,38 @@ interface NoDataViewsComponentProps {
   canCreateNewDataView: boolean;
 }
 
+const addDataViewText = i18n.translate('sharedUX.noDataViewsPage.addDataViewText', {
+  defaultMessage: 'Add a Data View',
+});
+
+const noDataViewsText = i18n.translate('sharedUX.noDataViewsPage.noDataViewsText', {
+  defaultMessage: 'No Data Views',
+});
+
+const noDescriptionText = i18n.translate('sharedUX.noDataViewsPage.descriptionText', {
+  defaultMessage: 'You have data in Elasticsearch, but no data views',
+});
+
 export const NoDataViewsComponent = (props: NoDataViewsComponentProps) => {
   const { onClick, canCreateNewDataView } = props;
+
+  const componentCss = css`
+    width: 50%;
+    margin: auto;
+    flex-grow: 0;
+  `;
+
   const button = (
     <EuiButton color={'primary'} onClick={onClick}>
-      {i18n.translate('sharedUX.noDataViewsPage.addDataViewText', {
-        defaultMessage: 'Add a Data View',
-      })}
+      {addDataViewText}
     </EuiButton>
   );
   return (
     <EuiCard
-      title={i18n.translate('sharedUX.noDataViewsPage.noDataViewsText', {
-        defaultMessage: 'No Data Views',
-      })}
+      title={noDataViewsText}
       textAlign="center"
-      description={i18n.translate('sharedUX.noDataViewsPage.descriptionText', {
-        defaultMessage: 'You have data in Elasticsearch, but no data views',
-      })}
-      style={{ width: '50%', margin: 'auto', flexGrow: 0 }}
+      description={noDescriptionText}
+      css={componentCss}
     >
       <div className="noResults__illustration">
         <NoResultsIllustration />
