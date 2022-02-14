@@ -6,7 +6,7 @@
  */
 
 import React, { MouseEvent, useCallback, useEffect, useState } from 'react';
-import { EuiBasicTable, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
@@ -144,13 +144,7 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
         duration ? (
           formatDuration(duration)
         ) : (
-          <EuiToolTip
-            content={i18n.translate('xpack.uptime.pingList.durationColumnToolTip', {
-              defaultMessage: 'Duration is unavailable for journeys that do not finish executing',
-            })}
-          >
-            <span data-test-subj="ping-list-duration-unavailable-tool-tip">{'--'}</span>
-          </EuiToolTip>
+          <span data-test-subj="ping-list-duration-unavailable-tool-tip">{'--'}</span>
         ),
     },
     ...(hasError
