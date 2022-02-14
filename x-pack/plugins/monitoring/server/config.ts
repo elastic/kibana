@@ -15,7 +15,7 @@ import { MonitoringConfigSchema } from './types';
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 const elasticsearchConfigSchema = ElasticsearchBaseConfig.elasticsearch.schema;
-export type ElasticsearchConfigType = TypeOf<typeof elasticsearchConfigSchema>;
+type ElasticsearchConfigType = TypeOf<typeof elasticsearchConfigSchema>;
 
 export const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.extends({
   logFetchCount: schema.number({ defaultValue: 10 }),
