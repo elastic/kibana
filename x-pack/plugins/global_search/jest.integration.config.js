@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export { pie } from './pie_chart';
-
-export type {
-  SharedPieLayerState,
-  PieLayerState,
-  PieVisualizationState,
-  PieExpressionArgs,
-  PieExpressionProps,
-} from './types';
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/global_search'],
+};
