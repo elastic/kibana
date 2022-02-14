@@ -15,7 +15,6 @@ import { getInitialRulesUsage } from './rules/get_initial_usage';
 import { getInitialMlJobUsage } from './ml_jobs/get_initial_usage';
 
 export interface GetDetectionsMetricsOptions {
-  kibanaIndex: string;
   signalsIndex: string;
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
@@ -24,7 +23,6 @@ export interface GetDetectionsMetricsOptions {
 }
 
 export const getDetectionsMetrics = async ({
-  kibanaIndex,
   signalsIndex,
   esClient,
   savedObjectsClient,
@@ -33,7 +31,7 @@ export const getDetectionsMetrics = async ({
 }: GetDetectionsMetricsOptions): Promise<DetectionMetrics> => {
   const [mlJobMetrics, detectionRuleMetrics] = await Promise.allSettled([
     getMlJobMetrics({ mlClient, savedObjectsClient, logger }),
-    getRuleMetrics({ kibanaIndex, signalsIndex, esClient, savedObjectsClient, logger }),
+    getRuleMetrics({ signalsIndex, esClient, savedObjectsClient, logger }),
   ]);
 
   return {

@@ -18,7 +18,6 @@ export interface UsageData {
 
 export const registerCollector: RegisterCollector = ({
   core,
-  kibanaIndex,
   signalsIndex,
   ml,
   usageCollection,
@@ -516,7 +515,6 @@ export const registerCollector: RegisterCollector = ({
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
       const detectionMetrics = await getDetectionsMetrics({
-        kibanaIndex,
         signalsIndex,
         esClient,
         savedObjectsClient,

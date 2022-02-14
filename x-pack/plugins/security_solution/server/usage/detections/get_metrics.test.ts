@@ -21,7 +21,11 @@ import {
   getMockMlDatafeedStatsResponse,
   getMockRuleSearchResponse,
 } from './ml_jobs/get_metrics.mocks';
-import { getMockRuleAlertsResponse, getMockAlertCasesResponse } from './rules/get_metrics.mocks';
+import {
+  getMockRuleAlertsResponse,
+  getMockAlertCaseCommentsResponse,
+  getEmptySavedObjectResponse,
+} from './rules/get_metrics.mocks';
 import { getInitialDetectionMetrics } from './get_initial_usage';
 import { getDetectionsMetrics } from './get_metrics';
 import { getInitialRulesUsage } from './rules/get_initial_usage';
@@ -41,7 +45,6 @@ describe('Detections Usage and Metrics', () => {
     it('returns zeroed counts if calls are empty', async () => {
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
-        kibanaIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -52,13 +55,13 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with rule, alerts and cases', async () => {
-      esClient.search
-        .mockResponseOnce(getMockRuleSearchResponse())
-        .mockResponseOnce(getMockRuleAlertsResponse(3400));
-      savedObjectsClient.find.mockResolvedValue(getMockAlertCasesResponse());
+      esClient.search.mockResponseOnce(getMockRuleAlertsResponse(3400));
+      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
+      savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+      // Get empty saved object for legacy notification system.
+      savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
-        kibanaIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -113,13 +116,13 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with on non elastic prebuilt rule', async () => {
-      esClient.search
-        .mockResponseOnce(getMockRuleSearchResponse('not_immutable'))
-        .mockResponseOnce(getMockRuleAlertsResponse(800));
-      savedObjectsClient.find.mockResolvedValue(getMockAlertCasesResponse());
+      esClient.search.mockResponseOnce(getMockRuleAlertsResponse(800));
+      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse('not_immutable'));
+      savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+      // Get empty saved object for legacy notification system.
+      savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
-        kibanaIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -159,13 +162,14 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns information with rule, no alerts and no cases', async () => {
-      esClient.search
-        .mockResponseOnce(getMockRuleSearchResponse())
-        .mockResponseOnce(getMockRuleAlertsResponse(0));
-      savedObjectsClient.find.mockResolvedValue(getMockAlertCasesResponse());
+      esClient.search.mockResponseOnce(getMockRuleAlertsResponse(0));
+      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
+      savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+      // Get empty saved object for legacy notification system.
+      savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
-        kibanaIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -225,6 +229,7 @@ describe('Detections Usage and Metrics', () => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mlClient = mlServicesMock.createSetupContract();
       savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectResponse());
     });
 
     it('returns an empty array if there is no data', async () => {
@@ -234,7 +239,6 @@ describe('Detections Usage and Metrics', () => {
       } as unknown as ReturnType<typeof mlClient.anomalyDetectorsProvider>);
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
-        kibanaIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,
@@ -267,7 +271,6 @@ describe('Detections Usage and Metrics', () => {
       } as unknown as ReturnType<typeof mlClient.anomalyDetectorsProvider>);
 
       const result = await getDetectionsMetrics({
-        kibanaIndex: '',
         signalsIndex: '',
         esClient,
         savedObjectsClient,

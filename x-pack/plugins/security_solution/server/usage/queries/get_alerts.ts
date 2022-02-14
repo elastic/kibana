@@ -77,7 +77,7 @@ export const getAlerts = async ({
         },
       },
       track_total_hits: false,
-      sort: [{ _shard_doc: 'desc' }] as unknown as string[], // Remove this "unknown" once it is typed correctly https://github.com/elastic/elasticsearch-js/issues/1589
+      sort: [{ _shard_doc: 'desc' }] as unknown as string[], // TODO: Remove this "unknown" once it is typed correctly https://github.com/elastic/elasticsearch-js/issues/1589
       pit: { id: pitId },
       size: 0,
     };

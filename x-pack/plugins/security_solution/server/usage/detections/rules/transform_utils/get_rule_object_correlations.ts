@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleSearchResult } from '../../../types';
+import type { SavedObjectsFindResult } from 'kibana/server';
 import type { RuleMetric } from '../types';
+import type { RuleSearchResult } from '../../../types';
+
 import { isElasticRule } from '../../../queries/utils/is_elastic_rule';
 
 export interface RuleObjectCorrelationsOptions {
-  ruleResults: Array<SearchHit<RuleSearchResult>>;
+  ruleResults: Array<SavedObjectsFindResult<RuleSearchResult>>;
   legacyNotificationRuleIds: Map<
     string,
     {
@@ -28,9 +29,10 @@ export const getRuleObjectCorrelations = ({
   casesRuleIds,
   alertsCounts,
 }: RuleObjectCorrelationsOptions): RuleMetric[] => {
-  return ruleResults.map((hit) => {
-    const ruleId = hit._id.split(':')[1];
-    const isElastic = isElasticRule(hit._source?.alert.tags);
+  return ruleResults.map((result) => {
+    const ruleId = result.id;
+    const { attributes } = result;
+    const isElastic = isElasticRule(attributes.tags);
 
     // Even if the legacy notification is set to "no_actions" we still count the rule as having a legacy notification that is not migrated yet.
     const hasLegacyNotification = legacyNotificationRuleIds.get(ruleId) != null;
@@ -38,19 +40,19 @@ export const getRuleObjectCorrelations = ({
     // We only count a rule as having a notification and being "enabled" if it is _not_ set to "no_actions"/"muteAll" and it has at least one action within its array.
     const hasNotification =
       !hasLegacyNotification &&
-      hit._source?.alert.actions != null &&
-      hit._source?.alert.actions.length > 0 &&
-      hit._source?.alert.muteAll !== true;
+      attributes.actions != null &&
+      attributes.actions.length > 0 &&
+      attributes.muteAll !== true;
 
     return {
-      rule_name: String(hit._source?.alert.name),
-      rule_id: String(hit._source?.alert.params.ruleId),
-      rule_type: String(hit._source?.alert.params.type),
-      rule_version: Number(hit._source?.alert.params.version),
-      enabled: Boolean(hit._source?.alert.enabled),
+      rule_name: attributes.name,
+      rule_id: attributes.params.ruleId,
+      rule_type: attributes.params.type,
+      rule_version: attributes.params.version,
+      enabled: attributes.enabled,
       elastic_rule: isElastic,
-      created_on: String(hit._source?.alert.createdAt),
-      updated_on: String(hit._source?.alert.updatedAt),
+      created_on: attributes.createdAt,
+      updated_on: attributes.updatedAt,
       alert_count_daily: alertsCounts.get(ruleId) || 0,
       cases_count_total: casesRuleIds.get(ruleId) || 0,
       has_legacy_notification: hasLegacyNotification,

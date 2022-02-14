@@ -23,7 +23,6 @@ import { getRuleObjectCorrelations } from './transform_utils/get_rule_object_cor
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
 
 export interface GetRuleMetricsOptions {
-  kibanaIndex: string;
   signalsIndex: string;
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
@@ -31,7 +30,6 @@ export interface GetRuleMetricsOptions {
 }
 
 export const getRuleMetrics = async ({
-  kibanaIndex,
   signalsIndex,
   esClient,
   savedObjectsClient,
@@ -40,8 +38,7 @@ export const getRuleMetrics = async ({
   try {
     // gets rule saved objects
     const ruleResults = await getDetectionRules({
-      esClient,
-      kibanaIndex,
+      savedObjectsClient,
       maxPerPage: MAX_PER_PAGE,
       maxSize: MAX_RESULTS_WINDOW,
       logger,
@@ -114,8 +111,8 @@ export const getRuleMetrics = async ({
     };
   } catch (e) {
     // ignore failure, usage will be zeroed
-    logger.error(
-      `Encountered error in telemetry of message: ${e.message}, error: ${e}. Telemetry for "detection rules" being skipped.`
+    logger.info(
+      `Encountered exception in telemetry of message: ${e.message}, error: ${e}. Telemetry for "detection rules" being skipped.`
     );
     return {
       detection_rule_detail: [],

@@ -6,8 +6,11 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectsFindResponse } from 'kibana/server';
+import type { AlertAggs } from '../../types';
+import { CommentAttributes, CommentType } from '../../../../../cases/common/api/cases/comment';
 
-export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<unknown, unknown> => ({
+export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<never, AlertAggs> => ({
   took: 7,
   timed_out: false,
   _shards: {
@@ -41,7 +44,10 @@ export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<unkn
   },
 });
 
-export const getMockAlertCasesResponse = () => ({
+export const getMockAlertCaseCommentsResponse = (): SavedObjectsFindResponse<
+  Partial<CommentAttributes>,
+  never
+> => ({
   page: 1,
   per_page: 10000,
   total: 4,
@@ -50,7 +56,7 @@ export const getMockAlertCasesResponse = () => ({
       type: 'cases-comments',
       id: '3bb5cc10-9249-11eb-85b7-254c8af1a983',
       attributes: {
-        type: 'alert',
+        type: CommentType.alert,
         alertId: '54802763917f521249c9f68d0d4be0c26cc538404c26dfed1ae7dcfa94ea2226',
         index: '.siem-signals-default-000001',
         rule: {
@@ -83,4 +89,11 @@ export const getMockAlertCasesResponse = () => ({
       score: 0,
     },
   ],
+});
+
+export const getEmptySavedObjectResponse = (): SavedObjectsFindResponse<never, never> => ({
+  page: 1,
+  per_page: 1_000,
+  total: 0,
+  saved_objects: [],
 });

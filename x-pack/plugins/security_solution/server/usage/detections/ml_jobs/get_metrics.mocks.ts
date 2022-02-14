@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectsFindResponse } from 'kibana/server';
+import type { RuleSearchResult } from '../../types';
 
 export const getMockListModulesResponse = () => [
   {
@@ -291,102 +292,100 @@ export const getMockMlDatafeedStatsResponse = () => ({
 
 export const getMockRuleSearchResponse = (
   immutableTag: string = '__internal_immutable:true'
-): SearchResponse<unknown, unknown> => ({
-  took: 2,
-  timed_out: false,
-  _shards: {
+): SavedObjectsFindResponse<RuleSearchResult, never> =>
+  ({
+    page: 1,
+    per_page: 1_000,
     total: 1,
-    successful: 1,
-    skipped: 0,
-    failed: 0,
-  },
-  hits: {
-    total: {
-      value: 1093,
-      relation: 'eq',
-    },
-    max_score: 0,
-    hits: [
+    saved_objects: [
       {
-        _index: '.kibanaindex',
-        _id: 'alert:6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
-        _score: 0,
-        _source: {
-          alert: {
-            name: 'Azure Diagnostic Settings Deletion',
-            tags: [
-              'Elastic',
-              'Cloud',
-              'Azure',
-              'Continuous Monitoring',
-              'SecOps',
-              'Monitoring',
-              '__internal_rule_id:5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
-              `${immutableTag}`,
+        type: 'alert',
+        id: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
+        namespaces: ['default'],
+        attributes: {
+          name: 'Azure Diagnostic Settings Deletion',
+          tags: [
+            'Elastic',
+            'Cloud',
+            'Azure',
+            'Continuous Monitoring',
+            'SecOps',
+            'Monitoring',
+            '__internal_rule_id:5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
+            `${immutableTag}`,
+          ],
+          alertTypeId: 'siem.queryRule',
+          consumer: 'siem',
+          params: {
+            author: ['Elastic'],
+            description:
+              'Identifies the deletion of diagnostic settings in Azure, which send platform logs and metrics to different destinations. An adversary may delete diagnostic settings in an attempt to evade defenses.',
+            ruleId: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
+            index: ['filebeat-*', 'logs-azure*'],
+            falsePositives: [
+              'Deletion of diagnostic settings may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Diagnostic settings deletion from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.',
             ],
-            alertTypeId: 'siem.signals',
-            consumer: 'siem',
-            params: {
-              author: ['Elastic'],
-              description:
-                'Identifies the deletion of diagnostic settings in Azure, which send platform logs and metrics to different destinations. An adversary may delete diagnostic settings in an attempt to evade defenses.',
-              ruleId: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
-              index: ['filebeat-*', 'logs-azure*'],
-              falsePositives: [
-                'Deletion of diagnostic settings may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Diagnostic settings deletion from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.',
-              ],
-              from: 'now-25m',
-              immutable: true,
-              query:
-                'event.dataset:azure.activitylogs and azure.activitylogs.operation_name:"MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE" and event.outcome:(Success or success)',
-              language: 'kuery',
-              license: 'Elastic License v2',
-              outputIndex: '.siem-signals',
-              maxSignals: 100,
-              riskScore: 47,
-              timestampOverride: 'event.ingested',
-              to: 'now',
-              type: 'query',
-              references: [
-                'https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-settings',
-              ],
-              note: 'The Azure Filebeat module must be enabled to use this rule.',
-              version: 4,
-              exceptionsList: [],
-            },
-            schedule: {
-              interval: '5m',
-            },
-            enabled: false,
-            actions: [],
-            throttle: null,
-            notifyWhen: 'onActiveAlert',
-            apiKeyOwner: null,
-            apiKey: null,
-            createdBy: 'user',
-            updatedBy: 'user',
-            createdAt: '2021-03-23T17:15:59.634Z',
-            updatedAt: '2021-03-23T17:15:59.634Z',
-            muteAll: false,
-            mutedInstanceIds: [],
-            executionStatus: {
-              status: 'pending',
-              lastExecutionDate: '2021-03-23T17:15:59.634Z',
-              error: null,
-            },
-            meta: {
-              versionApiKeyLastmodified: '8.0.0',
+            from: 'now-25m',
+            immutable: true,
+            query:
+              'event.dataset:azure.activitylogs and azure.activitylogs.operation_name:"MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE" and event.outcome:(Success or success)',
+            language: 'kuery',
+            license: 'Elastic License v2',
+            outputIndex: '.siem-signals',
+            maxSignals: 100,
+            riskScore: 47,
+            timestampOverride: 'event.ingested',
+            to: 'now',
+            type: 'query',
+            references: [
+              'https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-settings',
+            ],
+            note: 'The Azure Filebeat module must be enabled to use this rule.',
+            version: 4,
+            exceptionsList: [],
+          },
+          schedule: {
+            interval: '5m',
+          },
+          enabled: false,
+          actions: [],
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          apiKeyOwner: null,
+          apiKey: '',
+          legacyId: null,
+          createdBy: 'user',
+          updatedBy: 'user',
+          createdAt: '2021-03-23T17:15:59.634Z',
+          updatedAt: '2021-03-23T17:15:59.634Z',
+          muteAll: true,
+          mutedInstanceIds: [],
+          monitoring: {
+            execution: {
+              history: [],
+              calculated_metrics: {
+                success_ratio: 1,
+                p99: 7981,
+                p50: 1653,
+                p95: 6523.699999999996,
+              },
             },
           },
-          type: 'alert',
-          references: [],
-          migrationVersion: {
-            alert: '7.13.0',
+          meta: {
+            versionApiKeyLastmodified: '8.2.0',
           },
-          coreMigrationVersion: '8.0.0',
-          updated_at: '2021-03-23T17:15:59.634Z',
+          scheduledTaskId: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
         },
+        references: [],
+        migrationVersion: {
+          alert: '8.0.0',
+        },
+        coreMigrationVersion: '8.2.0',
+        updated_at: '2021-03-23T17:15:59.634Z',
+        version: 'Wzk4NTQwLDNd',
+        score: 0,
+        sort: ['1644865254209', '19548'],
       },
     ],
-  },
-});
+    // NOTE: We have to cast as "unknown" and then back to "RuleSearchResult" because "RuleSearchResult" isn't an exact type. See notes in the JSDocs fo that type.
+  } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);

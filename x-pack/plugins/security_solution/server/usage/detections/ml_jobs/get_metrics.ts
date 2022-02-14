@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  Logger,
-} from '../../../../../../../src/core/server';
+import type { KibanaRequest, SavedObjectsClientContract, Logger } from 'kibana/server';
 import type { MlDatafeedStats, MlJob, MlPluginSetup } from '../../../../../ml/server';
 import type { MlJobMetric, MlJobUsageMetric } from './types';
 
@@ -91,8 +87,8 @@ export const getMlJobMetrics = async ({
     };
   } catch (e) {
     // ignore failure, usage will be zeroed
-    logger.error(
-      `Encountered error in telemetry of message: ${e.message}, error: ${e}. Telemetry for "ml_jobs" will be skipped.`
+    logger.info(
+      `Encountered exception in telemetry of message: ${e.message}, error: ${e}. Telemetry for "ml_jobs" will be skipped.`
     );
     return {
       ml_job_usage: getInitialMlJobUsage(),
