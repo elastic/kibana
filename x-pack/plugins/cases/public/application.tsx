@@ -18,9 +18,7 @@ import {
 } from '../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '../../../../src/plugins/kibana_react/common';
 import { RenderAppProps } from './types';
-import { getCasesLazy } from './methods';
-import { APP_OWNER } from '../common/constants';
-import { useApplicationCapabilities } from './common/lib/kibana';
+import { CasesApp } from './components/app';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -33,26 +31,17 @@ export const renderApp = (deps: RenderAppProps) => {
   };
 };
 
-const CasesApp = () => {
+const CasesAppWithContext = () => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-  const userCapabilities = useApplicationCapabilities();
 
   return (
     <StyledComponentsThemeProvider darkMode={darkMode}>
-      {/* TODO: Replace div with page wrapper */}
-      <div>
-        {getCasesLazy({
-          owner: [APP_OWNER],
-          useFetchAlertData: () => [false, {}],
-          userCanCrud: userCapabilities.crud,
-          basePath: '/',
-        })}
-      </div>
+      <CasesApp />
     </StyledComponentsThemeProvider>
   );
 };
 
-CasesApp.displayName = 'CasesApp';
+CasesAppWithContext.displayName = 'CasesAppWithContext';
 
 export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
   const { mountParams, coreStart, pluginsStart, storage, kibanaVersion } = deps;
@@ -71,7 +60,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
             }}
           >
             <Router history={history}>
-              <CasesApp />
+              <CasesAppWithContext />
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>
