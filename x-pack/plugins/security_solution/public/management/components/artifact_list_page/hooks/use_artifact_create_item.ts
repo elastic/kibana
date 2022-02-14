@@ -8,7 +8,7 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { useQueryClient, useMutation } from 'react-query';
+import { useMutation } from 'react-query';
 import { HttpFetchError } from 'kibana/public';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
@@ -24,7 +24,6 @@ export function useCreateArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   callbacks: CallbackTypes = {}
 ) {
-  const queryClient = useQueryClient();
   const { onSuccess = () => {}, onError = () => {}, onSettled = () => {} } = callbacks;
 
   return useMutation<
@@ -40,7 +39,6 @@ export function useCreateArtifact(
       onSuccess,
       onError,
       onSettled: () => {
-        queryClient.invalidateQueries(['list', exceptionListApiClient]);
         onSettled();
       },
     }

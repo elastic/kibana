@@ -81,7 +81,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const {
       isPageInitializing,
-      isLoading,
+      isFetching: isLoading,
       data: listDataResponse,
       uiPagination,
       doesDataExist,
@@ -164,6 +164,10 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             page: pageSize !== uiPagination.pageSize ? 1 : pageIndex + 1,
             pageSize,
           });
+
+          // Scroll to the top to ensure that when new set of data is received and list updated,
+          // the user is back at the top of the list
+          window.scrollTo(0, 0);
         },
         [setUrlParams, uiPagination.pageSize]
       );

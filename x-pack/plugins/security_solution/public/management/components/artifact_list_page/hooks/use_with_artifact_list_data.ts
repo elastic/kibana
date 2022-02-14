@@ -64,7 +64,7 @@ export const useWithArtifactListData = (
 
   const {
     data: doesDataExist,
-    isLoading: isLoadingDataExists,
+    isFetching: isLoadingDataExists,
     refetch: checkIfDataExists,
   } = useQuery<boolean, ServerApiError>(
     ['does-data-exists', apiClient],
@@ -76,7 +76,6 @@ export const useWithArtifactListData = (
     }
   );
 
-  // Convert to useMemo()? that uses data from API request?
   const [uiPagination, setUiPagination] = useState<Pagination>({
     totalItemCount: 0,
     pageSize,
@@ -98,7 +97,7 @@ export const useWithArtifactListData = (
 
   const {
     data: listData,
-    isLoading: isLoadingListData,
+    isFetching: isLoadingListData,
     error: listDataError,
     isSuccess: isSuccessListData,
   } = listDataRequest;
