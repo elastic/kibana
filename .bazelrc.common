@@ -44,9 +44,7 @@ build --experimental_inprocess_symlink_creation
 
 # Incompatible flags to run with
 build --incompatible_no_implicit_file_export
-build --incompatible_restrict_string_escapes
 query --incompatible_no_implicit_file_export
-query --incompatible_restrict_string_escapes
 
 # Log configs
 ## different from default

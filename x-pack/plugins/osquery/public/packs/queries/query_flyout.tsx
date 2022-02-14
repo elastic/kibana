@@ -76,36 +76,35 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
-      if (!savedQuery) {
-        return reset();
-      }
+      reset();
 
-      setFieldValue('id', savedQuery.id);
-      setFieldValue('query', savedQuery.query);
+      if (savedQuery) {
+        setFieldValue('id', savedQuery.id);
+        setFieldValue('query', savedQuery.query);
 
-      if (savedQuery.description) {
-        setFieldValue('description', savedQuery.description);
-      }
+        if (savedQuery.description) {
+          setFieldValue('description', savedQuery.description);
+        }
 
-      if (savedQuery.interval) {
-        setFieldValue('interval', savedQuery.interval);
-      }
+        if (savedQuery.interval) {
+          setFieldValue('interval', savedQuery.interval);
+        }
 
-      if (savedQuery.platform) {
-        setFieldValue('platform', savedQuery.platform);
-      }
+        if (savedQuery.platform) {
+          setFieldValue('platform', savedQuery.platform);
+        }
 
-      if (savedQuery.version) {
-        setFieldValue('version', [savedQuery.version]);
-      }
+        if (savedQuery.version) {
+          setFieldValue('version', [savedQuery.version]);
+        }
 
-      if (savedQuery.ecs_mapping) {
-        setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
+        if (savedQuery.ecs_mapping) {
+          setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
+        }
       }
     },
     [setFieldValue, reset]
   );
-
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
   const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
 
