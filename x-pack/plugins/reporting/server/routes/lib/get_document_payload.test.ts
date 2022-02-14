@@ -76,6 +76,7 @@ describe('getDocumentPayload', () => {
           output: {
             content_type: 'text/csv',
             csv_contains_formulas: true,
+            csv_rows: 42000000,
             max_size_reached: true,
             size: 1024,
           },

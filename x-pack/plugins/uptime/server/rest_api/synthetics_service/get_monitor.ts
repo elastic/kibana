@@ -7,12 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from './service_errors';
 
-export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
+export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
@@ -23,7 +24,7 @@ export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   handler: async ({ request, response, savedObjectsClient }): Promise<any> => {
     const { monitorId } = request.params;
     try {
-      return await savedObjectsClient.get(syntheticsMonitorType, monitorId);
+      return await libs.requests.getSyntheticsMonitor({ monitorId, savedObjectsClient });
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
