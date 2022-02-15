@@ -1221,7 +1221,6 @@ describe('xy_expression', () => {
         column: 0,
         table: dateHistogramData.tables.timeLayer,
         range: [1585757732783, 1585758880838],
-        timeFieldName: 'order_date',
       });
     });
 
@@ -1301,7 +1300,6 @@ describe('xy_expression', () => {
         column: 0,
         table: numberHistogramData.tables.numberLayer,
         range: [5, 8],
-        timeFieldName: undefined,
       });
     });
 
@@ -1432,7 +1430,6 @@ describe('xy_expression', () => {
             value: 1585758120000,
           },
         ],
-        timeFieldName: 'order_date',
       });
     });
 

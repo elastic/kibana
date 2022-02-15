@@ -127,7 +127,7 @@ export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent
     .map(({ table, column }) => {
       const tableColumn = table.columns[column];
       const hasTimeRange = Boolean(
-        search.aggs.getDateHistogramMetaDataByDatatableColumn(tableColumn)?.timeRange
+        tableColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(tableColumn)?.timeRange
       );
       if (hasTimeRange) {
         return tableColumn.meta.field;
