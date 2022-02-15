@@ -32,10 +32,7 @@ Object {
     "syncColors": false,
     "visConfig": Object {
       "addTooltip": true,
-<<<<<<< HEAD
-=======
       "ariaLabel": undefined,
->>>>>>> main
       "buckets": Array [
         Object {
           "accessor": 1,
@@ -104,11 +101,7 @@ Object {
       "emptySizeRatio": 0.3,
       "isDonut": true,
       "labels": Object {
-<<<<<<< HEAD
-        "lastLevel": false,
-=======
         "last_level": false,
->>>>>>> main
         "percentDecimals": 2,
         "position": "default",
         "show": false,
@@ -172,10 +165,7 @@ Object {
     "syncColors": false,
     "visConfig": Object {
       "addTooltip": true,
-<<<<<<< HEAD
-=======
       "ariaLabel": undefined,
->>>>>>> main
       "buckets": Array [
         Object {
           "accessor": 1,
@@ -244,11 +234,7 @@ Object {
       "emptySizeRatio": 0.3,
       "isDonut": false,
       "labels": Object {
-<<<<<<< HEAD
-        "lastLevel": false,
-=======
         "last_level": false,
->>>>>>> main
         "percentDecimals": 2,
         "position": "default",
         "show": false,
@@ -301,8 +287,6 @@ Object {
 }
 `;
 
-<<<<<<< HEAD
 exports[`interpreter/functions#pieVis throws error if provided not valid legend position 1`] = `"Invalid legend position: 'some not valid position'. Supported values: top, bottom, left, right."`;
-=======
+
 exports[`interpreter/functions#pieVis throws error if provided split row and split column at once 1`] = `"A split row and column are specified. Expression is supporting only one of them at once."`;
->>>>>>> main

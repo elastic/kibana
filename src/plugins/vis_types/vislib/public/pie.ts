@@ -23,7 +23,7 @@ export type PieVisParams = Omit<CommonVislibParams, 'addLegend'> & {
   labels: {
     show: boolean;
     values: boolean;
-    lastLevel: boolean;
+    last_level: boolean;
     truncate: number | null;
   };
   legendDisplay: LegendDisplay;

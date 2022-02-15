@@ -67,9 +67,6 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "last_level": Array [
-                    true,
-                  ],
                   "show": Array [
                     true,
                   ],
