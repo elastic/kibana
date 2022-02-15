@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 
 import { NotificationsSetup, IUiSettingsClient, CoreTheme } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { SharePluginStart } from 'src/plugins/share/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
 import type { FileUploadPluginStart } from '../../../file_upload/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '../shared_imports';
 
@@ -38,7 +38,7 @@ export interface AppServices {
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
-  urlGenerators: SharePluginStart['urlGenerators'];
+  share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
 }
 
