@@ -174,7 +174,7 @@ describe('IndexingRulesTable', () => {
         filterType: 'path_template',
         valueType: 'include',
       };
-      table.prop('onAdd')(newIndexingRule, () => true);
+      table.prop('onAdd')(newIndexingRule, done);
       expect(initAddIndexingRule).toHaveBeenCalledWith(newIndexingRule);
       expect(clearFlashMessages).toHaveBeenCalled();
     });
