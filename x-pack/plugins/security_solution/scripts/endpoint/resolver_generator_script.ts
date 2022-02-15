@@ -84,13 +84,23 @@ async function deleteUser(esClient: Client, username: string): Promise<{ found: 
   });
 }
 
-const updateWithNewCredentials = (
-  url: string,
-  user: { username: string; password: string }
-): string => {
+const updateURL = ({
+  url,
+  user,
+  protocol,
+}: {
+  url: string;
+  user?: { username: string; password: string };
+  protocol?: string;
+}): string => {
   const urlObject = new URL(url);
-  urlObject.username = user.username;
-  urlObject.password = user.password;
+  if (user) {
+    urlObject.username = user.username;
+    urlObject.password = user.password;
+  }
+  if (protocol) {
+    urlObject.protocol = protocol;
+  }
   return urlObject.href;
 };
 
@@ -265,8 +275,8 @@ async function main() {
 
   if (argv.ssl) {
     ca = fs.readFileSync(CA_CERT_PATH);
-    url = argv.kibana.replace('http:', 'https:');
-    node = argv.node.replace('http:', 'https:');
+    url = updateURL({ url: argv.kibana, protocol: 'https:' });
+    node = updateURL({ url: argv.node, protocol: 'https:' });
     kbnClientOptions = {
       ...kbnClientOptions,
       url,
@@ -298,8 +308,8 @@ async function main() {
     if (user) {
       // use endpoint user for Es and Kibana URLs
 
-      url = updateWithNewCredentials(argv.kibana, user);
-      node = updateWithNewCredentials(argv.node, user);
+      url = updateURL({ url: argv.kibana, user });
+      node = updateURL({ url: argv.node, user });
 
       kbnClientOptions = {
         ...kbnClientOptions,
