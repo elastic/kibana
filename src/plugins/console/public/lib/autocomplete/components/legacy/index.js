@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-commonjs
-module.exports = require('@kbn/storybook').defaultConfig;
+export { LegacyTemplateAutocompleteComponent } from './legacy_template_autocomplete_component';
