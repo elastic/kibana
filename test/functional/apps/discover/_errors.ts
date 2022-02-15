@@ -16,9 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker']);
 
-  describe('errors', function describeIndexTests() {
+  describe.only('errors', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/invalid_scripted_field'
       );
