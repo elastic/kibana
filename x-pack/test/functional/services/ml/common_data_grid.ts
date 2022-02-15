@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { chunk } from 'lodash';
 import type { ProvidedType } from '@kbn/test';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { asyncForEach } from '../../apps/ml/settings/common';
 
 export interface SetValueOptions {
   clearWithKeyboard?: boolean;
@@ -22,6 +23,7 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const find = getService('find');
 
   return {
     dataGridSelector(tableSubj: string, subSelector?: string) {
@@ -152,18 +154,34 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
       });
     },
 
+    async assertColumnSelectorsSwitchState(expectedState: boolean) {
+      await retry.tryForTime(5 * 1000, async () => {
+        const visibilityToggles = await (
+          await find.byClassName('euiDataGrid__controlScroll')
+        ).findAllByCssSelector('[role="switch"]');
+
+        await asyncForEach(visibilityToggles, async (toggle) => {
+          const checked = (await toggle.getAttribute('aria-checked')) === 'true';
+          expect(checked).to.eql(
+            expectedState,
+            `Expected column select switch button's checked state to be ${expectedState} (got ${checked})`
+          );
+        });
+      });
+    },
+
     async hideAllColumns(tableSubj: string) {
       await this.toggleColumnSelectPopoverState(tableSubj, true);
       await testSubjects.click('dataGridColumnSelectorHideAllButton');
+      await this.assertColumnSelectorsSwitchState(false);
       await browser.pressKeys(browser.keys.ESCAPE);
-      // @todo: some validation
     },
 
     async showAllColumns(tableSubj: string) {
       await this.toggleColumnSelectPopoverState(tableSubj, true);
       await testSubjects.click('dataGridColumnSelectorShowAllButton');
+      await this.assertColumnSelectorsSwitchState(true);
       await browser.pressKeys(browser.keys.ESCAPE);
-      // @todo: some validation
     },
 
     async assertColumnSortPopoverOpenState(tableSubj: string, expectedOpenState: boolean) {
