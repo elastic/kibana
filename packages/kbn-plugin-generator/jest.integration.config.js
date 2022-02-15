@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-commonjs
-module.exports = require('@kbn/storybook').defaultConfig;
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-plugin-generator'],
+};
