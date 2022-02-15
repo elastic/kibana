@@ -191,6 +191,7 @@ export const SynchronizationLogic = kea<
         setIndexingRules: () => true,
         addIndexingRule: () => true,
         deleteIndexingRule: () => true,
+        resetSyncSettings: () => false,
         updateServerSettings: () => false,
       },
     ],

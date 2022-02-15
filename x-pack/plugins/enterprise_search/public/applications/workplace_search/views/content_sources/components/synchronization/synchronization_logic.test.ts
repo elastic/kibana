@@ -162,6 +162,7 @@ describe('SynchronizationLogic', () => {
       expect(SynchronizationLogic.values.thumbnailsChecked).toEqual(true);
       expect(SynchronizationLogic.values.contentExtractionChecked).toEqual(true);
       expect(SynchronizationLogic.values.indexingRules).toEqual(defaultIndexingRules);
+      expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(false);
     });
 
     describe('setSyncFrequency', () => {
