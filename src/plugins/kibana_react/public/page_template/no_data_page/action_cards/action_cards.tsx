@@ -6,18 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import React, { ReactElement } from 'react';
-import { ActionCard } from './action_card';
+import { ElasticAgentCard, NoDataCard } from '../no_data_card';
 
-interface ActionCardsProps {
-  actionCards: Array<ReactElement<typeof ActionCard>>;
+interface Props {
+  actionCards: Array<ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard>>;
 }
-export const ActionCards = (props: ActionCardsProps) => {
+
+export const ActionCards = (props: Props) => {
   const { actionCards } = props;
+  const cards = actionCards.map((card) => (
+    <EuiFlexItem key={card.key || ''} className="kbnNoDataPageContents__item">
+      {card}
+    </EuiFlexItem>
+  ));
   return (
     <EuiFlexGrid columns={2} style={{ justifyContent: 'space-around' }}>
-      {actionCards}
+      {cards}
     </EuiFlexGrid>
   );
 };
