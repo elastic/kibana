@@ -48,7 +48,7 @@ type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
 > & {
   ruleTypeId: SanitizedAlert['alertTypeId'];
 };
-type Rule = SanitizedRule<RuleTypeParams>;
+type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
 type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
 };
@@ -70,6 +70,7 @@ export type {
   RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedRule,
+  SanitizedRule,
 };
 export type { ActionType, AsApiContract };
 export {
