@@ -58,6 +58,7 @@ export class CanvasPlugin implements Plugin {
       embeddablePersistableStateService: {
         extract: plugins.embeddable.extract,
         inject: plugins.embeddable.inject,
+        getAllMigrations: plugins.embeddable.getAllMigrations,
       },
     });
 

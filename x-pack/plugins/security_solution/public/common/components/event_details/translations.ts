@@ -22,10 +22,10 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.over
   defaultMessage: 'Overview',
 });
 
-export const DUCOMENT_SUMMARY = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.documentSummary',
+export const HIGHLIGHTES_FIELDS = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields',
   {
-    defaultMessage: 'Document Summary',
+    defaultMessage: 'Highlighted fields',
   }
 );
 
@@ -113,9 +113,6 @@ export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
   }
 );
 
-export const VIEW_ALL_DOCUMENT_FIELDS = i18n.translate(
-  'xpack.securitySolution.eventDetails.viewAllDocumentFields',
-  {
-    defaultMessage: 'View all document fields in table',
-  }
-);
+export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
+  defaultMessage: 'View all fields in table',
+});

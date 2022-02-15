@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('validation', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/124663
+    describe.skip('validation', function () {
       it('can display errors', async function () {
         await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.settings.setIndexPatternField('log-fake*');

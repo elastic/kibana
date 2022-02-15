@@ -8,12 +8,16 @@
 import { EuiButton, EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { PolicyData } from '../../../../../../../common/endpoint/types';
+import { useGetLinkTo } from './use_policy_host_isolation_exceptions_empty_hooks';
 
 export const PolicyHostIsolationExceptionsEmptyUnexisting = ({
-  toHostIsolationList,
+  policy,
 }: {
-  toHostIsolationList: string;
+  policy: PolicyData;
 }) => {
+  const { onClickHandler, toRouteUrl } = useGetLinkTo(policy.id, policy.name, { show: 'create' });
+
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt
@@ -34,7 +38,8 @@ export const PolicyHostIsolationExceptionsEmptyUnexisting = ({
           />
         }
         actions={
-          <EuiButton color="primary" fill href={toHostIsolationList}>
+          // eslint-disable-next-line @elastic/eui/href-or-on-click
+          <EuiButton color="primary" fill onClick={onClickHandler} href={toRouteUrl}>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unexisting.action"
               defaultMessage="Add host isolation exceptions"

@@ -88,6 +88,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     usageCollection: deps.usageCollection,
     fieldFormats: deps.fieldFormats,
     dashboard: deps.dashboard,
+    charts: deps.charts,
     ...coreStart,
   };
 
@@ -134,7 +135,7 @@ export const renderApp = (
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
-    urlGenerators: deps.share.urlGenerators,
+    dashboard: deps.dashboard,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,

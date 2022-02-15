@@ -9,7 +9,7 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ILicense } from '../../../../licensing/public';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
-import { InvalidLicenseNotification } from './Invalid_license_notification';
+import { InvalidLicenseNotification } from './invalid_license_notification';
 
 export const LicenseContext = React.createContext<ILicense | undefined>(
   undefined

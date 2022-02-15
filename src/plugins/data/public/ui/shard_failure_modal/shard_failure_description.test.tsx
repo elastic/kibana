@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ShardFailureDescription } from './shard_failure_description';
 import { shardFailureResponse } from './__mocks__/shard_failure_response';
 import { ShardFailure } from './shard_failure_types';

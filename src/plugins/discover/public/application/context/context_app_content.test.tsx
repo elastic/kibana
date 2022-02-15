@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from './components/action_bar/action_bar';
-import { AppState, GetStateReturn } from './services/context_state';
+import { GetStateReturn } from './services/context_state';
 import { SortDirection } from 'src/plugins/data/common';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
@@ -52,7 +52,6 @@ describe('ContextAppContent test', () => {
     const props = {
       columns: ['order_date', '_source'],
       indexPattern: indexPatternMock,
-      appState: {} as unknown as AppState,
       stateContainer: {} as unknown as GetStateReturn,
       anchorStatus: anchorStatus || LoadingStatus.LOADED,
       predecessorsStatus: LoadingStatus.LOADED,

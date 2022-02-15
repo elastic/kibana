@@ -30,7 +30,7 @@ import {
 import { ListClient } from '../../../../../lists/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
-import { TelemetryEventsSender } from '../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
@@ -314,7 +314,7 @@ export interface SearchAfterAndBulkCreateParams {
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   id: string;
   inputIndexPattern: string[];
   signalsIndex: string;

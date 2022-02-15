@@ -20,7 +20,7 @@ export const PLUGIN = {
   },
 };
 
-export const MAJOR_VERSION = '8.1.0';
+export const MAJOR_VERSION = '8.2.0';
 
 export const API_BASE_PATH = '/api/remote_clusters';
 

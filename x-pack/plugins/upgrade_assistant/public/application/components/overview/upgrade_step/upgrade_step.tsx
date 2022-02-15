@@ -35,9 +35,6 @@ const i18nTexts = {
         "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade to Elastic 8.x. Be sure to back up your data again before upgrading. Upgrade your deployment on Elastic Cloud.",
     }
   ),
-  upgradeStepLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepLink', {
-    defaultMessage: 'Learn more',
-  }),
   upgradeStepCloudLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepCloudLink', {
     defaultMessage: 'Upgrade on Cloud',
   }),
@@ -110,7 +107,7 @@ const UpgradeStep = () => {
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href={docLinks.links.upgrade.upgradingElasticStack}
+              href={docLinks.links.upgrade.upgradingStackOnCloud}
               target="_blank"
               data-test-subj="upgradeSetupDocsLink"
               iconSide="right"
@@ -125,13 +122,13 @@ const UpgradeStep = () => {
   } else {
     callToAction = (
       <EuiButton
-        href={docLinks.links.upgrade.upgradingElasticStack}
+        href={docLinks.links.upgrade.upgradingStackOnPrem}
         target="_blank"
         data-test-subj="upgradeSetupDocsLink"
         iconSide="right"
         iconType="popout"
       >
-        {i18nTexts.upgradeStepLink}
+        {i18nTexts.upgradeGuideLink}
       </EuiButton>
     );
   }

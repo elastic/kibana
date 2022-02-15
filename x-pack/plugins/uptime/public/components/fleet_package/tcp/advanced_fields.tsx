@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -22,7 +22,11 @@ import { ConfigKey } from '../types';
 
 import { OptionalLabel } from '../optional_label';
 
-export const TCPAdvancedFields = () => {
+interface Props {
+  children?: React.ReactNode;
+}
+
+export const TCPAdvancedFields = memo<Props>(({ children }) => {
   const { fields, setFields } = useTCPAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
@@ -176,6 +180,7 @@ export const TCPAdvancedFields = () => {
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      {children}
     </EuiAccordion>
   );
-};
+});

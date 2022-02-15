@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { APIReturnType } from '../services/rest/createCallApmApi';
+import type { APIReturnType } from '../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';

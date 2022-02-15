@@ -53,7 +53,8 @@ export async function syncMvtSourceData({
         return true;
       },
     });
-    const canSkip = noChangesInSourceState && noChangesInSearchState;
+    const canSkip =
+      !syncContext.forceRefreshDueToDrawing && noChangesInSourceState && noChangesInSearchState;
 
     if (canSkip) {
       return;
@@ -63,7 +64,9 @@ export async function syncMvtSourceData({
   syncContext.startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
   try {
     const refreshToken =
-      !prevData || (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
+      !prevData ||
+      syncContext.forceRefreshDueToDrawing ||
+      (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
         ? uuid()
         : prevData.refreshToken;
 

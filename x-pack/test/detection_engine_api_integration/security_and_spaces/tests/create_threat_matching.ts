@@ -20,6 +20,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -104,7 +105,12 @@ export default ({ getService }: FtrProviderContext) => {
           getCreateThreatMatchRulesSchemaMock('rule-1', true)
         );
 
-        await waitForRuleSuccessOrStatus(supertest, log, ruleResponse.id, 'succeeded');
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          ruleResponse.id,
+          RuleExecutionStatus.succeeded
+        );
 
         const { body: rule } = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
@@ -472,7 +478,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id, 'failed');
+          await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus.failed);
 
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)

@@ -87,6 +87,7 @@ export function TransactionFlyout({
             transaction={transactionDoc}
             totalDuration={rootTransactionDuration}
             errorCount={errorCount}
+            coldStartBadge={transactionDoc.faas?.coldstart}
           />
           <EuiHorizontalRule margin="m" />
           <DroppedSpansWarning transactionDoc={transactionDoc} />

@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { act } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ActionConnector } from '../../../../types';
 import { useGetChoices } from './use_get_choices';
 import ServiceNowSIRParamsFields from './servicenow_sir_params';
 import { Choice } from './types';
+import { merge } from 'lodash';
 
 jest.mock('./use_get_choices');
 jest.mock('../../../../common/lib/kibana');
@@ -81,6 +82,12 @@ const choicesResponse = {
       element: 'category',
     },
     {
+      dependent_value: '',
+      label: 'Failed Login',
+      value: 'failed_login',
+      element: 'category',
+    },
+    {
       dependent_value: 'Denial of Service',
       label: 'Inbound or outbound',
       value: '12',
@@ -144,6 +151,10 @@ describe('ServiceNowSIRParamsFields renders', () => {
 
   test('all params fields is rendered', () => {
     const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+    act(() => {
+      onChoicesSuccess(choicesResponse.choices);
+    });
+    wrapper.update();
     expect(wrapper.find('[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="correlation_idInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="correlation_displayInput"]').exists()).toBeTruthy();
@@ -219,6 +230,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
         text: 'Criminal activity/investigation',
       },
       { value: 'Denial of Service', text: 'Denial of Service' },
+      { value: 'failed_login', text: 'Failed Login' },
     ]);
   });
 
@@ -275,6 +287,24 @@ describe('ServiceNowSIRParamsFields renders', () => {
       },
     ]);
   });
+  it('should hide subcategory if selecting a category without subcategories', async () => {
+    const newProps = merge({}, defaultProps, {
+      actionParams: {
+        subActionParams: {
+          incident: {
+            category: 'failed_login',
+            subcategory: null,
+          },
+        },
+      },
+    });
+    const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);
+    act(() => {
+      onChoicesSuccess(choicesResponse.choices);
+    });
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
+  });
 
   describe('UI updates', () => {
     const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
@@ -294,6 +324,10 @@ describe('ServiceNowSIRParamsFields renders', () => {
     simpleFields.forEach((field) =>
       test(`${field.key} update triggers editAction :D`, () => {
         const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+        act(() => {
+          onChoicesSuccess(choicesResponse.choices);
+        });
+        wrapper.update();
         const theField = wrapper.find(field.dataTestSubj).first();
         theField.prop('onChange')!(changeEvent);
         expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(changeEvent.target.value);

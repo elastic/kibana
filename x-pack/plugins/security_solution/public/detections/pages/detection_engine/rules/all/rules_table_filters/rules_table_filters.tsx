@@ -19,7 +19,6 @@ import { isEqual } from 'lodash/fp';
 import * as i18n from '../../translations';
 
 import { FilterOptions } from '../../../../../containers/detection_engine/rules';
-import { useTags } from '../../../../../containers/detection_engine/rules/use_tags';
 import { TagsFilterPopover } from './tags_filter_popover';
 
 interface RulesTableFiltersProps {
@@ -27,6 +26,9 @@ interface RulesTableFiltersProps {
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   currentFilterTags: string[];
+  tags: string[];
+  isLoadingTags: boolean;
+  reFetchTags: () => void;
 }
 
 /**
@@ -40,12 +42,14 @@ const RulesTableFiltersComponent = ({
   rulesCustomInstalled,
   rulesInstalled,
   currentFilterTags,
+  tags,
+  isLoadingTags,
+  reFetchTags,
 }: RulesTableFiltersProps) => {
   const [filter, setFilter] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showCustomRules, setShowCustomRules] = useState<boolean>(false);
   const [showElasticRules, setShowElasticRules] = useState<boolean>(false);
-  const [isLoadingTags, tags, reFetchTags] = useTags();
 
   useEffect(() => {
     reFetchTags();

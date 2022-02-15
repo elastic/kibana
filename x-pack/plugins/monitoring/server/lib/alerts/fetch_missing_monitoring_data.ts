@@ -11,6 +11,7 @@ import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 import { Globals } from '../../static_globals';
 import { getConfigCcs } from '../../../common/ccs_utils';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface ClusterBucketESResponse {
   key: string;
@@ -73,6 +74,7 @@ export async function fetchMissingMonitoringData(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
+            createDatasetFilter('node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
@@ -136,7 +138,7 @@ export async function fetchMissingMonitoringData(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const clusterBuckets = get(
     response,
     'aggregations.clusters.buckets',

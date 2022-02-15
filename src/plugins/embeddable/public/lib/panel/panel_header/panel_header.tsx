@@ -27,6 +27,7 @@ import { CustomizePanelTitleAction } from '.';
 
 export interface PanelHeaderProps {
   title?: string;
+  index?: number;
   isViewMode: boolean;
   hidePanelTitle: boolean;
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
@@ -114,6 +115,7 @@ function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription)
 
 export function PanelHeader({
   title,
+  index,
   isViewMode,
   hidePanelTitle,
   getActionContextMenuPanel,
@@ -159,6 +161,7 @@ export function PanelHeader({
           isViewMode={isViewMode}
           closeContextMenu={closeContextMenu}
           title={title}
+          index={index}
         />
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       </div>
@@ -228,6 +231,7 @@ export function PanelHeader({
           getActionContextMenuPanel={getActionContextMenuPanel}
           closeContextMenu={closeContextMenu}
           title={title}
+          index={index}
         />
       </figcaption>
     </span>

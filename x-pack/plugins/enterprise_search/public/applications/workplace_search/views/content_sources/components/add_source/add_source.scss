@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 // --------------------------------------------------
 // View: Adding a Source flow
 // --------------------------------------------------
@@ -79,6 +78,7 @@
     .euiFlexItem:first-child {
       align-self: flex-end;
     }
+
     .euiFlexItem:last-child {
       align-self: flex-start;
     }
@@ -96,5 +96,11 @@
     width: 2.5em;
     margin: 0;
     background: transparent;
+  }
+}
+
+@media (min-width: 768px) {
+  .organizational-content-source-item {
+    max-width: calc(33.3% - #{$euiSize});
   }
 }

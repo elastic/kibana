@@ -95,7 +95,7 @@ export async function fetchStackProductUsage(
     },
   };
 
-  const { body: responseBody } = await callCluster.search(params);
+  const responseBody = await callCluster.search(params);
   const response = responseBody as estypes.SearchResponse<ESResponse>;
   const uuidBuckets = get(response, 'aggregations.uuids.buckets', []) as UuidBucket[];
   const count = uuidBuckets.length;

@@ -12,6 +12,8 @@ jest.mock('../../hooks/use_request', () => {
     useGetSettings: jest.fn(),
     sendGetFleetStatus: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
+    useGetAgents: jest.fn(),
+    useGetAgentPolicies: jest.fn(),
   };
 });
 
@@ -61,4 +63,8 @@ jest.mock('@elastic/eui', () => {
     ...module,
     EuiSteps: 'eui-steps',
   };
+});
+
+jest.mock('../../applications/fleet/sections/agents/services/has_fleet_server', () => {
+  return { policyHasFleetServer: jest.fn().mockReturnValue(true) };
 });

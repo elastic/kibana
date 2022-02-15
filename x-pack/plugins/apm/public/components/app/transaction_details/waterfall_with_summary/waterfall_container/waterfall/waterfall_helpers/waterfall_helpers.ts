@@ -7,7 +7,7 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
-import { APIReturnType } from '../../../../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';

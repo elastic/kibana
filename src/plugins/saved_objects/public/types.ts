@@ -14,12 +14,12 @@ import {
   SavedObjectReference,
 } from 'kibana/public';
 import {
-  DataPublicPluginStart,
   IndexPattern,
-  IndexPatternsContract,
   ISearchSource,
+  ISearchStart,
   SerializedSearchSourceFields,
 } from '../../data/public';
+import { DataViewsContract } from '../../data_views/public';
 
 /** @deprecated */
 export interface SavedObject {
@@ -63,8 +63,8 @@ export interface SavedObjectCreationOpts {
 
 export interface SavedObjectKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
-  search: DataPublicPluginStart['search'];
+  dataViews: DataViewsContract;
+  search: ISearchStart;
   chrome: ChromeStart;
   overlays: OverlayStart;
 }

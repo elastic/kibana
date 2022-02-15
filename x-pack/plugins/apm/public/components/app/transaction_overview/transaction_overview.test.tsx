@@ -20,7 +20,7 @@ import * as useServiceAgentNameHook from '../../../context/apm_service/use_servi
 import {
   disableConsoleWarning,
   renderWithTheme,
-} from '../../../utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
 import { TransactionOverview } from './';
 
