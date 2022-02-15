@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 
 import type { AgentPolicy } from '../types';
 
-import { useGetAgentPolicies } from '.';
+import { useGetAgentPolicies } from './use_request';
 
 interface AgentEnrollmentFlyoutData {
   agentPolicies: AgentPolicy[];
