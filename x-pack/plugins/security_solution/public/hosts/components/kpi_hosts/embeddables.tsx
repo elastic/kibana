@@ -107,8 +107,8 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
   const dataTypesIndexPatterns = useMemo(() => patternList?.join(','), [patternList]);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
+    <EuiFlexGroup style={{ flexWrap: 'wrap' }}>
+      <EuiFlexItem grow={1} style={{ minWidth: '264px' }}>
         <EuiPanel
           color="transparent"
           hasBorder
@@ -119,16 +119,18 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
             <h3>{'Hosts'}</h3>
           </EuiTitle>
           <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
-            <EuiSplitPanel.Inner paddingSize="none">
+            <EuiSplitPanel.Inner paddingSize="none" style={{ width: '100%' }}>
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
                     customLensAttrs={customLensAttrs.kpiHostMetric}
                     customTimeRange={timerange}
-                    metricIcon="storage"
-                    metricIconColor="#6092c0"
                     isSingleMetric={true}
+                    singleMetricOptions={{
+                      metricIcon: 'storage',
+                      metricIconColor: '#6092c0',
+                    }}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -147,7 +149,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
           </EuiSplitPanel.Outer>
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem style={{ height: panelHeight }} grow={2}>
+      <EuiFlexItem style={{ height: panelHeight, minWidth: '528px' }} grow={2}>
         <EuiPanel
           color="transparent"
           hasBorder
@@ -158,17 +160,19 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
             <h3>{'User authentications'}</h3>
           </EuiTitle>
           <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
-            <EuiSplitPanel.Inner paddingSize="none">
+            <StyledInnerPannel paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsMetricSuccess}
                     customTimeRange={timerange}
-                    metricIcon="check"
-                    metricIconColor="#54B399"
-                    metricPostfix="success"
                     isSingleMetric={true}
+                    singleMetricOptions={{
+                      metricIcon: 'check',
+                      metricIconColor: '#54B399',
+                      metricPostfix: 'success',
+                    }}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -183,18 +187,20 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
-            </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner paddingSize="none">
+            </StyledInnerPannel>
+            <StyledInnerPannel paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    metricIcon="cross"
-                    metricIconColor="#e7664c"
-                    metricPostfix="fail"
                     customLensAttrs={customLensAttrs.kpiUserAuthenticationsMetricFailure}
                     customTimeRange={timerange}
                     isSingleMetric={true}
+                    singleMetricOptions={{
+                      metricIcon: 'cross',
+                      metricIconColor: '#e7664c',
+                      metricPostfix: 'fail',
+                    }}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -210,11 +216,11 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
-            </EuiSplitPanel.Inner>
+            </StyledInnerPannel>
           </EuiSplitPanel.Outer>
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem style={{ height: panelHeight }} grow={2}>
+      <EuiFlexItem style={{ height: panelHeight, minWidth: '528px' }} grow={2}>
         <EuiPanel
           color="transparent"
           hasBorder
@@ -225,17 +231,19 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
             <h3>{'Unique IPs'}</h3>
           </EuiTitle>
           <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
-            <EuiSplitPanel.Inner paddingSize="none">
+            <StyledInnerPannel paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
                     customLensAttrs={customLensAttrs.kpiUniqueIpsSourceMetric}
                     customTimeRange={timerange}
-                    metricIcon="visMapCoordinate"
-                    metricPostfix={SOURCE_UNIT_LABEL}
-                    metricIconColor="#d36086"
                     isSingleMetric={true}
+                    singleMetricOptions={{
+                      metricIcon: 'visMapCoordinate',
+                      metricIconColor: '#d36086',
+                      metricPostfix: SOURCE_UNIT_LABEL,
+                    }}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -250,18 +258,20 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
-            </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner paddingSize="none">
+            </StyledInnerPannel>
+            <StyledInnerPannel paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <EmbeddableHistogram
                     dataTypesIndexPatterns={dataTypesIndexPatterns}
-                    metricIcon="visMapCoordinate"
-                    metricIconColor="#9170b8"
-                    metricPostfix={DESTINATION_UNIT_LABEL}
                     customLensAttrs={customLensAttrs.kpiUniqueIpsDestinationMetric}
                     customTimeRange={timerange}
                     isSingleMetric={true}
+                    singleMetricOptions={{
+                      metricIcon: 'visMapCoordinate',
+                      metricIconColor: '#9170b8',
+                      metricPostfix: DESTINATION_UNIT_LABEL,
+                    }}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -277,7 +287,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
-            </EuiSplitPanel.Inner>
+            </StyledInnerPannel>
           </EuiSplitPanel.Outer>
         </EuiPanel>
       </EuiFlexItem>
@@ -288,3 +298,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
 export const ExploratoryCharts = React.memo(ExploratoryChartsComponents);
 
 ExploratoryCharts.displayName = 'ExploratoryCharts';
+
+const StyledInnerPannel = styled(EuiSplitPanel.Inner)`
+  width: 50%;
+`;
