@@ -174,8 +174,8 @@ describe('IndexingRulesTable', () => {
         filterType: 'path_template',
         valueType: 'include',
       };
-      table.prop('onAdd')(newIndexingRule, done);
-      expect(initAddIndexingRule).toHaveBeenCalledWith(newIndexingRule, done);
+      table.prop('onAdd')(newIndexingRule, () => true);
+      expect(initAddIndexingRule).toHaveBeenCalledWith(newIndexingRule);
       expect(clearFlashMessages).toHaveBeenCalled();
     });
   });
@@ -197,7 +197,7 @@ describe('IndexingRulesTable', () => {
         valueType: 'include',
       };
       table.prop('onUpdate')(newIndexingRule, done);
-      expect(initSetIndexingRule).toHaveBeenCalledWith(newIndexingRule, done);
+      expect(initSetIndexingRule).toHaveBeenCalledWith(newIndexingRule);
       expect(clearFlashMessages).toHaveBeenCalled();
     });
   });
