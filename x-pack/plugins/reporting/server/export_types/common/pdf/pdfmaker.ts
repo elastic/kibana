@@ -6,14 +6,10 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import _ from 'lodash';
 import path from 'path';
-import { Worker } from 'worker_threads';
-import { MessageChannel } from 'worker_threads';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
+import { MessageChannel, Worker } from 'worker_threads';
 import type { Layout } from '../../../../../screenshotting/server';
-import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
-import { getFont } from './get_font';
 import {
   headingHeight,
   pageMarginBottom,
@@ -22,9 +18,11 @@ import {
   subheadingHeight,
   tableBorderWidth,
 } from './constants';
+import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
+import { getFont } from './get_font';
 import { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
-
 import type { GeneratePdfRequest, GeneratePdfResponse } from './worker';
+
 // Ensure that the worker and all dependencies are included in the release bundle.
 import './worker';
 
