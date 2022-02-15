@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiIcon, EuiRange } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiRange } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState } from '../types';
@@ -16,100 +16,10 @@ import { YConfig } from '../../../common/expressions';
 import { LineStyle, FillStyle, IconPosition } from '../../../common/expressions/xy_chart';
 
 import { ColorPicker } from './color_picker';
-import { updateLayer, idPrefix } from '.';
+import { updateLayer } from '.';
 import { TooltipWrapper, useDebouncedValue } from '../../shared_components';
-
-const icons = [
-  {
-    value: 'empty',
-    label: i18n.translate('xpack.lens.xyChart.referenceLine.noIconLabel', {
-      defaultMessage: 'None',
-    }),
-  },
-  {
-    value: 'asterisk',
-    label: i18n.translate('xpack.lens.xyChart.referenceLine.asteriskIconLabel', {
-      defaultMessage: 'Asterisk',
-    }),
-  },
-  {
-    value: 'bell',
-    label: i18n.translate('xpack.lens.xyChart.referenceLine.bellIconLabel', {
-      defaultMessage: 'Bell',
-    }),
-  },
-  {
-    value: 'bolt',
-    label: i18n.translate('xpack.lens.xyChart.referenceLine.boltIconLabel', {
-      defaultMessage: 'Bolt',
-    }),
-  },
-  {
-    value: 'bug',
-    label: i18n.translate('xpack.lens.xyChart.referenceLine.bugIconLabel', {
-      defaultMessage: 'Bug',
-    }),
-  },
-  {
-    value: 'editorComment',
-    label: i18n.translate('xpack.lens.xyChart.referenceLine.commentIconLabel', {
-      defaultMessage: 'Comment',
-    }),
-  },
-  {
-    value: 'alert',
-    label: i18n.translate('xpack.lens.xyChart.referenceLine.alertIconLabel', {
-      defaultMessage: 'Alert',
-    }),
-  },
-  {
-    value: 'flag',
-    label: i18n.translate('xpack.lens.xyChart.referenceLine.flagIconLabel', {
-      defaultMessage: 'Flag',
-    }),
-  },
-  {
-    value: 'tag',
-    label: i18n.translate('xpack.lens.xyChart.referenceLine.tagIconLabel', {
-      defaultMessage: 'Tag',
-    }),
-  },
-];
-
-const IconView = (props: { value?: string; label: string }) => {
-  if (!props.value) return null;
-  return (
-    <span>
-      <EuiIcon type={props.value} />
-      {` ${props.label}`}
-    </span>
-  );
-};
-
-const IconSelect = ({
-  value,
-  onChange,
-}: {
-  value?: string;
-  onChange: (newIcon: string) => void;
-}) => {
-  const selectedIcon = icons.find((option) => value === option.value) || icons[0];
-
-  return (
-    <EuiComboBox
-      isClearable={false}
-      options={icons}
-      selectedOptions={[selectedIcon]}
-      onChange={(selection) => {
-        onChange(selection[0].value!);
-      }}
-      singleSelection={{ asPlainText: true }}
-      renderOption={IconView}
-      compressed
-      prepend={hasIcon(selectedIcon.value) ? <EuiIcon type={selectedIcon.value} /> : undefined}
-    />
-  );
-};
+import { IconSelect } from './icon_select';
+import { idPrefix } from './dimension_editor';
 
 interface LabelConfigurationOptions {
   isHorizontal: boolean;
@@ -117,16 +27,16 @@ interface LabelConfigurationOptions {
 }
 
 function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
-  const aboveLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.above', {
+  const aboveLabel = i18n.translate('xpack.lens.xyChart.fill.above', {
     defaultMessage: 'Above',
   });
-  const belowLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.below', {
+  const belowLabel = i18n.translate('xpack.lens.xyChart.fill.below', {
     defaultMessage: 'Below',
   });
-  const beforeLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.before', {
+  const beforeLabel = i18n.translate('xpack.lens.xyChart.fill.before', {
     defaultMessage: 'Before',
   });
-  const afterLabel = i18n.translate('xpack.lens.xyChart.referenceLineFill.after', {
+  const afterLabel = i18n.translate('xpack.lens.xyChart.fill.after', {
     defaultMessage: 'After',
   });
 
@@ -136,20 +46,20 @@ function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
   return [
     {
       id: `${idPrefix}none`,
-      label: i18n.translate('xpack.lens.xyChart.referenceLineFill.none', {
+      label: i18n.translate('xpack.lens.xyChart.fill.none', {
         defaultMessage: 'None',
       }),
-      'data-test-subj': 'lnsXY_referenceLine_fill_none',
+      'data-test-subj': 'lnsXY_fill_none',
     },
     {
       id: `${idPrefix}above`,
       label: aboveOptionLabel,
-      'data-test-subj': 'lnsXY_referenceLine_fill_above',
+      'data-test-subj': 'lnsXY_fill_above',
     },
     {
       id: `${idPrefix}below`,
       label: belowOptionLabel,
-      'data-test-subj': 'lnsXY_referenceLine_fill_below',
+      'data-test-subj': 'lnsXY_fill_below',
     },
   ];
 }
@@ -157,10 +67,10 @@ function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
 function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
   const autoOption = {
     id: `${idPrefix}auto`,
-    label: i18n.translate('xpack.lens.xyChart.referenceLineMarker.auto', {
+    label: i18n.translate('xpack.lens.xyChart.lineMarker.auto', {
       defaultMessage: 'Auto',
     }),
-    'data-test-subj': 'lnsXY_referenceLine_markerPosition_auto',
+    'data-test-subj': 'lnsXY_markerPosition_auto',
   };
 
   const topLabel = i18n.translate('xpack.lens.xyChart.markerPosition.above', {
@@ -180,13 +90,13 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
       {
         id: `${idPrefix}below`,
         label: isHorizontal ? leftLabel : bottomLabel,
-        'data-test-subj': 'lnsXY_referenceLine_markerPosition_below',
+        'data-test-subj': 'lnsXY_markerPosition_below',
       },
       autoOption,
       {
         id: `${idPrefix}above`,
         label: isHorizontal ? rightLabel : topLabel,
-        'data-test-subj': 'lnsXY_referenceLine_markerPosition_above',
+        'data-test-subj': 'lnsXY_markerPosition_above',
       },
     ];
   }
@@ -194,13 +104,13 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
     {
       id: `${idPrefix}left`,
       label: isHorizontal ? bottomLabel : leftLabel,
-      'data-test-subj': 'lnsXY_referenceLine_markerPosition_left',
+      'data-test-subj': 'lnsXY_markerPosition_left',
     },
     autoOption,
     {
       id: `${idPrefix}right`,
       label: isHorizontal ? topLabel : rightLabel,
-      'data-test-subj': 'lnsXY_referenceLine_markerPosition_right',
+      'data-test-subj': 'lnsXY_markerPosition_right',
     },
   ];
 }
@@ -253,33 +163,33 @@ export const ReferenceLinePanel = (
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.lens.referenceLineMarker.textVisibility', {
+        label={i18n.translate('xpack.lens.lineMarker.textVisibility', {
           defaultMessage: 'Text decoration',
         })}
         display="columnCompressed"
         fullWidth
       >
         <EuiButtonGroup
-          legend={i18n.translate('xpack.lens.referenceLineMarker.textVisibility', {
+          legend={i18n.translate('xpack.lens.lineMarker.textVisibility', {
             defaultMessage: 'Text decoration',
           })}
-          data-test-subj="lns-referenceLineMaker-text-visibility"
+          data-test-subj="lns-lineMarker-text-visibility"
           name="textVisibilityStyle"
           buttonSize="compressed"
           options={[
             {
               id: `${idPrefix}none`,
-              label: i18n.translate('xpack.lens.xyChart.referenceLineMarker.textVisibility.none', {
+              label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.none', {
                 defaultMessage: 'None',
               }),
-              'data-test-subj': 'lnsXY_reference_textVisibility_none',
+              'data-test-subj': 'lnsXY_textVisibility_none',
             },
             {
               id: `${idPrefix}name`,
-              label: i18n.translate('xpack.lens.xyChart.referenceLineMarker.textVisibility.name', {
+              label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.name', {
                 defaultMessage: 'Name',
               }),
-              'data-test-subj': 'lnsXY_reference_textVisibility_name',
+              'data-test-subj': 'lnsXY_textVisibility_name',
             },
           ]}
           idSelected={`${idPrefix}${Boolean(currentYConfig?.textVisibility) ? 'name' : 'none'}`}
@@ -292,7 +202,7 @@ export const ReferenceLinePanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.referenceLineMarker.icon', {
+        label={i18n.translate('xpack.lens.xyChart.lineMarker.icon', {
           defaultMessage: 'Icon decoration',
         })}
       >
@@ -308,18 +218,15 @@ export const ReferenceLinePanel = (
           display="columnCompressed"
           fullWidth
           isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
-          label={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
+          label={i18n.translate('xpack.lens.xyChart.lineMarker.position', {
             defaultMessage: 'Decoration position',
           })}
         >
           <TooltipWrapper
-            tooltipContent={i18n.translate(
-              'xpack.lens.referenceLineMarker.positionRequirementTooltip',
-              {
-                defaultMessage:
-                  'You must select an icon or show the name in order to alter its position',
-              }
-            )}
+            tooltipContent={i18n.translate('xpack.lens.lineMarker.positionRequirementTooltip', {
+              defaultMessage:
+                'You must select an icon or show the name in order to alter its position',
+            })}
             condition={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
             position="top"
             delay="regular"
@@ -327,10 +234,10 @@ export const ReferenceLinePanel = (
           >
             <EuiButtonGroup
               isFullWidth
-              legend={i18n.translate('xpack.lens.xyChart.referenceLineMarker.position', {
+              legend={i18n.translate('xpack.lens.xyChart.lineMarker.position', {
                 defaultMessage: 'Decoration position',
               })}
-              data-test-subj="lnsXY_markerPosition_referenceLine"
+              data-test-subj="lnsXY_markerPosition"
               name="markerPosition"
               isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
               buttonSize="compressed"
@@ -351,13 +258,13 @@ export const ReferenceLinePanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.referenceLineStyle.label', {
+        label={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
           defaultMessage: 'Line style',
         })}
       >
         <EuiButtonGroup
           isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.referenceLineStyle.label', {
+          legend={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
             defaultMessage: 'Line style',
           })}
           data-test-subj="lnsXY_line_style"
@@ -366,21 +273,21 @@ export const ReferenceLinePanel = (
           options={[
             {
               id: `${idPrefix}solid`,
-              label: i18n.translate('xpack.lens.xyChart.referenceLineStyle.solid', {
+              label: i18n.translate('xpack.lens.xyChart.lineStyle.solid', {
                 defaultMessage: 'Solid',
               }),
               'data-test-subj': 'lnsXY_line_style_solid',
             },
             {
               id: `${idPrefix}dashed`,
-              label: i18n.translate('xpack.lens.xyChart.referenceLineStyle.dashed', {
+              label: i18n.translate('xpack.lens.xyChart.lineStyle.dashed', {
                 defaultMessage: 'Dashed',
               }),
               'data-test-subj': 'lnsXY_line_style_dashed',
             },
             {
               id: `${idPrefix}dotted`,
-              label: i18n.translate('xpack.lens.xyChart.referenceLineStyle.dotted', {
+              label: i18n.translate('xpack.lens.xyChart.lineStyle.dotted', {
                 defaultMessage: 'Dotted',
               }),
               'data-test-subj': 'lnsXY_line_style_dotted',
@@ -396,7 +303,7 @@ export const ReferenceLinePanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.referenceLineThickness.label', {
+        label={i18n.translate('xpack.lens.xyChart.lineThickness.label', {
           defaultMessage: 'Line thickness',
         })}
       >
@@ -410,16 +317,16 @@ export const ReferenceLinePanel = (
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.referenceLineFill.label', {
+        label={i18n.translate('xpack.lens.xyChart.fill.label', {
           defaultMessage: 'Fill',
         })}
       >
         <EuiButtonGroup
           isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.referenceLineFill.label', {
+          legend={i18n.translate('xpack.lens.xyChart.fill.label', {
             defaultMessage: 'Fill',
           })}
-          data-test-subj="lnsXY_referenceLine_fill"
+          data-test-subj="lnsXY_fill"
           name="fill"
           buttonSize="compressed"
           options={getFillPositionOptions({ isHorizontal, axisMode: currentYConfig?.axisMode })}
@@ -433,7 +340,7 @@ export const ReferenceLinePanel = (
       <ColorPicker
         {...props}
         disableHelpTooltip
-        label={i18n.translate('xpack.lens.xyChart.referenceLineColor.label', {
+        label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
           defaultMessage: 'Color',
         })}
       />
@@ -463,7 +370,7 @@ const LineThicknessSlider = ({
   return (
     <EuiRange
       fullWidth
-      data-test-subj="lnsXY_referenceLineThickness"
+      data-test-subj="lnsXYThickness"
       value={unsafeValue}
       showInput
       min={minRange}

@@ -101,12 +101,26 @@ export function getColorAssignments(
   });
 }
 
+const getReferenceLineAccessorColorConfig = (layer: XYLayerConfig) => {
+  return layer.accessors.map((accessor) => {
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+    return {
+      columnId: accessor,
+      triggerIcon: 'color' as const,
+      color: currentYConfig?.color || defaultReferenceLineColor,
+    };
+  });
+};
+
 export function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
   layer: XYLayerConfig,
   paletteService: PaletteRegistry
 ): AccessorConfig[] {
+  if (isReferenceLayer(layer)) {
+    return getReferenceLineAccessorColorConfig(layer);
+  }
   const layerContainsSplits = Boolean(layer.splitAccessor);
   const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
   const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
@@ -116,13 +130,6 @@ export function getAccessorColorConfig(
       return {
         columnId: accessor as string,
         triggerIcon: 'disabled',
-      };
-    }
-    if (isReferenceLayer(layer)) {
-      return {
-        columnId: accessor as string,
-        triggerIcon: 'color',
-        color: currentYConfig?.color || defaultReferenceLineColor,
       };
     }
     const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
