@@ -38,7 +38,14 @@ describe('PdfMaker', () => {
   });
 
   describe('worker', () => {
-    it('should report when the PDF worker runs out of memory instead of crashing the main thread', async () => {
+    /**
+     * Leave this test skipped! It is a proof-of-concept for demonstrating that
+     * we correctly handle a worker OOM error. Due to the variability of when
+     * Node will terminate the worker thread due to exceeding resource resource
+     * limits we cannot guarantee this test will always execute in a reasonable
+     * amount of time.
+     */
+    it.skip('should report when the PDF worker runs out of memory instead of crashing the main thread', async () => {
       const leakyMaker = new (class MemoryLeakPdfMaker extends PdfMaker {
         // From local testing:
         // OOMs after 456.486 seconds with high young generation size

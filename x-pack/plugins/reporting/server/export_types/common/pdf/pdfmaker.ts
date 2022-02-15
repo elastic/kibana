@@ -60,7 +60,7 @@ export class PdfMaker {
   /**
    * The maximum heap size for young memory region of the worker thread.
    *
-   * @note leave 'undefined' to use the Node.js default value.
+   * @note we leave this 'undefined' to use the Node.js default value.
    * @note we set this to a low value to trigger an OOM event sooner for the worker
    * in test scenarios.
    */
