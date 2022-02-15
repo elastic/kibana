@@ -54,7 +54,7 @@ describe('getExceptionListFilter', () => {
     );
   });
 
-  test('it should create a filter that searches for both agnostic and single lists with additional filters if only searching for agnostic lists', () => {
+  test('it should create a filter that searches for both agnostic and single lists with additional filters if searching for both single and agnostic lists', () => {
     const filter = getExceptionListFilter({
       filter: 'exception-list-agnostic.attributes.name: "Sample Endpoint Exception List"',
       savedObjectTypes: ['exception-list-agnostic', 'exception-list'],
