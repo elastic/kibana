@@ -93,17 +93,17 @@ export default function ({ getService }: FtrProviderContext) {
         description: 'execution context propagates to Kibana logs',
         predicate: (record) =>
           isExecutionContextLog(record?.message, {
-            parent: {
-              type: 'task manager',
-              name: 'run alerting:test.executionContext',
-              // @ts-expect-error. it accepts strings only
-              id: ANY,
-              description: 'run task',
+            type: 'task manager',
+            name: 'run alerting:test.executionContext',
+            // @ts-expect-error. it accepts strings only
+            id: ANY,
+            description: 'run task',
+            child: {
+              type: 'alert',
+              name: 'execute test.executionContext',
+              id: alertId,
+              description: 'execute [test.executionContext] with name [abc] in [default] namespace',
             },
-            type: 'alert',
-            name: 'execute test.executionContext',
-            id: alertId,
-            description: 'execute [test.executionContext] with name [abc] in [default] namespace',
           }),
         retry,
       });
