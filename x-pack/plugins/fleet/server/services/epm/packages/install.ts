@@ -44,7 +44,7 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
-import { getBundledPackages } from './get_bundled_packages';
+import { getBundledPackages } from './bundled_packages';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;

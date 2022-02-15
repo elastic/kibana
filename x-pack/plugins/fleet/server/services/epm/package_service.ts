@@ -19,7 +19,7 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
-  RegistrySearchResult,
+  BundledPackage,
 } from '../../types';
 import { checkSuperuser } from '../../routes/security';
 import { FleetUnauthorizedError } from '../../errors';
@@ -44,7 +44,7 @@ export interface PackageClient {
     spaceId?: string;
   }): Promise<Installation | undefined>;
 
-  fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult>;
+  fetchFindLatestPackage(packageName: string): Promise<RegistryPackage | BundledPackage>;
 
   getRegistryPackage(
     packageName: string,

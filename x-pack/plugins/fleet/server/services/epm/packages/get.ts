@@ -146,7 +146,7 @@ export async function getPackageInfo(options: {
 
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackageWithFallbackToBundled(pkgName, { throwIfNotFound: false }),
+    Registry.fetchFindLatestPackageOrUndefined(pkgName),
   ]);
 
   if (!savedObject && !latestPackage) {

@@ -39,7 +39,7 @@ export async function bulkInstallPackages({
         return Promise.resolve(pkg);
       }
 
-      return Registry.fetchFindLatestPackageWithFallbackToBundled(pkg);
+      return Registry.fetchFindLatestPackageOrThrow(pkg);
     })
   );
 

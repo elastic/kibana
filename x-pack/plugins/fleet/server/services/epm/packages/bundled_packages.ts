@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 
+import type { BundledPackage } from '../../../types';
 import { appContextService } from '../../app_context';
 import { splitPkgKey } from '../registry';
 
 const BUNDLED_PACKAGE_DIRECTORY = path.join(__dirname, '../../../bundled_packages');
-
-interface BundledPackage {
-  name: string;
-  version: string;
-  buffer: Buffer;
-}
 
 export async function getBundledPackages(): Promise<BundledPackage[]> {
   try {
@@ -45,4 +40,11 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
 
     return [];
   }
+}
+
+export async function getBundledPackageByName(name: string): Promise<BundledPackage | undefined> {
+  const bundledPackages = await getBundledPackages();
+  const bundledPackage = bundledPackages.find((pkg) => pkg.name === name);
+
+  return bundledPackage;
 }

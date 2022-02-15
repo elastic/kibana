@@ -34,7 +34,7 @@ import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
 
-import { getBundledPackages } from '../packages/get_bundled_packages';
+import { getBundledPackages, getBundledPackageByName } from '../packages/bundled_packages';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -93,54 +93,45 @@ export async function fetchFindLatestPackageOrThrow(
   packageName: string,
   options?: FetchFindLatestPackageOptions
 ) {
-  const searchResults = await _fetchFindLatestPackage(packageName, options);
+  try {
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
 
-  if (!searchResults.length) {
-    throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
+    if (!searchResults.length) {
+      throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
+    }
+
+    return searchResults[0];
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      throw error;
+    }
+
+    return bundledPackage;
   }
-
-  return searchResults[0];
 }
 
 export async function fetchFindLatestPackageOrUndefined(
   packageName: string,
   options?: FetchFindLatestPackageOptions
 ) {
-  const searchResults = await _fetchFindLatestPackage(packageName, options);
-
-  if (!searchResults.length) {
-    return undefined;
-  }
-
-  return searchResults[0];
-}
-
-export async function fetchFindLatestPackageWithFallbackToBundled(
-  packageName: string,
-  options?: FetchFindLatestPackageOptions & { throwIfNotFound?: boolean }
-) {
   try {
-    const latestPackage = await fetchFindLatestPackageOrThrow(packageName, options);
+    const searchResults = await _fetchFindLatestPackage(packageName, options);
 
-    return latestPackage;
-  } catch (error) {
-    const bundledPackages = await getBundledPackages();
-    const bundledPackage = bundledPackages.find((b) => b.name === packageName);
-
-    if (!bundledPackage) {
-      // Callers must opt into re-throwing the original error from the registry request
-      if (options?.throwIfNotFound) {
-        throw error;
-      } else {
-        // By default, we'll just return undefined
-        return undefined;
-      }
+    if (!searchResults.length) {
+      return undefined;
     }
 
-    return {
-      name: bundledPackage.name,
-      version: bundledPackage.version,
-    };
+    return searchResults[0];
+  } catch (error) {
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    if (!bundledPackage) {
+      return undefined;
+    }
+
+    return bundledPackage;
   }
 }
 

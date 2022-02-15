@@ -33,12 +33,12 @@ import {
 } from './preconfiguration';
 import { outputService } from './output';
 import { packagePolicyService } from './package_policy';
-import { getBundledPackages } from './epm/packages/get_bundled_packages';
+import { getBundledPackages } from './epm/packages/bundled_packages';
 import type { InstallPackageParams } from './epm/packages/install';
 
 jest.mock('./agent_policy_update');
 jest.mock('./output');
-jest.mock('./epm/packages/get_bundled_packages');
+jest.mock('./epm/packages/bundled_packages');
 jest.mock('./epm/archive');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;

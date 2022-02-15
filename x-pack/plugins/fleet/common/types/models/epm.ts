@@ -109,6 +109,12 @@ export type ArchivePackage = PackageSpecManifest &
   // should an uploaded package be able to specify `internal`?
   Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;
 
+export interface BundledPackage {
+  name: string;
+  version: string;
+  buffer: Buffer;
+}
+
 export type RegistryPackage = PackageSpecManifest &
   Partial<RegistryOverridesToOptional> &
   RegistryAdditionalProperties &

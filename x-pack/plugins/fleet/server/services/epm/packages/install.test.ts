@@ -20,7 +20,7 @@ import { licenseService } from '../../license';
 import { installPackage } from './install';
 import * as install from './_install_package';
 import * as obj from './index';
-import { getBundledPackages } from './get_bundled_packages';
+import { getBundledPackages } from './bundled_packages';
 
 jest.mock('../../app_context', () => {
   return {
@@ -41,7 +41,7 @@ jest.mock('../../upgrade_sender');
 jest.mock('../../license');
 jest.mock('../../upgrade_sender');
 jest.mock('./cleanup');
-jest.mock('./get_bundled_packages');
+jest.mock('./bundled_packages');
 jest.mock('./_install_package', () => {
   return {
     _installPackage: jest.fn(() => Promise.resolve()),
@@ -76,7 +76,7 @@ describe('install', () => {
         return `${pkg.name}-${pkg.version}`;
       });
     jest
-      .spyOn(Registry, 'fetchFindLatestPackage')
+      .spyOn(Registry, 'fetchFindLatestPackageOrThrow')
       .mockImplementation(() => Promise.resolve({ version: '1.3.0' } as any));
     jest
       .spyOn(Registry, 'getRegistryPackage')
