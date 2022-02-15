@@ -9,7 +9,7 @@
 import { createDashboardUrlGenerator } from './url_generator';
 import { hashedItemStore } from '../../kibana_utils/public';
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { SavedObjectLoader } from './services/saved_object_loader';
 import { type Filter, FilterStateStore } from '@kbn/es-query';
 
 const APP_BASE_PATH: string = 'xyz/app/dashboards';
