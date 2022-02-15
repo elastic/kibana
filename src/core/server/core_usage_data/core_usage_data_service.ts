@@ -136,12 +136,12 @@ export class CoreUsageDataService
         // to map back from the index to the alias. So we have to make an API
         // call for every alias. The document count is the lucene document count.
         const catIndicesResults = await elasticsearch.client.asInternalUser.cat
-          .indices<any[]>({
+          .indices({
             index,
             format: 'JSON',
             bytes: 'b',
           })
-          .then(({ body }) => {
+          .then((body) => {
             const stats = body[0];
 
             return {
@@ -160,7 +160,7 @@ export class CoreUsageDataService
           .count({
             index,
           })
-          .then(({ body }) => {
+          .then((body) => {
             return {
               savedObjectsDocsCount: body.count ? body.count : 0,
             };
@@ -182,7 +182,7 @@ export class CoreUsageDataService
   private async getSavedObjectAliasUsageData(elasticsearch: ElasticsearchServiceStart) {
     // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
     // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
-    const { body: resp } = await elasticsearch.client.asInternalUser.search<
+    const resp = await elasticsearch.client.asInternalUser.search<
       unknown,
       { aliases: UsageDataAggs }
     >({

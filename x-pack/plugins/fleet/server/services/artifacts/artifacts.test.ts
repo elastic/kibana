@@ -44,11 +44,7 @@ describe('When using the artifacts services', () => {
   describe('and calling `getArtifact()`', () => {
     it('should get artifact using id', async () => {
       // @ts-expect-error not full interface
-      esClientMock.get.mockImplementation(() => {
-        return elasticsearchServiceMock.createSuccessTransportRequestPromise(
-          generateArtifactEsGetSingleHitMock()
-        );
-      });
+      esClientMock.get.mockResponse(generateArtifactEsGetSingleHitMock());
 
       expect(await getArtifact(esClientMock, '123')).toEqual(generateArtifactMock());
       expect(esClientMock.get).toHaveBeenCalledWith({
@@ -140,11 +136,7 @@ describe('When using the artifacts services', () => {
 
   describe('and calling `listArtifacts()`', () => {
     beforeEach(() => {
-      esClientMock.search.mockImplementation(() => {
-        return elasticsearchServiceMock.createSuccessTransportRequestPromise(
-          generateArtifactEsSearchResultHitsMock()
-        );
-      });
+      esClientMock.search.mockResponse(generateArtifactEsSearchResultHitsMock());
     });
 
     it('should use defaults when options is not provided', async () => {

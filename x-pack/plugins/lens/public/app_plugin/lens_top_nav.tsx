@@ -39,6 +39,7 @@ function getLensTopNavConfig(options: {
   tooltips: LensTopNavTooltips;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
+  contextOriginatingApp?: string;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -49,6 +50,7 @@ function getLensTopNavConfig(options: {
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     tooltips,
+    contextOriginatingApp,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -70,6 +72,23 @@ function getLensTopNavConfig(options: {
     : i18n.translate('xpack.lens.app.save', {
         defaultMessage: 'Save',
       });
+
+  if (contextOriginatingApp) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.goBackLabel', {
+        defaultMessage: `Go back to {contextOriginatingApp}`,
+        values: { contextOriginatingApp },
+      }),
+      run: actions.goBack,
+      className: 'lnsNavItem__goBack',
+      testId: 'lnsApp_goBackToAppButton',
+      description: i18n.translate('xpack.lens.app.goBackLabel', {
+        defaultMessage: `Go back to {contextOriginatingApp}`,
+        values: { contextOriginatingApp },
+      }),
+      disableButton: false,
+    });
+  }
 
   topNavMenu.push({
     label: i18n.translate('xpack.lens.app.inspect', {
@@ -151,6 +170,9 @@ export const LensTopNavMenu = ({
   redirectToOrigin,
   datasourceMap,
   title,
+  goBackToOriginatingApp,
+  contextOriginatingApp,
+  initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
 }: LensTopNavMenuProps) => {
@@ -270,17 +292,19 @@ export const LensTopNavMenu = ({
   ]);
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
-      showSaveAndReturn: Boolean(
-        isLinkedToOriginatingApp &&
-          // Temporarily required until the 'by value' paradigm is default.
-          (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-      ),
+      showSaveAndReturn:
+        Boolean(
+          isLinkedToOriginatingApp &&
+            // Temporarily required until the 'by value' paradigm is default.
+            (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
+        ) || Boolean(initialContextIsEmbedded),
       enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
       isByValueMode: getIsByValueMode(),
       allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
       showCancel: Boolean(isLinkedToOriginatingApp),
       savingToLibraryPermitted,
       savingToDashboardPermitted,
+      contextOriginatingApp,
       tooltips: {
         showExportWarning: () => {
           if (activeData) {
@@ -354,6 +378,11 @@ export const LensTopNavMenu = ({
             setIsSaveModalVisible(true);
           }
         },
+        goBack: () => {
+          if (contextOriginatingApp) {
+            goBackToOriginatingApp?.();
+          }
+        },
         cancel: () => {
           if (redirectToOrigin) {
             redirectToOrigin();
@@ -363,25 +392,28 @@ export const LensTopNavMenu = ({
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
   }, [
-    activeData,
-    attributeService,
-    dashboardFeatureFlag.allowByValueEmbeddables,
-    fieldFormats.deserialize,
-    getIsByValueMode,
-    initialInput,
     isLinkedToOriginatingApp,
+    dashboardFeatureFlag.allowByValueEmbeddables,
+    initialInput,
+    initialContextIsEmbedded,
     isSaveable,
-    title,
-    onAppLeave,
-    redirectToOrigin,
-    runSave,
-    savingToDashboardPermitted,
+    activeData,
+    getIsByValueMode,
     savingToLibraryPermitted,
-    setIsSaveModalVisible,
-    uiSettings,
-    unsavedTitle,
-    lensInspector,
+    savingToDashboardPermitted,
+    contextOriginatingApp,
     additionalMenuEntries,
+    lensInspector,
+    title,
+    unsavedTitle,
+    uiSettings,
+    fieldFormats.deserialize,
+    onAppLeave,
+    runSave,
+    attributeService,
+    setIsSaveModalVisible,
+    goBackToOriginatingApp,
+    redirectToOrigin,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

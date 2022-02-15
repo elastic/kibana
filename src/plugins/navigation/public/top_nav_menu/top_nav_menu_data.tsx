@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonProps } from '@elastic/eui';
+import { EuiButtonProps, EuiBetaBadgeProps } from '@elastic/eui';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
@@ -19,6 +19,7 @@ export interface TopNavMenuData {
   className?: string;
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string | undefined);
+  badge?: EuiBetaBadgeProps;
   emphasize?: boolean;
   isLoading?: boolean;
   iconType?: string;

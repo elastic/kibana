@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Visualization } from '../../types';
+import { Visualization, Suggestion } from '../../types';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -17,7 +17,7 @@ import {
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
-import { getSuggestions, Suggestion } from './suggestion_helpers';
+import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { mountWithProvider } from '../../mocks';
