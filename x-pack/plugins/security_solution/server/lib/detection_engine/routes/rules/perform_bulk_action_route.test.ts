@@ -17,20 +17,20 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
-import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import {
+  getPerformBulkActionSchemaMock,
+  getPerformBulkActionEditSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { isElasticRule } from '../../../../usage/detections';
 import { readRules } from '../../rules/read_rules';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
-jest.mock('../../../../usage/detections', () => ({ isElasticRule: jest.fn() }));
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
 
 describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
-  const isElasticRuleMock = isElasticRule as jest.Mock;
   const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -43,9 +43,7 @@ describe.each([
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    isElasticRuleMock.mockReturnValue(false);
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-
     performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
   });
 
@@ -78,10 +76,9 @@ describe.each([
 
   describe('rules execution failures', () => {
     it('returns error if rule is immutable/elastic', async () => {
-      isElasticRuleMock.mockReturnValue(true);
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
-          data: [mockRule],
+          data: [{ ...mockRule, params: { ...mockRule.params, immutable: true } }],
           total: 1,
         })
       );
@@ -179,7 +176,106 @@ describe.each([
       });
     });
 
-    it('returns partial failure error if couple of rule validations fail and the rest are successfull', async () => {
+    it('returns error if index patterns action is applied to machine learning rule', async () => {
+      readRulesMock.mockImplementationOnce(() =>
+        Promise.resolve({ ...mockRule, params: { ...mockRule.params, type: 'machine_learning' } })
+      );
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionEditSchemaMock(),
+          ids: ['failed-mock-id'],
+          query: undefined,
+          edit: [
+            {
+              type: 'add_index_patterns',
+              value: ['new-index-*'],
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+          errors: [
+            {
+              message:
+                "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+        },
+        message: 'Bulk edit failed',
+        status_code: 500,
+      });
+    });
+
+    it('returns error if all index pattern tried to be deleted', async () => {
+      readRulesMock.mockImplementationOnce(() =>
+        Promise.resolve({ ...mockRule, params: { ...mockRule.params, index: ['index-*'] } })
+      );
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionEditSchemaMock(),
+          ids: ['failed-mock-id'],
+          query: undefined,
+          edit: [
+            {
+              type: 'delete_index_patterns',
+              value: ['index-*'],
+            },
+          ],
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+          errors: [
+            {
+              message: "Can't delete all index patterns. At least one index pattern must be left",
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+        },
+        message: 'Bulk edit failed',
+        status_code: 500,
+      });
+    });
+
+    it('returns partial failure error if couple of rule validations fail and the rest are successful', async () => {
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
           data: [

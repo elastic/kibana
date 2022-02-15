@@ -18,9 +18,7 @@ describe('getOldestIdleActionTask', () => {
 
   it('returns a default of now-24h when no results', async () => {
     const client = elasticsearchServiceMock.createElasticsearchClient(
-      elasticsearchServiceMock.createSuccessTransportRequestPromise({
-        body: { hits: { hits: [], total: 0 } },
-      })
+      Promise.resolve({ hits: { hits: [], total: 0 } })
     );
 
     const ts = await getOldestIdleActionTask(client, '.index-name');
@@ -29,7 +27,7 @@ describe('getOldestIdleActionTask', () => {
 
   it('returns a default of Date.now-24h when a 404 is returned', async () => {
     const client = elasticsearchServiceMock.createElasticsearchClient(
-      elasticsearchServiceMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         error: { status: 404 },
       })
     );
@@ -40,7 +38,7 @@ describe('getOldestIdleActionTask', () => {
 
   it("returns the search result's task.runAt-24h field if it exists", async () => {
     const client = elasticsearchServiceMock.createElasticsearchClient(
-      elasticsearchServiceMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         hits: { hits: [{ _source: { task: { runAt: '2015-01-01T12:10:30Z' } } }], total: 1 },
       })
     );
@@ -51,7 +49,7 @@ describe('getOldestIdleActionTask', () => {
 
   it("fallsback to 0 if the search result's task.runAt field does not exist", async () => {
     const client1 = elasticsearchServiceMock.createElasticsearchClient(
-      elasticsearchServiceMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         hits: { hits: [{ _source: { task: { runAt: undefined } } }], total: 1 },
       })
     );
@@ -60,7 +58,7 @@ describe('getOldestIdleActionTask', () => {
     expect(ts1).toEqual('0');
 
     const client2 = elasticsearchServiceMock.createElasticsearchClient(
-      elasticsearchServiceMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         hits: { hits: [{ _source: { task: undefined } }], total: 1 },
       })
     );
