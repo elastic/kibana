@@ -231,7 +231,7 @@ export const getPieVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.pie.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];

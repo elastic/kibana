@@ -6,19 +6,18 @@
  */
 
 import { createEsContext } from './context';
-import { ElasticsearchClient, Logger } from '../../../../../src/core/server';
+import { Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { TransportResult } from '@elastic/elasticsearch';
+
 jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');
 
 let logger: Logger;
-let elasticsearchClient: DeeplyMockedKeys<ElasticsearchClient>;
+let elasticsearchClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
 beforeEach(() => {
   logger = loggingSystemMock.createLogger();
-  elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  elasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
 });
 
 describe('createEsContext', () => {
@@ -64,9 +63,9 @@ describe('createEsContext', () => {
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
-    elasticsearchClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
-    elasticsearchClient.indices.existsIndexTemplate.mockResolvedValue(asApiResponse(false));
-    elasticsearchClient.indices.existsAlias.mockResolvedValue(asApiResponse(false));
+    elasticsearchClient.indices.existsTemplate.mockResponse(false);
+    elasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+    elasticsearchClient.indices.existsAlias.mockResponse(false);
     const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.alias);
     expect(doesAliasExist).toBeFalsy();
 
@@ -83,7 +82,7 @@ describe('createEsContext', () => {
       kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
-    elasticsearchClient.indices.existsTemplate.mockResolvedValue(asApiResponse(true));
+    elasticsearchClient.indices.existsTemplate.mockResponse(true);
     context.initialize();
 
     const doesIlmPolicyExist = await context.esAdapter.doesIlmPolicyExist(
@@ -113,9 +112,3 @@ describe('createEsContext', () => {
     expect(success).toBe(false);
   });
 });
-
-function asApiResponse<T>(body: T): TransportResult<T> {
-  return {
-    body,
-  } as TransportResult<T>;
-}
