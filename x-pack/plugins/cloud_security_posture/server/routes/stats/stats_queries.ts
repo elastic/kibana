@@ -109,3 +109,63 @@ export const getRisksEsQuery = (cycleId: string): SearchRequest => ({
     },
   },
 });
+
+export const getClustersQuery = (cycleId: string): SearchRequest => ({
+  index: CSP_KUBEBEAT_INDEX_PATTERN,
+  size: 0,
+  query: {
+    bool: {
+      filter: [{ term: { 'cycle_id.keyword': cycleId } }],
+    },
+  },
+  aggs: {
+    by_cluster_id: {
+      terms: {
+        field: 'cluster_id.keyword',
+      },
+      aggs: {
+        failed_findings: {
+          filter: { term: { 'result.evaluation.keyword': 'failed' } },
+        },
+        passed_findings: {
+          filter: { term: { 'result.evaluation.keyword': 'passed' } },
+        },
+        benchmark: {
+          terms: {
+            field: 'rule.benchmark.keyword',
+          },
+        },
+      },
+    },
+  },
+});
+//
+// GET findings/_search
+// {
+//   "size": 0,
+//   "query": {
+//   "bool": {
+//     "filter": [
+//       {"term": {"result.evaluation.keyword": "passed"}}
+//     ]
+//   }
+// },
+//   "aggs":{
+//   "by_cluster_id":{
+//     "terms": {
+//       "field": "cluster_id.keyword"
+//     },
+//     "aggs": {
+//       "passed_findings": {
+//         "filter": { "term": { "result.evaluation.keyword": "passed" } }
+//       },
+//       "failed_findings": {
+//         "filter": { "term": { "result.evaluation.keyword": "failed" } }
+//       },
+//       "total": {
+//         "filter": { "term": {"field": "result.evaluation.keyword"} }
+//       }
+//     }
+//   }
+// }
+// }

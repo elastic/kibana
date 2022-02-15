@@ -30,4 +30,5 @@ export interface BenchmarkStats extends Stats {
 export interface CloudPostureStats extends Stats {
   benchmarksStats: BenchmarkStats[];
   resourceTypesAggs: ResourceTypeAgg[];
+  clusterAggs: any;
 }
