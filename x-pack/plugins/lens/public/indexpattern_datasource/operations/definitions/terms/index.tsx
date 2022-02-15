@@ -404,7 +404,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               label: ofName(
                 indexPattern.getFieldByName(fields[0])?.displayName,
                 fields.length - 1,
-                column.params.orderBy.type === 'rare'
+                newParams.orderBy.type === 'rare'
               ),
               params: {
                 ...newParams,
