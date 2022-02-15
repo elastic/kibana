@@ -152,10 +152,16 @@ describe('SynchronizationLogic', () => {
     it('resetSyncSettings', () => {
       SynchronizationLogic.actions.setContentExtractionChecked(false);
       SynchronizationLogic.actions.setThumbnailsChecked(false);
+      SynchronizationLogic.actions.addIndexingRule({
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+      });
       SynchronizationLogic.actions.resetSyncSettings();
 
       expect(SynchronizationLogic.values.thumbnailsChecked).toEqual(true);
       expect(SynchronizationLogic.values.contentExtractionChecked).toEqual(true);
+      expect(SynchronizationLogic.values.indexingRules).toEqual(defaultIndexingRules);
     });
 
     describe('setSyncFrequency', () => {

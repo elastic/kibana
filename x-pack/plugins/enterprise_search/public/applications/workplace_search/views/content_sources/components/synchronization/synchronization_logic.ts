@@ -303,6 +303,13 @@ export const SynchronizationLogic = kea<
         ],
         deleteIndexingRule: (indexingRules, rule) =>
           indexingRules.filter((currentRule) => currentRule.id !== rule.id),
+        resetSyncSettings: () =>
+          (props.contentSource.indexing.rules as IndexingRule[]).map((rule, index) => ({
+            filterType: rule.filterType,
+            id: index,
+            valueType: isIncludeRule(rule) ? 'include' : 'exclude',
+            value: isIncludeRule(rule) ? rule.include : rule.exclude,
+          })),
         setIndexingRules: (_, indexingRules) =>
           indexingRules.map((val, index) => ({ ...val, id: index })),
         setIndexingRule: (state, rule) =>
