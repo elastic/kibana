@@ -5,19 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { omit } from 'lodash/fp';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import {
-  superUser,
-  obsMinReadAlertsAll,
-  obsMinReadAlertsAllSpacesAll,
-  obsMinAll,
-  obsMinAllSpacesAll,
-} from '../../../common/lib/authentication/users';
-import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 import { RuleRegistrySearchResponse } from '../../../../../plugins/rule_registry/common/search_strategy';
 import {
   deleteSignalsIndex,
@@ -25,22 +15,19 @@ import {
   deleteAllAlerts,
   getRuleForSignalTesting,
   createRule,
-  waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
+  waitForRuleSuccessOrStatus,
 } from '../../../../detection_engine_api_integration/utils';
 import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/tests/generating_signals';
 import { QueryCreateSchema } from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');
   const log = getService('log');
 
-  const TEST_URL = '/internal/rac/alerts';
-  const ALERTS_INDEX_URL = `${TEST_URL}/index`;
   const SPACE1 = 'space1';
 
   describe('ruleRegistrySearchStrategy', () => {
