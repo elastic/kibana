@@ -15,6 +15,11 @@ import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
+import {
+  InlineEditableTableLogic,
+  InlineEditableTableProps,
+} from '../../../../../shared/tables/inline_editable_table/inline_editable_table_logic';
+import { ItemWithAnID } from '../../../../../shared/tables/types';
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
 jest.mock('../../source_logic', () => ({
@@ -353,12 +358,14 @@ describe('SynchronizationLogic', () => {
       it('calls validate endpoint and continues if no errors happen', async () => {
         const addIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'addIndexingRule');
         const promise = Promise.resolve({ rules: [] });
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
         http.post.mockReturnValue(promise);
-        const callbackObject = {
-          callback: () => true,
-        };
-        const callbackSpy = jest.spyOn(callbackObject, 'callback');
-        SynchronizationLogic.actions.initAddIndexingRule(indexingRule, callbackObject.callback);
+        SynchronizationLogic.actions.initAddIndexingRule(indexingRule);
 
         expect(http.post).toHaveBeenCalledWith(
           '/internal/workplace_search/org/sources/123/indexing_rules/validate',
@@ -375,20 +382,19 @@ describe('SynchronizationLogic', () => {
         );
         await promise;
         expect(addIndexingRuleSpy).toHaveBeenCalledWith(indexingRule);
-        expect(callbackSpy).toHaveBeenCalled();
+        expect(doneSpy).toHaveBeenCalled();
       });
 
       it('calls validate endpoint and sets errors if there is an error', async () => {
         const addIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'addIndexingRule');
         const promise = Promise.resolve({ rules: [{ valid: false, error: 'error' }] });
         http.post.mockReturnValue(promise);
-        const callbackObject = {
-          callback: () => true,
-        };
-        const callbackSpy = jest.spyOn(callbackObject, 'callback');
-        SynchronizationLogic.actions.initAddIndexingRule(
-          { ...indexingRule, valueType: 'include' },
-          callbackObject.callback
+        SynchronizationLogic.actions.initAddIndexingRule({ ...indexingRule, valueType: 'include' });
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
         );
 
         expect(http.post).toHaveBeenCalledWith(
@@ -406,18 +412,20 @@ describe('SynchronizationLogic', () => {
         );
         await promise;
         expect(addIndexingRuleSpy).not.toHaveBeenCalled();
-        expect(callbackSpy).toHaveBeenCalled();
+        expect(doneSpy).toHaveBeenCalled();
       });
 
       it('flashes an error if the API call fails', async () => {
         const addIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'addIndexingRule');
         const promise = Promise.reject('error');
         http.post.mockReturnValue(promise);
-        const callbackObject = {
-          callback: () => true,
-        };
-        const callbackSpy = jest.spyOn(callbackObject, 'callback');
-        SynchronizationLogic.actions.initAddIndexingRule(indexingRule, callbackObject.callback);
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
+        SynchronizationLogic.actions.initAddIndexingRule(indexingRule);
 
         expect(http.post).toHaveBeenCalledWith(
           '/internal/workplace_search/org/sources/123/indexing_rules/validate',
@@ -434,7 +442,7 @@ describe('SynchronizationLogic', () => {
         );
         await nextTick();
         expect(addIndexingRuleSpy).not.toHaveBeenCalled();
-        expect(callbackSpy).not.toHaveBeenCalled();
+        expect(doneSpy).not.toHaveBeenCalled();
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
@@ -446,15 +454,18 @@ describe('SynchronizationLogic', () => {
         value: 'value',
         id: 1,
       };
+
       it('calls validate endpoint and continues if no errors happen', async () => {
         const setIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'setIndexingRule');
         const promise = Promise.resolve({ rules: [] });
         http.post.mockReturnValue(promise);
-        const callbackObject = {
-          callback: () => true,
-        };
-        const callbackSpy = jest.spyOn(callbackObject, 'callback');
-        SynchronizationLogic.actions.initSetIndexingRule(indexingRule, callbackObject.callback);
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
+        SynchronizationLogic.actions.initSetIndexingRule(indexingRule);
 
         expect(http.post).toHaveBeenCalledWith(
           '/internal/workplace_search/org/sources/123/indexing_rules/validate',
@@ -471,21 +482,20 @@ describe('SynchronizationLogic', () => {
         );
         await promise;
         expect(setIndexingRuleSpy).toHaveBeenCalledWith(indexingRule);
-        expect(callbackSpy).toHaveBeenCalled();
+        expect(doneSpy).toHaveBeenCalled();
       });
 
       it('calls validate endpoint and sets errors if there is an error', async () => {
         const setIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'setIndexingRule');
         const promise = Promise.resolve({ rules: [{ valid: false, error: 'error' }] });
         http.post.mockReturnValue(promise);
-        const callbackObject = {
-          callback: () => true,
-        };
-        const callbackSpy = jest.spyOn(callbackObject, 'callback');
-        SynchronizationLogic.actions.initSetIndexingRule(
-          { ...indexingRule, valueType: 'include' },
-          callbackObject.callback
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
         );
+        SynchronizationLogic.actions.initSetIndexingRule({ ...indexingRule, valueType: 'include' });
 
         expect(http.post).toHaveBeenCalledWith(
           '/internal/workplace_search/org/sources/123/indexing_rules/validate',
@@ -502,17 +512,19 @@ describe('SynchronizationLogic', () => {
         );
         await promise;
         expect(setIndexingRuleSpy).not.toHaveBeenCalled();
-        expect(callbackSpy).toHaveBeenCalled();
+        expect(doneSpy).toHaveBeenCalled();
       });
       it('flashes an error if the API call fails', async () => {
         const setIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'setIndexingRule');
         const promise = Promise.reject('error');
         http.post.mockReturnValue(promise);
-        const callbackObject = {
-          callback: () => true,
-        };
-        const callbackSpy = jest.spyOn(callbackObject, 'callback');
-        SynchronizationLogic.actions.initSetIndexingRule(indexingRule, callbackObject.callback);
+        const doneSpy = jest.spyOn(
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions,
+          'doneEditing'
+        );
+        SynchronizationLogic.actions.initSetIndexingRule(indexingRule);
 
         expect(http.post).toHaveBeenCalledWith(
           '/internal/workplace_search/org/sources/123/indexing_rules/validate',
@@ -529,7 +541,7 @@ describe('SynchronizationLogic', () => {
         );
         await nextTick();
         expect(setIndexingRuleSpy).not.toHaveBeenCalled();
-        expect(callbackSpy).not.toHaveBeenCalled();
+        expect(doneSpy).not.toHaveBeenCalled();
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });

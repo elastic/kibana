@@ -390,11 +390,10 @@ export const SynchronizationLogic = kea<
         } as InlineEditableTableProps<ItemWithAnID>);
         if (error) {
           tableLogic.actions.setRowErrors([error]);
-          tableLogic.actions.doneEditing();
         } else {
           actions.addIndexingRule(rule);
-          tableLogic.actions.doneEditing();
         }
+        tableLogic.actions.doneEditing();
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -419,11 +418,10 @@ export const SynchronizationLogic = kea<
         } as InlineEditableTableProps<ItemWithAnID>);
         if (error) {
           tableLogic.actions.setRowErrors([error]);
-          tableLogic.actions.doneEditing();
         } else {
-          actions.addIndexingRule(rule);
-          tableLogic.actions.doneEditing();
+          actions.setIndexingRule(rule);
         }
+        tableLogic.actions.doneEditing();
       } catch (e) {
         flashAPIErrors(e);
       }
