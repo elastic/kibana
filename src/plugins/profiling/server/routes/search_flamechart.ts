@@ -124,29 +124,6 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           },
         });
 
-        const resTotalEvents = await esClient.search({
-          index,
-          body: {
-            size: 0,
-            query: filter,
-            aggs: {
-              histogram: {
-                auto_date_histogram: {
-                  field: '@timestamp',
-                  buckets: 100,
-                },
-                aggs: {
-                  Count: {
-                    sum: {
-                      field: 'Count',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        });
-
         const tracesDocIDs: string[] = [];
         resEvents.body.aggregations.sample.group_by.buckets.forEach((stackTraceItem: any) => {
           tracesDocIDs.push(stackTraceItem.key);
@@ -189,7 +166,6 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
 
         const flamegraph = new FlameGraph(
           resEvents.body,
-          resTotalEvents.body,
           resStackTraces.body.docs,
           resStackFrames.body.docs,
           resExecutables.body.docs
