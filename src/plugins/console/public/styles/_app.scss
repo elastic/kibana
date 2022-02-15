@@ -85,3 +85,7 @@
 .conApp__tabsExtension {
   border-bottom: $euiBorderThin;
 }
+
+.ace_editor.ace_autocomplete {
+  min-width: 480px;
+}
