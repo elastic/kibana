@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SpanArrayIterable } from '../lib/span_iterable';
+import { EntityArrayIterable } from '../lib/entity_iterable';
 import { apm } from '../lib/apm';
 import { timerange } from '../lib/timerange';
+import { ApmFields } from '../lib/apm/apm_fields';
 
 describe('DSL invocations', () => {
-  let arrayIterable: SpanArrayIterable;
+  let arrayIterable: EntityArrayIterable<ApmFields>;
   let eventsCopy: Array<Record<string, any>>;
 
   const range = timerange(
@@ -43,7 +44,7 @@ describe('DSL invocations', () => {
 
   beforeEach(() => {
     eventsCopy = iterable.toArray();
-    arrayIterable = new SpanArrayIterable(events);
+    arrayIterable = new EntityArrayIterable(events);
   });
   it('to array on iterable reads to completion', () => {
     expect(events.length).toBe(15 * 2);

@@ -7,11 +7,11 @@
  */
 
 import { Interval } from './interval';
-import { SpanGeneratorsUnion } from './span_generators_union';
-import { SpanIterable } from './span_iterable';
+import { EntityStreams } from './entity_streams';
+import { EntityIterable } from './entity_iterable';
 import { Serializable } from './serializable';
 
-export class SpanGenerator<TField> implements SpanIterable<TField> {
+export class EntityGenerator<TField> implements EntityIterable<TField> {
   private readonly _gen: () => Generator<Serializable<TField>>;
   constructor(
     private readonly interval: Interval,
@@ -47,8 +47,8 @@ export class SpanGenerator<TField> implements SpanIterable<TField> {
     return Array.from(this);
   }
 
-  concat(...iterables: Array<SpanIterable<TField>>): SpanGeneratorsUnion<TField> {
-    return new SpanGeneratorsUnion([this, ...iterables]);
+  merge(...iterables: Array<EntityIterable<TField>>): EntityStreams<TField> {
+    return new EntityStreams([this, ...iterables]);
   }
 
   private readonly _ratePerMinute: number;

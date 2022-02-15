@@ -51,7 +51,6 @@ export async function generateData({
               .destination(span.destination)
               .timestamp(timestamp)
           )
-          .serialize()
       )
   );
 }

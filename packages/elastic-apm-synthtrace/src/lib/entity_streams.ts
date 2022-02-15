@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SpanIterable } from './span_iterable';
+import { EntityIterable } from './entity_iterable';
 import { merge } from './utils/merge_iterable';
 
-export class SpanGeneratorsUnion<TFields> implements SpanIterable<TFields> {
-  constructor(private readonly dataGenerators: Array<SpanIterable<TFields>>) {
+export class EntityStreams<TFields> implements EntityIterable<TFields> {
+  constructor(private readonly dataGenerators: Array<EntityIterable<TFields>>) {
     const orders = new Set<'desc' | 'asc'>(dataGenerators.map((d) => d.order()));
     if (orders.size > 1) throw Error('Can only combine intervals with the same order()');
     this._order = orders.has('asc') ? 'asc' : 'desc';
@@ -32,8 +32,8 @@ export class SpanGeneratorsUnion<TFields> implements SpanIterable<TFields> {
     return Array.from(this);
   }
 
-  concat(...iterables: Array<SpanIterable<TFields>>): SpanGeneratorsUnion<TFields> {
-    return new SpanGeneratorsUnion([...this.dataGenerators, ...iterables]);
+  merge(...iterables: Array<EntityIterable<TFields>>): EntityStreams<TFields> {
+    return new EntityStreams([...this.dataGenerators, ...iterables]);
   }
 
   *[Symbol.iterator](): Iterator<TFields> {

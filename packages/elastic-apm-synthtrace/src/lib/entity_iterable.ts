@@ -7,10 +7,10 @@
  */
 
 import { ApmFields } from './apm/apm_fields';
-import { SpanGeneratorsUnion } from './span_generators_union';
+import { EntityStreams } from './entity_streams';
 import { Fields } from './entity';
 
-export interface SpanIterable<TFields extends Fields>
+export interface EntityIterable<TFields extends Fields = ApmFields>
   extends Iterable<TFields>,
     AsyncIterable<TFields> {
   order(): 'desc' | 'asc';
@@ -19,10 +19,10 @@ export interface SpanIterable<TFields extends Fields>
 
   toArray(): ApmFields[];
 
-  concat(...iterables: Array<SpanIterable<TFields>>): SpanGeneratorsUnion<TFields>;
+  merge(...iterables: Array<EntityIterable<TFields>>): EntityStreams<TFields>;
 }
 
-export class SpanArrayIterable<TFields extends Fields> implements SpanIterable<TFields> {
+export class EntityArrayIterable<TFields extends Fields> implements EntityIterable<TFields> {
   constructor(private fields: TFields[]) {
     const timestamps = fields.filter((f) => f['@timestamp']).map((f) => f['@timestamp']!);
     this._order = timestamps.length > 1 ? (timestamps[0] > timestamps[1] ? 'desc' : 'asc') : 'asc';
@@ -50,8 +50,8 @@ export class SpanArrayIterable<TFields extends Fields> implements SpanIterable<T
     return this.fields[Symbol.iterator]();
   }
 
-  concat(...iterables: Array<SpanIterable<TFields>>): SpanGeneratorsUnion<TFields> {
-    return new SpanGeneratorsUnion<TFields>([this, ...iterables]);
+  merge(...iterables: Array<EntityIterable<TFields>>): EntityStreams<TFields> {
+    return new EntityStreams<TFields>([this, ...iterables]);
   }
 
   toArray(): TFields[] {

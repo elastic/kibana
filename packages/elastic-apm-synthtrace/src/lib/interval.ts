@@ -7,8 +7,8 @@
  */
 import moment, { unitOfTime } from 'moment';
 import { random } from 'lodash';
-import { SpanIterable } from './span_iterable';
-import { SpanGenerator } from './span_generator';
+import { EntityIterable } from './entity_iterable';
+import { EntityGenerator } from './entity_generator';
 import { Serializable } from './serializable';
 
 export function parseInterval(interval: string): [number, unitOfTime.DurationConstructor] {
@@ -43,12 +43,17 @@ export class Interval implements Iterable<number> {
   private readonly intervalAmount: number;
   private readonly intervalUnit: unitOfTime.DurationConstructor;
   spans<TField>(
-    map: (timestamp: number, index?: number) => Serializable<TField>
-  ): SpanIterable<TField> {
-    return new SpanGenerator(this, function* (i) {
+    map: (timestamp: number, index?: number) => Serializable<TField> | Array<Serializable<TField>>
+  ): EntityIterable<TField> {
+    return new EntityGenerator(this, function* (i) {
       let index = 0;
       for (const x of i) {
-        yield map(x, index);
+        const data = map(x, index);
+        if (Array.isArray(data)) {
+          yield* data;
+        } else {
+          yield data;
+        }
         index++;
       }
     });

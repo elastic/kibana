@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { ApmFields } from './apm/apm_fields';
-import { SpanIterable } from './span_iterable';
+import { EntityIterable } from './entity_iterable';
 import { getTransactionMetrics } from './apm/processors/get_transaction_metrics';
 import { getSpanDestinationMetrics } from './apm/processors/get_span_destination_metrics';
 import { getBreakdownMetrics } from './apm/processors/get_breakdown_metrics';
@@ -18,7 +18,7 @@ import { ApmElasticsearchOutputWriteTargets } from './apm/utils/get_apm_write_ta
 import { Logger } from './utils/create_logger';
 import { Fields } from './entity';
 
-export interface StreamProcessorOptions<TFields extends Fields> {
+export interface StreamProcessorOptions<TFields extends Fields = ApmFields> {
   processors: Array<(events: TFields[]) => TFields[]>;
   flushInterval?: string;
   maxBufferSize?: number;
@@ -27,7 +27,7 @@ export interface StreamProcessorOptions<TFields extends Fields> {
   logger?: Logger;
 }
 
-export class StreamProcessor<TFields extends Fields> {
+export class StreamProcessor<TFields extends Fields = ApmFields> {
   public static readonly apmProcessors = [
     getTransactionMetrics,
     getSpanDestinationMetrics,
@@ -43,7 +43,7 @@ export class StreamProcessor<TFields extends Fields> {
   private readonly intervalUnit: any;
 
   // TODO move away from chunking and feed this data one by one to processors
-  *stream(...eventSources: Array<SpanIterable<TFields>>) {
+  *stream(...eventSources: Array<EntityIterable<TFields>>) {
     const maxBufferSize = this.options.maxBufferSize ?? 10000;
     const maxSourceEvents = this.options.maxSourceEvents;
     let localBuffer = [];
@@ -107,12 +107,12 @@ export class StreamProcessor<TFields extends Fields> {
     }
   }
 
-  async *streamAsync(...eventSources: Array<SpanIterable<TFields>>): AsyncIterator<ApmFields> {
+  async *streamAsync(...eventSources: Array<EntityIterable<TFields>>): AsyncIterator<ApmFields> {
     yield* this.stream(...eventSources);
   }
   *streamToDocument<TDocument>(
     map: (d: ApmFields) => TDocument,
-    ...eventSources: Array<SpanIterable<TFields>>
+    ...eventSources: Array<EntityIterable<TFields>>
   ): Generator<ApmFields> {
     for (const apmFields of this.stream(...eventSources)) {
       yield map(apmFields);
@@ -120,13 +120,13 @@ export class StreamProcessor<TFields extends Fields> {
   }
   async *streamToDocumentAsync<TDocument>(
     map: (d: ApmFields) => TDocument,
-    ...eventSources: Array<SpanIterable<TFields>>
+    ...eventSources: Array<EntityIterable<TFields>>
   ): AsyncIterator<ApmFields> {
     for (const apmFields of this.stream(...eventSources)) {
       yield map(apmFields);
     }
   }
-  streamToArray(...eventSources: Array<SpanIterable<TFields>>) {
+  streamToArray(...eventSources: Array<EntityIterable<TFields>>) {
     return Array.from<ApmFields>(this.stream(...eventSources));
   }
 
@@ -195,14 +195,14 @@ export class StreamProcessor<TFields extends Fields> {
 
 export async function* streamProcessAsync<TFields>(
   processors: Array<(events: TFields[]) => TFields[]>,
-  ...eventSources: Array<SpanIterable<TFields>>
+  ...eventSources: Array<EntityIterable<TFields>>
 ) {
   return new StreamProcessor({ processors }).streamAsync(...eventSources);
 }
 
 export function streamProcessToArray<TFields>(
   processors: Array<(events: TFields[]) => TFields[]>,
-  ...eventSources: Array<SpanIterable<TFields>>
+  ...eventSources: Array<EntityIterable<TFields>>
 ) {
   return new StreamProcessor({ processors }).streamToArray(...eventSources);
 }

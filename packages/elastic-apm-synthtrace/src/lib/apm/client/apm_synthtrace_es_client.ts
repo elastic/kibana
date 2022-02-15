@@ -11,9 +11,9 @@ import { cleanWriteTargets } from '../../utils/clean_write_targets';
 import { getApmWriteTargets } from '../utils/get_apm_write_targets';
 import { Logger } from '../../utils/create_logger';
 import { ApmFields } from '../apm_fields';
-import { SpanIterable } from '../../span_iterable';
+import { EntityIterable } from '../../entity_iterable';
 import { StreamProcessor } from '../../stream_processor';
-import { SpanGeneratorsUnion } from '../../span_generators_union';
+import { EntityStreams } from '../../entity_streams';
 
 export interface StreamToBulkOptions {
   concurrency?: number;
@@ -76,8 +76,11 @@ export class ApmSynthtraceEsClient {
     }
   }
 
-  async index<TFields>(events: SpanIterable<TFields> | SpanIterable<TFields>[], options?: StreamToBulkOptions) {
-    const dataStream = Array.isArray(events) ? new SpanGeneratorsUnion(events) : events;
+  async index<TFields>(
+    events: EntityIterable<TFields> | Array<EntityIterable<TFields>>,
+    options?: StreamToBulkOptions
+  ) {
+    const dataStream = Array.isArray(events) ? new EntityStreams(events) : events;
 
     const writeTargets = await this.getWriteTargets();
     // TODO logger.perf

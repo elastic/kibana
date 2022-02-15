@@ -7,9 +7,9 @@
  */
 
 import { RunOptions } from './utils/parse_run_cli_flags';
-import { SpanIterable } from '../lib/span_iterable';
+import { EntityIterable } from '../lib/entity_iterable';
 
-type Generate<TFields> = (range: { from: Date; to: Date }) => SpanIterable<TFields>;
+type Generate<TFields> = (range: { from: Date; to: Date }) => EntityIterable<TFields>;
 export type Scenario<TFields> = (options: RunOptions) => Promise<{
   generate: Generate<TFields>;
   mapToIndex?: (data: Record<string, any>) => string;

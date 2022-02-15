@@ -138,7 +138,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .transaction('GET /api/product/list')
                 .duration(GO_PROD_DURATION)
                 .timestamp(timestamp)
-                .serialize()
             ),
           timerange(start, end)
             .interval('1m')
@@ -148,7 +147,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .transaction('GET /api/product/:id')
                 .duration(GO_DEV_DURATION)
                 .timestamp(timestamp)
-                .serialize()
             ),
         ]);
       });

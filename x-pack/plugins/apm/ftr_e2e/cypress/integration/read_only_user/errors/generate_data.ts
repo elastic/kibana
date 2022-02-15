@@ -22,7 +22,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
     .interval('2m')
     .rate(1)
     .spans((timestamp, index) => [
-      ...opbeansJava
+      opbeansJava
         .transaction('GET /apple 🍎 ')
         .timestamp(timestamp)
         .duration(1000)
@@ -31,13 +31,11 @@ export function generateData({ from, to }: { from: number; to: number }) {
           opbeansJava
             .error(`Error ${index}`, `exception ${index}`)
             .timestamp(timestamp)
-        )
-        .serialize(),
-      ...opbeansNode
+        ),
+      opbeansNode
         .transaction('GET /banana 🍌')
         .timestamp(timestamp)
         .duration(500)
-        .success()
-        .serialize(),
+        .success(),
     ]);
 }

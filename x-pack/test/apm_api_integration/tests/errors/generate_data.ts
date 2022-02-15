@@ -47,9 +47,8 @@ export async function generateData({
           .timestamp(timestamp)
           .duration(1000)
           .success()
-          .serialize()
       )
-      .concat(
+      .merge(
         timerange(start, end)
           .interval(interval)
           .rate(transaction.failureRate)
@@ -62,7 +61,6 @@ export async function generateData({
               .duration(1000)
               .timestamp(timestamp)
               .failure()
-              .serialize()
           )
       );
   });

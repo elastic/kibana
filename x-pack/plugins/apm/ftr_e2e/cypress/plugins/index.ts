@@ -8,7 +8,7 @@ import {
   apm,
   createLogger,
   LogLevel,
-  SpanIterable,
+  EntityIterable,
 } from '@elastic/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 
@@ -46,7 +46,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
   );
 
   on('task', {
-    'synthtrace:index': async (events: SpanIterable) => {
+    'synthtrace:index': async (events: EntityIterable) => {
       await synthtraceEsClient.index(events);
       return null;
     },

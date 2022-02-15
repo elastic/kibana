@@ -117,14 +117,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
-                  .serialize()
               ),
-              ...serviceB
+              serviceB
                 .transaction('tx', 'Worker')
                 .timestamp(timestamp)
                 .duration(duration)
-                .success()
-                .serialize(),
+                .success(),
             ];
           });
 

@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SpanIterable } from '../..';
+import { EntityIterable } from '../..';
 import { apm } from '../../lib/apm';
+import { ApmFields } from '../../lib/apm/apm_fields';
 import { timerange } from '../../lib/timerange';
 
 describe('simple trace', () => {
-  let iterable: SpanIterable;
+  let iterable: EntityIterable<ApmFields>;
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {

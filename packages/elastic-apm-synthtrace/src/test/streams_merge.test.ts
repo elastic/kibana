@@ -34,7 +34,7 @@ describe('Merging streams', () => {
       .interval('1m')
       .rate(1)
       .spans(() => new Doc('metric'))
-      .concat(
+      .merge(
         range
           .interval('1m')
           .rate(4)

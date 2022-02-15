@@ -85,7 +85,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .timestamp(timestamp)
                   .duration(1000)
                   .success()
-                  .serialize()
               ),
             timerange(start, end)
               .interval('1m')
@@ -97,7 +96,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .duration(1000)
                   .timestamp(timestamp)
                   .failure()
-                  .serialize()
               ),
             timerange(start, end)
               .interval('1m')
@@ -108,7 +106,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .timestamp(timestamp)
                   .duration(1000)
                   .success()
-                  .serialize()
               ),
             timerange(start, end)
               .interval('1m')
@@ -120,7 +117,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .duration(1000)
                   .timestamp(timestamp)
                   .failure()
-                  .serialize()
               ),
           ]);
         });

@@ -51,7 +51,6 @@ export async function generateData({
           .timestamp(timestamp)
           .duration(1000)
           .success()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
@@ -63,7 +62,6 @@ export async function generateData({
           .duration(1000)
           .timestamp(timestamp)
           .failure()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
@@ -74,7 +72,6 @@ export async function generateData({
           .timestamp(timestamp)
           .duration(1000)
           .success()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
@@ -86,7 +83,6 @@ export async function generateData({
           .duration(1000)
           .timestamp(timestamp)
           .failure()
-          .serialize()
       ),
   ]);
 }

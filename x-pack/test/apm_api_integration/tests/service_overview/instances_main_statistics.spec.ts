@@ -328,7 +328,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
             interval.rate(GO_A_INSTANCE_RATE_FAILURE).spans((timestamp) =>
               goInstanceA
@@ -337,7 +336,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
             interval.rate(GO_B_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
               goInstanceB
@@ -346,7 +344,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
             interval.rate(JAVA_INSTANCE_RATE).spans((timestamp) =>
               javaInstance
@@ -355,7 +352,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
           ]);
         });

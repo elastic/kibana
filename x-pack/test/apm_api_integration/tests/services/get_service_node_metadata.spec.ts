@@ -68,7 +68,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
-                .serialize()
             )
         );
       });

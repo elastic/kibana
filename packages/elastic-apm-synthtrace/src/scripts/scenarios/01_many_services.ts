@@ -80,7 +80,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         .map(({ instance, url }) =>
           logger.perf('generating_apm_events', () => instanceSpans(instance, url))
         )
-        .reduce((p, c) => p.concat(c));
+        .reduce((p, c) => p.merge(c));
     },
   };
 };

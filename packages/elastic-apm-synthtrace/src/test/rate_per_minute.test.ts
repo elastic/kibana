@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SpanArrayIterable, SpanIterable } from '../lib/span_iterable';
+import { EntityArrayIterable, EntityIterable } from '../lib/entity_iterable';
 import { apm } from '../lib/apm';
 import { timerange } from '../lib/timerange';
+import { ApmFields } from '../lib/apm/apm_fields';
 
 describe('rate per minute calculations', () => {
-  let iterable: SpanIterable;
-  let arrayIterable: SpanArrayIterable;
+  let iterable: EntityIterable<ApmFields>;
+  let arrayIterable: EntityArrayIterable<ApmFields>;
   let events: Array<Record<string, any>>;
 
   const range = timerange(
@@ -46,7 +47,7 @@ describe('rate per minute calculations', () => {
           )
       );
     events = iterable.toArray();
-    arrayIterable = new SpanArrayIterable(events);
+    arrayIterable = new EntityArrayIterable(events);
   });
   it('array iterable returns exact rate per minute', () => {
     expect(arrayIterable.ratePerMinute()).toEqual(2);

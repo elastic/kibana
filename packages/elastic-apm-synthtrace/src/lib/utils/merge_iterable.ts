@@ -9,10 +9,10 @@
 import { range } from 'lodash';
 import { ApmFields } from '../apm/apm_fields';
 import { Fields } from '../entity';
-import { SpanIterable } from '../span_iterable';
+import { EntityIterable } from '../entity_iterable';
 
 export function merge<TField extends Fields>(
-  iterables: Array<SpanIterable<TField>>
+  iterables: Array<EntityIterable<TField>>
 ): Iterable<TField> {
   if (iterables.length === 1) return iterables[0];
 

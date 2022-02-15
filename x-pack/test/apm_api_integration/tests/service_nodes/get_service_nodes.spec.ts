@@ -67,7 +67,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   'jvm.thread.count': 25,
                 })
                 .timestamp(timestamp)
-                .serialize()
             )
         );
       });

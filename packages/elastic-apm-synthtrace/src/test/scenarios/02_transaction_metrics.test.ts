@@ -10,6 +10,7 @@ import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
 import { getTransactionMetrics } from '../../lib/apm/processors/get_transaction_metrics';
 import { StreamProcessor } from '../../lib/stream_processor';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
 describe('transaction metrics', () => {
   let events: Array<Record<string, any>>;
@@ -26,7 +27,7 @@ describe('transaction metrics', () => {
     const span = (timestamp: number) =>
       javaInstance.transaction('GET /api/product/list').duration(1000).timestamp(timestamp);
 
-    const processor = new StreamProcessor({
+    const processor = new StreamProcessor<ApmFields>({
       processors: [getTransactionMetrics],
       flushInterval: '15m',
     });

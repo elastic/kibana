@@ -34,7 +34,7 @@ const scenario: Scenario<StackMonitoringFields> = async (runOptions: RunOptions)
         .spans((timestamp) =>
           logger.perf('generating_es_events', () => clusterStats.timestamp(timestamp).indices(115))
         )
-        .concat(
+        .merge(
           interval.spans((timestamp) =>
             logger.perf('generating_kb_events', () =>
               kibanaStats.timestamp(timestamp).requests(10, 20)

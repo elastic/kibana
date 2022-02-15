@@ -12,7 +12,7 @@ import { RunOptions } from './parse_run_cli_flags';
 import { ApmFields } from '../../lib/apm/apm_fields';
 import { ApmSynthtraceEsClient } from '../../lib/apm';
 import { Logger } from '../../lib/utils/create_logger';
-import { SpanArrayIterable } from '../../lib/span_iterable';
+import { EntityArrayIterable } from '../../lib/entity_iterable';
 
 export async function startLiveDataUpload(
   esClient: ApmSynthtraceEsClient,
@@ -57,7 +57,7 @@ export async function startLiveDataUpload(
     queuedEvents = eventsToRemainInQueue;
 
     await logger.perf('index_live_scenario', () =>
-      esClient.index(new SpanArrayIterable(eventsToUpload), {
+      esClient.index(new EntityArrayIterable(eventsToUpload), {
         concurrency: runOptions.clientWorkers,
         maxDocs: runOptions.maxDocs,
         mapToIndex,

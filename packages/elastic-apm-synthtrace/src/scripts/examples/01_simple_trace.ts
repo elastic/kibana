@@ -78,12 +78,12 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
               .timestamp(timestamp)
           );
 
-        return successfulTraceEvents.concat(failedTraceEvents, metricsets);
+        return successfulTraceEvents.merge(failedTraceEvents, metricsets);
       };
 
       return instances
         .map((instance) => logger.perf('generating_apm_events', () => instanceSpans(instance)))
-        .reduce((p, c) => p.concat(c));
+        .reduce((p, c) => p.merge(c));
     },
   };
 };

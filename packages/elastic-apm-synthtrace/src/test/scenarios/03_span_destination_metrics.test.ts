@@ -10,6 +10,7 @@ import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
 import { getSpanDestinationMetrics } from '../../lib/apm/processors/get_span_destination_metrics';
 import { StreamProcessor } from '../../lib/stream_processor';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
 describe('span destination metrics', () => {
   let events: Array<Record<string, any>>;
@@ -22,7 +23,7 @@ describe('span destination metrics', () => {
       new Date('2021-01-01T00:00:00.000Z'),
       new Date('2021-01-01T00:15:00.000Z')
     );
-    const processor = new StreamProcessor({ processors: [getSpanDestinationMetrics] });
+    const processor = new StreamProcessor<ApmFields>({ processors: [getSpanDestinationMetrics] });
     events = processor
       .streamToArray(
         range

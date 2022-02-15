@@ -28,7 +28,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
     .interval('1s')
     .rate(1)
     .spans((timestamp) => [
-      ...opbeansJava
+      opbeansJava
         .transaction('GET /api/product')
         .timestamp(timestamp)
         .duration(1000)
@@ -43,24 +43,17 @@ export function opbeans({ from, to }: { from: number; to: number }) {
             .duration(50)
             .success()
             .destination('postgresql')
-        )
-        .serialize(),
-      ...opbeansNode
+        ),
+      opbeansNode
         .transaction('GET /api/product/:id')
         .timestamp(timestamp)
         .duration(500)
-        .success()
-        .serialize(),
-      ...opbeansNode
+        .success(),
+      opbeansNode
         .transaction('Worker job', 'Worker')
         .timestamp(timestamp)
         .duration(1000)
-        .success()
-        .serialize(),
-      ...opbeansRum
-        .transaction('/')
-        .timestamp(timestamp)
-        .duration(1000)
-        .serialize(),
+        .success(),
+      opbeansRum.transaction('/').timestamp(timestamp).duration(1000),
     ]);
 }
