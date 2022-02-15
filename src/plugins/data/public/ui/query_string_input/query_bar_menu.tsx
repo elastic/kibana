@@ -22,6 +22,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '../../../../kibana_react/public';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
 import { IDataPluginServices } from '../../types';
+import { fromUser } from '../../query';
 import { TimeRange, SavedQueryService, SavedQuery } from '../..';
 import { KibanaReactContextValue } from '../../../../kibana_react/public';
 import { QueryLanguageSwitcher } from '../query_string_input/language_switcher';
@@ -29,6 +30,7 @@ import { QueryLanguageSwitcher } from '../query_string_input/language_switcher';
 interface Props {
   language: string;
   onQueryChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onQueryBarSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   toggleFilterBarMenuPopover: (value: boolean) => void;
   openQueryBarMenu: boolean;
   nonKqlMode?: 'lucene' | 'text';
@@ -51,6 +53,7 @@ export function QueryBarMenu({
   dateRangeFrom,
   dateRangeTo,
   onQueryChange,
+  onQueryBarSubmit,
   savedQueryService,
   applySelectedQuery,
   saveQueryFormComponent,
@@ -149,6 +152,10 @@ export function QueryBarMenu({
 
     const newQuery = { query: '', language: lang };
     onQueryStringChange(newQuery.query);
+    onQueryBarSubmit({
+      query: { query: fromUser(newQuery.query), language: newQuery.language },
+      dateRange: getDateRange(),
+    });
   };
 
   const luceneLabel = i18n.translate('data.query.queryBar.luceneLanguageName', {
@@ -260,6 +267,7 @@ export function QueryBarMenu({
           onSelectLanguage={onSelectLanguage}
           nonKqlMode={nonKqlMode}
           nonKqlModeHelpText={nonKqlModeHelpText}
+          isOnMenu={true}
         />
       ),
     },

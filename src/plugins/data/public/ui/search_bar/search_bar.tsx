@@ -376,6 +376,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         language={this.state.query!.language}
         services={this.services}
         onQueryChange={this.onQueryBarChange}
+        onQueryBarSubmit={this.onQueryBarSubmit}
         dateRangeFrom={this.state.dateRangeFrom}
         dateRangeTo={this.state.dateRangeTo}
         savedQueryService={this.savedQueryService}
@@ -399,16 +400,16 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
-          prepend={
-            this.props.showFilterBar && this.state.query
-              ? this.renderSavedQueryManagement(
-                  this.props.onClearSavedQuery,
-                  this.props.showSaveQuery,
-                  this.props.savedQuery
-                )
-              : undefined
-          }
-          // prepend={this.props.showFilterBar && this.state.query ? queryBarMenu : undefined}
+          // prepend={
+          //   this.props.showFilterBar && this.state.query
+          //     ? this.renderSavedQueryManagement(
+          //         this.props.onClearSavedQuery,
+          //         this.props.showSaveQuery,
+          //         this.props.savedQuery
+          //       )
+          //     : undefined
+          // }
+          prepend={this.props.showFilterBar && this.state.query ? queryBarMenu : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}

@@ -38,7 +38,6 @@ export function SaveQueryForm({
   showTimeFilterOption = true,
 }: Props) {
   const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
-  const [description, setDescription] = useState(savedQuery?.attributes.description ?? '');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
     Boolean(savedQuery?.attributes.filters ?? true)
@@ -101,17 +100,18 @@ export function SaveQueryForm({
       onSave({
         id: savedQuery?.id,
         title,
-        description,
+        description: '',
         shouldIncludeFilters,
         shouldIncludeTimefilter,
       });
     }
+    onClose();
   }, [
     validate,
+    onClose,
     onSave,
     savedQuery?.id,
     title,
-    description,
     shouldIncludeFilters,
     shouldIncludeTimefilter,
   ]);
@@ -152,21 +152,6 @@ export function SaveQueryForm({
           isInvalid={hasErrors}
           onBlur={autoTrim}
           compressed
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={i18n.translate('data.search.searchBar.savedQueryDescriptionLabelText', {
-          defaultMessage: 'Description',
-        })}
-      >
-        <EuiFieldText
-          value={description}
-          name="description"
-          onChange={(event) => {
-            setDescription(event.target.value);
-          }}
-          data-test-subj="saveQueryFormDescription"
         />
       </EuiFormRow>
       {showFilterOption && (

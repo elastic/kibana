@@ -19,7 +19,6 @@ import {
   EuiSwitch,
   EuiText,
   PopoverAnchorPosition,
-  EuiPopoverFooter,
   toSentenceCase,
   EuiHorizontalRule,
 } from '@elastic/eui';
@@ -34,6 +33,7 @@ export interface QueryLanguageSwitcherProps {
   anchorPosition?: PopoverAnchorPosition;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  isOnMenu?: boolean;
 }
 
 export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
@@ -42,6 +42,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   onSelectLanguage,
   nonKqlMode = 'lucene',
   nonKqlModeHelpText,
+  isOnMenu = false,
 }: QueryLanguageSwitcherProps) {
   const kibana = useKibana();
   const kueryQuerySyntaxDocs = kibana.services.docLinks!.links.query.kueryQuerySyntax;
@@ -81,39 +82,39 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
     </EuiButtonEmpty>
   );
 
-  // return (
-  //   <div>
-  //     <EuiContextMenuItem
-  //       key="KQL"
-  //       icon={language === 'kuery' ? 'check' : 'empty'}
-  //       onClick={() => {
-  //         onSelectLanguage('kuery');
-  //       }}
-  //     >
-  //       KQL
-  //     </EuiContextMenuItem>
-  //     <EuiContextMenuItem
-  //       key={nonKqlMode}
-  //       icon={language === 'kuery' ? 'empty' : 'check'}
-  //       onClick={() => {
-  //         onSelectLanguage(nonKqlMode);
-  //       }}
-  //     >
-  //       {toSentenceCase(nonKqlMode)}
-  //     </EuiContextMenuItem>
-  //     <EuiHorizontalRule margin="none" />
-  //     <EuiContextMenuItem
-  //       key={'documentation'}
-  //       icon={'documentation'}
-  //       href={kueryQuerySyntaxDocs}
-  //       target="_blank"
-  //     >
-  //       Documentation
-  //     </EuiContextMenuItem>
-  //   </div>
-  // );
+  const languageMenuItem = (
+    <div>
+      <EuiContextMenuItem
+        key="KQL"
+        icon={language === 'kuery' ? 'check' : 'empty'}
+        onClick={() => {
+          onSelectLanguage('kuery');
+        }}
+      >
+        KQL
+      </EuiContextMenuItem>
+      <EuiContextMenuItem
+        key={nonKqlMode}
+        icon={language === 'kuery' ? 'empty' : 'check'}
+        onClick={() => {
+          onSelectLanguage(nonKqlMode);
+        }}
+      >
+        {toSentenceCase(nonKqlMode)}
+      </EuiContextMenuItem>
+      <EuiHorizontalRule margin="none" />
+      <EuiContextMenuItem
+        key={'documentation'}
+        icon={'documentation'}
+        href={kueryQuerySyntaxDocs}
+        target="_blank"
+      >
+        Documentation
+      </EuiContextMenuItem>
+    </div>
+  );
 
-  return (
+  const languageQueryStringComponent = (
     <EuiPopover
       id="queryLanguageSwitcherPopover"
       anchorClassName="euiFormControlLayout__append"
@@ -184,4 +185,6 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       </div>
     </EuiPopover>
   );
+
+  return isOnMenu ? languageMenuItem : languageQueryStringComponent;
 });

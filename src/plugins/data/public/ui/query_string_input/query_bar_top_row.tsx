@@ -360,6 +360,7 @@ export const QueryBarTopRow = React.memo(
             nonKqlMode={props.nonKqlMode}
             nonKqlModeHelpText={props.nonKqlModeHelpText}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            disableLanguageSwitcher={true}
           />
         </EuiFlexItem>
       );
