@@ -63,8 +63,6 @@ export {
   NoDataCard,
 } from './page_template';
 
-export { NO_DATA_PAGE_MAX_WIDTH, NO_DATA_PAGE_TEMPLATE_PROPS } from './empty_state_page';
-
 export type { Value } from './validated_range';
 export { ValidatedDualRange } from './validated_range';
 
