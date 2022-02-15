@@ -34,7 +34,7 @@ import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
 
-import { getBundledPackages, getBundledPackageByName } from '../packages/bundled_packages';
+import { getBundledPackageByName } from '../packages/bundled_packages';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
