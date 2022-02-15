@@ -215,6 +215,30 @@ describe('successful migrations', () => {
       expect(migration800(action, context)).toEqual(action);
     });
   });
+
+  describe('8.2.0', () => {
+    test('change email service elastic_cloud to other', () => {
+      const migration820 = getActionsMigrations(encryptedSavedObjectsSetup)['8.2.0'];
+      const action = getMockData({
+        config: {
+          service: 'elastic_cloud',
+        },
+      });
+      const expectedAction = {
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            service: 'other',
+            host: 'dockerhost',
+            port: 10025,
+            secure: false,
+          },
+        },
+      };
+      expect(migration820(action, context)).toEqual(expectedAction);
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {

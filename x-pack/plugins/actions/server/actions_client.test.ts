@@ -39,6 +39,7 @@ import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { Logger } from 'kibana/server';
 import { connectorTokenClientMock } from './builtin_action_types/lib/connector_token_client.mock';
+import { ActionTypeId as EmailActionTypeId } from './builtin_action_types/email';
 
 jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -2044,5 +2045,161 @@ describe('isPreconfigured()', () => {
     });
 
     expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);
+  });
+});
+
+describe('should handle email service elastic_cloud changed to other on create', () => {
+  test('on create', async () => {
+    actionTypeRegistry.register({
+      id: EmailActionTypeId,
+      name: `${EmailActionTypeId} connector name`,
+      minimumLicenseRequired: 'gold',
+      executor,
+    });
+
+    const savedObjectCreateResult = {
+      id: '1',
+      type: 'type',
+      attributes: {
+        name: 'elastic cloud email connector',
+        actionTypeId: EmailActionTypeId,
+        isMissingSecrets: false,
+        config: {
+          service: 'other',
+          host: 'dockerhost',
+          port: 10025,
+          secure: false,
+        },
+      },
+      references: [],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+    const result = await actionsClient.create({
+      action: {
+        name: 'elastic cloud email connector',
+        actionTypeId: EmailActionTypeId,
+        config: { service: 'elastic_cloud' },
+        secrets: {},
+      },
+    });
+    expect(result).toEqual({
+      id: '1',
+      isPreconfigured: false,
+      name: 'elastic cloud email connector',
+      actionTypeId: EmailActionTypeId,
+      isMissingSecrets: false,
+      config: {
+        service: 'other',
+        host: 'dockerhost',
+        port: 10025,
+        secure: false,
+      },
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        Object {
+          "actionTypeId": ".email",
+          "config": Object {
+            "host": "dockerhost",
+            "port": 10025,
+            "secure": false,
+            "service": "other",
+          },
+          "isMissingSecrets": false,
+          "name": "elastic cloud email connector",
+          "secrets": Object {},
+        },
+        Object {
+          "id": "mock-saved-object-id",
+        },
+      ]
+    `);
+  });
+
+  test('on update', async () => {
+    actionTypeRegistry.register({
+      id: EmailActionTypeId,
+      name: `${EmailActionTypeId} connector name`,
+      minimumLicenseRequired: 'gold',
+      executor,
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: EmailActionTypeId,
+        config: {
+          service: 'gmail',
+        },
+      },
+      references: [],
+    });
+
+    const savedObjectCreateResult = {
+      id: '1',
+      type: 'type',
+      attributes: {
+        name: 'elastic cloud email connector',
+        actionTypeId: EmailActionTypeId,
+        isMissingSecrets: false,
+        config: {
+          service: 'other',
+          host: 'dockerhost',
+          port: 10025,
+          secure: false,
+        },
+      },
+      references: [],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+    const result = await actionsClient.update({
+      id: '1',
+      action: {
+        name: 'elastic cloud email connector -- renamed!',
+        config: { service: 'elastic_cloud' },
+        secrets: {},
+      },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionTypeId": ".email",
+        "config": Object {
+          "host": "dockerhost",
+          "port": 10025,
+          "secure": false,
+          "service": "other",
+        },
+        "id": "1",
+        "isMissingSecrets": false,
+        "isPreconfigured": false,
+        "name": "elastic cloud email connector",
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        Object {
+          "actionTypeId": ".email",
+          "config": Object {
+            "host": "dockerhost",
+            "port": 10025,
+            "secure": false,
+            "service": "other",
+          },
+          "isMissingSecrets": false,
+          "name": "elastic cloud email connector -- renamed!",
+          "secrets": Object {},
+        },
+        Object {
+          "id": "1",
+          "overwrite": true,
+          "references": Array [],
+        },
+      ]
+    `);
   });
 });

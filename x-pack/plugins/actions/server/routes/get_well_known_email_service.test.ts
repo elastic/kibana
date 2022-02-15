@@ -80,20 +80,12 @@ describe('getWellKnownEmailServiceRoute', () => {
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "host": "dockerhost",
-          "port": 10025,
-          "secure": false,
-        },
+        "body": Object {},
       }
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: {
-        host: 'dockerhost',
-        port: 10025,
-        secure: false,
-      },
+      body: {},
     });
   });
 

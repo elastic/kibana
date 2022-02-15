@@ -23,6 +23,8 @@ import {
   getActionType,
   EmailActionType,
   EmailActionTypeExecutorOptions,
+  isCloudEmailService,
+  getCloudEmailServiceConfigAsOther,
 } from './email';
 
 const sendEmailMock = sendEmail as jest.Mock;
@@ -120,21 +122,18 @@ describe('config validation', () => {
     });
   });
 
-  test(`config validation succeeds when config is valid and service is elastic_cloud`, () => {
+  test(`config validation fails when config is valid and service is elastic_cloud`, () => {
     const config: Record<string, unknown> = {
       service: 'elastic_cloud',
       from: 'bob@example.com',
-      hasAuth: true,
+      hasAuth: false,
     };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...config,
-      host: null,
-      port: null,
-      secure: null,
-      clientId: null,
-      tenantId: null,
-      oauthTokenUrl: null,
-    });
+
+    expect(() => {
+      validateConfig(actionType, config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [service] value 'elastic_cloud' is not valid"`
+    );
   });
 
   test('config validation fails when config is not valid', () => {
@@ -568,7 +567,10 @@ describe('execute()', () => {
       ...executorOptions,
       config: {
         ...config,
-        service: 'elastic_cloud',
+        service: 'other',
+        host: 'dockerhost',
+        port: 10025,
+        secure: false,
         hasAuth: false,
       },
       secrets: {
@@ -743,6 +745,28 @@ describe('execute()', () => {
       --
 
       This message was sent by Kibana. [View this in Kibana](https://localhost:1234/foo/bar/my/app)."
+    `);
+  });
+
+  test('isCloudEmailService works as expected', () => {
+    const configCloud = { service: 'elastic_cloud' };
+    const configOther = { service: 'other' };
+    const configGmail = { service: 'gmail' };
+
+    expect(isCloudEmailService(configCloud)).toBe(true);
+    expect(isCloudEmailService(configOther)).toBe(false);
+    expect(isCloudEmailService(configGmail)).toBe(false);
+  });
+
+  test('getCloudEmailServiceConfigAsOther works as expected', async () => {
+    const configCloud = getCloudEmailServiceConfigAsOther();
+    expect(configCloud).toMatchInlineSnapshot(`
+      Object {
+        "host": "dockerhost",
+        "port": 10025,
+        "secure": false,
+        "service": "other",
+      }
     `);
   });
 });
