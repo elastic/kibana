@@ -29,7 +29,7 @@ export const sessionEntryLeadersRoute = (router: IRouter) => {
 
       return response.ok({
         body: {
-          session_entry_leader: result?.body?._source,
+          session_entry_leader: result?._source,
         },
       });
     }
