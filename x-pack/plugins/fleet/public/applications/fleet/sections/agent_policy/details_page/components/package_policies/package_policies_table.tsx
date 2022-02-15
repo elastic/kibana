@@ -25,12 +25,7 @@ import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
-import {
-  useCapabilities,
-  useLink,
-  usePackageInstallations,
-  useStartServices,
-} from '../../../../../hooks';
+import { useAuthz, useLink, usePackageInstallations, useStartServices } from '../../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
 
 interface Props {
@@ -55,7 +50,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { application } = useStartServices();
-  const hasWriteCapabilities = useCapabilities().write;
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const { updatableIntegrations } = usePackageInstallations();
   const { getHref } = useLink();
 
@@ -109,7 +105,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
           <EuiLink
             title={value}
-            {...(hasWriteCapabilities
+            {...(canReadIntegrationPolicies
               ? {
                   href: getHref('edit_integration', {
                     policyId: agentPolicy.id,
@@ -144,7 +140,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         render(packageTitle: string, packagePolicy: InMemoryPackagePolicy) {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem data-test-subj="PackagePoliciesTableLink" grow={false}>
                 <EuiLink
                   href={
                     packagePolicy.package &&
@@ -193,8 +189,10 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="PackagePoliciesTableUpgradeButton"
                       size="s"
                       minWidth="0"
+                      isDisabled={!canWriteIntegrationPolicies}
                       href={`${getHref('upgrade_package_policy', {
                         policyId: agentPolicy.id,
                         packagePolicyId: packagePolicy.id,
@@ -231,7 +229,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         actions: [
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
-              return (
+              return canWriteIntegrationPolicies ? (
                 <PackagePolicyActionsMenu
                   agentPolicy={agentPolicy}
                   packagePolicy={packagePolicy}
@@ -240,13 +238,15 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     packagePolicyId: packagePolicy.id,
                   })}?from=fleet-policy-list`}
                 />
+              ) : (
+                <></>
               );
             },
           },
         ],
       },
     ],
-    [agentPolicy, getHref, hasWriteCapabilities]
+    [agentPolicy, getHref, canWriteIntegrationPolicies, canReadIntegrationPolicies]
   );
 
   return (
@@ -268,7 +268,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               <EuiButton
                 key="addPackagePolicyButton"
                 fill
-                isDisabled={!hasWriteCapabilities}
+                isDisabled={!canWriteIntegrationPolicies}
                 iconType="plusInCircle"
                 onClick={() => {
                   application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
@@ -276,6 +276,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     state: { forAgentPolicyId: agentPolicy.id },
                   });
                 }}
+                data-test-subj="addPackagePolicyButton"
               >
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.addPackagePolicyButtonText"

@@ -60,6 +60,7 @@ export const usePolicy = (fleetPolicyName: string = '') => {
     isZipUrlTLSEnabled,
     name: monitorName, // the monitor name can come from two different places, either from fleet or from uptime
     locations,
+    namespace,
   } = usePolicyConfigContext();
   const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
   const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
@@ -91,6 +92,7 @@ export const usePolicy = (fleetPolicyName: string = '') => {
         },
         [ConfigKey.NAME]: fleetPolicyName || monitorName,
         [ConfigKey.LOCATIONS]: locations,
+        [ConfigKey.NAMESPACE]: namespace,
       } as HTTPFields,
       [DataStream.TCP]: {
         ...tcpSimpleFields,
@@ -102,11 +104,13 @@ export const usePolicy = (fleetPolicyName: string = '') => {
         },
         [ConfigKey.NAME]: fleetPolicyName || monitorName,
         [ConfigKey.LOCATIONS]: locations,
+        [ConfigKey.NAMESPACE]: namespace,
       } as TCPFields,
       [DataStream.ICMP]: {
         ...icmpSimpleFields,
         [ConfigKey.NAME]: fleetPolicyName || monitorName,
         [ConfigKey.LOCATIONS]: locations,
+        [ConfigKey.NAMESPACE]: namespace,
       } as ICMPFields,
       [DataStream.BROWSER]: {
         ...browserSimpleFields,
@@ -117,6 +121,7 @@ export const usePolicy = (fleetPolicyName: string = '') => {
         },
         [ConfigKey.NAME]: fleetPolicyName || monitorName,
         [ConfigKey.LOCATIONS]: locations,
+        [ConfigKey.NAMESPACE]: namespace,
       } as BrowserFields,
     }),
     [
@@ -132,6 +137,7 @@ export const usePolicy = (fleetPolicyName: string = '') => {
       fleetPolicyName,
       monitorName,
       locations,
+      namespace,
     ]
   );
 

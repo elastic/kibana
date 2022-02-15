@@ -15,7 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Incoming Execution via PowerShell Remoting",
-  "query": "sequence by host.id with maxspan = 30s\n   [network where network.direction : (\"incoming\", \"ingress\") and destination.port in (5985, 5986) and\n    network.protocol == \"http\" and source.address != \"127.0.0.1\" and source.address != \"::1\"\n   ]\n   [process where event.type == \"start\" and process.parent.name : \"wsmprovhost.exe\" and not process.name : \"conhost.exe\"]\n",
+  "query": "sequence by host.id with maxspan = 30s\n   [network where network.direction : (\"incoming\", \"ingress\") and destination.port in (5985, 5986) and\n    network.protocol == \"http\" and source.ip != \"127.0.0.1\" and source.ip != \"::1\"\n   ]\n   [process where event.type == \"start\" and process.parent.name : \"wsmprovhost.exe\" and not process.name : \"conhost.exe\"]\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/scripting/learn/remoting/running-remote-commands?view=powershell-7.1"
   ],
@@ -47,5 +47,5 @@
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 4
 }

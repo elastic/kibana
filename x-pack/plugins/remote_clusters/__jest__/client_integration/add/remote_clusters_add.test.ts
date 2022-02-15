@@ -6,7 +6,7 @@
  */
 
 import { SinonFakeServer } from 'sinon';
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, RemoteClustersActions } from '../helpers';

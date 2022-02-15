@@ -60,6 +60,7 @@ export type {
   PersistableStateMigrateFn,
   MigrateFunction,
   MigrateFunctionsObject,
+  GetMigrationFunctionObjectFn,
   PersistableState,
   PersistableStateDefinition,
 } from './persistable_state';

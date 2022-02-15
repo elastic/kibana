@@ -33,17 +33,23 @@ export function isQuickFunction(operationType: string) {
 export const LabelInput = ({
   value,
   onChange,
+  defaultValue,
 }: {
   value: string;
   onChange: (value: string) => void;
+  defaultValue?: string;
 }) => {
-  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({ onChange, value });
+  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({
+    onChange,
+    value,
+    defaultValue,
+  });
 
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
-        defaultMessage: 'Display name',
-        description: 'Display name of a column of data',
+        defaultMessage: 'Name',
+        description: 'Name of a column of data',
       })}
       display="columnCompressed"
       fullWidth

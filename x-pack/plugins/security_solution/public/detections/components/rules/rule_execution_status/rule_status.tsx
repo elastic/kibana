@@ -12,7 +12,7 @@ import { RuleExecutionStatus } from '../../../../../common/detection_engine/sche
 
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { getStatusColor, normalizeRuleExecutionStatus } from './utils';
+import { getStatusText, getStatusColor } from './utils';
 import * as i18n from './translations';
 
 interface RuleStatusProps {
@@ -22,18 +22,18 @@ interface RuleStatusProps {
 }
 
 const RuleStatusComponent: React.FC<RuleStatusProps> = ({ status, date, children }) => {
-  const normalizedStatus = normalizeRuleExecutionStatus(status);
-  const statusColor = getStatusColor(normalizedStatus);
+  const statusText = getStatusText(status);
+  const statusColor = getStatusColor(status);
   return (
     <>
       <EuiFlexItem grow={false}>
         <EuiHealth color={statusColor}>
           <EuiText data-test-subj="ruleStatus" size="xs">
-            {normalizedStatus ?? getEmptyTagValue()}
+            {statusText ?? getEmptyTagValue()}
           </EuiText>
         </EuiHealth>
       </EuiFlexItem>
-      {date != null && normalizedStatus != null && (
+      {date != null && status != null && (
         <>
           <EuiFlexItem grow={false}>
             <>{i18n.STATUS_AT}</>

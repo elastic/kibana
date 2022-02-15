@@ -30,9 +30,10 @@ function getReportStatus(src: Job): JobSummary {
     id: src.id,
     status: src.status,
     title: src.title,
-    jobtype: src.jobtype,
+    jobtype: src.prettyJobTypeName ?? src.jobtype,
     maxSizeReached: src.max_size_reached,
     csvContainsFormulas: src.csv_contains_formulas,
+    csvRows: src.csv_rows,
   };
 }
 

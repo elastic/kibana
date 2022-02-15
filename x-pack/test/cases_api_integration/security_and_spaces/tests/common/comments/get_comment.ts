@@ -10,16 +10,12 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
-  createCaseAction,
-  createSubCase,
   deleteAllCaseItems,
-  deleteCaseAction,
   createCase,
   createComment,
   getComment,
   superUserSpace1Auth,
 } from '../../../../common/lib/utils';
-import { CommentType } from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -64,26 +60,6 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: 'fake-id',
         commentId: 'fake-id',
         expectedHttpCode: 404,
-      });
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    describe.skip('sub cases', () => {
-      let actionID: string;
-      before(async () => {
-        actionID = await createCaseAction(supertest);
-      });
-      after(async () => {
-        await deleteCaseAction(supertest, actionID);
-      });
-      it('should get a sub case comment', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        const comment = await getComment({
-          supertest,
-          caseId: caseInfo.id,
-          commentId: caseInfo.comments![0].id,
-        });
-        expect(comment.type).to.be(CommentType.generatedAlert);
       });
     });
 

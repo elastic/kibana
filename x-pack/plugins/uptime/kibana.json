@@ -5,6 +5,7 @@
   "optionalPlugins": ["cloud", "data", "fleet", "home", "ml"],
   "requiredPlugins": [
     "alerting",
+    "cases",
     "embeddable",
     "encryptedSavedObjects",
     "features",

@@ -83,7 +83,7 @@ describe('percentile(resp, panel, series)', () => {
 
     expect(results).toHaveLength(2);
 
-    expect(results[0]).toHaveProperty('id', 'test:10-90');
+    expect(results[0]).toHaveProperty('id', 'test╰┄►10-90');
     expect(results[0]).toHaveProperty('color', '#000028');
     expect(results[0]).toHaveProperty('label', 'Percentile of cpu');
     expect(results[0]).toHaveProperty('lines');
@@ -100,7 +100,7 @@ describe('percentile(resp, panel, series)', () => {
       [2, 1.2, 5.3],
     ]);
 
-    expect(results[1]).toHaveProperty('id', 'test:50');
+    expect(results[1]).toHaveProperty('id', 'test╰┄►50');
     expect(results[1]).toHaveProperty('color', 'rgb(255, 0, 0)');
     expect(results[1]).toHaveProperty('label', '(50) Percentile of cpu');
     expect(results[1]).toHaveProperty('stack', false);

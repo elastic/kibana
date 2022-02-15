@@ -7,29 +7,27 @@
  */
 
 import React from 'react';
-import { ReactWrapper, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { flattenHit } from 'src/plugins/data/common';
 import { ElasticSearchHit } from '../../types';
 
-jest.mock('../../../../kibana_react/public', () => ({
-  useUiSetting: () => true,
-  withKibana: (comp: ReactWrapper) => {
-    return comp;
-  },
-}));
-
-jest.mock('../../kibana_services', () => ({
-  getServices: () => ({
+jest.mock('../../utils/use_discover_services', () => {
+  const services = {
     uiSettings: {
-      get: jest.fn((key) => key === 'discover:maxDocFieldsDisplayed' && 200),
+      get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
     },
     fieldFormats: {
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
     },
-  }),
-}));
+  };
+  const originalModule = jest.requireActual('../../utils/use_discover_services');
+  return {
+    ...originalModule,
+    useDiscoverServices: () => services,
+  };
+});
 
 const rowsSource: ElasticSearchHit[] = [
   {
@@ -88,6 +86,50 @@ describe('Discover grid cell rendering', function () {
         rowIndex={0}
         columnId="bytes"
         isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+  });
+
+  it('renders bytes column correctly using _source when details is true', () => {
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsSource,
+      rowsSource.map(flatten),
+      false,
+      [],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="bytes"
+        isDetails={true}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+  });
+
+  it('renders bytes column correctly using fields when details is true', () => {
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFields,
+      rowsFields.map(flatten),
+      false,
+      [],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="bytes"
+        isDetails={true}
         isExpanded={false}
         isExpandable={true}
         setCellProps={jest.fn()}
@@ -514,13 +556,16 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <span>
-        {
-        "object.value": [
-          100
-        ]
-      }
-      </span>
+      <JsonCodeEditor
+        json={
+          Object {
+            "object.value": Array [
+              100,
+            ],
+          }
+        }
+        width={370}
+      />
     `);
   });
 
@@ -634,9 +679,15 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <Fragment>
-        .gz
-      </Fragment>
+      <span
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": Array [
+              ".gz",
+            ],
+          }
+        }
+      />
     `);
 
     const componentWithDetails = shallow(
@@ -650,13 +701,14 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(componentWithDetails).toMatchInlineSnapshot(`
-      <JsonCodeEditor
-        json={
-          Array [
-            ".gz",
-          ]
+      <span
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": Array [
+              ".gz",
+            ],
+          }
         }
-        width={370}
       />
     `);
   });

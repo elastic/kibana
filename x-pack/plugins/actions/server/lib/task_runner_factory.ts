@@ -86,7 +86,7 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, params, apiKey, relatedSavedObjects },
+          attributes: { actionId, params, apiKey, executionId, relatedSavedObjects },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -114,6 +114,7 @@ export class TaskRunnerFactory {
             request,
             ...getSourceFromReferences(references),
             taskInfo,
+            executionId,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
@@ -178,7 +179,7 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, apiKey, relatedSavedObjects },
+          attributes: { actionId, apiKey, executionId, relatedSavedObjects },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -193,6 +194,7 @@ export class TaskRunnerFactory {
         await actionExecutor.logCancellation({
           actionId,
           request,
+          executionId,
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
           ...getSourceFromReferences(references),
         });

@@ -62,6 +62,7 @@ Object {
       "type": "datatable",
     },
     "visParams": Object {
+      "ariaLabel": undefined,
       "bucket": Object {
         "accessor": 1,
       },
@@ -110,6 +111,7 @@ Object {
       "type": "datatable",
     },
     "visParams": Object {
+      "ariaLabel": undefined,
       "bucket": Object {
         "accessor": Object {
           "id": "country",

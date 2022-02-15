@@ -6,7 +6,17 @@
  */
 import { Page } from '@elastic/synthetics';
 
-export function loginPageProvider({ page }: { page: Page; kibanaUrl: string }) {
+export function loginPageProvider({
+  page,
+  isRemote = false,
+  username = 'elastic',
+  password = 'changeme',
+}: {
+  page: Page;
+  isRemote?: boolean;
+  username?: string;
+  password?: string;
+}) {
   return {
     async waitForLoadingToFinish() {
       while (true) {
@@ -14,11 +24,14 @@ export function loginPageProvider({ page }: { page: Page; kibanaUrl: string }) {
         await page.waitForTimeout(5 * 1000);
       }
     },
-    async loginToKibana() {
-      await page.fill('[data-test-subj=loginUsername]', 'elastic', {
+    async loginToKibana(usernameT?: string, passwordT?: string) {
+      if (isRemote) {
+        await page.click('text="Log in with Elasticsearch"');
+      }
+      await page.fill('[data-test-subj=loginUsername]', usernameT ?? username, {
         timeout: 60 * 1000,
       });
-      await page.fill('[data-test-subj=loginPassword]', 'changeme');
+      await page.fill('[data-test-subj=loginPassword]', passwordT ?? password);
 
       await page.click('[data-test-subj=loginSubmit]');
 

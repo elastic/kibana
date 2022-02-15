@@ -351,6 +351,8 @@ a configuration option for changing the tooltip position and padding:
 *Vega* can load data from any URL. To enable, set `vis_type_vega.enableExternalUrls: true` in `kibana.yml`,
 then restart {kib}.
 
+You can make the current time range part of the external as a millisecond timestamp by using the placeholders `%timefilter_min%` and `%timefilter_max%`, e.g. `http://example.com?min=%timefilter_min%`.
+
 [float]
 [[vega-inspector]]
 ====== Vega Inspector
@@ -427,8 +429,9 @@ To keep signal values set `restoreSignalValuesOnRefresh: true` in the Vega confi
 /**
   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
   * @param {string} [index] as defined in Kibana, or default if missing
+  * @param {string} Custom label of the filter shown in the filter bar
   */
-kibanaAddFilter(query, index)
+kibanaAddFilter(query, index, alias)
 
 /**
   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor

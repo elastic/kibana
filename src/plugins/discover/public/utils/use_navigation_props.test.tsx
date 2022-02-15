@@ -17,8 +17,7 @@ import {
 } from './use_navigation_props';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { setServices } from '../kibana_services';
-import { DiscoverServices } from '../build_services';
+import { KibanaContextProvider } from '../../../kibana_react/public';
 
 const filterManager = createFilterManagerMock();
 const defaultProps = {
@@ -45,16 +44,17 @@ const getContextRoute = () => {
   return `/context/${defaultProps.indexPatternId}/${defaultProps.rowId}`;
 };
 
-const render = () => {
+const render = (withRouter = true, props?: Partial<UseNavigationProps>) => {
   const history = createMemoryHistory<HistoryState>({
     initialEntries: ['/' + getSearch()],
   });
-  setServices({ history: () => history } as unknown as DiscoverServices);
   const wrapper = ({ children }: { children: ReactElement }) => (
-    <Router history={history}>{children}</Router>
+    <KibanaContextProvider services={{ history: () => history }}>
+      {withRouter ? <Router history={history}>{children}</Router> : children}
+    </KibanaContextProvider>
   );
   return {
-    result: renderHook(() => useNavigationProps(defaultProps), { wrapper }).result,
+    result: renderHook(() => useNavigationProps({ ...defaultProps, ...props }), { wrapper }).result,
     history,
   };
 };
@@ -81,12 +81,7 @@ describe('useNavigationProps', () => {
   });
 
   test('should create valid links to the context and single doc pages from embeddable', () => {
-    const { result } = renderHook(() =>
-      useNavigationProps({
-        ...defaultProps,
-        addBasePath: (val: string) => `${basePathPrefix}${val}`,
-      })
-    );
+    const { result } = render(false, { addBasePath: (val: string) => `${basePathPrefix}${val}` });
 
     expect(result.current.singleDocProps.href!).toEqual(
       `${basePathPrefix}/app/discover#${getSingeDocRoute()}?id=${defaultProps.rowId}`

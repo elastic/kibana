@@ -60,13 +60,15 @@ export function ServiceOverviewDependenciesTable({
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
-        params: {
-          path: { serviceName },
-          query: { start, end, environment, numBuckets: 20, offset },
-        },
-      });
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/dependencies',
+        {
+          params: {
+            path: { serviceName },
+            query: { start, end, environment, numBuckets: 20, offset },
+          },
+        }
+      );
     },
     [start, end, serviceName, environment, offset]
   );

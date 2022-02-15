@@ -58,7 +58,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
     if (wasDeleted) {
       toasts.addSuccess(
         i18n.translate('xpack.securitySolution.eventFilters.deletionDialog.deleteSuccess', {
-          defaultMessage: '"{name}" has been removed from the Event Filters list.',
+          defaultMessage: '"{name}" has been removed from the event filters list.',
           values: { name: eventFilter?.name },
         })
       );
@@ -73,7 +73,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
       toasts.addDanger(
         i18n.translate('xpack.securitySolution.eventFilters.deletionDialog.deleteFailure', {
           defaultMessage:
-            'Unable to remove "{name}" from the Event Filters list. Reason: {message}',
+            'Unable to remove "{name}" from the event filters list. Reason: {message}',
           values: { name: eventFilter?.name, message: deleteError.message },
         })
       );

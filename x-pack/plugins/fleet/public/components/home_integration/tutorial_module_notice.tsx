@@ -11,13 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, EuiLink, EuiSpacer, EuiIcon } from '@elastic/eui';
 import type { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
 
-import { useGetPackages, useLink, useCapabilities } from '../../hooks';
+import { useGetPackages, useLink, useStartServices } from '../../hooks';
 import { pkgKeyFromPackageInfo } from '../../services';
 import { FLEET_APM_PACKAGE } from '../../../common/constants';
 
 const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {
   const { getHref } = useLink();
-  const { show: hasIngestManager } = useCapabilities();
+  const { application } = useStartServices();
+  const hasIntegrationsPermissions = application.capabilities.navLinks.integrations;
   const { data: packagesData, isLoading } = useGetPackages();
 
   const pkgInfo =
@@ -25,7 +26,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
     packagesData?.response &&
     packagesData.response.find((pkg) => pkg.name === moduleName && pkg.name !== FLEET_APM_PACKAGE); // APM needs special handling
 
-  if (hasIngestManager && pkgInfo) {
+  if (hasIntegrationsPermissions && pkgInfo) {
     return (
       <>
         <EuiSpacer />

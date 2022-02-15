@@ -9,11 +9,15 @@ import { EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
@@ -84,10 +88,13 @@ export function getColumns({
         const previousPeriodTimeseries =
           errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]
             ?.timeseries;
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
 
         return (
           <SparkPlot
-            color="euiColorVis7"
+            color={currentPeriodColor}
             series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
@@ -101,6 +108,7 @@ export function getColumns({
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimeseries : undefined
             }
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },

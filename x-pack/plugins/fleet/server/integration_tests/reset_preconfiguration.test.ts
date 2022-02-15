@@ -7,17 +7,29 @@
 
 import Path from 'path';
 
+import { adminTestUser } from '@kbn/test';
+
 import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+import type { HttpMethod } from 'src/core/test_helpers/kbn_server';
 
 import type { AgentPolicySOAttributes } from '../types';
+
+import { useDockerRegistry } from './docker_registry_helper';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 type Root = ReturnType<typeof kbnTestServer.createRoot>;
 
+function getSupertestWithAdminUser(root: Root, method: HttpMethod, path: string) {
+  const testUserCredentials = Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`);
+  return kbnTestServer
+    .getSupertest(root, method, path)
+    .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);
+}
+
 const waitForFleetSetup = async (root: Root) => {
   const isFleetSetupRunning = async () => {
-    const statusApi = kbnTestServer.getSupertest(root, 'get', '/api/status');
+    const statusApi = getSupertestWithAdminUser(root, 'get', '/api/status');
     const resp = await statusApi.send();
     const fleetStatus = resp.body?.status?.plugins?.fleet;
     if (fleetStatus?.meta?.error) {
@@ -32,9 +44,11 @@ const waitForFleetSetup = async (root: Root) => {
   }
 };
 
-describe('Fleet preconfiguration rest', () => {
+describe('Fleet preconfiguration reset', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
+
+  const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
     const { startES } = kbnTestServer.createTestServers({
@@ -53,6 +67,13 @@ describe('Fleet preconfiguration rest', () => {
         {
           xpack: {
             fleet: {
+              registryUrl,
+              packages: [
+                {
+                  name: 'fleet_server',
+                  version: 'latest',
+                },
+              ],
               // Preconfigure two policies test-12345 and test-456789
               agentPolicies: [
                 {
@@ -181,12 +202,12 @@ describe('Fleet preconfiguration rest', () => {
 
   describe('Reset all policy', () => {
     it('Works and reset all preconfigured policies', async () => {
-      const resetAPI = kbnTestServer.getSupertest(
+      const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').send();
+      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -208,8 +229,7 @@ describe('Fleet preconfiguration rest', () => {
     });
   });
 
-  // SKIP: https://github.com/elastic/kibana/issues/123528
-  describe.skip('Reset one preconfigured policy', () => {
+  describe('Reset one preconfigured policy', () => {
     const POLICY_ID = 'test-12345';
 
     it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {
@@ -224,12 +244,12 @@ describe('Fleet preconfiguration rest', () => {
 
       const secondAgentPoliciesUpdatedAt = oldAgentPolicies.saved_objects[0].updated_at;
 
-      const resetAPI = kbnTestServer.getSupertest(
+      const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').send();
+      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -260,12 +280,12 @@ describe('Fleet preconfiguration rest', () => {
         package_policies: [],
       });
 
-      const resetAPI = kbnTestServer.getSupertest(
+      const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').send();
+      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
 
       const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
         type: 'ingest-agent-policies',

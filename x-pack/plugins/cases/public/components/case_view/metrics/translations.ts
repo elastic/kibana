@@ -66,5 +66,5 @@ export const CASE_REOPENED = i18n.translate('xpack.cases.caseView.metrics.lifesp
 });
 
 export const CASE_REOPENED_ON = i18n.translate('xpack.cases.caseView.metrics.lifespan.reopenedOn', {
-  defaultMessage: 'Reopened on ',
+  defaultMessage: 'Reopened ',
 });

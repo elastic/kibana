@@ -710,21 +710,17 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     const zipUrl = getByRole('textbox', { name: 'Zip URL' }) as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(zipUrl, { target: { value: '' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
-    fireEvent.change(timeout, { target: { value: '-1' } });
 
     await waitFor(() => {
       const hostError = getByText('Zip URL is required');
       const monitorIntervalError = getByText('Monitor interval is required');
-      const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
-      expect(timeoutError).toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: false,
@@ -735,12 +731,10 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     // resolve errors
     fireEvent.change(zipUrl, { target: { value: 'http://github.com/tests.zip' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } });
-    fireEvent.change(timeout, { target: { value: '1' } });
 
     await waitFor(() => {
       expect(queryByText('Zip URL is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
-      expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: true,

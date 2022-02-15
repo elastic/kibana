@@ -13,7 +13,6 @@ import {
   CaseExternalServiceBasic,
   CaseFullExternalService,
   CaseStatuses,
-  CaseType,
   ConnectorTypes,
   NONE_CONNECTOR_ID,
 } from '../../common/api';
@@ -110,7 +109,6 @@ export const basicCaseFields = {
   title: 'Super Bad Security Issue',
   status: CaseStatuses.open,
   tags: ['defacement'],
-  type: CaseType.individual,
   updated_at: '2019-11-25T21:54:48.952Z',
   updated_by: {
     full_name: 'elastic',

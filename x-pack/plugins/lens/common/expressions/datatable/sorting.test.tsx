@@ -24,7 +24,7 @@ function testSorting({
   input: unknown[];
   output: unknown[];
   direction: 'asc' | 'desc';
-  type: DatatableColumnType | 'range';
+  type: DatatableColumnType | 'range' | 'version';
   keepLast?: boolean; // special flag to handle values that should always be last no matter the direction
   reverseOutput?: boolean;
 }) {
@@ -101,6 +101,37 @@ describe('Data sorting criteria', () => {
         output: [now, now - 150000, 0, null, undefined, Number.NaN],
         direction: 'desc',
         type: 'number',
+        reverseOutput: false,
+      });
+    });
+  });
+
+  describe('Version sorting', () => {
+    for (const direction of ['asc', 'desc'] as const) {
+      it(`should provide the version criteria for terms values (${direction})`, () => {
+        testSorting({
+          input: ['1.21.0', '1.1.0', '1.112.0', '1.0.0'],
+          output: ['1.0.0', '1.1.0', '1.21.0', '1.112.0'],
+          direction,
+          type: 'version',
+        });
+      });
+    }
+
+    it('should sort non-version stuff to the end', () => {
+      testSorting({
+        input: ['1.21.0', undefined, '1.1.0', null, '1.112.0', '__other__', '1.0.0'],
+        output: ['1.0.0', '1.1.0', '1.21.0', '1.112.0', undefined, null, '__other__'],
+        direction: 'asc',
+        type: 'version',
+        reverseOutput: false,
+      });
+
+      testSorting({
+        input: ['1.21.0', undefined, '1.1.0', null, '1.112.0', '__other__', '1.0.0'],
+        output: ['1.112.0', '1.21.0', '1.1.0', '1.0.0', undefined, null, '__other__'],
+        direction: 'desc',
+        type: 'version',
         reverseOutput: false,
       });
     });

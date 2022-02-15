@@ -6,10 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../common/utils/formatters';
 import { APMChartSpec, Coordinate } from '../../typings/timeseries';
-import { APIReturnType } from '../services/rest/createCallApmApi';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../components/shared/charts/helper/get_timeseries_color';
+import { APIReturnType } from '../services/rest/create_call_apm_api';
 
 export type LatencyChartsResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
@@ -21,11 +24,9 @@ export interface LatencyChartData {
 
 export function getLatencyChartSelector({
   latencyChart,
-  theme,
   latencyAggregationType,
 }: {
   latencyChart?: LatencyChartsResponse;
-  theme: EuiTheme;
   latencyAggregationType?: string;
 }): Partial<LatencyChartData> {
   if (
@@ -37,27 +38,35 @@ export function getLatencyChartSelector({
   return {
     currentPeriod: getLatencyTimeseries({
       latencyChart: latencyChart.currentPeriod,
-      theme,
       latencyAggregationType,
     }),
     previousPeriod: getPreviousPeriodTimeseries({
       previousPeriod: latencyChart.previousPeriod,
-      theme,
+      latencyAggregationType,
     }),
   };
 }
 
 function getPreviousPeriodTimeseries({
   previousPeriod,
-  theme,
+  latencyAggregationType,
 }: {
   previousPeriod: LatencyChartsResponse['previousPeriod'];
-  theme: EuiTheme;
+  latencyAggregationType: string;
 }) {
+  let chartType = ChartType.LATENCY_AVG;
+  if (latencyAggregationType === 'p95') {
+    chartType = ChartType.LATENCY_P95;
+  } else if (latencyAggregationType === 'p99') {
+    chartType = ChartType.LATENCY_P99;
+  }
+
+  const { previousPeriodColor } = getTimeSeriesColor(chartType);
+
   return {
     data: previousPeriod.latencyTimeseries ?? [],
     type: 'area',
-    color: theme.eui.euiColorMediumShade,
+    color: previousPeriodColor,
     title: i18n.translate(
       'xpack.apm.serviceOverview.latencyChartTitle.previousPeriodLabel',
       { defaultMessage: 'Previous period' }
@@ -67,11 +76,9 @@ function getPreviousPeriodTimeseries({
 
 function getLatencyTimeseries({
   latencyChart,
-  theme,
   latencyAggregationType,
 }: {
   latencyChart: LatencyChartsResponse['currentPeriod'];
-  theme: EuiTheme;
   latencyAggregationType: string;
 }) {
   const { overallAvgDuration } = latencyChart;
@@ -79,6 +86,7 @@ function getLatencyTimeseries({
 
   switch (latencyAggregationType) {
     case 'avg': {
+      const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
       return {
         title: i18n.translate(
           'xpack.apm.transactions.latency.chart.averageLabel',
@@ -87,10 +95,11 @@ function getLatencyTimeseries({
         data: latencyTimeseries,
         legendValue: asDuration(overallAvgDuration),
         type: 'linemark',
-        color: theme.eui.euiColorVis1,
+        color: currentPeriodColor,
       };
     }
     case 'p95': {
+      const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_P95);
       return {
         title: i18n.translate(
           'xpack.apm.transactions.latency.chart.95thPercentileLabel',
@@ -99,10 +108,11 @@ function getLatencyTimeseries({
         titleShort: '95th',
         data: latencyTimeseries,
         type: 'linemark',
-        color: theme.eui.euiColorVis5,
+        color: currentPeriodColor,
       };
     }
     case 'p99': {
+      const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_P99);
       return {
         title: i18n.translate(
           'xpack.apm.transactions.latency.chart.99thPercentileLabel',
@@ -111,7 +121,7 @@ function getLatencyTimeseries({
         titleShort: '99th',
         data: latencyTimeseries,
         type: 'linemark',
-        color: theme.eui.euiColorVis7,
+        color: currentPeriodColor,
       };
     }
   }

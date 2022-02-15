@@ -91,7 +91,7 @@ const baseColumnArgs: {
 
     // Private
     operationType: 'count',
-    sourceField: 'Records',
+    sourceField: '___records___',
   },
   indexPattern,
   layer: {

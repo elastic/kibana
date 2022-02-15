@@ -61,11 +61,22 @@ describe('perform_bulk_action_schema', () => {
       const payload = {
         query: 'name: test',
         action: BulkAction.enable,
-        ids: ['id'],
+        mock: ['id'],
       };
       const message = retrieveValidationMessage(payload);
 
-      expect(getPaths(left(message.errors))).toEqual(['invalid keys "ids,["id"]"']);
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "mock,["id"]"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('invalid request: wrong type for ids', () => {
+      const payload = {
+        ids: 'mock',
+        action: BulkAction.enable,
+      };
+      const message = retrieveValidationMessage(payload);
+
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "mock" supplied to "ids"']);
       expect(message.schema).toEqual({});
     });
   });

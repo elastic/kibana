@@ -24,6 +24,10 @@ export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => 
 export const useKibana = jest.fn().mockReturnValue({
   services: {
     ...mockStartServicesMock,
+    uiSettings: {
+      get: jest.fn(),
+      set: jest.fn(),
+    },
     data: {
       ...mockStartServicesMock.data,
       search: {

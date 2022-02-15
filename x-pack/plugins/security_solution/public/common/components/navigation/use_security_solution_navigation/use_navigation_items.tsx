@@ -86,7 +86,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
               items: [
                 navTabs.hosts,
                 navTabs.network,
-                ...(navTabs.ueba != null ? [navTabs.ueba] : []),
+                ...(navTabs.users != null ? [navTabs.users] : []),
               ],
             },
             {
@@ -103,6 +103,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs.trusted_apps,
                 navTabs.event_filters,
                 ...(canSeeHostIsolationExceptions ? [navTabs.host_isolation_exceptions] : []),
+                navTabs.blocklist,
               ],
             },
           ]

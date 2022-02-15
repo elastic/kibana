@@ -21,7 +21,7 @@ import type {
   LatencyCorrelationsResponse,
 } from '../../../../common/correlations/latency_correlations/types';
 
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 import {
   getInitialResponse,
@@ -81,16 +81,18 @@ export function useLatencyCorrelations() {
       };
 
       // Initial call to fetch the overall distribution for the log-log plot.
-      const { overallHistogram, percentileThresholdValue } = await callApmApi({
-        endpoint: 'POST /internal/apm/latency/overall_distribution',
-        signal: abortCtrl.current.signal,
-        params: {
-          body: {
-            ...fetchParams,
-            percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+      const { overallHistogram, percentileThresholdValue } = await callApmApi(
+        'POST /internal/apm/latency/overall_distribution',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+            },
           },
-        },
-      });
+        }
+      );
       responseUpdate.overallHistogram = overallHistogram;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
@@ -104,13 +106,15 @@ export function useLatencyCorrelations() {
       });
       setResponse.flush();
 
-      const { fieldCandidates } = await callApmApi({
-        endpoint: 'GET /internal/apm/correlations/field_candidates',
-        signal: abortCtrl.current.signal,
-        params: {
-          query: fetchParams,
-        },
-      });
+      const { fieldCandidates } = await callApmApi(
+        'GET /internal/apm/correlations/field_candidates',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            query: fetchParams,
+          },
+        }
+      );
 
       if (abortCtrl.current.signal.aborted) {
         return;
@@ -128,16 +132,18 @@ export function useLatencyCorrelations() {
       const fieldCandidateChunks = chunk(fieldCandidates, chunkSize);
 
       for (const fieldCandidateChunk of fieldCandidateChunks) {
-        const fieldValuePairChunkResponse = await callApmApi({
-          endpoint: 'POST /internal/apm/correlations/field_value_pairs',
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              fieldCandidates: fieldCandidateChunk,
+        const fieldValuePairChunkResponse = await callApmApi(
+          'POST /internal/apm/correlations/field_value_pairs',
+          {
+            signal: abortCtrl.current.signal,
+            params: {
+              body: {
+                ...fetchParams,
+                fieldCandidates: fieldCandidateChunk,
+              },
             },
-          },
-        });
+          }
+        );
 
         if (fieldValuePairChunkResponse.fieldValuePairs.length > 0) {
           fieldValuePairs.push(...fieldValuePairChunkResponse.fieldValuePairs);
@@ -172,13 +178,15 @@ export function useLatencyCorrelations() {
       );
 
       for (const fieldValuePairChunk of fieldValuePairChunks) {
-        const significantCorrelations = await callApmApi({
-          endpoint: 'POST /internal/apm/correlations/significant_correlations',
-          signal: abortCtrl.current.signal,
-          params: {
-            body: { ...fetchParams, fieldValuePairs: fieldValuePairChunk },
-          },
-        });
+        const significantCorrelations = await callApmApi(
+          'POST /internal/apm/correlations/significant_correlations',
+          {
+            signal: abortCtrl.current.signal,
+            params: {
+              body: { ...fetchParams, fieldValuePairs: fieldValuePairChunk },
+            },
+          }
+        );
 
         if (significantCorrelations.latencyCorrelations.length > 0) {
           significantCorrelations.latencyCorrelations.forEach((d) => {
@@ -207,16 +215,18 @@ export function useLatencyCorrelations() {
 
       setResponse.flush();
 
-      const { stats } = await callApmApi({
-        endpoint: 'POST /internal/apm/correlations/field_stats',
-        signal: abortCtrl.current.signal,
-        params: {
-          body: {
-            ...fetchParams,
-            fieldsToSample: [...fieldsToSample],
+      const { stats } = await callApmApi(
+        'POST /internal/apm/correlations/field_stats',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              fieldsToSample: [...fieldsToSample],
+            },
           },
-        },
-      });
+        }
+      );
 
       responseUpdate.fieldStats = stats;
       setResponse({

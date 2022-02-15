@@ -56,10 +56,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const {
-    services: { http, docLinks, data, share, uiSettings, application },
+    services: { http, docLinks, dataViews, share, uiSettings, application },
   } = useKibana<CoreStart & AppPluginStartDependencies>();
   const addBasePath = http.basePath.prepend;
-  const indexPatternService = data.indexPatterns;
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
   // Home does not have a locator implemented, so hard-code it here.
@@ -111,14 +110,14 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
-      const hasUserIndexPattern = await indexPatternService.hasUserDataView().catch(() => true);
+      const hasUserIndexPattern = await dataViews.hasUserDataView().catch(() => true);
 
       setNewKibanaInstance(!hasUserIndexPattern);
       setIsLoading(false);
     };
 
     fetchIsNewKibanaInstance();
-  }, [indexPatternService]);
+  }, [dataViews]);
 
   const renderAppCard = (appId: string) => {
     const app = kibanaApps.find(({ id }) => id === appId);

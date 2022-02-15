@@ -8,7 +8,6 @@
 import { IScopedClusterClient } from 'kibana/server';
 import RE2 from 're2';
 import { mlLog } from '../../../lib/log';
-import { Job } from '../../../../common/types/anomaly_detection_jobs';
 
 const GROUP = 'metrics';
 const MODULE_PREFIX = 'kibana-metrics-ui';
@@ -29,7 +28,7 @@ export async function metricsJobsSpaces({
   asInternalUser,
 }: IScopedClusterClient): Promise<Array<{ id: string; space: string }>> {
   try {
-    const { body } = await asInternalUser.ml.getJobs<{ jobs: Job[] }>({
+    const body = await asInternalUser.ml.getJobs({
       job_id: GROUP,
     });
     if (body.jobs.length === 0) {

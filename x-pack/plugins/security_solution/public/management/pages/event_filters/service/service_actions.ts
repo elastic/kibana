@@ -16,7 +16,7 @@ import { HttpStart } from 'kibana/public';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
-  EVENT_FILTER_LIST,
+  EVENT_FILTER_LIST_DEFINITION,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
 } from '../constants';
 import { Immutable } from '../../../../../common/endpoint/types';
@@ -24,7 +24,7 @@ import { Immutable } from '../../../../../common/endpoint/types';
 async function createEventFilterList(http: HttpStart): Promise<void> {
   try {
     await http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-      body: JSON.stringify(EVENT_FILTER_LIST),
+      body: JSON.stringify(EVENT_FILTER_LIST_DEFINITION),
     });
   } catch (err) {
     // Ignore 409 errors. List already created
@@ -111,10 +111,17 @@ export async function deleteOne(http: HttpStart, id: string): Promise<ExceptionL
   });
 }
 
-export async function getSummary(http: HttpStart): Promise<ExceptionListSummarySchema> {
+export async function getSummary({
+  http,
+  filter,
+}: {
+  http: HttpStart;
+  filter?: string;
+}): Promise<ExceptionListSummarySchema> {
   await ensureEventFiltersListExists(http);
   return http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
     query: {
+      filter,
       list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
       namespace_type: 'agnostic',
     },

@@ -102,7 +102,9 @@ export const MetricDistributionChart: FC<Props> = ({
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={chartData.length > 0 ? chartData : [{ x: 0, y: 0 }]}
+          data={
+            chartData.length > 0 ? chartData : [{ x: 0, y: 0, dataMin: 0, dataMax: 0, percent: 0 }]
+          }
           curve={CurveType.CURVE_STEP_AFTER}
         />
       </Chart>

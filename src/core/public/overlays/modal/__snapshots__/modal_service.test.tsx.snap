@@ -19,6 +19,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -43,6 +44,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -103,6 +105,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -125,6 +128,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -152,6 +156,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -172,6 +177,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -232,6 +238,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -254,6 +261,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -279,6 +287,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -303,6 +312,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -323,6 +333,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -346,6 +357,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -396,6 +408,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -418,6 +431,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -443,6 +457,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -467,6 +482,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -487,6 +503,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -510,6 +527,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -565,6 +583,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -587,6 +606,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -612,6 +632,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -636,6 +657,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -656,6 +678,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -679,6 +702,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -729,6 +753,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -751,6 +776,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -776,6 +802,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -800,6 +827,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -820,6 +848,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -843,6 +872,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -932,6 +962,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -956,6 +987,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -1006,6 +1038,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -1030,6 +1063,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -1085,6 +1119,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -1109,6 +1144,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,
@@ -1159,6 +1195,7 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
                         "_isScalar": false,
@@ -1183,6 +1220,7 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
                       "_isScalar": false,

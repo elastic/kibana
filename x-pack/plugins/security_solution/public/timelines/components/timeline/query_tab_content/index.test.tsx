@@ -52,6 +52,9 @@ jest.mock('../../../../common/lib/kibana', () => {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
       services: {
+        theme: {
+          theme$: {},
+        },
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),

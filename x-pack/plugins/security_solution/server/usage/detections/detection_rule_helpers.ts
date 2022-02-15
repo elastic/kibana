@@ -374,8 +374,8 @@ export const getDetectionRuleMetrics = async (
   };
 
   try {
-    const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
-    const { body: detectionAlertsResp } = (await esClient.search({
+    const ruleResults = await esClient.search<RuleSearchResult>(ruleSearchOptions);
+    const detectionAlertsResp = (await esClient.search({
       index: `${signalsIndex}*`,
       size: MAX_RESULTS_WINDOW,
       body: {
@@ -399,7 +399,7 @@ export const getDetectionRuleMetrics = async (
           },
         },
       },
-    })) as { body: AlertsAggregationResponse };
+    })) as AlertsAggregationResponse;
 
     const cases = await savedObjectClient.find<CasesSavedObject>({
       type: CASE_COMMENT_SAVED_OBJECT,
@@ -434,12 +434,13 @@ export const getDetectionRuleMetrics = async (
 
     const casesCache = cases.saved_objects.reduce((cache, { attributes: casesObject }) => {
       const ruleId = casesObject.rule.id;
-
-      const cacheCount = cache.get(ruleId);
-      if (cacheCount === undefined) {
-        cache.set(ruleId, 1);
-      } else {
-        cache.set(ruleId, cacheCount + 1);
+      if (ruleId != null) {
+        const cacheCount = cache.get(ruleId);
+        if (cacheCount === undefined) {
+          cache.set(ruleId, 1);
+        } else {
+          cache.set(ruleId, cacheCount + 1);
+        }
       }
       return cache;
     }, new Map<string, number>());

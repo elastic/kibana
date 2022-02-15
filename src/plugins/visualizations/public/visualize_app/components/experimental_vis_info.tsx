@@ -15,7 +15,9 @@ export const InfoComponent = () => {
     <>
       <FormattedMessage
         id="visualizations.experimentalVisInfoText"
-        defaultMessage="This visualization is experimental and is not subject to the support SLA of official GA features.
+        defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release.
+          Elastic will take a best effort approach to fix any issues, but features in technical preview
+          are not subject to the support SLA of official GA features.
           For feedback, please create an issue in {githubLink}."
         values={{
           githubLink: (

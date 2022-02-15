@@ -6,7 +6,6 @@
  */
 
 import type { TransformConfigSchema } from './transforms/types';
-import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 
 /**
  * as const
@@ -64,7 +63,6 @@ export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*' as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
-export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
@@ -76,7 +74,7 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threat.indicator' as const;
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments' as const;
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
-export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"' as const;
+export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 
 export enum SecurityPageName {
   administration = 'administration',
@@ -86,6 +84,7 @@ export enum SecurityPageName {
    * Warning: Computed values are not permitted in an enum with string valued members
    * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
    */
+  blocklist = 'blocklist',
   case = 'cases',
   caseConfigure = 'cases_configure',
   caseCreate = 'cases_create',
@@ -100,6 +99,7 @@ export enum SecurityPageName {
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
+  users = 'users',
   investigate = 'investigate',
   network = 'network',
   networkAnomalies = 'network-anomalies',
@@ -113,7 +113,6 @@ export enum SecurityPageName {
   policies = 'policies',
   rules = 'rules',
   trustedApps = 'trusted_apps',
-  ueba = 'ueba',
   uncommonProcesses = 'uncommon_processes',
 }
 
@@ -125,7 +124,7 @@ export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
-export const UEBA_PATH = '/ueba' as const;
+export const USERS_PATH = '/users' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
@@ -134,6 +133,7 @@ export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
+export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
@@ -143,7 +143,7 @@ export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}` as const;
 export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}` as const;
 
 export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}` as const;
-export const APP_UEBA_PATH = `${APP_PATH}${UEBA_PATH}` as const;
+export const APP_USERS_PATH = `${APP_PATH}${USERS_PATH}` as const;
 export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}` as const;
 export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
@@ -153,6 +153,7 @@ export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}` as const;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as const;
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
+export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -164,11 +165,6 @@ export const DEFAULT_INDEX_PATTERN = [
   'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
-];
-
-export const DEFAULT_INDEX_PATTERN_EXPERIMENTAL = [
-  // TODO: Steph/ueba TEMP for testing UEBA data
-  'ml_host_risk_score_*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
@@ -269,6 +265,14 @@ export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
 export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 
+/**
+ * Telemetry detection endpoint for any previews requested of what data we are
+ * providing through UI/UX and for e2e tests.
+ *   curl http//localhost:5601/internal/security_solution/telemetry
+ * to see the contents
+ */
+export const SECURITY_TELEMETRY_URL = `/internal/security_solution/telemetry` as const;
+
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;
@@ -335,10 +339,6 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.teams',
   '.webhook',
 ];
-
-if (ENABLE_CASE_CONNECTOR) {
-  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
-}
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
@@ -407,3 +407,16 @@ export const WARNING_TRANSFORM_STATES = new Set([
 export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
+
+/**
+ * Max number of rules to display on UI in table, max number of rules that can be edited in a single bulk edit API request
+ * We limit number of rules in bulk edit API, because rulesClient doesn't support bulkGet of rules by ids.
+ * Given this limitation, current implementation fetches each rule separately through rulesClient.resolve method.
+ * As max number of rules displayed on a page is 100, max 100 rules can be bulk edited by passing their ids to API.
+ * We decided add this limit(number of ids less than 100) in bulk edit API as well, to prevent a huge number of single rule fetches
+ */
+export const RULES_TABLE_MAX_PAGE_SIZE = 100;
+export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
+
+export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
+  'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';

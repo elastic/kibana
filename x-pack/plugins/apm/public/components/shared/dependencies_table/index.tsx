@@ -27,6 +27,10 @@ import { ListMetric } from '../list_metric';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../charts/helper/get_timeseries_color';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,
@@ -82,14 +86,19 @@ export function DependenciesTable(props: Props) {
       }),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.LATENCY_AVG
+        );
+
         return (
           <ListMetric
             compact
-            color="euiColorVis1"
+            color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             series={currentStats.latency.timeseries}
             comparisonSeries={previousStats?.latency.timeseries}
             valueLabel={asMillisecondDuration(currentStats.latency.value)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -102,14 +111,19 @@ export function DependenciesTable(props: Props) {
       }),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.THROUGHPUT
+        );
+
         return (
           <ListMetric
             compact
-            color="euiColorVis0"
+            color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             series={currentStats.throughput.timeseries}
             comparisonSeries={previousStats?.throughput.timeseries}
             valueLabel={asTransactionRate(currentStats.throughput.value)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -122,14 +136,19 @@ export function DependenciesTable(props: Props) {
       }),
       align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
+
         return (
           <ListMetric
             compact
-            color="euiColorVis7"
+            color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
             series={currentStats.errorRate.timeseries}
             comparisonSeries={previousStats?.errorRate.timeseries}
             valueLabel={asPercent(currentStats.errorRate.value, 1)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },

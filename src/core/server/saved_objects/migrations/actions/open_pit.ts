@@ -40,6 +40,6 @@ export const openPit =
         index,
         keep_alive: pitKeepAlive,
       })
-      .then((response) => Either.right({ pitId: response.body.id }))
+      .then((response) => Either.right({ pitId: response.id }))
       .catch(catchRetryableEsClientErrors);
   };

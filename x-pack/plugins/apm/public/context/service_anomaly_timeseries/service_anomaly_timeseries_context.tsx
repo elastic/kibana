@@ -53,19 +53,21 @@ export function ServiceAnomalyTimeseriesContextProvider({
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/anomaly_charts',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              transactionType,
+            },
           },
-          query: {
-            start,
-            end,
-            transactionType,
-          },
-        },
-      });
+        }
+      );
     },
     [serviceName, canGetAnomalies, transactionType, start, end]
   );

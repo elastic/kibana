@@ -242,6 +242,7 @@ export class SecurityPlugin
     this.sessionManagementService.setup({ config, http: core.http, taskManager });
     this.authenticationService.setup({
       http: core.http,
+      elasticsearch: core.elasticsearch,
       config,
       license,
       buildNumber: this.initializerContext.env.packageInfo.buildNum,

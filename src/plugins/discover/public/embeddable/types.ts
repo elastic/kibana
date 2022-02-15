@@ -24,6 +24,7 @@ export interface SearchInput extends EmbeddableInput {
   hidePanelTitles?: boolean;
   columns?: string[];
   sort?: SortOrder[];
+  rowHeight?: number;
 }
 
 export interface SearchOutput extends EmbeddableOutput {

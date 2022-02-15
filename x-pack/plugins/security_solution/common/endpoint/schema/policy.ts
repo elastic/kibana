@@ -19,21 +19,3 @@ export const GetAgentPolicySummaryRequestSchema = {
     policy_id: schema.nullable(schema.string()),
   }),
 };
-
-const ListWithKuerySchema = schema.object({
-  page: schema.maybe(schema.number({ defaultValue: 1 })),
-  pageSize: schema.maybe(schema.number({ defaultValue: 20 })),
-  sort: schema.maybe(schema.string()),
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  showUpgradeable: schema.maybe(schema.boolean()),
-  kuery: schema.maybe(
-    schema.oneOf([
-      schema.string(),
-      schema.any(), // KueryNode
-    ])
-  ),
-});
-
-export const GetEndpointPackagePolicyRequestSchema = {
-  query: ListWithKuerySchema,
-};

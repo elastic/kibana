@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
+import { cloneDeep, get, omit, has, flow, forOwn, mapValues } from 'lodash';
+import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
+import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
+import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
-
-import { DEFAULT_QUERY_LANGUAGE, INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
+import {
+  DEFAULT_QUERY_LANGUAGE,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  SerializedSearchSourceFields,
+} from '../../../data/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
@@ -21,7 +26,9 @@ import {
   commonAddDropLastBucketIntoTSVBModel,
   commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
+  commonUpdatePieVisApi,
 } from './visualization_common_migrations';
+import { VisualizationSavedObjectAttributes } from '../../common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -1126,7 +1133,31 @@ export const removeMarkdownLessFromTSVB: SavedObjectMigrationFn<any, any> = (doc
   return doc;
 };
 
-export const visualizationSavedObjectTypeMigrations = {
+export const updatePieVisApi: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    const newVisState = commonUpdatePieVisApi(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  }
+
+  return doc;
+};
+
+const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
    * after it. The reason for that is, that this migration has been introduced once 7.0.0 was already
@@ -1181,4 +1212,42 @@ export const visualizationSavedObjectTypeMigrations = {
   ),
   '7.17.0': flow(addDropLastBucketIntoTSVBModel714Above),
   '8.0.0': flow(removeMarkdownLessFromTSVB),
+  '8.1.0': flow(updatePieVisApi),
 };
+
+/**
+ * This creates a migration map that applies search source migrations to legacy visualization SOs
+ */
+const getVisualizationSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
+  mapValues<MigrateFunctionsObject, MigrateFunction>(
+    searchSourceMigrations,
+    (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
+      (state) => {
+        const _state = state as unknown as { attributes: VisualizationSavedObjectAttributes };
+
+        const parsedSearchSourceJSON = _state.attributes.kibanaSavedObjectMeta.searchSourceJSON;
+
+        if (!parsedSearchSourceJSON) return _state;
+
+        return {
+          ..._state,
+          attributes: {
+            ..._state.attributes,
+            kibanaSavedObjectMeta: {
+              ..._state.attributes.kibanaSavedObjectMeta,
+              searchSourceJSON: JSON.stringify(migrate(JSON.parse(parsedSearchSourceJSON))),
+            },
+          },
+        };
+      }
+  );
+
+export const getAllMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+): SavedObjectMigrationMap =>
+  mergeSavedObjectMigrationMaps(
+    visualizationSavedObjectTypeMigrations,
+    getVisualizationSearchSourceMigrations(
+      searchSourceMigrations
+    ) as unknown as SavedObjectMigrationMap
+  );

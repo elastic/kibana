@@ -8,7 +8,7 @@
 import './agent_enrollment_flyout.test.mocks';
 
 import React from 'react';
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 
 import { coreMock } from 'src/core/public/mocks';
@@ -16,7 +16,13 @@ import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import type { AgentPolicy } from '../../../common';
-import { useGetSettings, sendGetFleetStatus, sendGetOneAgentPolicy } from '../../hooks/use_request';
+import {
+  useGetSettings,
+  sendGetFleetStatus,
+  sendGetOneAgentPolicy,
+  useGetAgents,
+  useGetAgentPolicies,
+} from '../../hooks/use_request';
 import { FleetStatusProvider, ConfigContext } from '../../hooks';
 
 import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
@@ -92,9 +98,17 @@ describe('<AgentEnrollmentFlyout />', () => {
       setPlatform: jest.fn(),
     });
 
+    (useGetAgents as jest.Mock).mockReturnValue({
+      data: { items: [{ policy_id: 'fleet-server-policy' }] },
+    });
+
+    (useGetAgentPolicies as jest.Mock).mockReturnValue?.({
+      data: { items: [{ id: 'fleet-server-policy' }] },
+    });
+
     await act(async () => {
       testBed = await setup({
-        agentPolicies: [],
+        agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
         onClose: jest.fn(),
       });
       testBed.component.update();
@@ -118,6 +132,7 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
+            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             agentPolicy: testAgentPolicy,
             onClose: jest.fn(),
           });
@@ -133,13 +148,32 @@ describe('<AgentEnrollmentFlyout />', () => {
       });
     });
 
+    describe('with a specific policy when no agentPolicies set', () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        await act(async () => {
+          testBed = await setup({
+            agentPolicy: testAgentPolicy,
+            onClose: jest.fn(),
+          });
+          testBed.component.update();
+        });
+      });
+
+      it('should not show fleet server instructions', () => {
+        const { exists } = testBed;
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
+        expect(AgentEnrollmentKeySelectionStep).toHaveBeenCalled();
+      });
+    });
+
     // Skipped due to implementation details in the step components. See https://github.com/elastic/kibana/issues/103894
     describe.skip('"View data" extension point', () => {
       it('shows the "View data" step when UI extension is provided', async () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
-            agentPolicies: [],
+            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             onClose: jest.fn(),
             viewDataStep: { title: 'View Data', children: <div /> },
           });
@@ -159,7 +193,7 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
-            agentPolicies: [],
+            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             onClose: jest.fn(),
             viewDataStep: undefined,
           });
@@ -190,6 +224,7 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
+            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             agentPolicy: testAgentPolicy,
             onClose: jest.fn(),
           });

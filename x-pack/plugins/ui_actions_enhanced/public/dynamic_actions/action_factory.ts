@@ -6,7 +6,10 @@
  */
 
 import type { UiComponent, CollectConfigProps } from 'src/plugins/kibana_utils/public';
-import type { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+import type {
+  MigrateFunctionsObject,
+  GetMigrationFunctionObjectFn,
+} from 'src/plugins/kibana_utils/common';
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
 import type {
   UiActionsPresentable as Presentable,
@@ -51,7 +54,7 @@ export class ActionFactory<
   public readonly ReactCollectConfig: React.FC<CollectConfigProps<Config, FactoryContext>>;
   public readonly createConfig: (context: FactoryContext) => Config;
   public readonly isConfigValid: (config: Config, context: FactoryContext) => boolean;
-  public readonly migrations: MigrateFunctionsObject;
+  public readonly migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
 
   constructor(
     protected readonly def: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>,

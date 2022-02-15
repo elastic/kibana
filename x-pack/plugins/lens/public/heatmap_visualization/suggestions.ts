@@ -48,15 +48,27 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     return [];
   }
 
+  if (metrics.length > 1) {
+    return [];
+  }
+
   const isSingleBucketDimension = groups.length === 1 && metrics.length === 0;
 
   /**
    * Hide for:
    * - reduced and reorder tables
    * - tables with just a single bucket dimension
+   * - tables with only date histogram
    */
+  const hasOnlyDatehistogramBuckets =
+    metrics.length === 1 &&
+    groups.length > 0 &&
+    groups.every((group) => group.operation.dataType === 'date');
   const hide =
-    table.changeType === 'reduced' || table.changeType === 'reorder' || isSingleBucketDimension;
+    table.changeType === 'reduced' ||
+    table.changeType === 'reorder' ||
+    isSingleBucketDimension ||
+    hasOnlyDatehistogramBuckets;
 
   const newState: HeatmapVisualizationState = {
     shape: CHART_SHAPES.HEATMAP,
@@ -70,8 +82,10 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     gridConfig: {
       type: HEATMAP_GRID_FUNCTION,
       isCellLabelVisible: false,
-      isYAxisLabelVisible: true,
-      isXAxisLabelVisible: true,
+      isYAxisLabelVisible: state?.gridConfig?.isYAxisLabelVisible ?? true,
+      isXAxisLabelVisible: state?.gridConfig?.isXAxisLabelVisible ?? true,
+      isYAxisTitleVisible: state?.gridConfig?.isYAxisTitleVisible ?? false,
+      isXAxisTitleVisible: state?.gridConfig?.isXAxisTitleVisible ?? false,
     },
   };
 
@@ -87,21 +101,24 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   newState.xAccessor = histogram[0]?.columnId || ordinal[0]?.columnId;
   newState.yAccessor = groups.find((g) => g.columnId !== newState.xAccessor)?.columnId;
 
-  if (newState.xAccessor) {
-    score += 0.3;
-  }
-  if (newState.yAccessor) {
-    score += 0.3;
+  const hasDatehistogram = groups.some((group) => group.operation.dataType === 'date');
+
+  if (!hasDatehistogram) {
+    if (newState.xAccessor) {
+      score += 0.3;
+    }
+    if (newState.yAccessor) {
+      score += 0.3;
+    }
   }
 
   return [
     {
       state: newState,
       title: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
-        defaultMessage: 'Heatmap',
+        defaultMessage: 'Heat map',
       }),
-      // Temp hide all suggestions while heatmap is in beta
-      hide: true || hide,
+      hide,
       previewIcon: 'empty',
       score: Number(score.toFixed(1)),
     },

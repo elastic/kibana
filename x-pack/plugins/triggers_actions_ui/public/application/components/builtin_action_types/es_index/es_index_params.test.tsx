@@ -6,12 +6,25 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '../../../../types';
+import { MockCodeEditor } from '../../../code_editor.mock';
+
+const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('../../../../common/lib/kibana');
+
+jest.mock(kibanaReactPath, () => {
+  const original = jest.requireActual(kibanaReactPath);
+  return {
+    ...original,
+    CodeEditor: (props: any) => {
+      return <MockCodeEditor {...props} />;
+    },
+  };
+});
 
 const actionConnector = {
   actionTypeId: '.index',

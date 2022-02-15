@@ -17,7 +17,8 @@ import {
   mergePaletteParams,
   remapStopsByNewInterval,
   reversePalette,
-  roundStopValues,
+  updateRangeType,
+  changeColorPalette,
 } from './utils';
 
 describe('applyPaletteParams', () => {
@@ -411,14 +412,6 @@ describe('isValidColor', () => {
   });
 });
 
-describe('roundStopValues', () => {
-  it('should round very long values', () => {
-    expect(roundStopValues([{ color: 'red', stop: 0.1515 }])).toEqual([
-      { color: 'red', stop: 0.15 },
-    ]);
-  });
-});
-
 describe('getStepValue', () => {
   it('should compute the next step based on the last 2 stops', () => {
     expect(
@@ -488,5 +481,312 @@ describe('getContrastColor', () => {
     expect(getContrastColor('#ffffff00', false)).toBe('#000000');
     expect(getContrastColor('rgba(255,255,255,0)', true)).toBe('#ffffff');
     expect(getContrastColor('rgba(255,255,255,0)', false)).toBe('#000000');
+  });
+});
+
+describe('updateRangeType', () => {
+  const paletteRegistry = chartPluginMock.createPaletteRegistry();
+  const colorRanges = [
+    {
+      start: 0,
+      end: 40,
+      color: 'green',
+    },
+    {
+      start: 40,
+      end: 80,
+      color: 'blue',
+    },
+    {
+      start: 80,
+      end: 100,
+      color: 'red',
+    },
+  ];
+  it('should correctly update palette params with new range type if continuity is none', () => {
+    const newPaletteParams = updateRangeType(
+      'number',
+      {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          continuity: 'none',
+          name: 'custom',
+          rangeType: 'percent',
+          rangeMax: 100,
+          rangeMin: 0,
+          colorStops: [
+            { color: 'green', stop: 0 },
+            { color: 'blue', stop: 40 },
+            { color: 'red', stop: 80 },
+          ],
+        },
+      },
+      { min: 0, max: 200 },
+      paletteRegistry,
+      colorRanges
+    );
+    expect(newPaletteParams).toEqual({
+      rangeType: 'number',
+      rangeMin: 0,
+      rangeMax: 200,
+      colorStops: [
+        {
+          color: 'green',
+          stop: 0,
+        },
+        {
+          color: 'blue',
+          stop: 80,
+        },
+        {
+          color: 'red',
+          stop: 160,
+        },
+      ],
+      stops: [
+        {
+          color: 'green',
+          stop: 80,
+        },
+        {
+          color: 'blue',
+          stop: 160,
+        },
+        {
+          color: 'red',
+          stop: 200,
+        },
+      ],
+    });
+  });
+
+  it('should correctly update palette params with new range type if continuity is all', () => {
+    const newPaletteParams = updateRangeType(
+      'number',
+      {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          continuity: 'all',
+          name: 'custom',
+          rangeType: 'percent',
+          rangeMax: 100,
+          rangeMin: 0,
+          colorStops: [
+            { color: 'green', stop: 0 },
+            { color: 'blue', stop: 40 },
+            { color: 'red', stop: 80 },
+          ],
+        },
+      },
+      { min: 0, max: 200 },
+      paletteRegistry,
+      colorRanges
+    );
+    expect(newPaletteParams).toEqual({
+      rangeType: 'number',
+      rangeMin: Number.NEGATIVE_INFINITY,
+      rangeMax: Number.POSITIVE_INFINITY,
+      colorStops: [
+        {
+          color: 'green',
+          stop: 0,
+        },
+        {
+          color: 'blue',
+          stop: 80,
+        },
+        {
+          color: 'red',
+          stop: 160,
+        },
+      ],
+      stops: [
+        {
+          color: 'green',
+          stop: 80,
+        },
+        {
+          color: 'blue',
+          stop: 160,
+        },
+        {
+          color: 'red',
+          stop: 200,
+        },
+      ],
+    });
+  });
+
+  it('should correctly update palette params with new range type if continuity is below', () => {
+    const newPaletteParams = updateRangeType(
+      'number',
+      {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          continuity: 'below',
+          name: 'custom',
+          rangeType: 'percent',
+          rangeMax: 100,
+          rangeMin: 0,
+          colorStops: [
+            { color: 'green', stop: 0 },
+            { color: 'blue', stop: 40 },
+            { color: 'red', stop: 80 },
+          ],
+        },
+      },
+      { min: 0, max: 200 },
+      paletteRegistry,
+      colorRanges
+    );
+    expect(newPaletteParams).toEqual({
+      rangeType: 'number',
+      rangeMin: Number.NEGATIVE_INFINITY,
+      rangeMax: 200,
+      colorStops: [
+        {
+          color: 'green',
+          stop: 0,
+        },
+        {
+          color: 'blue',
+          stop: 80,
+        },
+        {
+          color: 'red',
+          stop: 160,
+        },
+      ],
+      stops: [
+        {
+          color: 'green',
+          stop: 80,
+        },
+        {
+          color: 'blue',
+          stop: 160,
+        },
+        {
+          color: 'red',
+          stop: 200,
+        },
+      ],
+    });
+  });
+
+  it('should correctly update palette params with new range type if continuity is above', () => {
+    const newPaletteParams = updateRangeType(
+      'number',
+      {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          continuity: 'above',
+          name: 'custom',
+          rangeType: 'percent',
+          rangeMax: 100,
+          rangeMin: 0,
+          colorStops: [
+            { color: 'green', stop: 0 },
+            { color: 'blue', stop: 40 },
+            { color: 'red', stop: 80 },
+          ],
+        },
+      },
+      { min: 0, max: 200 },
+      paletteRegistry,
+      colorRanges
+    );
+    expect(newPaletteParams).toEqual({
+      rangeType: 'number',
+      rangeMin: 0,
+      rangeMax: Number.POSITIVE_INFINITY,
+      colorStops: [
+        {
+          color: 'green',
+          stop: 0,
+        },
+        {
+          color: 'blue',
+          stop: 80,
+        },
+        {
+          color: 'red',
+          stop: 160,
+        },
+      ],
+      stops: [
+        {
+          color: 'green',
+          stop: 80,
+        },
+        {
+          color: 'blue',
+          stop: 160,
+        },
+        {
+          color: 'red',
+          stop: 200,
+        },
+      ],
+    });
+  });
+});
+
+describe('changeColorPalette', () => {
+  const paletteRegistry = chartPluginMock.createPaletteRegistry();
+
+  it('should correct update params for new palette', () => {
+    const newPaletteParams = changeColorPalette(
+      {
+        type: 'palette',
+        name: 'default',
+      },
+      {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          continuity: 'above',
+          name: 'custom',
+          rangeType: 'percent',
+          rangeMax: 100,
+          rangeMin: 0,
+          colorStops: [
+            { color: 'green', stop: 0 },
+            { color: 'blue', stop: 40 },
+            { color: 'red', stop: 80 },
+          ],
+        },
+      },
+      paletteRegistry,
+      { min: 0, max: 200 },
+      false
+    );
+    expect(newPaletteParams).toEqual({
+      name: 'default',
+      type: 'palette',
+      params: {
+        rangeType: 'percent',
+        name: 'default',
+        continuity: 'above',
+        rangeMin: 0,
+        rangeMax: Number.POSITIVE_INFINITY,
+        reverse: false,
+        colorStops: undefined,
+        stops: [
+          {
+            color: 'red',
+            stop: 0,
+          },
+          {
+            color: 'black',
+            stop: 50,
+          },
+        ],
+      },
+    });
   });
 });

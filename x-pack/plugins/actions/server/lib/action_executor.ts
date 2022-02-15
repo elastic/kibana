@@ -60,6 +60,7 @@ export interface ExecuteOptions<Source = unknown> {
   params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
+  executionId?: string;
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
@@ -90,6 +91,7 @@ export class ActionExecutor {
     source,
     isEphemeral,
     taskInfo,
+    executionId,
     relatedSavedObjects,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
@@ -187,6 +189,7 @@ export class ActionExecutor {
           action: EVENT_LOG_ACTIONS.execute,
           ...namespace,
           ...task,
+          executionId,
           savedObjects: [
             {
               type: 'action',
@@ -283,11 +286,13 @@ export class ActionExecutor {
     request,
     relatedSavedObjects,
     source,
+    executionId,
     taskInfo,
   }: {
     actionId: string;
     request: KibanaRequest;
     taskInfo?: TaskInfo;
+    executionId?: string;
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
   }) {
@@ -327,6 +332,7 @@ export class ActionExecutor {
       }' execution cancelled due to timeout - exceeded default timeout of "5m"`,
       ...namespace,
       ...task,
+      executionId,
       savedObjects: [
         {
           type: 'action',

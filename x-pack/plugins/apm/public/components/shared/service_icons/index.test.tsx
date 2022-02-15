@@ -8,7 +8,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
-// import { renderWithTheme } from '../../../../utils/testHelpers';
+// import { renderWithTheme } from '../../../../utils/test_helpers';
 import React, { ReactNode } from 'react';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
@@ -180,8 +180,7 @@ describe('ServiceIcons', () => {
 
   describe('details', () => {
     const callApmApi =
-      (apisMockData: Record<string, object>) =>
-      ({ endpoint }: { endpoint: string }) => {
+      (apisMockData: Record<string, object>) => (endpoint: string) => {
         return apisMockData[endpoint];
       };
     it('Shows loading spinner while fetching data', () => {
@@ -190,6 +189,7 @@ describe('ServiceIcons', () => {
           data: {
             agentName: 'java',
             containerType: 'Kubernetes',
+            serverlessType: 'lambda',
             cloudProvider: 'gcp',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
@@ -221,6 +221,7 @@ describe('ServiceIcons', () => {
       expect(queryAllByTestId('loading')).toHaveLength(0);
       expect(getByTestId('service')).toBeInTheDocument();
       expect(getByTestId('container')).toBeInTheDocument();
+      expect(getByTestId('serverless')).toBeInTheDocument();
       expect(getByTestId('cloud')).toBeInTheDocument();
       fireEvent.click(getByTestId('popover_Service'));
       expect(getByTestId('loading-content')).toBeInTheDocument();
@@ -232,6 +233,7 @@ describe('ServiceIcons', () => {
           data: {
             agentName: 'java',
             containerType: 'Kubernetes',
+            serverlessType: '',
             cloudProvider: 'gcp',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
@@ -269,6 +271,119 @@ describe('ServiceIcons', () => {
       expect(queryAllByTestId('loading-content')).toHaveLength(0);
       expect(getByText('Service')).toBeInTheDocument();
       expect(getByText('v1.0.0')).toBeInTheDocument();
+    });
+
+    it('shows serverless content', () => {
+      const apisMockData = {
+        'GET /internal/apm/services/{serviceName}/metadata/icons': {
+          data: {
+            agentName: 'java',
+            containerType: 'Kubernetes',
+            serverlessType: 'lambda',
+            cloudProvider: 'gcp',
+          },
+          status: fetcherHook.FETCH_STATUS.SUCCESS,
+          refetch: jest.fn(),
+        },
+        'GET /internal/apm/services/{serviceName}/metadata/details': {
+          data: {
+            serverless: {
+              type: '',
+              functionNames: ['lambda-java-dev'],
+              faasTriggerTypes: ['datasource', 'http'],
+            },
+          },
+          status: fetcherHook.FETCH_STATUS.SUCCESS,
+          refetch: jest.fn(),
+        },
+      };
+      jest
+        .spyOn(fetcherHook, 'useFetcher')
+        .mockImplementation((func: Function, deps: string[]) => {
+          return func(callApmApi(apisMockData)) || {};
+        });
+
+      const { queryAllByTestId, getByTestId, getByText } = render(
+        <Wrapper>
+          <EuiThemeProvider>
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
+          </EuiThemeProvider>
+        </Wrapper>
+      );
+      expect(queryAllByTestId('loading')).toHaveLength(0);
+      expect(getByTestId('service')).toBeInTheDocument();
+      expect(getByTestId('container')).toBeInTheDocument();
+      expect(getByTestId('serverless')).toBeInTheDocument();
+      expect(getByTestId('cloud')).toBeInTheDocument();
+
+      fireEvent.click(getByTestId('popover_Serverless'));
+      expect(queryAllByTestId('loading-content')).toHaveLength(0);
+      expect(getByText('Serverless')).toBeInTheDocument();
+      expect(getByText('lambda-java-dev')).toBeInTheDocument();
+      expect(getByText('datasource')).toBeInTheDocument();
+      expect(getByText('http')).toBeInTheDocument();
+    });
+
+    it('shows cloud content', () => {
+      const apisMockData = {
+        'GET /internal/apm/services/{serviceName}/metadata/icons': {
+          data: {
+            agentName: 'java',
+            containerType: 'Kubernetes',
+            serverlessType: 'lambda',
+            cloudProvider: 'gcp',
+          },
+          status: fetcherHook.FETCH_STATUS.SUCCESS,
+          refetch: jest.fn(),
+        },
+        'GET /internal/apm/services/{serviceName}/metadata/details': {
+          data: {
+            cloud: {
+              provider: 'aws',
+              projectName: '',
+              serviceName: 'lambda',
+              availabilityZones: [],
+              regions: ['us-east-1'],
+              machineTypes: [],
+            },
+          },
+          status: fetcherHook.FETCH_STATUS.SUCCESS,
+          refetch: jest.fn(),
+        },
+      };
+      jest
+        .spyOn(fetcherHook, 'useFetcher')
+        .mockImplementation((func: Function, deps: string[]) => {
+          return func(callApmApi(apisMockData)) || {};
+        });
+
+      const { queryAllByTestId, getByTestId, getByText } = render(
+        <Wrapper>
+          <EuiThemeProvider>
+            <ServiceIcons
+              serviceName="foo"
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />
+          </EuiThemeProvider>
+        </Wrapper>
+      );
+      expect(queryAllByTestId('loading')).toHaveLength(0);
+      expect(getByTestId('service')).toBeInTheDocument();
+      expect(getByTestId('container')).toBeInTheDocument();
+      expect(getByTestId('serverless')).toBeInTheDocument();
+      expect(getByTestId('cloud')).toBeInTheDocument();
+
+      fireEvent.click(getByTestId('popover_Cloud'));
+      expect(queryAllByTestId('loading-content')).toHaveLength(0);
+      expect(getByText('Cloud')).toBeInTheDocument();
+      expect(getByText('aws')).toBeInTheDocument();
+      expect(getByText('lambda')).toBeInTheDocument();
+      expect(getByText('us-east-1')).toBeInTheDocument();
     });
   });
 });

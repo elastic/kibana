@@ -43,7 +43,7 @@ export const useUserActionsHandler = ({
   fetchUserActions,
   updateCase,
 }: UseUserActionsHandlerArgs): UseUserActionsHandler => {
-  const { detailName: caseId, subCaseId } = useCaseViewParams();
+  const { detailName: caseId } = useCaseViewParams();
   const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
     useLensDraftComment();
   const handlerTimeoutId = useRef(0);
@@ -75,10 +75,9 @@ export const useUserActionsHandler = ({
         fetchUserActions,
         version,
         updateCase,
-        subCaseId,
       });
     },
-    [caseId, fetchUserActions, patchComment, subCaseId, updateCase]
+    [caseId, fetchUserActions, patchComment, updateCase]
   );
 
   const handleOutlineComment = useCallback(

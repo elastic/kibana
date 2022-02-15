@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
