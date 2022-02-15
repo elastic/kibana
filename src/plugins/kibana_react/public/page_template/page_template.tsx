@@ -136,7 +136,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       <EmptyStatePage
         data-test-subj={rest['data-test-subj']}
         template={template}
-        classes={classes}
+        className={classes}
         pageSideBar={pageSideBar}
         pageSideBarProps={{
           paddingSize: solutionNav ? 'none' : 'l',

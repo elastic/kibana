@@ -9,14 +9,8 @@ import { EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplateProps, NO_DATA_PAGE_TEMPLATE_PROPS, NoDataPage } from '../page_template';
 
-interface Props {
-  classes: string;
-}
-
-type EmptyPageProps = Props & KibanaPageTemplateProps;
-
-export const EmptyStatePage = (props: EmptyPageProps) => {
-  const { template, classes, pageSideBar, pageSideBarProps, noDataConfig } = props;
+export const EmptyStatePage = (props: KibanaPageTemplateProps) => {
+  const { template, className, pageSideBar, pageSideBarProps, noDataConfig } = props;
 
   if (!noDataConfig) {
     return null;
@@ -26,7 +20,7 @@ export const EmptyStatePage = (props: EmptyPageProps) => {
     <EuiPageTemplate
       data-test-subj={props['data-test-subj']}
       template={template}
-      className={classes}
+      className={className}
       pageSideBar={pageSideBar}
       pageSideBarProps={pageSideBarProps}
       {...NO_DATA_PAGE_TEMPLATE_PROPS}

@@ -22,7 +22,7 @@ export const NoDataPageBody = (props: NoDataPageBodyProps) => {
   const { pageTitle, docsLink, solution, actionCards, logo } = props;
 
   return (
-    <React.Fragment>
+    <>
       <EuiText textAlign="center">
         <KibanaPageTemplateSolutionNavAvatar
           name={solution}
@@ -53,6 +53,6 @@ export const NoDataPageBody = (props: NoDataPageBodyProps) => {
       <EuiSpacer size="xxl" />
       <EuiSpacer size="l" />
       <ActionCards actionCards={actionCards} />
-    </React.Fragment>
+    </>
   );
 };
