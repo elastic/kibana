@@ -6,13 +6,13 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { Filter } from '@kbn/es-query';
 import { useKibana } from '../../../../utils/kibana_react';
 import { SeriesConfig, SeriesUrl } from '../types';
 import { useAppIndexPatternContext } from './use_app_index_pattern';
 import { buildExistsFilter, urlFilterToPersistedFilter } from '../configurations/utils';
 import { getFiltersFromDefs } from './use_lens_attributes';
 import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
-import { Filter } from '@kbn/es-query';
 
 interface UseDiscoverLink {
   seriesConfig?: SeriesConfig;
