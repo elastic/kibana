@@ -36,7 +36,7 @@ import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/
 import { CloudSetup } from '../../cloud/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
-import { configSchema } from './config';
+import { configSchema, MonitoringConfig } from './config';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -70,10 +70,6 @@ export interface PluginsStart {
   licensing: LicensingPluginStart;
 }
 
-export interface MonitoringCoreConfig {
-  get: (key: string) => string | undefined;
-}
-
 export interface RouteDependencies {
   cluster: ICustomClusterClient;
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
@@ -84,7 +80,7 @@ export interface RouteDependencies {
 }
 
 export interface MonitoringCore {
-  config: () => MonitoringCoreConfig;
+  config: MonitoringConfig;
   log: Logger;
   route: (options: any) => void;
 }
@@ -125,11 +121,10 @@ export interface LegacyRequest {
 }
 
 export interface LegacyServer {
+  instanceUuid: string;
   log: Logger;
   route: (params: any) => void;
-  config: () => {
-    get: (key: string) => string | undefined;
-  };
+  config: MonitoringConfig;
   newPlatform: {
     setup: {
       plugins: PluginsSetup;

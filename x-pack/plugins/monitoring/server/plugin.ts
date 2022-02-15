@@ -19,9 +19,8 @@ import {
   Plugin,
   PluginInitializerContext,
   ResponseError,
-  SharedGlobalConfig,
 } from 'kibana/server';
-import { get, has } from 'lodash';
+import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
@@ -79,7 +78,6 @@ export class MonitoringPlugin
   private bulkUploader?: IBulkUploader;
 
   private readonly config: MonitoringConfig;
-  private readonly legacyConfig: SharedGlobalConfig;
   private coreSetup?: CoreSetup;
   private setupPlugins?: PluginsSetup;
 
@@ -88,7 +86,6 @@ export class MonitoringPlugin
     this.log = initializerContext.logger.get(LOGGING_TAG);
     this.getLogger = (...scopes: string[]) => initializerContext.logger.get(LOGGING_TAG, ...scopes);
     this.config = createConfig(this.initializerContext.config.get<MonitoringConfigSchema>());
-    this.legacyConfig = this.initializerContext.config.legacy.get();
   }
 
   setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
@@ -120,7 +117,6 @@ export class MonitoringPlugin
       config: this.config!,
       getLogger: this.getLogger,
       log: this.log,
-      legacyConfig: this.legacyConfig,
       coreSetup: this.coreSetup!,
       setupPlugins: this.setupPlugins!,
     });
@@ -167,7 +163,6 @@ export class MonitoringPlugin
 
   init(cluster: ICustomClusterClient, coreStart: CoreStart) {
     const config = createConfig(this.initializerContext.config.get<MonitoringConfigSchema>());
-    const legacyConfig = this.initializerContext.config.legacy.get();
     const coreSetup = this.coreSetup!;
     const plugins = this.setupPlugins!;
 
@@ -188,7 +183,6 @@ export class MonitoringPlugin
       // Create our shim which is currently used to power our routing
       this.monitoringCore = this.getLegacyShim(
         config,
-        legacyConfig,
         coreSetup.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         cluster,
         plugins
@@ -312,31 +306,13 @@ export class MonitoringPlugin
 
   getLegacyShim(
     config: MonitoringConfig,
-    legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     cluster: ICustomClusterClient,
     setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
-    const legacyConfigWrapper = () => ({
-      get: (_key: string): string | undefined => {
-        const key = _key.includes('monitoring.') ? _key.split('monitoring.')[1] : _key;
-        if (has(config, key)) {
-          return get(config, key);
-        }
-        if (has(legacyConfig, key)) {
-          return get(legacyConfig, key);
-        }
-
-        if (key === 'server.uuid') {
-          return this.legacyShimDependencies.instanceUuid;
-        }
-
-        throw new Error(`Unknown key '${_key}'`);
-      },
-    });
     return {
-      config: legacyConfigWrapper,
+      config,
       log: this.log,
       route: (options: any) => {
         const method = options.method;
@@ -371,9 +347,10 @@ export class MonitoringPlugin
               }
             },
             server: {
+              instanceUuid: this.legacyShimDependencies.instanceUuid,
               log: this.log,
               route: () => {},
-              config: legacyConfigWrapper,
+              config,
               newPlatform: {
                 setup: {
                   plugins: setupPlugins,

@@ -225,9 +225,7 @@ export function getPipelineStatsAggregation({
     query,
     pipelineId,
     version,
-    // @ts-ignore not undefined, need to get correct config
-    // https://github.com/elastic/kibana/issues/112146
-    config.get('monitoring.ui.max_bucket_size'),
+    config.ui.max_bucket_size,
     callWithRequest,
     req
   );
