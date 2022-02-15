@@ -144,6 +144,10 @@ export async function getPackageInfo(options: {
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
 
+  const logger = appContextService.getLogger();
+  const start = Date.now();
+  logger.debug(`Getting package info for ${pkgName}-${pkgVersion}`);
+
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackageWithFallbackToBundled(pkgName),
@@ -175,6 +179,10 @@ export async function getPackageInfo(options: {
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
   const updated = { ...packageInfo, ...additions };
+
+  const end = Date.now();
+
+  logger.debug(`Retrieved package info in ${end - start}ms`);
 
   return createInstallableFrom(updated, savedObject);
 }

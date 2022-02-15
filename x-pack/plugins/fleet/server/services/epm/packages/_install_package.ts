@@ -69,6 +69,7 @@ export async function _installPackage({
   installSource: InstallSource;
   spaceId: string;
 }): Promise<AssetReference[]> {
+  const start = Date.now();
   const { name: pkgName, version: pkgVersion } = packageInfo;
 
   try {
@@ -235,6 +236,10 @@ export async function _installPackage({
 
       await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
     }
+
+    const end = Date.now();
+
+    logger.debug(`Installation of ${pkgName}-${pkgVersion} took ${end - start}ms`);
 
     return [
       ...installedKibanaAssetsRefs,
