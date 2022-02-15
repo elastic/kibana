@@ -6,6 +6,7 @@
  */
 
 import {
+  Client,
   TransportRequestOptions,
   TransportResult,
   TransportRequestOptionsWithMeta,
@@ -35,47 +36,73 @@ export function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): ISco
   };
 }
 
+interface ElasticsearchClientWithChild extends ElasticsearchClient {
+  child: Client['child'];
+}
+
 function wrapEsClient(
   esClient: ElasticsearchClient,
   abortController: AbortController
 ): ElasticsearchClient {
-  const wrappedClient: Record<string, unknown> = Object.create(
-    Object.getPrototypeOf(esClient),
-    Object.getOwnPropertyDescriptors(esClient)
-  );
+  // Core hides access to .child via TS
+  const wrappedClient = (esClient as ElasticsearchClientWithChild).child({});
 
-  for (const attr in esClient) {
-    if (!['search'].includes(attr)) {
-      wrappedClient[attr] = esClient[attr as keyof ElasticsearchClient];
-    }
-  }
+  // Wrap the functions we want to modify
+  wrapSearchFn(wrappedClient, abortController);
 
-  wrappedClient.search = async <
+  return wrappedClient;
+}
+
+function wrapSearchFn(esClient: ElasticsearchClient, abortController: AbortController) {
+  const originalSearch = esClient.search;
+
+  // A bunch of overloads to make TypeScript happy
+  async function search<
     TDocument = unknown,
     TAggregations = Record<AggregateName, AggregationsAggregate>
   >(
-    query?: SearchRequest | SearchRequestWithBody,
-    options?:
-      | TransportRequestOptions
-      | TransportRequestOptionsWithMeta
-      | TransportRequestOptionsWithOutMeta
+    params?: SearchRequest | SearchRequestWithBody,
+    options?: TransportRequestOptionsWithOutMeta
+  ): Promise<SearchResponse<TDocument, TAggregations>>;
+  async function search<
+    TDocument = unknown,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >(
+    params?: SearchRequest | SearchRequestWithBody,
+    options?: TransportRequestOptionsWithMeta
+  ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, unknown>>;
+  async function search<
+    TDocument = unknown,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >(
+    params?: SearchRequest | SearchRequestWithBody,
+    options?: TransportRequestOptions
+  ): Promise<SearchResponse<TDocument, TAggregations>>;
+  async function search<
+    TDocument = unknown,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >(
+    params?: SearchRequest | SearchRequestWithBody,
+    options?: TransportRequestOptions
   ): Promise<
     | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
     | SearchResponse<TDocument, TAggregations>
-  > => {
+  > {
     try {
       const searchOptions = options ?? {};
-      return await esClient.search<TDocument, TAggregations>(query, {
+      return (await originalSearch.call(esClient, params, {
         ...searchOptions,
         signal: abortController.signal,
-      });
+      })) as
+        | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
+        | SearchResponse<TDocument, TAggregations>;
     } catch (e) {
       if (abortController.signal.aborted) {
         throw new Error('Search has been aborted due to cancelled execution');
       }
       throw e;
     }
-  };
+  }
 
-  return wrappedClient as ElasticsearchClient;
+  esClient.search = search;
 }
