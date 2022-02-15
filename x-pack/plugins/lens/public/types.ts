@@ -8,6 +8,7 @@
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { TopNavMenuData } from 'src/plugins/navigation/public';
 import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';
 import type {
@@ -17,7 +18,7 @@ import type {
   Datatable,
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import type { DateRange, LayerType } from '../common';
+import type { DateRange, LayerType, SortingHint } from '../common';
 import type { Query } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
@@ -435,6 +436,7 @@ export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataT
 export interface Operation extends OperationMetadata {
   // User-facing label for the operation
   label: string;
+  sortingHint?: SortingHint;
 }
 
 export interface OperationMetadata {
@@ -877,3 +879,18 @@ export interface SharingSavedObjectProps {
   aliasTargetId?: string;
   sourceId?: string;
 }
+
+/**
+ * Configuration of a top nav entry which can be shown for specific scenarios given a certain combination of active datasource and visualization id.
+ * This function gets passed the currently active visualization id and state as well as the current datasource states.
+ *
+ * If it returns a top nav menu entry, it is rendered along with the native Lens menu entries
+ */
+export type LensTopNavMenuEntryGenerator = (props: {
+  visualizationId: string;
+  datasourceStates: Record<string, { state: unknown }>;
+  visualizationState: unknown;
+  query: Query;
+  filters: Filter[];
+  initialContext?: VisualizeFieldContext;
+}) => undefined | TopNavMenuData;
