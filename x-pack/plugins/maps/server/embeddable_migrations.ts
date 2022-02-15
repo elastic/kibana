@@ -27,8 +27,8 @@ export const embeddableMigrations = {
         attributes: moveAttribution(state as { attributes: MapSavedObjectAttributes }),
       } as SerializableRecord;
     } catch (e) {
-      // Do not fail migration for invalid layerListJSON
-      // Maps application can display invalid layerListJSON error when saved object is viewed
+      // Do not failed migration
+      // Maps application can display error when viewed
       return state;
     }
   },
@@ -40,8 +40,8 @@ export const embeddableMigrations = {
         attributes,
       } as SerializableRecord;
     } catch (e) {
-      // Do not fail migration for invalid layerListJSON
-      // Maps application can display invalid layerListJSON error when saved object is viewed
+      // Do not failed migration
+      // Maps application can display error when viewed
       return state;
     }
   },
@@ -52,8 +52,8 @@ export const embeddableMigrations = {
         attributes: setEmsTmsDefaultModes(state as { attributes: MapSavedObjectAttributes }),
       } as SerializableRecord;
     } catch (e) {
-      // Do not fail migration for invalid layerListJSON
-      // Maps application can display invalid layerListJSON error when saved object is viewed
+      // Do not failed migration
+      // Maps application can display error when viewed
       return state;
     }
   },
@@ -65,8 +65,8 @@ export const embeddableMigrations = {
         attributes,
       } as SerializableRecord;
     } catch (e) {
-      // Do not fail migration for invalid layerListJSON
-      // Maps application can display invalid layerListJSON error when saved object is viewed
+      // Do not failed migration
+      // Maps application can display error when viewed
       return state;
     }
   },
@@ -77,8 +77,8 @@ export const embeddableMigrations = {
         attributes: renameLayerTypes(state as { attributes: MapSavedObjectAttributes }),
       } as SerializableRecord;
     } catch (e) {
-      // Do not fail migration for invalid layerListJSON
-      // Maps application can display invalid layerListJSON error when saved object is viewed
+      // Do not failed migration
+      // Maps application can display error when viewed
       return state;
     }
   },
