@@ -157,4 +157,14 @@ export class PdfMaker {
       this._pdfDoc.end();
     });
   }
+
+  getPageCount(): number {
+    const pageRange = this._pdfDoc?.bufferedPageRange();
+    if (!pageRange) {
+      return 0;
+    }
+    const { count, start } = pageRange;
+
+    return start + count;
+  }
 }
