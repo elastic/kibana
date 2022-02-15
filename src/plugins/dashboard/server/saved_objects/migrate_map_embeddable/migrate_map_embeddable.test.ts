@@ -9,7 +9,7 @@
 import { savedObjectsServiceMock } from '../../../../../core/server/mocks';
 import { migrateMapEmbeddable } from './migrate_map_embeddable';
 
-test('Should extract references from by-value map panels', () => {
+test('Should update by-value map panels with reference names', () => {
   const dashboard = {
     id: 'cf56e3f0-8de8-11ec-975f-f7e09cf7ebaf',
     type: 'dashboard',
@@ -33,7 +33,7 @@ test('Should extract references from by-value map panels', () => {
     references: [
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: '6c75ee1d-28d9-4eea-8816-4110f3d8c154:layer_1_source_index_pattern',
+        name: '6c75ee1d-28d9-4eea-8816-4110f3d8c154:layer_0_source_index_pattern',
         type: 'index-pattern',
       },
     ],
@@ -44,12 +44,7 @@ test('Should extract references from by-value map panels', () => {
   const updated = migrateMapEmbeddable(dashboard, contextMock);
   expect(updated.references).toEqual([
     {
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-      name: '6c75ee1d-28d9-4eea-8816-4110f3d8c154:layer_1_source_index_pattern',
-      type: 'index-pattern',
-    },
-    {
-      name: '6c75ee1d-28d9-4eea-8816-4110f3d8c154_layer_0_source_index_pattern',
+      name: '6c75ee1d-28d9-4eea-8816-4110f3d8c154:layer_0_source_index_pattern',
       type: 'index-pattern',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     },
@@ -57,7 +52,5 @@ test('Should extract references from by-value map panels', () => {
 
   const panels = JSON.parse(updated.attributes.panelsJSON);
   const layerList = JSON.parse(panels[0].embeddableConfig.attributes.layerListJSON);
-  expect(layerList[0].sourceDescriptor.indexPatternRefName).toEqual(
-    '6c75ee1d-28d9-4eea-8816-4110f3d8c154_layer_0_source_index_pattern'
-  );
+  expect(layerList[0].sourceDescriptor.indexPatternRefName).toEqual('layer_0_source_index_pattern');
 });

@@ -22,7 +22,6 @@ export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
   // by-value embeddable
   const { attributes, references } = extractReferences({
     attributes: typedState.attributes as MapSavedObjectAttributes,
-    embeddableId: typedState.id,
   });
 
   return {

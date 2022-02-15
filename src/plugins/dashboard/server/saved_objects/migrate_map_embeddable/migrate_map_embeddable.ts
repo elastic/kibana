@@ -17,8 +17,6 @@ export const migrateMapEmbeddable: SavedObjectMigrationFn<any, any> = (doc) => {
     return doc;
   }
 
-  const dashboardReferences = doc.references ? [...doc.references] : [];
-
   let panels: SavedDashboardPanel[] = [];
   try {
     panels = JSON.parse(doc.attributes.panelsJSON);
@@ -32,11 +30,9 @@ export const migrateMapEmbeddable: SavedObjectMigrationFn<any, any> = (doc) => {
       return panel;
     }
 
-    const { attributes, references } = extractReferences({
+    const { attributes } = extractReferences({
       attributes: panel.embeddableConfig.attributes as Record<string, string>,
-      embeddableId: panel.panelIndex,
     });
-    dashboardReferences.push(...references);
     return {
       ...panel,
       embeddableConfig: {
@@ -52,6 +48,5 @@ export const migrateMapEmbeddable: SavedObjectMigrationFn<any, any> = (doc) => {
       ...doc.attributes,
       panelsJSON: JSON.stringify(migratedPanels),
     },
-    references: dashboardReferences,
   };
 };

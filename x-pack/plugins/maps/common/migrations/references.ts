@@ -19,11 +19,9 @@ interface IndexPatternReferenceDescriptor {
 export function extractReferences({
   attributes,
   references = [],
-  embeddableId,
 }: {
   attributes: MapSavedObjectAttributes;
   references?: SavedObjectReference[];
-  embeddableId?: string;
 }) {
   if (!attributes.layerListJSON) {
     return { attributes, references };
@@ -42,8 +40,7 @@ export function extractReferences({
     // Extract index-pattern references from source descriptor
     if (layer.sourceDescriptor && 'indexPatternId' in layer.sourceDescriptor) {
       const sourceDescriptor = layer.sourceDescriptor as IndexPatternReferenceDescriptor;
-      const baseRefName = `layer_${layerIndex}_source_index_pattern`;
-      const refName = embeddableId ? `${embeddableId}_${baseRefName}` : baseRefName;
+      const refName = `layer_${layerIndex}_source_index_pattern`;
       extractedReferences.push({
         name: refName,
         type: 'index-pattern',
@@ -60,8 +57,7 @@ export function extractReferences({
       joins.forEach((join, joinIndex) => {
         if ('indexPatternId' in join.right) {
           const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
-          const baseRefName = `layer_${layerIndex}_join_${joinIndex}_index_pattern`;
-          const refName = embeddableId ? `${embeddableId}_${baseRefName}` : baseRefName;
+          const refName = `layer_${layerIndex}_join_${joinIndex}_index_pattern`;
           extractedReferences.push({
             name: refName,
             type: 'index-pattern',

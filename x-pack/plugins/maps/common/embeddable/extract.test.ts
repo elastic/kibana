@@ -33,7 +33,7 @@ test('Should update state with refNames with by-value embeddable state', () => {
     references: [
       {
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: '8d62c3f0-c61f-4c09-ac24-9b8ee4320e20_layer_0_source_index_pattern',
+        name: 'layer_0_source_index_pattern',
         type: 'index-pattern',
       },
     ],
@@ -41,7 +41,7 @@ test('Should update state with refNames with by-value embeddable state', () => {
       id: '8d62c3f0-c61f-4c09-ac24-9b8ee4320e20',
       attributes: {
         layerListJSON:
-          '[{"sourceDescriptor":{"indexPatternRefName":"8d62c3f0-c61f-4c09-ac24-9b8ee4320e20_layer_0_source_index_pattern"}}]',
+          '[{"sourceDescriptor":{"indexPatternRefName":"layer_0_source_index_pattern"}}]',
       },
       type: 'map',
     },

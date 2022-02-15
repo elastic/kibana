@@ -6,6 +6,28 @@
  */
 
 import { extractReferences, injectReferences } from './references';
+import { SOURCE_TYPES } from '../constants';
+
+const layerListJSON = {
+  esSearchSource: {
+    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_SEARCH}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
+    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_SEARCH}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
+  },
+  esGeoGridSource: {
+    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_GEO_GRID}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
+    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_GEO_GRID}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
+  },
+  join: {
+    withIndexPatternId:
+      '[{"joins":[{"right":{"indexPatternId":"e20b2a30-f735-11e8-8ce0-9723965e01e3"}}]}]',
+    withIndexPatternRef:
+      '[{"joins":[{"right":{"indexPatternRefName":"layer_0_join_0_index_pattern"}}]}]',
+  },
+  pewPewSource: {
+    withIndexPatternId: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_PEW_PEW}\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\"}}]`,
+    withIndexPatternRef: `[{\"sourceDescriptor\":{\"type\":\"${SOURCE_TYPES.ES_PEW_PEW}\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"}}]`,
+  },
+};
 
 describe('extractReferences', () => {
   test('Should handle missing layerListJSON attribute', () => {
@@ -20,17 +42,15 @@ describe('extractReferences', () => {
     });
   });
 
-  test('Should extract index-pattern reference from source with indexPatternId', () => {
+  test('Should extract index-pattern reference from ES search source descriptor', () => {
     const attributes = {
       title: 'my map',
-      layerListJSON:
-        '[{"sourceDescriptor":{"indexPatternId":"c698b940-e149-11e8-a35a-370a8516603a"}}]',
+      layerListJSON: layerListJSON.esSearchSource.withIndexPatternId,
     };
     expect(extractReferences({ attributes })).toEqual({
       attributes: {
         title: 'my map',
-        layerListJSON:
-          '[{"sourceDescriptor":{"indexPatternRefName":"layer_0_source_index_pattern"}}]',
+        layerListJSON: layerListJSON.esSearchSource.withIndexPatternRef,
       },
       references: [
         {
@@ -42,17 +62,55 @@ describe('extractReferences', () => {
     });
   });
 
-  test('Should extract index-pattern reference from join with indexPatternId', () => {
+  test('Should extract index-pattern reference from ES geo grid source descriptor', () => {
     const attributes = {
       title: 'my map',
-      layerListJSON:
-        '[{"joins":[{"right":{"indexPatternId":"e20b2a30-f735-11e8-8ce0-9723965e01e3"}}]}]',
+      layerListJSON: layerListJSON.esGeoGridSource.withIndexPatternId,
     };
     expect(extractReferences({ attributes })).toEqual({
       attributes: {
         title: 'my map',
-        layerListJSON:
-          '[{"joins":[{"right":{"indexPatternRefName":"layer_0_join_0_index_pattern"}}]}]',
+        layerListJSON: layerListJSON.esGeoGridSource.withIndexPatternRef,
+      },
+      references: [
+        {
+          id: 'c698b940-e149-11e8-a35a-370a8516603a',
+          name: 'layer_0_source_index_pattern',
+          type: 'index-pattern',
+        },
+      ],
+    });
+  });
+
+  test('Should extract index-pattern reference from ES pew pew source descriptor', () => {
+    const attributes = {
+      title: 'my map',
+      layerListJSON: layerListJSON.pewPewSource.withIndexPatternId,
+    };
+    expect(extractReferences({ attributes })).toEqual({
+      attributes: {
+        title: 'my map',
+        layerListJSON: layerListJSON.pewPewSource.withIndexPatternRef,
+      },
+      references: [
+        {
+          id: 'c698b940-e149-11e8-a35a-370a8516603a',
+          name: 'layer_0_source_index_pattern',
+          type: 'index-pattern',
+        },
+      ],
+    });
+  });
+
+  test('Should extract index-pattern reference from joins', () => {
+    const attributes = {
+      title: 'my map',
+      layerListJSON: layerListJSON.join.withIndexPatternId,
+    };
+    expect(extractReferences({ attributes })).toEqual({
+      attributes: {
+        title: 'my map',
+        layerListJSON: layerListJSON.join.withIndexPatternRef,
       },
       references: [
         {
@@ -61,52 +119,6 @@ describe('extractReferences', () => {
           type: 'index-pattern',
         },
       ],
-    });
-  });
-
-  describe('embeddable', () => {
-    test('Should extract index-pattern reference from source with indexPatternId', () => {
-      const attributes = {
-        title: 'my map',
-        layerListJSON:
-          '[{"sourceDescriptor":{"indexPatternId":"c698b940-e149-11e8-a35a-370a8516603a"}}]',
-      };
-      expect(extractReferences({ attributes, embeddableId: 'panel1' })).toEqual({
-        attributes: {
-          title: 'my map',
-          layerListJSON:
-            '[{"sourceDescriptor":{"indexPatternRefName":"panel1_layer_0_source_index_pattern"}}]',
-        },
-        references: [
-          {
-            id: 'c698b940-e149-11e8-a35a-370a8516603a',
-            name: 'panel1_layer_0_source_index_pattern',
-            type: 'index-pattern',
-          },
-        ],
-      });
-    });
-
-    test('Should extract index-pattern reference from join with indexPatternId', () => {
-      const attributes = {
-        title: 'my map',
-        layerListJSON:
-          '[{"joins":[{"right":{"indexPatternId":"e20b2a30-f735-11e8-8ce0-9723965e01e3"}}]}]',
-      };
-      expect(extractReferences({ attributes, embeddableId: 'panel1' })).toEqual({
-        attributes: {
-          title: 'my map',
-          layerListJSON:
-            '[{"joins":[{"right":{"indexPatternRefName":"panel1_layer_0_join_0_index_pattern"}}]}]',
-        },
-        references: [
-          {
-            id: 'e20b2a30-f735-11e8-8ce0-9723965e01e3',
-            name: 'panel1_layer_0_join_0_index_pattern',
-            type: 'index-pattern',
-          },
-        ],
-      });
     });
   });
 });
@@ -126,8 +138,7 @@ describe('injectReferences', () => {
   test('Should inject index-pattern reference into ES search source descriptor', () => {
     const attributes = {
       title: 'my map',
-      layerListJSON:
-        '[{"sourceDescriptor":{"indexPatternRefName":"layer_0_source_index_pattern"}}]',
+      layerListJSON: layerListJSON.esSearchSource.withIndexPatternRef,
     };
     const references = [
       {
@@ -139,8 +150,47 @@ describe('injectReferences', () => {
     expect(injectReferences({ attributes, references })).toEqual({
       attributes: {
         title: 'my map',
-        layerListJSON:
-          '[{"sourceDescriptor":{"indexPatternId":"c698b940-e149-11e8-a35a-370a8516603a"}}]',
+        layerListJSON: layerListJSON.esSearchSource.withIndexPatternId,
+      },
+    });
+  });
+
+  test('Should inject index-pattern reference into ES geo grid source descriptor', () => {
+    const attributes = {
+      title: 'my map',
+      layerListJSON: layerListJSON.esGeoGridSource.withIndexPatternRef,
+    };
+    const references = [
+      {
+        id: 'c698b940-e149-11e8-a35a-370a8516603a',
+        name: 'layer_0_source_index_pattern',
+        type: 'index-pattern',
+      },
+    ];
+    expect(injectReferences({ attributes, references })).toEqual({
+      attributes: {
+        title: 'my map',
+        layerListJSON: layerListJSON.esGeoGridSource.withIndexPatternId,
+      },
+    });
+  });
+
+  test('Should inject index-pattern reference into ES pew pew source descriptor', () => {
+    const attributes = {
+      title: 'my map',
+      layerListJSON: layerListJSON.pewPewSource.withIndexPatternRef,
+    };
+    const references = [
+      {
+        id: 'c698b940-e149-11e8-a35a-370a8516603a',
+        name: 'layer_0_source_index_pattern',
+        type: 'index-pattern',
+      },
+    ];
+    expect(injectReferences({ attributes, references })).toEqual({
+      attributes: {
+        title: 'my map',
+        layerListJSON: layerListJSON.pewPewSource.withIndexPatternId,
       },
     });
   });
@@ -148,8 +198,7 @@ describe('injectReferences', () => {
   test('Should inject index-pattern reference into joins', () => {
     const attributes = {
       title: 'my map',
-      layerListJSON:
-        '[{"joins":[{"right":{"indexPatternRefName":"layer_0_join_0_index_pattern"}}]}]',
+      layerListJSON: layerListJSON.join.withIndexPatternRef,
     };
     const references = [
       {
@@ -161,8 +210,7 @@ describe('injectReferences', () => {
     expect(injectReferences({ attributes, references })).toEqual({
       attributes: {
         title: 'my map',
-        layerListJSON:
-          '[{"joins":[{"right":{"indexPatternId":"e20b2a30-f735-11e8-8ce0-9723965e01e3"}}]}]',
+        layerListJSON: layerListJSON.join.withIndexPatternId,
       },
     });
   });

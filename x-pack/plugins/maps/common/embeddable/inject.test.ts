@@ -29,13 +29,13 @@ test('Should inject refNames with by-value embeddable state', () => {
     id: '8d62c3f0-c61f-4c09-ac24-9b8ee4320e20',
     attributes: {
       layerListJSON:
-        '[{"sourceDescriptor":{"indexPatternRefName":"8d62c3f0-c61f-4c09-ac24-9b8ee4320e20_layer_0_source_index_pattern"}}]',
+        '[{"sourceDescriptor":{"indexPatternRefName":"layer_0_source_index_pattern"}}]',
     },
     type: 'map',
   };
   const refernces = [
     {
-      name: '8d62c3f0-c61f-4c09-ac24-9b8ee4320e20_layer_0_source_index_pattern',
+      name: 'layer_0_source_index_pattern',
       type: 'index-pattern',
       id: 'changed_index_pattern_id',
     },
