@@ -131,7 +131,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     ticksPosition: {
       types: ['string'],
       default: GaugeTicksPositions.AUTO,
-      options: [GaugeTicksPositions.AUTO, GaugeTicksPositions.BANDS],
+      options: [GaugeTicksPositions.HIDDEN, GaugeTicksPositions.AUTO, GaugeTicksPositions.BANDS],
       help: i18n.translate('expressionGauge.functions.gauge.args.ticksPosition.help', {
         defaultMessage: 'Specifies the placement of ticks',
       }),

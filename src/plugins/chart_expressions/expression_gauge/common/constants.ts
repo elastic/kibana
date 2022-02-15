@@ -17,6 +17,7 @@ export const GaugeShapes = {
 } as const;
 
 export const GaugeTicksPositions = {
+  HIDDEN: 'hidden',
   AUTO: 'auto',
   BANDS: 'bands',
 } as const;

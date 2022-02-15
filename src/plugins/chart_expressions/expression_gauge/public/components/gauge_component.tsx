@@ -145,9 +145,14 @@ function getTicks(
   range: [number, number],
   colorBands?: number[]
 ) {
+  if (ticksPosition === GaugeTicksPositions.HIDDEN) {
+    return [];
+  }
+
   if (ticksPosition === GaugeTicksPositions.BANDS && colorBands) {
     return colorBands && getTicksLabels(colorBands);
   }
+
   const TICKS_NO = 3;
   const min = Math.min(...(colorBands || []), ...range);
   const max = Math.max(...(colorBands || []), ...range);
