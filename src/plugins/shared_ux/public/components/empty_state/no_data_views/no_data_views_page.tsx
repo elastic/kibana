@@ -13,10 +13,11 @@ import { DataView } from '../../../../../data_views/public';
 
 export interface NoDataViewsPageProps {
   onDataViewCreated: (dataView: DataView) => void;
+  dataViewsDocLink: string;
 }
 
 export const NoDataViewsPage = (props: NoDataViewsPageProps) => {
-  const { onDataViewCreated } = props;
+  const { onDataViewCreated, dataViewsDocLink } = props;
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   useEffect(() => {
@@ -52,6 +53,10 @@ export const NoDataViewsPage = (props: NoDataViewsPageProps) => {
   }, [canCreateNewDataView, openDataViewEditor, setDataViewEditorRef, onDataViewCreated]);
 
   return (
-    <NoDataViewsComponent onClick={createNewDataView} canCreateNewDataView={canCreateNewDataView} />
+    <NoDataViewsComponent
+      onClick={createNewDataView}
+      canCreateNewDataView={canCreateNewDataView}
+      dataViewsDocLink={dataViewsDocLink}
+    />
   );
 };

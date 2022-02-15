@@ -10,6 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { NoDataViewsPage } from './no_data_views_page';
 import { NoDataViewsComponent } from './no_data_views_component';
 import mdx from './no_data_views_page.mdx';
+import { docLinksServiceFactory } from '../../../services/storybook/doc_links';
 
 export default {
   title: 'No Data Views Page',
@@ -22,7 +23,12 @@ export default {
 };
 
 export const ConnectedComponent = () => {
-  return <NoDataViewsPage onDataViewCreated={action('onDataViewCreated')} />;
+  return (
+    <NoDataViewsPage
+      onDataViewCreated={action('onDataViewCreated')}
+      dataViewsDocLink={docLinksServiceFactory().dataViewsDocsLink}
+    />
+  );
 };
 
 ConnectedComponent.argTypes = {
@@ -30,9 +36,24 @@ ConnectedComponent.argTypes = {
 };
 
 export const PureComponent = () => {
-  return <NoDataViewsComponent canCreateNewDataView={true} onClick={action('onClick')} />;
+  return (
+    <NoDataViewsComponent
+      canCreateNewDataView={true}
+      onClick={action('onClick')}
+      dataViewsDocLink={'https://google.com'}
+    />
+  );
 };
 
 export const PureComponentCannotCreateDataViews = () => {
-  return <NoDataViewsComponent canCreateNewDataView={false} />;
+  return (
+    <NoDataViewsComponent
+      canCreateNewDataView={false}
+      dataViewsDocLink={docLinksServiceFactory().dataViewsDocsLink}
+    />
+  );
+};
+
+export const PureComponentNoDocumentation = () => {
+  return <NoDataViewsComponent canCreateNewDataView={true} onClick={action('onClick')} />;
 };

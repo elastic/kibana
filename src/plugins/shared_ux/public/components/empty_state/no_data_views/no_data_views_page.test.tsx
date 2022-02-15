@@ -29,7 +29,12 @@ describe('<NoDataViewsPageTest />', () => {
   });
 
   test('on dataView created', () => {
-    const component = mount(<NoDataViewsPage onDataViewCreated={jest.fn()} />);
+    const component = mount(
+      <NoDataViewsPage
+        onDataViewCreated={jest.fn()}
+        dataViewsDocLink={services.docLinks.dataViewsDocsLink}
+      />
+    );
 
     expect(services.editors.openDataViewEditor).not.toHaveBeenCalled();
     component.find(EuiButton).simulate('click');

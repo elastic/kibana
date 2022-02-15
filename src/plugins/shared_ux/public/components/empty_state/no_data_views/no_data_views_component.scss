@@ -1,0 +1,12 @@
+@include euiBreakpoint('xs', 's') {
+  .noDataViews__illustration > svg {
+    width: $euiSize * 12;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .noDataViews__text {
+    text-align: center;
+    align-items: center;
+  }
+}

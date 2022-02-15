@@ -11,6 +11,7 @@ import { PluginServiceFactory } from '../types';
 import { platformServiceFactory } from './platform';
 import { editorsServiceFactory } from './editors';
 import { userPermissionsServiceFactory } from './permissions';
+import { docLinksServiceFactory } from './doc_links';
 
 /**
  * A factory function for creating a Storybook-based implementation of `SharedUXServices`.
@@ -19,4 +20,5 @@ export const servicesFactory: PluginServiceFactory<SharedUXServices, {}> = (para
   platform: platformServiceFactory(params),
   permissions: userPermissionsServiceFactory(),
   editors: editorsServiceFactory(),
+  docLinks: docLinksServiceFactory(),
 });

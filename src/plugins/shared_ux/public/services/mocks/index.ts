@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { docLinksServiceFactory } from './doc_links.mock';
+
 export type { MockPlatformServiceFactory } from './platform.mock';
 export { platformServiceFactory } from './platform.mock';
 
@@ -21,4 +23,5 @@ export const servicesFactory: PluginServiceFactory<SharedUXServices> = () => ({
   platform: platformServiceFactory(),
   permissions: userPermissionsServiceFactory(),
   editors: editorsServiceFactory(),
+  docLinks: docLinksServiceFactory(),
 });

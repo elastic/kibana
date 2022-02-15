@@ -12,6 +12,7 @@ import type { KibanaPluginServiceFactory } from '../types';
 import { platformServiceFactory } from './platform';
 import { userPermissionsServiceFactory } from './permissions';
 import { editorsServiceFactory } from './editors';
+import { docLinksServiceFactory } from './doc_links';
 
 /**
  * A factory function for creating a Kibana-based implementation of `SharedUXServices`.
@@ -23,4 +24,5 @@ export const servicesFactory: KibanaPluginServiceFactory<
   platform: platformServiceFactory(params),
   permissions: userPermissionsServiceFactory(params),
   editors: editorsServiceFactory(params),
+  docLinks: docLinksServiceFactory(params),
 });

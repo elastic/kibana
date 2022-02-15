@@ -5,5 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { NoResultsIllustration } from './no_results_illustration';
+export interface SharedUXDocLinksService {
+  dataViewsDocsLink: string;
+}
