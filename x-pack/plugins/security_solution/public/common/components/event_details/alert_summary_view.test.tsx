@@ -61,6 +61,18 @@ describe('AlertSummaryView', () => {
     expect(getAllByTestId('hover-actions-filter-for').length).toBeGreaterThan(0);
   });
 
+  test('Renders the correct global fields', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <AlertSummaryView {...props} />
+      </TestProviders>
+    );
+
+    ['host.name', 'user.name', 'Rule type', 'query'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
   test('it does NOT render the action cell for the active timeline', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
