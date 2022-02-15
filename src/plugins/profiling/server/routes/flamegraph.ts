@@ -59,14 +59,12 @@ function getLabel(frame: any, executable: any, type: number) {
 
 export class FlameGraph {
   events: any;
-  totalEvents: any;
   stacktraces: any;
   stackframes: any;
   executables: any;
 
-  constructor(events: any, totalEvents: any, stackTraces: any, stackFrames: any, executables: any) {
+  constructor(events: any, stackTraces: any, stackFrames: any, executables: any) {
     this.events = events;
-    this.totalEvents = totalEvents;
     this.stacktraces = stackTraces;
     this.stackframes = stackFrames;
     this.executables = executables;
