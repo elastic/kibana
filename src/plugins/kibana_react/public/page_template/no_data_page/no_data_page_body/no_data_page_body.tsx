@@ -11,11 +11,10 @@ import React, { ReactElement } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPageProps } from '../no_data_page';
 import { KibanaPageTemplateSolutionNavAvatar } from '../../solution_nav';
-import { ActionCards } from '../action_cards';
-import { ElasticAgentCard, NoDataCard } from '../no_data_card';
+import { ActionCard, ActionCards } from '../actions';
 
 type NoDataPageBodyProps = {
-  actionCards: Array<ReactElement<typeof NoDataCard> | ReactElement<typeof ElasticAgentCard>>;
+  actionCards: Array<ReactElement<typeof ActionCard>>;
 } & Omit<NoDataPageProps, 'actions'>;
 
 export const NoDataPageBody = (props: NoDataPageBodyProps) => {

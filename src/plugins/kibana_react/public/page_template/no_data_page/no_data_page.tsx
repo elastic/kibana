@@ -13,8 +13,10 @@ import { EuiCardProps, EuiSpacer, EuiText, EuiLink, CommonProps } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
+import { KibanaPageTemplateProps } from '../page_template';
 
 import { ElasticAgentCard, NoDataCard } from './no_data_card';
+import { ActionCard } from './actions';
 import { NoDataPageBody } from './no_data_page_body/no_data_page_body';
 
 export const NO_DATA_RECOMMENDED = i18n.translate(
@@ -97,11 +99,12 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     return Object.values(sortedData).map((action, i) => {
       const isAgent = actionsKeys[i] === 'elasticAgent' || actionsKeys[i] === 'beats';
       const key = isAgent ? 'empty-page-agent-action' : `empty-page-${actionsKeys[i]}-action`;
-      return isAgent ? (
-        <ElasticAgentCard key={key} solution={solution} {...action} />
+      const noDataCard = isAgent ? (
+        <ElasticAgentCard solution={solution} {...action} />
       ) : (
-        <NoDataCard key={key} {...action} />
+        <NoDataCard {...action} />
       );
+      return <ActionCard key={key} child={noDataCard} />;
     });
   }, [actions, sortedData, actionsKeys]);
 

@@ -57,6 +57,8 @@ export type {
 export {
   KibanaPageTemplate,
   KibanaPageTemplateSolutionNavAvatar,
+  NO_DATA_PAGE_MAX_WIDTH,
+  NO_DATA_PAGE_TEMPLATE_PROPS,
   NO_DATA_RECOMMENDED,
   NoDataPage,
   ElasticAgentCard,
