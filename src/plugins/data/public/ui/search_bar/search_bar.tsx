@@ -25,7 +25,7 @@ import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
-import { SavedQueryManagementComponent } from '../saved_query_management';
+import { SavedFilterSetListing } from '../saved_query_management';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -386,6 +386,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         openQueryBarMenu={this.state.openQueryBarMenu}
         onFiltersUpdated={this.props.onFiltersUpdated}
         filters={this.props.filters}
+        manageFilterSetComponent={
+          this.props.showFilterBar && this.state.query
+            ? this.renderSavedQueryManagement(
+                this.props.onClearSavedQuery,
+                this.props.showSaveQuery,
+                this.props.savedQuery
+              )
+            : undefined
+        }
       />
     );
 
@@ -496,7 +505,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       savedQuery: SearchBarOwnProps['savedQuery']
     ) => {
       const savedQueryManagement = onClearSavedQuery && (
-        <SavedQueryManagementComponent
+        <SavedFilterSetListing
           showSaveQuery={showSaveQuery}
           loadedSavedQuery={savedQuery}
           onSave={this.onInitiateSave}

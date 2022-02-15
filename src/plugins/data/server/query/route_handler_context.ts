@@ -15,7 +15,9 @@ function injectReferences({
   id,
   attributes,
   references,
-}: Pick<SavedObject<SavedQueryAttributes>, 'id' | 'attributes' | 'references'>) {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  updated_at,
+}: Pick<SavedObject<SavedQueryAttributes>, 'id' | 'attributes' | 'references' | 'updated_at'>) {
   const { query } = attributes;
   if (typeof query.query === 'string') {
     try {
@@ -26,7 +28,7 @@ function injectReferences({
     }
   }
   const filters = inject(attributes.filters ?? [], references);
-  return { id, attributes: { ...attributes, filters } };
+  return { id, attributes: { ...attributes, filters }, updated_at };
 }
 
 function extractReferences({

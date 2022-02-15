@@ -7,3 +7,4 @@
  */
 
 export { SavedQueryManagementComponent } from './saved_query_management_component';
+export { SavedFilterSetListing } from './saved_filter_set_listing';
