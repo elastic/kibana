@@ -385,3 +385,23 @@ This content has moved. Refer to <<managing-data-views>>.
 == Kibana role management.
 
 This content has moved. Refer to <<kibana-role-management>>.
+
+[role="exclude",id="upgrade-migrations"]
+== Upgrade migrations
+
+This content has moved. Refer to <<saved-object-migrations>>.
+
+[role="exclude",id="upgrade-standard"]
+== Standard Upgrade
+
+This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
+
+[role="exclude",id="upgrade-assistant"]
+== Upgrade Assistant
+
+This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant].
+
+[role="exclude",id="brew"]
+== Install {kib} on macOS with Homebrew
+
+This page has been deleted. Refer to <<install>>.

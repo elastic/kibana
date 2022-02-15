@@ -24,7 +24,6 @@
     "cloud",
     "fleet",
     "home",
-    "maps",
     "ml",
     "security",
     "spaces",
@@ -39,7 +38,6 @@
     "home",
     "kibanaReact",
     "kibanaUtils",
-    "maps",
     "ml",
     "observability"
   ]

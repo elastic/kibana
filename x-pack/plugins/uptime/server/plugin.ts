@@ -37,10 +37,13 @@ export class Plugin implements PluginType {
   private logger: Logger;
   private server?: UptimeServerSetup;
   private syntheticService?: SyntheticsService;
+  private readonly isServiceEnabled?: boolean;
 
   constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
     this.initContext = initializerContext;
     this.logger = initializerContext.logger.get();
+    const config = this.initContext.config.get<UptimeConfig>();
+    this.isServiceEnabled = config?.ui?.monitorManagement?.enabled && Boolean(config.service);
   }
 
   public setup(core: CoreSetup, plugins: UptimeCorePluginsSetup) {
@@ -72,9 +75,10 @@ export class Plugin implements PluginType {
       router: core.http.createRouter(),
       cloud: plugins.cloud,
       kibanaVersion: this.initContext.env.packageInfo.version,
+      logger: this.logger,
     } as UptimeServerSetup;
 
-    if (this.server?.config?.service?.enabled) {
+    if (this.isServiceEnabled && this.server.config.service) {
       this.syntheticService = new SyntheticsService(
         this.logger,
         this.server,
@@ -86,7 +90,11 @@ export class Plugin implements PluginType {
 
     initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
 
-    registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, config);
+    registerUptimeSavedObjects(
+      core.savedObjects,
+      plugins.encryptedSavedObjects,
+      Boolean(this.isServiceEnabled)
+    );
 
     KibanaTelemetryAdapter.registerUsageCollector(
       plugins.usageCollection,
@@ -99,7 +107,7 @@ export class Plugin implements PluginType {
   }
 
   public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
-    if (this.server?.config?.service?.enabled) {
+    if (this.isServiceEnabled) {
       this.savedObjectsClient = new SavedObjectsClient(
         coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
       );
@@ -116,7 +124,7 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
-    if (this.server?.config?.service?.enabled) {
+    if (this.isServiceEnabled) {
       this.syntheticService?.init();
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
       if (this.server && this.syntheticService) {

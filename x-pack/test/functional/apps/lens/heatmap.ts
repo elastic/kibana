@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render heatmap chart with the temperature palette', async () => {
-      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+      await PageObjects.lens.switchToVisualization('heatmap', 'heat');
       await PageObjects.lens.waitForVisualization();
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 

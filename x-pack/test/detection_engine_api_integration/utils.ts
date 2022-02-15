@@ -36,12 +36,14 @@ import {
   PreviewRulesSchema,
   ThreatMatchCreateSchema,
   RulePreviewLogs,
+  SavedQueryCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
+  RuleExecutionStatus,
   Status,
   SignalIds,
-} from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
+} from '../../plugins/security_solution/common/detection_engine/schemas/common';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 import {
   DETECTION_ENGINE_INDEX_URL,
@@ -130,7 +132,7 @@ export const getSimplePreviewRule = (
 
 /**
  * This is a typical signal testing rule that is easy for most basic testing of output of signals.
- * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
  * creation and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is rule-1 by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
@@ -153,8 +155,25 @@ export const getRuleForSignalTesting = (
 });
 
 /**
+ * This is a typical signal testing rule that is easy for most basic testing of output of Saved Query signals.
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
+ * creation for SavedQuery and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is threshold-rule by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getSavedQueryRuleForSignalTesting = (
+  index: string[],
+  ruleId = 'saved-query-rule',
+  enabled = true
+): SavedQueryCreateSchema => ({
+  ...getRuleForSignalTesting(index, ruleId, enabled),
+  type: 'saved_query',
+  saved_id: 'abcd',
+});
+
+/**
  * This is a typical signal testing rule that is easy for most basic testing of output of EQL signals.
- * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
  * creation for EQL and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is eql-rule by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
@@ -171,8 +190,40 @@ export const getEqlRuleForSignalTesting = (
 });
 
 /**
+ * This is a typical signal testing rule that is easy for most basic testing of output of Threat Match signals.
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
+ * creation for Threat Match and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is threshold-rule by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
+ */
+export const getThreatMatchRuleForSignalTesting = (
+  index: string[],
+  ruleId = 'threat-match-rule',
+  enabled = true
+): ThreatMatchCreateSchema => ({
+  ...getRuleForSignalTesting(index, ruleId, enabled),
+  type: 'threat_match',
+  language: 'kuery',
+  query: '*:*',
+  threat_query: '*:*',
+  threat_mapping: [
+    // We match host.name against host.name
+    {
+      entries: [
+        {
+          field: 'host.name',
+          value: 'host.name',
+          type: 'mapping',
+        },
+      ],
+    },
+  ],
+  threat_index: index, // match against same index for simplicity
+});
+
+/**
  * This is a typical signal testing rule that is easy for most basic testing of output of Threshold signals.
- * It starts out in an enabled true state. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The 'from' is set very far back to test the basics of signal
  * creation for Threshold and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is threshold-rule by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
@@ -873,7 +924,7 @@ export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
   log: ToolingLog,
-  maxTimeout: number = 800000,
+  maxTimeout: number = 100000,
   timeoutWait: number = 250
 ): Promise<void> => {
   let found = false;
@@ -1323,7 +1374,7 @@ export const waitForAlertToComplete = async (
     async () => {
       const response = await supertest.get(`/api/alerts/alert/${id}/state`).set('kbn-xsrf', 'true');
       if (response.status !== 200) {
-        log.error(
+        log.debug(
           `Did not get an expected 200 "ok" when waiting for an alert to complete (waitForAlertToComplete). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
             response.body
           )}, status: ${JSON.stringify(response.status)}`
@@ -1345,7 +1396,7 @@ export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   id: string,
-  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded',
+  status: RuleExecutionStatus = RuleExecutionStatus.succeeded,
   afterDate?: Date
 ): Promise<void> => {
   await waitFor(
@@ -1356,7 +1407,7 @@ export const waitForRuleSuccessOrStatus = async (
           .set('kbn-xsrf', 'true')
           .query({ id });
         if (response.status !== 200) {
-          log.error(
+          log.debug(
             `Did not get an expected 200 "ok" when waiting for a rule success or status (waitForRuleSuccessOrStatus). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
               response.body
             )}, status: ${JSON.stringify(response.status)}`
@@ -1410,9 +1461,7 @@ export const waitForSignalsToBePresent = async (
       return signalsOpen.hits.hits.length >= numberOfSignals;
     },
     'waitForSignalsToBePresent',
-    log,
-    20000,
-    250 // Wait 250ms between tries
+    log
   );
 };
 

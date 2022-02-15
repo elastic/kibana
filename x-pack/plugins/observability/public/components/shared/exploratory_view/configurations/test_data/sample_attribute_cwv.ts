@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RECORDS_FIELD } from '../constants';
+
 export const sampleAttributeCoreWebVital = {
   description: '',
   references: [
@@ -59,7 +61,7 @@ export const sampleAttributeCoreWebVital = {
                 label: 'Average',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
               'y-axis-column-2': {
                 dataType: 'number',
@@ -71,7 +73,7 @@ export const sampleAttributeCoreWebVital = {
                 label: 'Poor',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0': {
                 dataType: 'number',
@@ -84,7 +86,7 @@ export const sampleAttributeCoreWebVital = {
                 label: 'Good',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
             },
             incompleteColumns: {},

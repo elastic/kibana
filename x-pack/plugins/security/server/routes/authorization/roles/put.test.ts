@@ -46,8 +46,8 @@ interface TestOptions {
   name: string;
   licenseCheckResult?: LicenseCheck;
   apiResponses?: {
-    get: () => Promise<unknown>;
-    put: () => Promise<unknown>;
+    get: () => unknown;
+    put: () => unknown;
   };
   payload?: Record<string, any>;
   asserts: {
@@ -81,14 +81,14 @@ const putRoleTest = (
     };
 
     if (apiResponses?.get) {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockImplementationOnce(
-        (async () => ({ body: await apiResponses?.get() })) as any
+      mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementationOnce(
+        (() => ({ body: apiResponses?.get() })) as any
       );
     }
 
     if (apiResponses?.put) {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.putRole.mockImplementationOnce(
-        (async () => ({ body: await apiResponses?.put() })) as any
+      mockContext.core.elasticsearch.client.asCurrentUser.security.putRole.mockResponseImplementationOnce(
+        (() => ({ body: apiResponses?.put() })) as any
       );
     }
 
@@ -273,7 +273,10 @@ describe('PUT role', () => {
     putRoleTest(`creates empty role`, {
       name: 'foo-role',
       payload: {},
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -303,7 +306,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -342,7 +348,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -379,7 +388,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -444,7 +456,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         apiArguments: {
           get: [{ name: 'foo-role' }, { ignore: [404] }],
@@ -534,7 +549,7 @@ describe('PUT role', () => {
         ],
       },
       apiResponses: {
-        get: async () => ({
+        get: () => ({
           'foo-role': {
             metadata: {
               bar: 'old-metadata',
@@ -564,7 +579,7 @@ describe('PUT role', () => {
             ],
           },
         }),
-        put: async () => {},
+        put: () => {},
       },
       asserts: {
         apiArguments: {
@@ -637,7 +652,7 @@ describe('PUT role', () => {
         ],
       },
       apiResponses: {
-        get: async () => ({
+        get: () => ({
           'foo-role': {
             metadata: {
               bar: 'old-metadata',
@@ -672,7 +687,7 @@ describe('PUT role', () => {
             ],
           },
         }),
-        put: async () => {},
+        put: () => {},
       },
       asserts: {
         apiArguments: {
@@ -728,7 +743,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         recordSubFeaturePrivilegeUsage: true,
         apiArguments: {
@@ -769,7 +787,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         recordSubFeaturePrivilegeUsage: false,
         apiArguments: {
@@ -810,7 +831,10 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: { get: async () => ({}), put: async () => {} },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
       asserts: {
         recordSubFeaturePrivilegeUsage: false,
         apiArguments: {

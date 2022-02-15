@@ -30,7 +30,7 @@ function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: 
       },
       { ignore: [404] }
     )
-    .then(({ body: result }) => result);
+    .then((result) => result);
 }
 
 export function registerVisualizeRoute({

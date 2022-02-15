@@ -771,6 +771,41 @@ describe('IndexPatternDimensionEditorPanel', () => {
         });
       });
 
+      it('returns no combine_compatible drop type if the target column uses rarity ordering', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                orderBy: { type: 'rare' },
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible'],
+        });
+      });
+
       it('returns no combine drop type if the dragged column is compatible, the target one supports multiple fields but there are too many fields', () => {
         state = getStateWithMultiFieldColumn();
         state.layers.first = {
@@ -2167,6 +2202,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                       },
                       orderDirection: 'desc',
                       size: 10,
+                      parentFormat: { id: 'terms' },
                     },
                   },
                   col3: testState.layers.first.columns.col3,
@@ -2257,6 +2293,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                         type: 'alphabetical',
                       },
                       orderDirection: 'desc',
+                      parentFormat: { id: 'terms' },
                       size: 10,
                     },
                   },
@@ -2267,6 +2304,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     filter: undefined,
                     operationType: 'unique_count',
                     sourceField: 'src',
+                    timeShift: undefined,
                     dataType: 'number',
                     params: undefined,
                     scale: 'ratio',

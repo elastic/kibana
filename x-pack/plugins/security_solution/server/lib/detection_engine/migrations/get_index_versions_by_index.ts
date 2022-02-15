@@ -33,7 +33,7 @@ export const getIndexVersionsByIndex = async ({
   esClient: ElasticsearchClient;
   index: string[];
 }): Promise<IndexVersionsByIndex> => {
-  const { body: indexVersions } = await esClient.indices.getMapping<IndexMappingsResponse>({
+  const indexVersions = await esClient.indices.getMapping({
     index,
   });
 

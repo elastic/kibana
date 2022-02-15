@@ -10,7 +10,6 @@ import { Coordinate } from '../../../../typings/timeseries';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
-  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
@@ -23,7 +22,6 @@ export async function getErrorGroupDetailedStatistics({
   serviceName,
   setup,
   numBuckets,
-  transactionType,
   groupIds,
   environment,
   start,
@@ -33,7 +31,6 @@ export async function getErrorGroupDetailedStatistics({
   serviceName: string;
   setup: Setup;
   numBuckets: number;
-  transactionType: string;
   groupIds: string[];
   environment: string;
   start: number;
@@ -56,7 +53,6 @@ export async function getErrorGroupDetailedStatistics({
             filter: [
               { terms: { [ERROR_GROUP_ID]: groupIds } },
               { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -111,7 +107,6 @@ export async function getErrorGroupPeriods({
   serviceName,
   setup,
   numBuckets,
-  transactionType,
   groupIds,
   environment,
   comparisonStart,
@@ -123,7 +118,6 @@ export async function getErrorGroupPeriods({
   serviceName: string;
   setup: Setup;
   numBuckets: number;
-  transactionType: string;
   groupIds: string[];
   environment: string;
   comparisonStart?: number;
@@ -137,7 +131,6 @@ export async function getErrorGroupPeriods({
     serviceName,
     setup,
     numBuckets,
-    transactionType,
     groupIds,
   };
 

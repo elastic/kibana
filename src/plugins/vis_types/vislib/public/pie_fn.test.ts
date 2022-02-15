@@ -39,7 +39,7 @@ describe('interpreter/functions#pie', () => {
   const visConfig = {
     type: 'pie',
     addTooltip: true,
-    addLegend: true,
+    legendDisplay: 'show',
     legendPosition: 'right',
     isDonut: true,
     labels: {

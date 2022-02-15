@@ -367,7 +367,7 @@ export class DataViewsService {
   /**
    * Converts index pattern saved object to index pattern spec
    * @param savedObject
-   * @returns IndexPatternSpec
+   * @returns DataViewSpec
    */
 
   savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {

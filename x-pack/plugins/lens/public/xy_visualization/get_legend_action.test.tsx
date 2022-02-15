@@ -8,7 +8,7 @@
 import React from 'react';
 import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import type { LensMultiTable } from '../../common';
 import { layerTypes } from '../../common';

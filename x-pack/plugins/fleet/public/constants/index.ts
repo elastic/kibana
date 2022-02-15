@@ -29,3 +29,11 @@ export * from './page_paths';
 export const INDEX_NAME = '.kibana';
 
 export const CUSTOM_LOGS_INTEGRATION_NAME = 'log';
+
+export const DURATION_APM_SETTINGS_VARS = {
+  IDLE_TIMEOUT: 'idle_timeout',
+  READ_TIMEOUT: 'read_timeout',
+  SHUTDOWN_TIMEOUT: 'shutdown_timeout',
+  TAIL_SAMPLING_INTERVAL: 'tail_sampling_interval',
+  WRITE_TIMEOUT: 'write_timeout',
+};

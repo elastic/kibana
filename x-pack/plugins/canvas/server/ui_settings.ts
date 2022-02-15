@@ -21,7 +21,7 @@ export const getUISettings = (): Record<string, UiSettingsParams<boolean>> => ({
     }),
     description: i18n.translate('xpack.canvas.labs.enableLabsDescription', {
       defaultMessage:
-        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable experimental features in Canvas.',
+        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in Canvas.',
     }),
     value: false,
     type: 'boolean',

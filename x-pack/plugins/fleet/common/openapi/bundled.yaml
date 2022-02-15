@@ -396,6 +396,8 @@ paths:
               properties:
                 force:
                   type: boolean
+                ignore_constraints:
+                  type: boolean
     put:
       summary: Packages - Update
       tags: []
@@ -2363,6 +2365,8 @@ components:
       title: New agent policy
       type: object
       properties:
+        id:
+          type: string
         name:
           type: string
         namespace:
@@ -2376,6 +2380,9 @@ components:
             enum:
               - metrics
               - logs
+      required:
+        - name
+        - namespace
     new_package_policy:
       title: New package policy
       type: object

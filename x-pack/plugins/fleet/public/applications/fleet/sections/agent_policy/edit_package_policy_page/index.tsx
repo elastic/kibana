@@ -64,10 +64,9 @@ import type {
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
-
 import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
 
-import { hasUpgradeAvailable } from './utils';
+import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -232,6 +231,10 @@ export const EditPackagePolicyForm = memo<{
                   ...basePolicyInputVars,
                 };
               }
+              // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
+              if (basePackage.name === 'apm') {
+                newVars = fixApmDurationVars(newVars);
+              }
               return {
                 ...restOfInput,
                 streams: streams.map((stream: any) => {
@@ -344,6 +347,8 @@ export const EditPackagePolicyForm = memo<{
         : false;
       if (!hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
@@ -729,6 +734,12 @@ const UpgradeBreadcrumb: React.FunctionComponent<{
   return null;
 };
 
+const FlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+  }
+`;
+
 const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
 }> = ({ dryRunData }) => {
@@ -741,12 +752,6 @@ const UpgradeStatusCallout: React.FunctionComponent<{
   const isReadyForUpgrade = !dryRunData[0].hasErrors;
 
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
-
-  const FlyoutBody = styled(EuiFlyoutBody)`
-    .euiFlyoutBody__overflowContent {
-      padding: 0;
-    }
-  `;
 
   return (
     <>

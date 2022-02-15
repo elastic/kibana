@@ -47,7 +47,7 @@ export const patchRulesBulkRoute = (
       const siemResponse = buildSiemResponse(response);
 
       const rulesClient = context.alerting.getRulesClient();
-      const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+      const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = context.core.savedObjects.client;
 
       const mlAuthz = buildMlAuthz({
@@ -189,9 +189,7 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(
-                rule.id
-              );
+              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
               return transformValidateBulkError(
                 rule.id,
                 rule,

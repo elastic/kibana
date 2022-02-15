@@ -18,7 +18,7 @@ import {
   AlertClusterHealth,
   AlertInstanceState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { RULE_CLUSTER_HEALTH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
@@ -111,7 +111,7 @@ export class ClusterHealthRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

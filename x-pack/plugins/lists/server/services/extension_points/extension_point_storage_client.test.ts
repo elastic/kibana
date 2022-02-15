@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';
 import { getCreateExceptionListItemOptionsMock } from '../exception_lists/exception_list_client.mock';

@@ -853,12 +853,13 @@ module.exports = {
     },
 
     /**
-     * APM and Observability overrides
+     * APM, UX and Observability overrides
      */
     {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -881,6 +882,18 @@ module.exports = {
           {
             namedComponents: 'function-declaration',
             unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
+    {
+      // require explicit return types in route handlers for performance reasons
+      files: ['x-pack/plugins/apm/server/**/route.ts'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': [
+          'error',
+          {
+            allowTypedFunctionExpressions: false,
           },
         ],
       },

@@ -482,25 +482,6 @@ exports[`share url panel content should hide short url section when allowShortUr
         }
       />
     </EuiFormRow>
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      label={
-        <FormattedMessage
-          defaultMessage="URL"
-          id="share.urlPanel.urlGroupTitle"
-          values={Object {}}
-        />
-      }
-      labelType="label"
-    >
-      <EuiSpacer
-        size="s"
-      />
-    </EuiFormRow>
     <EuiSpacer
       size="m"
     />

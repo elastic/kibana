@@ -97,7 +97,7 @@ import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { SanitizedAlert } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogClient } from '../rule_execution_log';
+import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
 
 export type RuleAlertType = SanitizedAlert<RuleParams>;
 
@@ -269,7 +269,7 @@ export interface ReadRuleOptions {
 export interface DeleteRuleOptions {
   ruleId: Id;
   rulesClient: RulesClient;
-  ruleExecutionLogClient: IRuleExecutionLogClient;
+  ruleExecutionLog: IRuleExecutionLogForRoutes;
 }
 
 export interface FindRuleOptions {

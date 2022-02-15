@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
 import { getApmTraceUrl } from '../../../../../observability/public';
-import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
+import { useLinkProps, LinkDescriptor } from '../../../../../observability/public';
 import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];

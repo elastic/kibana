@@ -10,6 +10,7 @@ import { AddConfigDeprecation } from '@kbn/config';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
+import type { Client } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { ConditionalType } from '@kbn/config-schema';
 import { ConfigDeprecation } from '@kbn/config';
@@ -31,7 +32,6 @@ import { EnvironmentMode } from '@kbn/config';
 import { errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IncomingHttpHeaders } from 'http';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
@@ -53,9 +53,6 @@ import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShallowPromise } from '@kbn/utility-types';
 import { Stream } from 'stream';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { TransportRequestParams } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -426,6 +423,7 @@ export interface CoreServicesUsageData {
             docsDeleted: number;
             storeSizeBytes: number;
             primaryStoreSizeBytes: number;
+            savedObjectsDocsCount: number;
         }[];
         legacyUrlAliases: {
             activeCount: number;
@@ -887,11 +885,7 @@ export { EcsEventOutcome }
 export { EcsEventType }
 
 // @public
-export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'> & {
-    transport: {
-        request<TResponse = unknown>(params: TransportRequestParams, options?: TransportRequestOptions): Promise<TransportResult<TResponse>>;
-    };
-};
+export type ElasticsearchClient = Omit<Client, 'connectionPool' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'>;
 
 // @public
 export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'compression' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
@@ -1328,9 +1322,9 @@ export type KibanaExecutionContext = {
     readonly type: string;
     readonly name: string;
     readonly id: string;
-    readonly description: string;
+    readonly description?: string;
     readonly url?: string;
-    parent?: KibanaExecutionContext;
+    child?: KibanaExecutionContext;
 };
 
 // @public
@@ -3166,7 +3160,7 @@ export const validBodyOutput: readonly ["data", "stream"];
 
 // Warnings were encountered during analysis:
 //
-// src/core/server/elasticsearch/client/types.ts:93:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
+// src/core/server/elasticsearch/client/types.ts:81:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:375:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts

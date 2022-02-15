@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import type { Writable } from '@kbn/utility-types';
 import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from 'src/core/server';
 import { SavedObjectsErrorHelpers, ServiceStatusLevels } from 'src/core/server';

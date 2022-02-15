@@ -69,7 +69,7 @@ import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_m
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import {
   registerEventLogProvider,
-  ruleExecutionLoggerFactory,
+  ruleExecutionLogForExecutorsFactory,
 } from './lib/detection_engine/rule_execution_log';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -94,6 +94,7 @@ import type {
 } from './plugin_contract';
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
+import { featureUsageService } from './endpoint/services/feature_usage';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -167,10 +168,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
-      kibanaIndex: core.savedObjects.getKibanaIndex(),
       signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
+      logger,
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
@@ -232,7 +233,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
       ruleDataClient,
       eventLogService,
-      ruleExecutionLoggerFactory,
+      ruleExecutionLoggerFactory: ruleExecutionLogForExecutorsFactory,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -339,6 +340,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       taskManager: plugins.taskManager!,
     });
 
+    featureUsageService.setup(plugins.licensing);
+
     return {};
   }
 
@@ -401,6 +404,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       // License related start
       licenseService.start(this.licensing$);
+      featureUsageService.start(plugins.licensing);
       this.policyWatcher = new PolicyWatcher(
         plugins.fleet.packagePolicyService,
         core.savedObjects,
@@ -441,6 +445,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       licenseService,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
+      featureUsageService,
     });
 
     this.telemetryReceiver.start(
