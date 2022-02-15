@@ -28,6 +28,23 @@
   }
 }
 
+.kbnQueryBar__dataViewInput {
+  & .euiFormRow__labelWrapper {
+    width: fit-content;
+    color: $euiTitleColor;
+    background-color: $euiFormInputGroupLabelBackground;
+    margin-right: 0;
+    padding: 0 7px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
+
+  & .euiComboBox__inputWrap {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
 .kbnQueryBar__filterModalWrapper {
   @media only screen and (min-width: map-get($euiBreakpoints, 'm')) {
     & {
