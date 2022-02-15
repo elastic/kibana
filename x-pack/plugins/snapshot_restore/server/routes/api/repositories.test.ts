@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common';
+import {
+  ON_PREM_REPOSITORY_TYPES,
+  MODULE_REPOSITORY_TYPES,
+  REPOSITORY_PLUGINS_MAP,
+} from '../../../common';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
 import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
@@ -253,14 +257,14 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       path: addBasePath('repository_types'),
     };
 
-    it('returns default types if no repository plugins returned from ES', async () => {
+    it('returns module types and on-prem types if no repository plugins returned from ES', async () => {
       nodesInfoFn.mockResolvedValue({ nodes: { testNodeId: { plugins: [] } } });
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
+      const expectedResponse = [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
-    it('returns default types with any repository plugins returned from ES', async () => {
+    it('returns module types and on-prem types with any repository plugins returned from ES', async () => {
       const pluginNames = Object.keys(REPOSITORY_PLUGINS_MAP);
       const pluginTypes = Object.entries(REPOSITORY_PLUGINS_MAP).map(([key, value]) => value);
 
@@ -269,7 +273,11 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       };
       nodesInfoFn.mockResolvedValue(mockEsResponse);
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES, ...pluginTypes];
+      const expectedResponse = [
+        ...MODULE_REPOSITORY_TYPES,
+        ...ON_PREM_REPOSITORY_TYPES,
+        ...pluginTypes,
+      ];
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
@@ -280,7 +288,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       };
       nodesInfoFn.mockResolvedValue(mockEsResponse);
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
+      const expectedResponse = [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
@@ -296,7 +304,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       };
       nodesInfoFn.mockResolvedValue(mockEsResponse);
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
+      const expectedResponse = [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
