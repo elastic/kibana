@@ -11,14 +11,12 @@ import { ReportingPlugin } from './plugin';
 
 export { config } from './config';
 
-/*
+/**
  * Common types that are documented in the Public API
  */
 export type { ReportingSetup, ReportingStart } from './types';
 
-/**
- * @internal
- */
+// @internal
 export const plugin = (initContext: PluginInitializerContext<ReportingConfigType>) =>
   new ReportingPlugin(initContext);
 

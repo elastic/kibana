@@ -13,14 +13,14 @@ import type { ReportingPublicComponents } from './shared/get_shared_components';
  * Setup contract for the Reporting plugin.
  */
 export interface ReportingSetup {
-  /*
+  /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    *
    * @returns boolean
    */
   usesUiCapabilities: () => boolean;
 
-  /*
+  /**
    * A set of React components for displaying a Reporting share menu in an application
    */
   components: ReportingPublicComponents;

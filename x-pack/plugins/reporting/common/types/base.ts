@@ -11,7 +11,7 @@ import { LocatorParams } from './url';
 
 export type JobId = string;
 
-/*
+/**
  * @deprecated
  */
 export type BaseParams = Ensure<
@@ -25,7 +25,7 @@ export type BaseParams = Ensure<
   SerializableRecord
 >;
 
-/*
+/**
  * Report job parameters that an application must return from its
  * getSharingData function.
  */
@@ -33,7 +33,7 @@ export type BaseParamsV2 = BaseParams & {
   locatorParams: LocatorParams[];
 };
 
-/*
+/**
  * @deprecated
  */
 export interface BasePayload extends BaseParams {
@@ -42,7 +42,7 @@ export interface BasePayload extends BaseParams {
   isDeprecated?: boolean;
 }
 
-/*
+/**
  * Report job parameters, after they are processed in the request handler.
  */
 export interface BasePayloadV2 extends BaseParamsV2 {

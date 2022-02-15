@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/*
+/**
  * Common types that are documented in the Public API
  */
 export type {

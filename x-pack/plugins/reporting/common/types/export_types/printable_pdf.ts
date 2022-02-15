@@ -26,7 +26,9 @@ export type JobParamsPDFDeprecated = BaseParamsPDF & BaseParams;
  */
 export type JobAppParamsPDF = Omit<JobParamsPDFDeprecated, 'browserTimezone' | 'version'>;
 
-// Job payload: structure of stored job data provided by create_job
+/**
+ * Structure of stored job data provided by create_job
+ */
 export interface TaskPayloadPDF extends BasePayload {
   layout: LayoutParams;
   forceNow?: string;
