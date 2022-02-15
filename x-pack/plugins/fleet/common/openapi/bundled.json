@@ -646,6 +646,9 @@
                 "properties": {
                   "force": {
                     "type": "boolean"
+                  },
+                  "ignore_constraints": {
+                    "type": "boolean"
                   }
                 }
               }

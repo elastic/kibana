@@ -396,6 +396,8 @@ paths:
               properties:
                 force:
                   type: boolean
+                ignore_constraints:
+                  type: boolean
     put:
       summary: Packages - Update
       tags: []

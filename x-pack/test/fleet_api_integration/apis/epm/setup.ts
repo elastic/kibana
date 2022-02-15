@@ -52,6 +52,40 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    it('does not fail when package is no longer compatible in registry', async () => {
+      await supertest
+        .post(`/api/fleet/epm/packages/deprecated/0.1.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true, ignore_constraints: true })
+        .expect(200);
+
+      const agentPolicyResponse = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'deprecated-ap-1',
+          namespace: 'default',
+          monitoring_enabled: [],
+        })
+        .expect(200);
+
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'deprecated-1',
+          policy_id: agentPolicyResponse.body.item.id,
+          package: {
+            name: 'deprecated',
+            version: '0.1.0',
+          },
+          inputs: [],
+        })
+        .expect(200);
+
+      await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
+    });
+
     it('allows elastic/fleet-server user to call required APIs', async () => {
       const {
         token,
