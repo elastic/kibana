@@ -86,10 +86,12 @@ export const getMlJobMetrics = async ({
       ml_job_metrics: jobMetrics,
     };
   } catch (e) {
-    // ignore failure, usage will be zeroed
-    logger.info(
-      `Encountered exception in telemetry of message: ${e.message}, error: ${e}. Telemetry for "ml_jobs" will be skipped.`
-    );
+    // ignore failure, usage will be zeroed. We don't log the message below as currently ML jobs when it does
+    // not have a "security" job will cause a throw. If this does not normally throw eventually on normal operations
+    // we should log a debug message like the following below to not unnecessarily worry users as this will not effect them:
+    // logger.debug(
+    //  `Encountered unexpected condition in telemetry of message: ${e.message}, object: ${e}. Telemetry for "ml_jobs" will be skipped.`
+    // );
     return {
       ml_job_usage: getInitialMlJobUsage(),
       ml_job_metrics: [],

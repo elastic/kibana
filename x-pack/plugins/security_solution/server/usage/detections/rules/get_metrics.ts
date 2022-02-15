@@ -110,9 +110,9 @@ export const getRuleMetrics = async ({
       detection_rule_usage: rulesUsage,
     };
   } catch (e) {
-    // ignore failure, usage will be zeroed
-    logger.info(
-      `Encountered exception in telemetry of message: ${e.message}, error: ${e}. Telemetry for "detection rules" being skipped.`
+    // ignore failure, usage will be zeroed. We use debug mode to not unnecessarily worry users as this will not effect them.
+    logger.debug(
+      `Encountered unexpected condition in telemetry of message: ${e.message}, object: ${e}. Telemetry for "detection rules" being skipped.`
     );
     return {
       detection_rule_detail: [],
