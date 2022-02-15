@@ -413,7 +413,7 @@ export function EditFilterModal({
     }
     const alias = customLabel || null;
     // validation for existence of saved filter with given alias
-    if (alias && isLabelDuplicated()) {
+    if (alias && !filter.meta.alias && isLabelDuplicated()) {
       setSubmitDisabled(true);
       return;
     }
