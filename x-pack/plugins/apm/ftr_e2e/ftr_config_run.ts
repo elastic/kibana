@@ -7,7 +7,6 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import cypress from 'cypress';
-import path from 'path';
 import { cypressStart } from './cypress_start';
 import { FtrProviderContext } from './ftr_provider_context';
 
