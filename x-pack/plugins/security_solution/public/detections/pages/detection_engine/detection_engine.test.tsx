@@ -72,6 +72,9 @@ jest.mock('../../../common/lib/kibana', () => {
             siem: { crud_alerts: true, read_alerts: true },
           },
         },
+        cases: {
+          getCasesContext: jest.fn(),
+        },
         uiSettings: {
           get: jest.fn(),
         },
