@@ -15,6 +15,7 @@ import {
 import {
   createRule,
   createSignalsIndex,
+  deleteAllAlerts,
   deleteSignalsIndex,
   finalizeSignalsMigration,
   getEqlRuleForSignalTesting,
@@ -57,6 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
       );
       await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
     });
 
     describe('CTI', () => {
