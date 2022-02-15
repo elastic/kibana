@@ -68,7 +68,7 @@ import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/co
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
-import { getAppliedTimeRange, getXDomain, XyEndzones } from './x_domain';
+import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './get_legend_action';
 import {
   computeChartMargins,
@@ -513,10 +513,6 @@ export function XYChart({
         value: pointValue,
       });
     }
-    const currentColumnMeta = table.columns.find((el) => el.id === layer.xAccessor)?.meta;
-    const xAxisFieldName = currentColumnMeta?.field;
-    const isDateField = currentColumnMeta?.type === 'date';
-
     const context: LensFilterEvent['data'] = {
       data: points.map((point) => ({
         row: point.row,
@@ -524,7 +520,6 @@ export function XYChart({
         value: point.value,
         table,
       })),
-      timeFieldName: xDomain && isDateField ? xAxisFieldName : undefined,
     };
     onClickValue(context);
   };
@@ -542,13 +537,10 @@ export function XYChart({
 
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === filteredLayers[0].xAccessor);
 
-    const timeFieldName = getAppliedTimeRange(filteredLayers, data)?.field;
-
     const context: LensBrushEvent['data'] = {
       range: [min, max],
       table,
       column: xAxisColumnIndex,
-      timeFieldName,
     };
     onSelectRange(context);
   };
