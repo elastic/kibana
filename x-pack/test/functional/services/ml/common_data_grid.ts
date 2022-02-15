@@ -99,10 +99,7 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
       expectedColumnValues: string[]
     ) {
       await retry.tryForTime(20 * 1000, async () => {
-        const uniqueColumnValues = await this.getEuiDataGridColumnUniqueValues(
-          tableSubj,
-          column + 1
-        );
+        const uniqueColumnValues = await this.getEuiDataGridColumnUniqueValues(tableSubj, column);
 
         uniqueColumnValues.sort();
         // check if the returned unique value matches the supplied filter value
@@ -115,10 +112,7 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
 
     async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
       await retry.tryForTime(20 * 1000, async () => {
-        const uniqueColumnValues = await this.getEuiDataGridColumnUniqueValues(
-          tableSubj,
-          column + 1
-        );
+        const uniqueColumnValues = await this.getEuiDataGridColumnUniqueValues(tableSubj, column);
         uniqueColumnValues.forEach((value) => {
           // check if the returned unique value is not empty
           expect(value).to.not.eql('');
