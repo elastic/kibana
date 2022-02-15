@@ -16,6 +16,7 @@ import {
   GaugeTicksPosition,
   GaugeLabelMajorModes,
   GaugeColorModes,
+  GaugeShapes,
 } from '../../common';
 import { GaugeTicksPositions } from '../../common';
 import {
@@ -243,6 +244,10 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     // TODO: format in charts
     const formattedActual = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
     const goalConfig = getGoalConfig(gaugeType);
+    const totalTicks = getTicks(ticksPosition, [min, max], bands);
+    const ticks =
+      gaugeType === GaugeShapes.CIRCLE ? totalTicks.slice(0, totalTicks.length - 1) : totalTicks;
+
     return (
       <Chart>
         <Settings
@@ -259,7 +264,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           actual={formattedActual}
           tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
           bands={bands}
-          ticks={getTicks(ticksPosition, [min, max], bands)}
+          ticks={ticks.slice(0, ticks.length - 1)}
           bandFillColor={
             colorMode === GaugeColorModes.PALETTE && colors
               ? (val) => {

@@ -9,8 +9,8 @@ import { GoalProps } from '@elastic/charts';
 import { GaugeShape, GaugeShapes } from '../../../common';
 
 const getCicleConfig = () => ({
-  angleStart: Math.PI + Math.PI / 2,
-  angleEnd: -Math.PI / 2,
+  angleStart: Math.PI / 2,
+  angleEnd: -(Math.PI + Math.PI / 2),
 });
 
 const getArcConfig = () => ({
