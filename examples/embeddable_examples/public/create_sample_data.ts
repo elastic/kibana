@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { TodoSavedObjectAttributes, BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../common';
 
-export async function createSampleData(client: SavedObjectsClientContract, overwrite = true) {
-  await client.create<TodoSavedObjectAttributes>(
+export async function createSampleData(core: CoreStart, overwrite = true) {
+  if (!core.application.capabilities.embeddableExamplesTodo?.saveTodo) {
+    return;
+  }
+
+  await core.savedObjects.client.create<TodoSavedObjectAttributes>(
     'todo',
     {
       task: 'Take the garbage out',
@@ -23,7 +27,7 @@ export async function createSampleData(client: SavedObjectsClientContract, overw
     }
   );
 
-  await client.create<BookSavedObjectAttributes>(
+  await core.savedObjects.client.create<BookSavedObjectAttributes>(
     BOOK_SAVED_OBJECT,
     {
       title: 'Pillars of the Earth',

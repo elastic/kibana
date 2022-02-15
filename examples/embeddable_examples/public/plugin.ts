@@ -179,7 +179,7 @@ export class EmbeddableExamplesPlugin
     deps: EmbeddableExamplesStartDependencies
   ): EmbeddableExamplesStart {
     return {
-      createSampleData: () => createSampleData(core.savedObjects.client),
+      createSampleData: () => createSampleData(core),
       factories: this.exampleEmbeddableFactories as ExampleEmbeddableFactories,
     };
   }

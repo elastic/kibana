@@ -10,7 +10,7 @@
   },
   "description": "Example app that shows how to register custom embeddables",
   "requiredPlugins": ["embeddable", "uiActions", "savedObjects", "dashboard", "kibanaUtils"],
-  "optionalPlugins": [],
+  "optionalPlugins": ["features"],
   "extraPublicDirs": ["public/todo", "public/hello_world", "public/todo/todo_ref_embeddable"],
   "requiredBundles": ["kibanaReact"]
 }
