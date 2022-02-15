@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 import {
   AppMountParameters,
   AppUpdater,
@@ -18,44 +17,39 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
-import { isFilterPinned } from '@kbn/es-query';
-import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
+import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
+import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
+import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from 'src/plugins/share/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { EuiLoadingContent } from '@elastic/eui';
-import { DataPublicPluginStart, DataPublicPluginSetup } from '../../data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
-import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
   setDocViewsRegistry,
-  setUrlTracker,
   setHeaderActionMenuMounter,
-  setUiActions,
   setScopedHistory,
-  getScopedHistory,
+  setUiActions,
+  setUrlTracker,
   syncHistoryLocations,
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import {
-  DiscoverUrlGeneratorState,
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGenerator,
-  SEARCH_SESSION_ID_QUERY_PARAM,
+  DiscoverUrlGeneratorState,
 } from './url_generator';
-import { DiscoverAppLocatorDefinition, DiscoverAppLocator } from './locator';
+import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from './locator';
 import { SearchEmbeddableFactory } from './embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/data_view_field_editor/public';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
@@ -283,55 +277,6 @@ export class DiscoverPlugin
       ),
     });
 
-    const {
-      appMounted,
-      appUnMounted,
-      stop: stopUrlTracker,
-      setActiveUrl: setTrackedUrl,
-      restorePreviousUrl,
-    } = createKbnUrlTracker({
-      // we pass getter here instead of plain `history`,
-      // so history is lazily created (when app is mounted)
-      // this prevents redundant `#` when not in discover app
-      getHistory: getScopedHistory,
-      baseUrl,
-      defaultSubUrl: '#/',
-      storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
-      navLinkUpdater$: this.appStateUpdater,
-      toastNotifications: core.notifications.toasts,
-      stateParams: [
-        {
-          kbnUrlKey: '_g',
-          stateUpdate$: plugins.data.query.state$.pipe(
-            filter(
-              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
-            ),
-            map(({ state }) => ({
-              ...state,
-              filters: state.filters?.filter(isFilterPinned),
-            }))
-          ),
-        },
-      ],
-      onBeforeNavLinkSaved: (newNavLink: string) => {
-        // Do not save SEARCH_SESSION_ID into nav link, because of possible edge cases
-        // that could lead to session restoration failure.
-        // see: https://github.com/elastic/kibana/issues/87149
-        if (newNavLink.includes(SEARCH_SESSION_ID_QUERY_PARAM)) {
-          newNavLink = replaceUrlHashQuery(newNavLink, (query) => {
-            delete query[SEARCH_SESSION_ID_QUERY_PARAM];
-            return query;
-          });
-        }
-
-        return newNavLink;
-      },
-    });
-    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
-    this.stopUrlTracking = () => {
-      stopUrlTracker();
-    };
-
     core.application.register({
       id: 'discover',
       title: 'Discover',
@@ -341,6 +286,14 @@ export class DiscoverPlugin
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
+        const [coreStart, discoverStartPlugins] = await core.getStartServices();
+        const { initializeKbnUrlTracking } = await import('./utils/initialize_kbn_url_tracking');
+        const { setTrackedUrl, restorePreviousUrl, stopUrlTracker, appMounted, appUnMounted } =
+          initializeKbnUrlTracking(baseUrl, coreStart, this.appStateUpdater, discoverStartPlugins);
+        setUrlTracker({ setTrackedUrl, restorePreviousUrl });
+        this.stopUrlTracking = () => {
+          stopUrlTracker();
+        };
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
@@ -351,7 +304,6 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        const [coreStart, discoverStartPlugins] = await core.getStartServices();
         const services = buildServices(coreStart, discoverStartPlugins, this.initializerContext);
 
         // make sure the index pattern list is up to date
