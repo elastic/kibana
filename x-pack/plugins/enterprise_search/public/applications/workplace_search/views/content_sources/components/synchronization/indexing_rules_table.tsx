@@ -13,7 +13,6 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiLink,
   EuiSelect,
   EuiSpacer,
@@ -186,9 +185,6 @@ export const IndexingRulesTable: React.FC = () => {
               isInvalid={isInvalid}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip content={indexingRule.value} type="iInCircle" position="top" />
-          </EuiFlexItem>
         </EuiFlexGroup>
       ),
       render: (indexingRule) => <EuiText size="s">{indexingRule.value}</EuiText>,
@@ -216,16 +212,16 @@ export const IndexingRulesTable: React.FC = () => {
       description={description}
       instanceId={indexingRulesInstanceId}
       items={indexingRules}
-      onAdd={(newRule, done) => {
-        initAddIndexingRule(newRule, done);
+      onAdd={(newRule) => {
+        initAddIndexingRule(newRule);
         clearFlashMessages();
       }}
       onDelete={(rule) => {
         deleteIndexingRule(rule);
         clearFlashMessages();
       }}
-      onUpdate={(rule, done) => {
-        initSetIndexingRule(rule, done);
+      onUpdate={(rule) => {
+        initSetIndexingRule(rule);
         clearFlashMessages();
       }}
       onReorder={(newIndexingRules) => {
@@ -233,7 +229,6 @@ export const IndexingRulesTable: React.FC = () => {
         clearFlashMessages();
       }}
       title=""
-      uneditableItems={[]}
       canRemoveLastItem
     />
   );

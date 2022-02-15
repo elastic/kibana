@@ -10,7 +10,7 @@ import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
@@ -29,5 +29,6 @@ describe('SynchronizationRouter', () => {
     expect(wrapper.find(Frequency)).toHaveLength(2);
     expect(wrapper.find(Switch)).toHaveLength(1);
     expect(wrapper.find(Route)).toHaveLength(4);
+    expect(wrapper.find(Redirect)).toHaveLength(1);
   });
 });

@@ -97,16 +97,10 @@ interface SynchronizationActions {
   setServerSchedule(schedule: IndexingSchedule): IndexingSchedule;
   updateServerSettings(body: ServerSyncSettingsBody): ServerSyncSettingsBody;
   addIndexingRule(indexingRule: EditableIndexingRuleBase): EditableIndexingRuleBase;
-  initAddIndexingRule(
-    rule: EditableIndexingRule,
-    callback: Function
-  ): { rule: EditableIndexingRule; callback: Function };
+  initAddIndexingRule(rule: EditableIndexingRule): { rule: EditableIndexingRule };
   setIndexingRules(indexingRules: EditableIndexingRule[]): EditableIndexingRule[];
   setIndexingRule(indexingRule: EditableIndexingRule): EditableIndexingRule;
-  initSetIndexingRule(
-    indexingRule: EditableIndexingRule,
-    callback: Function
-  ): { rule: EditableIndexingRule; callback: Function };
+  initSetIndexingRule(indexingRule: EditableIndexingRule): { rule: EditableIndexingRule };
   deleteIndexingRule(indexingRule: EditableIndexingRule): EditableIndexingRule;
 }
 
@@ -145,6 +139,12 @@ export interface EditableIndexingRule extends EditableIndexingRuleBase {
   id: number;
 }
 
+interface IndexingRuleForAPI {
+  filter_type: 'object_type' | 'path_template' | 'file_extension';
+  include?: string;
+  exclude?: string;
+}
+
 const isIncludeRule = (rule: IndexingRule): rule is IndexingRuleInclude => {
   return !!(rule as IndexingRuleInclude).include;
 };
@@ -178,8 +178,8 @@ export const SynchronizationLogic = kea<
     addBlockedWindow: true,
     addIndexingRule: (rule: EditableIndexingRuleBase) => rule,
     deleteIndexingRule: (rule: EditableIndexingRule) => rule,
-    initAddIndexingRule: (rule: EditableIndexingRule, callback: Function) => ({ rule, callback }),
-    initSetIndexingRule: (rule: EditableIndexingRule, callback: Function) => ({ rule, callback }),
+    initAddIndexingRule: (rule: EditableIndexingRule) => ({ rule }),
+    initSetIndexingRule: (rule: EditableIndexingRule) => ({ rule }),
     setIndexingRules: (indexingRules: EditableIndexingRule[]) => indexingRules,
     setIndexingRule: (rule: EditableIndexingRule) => rule,
   },
@@ -347,11 +347,7 @@ export const SynchronizationLogic = kea<
     indexingRulesForAPI: [
       () => [selectors.indexingRules],
       (indexingRules: EditableIndexingRule[]) =>
-        indexingRules.map(({ filterType, valueType, value }) =>
-          valueType === 'include'
-            ? { filter_type: filterType, include: value }
-            : { filter_type: filterType, exclude: value }
-        ),
+        indexingRules.map((indexingRule) => indexingRuleToApiFormat(indexingRule)),
     ],
   }),
   listeners: ({ actions, values, props }) => ({
@@ -374,10 +370,9 @@ export const SynchronizationLogic = kea<
       KibanaLogic.values.navigateToUrl(path);
       actions.setNavigatingBetweenTabs(false);
     },
-    initAddIndexingRule: async ({ rule, callback }) => {
+    initAddIndexingRule: async ({ rule }) => {
       const { id: sourceId } = props.contentSource;
       const route = `/internal/workplace_search/org/sources/${sourceId}/indexing_rules/validate`;
-      const { filterType, valueType, value } = rule;
       try {
         const response = await HttpLogic.values.http.post<{
           rules: Array<{
@@ -386,34 +381,27 @@ export const SynchronizationLogic = kea<
           }>;
         }>(route, {
           body: JSON.stringify({
-            rules: [
-              valueType === 'exclude'
-                ? {
-                    filter_type: filterType,
-                    exclude: value,
-                  }
-                : { filter_type: filterType, include: value },
-            ],
+            rules: [indexingRuleToApiFormat(rule)],
           }),
         });
         const error = response.rules[0]?.error;
+        const tableLogic = InlineEditableTableLogic({
+          instanceId: 'IndexingRulesTable',
+        } as InlineEditableTableProps<ItemWithAnID>);
         if (error) {
-          InlineEditableTableLogic({
-            instanceId: 'IndexingRulesTable',
-          } as InlineEditableTableProps<ItemWithAnID>).actions.setRowErrors([error]);
-          callback();
+          tableLogic.actions.setRowErrors([error]);
+          tableLogic.actions.doneEditing();
         } else {
           actions.addIndexingRule(rule);
-          callback();
+          tableLogic.actions.doneEditing();
         }
       } catch (e) {
         flashAPIErrors(e);
       }
     },
-    initSetIndexingRule: async ({ rule, callback }) => {
+    initSetIndexingRule: async ({ rule }) => {
       const { id: sourceId } = props.contentSource;
       const route = `/internal/workplace_search/org/sources/${sourceId}/indexing_rules/validate`;
-      const { filterType, valueType, value } = rule;
       try {
         const response = await HttpLogic.values.http.post<{
           rules: Array<{
@@ -422,25 +410,19 @@ export const SynchronizationLogic = kea<
           }>;
         }>(route, {
           body: JSON.stringify({
-            rules: [
-              valueType === 'exclude'
-                ? {
-                    filter_type: filterType,
-                    exclude: value,
-                  }
-                : { filter_type: filterType, include: value },
-            ],
+            rules: [indexingRuleToApiFormat(rule)],
           }),
         });
         const error = response.rules[0]?.error;
+        const tableLogic = InlineEditableTableLogic({
+          instanceId: 'IndexingRulesTable',
+        } as InlineEditableTableProps<ItemWithAnID>);
         if (error) {
-          InlineEditableTableLogic({
-            instanceId: 'IndexingRulesTable',
-          } as InlineEditableTableProps<ItemWithAnID>).actions.setRowErrors([error]);
-          callback();
+          tableLogic.actions.setRowErrors([error]);
+          tableLogic.actions.doneEditing();
         } else {
-          actions.setIndexingRule(rule);
-          callback();
+          actions.addIndexingRule(rule);
+          tableLogic.actions.doneEditing();
         }
       } catch (e) {
         flashAPIErrors(e);
@@ -529,4 +511,11 @@ const formatBlockedWindowsForServer = (
     start,
     end,
   }));
+};
+
+const indexingRuleToApiFormat = (indexingRule: EditableIndexingRule): IndexingRuleForAPI => {
+  const { valueType, filterType, value } = indexingRule;
+  return valueType === 'include'
+    ? { filter_type: filterType, include: value }
+    : { filter_type: filterType, exclude: value };
 };

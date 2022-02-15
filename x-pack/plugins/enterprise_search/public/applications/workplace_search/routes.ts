@@ -76,6 +76,7 @@ export const DISPLAY_SETTINGS_RESULT_DETAIL_PATH = `${SOURCE_DISPLAY_SETTINGS_PA
 
 export const SYNC_FREQUENCY_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/frequency`;
 export const BLOCKED_TIME_WINDOWS_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/frequency/blocked_windows`;
+export const OLD_OBJECTS_AND_ASSETS_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/objects_and_assets`;
 export const ASSETS_AND_OBJECTS_PATH = `${SOURCE_SYNCHRONIZATION_PATH}/assets_and_objects`;
 
 export const ORG_SETTINGS_PATH = '/settings';

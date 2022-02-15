@@ -85,7 +85,8 @@ export const AssetsAndObjects: React.FC = () => {
         messageText={SYNC_UNSAVED_CHANGES_MESSAGE}
       />
       <ViewContentHeader title={NAV.SYNCHRONIZATION_ASSETS_AND_OBJECTS} action={actions} />
-      {SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION} <EuiSpacer />
+      {SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION}
+      <EuiSpacer />
       <EuiLink href={docLinks.workplaceSearchSynch} external>
         {SOURCE_ASSETS_AND_OBJECTS_LEARN_MORE_LINK}
       </EuiLink>
