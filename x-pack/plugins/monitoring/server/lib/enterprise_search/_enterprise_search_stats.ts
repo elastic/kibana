@@ -32,7 +32,7 @@ export const entSearchUuidsAgg = (maxBucketSize: number) => ({
     },
   },
 
-  // Collect all runnng versions
+  // Collect all running versions
   versions: {
     terms: {
       field: 'enterprisesearch.health.version.number',

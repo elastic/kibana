@@ -177,7 +177,7 @@ export class MonitoringPlugin
       ),
     };
 
-    // If the UI is enabled, then we want to register it so it shows up
+    // If the UI is enabled, then we want to register it, so it shows up
     // and start any other UI-related setup tasks
     if (config.ui.enabled) {
       // Create our shim which is currently used to power our routing
@@ -402,7 +402,7 @@ export class MonitoringPlugin
         } else if (method === 'PUT') {
           router.put(options, handler);
         } else {
-          throw new Error('Unsupport API method: ' + method);
+          throw new Error('Unsupported API method: ' + method);
         }
       },
     };
