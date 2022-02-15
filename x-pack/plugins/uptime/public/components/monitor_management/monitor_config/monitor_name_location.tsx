@@ -43,7 +43,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
             defaultMessage="Monitor name"
           />
         }
-        fullWidth={true}
+        fullWidth={false}
         isInvalid={isNameInvalid || nameAlreadyExists}
         error={
           nameAlreadyExists ? (

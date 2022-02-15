@@ -6,17 +6,19 @@
  */
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiSpacer, EuiDescribedFormGroup, EuiLink, EuiFieldText } from '@elastic/eui';
-import type { Validation } from '../../../../common/types/index';
-import { ConfigKey } from '../../../../common/runtime_types/monitor_management';
+import { EuiFormRow, EuiSpacer, EuiLink, EuiFieldText } from '@elastic/eui';
+import type { Validation } from '../../../../common/types';
+import { ConfigKey } from '../../../../common/runtime_types';
+import { DescribedFormGroupWithWrap } from '../../fleet_package/common/described_form_group_with_wrap';
 import { usePolicyConfigContext } from '../../fleet_package/contexts';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   validate: Validation;
+  minColumnWidth?: string;
 }
 
-export const MonitorManagementAdvancedFields = memo<Props>(({ validate }) => {
+export const MonitorManagementAdvancedFields = memo<Props>(({ validate, minColumnWidth }) => {
   const { namespace, setNamespace } = usePolicyConfigContext();
 
   const namespaceErrorMsg = validate[ConfigKey.NAMESPACE]?.({
@@ -26,7 +28,8 @@ export const MonitorManagementAdvancedFields = memo<Props>(({ validate }) => {
   const { services } = useKibana();
 
   return (
-    <EuiDescribedFormGroup
+    <DescribedFormGroupWithWrap
+      minColumnWidth={minColumnWidth}
       title={
         <h4>
           <FormattedMessage
@@ -83,6 +86,6 @@ export const MonitorManagementAdvancedFields = memo<Props>(({ validate }) => {
           name="namespace"
         />
       </EuiFormRow>
-    </EuiDescribedFormGroup>
+    </DescribedFormGroupWithWrap>
   );
 });
