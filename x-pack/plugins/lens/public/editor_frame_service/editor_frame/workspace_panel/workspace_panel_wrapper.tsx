@@ -8,9 +8,8 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSwitch } from '@elastic/eui';
+import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiButtonIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
@@ -164,7 +163,7 @@ export function WorkspacePanelWrapper({
                     alignItems="center"
                     justifyContent="flexEnd"
                     gutterSize="s"
-                    responsive={true}
+                    responsive={false}
                   >
                     <EuiFlexItem grow={false}>
                       <EuiSwitch
@@ -177,19 +176,16 @@ export function WorkspacePanelWrapper({
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButton
+                      <EuiButtonIcon
                         disabled={autoApplyEnabled || changesApplied}
-                        fill
+                        display="fill"
                         className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
                         iconType="play"
                         onClick={() => dispatchLens(applyChanges())}
-                        size="s"
-                      >
-                        <FormattedMessage
-                          id="xpack.lens.editorFrame.applyChangesLabel"
-                          defaultMessage="Apply"
-                        />
-                      </EuiButton>
+                        aria-label={i18n.translate('xpack.lens.editorFrame.applyChangesLabel', {
+                          defaultMessage: 'Apply',
+                        })}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
