@@ -49,6 +49,6 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return errors;
     }
 
-    return [];
+    return newMonitor;
   },
 });
