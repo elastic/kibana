@@ -27,4 +27,6 @@ export const getInferenceQuerySchema = schema.object({
   include: schema.maybe(schema.string()),
 });
 
-export const trainedModel = schema.any();
+export const putTrainedModelQuerySchema = schema.object({
+  defer_definition_decompression: schema.maybe(schema.boolean()),
+});

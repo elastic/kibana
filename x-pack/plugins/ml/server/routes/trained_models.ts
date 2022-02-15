@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   getInferenceQuerySchema,
   modelIdSchema,
   optionalModelIdSchema,
-  trainedModel,
+  putTrainedModelQuerySchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -195,7 +196,8 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/{modelId}',
       validate: {
         params: modelIdSchema,
-        body: trainedModel,
+        body: schema.any(),
+        query: putTrainedModelQuerySchema,
       },
       options: {
         tags: ['access:ml:canCreateTrainedModels'],
@@ -203,11 +205,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        // defer_definition_decompression should be allowed in query !!!!!!!!!!!!!!!!!!!!!!!!!!!
         const { modelId } = request.params;
         const body = await mlClient.putTrainedModel({
           model_id: modelId,
           body: request.body,
+          ...(request.query?.defer_definition_decompression
+            ? { defer_definition_decompression: true }
+            : {}),
         });
         return response.ok({
           body,
