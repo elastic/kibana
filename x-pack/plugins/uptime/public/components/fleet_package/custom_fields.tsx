@@ -14,11 +14,11 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiDescribedFormGroup,
   EuiSwitch,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+import { DescribedFormGroupWithWrap } from './common/described_form_group_with_wrap';
 import { ConfigKey, DataStream, Validation } from './types';
 import { usePolicyConfigContext } from './contexts';
 import { TLSFields } from './tls_fields';
@@ -36,6 +36,7 @@ interface Props {
   dataStreams?: DataStream[];
   children?: React.ReactNode;
   appendAdvancedFields?: React.ReactNode;
+  minColumnWidth?: string;
 }
 
 const dataStreamToString = [
@@ -54,7 +55,7 @@ const dataStreamToString = [
 ];
 
 export const CustomFields = memo<Props>(
-  ({ validate, dataStreams = [], children, appendAdvancedFields }) => {
+  ({ validate, dataStreams = [], children, appendAdvancedFields, minColumnWidth }) => {
     const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled, isEditable } =
       usePolicyConfigContext();
 
@@ -86,7 +87,8 @@ export const CustomFields = memo<Props>(
 
     return (
       <EuiForm component="form">
-        <EuiDescribedFormGroup
+        <DescribedFormGroupWithWrap
+          minColumnWidth={minColumnWidth}
           title={
             <h4>
               <FormattedMessage
@@ -165,9 +167,10 @@ export const CustomFields = memo<Props>(
               {renderSimpleFields(monitorType)}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiDescribedFormGroup>
+        </DescribedFormGroupWithWrap>
         {(isHTTP || isTCP) && (
-          <EuiDescribedFormGroup
+          <DescribedFormGroupWithWrap
+            minColumnWidth={minColumnWidth}
             title={
               <h4>
                 <FormattedMessage
@@ -197,15 +200,23 @@ export const CustomFields = memo<Props>(
               onChange={(event) => setIsTLSEnabled(event.target.checked)}
             />
             <TLSFields />
-          </EuiDescribedFormGroup>
+          </DescribedFormGroupWithWrap>
         )}
         <EuiSpacer size="m" />
         {isHTTP && (
-          <HTTPAdvancedFields validate={validate}>{appendAdvancedFields}</HTTPAdvancedFields>
+          <HTTPAdvancedFields validate={validate} minColumnWidth={minColumnWidth}>
+            {appendAdvancedFields}
+          </HTTPAdvancedFields>
         )}
-        {isTCP && <TCPAdvancedFields>{appendAdvancedFields}</TCPAdvancedFields>}
+        {isTCP && (
+          <TCPAdvancedFields minColumnWidth={minColumnWidth}>
+            {appendAdvancedFields}
+          </TCPAdvancedFields>
+        )}
         {isBrowser && (
-          <BrowserAdvancedFields validate={validate}>{appendAdvancedFields}</BrowserAdvancedFields>
+          <BrowserAdvancedFields validate={validate} minColumnWidth={minColumnWidth}>
+            {appendAdvancedFields}
+          </BrowserAdvancedFields>
         )}
         {isICMP && <ICMPAdvancedFields>{appendAdvancedFields}</ICMPAdvancedFields>}
       </EuiForm>
