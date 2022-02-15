@@ -172,6 +172,7 @@ export function WorkspacePanelWrapper({
                         })}
                         checked={autoApplyEnabled}
                         onChange={toggleAutoApply}
+                        data-test-subj="lensToggleAutoApply"
                         className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
                       />
                     </EuiFlexItem>
@@ -182,6 +183,7 @@ export function WorkspacePanelWrapper({
                         className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
                         iconType="play"
                         onClick={() => dispatchLens(applyChanges())}
+                        data-test-subj="lensApplyChanges"
                         aria-label={i18n.translate('xpack.lens.editorFrame.applyChangesLabel', {
                           defaultMessage: 'Apply',
                         })}
