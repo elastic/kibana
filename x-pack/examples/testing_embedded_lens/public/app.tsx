@@ -422,7 +422,9 @@ export const App = (props: {
   const switchChartPreset = useCallback(
     (newIndex) => {
       const newChart = charts[newIndex];
-      saveValidSO(JSON.stringify(newChart.attributes, null, 2));
+      const newAttributes = JSON.stringify(newChart.attributes, null, 2);
+      currentSO.current = newAttributes;
+      saveValidSO(newAttributes);
     },
     [charts]
   );
@@ -475,18 +477,18 @@ export const App = (props: {
                           const newColor = `rgb(${[1, 2, 3].map(() =>
                             Math.floor(Math.random() * 256)
                           )})`;
-                          saveValidSO(
-                            JSON.stringify(
-                              getLensAttributes(
-                                props.defaultDataView,
-                                fields,
-                                currentAttributes.state.visualization.preferredSeriesType,
-                                newColor
-                              ),
-                              null,
-                              2
-                            )
+                          const newAttributes = JSON.stringify(
+                            getLensAttributes(
+                              props.defaultDataView,
+                              fields,
+                              currentAttributes.state.visualization.preferredSeriesType,
+                              newColor
+                            ),
+                            null,
+                            2
                           );
+                          currentSO.current = newAttributes;
+                          saveValidSO(newAttributes);
                         }}
                         isDisabled={isColorDisabled}
                       >
