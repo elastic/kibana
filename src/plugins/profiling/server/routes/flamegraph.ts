@@ -7,7 +7,8 @@
  */
 
 function getExeFileName(exe: any, type: number) {
-  if (exe.FileName === undefined) {
+  if (exe === undefined || exe.FileName === undefined) {
+    console.log("MISSING EXE")
     return '';
   }
   if (exe.FileName !== '') {
