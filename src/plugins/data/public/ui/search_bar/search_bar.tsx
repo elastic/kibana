@@ -294,7 +294,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     try {
       let response;
-      if (this.props.savedQuery && !saveAsNew) {
+      if (!saveAsNew) {
         response = await this.savedQueryService.updateQuery(
           savedQueryMeta.id!,
           savedQueryAttributes
@@ -651,6 +651,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           isAddFilterModalOpen={this.state.isAddFilterModalOpen}
           addFilterMode={this.state.addFilterMode}
           onNewFiltersSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
+          savedQueryService={this.savedQueryService}
         />
       );
     }

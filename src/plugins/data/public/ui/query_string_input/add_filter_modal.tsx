@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { groupBy } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
+import { groupBy, sortBy } from 'lodash';
 import classNames from 'classnames';
 import { Filter, buildFilter, buildCustomFilter, cleanFilter } from '@kbn/es-query';
 import {
@@ -24,7 +24,6 @@ import {
   EuiTabs,
   EuiTab,
   EuiForm,
-  EuiSpacer,
   EuiHorizontalRule,
   EuiButtonIcon,
   EuiText,
@@ -34,7 +33,7 @@ import {
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../kibana_react/public';
-import { getIndexPatternFromFilter } from '../../query';
+import { getIndexPatternFromFilter, SavedQuery, SavedQueryService } from '../../query';
 import {
   getFilterableFields,
   getOperatorOptions,
@@ -93,6 +92,7 @@ export function AddFilterModal({
   savedQueryManagement,
   initialAddFilterMode,
   saveFilters,
+  savedQueryService,
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (
@@ -109,6 +109,7 @@ export function AddFilterModal({
   savedQueryManagement?: JSX.Element;
   initialAddFilterMode?: string;
   saveFilters: (savedQueryMeta: SavedQueryMeta) => void;
+  savedQueryService: SavedQueryService;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -118,18 +119,48 @@ export function AddFilterModal({
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
   const [groupsCount, setGroupsCount] = useState<number>(1);
 
+  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
+  const [submitDisabled, setSubmitDisabled] = useState(false);
+
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>([
     {
       field: undefined,
       operator: undefined,
       value: undefined,
-      groupId: multipleFilters?.length ? multipleFilters?.length + 1 : 1,
-      id: multipleFilters?.length ? multipleFilters?.length : 0,
+      groupId: multipleFilters?.length
+        ? Math.max.apply(
+          Math,
+          multipleFilters.map((f) => f.groupId)
+        ) + 1
+        : 1,
+      id: multipleFilters?.length
+        ? Math.max.apply(
+          Math,
+          multipleFilters.map((f) => f.id)
+        ) + 1
+        : 0,
       subGroupId: 1,
       relationship: undefined,
       groupsCount,
     },
   ]);
+
+  useEffect(() => {
+    const fetchQueries = async () => {
+      const allSavedQueries = await savedQueryService.getAllSavedQueries();
+      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
+      setSavedQueries(sortedAllSavedQueries);
+    };
+    fetchQueries();
+  }, [savedQueryService]);
+
+  const isLabelDuplicated = useCallback(
+    () =>
+      !!savedQueries.find(
+        (existingSavedQuery) => existingSavedQuery.attributes.title === customLabel
+      ),
+    [savedQueries, customLabel]
+  );
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
@@ -138,10 +169,19 @@ export function AddFilterModal({
         field: undefined,
         operator: undefined,
         value: undefined,
-        groupId: 1,
-        id: 0,
+        groupId: multipleFilters?.length
+          ? Math.max.apply(
+            Math,
+            multipleFilters.map((f) => f.groupId)
+          ) + 1
+          : 1,
+        id: multipleFilters?.length
+          ? Math.max.apply(
+            Math,
+            multipleFilters.map((f) => f.id)
+          ) + 1
+          : 0,
         subGroupId: 1,
-        groupsCount
       },
     ]);
     setGroupsCount(1);
@@ -367,6 +407,12 @@ export function AddFilterModal({
       return; // typescript validation
     }
     const alias = customLabel || null;
+
+    if (alias && isLabelDuplicated()) {
+      setSubmitDisabled(true);
+      return;
+    }
+
     if (addFilterMode === 'query_builder') {
       const { index, disabled = false, negate = false } = filter.meta;
       const newIndex = index || indexPatterns[0].id!;
@@ -532,7 +578,8 @@ export function AddFilterModal({
                                         operator: undefined,
                                         value: undefined,
                                         relationship: undefined,
-                                        groupId: filtersOnGroup.length > 1 ? groupsCount : (Number(multipleFilters?.length) + localFilters.length + 1),
+                                        groupId: filtersOnGroup.length > 1 ? localFilters[localFilters.length - 1].groupId
+                                          : localFilters[localFilters.length - 1].groupId + 1,
                                         subGroupId,
                                         groupsCount,
                                         id: Number(multipleFilters?.length) + localFilters.length,
@@ -636,7 +683,7 @@ export function AddFilterModal({
   };
 
   return (
-    <EuiModal style={{minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
+    <EuiModal style={{ minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
@@ -682,10 +729,17 @@ export function AddFilterModal({
                   defaultMessage: 'Save as (optional)',
                 })}
                 display="columnCompressed"
+                error={i18n.translate('data.search.searchBar.savedQueryForm.titleConflictText', {
+                  defaultMessage: 'Name conflicts with an existing saved query.',
+                })}
+                isInvalid={submitDisabled}
               >
                 <EuiFieldText
                   value={`${customLabel}`}
-                  onChange={(e) => setCustomLabel(e.target.value)}
+                  onChange={(e) => {
+                    setSubmitDisabled(false);
+                    setCustomLabel(e.target.value);
+                  }}
                   compressed
                 />
               </EuiFormRow>
@@ -706,6 +760,7 @@ export function AddFilterModal({
                   fill
                   onClick={onAddFilter}
                   data-test-subj="canvasCustomElementForm-submit"
+                  disabled={submitDisabled}
                 >
                   {i18n.translate('data.filter.addFilterModal.addFilterBtnLabel', {
                     defaultMessage: 'Add filter',

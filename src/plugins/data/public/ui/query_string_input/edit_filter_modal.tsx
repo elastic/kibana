@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { groupBy } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
+import { groupBy, sortBy } from 'lodash';
 import classNames from 'classnames';
 import {
   Filter,
@@ -40,7 +40,7 @@ import {
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../kibana_react/public';
-import { getIndexPatternFromFilter } from '../../query';
+import { getIndexPatternFromFilter, SavedQuery, SavedQueryService } from '../../query';
 import {
   getFilterableFields,
   getOperatorOptions,
@@ -95,7 +95,8 @@ export function EditFilterModal({
   timeRangeForSuggestionsOverride,
   initialAddFilterMode,
   onRemoveFilterGroup,
-  saveFilters
+  saveFilters,
+  savedQueryService,
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (
@@ -112,7 +113,8 @@ export function EditFilterModal({
   timeRangeForSuggestionsOverride?: boolean;
   initialAddFilterMode?: string;
   onRemoveFilterGroup: () => void;
-  saveFilters: (savedQueryMeta: SavedQueryMeta) => void;
+  saveFilters: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
+  savedQueryService: SavedQueryService;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -124,6 +126,18 @@ export function EditFilterModal({
     convertFilterToFilterGroup(currentEditFilters)
   );
   const [groupsCount, setGroupsCount] = useState<number>(filter.groupCount ?? 0);
+  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
+  const [submitDisabled, setSubmitDisabled] = useState(false);
+
+  useEffect(() => {
+    const fetchQueries = async () => {
+      const allSavedQueries = await savedQueryService.getAllSavedQueries();
+      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
+      setSavedQueries(sortedAllSavedQueries);
+    };
+    fetchQueries();
+  }, [savedQueryService]);
+
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
       return [
@@ -154,10 +168,35 @@ export function EditFilterModal({
     });
   }
 
+  const isLabelDuplicated = useCallback(
+    () =>
+      !!savedQueries.find(
+        (existingSavedQuery) => existingSavedQuery.attributes.title === customLabel
+      ),
+    [savedQueries, customLabel]
+  );
+
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
     setLocalFilters([
-      { field: undefined, operator: undefined, value: undefined, groupId: 1, id: 0, subGroupId: 1 },
+      {
+        field: undefined,
+        operator: undefined,
+        value: undefined,
+        groupId: multipleFilters?.length
+          ? Math.max.apply(
+            Math,
+            multipleFilters.map((f) => f.groupId)
+          ) + 1
+          : 1,
+        id: multipleFilters?.length
+          ? Math.max.apply(
+            Math,
+            multipleFilters.map((f) => f.id)
+          ) + 1
+          : 0,
+        subGroupId: 1,
+      },
     ]);
     setGroupsCount(1);
   };
@@ -373,12 +412,43 @@ export function EditFilterModal({
     );
   };
 
+  const onSubmitWithLabel = (filters: Filter[]) => {
+    const queryMetaObj = {
+      title: customLabel,
+      description: '',
+      shouldIncludeFilters: false,
+      shouldIncludeTimefilter: false,
+      filters,
+    };
+    if (!filter.meta.alias) {
+      // if our filters had not alias before then we save them as new fiterSet
+      saveFilters(queryMetaObj, true);
+    } else {
+      const curQuery = savedQueries.find(
+        (existingQuery) => existingQuery.attributes.title === filter.meta.alias
+      );
+      saveFilters(
+        {
+          ...queryMetaObj,
+          id: curQuery?.id,
+        },
+        false
+      );
+    }
+  };
+
   const onUpdateFilter = () => {
     const { $state } = filter;
     if (!$state || !$state.store) {
       return; // typescript validation
     }
     const alias = customLabel || null;
+
+    if (alias && !filter.meta.alias && isLabelDuplicated()) {
+      setSubmitDisabled(true);
+      return;
+    }
+
     if (addFilterMode === 'query_builder') {
       const { index, disabled = false, negate = false } = filter.meta;
       const newIndex = index || indexPatterns[0].id!;
@@ -393,13 +463,7 @@ export function EditFilterModal({
       );
       onSubmit([builtCustomFilter]);
       if (alias) {
-        saveFilters({
-          title: customLabel,
-          description: '',
-          shouldIncludeFilters: false,
-          shouldIncludeTimefilter: false,
-          filters: [builtCustomFilter],
-        });
+        onSubmitWithLabel([builtCustomFilter]);
       }
     } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
@@ -422,13 +486,7 @@ export function EditFilterModal({
         ) as Filter[];
         onMultipleFiltersSubmit(localFilters, finalFilters, groupsCount);
         if (alias) {
-          saveFilters({
-            title: customLabel,
-            description: '',
-            shouldIncludeFilters: false,
-            shouldIncludeTimefilter: false,
-            filters: finalFilters,
-          });
+          onSubmitWithLabel(finalFilters);
         }
       }
     } else if (addFilterMode === 'saved_filters') {
@@ -503,9 +561,11 @@ export function EditFilterModal({
                                       if (subGroup.length < 2) {
                                         localFilters[idx] = updatedLocalFilter;
                                       }
-                                      const countOfFilterBeforeFilterEdit = multipleFilters.filter(
-                                        (f) => f.groupId === Number(groupId)
-                                      );
+                                      const newId =
+                                        Math.max(
+                                          multipleFilters?.length - 1,
+                                          localFilters[localFilters.length - 1].id
+                                        ) + 1;
                                       setLocalFilters([
                                         ...localFilters,
                                         {
@@ -514,7 +574,7 @@ export function EditFilterModal({
                                           value: undefined,
                                           relationship: undefined,
                                           groupId: localfilter.groupId,
-                                          id: Number(multipleFilters.length) - countOfFilterBeforeFilterEdit.length + localFilters.length,
+                                          id: newId,
                                           subGroupId,
                                         },
                                       ]);
@@ -545,9 +605,20 @@ export function EditFilterModal({
                                       (f) => f.id === localfilter.id && f.groupId === Number(groupId)
                                     );
                                     localFilters[idx] = updatedLocalFilter;
-                                    const countOfFilterBeforeFilterEdit = multipleFilters.filter(
-                                      (f) => f.groupId === Number(groupId)
+                                    const maxExistingGroupIdValue: number = Math.max.apply(
+                                      Math,
+                                      multipleFilters?.map((f) => f.groupId)
                                     );
+                                    const newGroupId =
+                                      Math.max(
+                                        maxExistingGroupIdValue,
+                                        localFilters[localFilters.length - 1].groupId
+                                      ) + 1;
+                                    const newId =
+                                      Math.max(
+                                        multipleFilters?.length - 1,
+                                        localFilters[localFilters.length - 1].id
+                                      ) + 1;
                                     setLocalFilters([
                                       ...localFilters,
                                       {
@@ -555,9 +626,12 @@ export function EditFilterModal({
                                         operator: undefined,
                                         value: undefined,
                                         relationship: undefined,
-                                        groupId: filtersOnGroup.length > 1 ? groupsCount : (Number(multipleFilters?.length) - countOfFilterBeforeFilterEdit.length + localFilters.length + 1),
+                                        groupId:
+                                          filtersOnGroup.length > 1
+                                            ? localFilters[localFilters.length - 1].groupId
+                                            : newGroupId,
+                                        id: newId,
                                         subGroupId,
-                                        id: Number(multipleFilters.length) - countOfFilterBeforeFilterEdit.length + localFilters.length,
                                       },
                                     ]);
                                     if (filtersOnGroup.length <= 1) {
@@ -708,10 +782,17 @@ export function EditFilterModal({
                   defaultMessage: 'Label (optional)',
                 })}
                 display="columnCompressed"
+                error={i18n.translate('data.search.searchBar.savedQueryForm.titleConflictText', {
+                  defaultMessage: 'Name conflicts with an existing saved query.',
+                })}
+                isInvalid={submitDisabled}
               >
                 <EuiFieldText
                   value={`${customLabel}`}
-                  onChange={(e) => setCustomLabel(e.target.value)}
+                  onChange={(e) => {
+                    setSubmitDisabled(false);
+                    setCustomLabel(e.target.value);
+                  }}
                   compressed
                 />
               </EuiFormRow>
@@ -746,6 +827,7 @@ export function EditFilterModal({
                   fill
                   onClick={onApplyChangesFilter}
                   data-test-subj="canvasCustomElementForm-submit"
+                  disabled={submitDisabled}
                 >
                   {i18n.translate('data.filter.addFilterModal.applyChangesFilterBtnLabel', {
                     defaultMessage: 'Apply changes',
