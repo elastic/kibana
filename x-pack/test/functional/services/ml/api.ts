@@ -126,6 +126,47 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async hasForecastResults(jobId: string): Promise<boolean> {
+      const body = await es.search({
+        index: '.ml-anomalies-*',
+        body: {
+          size: 1,
+          query: {
+            bool: {
+              must: [
+                {
+                  match: {
+                    job_id: jobId,
+                  },
+                },
+                {
+                  match: {
+                    result_type: 'model_forecast',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      return body.hits.hits.length > 0;
+    },
+
+    async assertForecastResultsExist(jobId: string) {
+      await retry.waitForWithTimeout(
+        `forecast results for job ${jobId} to exist`,
+        30 * 1000,
+        async () => {
+          if ((await this.hasForecastResults(jobId)) === true) {
+            return true;
+          } else {
+            throw new Error(`expected forecast results for job '${jobId}' to exist`);
+          }
+        }
+      );
+    },
+
     async createIndex(
       indices: string,
       mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping

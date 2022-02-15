@@ -48,12 +48,17 @@ import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
-import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
+import {
+  IndexPatternField,
+  IndexPatternPrivateState,
+  IndexPatternPersistedState,
+  IndexPattern,
+} from './types';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
 } from '../../../../../src/plugins/kibana_react/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
@@ -69,15 +74,22 @@ export { deleteColumn } from './operations';
 
 export function columnToOperation(
   column: GenericIndexPatternColumn,
-  uniqueLabel?: string
+  uniqueLabel?: string,
+  dataView?: IndexPattern
 ): Operation {
   const { dataType, label, isBucketed, scale, operationType } = column;
+  const fieldTypes =
+    'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
+    sortingHint:
+      column.dataType === 'string' && fieldTypes?.includes(ES_FIELD_TYPES.VERSION)
+        ? 'version'
+        : undefined,
   };
 }
 
@@ -446,7 +458,11 @@ export function getIndexPatternDatasource({
 
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {
-              return columnToOperation(layer.columns[columnId], columnLabelMap[columnId]);
+              return columnToOperation(
+                layer.columns[columnId],
+                columnLabelMap[columnId],
+                state.indexPatterns[layer.indexPatternId]
+              );
             }
           }
           return null;
