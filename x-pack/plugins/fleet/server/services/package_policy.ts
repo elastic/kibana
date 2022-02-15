@@ -370,11 +370,11 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    packagePolicy: UpdatePackagePolicy,
+    packagePolicyUpdate: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser },
     currentVersion?: string
   ): Promise<PackagePolicy> {
-    packagePolicy.name = packagePolicy.name.trim();
+    const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
