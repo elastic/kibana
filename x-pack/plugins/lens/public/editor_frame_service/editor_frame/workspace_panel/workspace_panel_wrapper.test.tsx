@@ -188,8 +188,6 @@ describe('workspace_panel_wrapper', () => {
       expect(harness.canApplyChanges).toBeFalsy();
       // apply changes button should now be disabled
       expect(harness.autoApplySwitchOn).toBeTruthy();
-      // state got applied
-      expect(store.getState().lens.visualization.state).toEqual({ something: 'changed' });
     });
   });
 });

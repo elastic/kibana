@@ -27,7 +27,6 @@ export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
-// TODO - do we need to check datasourceLayers?
 export const selectChangesApplied = createSelector(
   [selectAppliedState, selectVisualization, selectDatasourceStates],
   (appliedState, visualization, datasourceStates) => {

@@ -471,38 +471,36 @@ export const LensTopNavMenu = ({
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
   return (
-    <>
-      <TopNavMenu
-        setMenuMountPoint={setHeaderActionMenu}
-        config={topNavConfig}
-        showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
-        savedQuery={savedQuery}
-        onQuerySubmit={onQuerySubmitWrapped}
-        onSaved={onSavedWrapped}
-        onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
-        onClearSavedQuery={onClearSavedQueryWrapped}
-        indexPatterns={indexPatterns}
-        query={query}
-        dateRangeFrom={from}
-        dateRangeTo={to}
-        indicateNoData={indicateNoData}
-        showSearchBar={true}
-        showDatePicker={
-          indexPatterns.some((ip) => ip.isTimeBased()) ||
-          Boolean(
-            allLoaded &&
-              activeDatasourceId &&
-              datasourceMap[activeDatasourceId].isTimeBased(
-                datasourceStates[activeDatasourceId].state
-              )
-          )
-        }
-        showQueryBar={true}
-        showFilterBar={true}
-        data-test-subj="lnsApp_topNav"
-        screenTitle={'lens'}
-        appName={'lens'}
-      />
-    </>
+    <TopNavMenu
+      setMenuMountPoint={setHeaderActionMenu}
+      config={topNavConfig}
+      showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
+      savedQuery={savedQuery}
+      onQuerySubmit={onQuerySubmitWrapped}
+      onSaved={onSavedWrapped}
+      onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
+      onClearSavedQuery={onClearSavedQueryWrapped}
+      indexPatterns={indexPatterns}
+      query={query}
+      dateRangeFrom={from}
+      dateRangeTo={to}
+      indicateNoData={indicateNoData}
+      showSearchBar={true}
+      showDatePicker={
+        indexPatterns.some((ip) => ip.isTimeBased()) ||
+        Boolean(
+          allLoaded &&
+            activeDatasourceId &&
+            datasourceMap[activeDatasourceId].isTimeBased(
+              datasourceStates[activeDatasourceId].state
+            )
+        )
+      }
+      showQueryBar={true}
+      showFilterBar={true}
+      data-test-subj="lnsApp_topNav"
+      screenTitle={'lens'}
+      appName={'lens'}
+    />
   );
 };

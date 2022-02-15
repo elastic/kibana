@@ -234,6 +234,8 @@ describe('workspace_panel', () => {
       (appliedDatasourceLayers?.first as DatasourcePublicAPI & { applied: boolean }).applied
     ).toBe(true);
 
+    // START NEW SCENARIO — make sure it switches back to using working state when auto-apply is reenabled
+
     // have to do this part manually in the test, but in the application it will happen in the frame API selector which will be called in the parent component tree
     instance.setProps({
       framePublicAPI: { ...framePublicAPI, appliedDatasourceLayers: undefined },

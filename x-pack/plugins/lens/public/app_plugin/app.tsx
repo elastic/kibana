@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import {
   createKbnUrlStateStorage,
-  Storage,
   withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -30,15 +29,11 @@ import {
   LensAppState,
   DispatchSetState,
   selectSavedObjectFormat,
-  enableAutoApply,
-  applyChanges,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
-import { disableAutoApply } from '../state_management/lens_slice';
-import { writeToStorage } from '../settings_storage';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
