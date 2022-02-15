@@ -2,7 +2,6 @@
 
 set -uo pipefail
 
-export CODE_COVERAGE=true
 export COVERALLS_PARALLEL=true
 
 JOB=$BUILDKITE_PARALLEL_JOB
@@ -13,27 +12,37 @@ JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 i=0
 exitCode=0
 
-# target/jest-coverage/lcov.info
-
 while read -r config; do
   if [ "$((i % JOB_COUNT))" -eq "$JOB" ]; then
+    if [[ "$config" == *"jest.config.js" ]]; then
+      export CODE_COVERAGE=true
+    else
+      export CODE_COVERAGE=''
+    fi
+    
     echo "--- $ node scripts/jest --config $config"
     rm -f target/jest-coverage/lcov.info
-    node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests \
-      --coverage --coverageReporters lcov --coverageDirectory target/jest-coverage
+
+    if [[ "$CODE_COVERAGE" == "true" ]]; then
+      node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests \
+        --coverage --coverageReporters lcov --coverageDirectory target/jest-coverage
+    else
+      node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests
+    fi
     lastCode=$?
 
     if [ $lastCode -ne 0 ]; then
       exitCode=10
       echo "Jest exited with code $lastCode"
       echo "^^^ +++"
-    fi
+    else
+      if [[ "$CODE_COVERAGE" == "true" ]]; then
+        echo 'Uploading to coveralls...'
+        cat target/jest-coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+        buildkite-agent meta-data set "did-upload-coveralls" 'true'
+      fi
+    fi    
   fi
-
-  echo 'Uploading to coveralls...'
-  cat target/jest-coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
-  buildkite-agent meta-data set "did-upload-coveralls" 'true'
-  
 
   ((i=i+1))
 # uses heredoc to avoid the while loop being in a sub-shell thus unable to overwrite exitCode
