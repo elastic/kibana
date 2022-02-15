@@ -767,3 +767,38 @@
     "type": "doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:outbound-missing-reference-conflict-1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "This is used to test if an imported object with a missing reference will have an exact match conflict when the missing reference is replaced"
+      },
+      "type": "sharedtype",
+      "namespaces": ["*"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:outbound-missing-reference-conflict-2a",
+    "index": ".kibana",
+    "source": {
+      "originId": "outbound-missing-reference-conflict-2",
+      "sharedtype": {
+        "title": "This is used to test if an imported object with a missing reference will have an inexact match conflict when the missing reference is replaced"
+      },
+      "type": "sharedtype",
+      "namespaces": ["*"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
