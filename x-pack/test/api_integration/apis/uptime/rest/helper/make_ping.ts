@@ -57,6 +57,32 @@ export const makePing = async (
     host: {
       name: 'avc-x1e',
     },
+    http: {
+      rtt: {
+        response_header: {
+          us: 19349,
+        },
+        total: {
+          us: 48954,
+        },
+        write_request: {
+          us: 33,
+        },
+        content: {
+          us: 51,
+        },
+        validate: {
+          us: 19400,
+        },
+      },
+      response: {
+        status_code: 200,
+        body: {
+          bytes: 3,
+          hash: '27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf',
+        },
+      },
+    },
     monitor: {
       duration: {
         us: 49347,

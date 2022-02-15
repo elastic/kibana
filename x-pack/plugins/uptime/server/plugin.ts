@@ -90,6 +90,7 @@ export class Plugin implements PluginType {
       );
 
       this.syntheticService.registerSyncTask(plugins.taskManager);
+      this.telemetryEventsSender.setup(plugins.telemetry);
     }
 
     initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
@@ -104,8 +105,6 @@ export class Plugin implements PluginType {
       plugins.usageCollection,
       () => this.savedObjectsClient
     );
-
-    this.telemetryEventsSender.setup(plugins.telemetry);
 
     return {
       ruleRegistry: ruleDataClient,
@@ -136,9 +135,8 @@ export class Plugin implements PluginType {
       if (this.server && this.syntheticService) {
         this.server.syntheticsService = this.syntheticService;
       }
+      this.telemetryEventsSender.start(plugins.telemetry, coreStart);
     }
-
-    this.telemetryEventsSender.start(plugins.telemetry, coreStart);
   }
 
   public stop() {}
