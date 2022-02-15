@@ -30,16 +30,6 @@ async function ftrConfigRun({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...kibanaConfig.getAll(),
     testRunner,
-    dockerServers: defineDockerServersConfig({
-      registry: {
-        enabled: true,
-        image: dockerImage,
-        portInContainer: 8080,
-        port: packageRegistryPort,
-        args: dockerArgs,
-        waitForLogLine: 'package manifests loaded',
-      },
-    }),
   };
 }
 

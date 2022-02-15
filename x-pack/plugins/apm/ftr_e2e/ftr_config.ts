@@ -41,11 +41,6 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-
-        // Fleet config
-        `--xpack.fleet.packages.0.name=endpoint`,
-        `--xpack.fleet.packages.0.version=latest`,
-        `--xpack.fleet.registryUrl=http://localhost:${packageRegistryPort}`,
       ],
     },
   };
