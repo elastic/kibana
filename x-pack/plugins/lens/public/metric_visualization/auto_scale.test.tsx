@@ -53,7 +53,7 @@ describe('AutoScale', () => {
           style="display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5"
         >
           <div
-            class="lnsMetricExpression__containerScale titleSizeXL"
+            class="lnsMetricExpression__containerScale"
             style="transform:scale(0)"
           >
             <h1>
