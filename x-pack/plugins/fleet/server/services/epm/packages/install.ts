@@ -89,7 +89,7 @@ export async function ensureInstalledPackage(options: {
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
     ? { name: pkgName, version: pkgVersion }
-    : await Registry.fetchFindLatestPackage(pkgName);
+    : await Registry.fetchFindLatestPackageOrThrow(pkgName);
 
   const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
@@ -252,7 +252,9 @@ async function installPackageFromRegistry({
     installType = getInstallType({ pkgVersion, installedPkg });
 
     // get latest package version
-    const latestPackage = await Registry.fetchFindLatestPackage(pkgName, { ignoreConstraints });
+    const latestPackage = await Registry.fetchFindLatestPackageOrThrow(pkgName, {
+      ignoreConstraints,
+    });
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
