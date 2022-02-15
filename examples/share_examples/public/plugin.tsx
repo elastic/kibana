@@ -39,7 +39,7 @@ export class ShareDemoPlugin
   }
 
   public start(core: CoreStart, { share }: StartDeps) {
-
+    
   }
 
   public stop() {}

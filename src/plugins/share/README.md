@@ -37,6 +37,16 @@ Dashboard applications.
 
 ## Locators
 
+*Locators* are entities which given some *parameters* can navigate Kibana user
+to some deep link in Kibana or return back a full formatted URL.
+
+Kibana apps create locators and expose them from their plugin contracts. Then
+other plugins can use those locators to navigate deeply into Kibana applications.
+
+### Creating a locator for you Kibana app
+
+
+
 
 ## Short URLs
 
