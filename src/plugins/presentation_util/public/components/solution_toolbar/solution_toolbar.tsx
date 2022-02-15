@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
   AddFromLibraryButton,
+  AddControlButton,
   QuickButtonGroup,
   PrimaryActionButton,
   SolutionToolbarButton,
@@ -24,19 +25,22 @@ interface NamedSlots {
   primaryActionButton: ReactElement<typeof PrimaryActionButton | typeof PrimaryActionPopover>;
   quickButtonGroup?: ReactElement<typeof QuickButtonGroup>;
   addFromLibraryButton?: ReactElement<typeof AddFromLibraryButton>;
+  addControlButton?: ReactElement<typeof AddControlButton>;
   extraButtons?: Array<ReactElement<typeof SolutionToolbarButton | typeof SolutionToolbarPopover>>;
 }
 
 export interface Props {
   isDarkModeEnabled?: boolean;
+  isControlsEnabled?: boolean;
   children: NamedSlots;
 }
 
-export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
+export const SolutionToolbar = ({ isDarkModeEnabled, isControlsEnabled, children }: Props) => {
   const {
     primaryActionButton,
     quickButtonGroup,
     addFromLibraryButton,
+    addControlButton,
     extraButtons = [],
   } = children;
 
@@ -63,6 +67,9 @@ export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
           {extra}
           {addFromLibraryButton ? (
             <EuiFlexItem grow={false}>{addFromLibraryButton}</EuiFlexItem>
+          ) : null}
+          {isControlsEnabled && addControlButton ? (
+            <EuiFlexItem grow={false}>{addControlButton}</EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>

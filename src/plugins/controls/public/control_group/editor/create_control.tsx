@@ -16,42 +16,36 @@ import {
 } from '@elastic/eui';
 import React, { useState, ReactElement } from 'react';
 
-import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
 import { OverlayRef } from '../../../../../core/public';
-import { forwardAllContext } from './forward_all_context';
 import { DEFAULT_CONTROL_WIDTH } from './editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
-import { controlGroupReducers } from '../state/control_group_reducers';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddable/public';
-import { useReduxContainerContext } from '../../../../presentation_util/public';
 import { ControlWidth, IEditableControlFactory, ControlInput } from '../../types';
+import { toMountPoint } from '../../../../kibana_react/public';
 
-export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean }) => {
+export interface CreateControlButtonProps {
+  defaultControlWidth?: ControlWidth;
+  updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
+  addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
+  isIconButton: boolean;
+}
+
+export const CreateControlButton = ({
+  defaultControlWidth,
+  updateDefaultWidth,
+  addNewEmbeddable,
+  isIconButton,
+}: CreateControlButtonProps) => {
   // Controls Services Context
-  const { overlays, controls } = pluginServices.getHooks();
-  const { getControlTypes, getControlFactory } = controls.useService();
-  const { openFlyout, openConfirm } = overlays.useService();
-
-  // Redux embeddable container Context
-  const reduxContainerContext = useReduxContainerContext<
-    ControlGroupInput,
-    typeof controlGroupReducers
-  >();
-  const {
-    containerActions: { addNewEmbeddable },
-    actions: { setDefaultControlWidth },
-    useEmbeddableSelector,
-    useEmbeddableDispatch,
-  } = reduxContainerContext;
-  const dispatch = useEmbeddableDispatch();
-
-  // current state
-  const { defaultControlWidth } = useEmbeddableSelector((state) => state);
+  const { overlays, controls } = pluginServices.getServices();
+  const { getControlTypes, getControlFactory } = controls;
+  const { openFlyout, openConfirm } = overlays;
   const [isControlTypePopoverOpen, setIsControlTypePopoverOpen] = useState(false);
 
   const createNewControl = async (type: string) => {
+    const PresentationUtilProvider = pluginServices.getContextProvider();
     const factory = getControlFactory(type);
     if (!factory) throw new EmbeddableFactoryNotFoundError(type);
 
@@ -80,26 +74,27 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
       const editableFactory = factory as IEditableControlFactory;
 
       const flyoutInstance = openFlyout(
-        forwardAllContext(
-          <ControlEditor
-            isCreate={true}
-            factory={editableFactory}
-            width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
-            updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
-            updateWidth={(newWidth) => dispatch(setDefaultControlWidth(newWidth as ControlWidth))}
-            onTypeEditorChange={(partialInput) =>
-              (inputToReturn = { ...inputToReturn, ...partialInput })
-            }
-            onSave={() => {
-              if (editableFactory.presaveTransformFunction) {
-                inputToReturn = editableFactory.presaveTransformFunction(inputToReturn);
+        toMountPoint(
+          <PresentationUtilProvider>
+            <ControlEditor
+              isCreate={true}
+              factory={editableFactory}
+              width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
+              updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+              updateWidth={updateDefaultWidth}
+              onTypeEditorChange={(partialInput) =>
+                (inputToReturn = { ...inputToReturn, ...partialInput })
               }
-              resolve(inputToReturn);
-              flyoutInstance.close();
-            }}
-            onCancel={() => onCancel(flyoutInstance)}
-          />,
-          reduxContainerContext
+              onSave={() => {
+                if (editableFactory.presaveTransformFunction) {
+                  inputToReturn = editableFactory.presaveTransformFunction(inputToReturn);
+                }
+                resolve(inputToReturn);
+                flyoutInstance.close();
+              }}
+              onCancel={() => onCancel(flyoutInstance)}
+            />
+          </PresentationUtilProvider>
         ),
         {
           onClose: (flyout) => onCancel(flyout),

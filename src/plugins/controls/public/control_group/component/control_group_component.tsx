@@ -61,12 +61,15 @@ export const ControlGroup = () => {
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { setControlOrders },
+    actions: { setControlOrders, setDefaultControlWidth }, // setShowToolbarButton,
+    containerActions: { addNewEmbeddable },
   } = reduxContainerContext;
   const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels, viewMode, controlStyle } = useEmbeddableSelector((state) => state);
+  const { panels, viewMode, controlStyle, defaultControlWidth } = useEmbeddableSelector(
+    (state) => state
+  );
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -112,6 +115,19 @@ export const ControlGroup = () => {
   let panelBg: 'subdued' | 'plain' | 'success' = 'subdued';
   if (emptyState) panelBg = 'plain';
   if (draggingId) panelBg = 'success';
+
+  const getControlButton = (isIconButton: boolean) => {
+    return (
+      <CreateControlButton
+        isIconButton={isIconButton}
+        defaultControlWidth={defaultControlWidth}
+        updateDefaultWidth={(newDefaultControlWidth) =>
+          dispatch(setDefaultControlWidth(newDefaultControlWidth))
+        }
+        addNewEmbeddable={(type, input) => addNewEmbeddable(type, input)}
+      />
+    );
+  };
 
   return (
     <EuiPanel
@@ -192,7 +208,7 @@ export const ControlGroup = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-                    <CreateControlButton isIconButton={true} />
+                    {getControlButton(true)}
                   </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -215,11 +231,7 @@ export const ControlGroup = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <div className="addControlButton">
-                <CreateControlButton isIconButton={false} />
-              </div>
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{getControlButton(false)}</EuiFlexItem>
           </EuiFlexGroup>
         </>
       )}

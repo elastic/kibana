@@ -586,7 +586,7 @@ export function DashboardTopNav({
       {dashboardState.viewMode !== ViewMode.VIEW ? (
         <>
           <EuiHorizontalRule margin="none" />
-          <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
+          <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME} isControlsEnabled={true}>
             {{
               primaryActionButton: (
                 <PrimaryActionButton
@@ -604,6 +604,8 @@ export function DashboardTopNav({
                   data-test-subj="dashboardAddPanelButton"
                 />
               ),
+              addControlButton:
+                dashboardAppState.dashboardContainer.controlGroup?.getControlButton(false),
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}
