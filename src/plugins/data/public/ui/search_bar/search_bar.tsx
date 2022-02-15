@@ -593,7 +593,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onToggleAllNegated={this.onToggleAllNegated}
         onRemoveAll={this.onRemoveAll}
         services={this.services}
-        onQueryChange={this.onQueryBarChange}
+        onQueryChange={this.onQueryBarSubmit}
         dateRangeFrom={this.state.dateRangeFrom}
         dateRangeTo={this.state.dateRangeTo}
         toggleAddFilterModal={this.toggleAddFilterModal}
