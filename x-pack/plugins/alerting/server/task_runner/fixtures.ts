@@ -10,15 +10,7 @@ import { Alert, AlertTypeParams, RecoveredActionGroup } from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { TaskStatus } from '../../../task_manager/server';
-
-export enum Actions {
-  'EXECUTE_START' = 'execute-start',
-  'NEW_INSTANCE' = 'new-instance',
-  'ACTIVE_INSTANCE' = 'active-instance',
-  'RECOVERED_INSTANCE' = 'recovered-instance',
-  'EXECUTE_ACTION' = 'execute-action',
-  'EXECUTE' = 'execute',
-}
+import { EVENT_LOG_ACTIONS } from '../plugin';
 
 interface GeneratorParams {
   [key: string]: string | number | boolean | undefined | object[] | boolean[] | object;
@@ -263,33 +255,33 @@ const generateMessage = ({
   reason,
   status,
 }: GeneratorParams) => {
-  if (action === Actions.EXECUTE_START) {
+  if (action === EVENT_LOG_ACTIONS.executeStart) {
     return `rule execution start: "${mockTaskInstance().params.alertId}"`;
   }
 
-  if (action === Actions.NEW_INSTANCE) {
+  if (action === EVENT_LOG_ACTIONS.newInstance) {
     return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' created new alert: '${instanceId}'`;
   }
 
-  if (action === Actions.ACTIVE_INSTANCE) {
+  if (action === EVENT_LOG_ACTIONS.activeInstance) {
     if (actionSubgroup) {
       return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' active alert: '${instanceId}' in actionGroup(subgroup): 'default(${actionSubgroup})'`;
     }
     return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' active alert: '${instanceId}' in actionGroup: '${actionGroupId}'`;
   }
 
-  if (action === Actions.RECOVERED_INSTANCE) {
+  if (action === EVENT_LOG_ACTIONS.recoveredInstance) {
     return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' alert '${instanceId}' has recovered`;
   }
 
-  if (action === Actions.EXECUTE_ACTION) {
+  if (action === EVENT_LOG_ACTIONS.executeAction) {
     if (actionSubgroup) {
       return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup(subgroup): 'default(${actionSubgroup})' action: action:${instanceId}`;
     }
     return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${instanceId}`;
   }
 
-  if (action === Actions.EXECUTE) {
+  if (action === EVENT_LOG_ACTIONS.execute) {
     if (status === 'error' && reason === 'execute') {
       return `rule execution failure: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
     }
