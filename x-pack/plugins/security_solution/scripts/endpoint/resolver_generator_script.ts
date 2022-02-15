@@ -85,11 +85,13 @@ async function deleteUser(esClient: Client, username: string): Promise<{ found: 
 }
 
 const updateWithNewCredentials = (
-  url: string[],
+  url: string,
   user: { username: string; password: string }
 ): string => {
-  url.splice(0, 1, `http://${user.username}:${user.password}`);
-  return url.join('@');
+  const urlObject = new URL(url);
+  urlObject.username = user.username;
+  urlObject.password = user.password;
+  return urlObject.href;
 };
 
 async function main() {
@@ -295,11 +297,9 @@ async function main() {
     // update client and kibana options before instantiating
     if (user) {
       // use endpoint user for Es and Kibana URLs
-      const kibanaUrlInfo = argv.kibana.split('@');
-      const elasticUrlInfo = argv.node.split('@');
 
-      url = updateWithNewCredentials(kibanaUrlInfo, user);
-      node = updateWithNewCredentials(elasticUrlInfo, user);
+      url = updateWithNewCredentials(argv.kibana, user);
+      node = updateWithNewCredentials(argv.node, user);
 
       kbnClientOptions = {
         ...kbnClientOptions,
