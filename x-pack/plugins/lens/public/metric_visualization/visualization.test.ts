@@ -298,7 +298,7 @@ describe('metric_visualization', () => {
                 ],
                 "mode": Array [
                   "full",
-                ],s
+                ],
                 "palette": Array [],
                 "size": Array [
                   "xl",
