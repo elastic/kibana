@@ -738,7 +738,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 788,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });
@@ -865,7 +865,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 788,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });
@@ -921,10 +921,6 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_THRESHOLD_RESULT]: {
               terms: [
                 {
-                  field: 'event.module',
-                  value: 'system',
-                },
-                {
                   field: 'host.id',
                   value: '2ab45fc1c41e4c84bbd02202a7e5761f',
                 },
@@ -932,9 +928,13 @@ export default ({ getService }: FtrProviderContext) => {
                   field: 'process.name',
                   value: 'sshd',
                 },
+                {
+                  field: 'event.module',
+                  value: 'system',
+                },
               ],
               count: 21,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T20:22:03.561Z',
             },
           });
         });
