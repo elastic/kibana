@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ClusterGetSettingsResponse } from '@elastic/elasticsearch/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
@@ -16,9 +17,31 @@ interface NodeWithLowDiskSpace {
   lowDiskWatermarkSetting: string;
 }
 
-// The percentage used to determine if the user has low disk space
-// For example, if a user has used 80%, and has a low disk watermark setting of 85%, we would warn the user
+// Buffer percentage used to determine if the user has low disk space
+// For example, if a user has used 80%, and has defined a low disk watermark setting of 85%, we would warn the user
 const LOW_DISK_SPACE_BUFFER_PERCENTAGE = 5;
+
+const getLowDiskWatermarkSetting = (clusterSettings: ClusterGetSettingsResponse) => {
+  const { defaults, persistent, transient } = clusterSettings;
+
+  const defaultLowDiskWatermarkSetting =
+    defaults && defaults['cluster.routing.allocation.disk.watermark.low'];
+  const transientLowDiskWatermarkSetting =
+    transient && transient['cluster.routing.allocation.disk.watermark.low'];
+  const persistentLowDiskWatermarkSetting =
+    persistent && persistent['cluster.routing.allocation.disk.watermark.low'];
+
+  // Settings are applied in the following order of precendence: transient, persistent, default
+  if (transientLowDiskWatermarkSetting) {
+    return transientLowDiskWatermarkSetting;
+  } else if (persistentLowDiskWatermarkSetting) {
+    return persistentLowDiskWatermarkSetting;
+  } else if (defaultLowDiskWatermarkSetting) {
+    return defaultLowDiskWatermarkSetting;
+  }
+
+  return undefined;
+};
 
 export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
@@ -42,25 +65,7 @@ export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: Route
             include_defaults: true,
           });
 
-          const { defaults, persistent, transient } = clusterSettings;
-
-          const defaultLowDiskWatermarkSetting =
-            defaults && defaults['cluster.routing.allocation.disk.watermark.low'];
-          const transientLowDiskWatermarkSetting =
-            transient['cluster.routing.allocation.disk.watermark.low'];
-          const persistentLowDiskWatermarkSetting =
-            persistent['cluster.routing.allocation.disk.watermark.low'];
-
-          let lowDiskWatermarkSetting: string | undefined;
-
-          // Settings are applied in the following order of precendence: transient, persistent, default
-          if (transientLowDiskWatermarkSetting) {
-            lowDiskWatermarkSetting = transientLowDiskWatermarkSetting;
-          } else if (persistentLowDiskWatermarkSetting) {
-            lowDiskWatermarkSetting = persistentLowDiskWatermarkSetting;
-          } else if (defaultLowDiskWatermarkSetting) {
-            lowDiskWatermarkSetting = defaultLowDiskWatermarkSetting;
-          }
+          const lowDiskWatermarkSetting = getLowDiskWatermarkSetting(clusterSettings);
 
           if (lowDiskWatermarkSetting) {
             const { body: nodeStats } = await client.asCurrentUser.nodes.stats({
@@ -83,7 +88,7 @@ export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: Route
               );
 
               if (isLowDiskWatermarkPercentage) {
-                const percentageAvailable = Math.round(availableInBytes / totalInBytes) * 100;
+                const percentageAvailable = (availableInBytes / totalInBytes) * 100;
                 const percentageUsed = 100 - percentageAvailable;
                 const rawLowDiskWatermarkPercentageValue = Number(
                   lowDiskWatermarkSetting!.replace('%', '')
@@ -107,10 +112,10 @@ export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: Route
                   lowDiskWatermarkSetting!
                 ).getValueInBytes();
 
-                const percentageAvailable = Math.round(availableInBytes / totalInBytes) * 100;
+                const percentageAvailable = (availableInBytes / totalInBytes) * 100;
                 const percentageUsed = 100 - percentageAvailable;
                 const rawLowDiskWatermarkPercentageValue =
-                  Math.round(rawLowDiskWatermarkBytesValue / totalInBytes) * 100;
+                  (rawLowDiskWatermarkBytesValue / totalInBytes) * 100;
 
                 // Substract LOW_DISK_SPACE_BUFFER_PERCENTAGE (5%) from the low disk watermark setting
                 // If the percentage in use is >= to this, mark node as having low disk space
@@ -131,7 +136,7 @@ export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: Route
           }
 
           // If the low disk watermark setting is undefined, send empty array
-          // This may occur if configured in elasticsearch.yml
+          // This may occur if the setting is configured in elasticsearch.yml
           return response.ok({ body: [] });
         } catch (error) {
           return handleEsError({ error, response });
