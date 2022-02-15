@@ -38,7 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('test metadata apis', () => {
     describe('list endpoints GET route', () => {
-      describe('with .metrics-endpoint.metadata_united_default index', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/123253
+      describe.skip('with .metrics-endpoint.metadata_united_default index', () => {
         const numberOfHostsInFixture = 2;
 
         before(async () => {
