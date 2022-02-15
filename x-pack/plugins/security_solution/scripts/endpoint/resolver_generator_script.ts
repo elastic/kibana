@@ -39,12 +39,17 @@ async function deleteIndices(indices: string[], client: Client) {
 
 interface UserInfo {
   username: string;
+  password: string;
 }
 
 async function addUser(
   esClient: Client,
-  user = { username: 'endpoint_user', password: 'changeme' }
+  user?: { username: string; password: string }
 ): Promise<UserInfo | undefined> {
+  if (!user) {
+    return;
+  }
+
   const path = `_security/user/${user.username}`;
   // add user if doesn't exist already
   try {
@@ -55,7 +60,7 @@ async function addUser(
       body: {
         password: user.password,
         roles: ['superuser', 'kibana_system'],
-        full_name: 'endpoint user',
+        full_name: user.username,
       },
     });
     if (addedUser.created) {
@@ -65,6 +70,7 @@ async function addUser(
     }
     return {
       username: user.username,
+      password: user.password,
     };
   } catch (error) {
     handleErr(error);
@@ -77,6 +83,14 @@ async function deleteUser(esClient: Client, username: string): Promise<{ found: 
     path: `_security/user/${username}`,
   });
 }
+
+const updateWithNewCredentials = (
+  url: string[],
+  user: { username: string; password: string }
+): string => {
+  url.splice(0, 1, `http://${user.username}:${user.password}`);
+  return url.join('@');
+};
 
 async function main() {
   const argv = yargs.help().options({
@@ -220,11 +234,14 @@ async function main() {
       type: 'boolean',
       default: false,
     },
-    newUser: {
+    withNewUser: {
       alias: 'nu',
-      describe: 'Adds a new user with username:password',
+      describe:
+        'If the --fleet flag is enabled, using `--withNewUser=username:password` would add a new user with \
+         the given username, password and `superuser`, `kibana_system` roles. Adding a new user would also write \
+        to indices in the generator as this user with the new roles.',
       type: 'string',
-      default: 'endpoint_user:changeme',
+      default: '',
     },
   }).argv;
   let ca: Buffer;
@@ -259,28 +276,37 @@ async function main() {
     clientOptions = { node: argv.node };
   }
   let client = new Client(clientOptions);
-  // add endpoint user
-  const newUserCreds = argv.newUser ? argv.newUser.split(':') : undefined;
-  const user: UserInfo | undefined = await addUser(
-    client,
-    newUserCreds
-      ? {
-          username: newUserCreds[0],
-          password: newUserCreds[1],
-        }
-      : undefined
-  );
+  let user: UserInfo | undefined;
+  // if fleet flag is used
+  if (argv.fleet) {
+    // add endpoint user if --withNewUser flag has values as username:password
+    const newUserCreds =
+      argv.withNewUser.indexOf(':') !== -1 ? argv.withNewUser.split(':') : undefined;
+    user = await addUser(
+      client,
+      newUserCreds
+        ? {
+            username: newUserCreds[0],
+            password: newUserCreds[1],
+          }
+        : undefined
+    );
 
-  // update client and kibana options before instantiating
-  if (user) {
-    // use endpoint user for Es and Kibana URLs
-    url = argv.kibana.replace('elastic', user.username);
-    node = argv.node.replace('elastic', user.username);
-    kbnClientOptions = {
-      ...kbnClientOptions,
-      url,
-    };
-    client = new Client({ ...clientOptions, node });
+    // update client and kibana options before instantiating
+    if (user) {
+      // use endpoint user for Es and Kibana URLs
+      const kibanaUrlInfo = argv.kibana.split('@');
+      const elasticUrlInfo = argv.node.split('@');
+
+      url = updateWithNewCredentials(kibanaUrlInfo, user);
+      node = updateWithNewCredentials(elasticUrlInfo, user);
+
+      kbnClientOptions = {
+        ...kbnClientOptions,
+        url,
+      };
+      client = new Client({ ...clientOptions, node });
+    }
   }
   // instantiate kibana client
   const kbnClient = new KbnClient({ ...kbnClientOptions });
@@ -298,6 +324,14 @@ async function main() {
     console.log(`No seed supplied, using random seed: ${seed}`);
   }
   const startTime = new Date().getTime();
+  if (argv.fleet && !argv.withNewUser) {
+    // warn and exit when using fleet flag
+    console.log(
+      'Please use the --withNewUser=username:password flag to add a custom user with required roles when --fleet is enabled!'
+    );
+    // eslint-disable-next-line no-process-exit
+    process.exit(0);
+  }
   await indexHostsAndAlerts(
     client,
     kbnClient,
@@ -330,7 +364,7 @@ async function main() {
   if (user) {
     const deleted = await deleteUser(client, user.username);
     if (deleted.found) {
-      console.log(`user ${user.username} deleted successfully!`);
+      console.log(`User ${user.username} deleted successfully!`);
     }
   }
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
