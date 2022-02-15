@@ -51,8 +51,8 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
       APP_ID,
       'visualize_geo_field',
       context.originatingApp
-        ? `visualize_geo_field_${context.originatingApp}`
-        : `visualize_geo_field`
+        ? `_${context.originatingApp}`
+        : ''
     );
 
     getCore().application.navigateToApp(app, {
