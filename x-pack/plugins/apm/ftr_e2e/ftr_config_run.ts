@@ -14,15 +14,6 @@ import { FtrProviderContext } from './ftr_provider_context';
 async function ftrConfigRun({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(require.resolve('./ftr_config.ts'));
 
-  // mount the config file for the package registry
-  const dockerArgs: string[] = [
-    '-v',
-    `${path.join(
-      path.dirname(__filename),
-      './apis/fixtures/package_registry_config.yml'
-    )}:/package-registry/config.yml`,
-  ];
-
   return {
     ...kibanaConfig.getAll(),
     testRunner,
