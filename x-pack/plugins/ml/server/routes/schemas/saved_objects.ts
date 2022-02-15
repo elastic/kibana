@@ -21,7 +21,7 @@ export const updateJobsSpaces = schema.object({
   spacesToRemove: schema.arrayOf(schema.string()),
 });
 
-export const updateModelsSpaces = schema.object({
+export const updateTrainedModelsSpaces = schema.object({
   modelIds: schema.arrayOf(schema.string()),
   spacesToAdd: schema.arrayOf(schema.string()),
   spacesToRemove: schema.arrayOf(schema.string()),

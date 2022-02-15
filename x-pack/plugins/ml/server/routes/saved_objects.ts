@@ -10,7 +10,7 @@ import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory, JobSavedObjectStatus } from '../saved_objects';
 import {
   updateJobsSpaces,
-  updateModelsSpaces,
+  updateTrainedModelsSpaces,
   jobsAndCurrentSpace,
   syncJobObjects,
   syncCheckSchema,
@@ -201,17 +201,17 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {post} /api/ml/saved_objects/update_trained_models_spaces Update what spaces jobs are assigned to
-   * @apiName UpdateModelsSpaces
-   * @apiDescription Update a list of models to add and/or remove them from given spaces
+   * @api {post} /api/ml/saved_objects/update_trained_models_spaces Update what spaces trained models are assigned to
+   * @apiName UpdateTrainedModelsSpaces
+   * @apiDescription Update a list of trained models to add and/or remove them from given spaces
    *
-   * @apiSchema (body) updateModelsSpaces
+   * @apiSchema (body) updateTrainedModelsSpaces
    */
   router.post(
     {
       path: '/api/ml/saved_objects/update_trained_models_spaces',
       validate: {
-        body: updateModelsSpaces,
+        body: updateTrainedModelsSpaces,
       },
       options: {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
@@ -336,9 +336,9 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/trained_models_spaces Get all models and their spaces
-   * @apiName ModelsSpaces
-   * @apiDescription List all models and their spaces.
+   * @api {get} /api/ml/saved_objects/trained_models_spaces Get all trained models and their spaces
+   * @apiName TrainedModelsSpaces
+   * @apiDescription List all trained models and their spaces.
    *
    */
   router.get(

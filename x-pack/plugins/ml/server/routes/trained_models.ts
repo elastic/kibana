@@ -95,9 +95,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   /**
    * @apiGroup TrainedModels
    *
-   * @api {get} /api/ml/trained_models/:modelId/_stats Get stats of a trained model
+   * @api {get} /api/ml/trained_models/_stats Get stats for all trained models
    * @apiName GetTrainedModelStats
-   * @apiDescription Retrieves usage information for trained models.
+   * @apiDescription Retrieves usage information for all trained models.
    */
   router.get(
     {
@@ -123,7 +123,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    * @apiGroup TrainedModels
    *
    * @api {get} /api/ml/trained_models/:modelId/_stats Get stats of a trained model
-   * @apiName GetTrainedModelStats
+   * @apiName GetTrainedModelStatsById
    * @apiDescription Retrieves usage information for trained models.
    */
   router.get(
