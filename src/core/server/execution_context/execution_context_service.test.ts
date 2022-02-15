@@ -32,7 +32,6 @@ describe('ExecutionContextService', () => {
             type: 'type-a',
             name: 'name-a',
             id: 'id-a',
-            space: 'a',
             description: 'description-a',
           });
           await delay(500);
@@ -44,7 +43,6 @@ describe('ExecutionContextService', () => {
             type: 'type-b',
             name: 'name-b',
             id: 'id-b',
-            space: 'a',
             description: 'description-b',
           });
           await delay(100);
@@ -59,7 +57,6 @@ describe('ExecutionContextService', () => {
           {
             type: 'type-a',
             name: 'name-a',
-            space: 'a',
             id: 'id-a',
             description: 'description-a',
             child: undefined,
@@ -68,7 +65,6 @@ describe('ExecutionContextService', () => {
           {
             type: 'type-b',
             name: 'name-b',
-            space: 'a',
             id: 'id-b',
             description: 'description-b',
             child: undefined,
