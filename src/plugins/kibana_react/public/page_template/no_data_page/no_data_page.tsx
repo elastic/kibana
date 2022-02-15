@@ -16,7 +16,6 @@ import classNames from 'classnames';
 import { KibanaPageTemplateProps } from '../page_template';
 
 import { ElasticAgentCard, NoDataCard } from './no_data_card';
-import { ActionCard } from './actions';
 import { NoDataPageBody } from './no_data_page_body/no_data_page_body';
 
 export const NO_DATA_PAGE_MAX_WIDTH = 950;
@@ -109,12 +108,11 @@ export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
     return Object.values(sortedData).map((action, i) => {
       const isAgent = actionsKeys[i] === 'elasticAgent' || actionsKeys[i] === 'beats';
       const key = isAgent ? 'empty-page-agent-action' : `empty-page-${actionsKeys[i]}-action`;
-      const noDataCard = isAgent ? (
-        <ElasticAgentCard solution={solution} {...action} />
+      return isAgent ? (
+        <ElasticAgentCard key={key} solution={solution} {...action} />
       ) : (
-        <NoDataCard {...action} />
+        <NoDataCard key={key} {...action} />
       );
-      return <ActionCard key={key} child={noDataCard} />;
     });
   }, [actions, sortedData, actionsKeys]);
 

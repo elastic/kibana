@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ActionCard } from './action_card';
 export { ActionCards } from './action_cards';

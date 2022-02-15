@@ -109,23 +109,13 @@ exports[`NoDataPage render 1`] = `
   <NoDataPageBody
     actionCards={
       Array [
-        <ActionCard
-          child={
-            <ElasticAgentCard
-              solution="Elastic"
-            />
-          }
+        <ElasticAgentCard
+          solution="Elastic"
         />,
-        <ActionCard
-          child={
-            <ElasticAgentCard
-              solution="Elastic"
-            />
-          }
+        <ElasticAgentCard
+          solution="Elastic"
         />,
-        <ActionCard
-          child={<NoDataCard />}
-        />,
+        <NoDataCard />,
       ]
     }
     docsLink="test"

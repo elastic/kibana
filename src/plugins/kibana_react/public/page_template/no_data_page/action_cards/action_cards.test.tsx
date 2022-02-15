@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ActionCard } from './action_card';
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { NoDataCard } from '../no_data_card';
@@ -19,12 +18,12 @@ describe('ActionCards', () => {
     onClick,
   };
   const card = <NoDataCard key={'key'} {...action} />;
-  const actionCard1 = <ActionCard key={'first'} child={card} />;
-  const actionCard2 = <ActionCard key={'second'} child={card} />;
+  const actionCard1 = <div key={'first'}>{card}</div>;
+  const actionCard2 = <div key={'second'}>{card}</div>;
 
   test('renders correctly', () => {
     const component = shallowWithIntl(<ActionCards actionCards={[actionCard1, actionCard2]} />);
-    const actionCards = component.find(ActionCard);
+    const actionCards = component.find('div');
     expect(actionCards.length).toBe(2);
     expect(actionCards.at(0).key()).toBe('first');
     expect(actionCards.at(1).key()).toBe('second');

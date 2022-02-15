@@ -7,7 +7,7 @@
  */
 
 import { NoDataPageBody } from './no_data_page_body';
-import { ActionCard } from '../actions';
+import { ActionCard } from '../action_cards';
 import React, { ReactElement } from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { NoDataCard } from '../no_data_card';
