@@ -121,6 +121,7 @@ export function FilterSetMenu({
 
     const newQuery = { query: '', language: lang };
     onQueryStringChange(newQuery);
+    closePopover();
   };
 
   const luceneLabel = i18n.translate('data.query.queryBar.luceneLanguageName', {
