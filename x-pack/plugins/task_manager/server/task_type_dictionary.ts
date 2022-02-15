@@ -14,6 +14,9 @@ import { Logger } from '../../../../src/core/server';
 export const REMOVED_TYPES: string[] = [
   // for testing
   'sampleTaskRemovedType',
+
+  // deprecated in https://github.com/elastic/kibana/pull/121442
+  'alerting:siem.signals',
 ];
 
 /**
