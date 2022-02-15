@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
 import { MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
@@ -19,6 +20,7 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
+    const monitors: Array<SavedObject<SyntheticsMonitor>> = [];
 
     const validationResult = validateMonitor(monitor as MonitorFields);
 
@@ -27,12 +29,16 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    const newMonitor = await savedObjectsClient.create<SyntheticsMonitor>(
-      syntheticsMonitorType,
-      monitor
-    );
+    for (let i = 0; i < 100; i++) {
+      const mon = await savedObjectsClient.create<SyntheticsMonitor>(
+        syntheticsMonitorType,
+        monitor
+      );
+      monitors.push(mon);
+    }
 
     const { syntheticsService } = server;
+    const newMonitor = monitors[0];
 
     const errors = await syntheticsService.pushConfigs(request, [
       {
