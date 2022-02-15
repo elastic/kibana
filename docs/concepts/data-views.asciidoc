@@ -32,15 +32,18 @@ uploaded a file, or added sample data,
 you get a data view for free, and can start exploring your data.
 If you loaded your own data, follow these steps to create a data view.
 
-. Open the main menu, then click to *Stack Management > Data Views*.
+. Open the main menu, then select *Discover*.
 
-. Click *Create data view*.
-
+. Click the ellipsis icon (...), and then click *Create new data view*.
++
 [role="screenshot"]
-image:management/index-patterns/images/create-data-view.png["Create data view"]
+image:discover/images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
 
 . Start typing in the *name* field, and {kib} looks for the names of
 indices, data streams, and aliases that match your input.
++
+[role="screenshot"]
+image:management/index-patterns/images/create-data-view.png["Create data view"]
 +
 ** To match multiple sources, use a wildcard (*). For example, `filebeat-*` matches
 `filebeat-apache-a`, `filebeat-apache-b`, and so on.
