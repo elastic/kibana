@@ -9,6 +9,15 @@ import { run, createFailError } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
+import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
+
+class EndpointPolicyGenerator extends BaseDataGenerator {
+  public policyName(preFix: string | number = '') {
+    return `${preFix}${preFix ? ' ' : ''}${this.randomString(5)} Endpoint Policy`;
+  }
+}
+
+const generate = new EndpointPolicyGenerator();
 
 export const cli = () => {
   run(
@@ -24,7 +33,11 @@ export const cli = () => {
 
         while (created < max) {
           created++;
-          await indexFleetEndpointPolicy(kbn, `${count} Endpoint Policy`, endpointPackage.version);
+          await indexFleetEndpointPolicy(
+            kbn,
+            generate.policyName(created),
+            endpointPackage.version
+          );
         }
       } catch (error) {
         log.error(error);
