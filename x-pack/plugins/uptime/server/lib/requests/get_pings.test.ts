@@ -51,17 +51,15 @@ describe('getAll', () => {
       },
     ];
     mockEsSearchResult = {
-      body: {
-        hits: {
-          total: {
-            value: mockHits.length,
-          },
-          hits: mockHits,
+      hits: {
+        total: {
+          value: mockHits.length,
         },
-        aggregations: {
-          locations: {
-            buckets: [{ key: 'foo' }],
-          },
+        hits: mockHits,
+      },
+      aggregations: {
+        locations: {
+          buckets: [{ key: 'foo' }],
         },
       },
     };
@@ -90,7 +88,7 @@ describe('getAll', () => {
   it('returns data in the appropriate shape', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+    mockEsClient.search.mockResponseOnce(mockEsSearchResult);
 
     const result = await getPings({
       uptimeEsClient,
@@ -113,7 +111,7 @@ describe('getAll', () => {
   it('creates appropriate sort and size parameters', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+    mockEsClient.search.mockResponseOnce(mockEsSearchResult);
 
     await getPings({
       uptimeEsClient,
@@ -177,6 +175,9 @@ describe('getAll', () => {
           },
           "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
         },
+        Object {
+          "meta": true,
+        },
       ]
     `);
   });
@@ -184,7 +185,7 @@ describe('getAll', () => {
   it('omits the sort param when no sort passed', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+    mockEsClient.search.mockResponseOnce(mockEsSearchResult);
 
     await getPings({
       uptimeEsClient,
@@ -246,6 +247,9 @@ describe('getAll', () => {
           },
           "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
         },
+        Object {
+          "meta": true,
+        },
       ]
     `);
   });
@@ -253,7 +257,7 @@ describe('getAll', () => {
   it('omits the size param when no size passed', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+    mockEsClient.search.mockResponseOnce(mockEsSearchResult);
 
     await getPings({
       uptimeEsClient,
@@ -315,6 +319,9 @@ describe('getAll', () => {
           },
           "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
         },
+        Object {
+          "meta": true,
+        },
       ]
     `);
   });
@@ -322,7 +329,7 @@ describe('getAll', () => {
   it('adds a filter for monitor ID', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+    mockEsClient.search.mockResponseOnce(mockEsSearchResult);
 
     await getPings({
       uptimeEsClient,
@@ -389,6 +396,9 @@ describe('getAll', () => {
           },
           "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
         },
+        Object {
+          "meta": true,
+        },
       ]
     `);
   });
@@ -396,7 +406,7 @@ describe('getAll', () => {
   it('adds excluded locations terms agg', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+    mockEsClient.search.mockResponseOnce(mockEsSearchResult);
 
     await getPings({
       uptimeEsClient,
@@ -427,7 +437,7 @@ describe('getAll', () => {
   it('throws error for invalid exclusions', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+    mockEsClient.search.mockResponseOnce(mockEsSearchResult);
 
     await expect(
       getPings({
@@ -441,7 +451,7 @@ describe('getAll', () => {
   it('adds a filter for monitor status', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+    mockEsClient.search.mockResponseOnce(mockEsSearchResult);
 
     await getPings({
       uptimeEsClient,
@@ -507,6 +517,9 @@ describe('getAll', () => {
             ],
           },
           "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+        },
+        Object {
+          "meta": true,
         },
       ]
     `);
