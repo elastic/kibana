@@ -8,7 +8,7 @@
 import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
 import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
 import type { XOR } from './common';
-import type { DeploymentState } from '../constants/trained_models';
+import type { DeploymentState, TrainedModelType } from '../constants/trained_models';
 
 export interface IngestStats {
   count: number;
@@ -103,7 +103,7 @@ export interface TrainedModelConfigResponse {
     model_aliases?: string[];
   } & Record<string, unknown>;
   model_id: string;
-  model_type: 'tree_ensemble' | 'pytorch' | 'lang_ident';
+  model_type: TrainedModelType;
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;

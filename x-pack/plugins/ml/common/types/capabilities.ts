@@ -32,6 +32,8 @@ export const userMlCapabilities = {
   canDeleteAnnotation: false,
   // Alerts
   canUseMlAlerts: false,
+  // Trained models
+  canGetTrainedModels: false,
 };
 
 export const adminMlCapabilities = {
@@ -65,6 +67,10 @@ export const adminMlCapabilities = {
   canUseMlAlerts: false,
   // Model management
   canViewMlNodes: false,
+  // Trained models
+  canCreateTrainedModels: false,
+  canDeleteTrainedModels: false,
+  canStartStopTrainedModels: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;

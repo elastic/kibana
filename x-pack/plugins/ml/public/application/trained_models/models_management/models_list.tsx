@@ -49,7 +49,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
-import { DEPLOYMENT_STATE } from '../../../../common/constants/trained_models';
+import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { JobSpacesList } from '../../components/job_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
@@ -118,7 +118,8 @@ export const ModelsList: FC<Props> = ({
 
   const searchQueryText = pageState.queryText ?? '';
 
-  const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
+  const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
+  const canStartStopTrainedModels = capabilities.ml.canStartStopTrainedModels as boolean;
 
   const trainedModelsApiService = useTrainedModelsApiService();
   const savedObjectsApiService = useSavedObjectsApiService();
@@ -184,7 +185,9 @@ export const ModelsList: FC<Props> = ({
       }
 
       // Need to fetch state for 3rd party models to enable/disable actions
-      await fetchModelsStats(newItems.filter((v) => v.model_type.includes('pytorch')));
+      await fetchModelsStats(
+        newItems.filter((v) => v.model_type.includes(TRAINED_MODEL_TYPE.PYTORCH))
+      );
 
       setItems(newItems);
 
@@ -407,12 +410,13 @@ export const ModelsList: FC<Props> = ({
           enabled: (item) => {
             const { state } = item.stats?.deployment_stats ?? {};
             return (
+              canStartStopTrainedModels &&
               !isLoading &&
               state !== DEPLOYMENT_STATE.STARTED &&
               state !== DEPLOYMENT_STATE.STARTING
             );
           },
-          available: (item) => item.model_type === 'pytorch',
+          available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
           onClick: async (item) => {
             try {
               setIsLoading(true);
@@ -453,8 +457,9 @@ export const ModelsList: FC<Props> = ({
           icon: 'stop',
           type: 'icon',
           isPrimary: true,
-          available: (item) => item.model_type === 'pytorch',
+          available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
           enabled: (item) =>
+            canStartStopTrainedModels &&
             !isLoading &&
             isPopulatedObject(item.stats?.deployment_stats) &&
             item.stats?.deployment_stats?.state !== DEPLOYMENT_STATE.STOPPING,
@@ -510,7 +515,7 @@ export const ModelsList: FC<Props> = ({
           onClick: async (model) => {
             await prepareModelsForDeletion([model]);
           },
-          available: (item) => canDeleteDataFrameAnalytics && !isBuiltInModel(item),
+          available: (item) => canDeleteTrainedModels && !isBuiltInModel(item),
           enabled: (item) => {
             // TODO check for permissions to delete ingest pipelines.
             // ATM undefined means pipelines fetch failed server-side.
@@ -690,7 +695,7 @@ export const ModelsList: FC<Props> = ({
     </EuiFlexItem>
   );
 
-  const isSelectionAllowed = canDeleteDataFrameAnalytics;
+  const isSelectionAllowed = canDeleteTrainedModels;
 
   const selection: EuiTableSelectionType<ModelItem> | undefined = isSelectionAllowed
     ? {

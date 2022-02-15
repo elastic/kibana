@@ -40,7 +40,7 @@ export function savedObjectsRoutes(
       path: '/api/ml/saved_objects/status',
       validate: false,
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, response, jobSavedObjectService }) => {
@@ -75,7 +75,11 @@ export function savedObjectsRoutes(
         query: syncJobObjects,
       },
       options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+        tags: [
+          'access:ml:canCreateJob',
+          'access:ml:canCreateDataFrameAnalytics',
+          'access:ml:canCreateTrainedModels',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
@@ -108,7 +112,11 @@ export function savedObjectsRoutes(
         query: syncJobObjects,
       },
       options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+        tags: [
+          'access:ml:canCreateJob',
+          'access:ml:canCreateDataFrameAnalytics',
+          'access:ml:canCreateTrainedModels',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
@@ -141,7 +149,11 @@ export function savedObjectsRoutes(
         body: syncCheckSchema,
       },
       options: {
-        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+        tags: [
+          'access:ml:canGetJobs',
+          'access:ml:canGetDataFrameAnalytics',
+          'access:ml:canGetTrainedModels',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
@@ -214,7 +226,7 @@ export function savedObjectsRoutes(
         body: updateTrainedModelsSpaces,
       },
       options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+        tags: ['access:ml:canCreateTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
@@ -346,7 +358,7 @@ export function savedObjectsRoutes(
       path: '/api/ml/saved_objects/trained_models_spaces',
       validate: false,
       options: {
-        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {

@@ -35,7 +35,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         query: getInferenceQuerySchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
@@ -104,7 +104,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/_stats',
       validate: false,
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
@@ -133,7 +133,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         params: modelIdSchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
@@ -165,7 +165,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         params: modelIdSchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
@@ -198,7 +198,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         body: trainedModel,
       },
       options: {
-        tags: ['access:ml:canCreateDataFrameAnalytics'],
+        tags: ['access:ml:canCreateTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
@@ -232,7 +232,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         params: modelIdSchema,
       },
       options: {
-        tags: ['access:ml:canDeleteDataFrameAnalytics'],
+        tags: ['access:ml:canDeleteTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
@@ -266,6 +266,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           'access:ml:canViewMlNodes',
           'access:ml:canGetDataFrameAnalytics',
           'access:ml:canGetJobs',
+          'access:canGetTrainedModels',
         ],
       },
     },
@@ -300,7 +301,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         params: modelIdSchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canStartStopTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
@@ -333,7 +334,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         query: forceQuerySchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canStartStopTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
