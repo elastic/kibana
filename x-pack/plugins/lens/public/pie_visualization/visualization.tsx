@@ -19,22 +19,22 @@ import type {
   AccessorConfig,
   VisualizationDimensionGroupConfig,
 } from '../types';
-import { toExpression, toPreviewExpression } from './to_expression';
-import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
-import { layerTypes } from '../../common';
+import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
+import { CategoryDisplay, layerTypes, LegendDisplay, NumberDisplay } from '../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
+import { PieChartTypes, PieLayerState, PieVisualizationState } from '../../common';
 
 function newLayerState(layerId: string): PieLayerState {
   return {
     layerId,
     groups: [],
     metric: undefined,
-    numberDisplay: 'percent',
-    categoryDisplay: 'default',
-    legendDisplay: 'default',
+    numberDisplay: NumberDisplay.PERCENT,
+    categoryDisplay: CategoryDisplay.DEFAULT,
+    legendDisplay: LegendDisplay.DEFAULT,
     nestedLegend: false,
     layerType: layerTypes.DATA,
   };
@@ -108,7 +108,7 @@ export const getPieVisualization = ({
   initialize(addNewLayer, state, mainPalette) {
     return (
       state || {
-        shape: 'donut',
+        shape: PieChartTypes.DONUT,
         layers: [newLayerState(addNewLayer())],
         palette: mainPalette,
       }
@@ -126,14 +126,11 @@ export const getPieVisualization = ({
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
-    const originalOrder = datasource
-      .getTableSpec()
-      .map(({ columnId }) => columnId)
-      .filter((columnId) => columnId !== layer.metric);
+    const originalOrder = getSortedGroups(datasource, layer);
     // When we add a column it could be empty, and therefore have no order
-    const sortedColumns: AccessorConfig[] = Array.from(
-      new Set(originalOrder.concat(layer.groups))
-    ).map((accessor) => ({ columnId: accessor }));
+    const sortedColumns: AccessorConfig[] = originalOrder.map((accessor) => ({
+      columnId: accessor,
+    }));
 
     if (sortedColumns.length) {
       applyPaletteToColumnConfig(sortedColumns, state, paletteService);
@@ -197,7 +194,7 @@ export const getPieVisualization = ({
           return l;
         }
         if (groupId === 'groups') {
-          return { ...l, groups: [...l.groups, columnId] };
+          return { ...l, groups: [...l.groups.filter((group) => group !== columnId), columnId] };
         }
         return { ...l, metric: columnId };
       }),
@@ -234,7 +231,7 @@ export const getPieVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.pie.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
       },
     ];
