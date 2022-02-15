@@ -26,7 +26,7 @@ import {
   useGetSettings,
   sendGetOneAgentPolicy,
   useFleetStatus,
-  useGetAgentPolicies,
+  useAgentEnrollmentFlyoutData,
 } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy } from '../../types';
@@ -64,23 +64,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
-  // loading the latest agentPolicies for add agent flyout
-  const {
-    data: agentPoliciesData,
-    isLoading: isLoadingAgentPolicies,
-    resendRequest: refreshAgentPolicies,
-  } = useGetAgentPolicies({
-    page: 1,
-    perPage: 1000,
-    full: true,
-  });
-
-  const agentPolicies = useMemo(() => {
-    if (!isLoadingAgentPolicies) {
-      return agentPoliciesData?.items;
-    }
-    return [];
-  }, [isLoadingAgentPolicies, agentPoliciesData?.items]);
+  const { agentPolicies, refreshAgentPolicies } = useAgentEnrollmentFlyoutData();
 
   useEffect(() => {
     async function checkPolicyIsFleetServer() {
