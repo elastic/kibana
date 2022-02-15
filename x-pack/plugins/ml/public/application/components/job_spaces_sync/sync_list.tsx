@@ -8,9 +8,19 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiText, EuiTitle, EuiAccordion, EuiTextColor, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiText,
+  EuiTitle,
+  EuiAccordion,
+  EuiTextColor,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { SyncSavedObjectResponse } from '../../../../common/types/saved_objects';
+import type {
+  SyncSavedObjectResponse,
+  SavedObjectResult,
+} from '../../../../common/types/saved_objects';
 
 export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {
   if (syncItems === null) {
@@ -66,7 +76,9 @@ const SavedObjectsCreated: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
       </EuiText>
     </>
   );
-  return <SyncItem id="savedObjectsCreated" title={title} items={items} />;
+  return (
+    <SyncItem id="savedObjectsCreated" title={title} results={syncItems.savedObjectsCreated} />
+  );
 };
 
 const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
@@ -97,7 +109,9 @@ const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
       </EuiText>
     </>
   );
-  return <SyncItem id="savedObjectsDeleted" title={title} items={items} />;
+  return (
+    <SyncItem id="savedObjectsDeleted" title={title} results={syncItems.savedObjectsDeleted} />
+  );
 };
 
 const DatafeedsAdded: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
@@ -128,7 +142,7 @@ const DatafeedsAdded: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems 
       </EuiText>
     </>
   );
-  return <SyncItem id="datafeedsAdded" title={title} items={items} />;
+  return <SyncItem id="datafeedsAdded" title={title} results={syncItems.datafeedsAdded} />;
 };
 
 const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
@@ -159,21 +173,39 @@ const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItem
       </EuiText>
     </>
   );
-  return <SyncItem id="datafeedsRemoved" title={title} items={items} />;
+  return <SyncItem id="datafeedsRemoved" title={title} results={syncItems.datafeedsRemoved} />;
 };
 
-const SyncItem: FC<{ id: string; title: JSX.Element; items: string[] }> = ({
+const SyncItem: FC<{ id: string; title: JSX.Element; results: SavedObjectResult }> = ({
   id,
   title,
-  items,
-}) => (
-  <EuiAccordion id={id} buttonContent={title} paddingSize="l">
-    <EuiText size="s">
-      <ul>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </EuiText>
-  </EuiAccordion>
-);
+  results,
+}) => {
+  const itemsByType = Object.entries(results).reduce((acc, [item, { type }]) => {
+    if (acc[type] === undefined) {
+      acc[type] = [];
+    }
+    acc[type].push(item);
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  return (
+    <EuiAccordion id={id} buttonContent={title} paddingSize="l">
+      {Object.entries(itemsByType).map(([type, items]) => {
+        return (
+          <>
+            <EuiText size="s">
+              <div style={{ fontWeight: 'bold' }}>{type}</div>
+              <ul>
+                {items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        );
+      })}
+    </EuiAccordion>
+  );
+};
