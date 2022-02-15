@@ -38,7 +38,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
         data-test-subj="lnsMissingValuesSelect"
         legend="This is a basic group"
         options={titlePositions}
-        idSelected={state.titlePosition ?? 'top'}
+        idSelected={state.titlePosition ?? 'bottom'}
         onChange={(value) => {
           setState({ ...state, titlePosition: value as MetricState['titlePosition'] });
         }}

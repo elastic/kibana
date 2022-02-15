@@ -310,7 +310,7 @@ describe('metric_visualization', () => {
                   "",
                 ],
                 "titlePosition": Array [
-                  "top",
+                  "bottom",
                 ],
               },
               "function": "lens_metric_chart",

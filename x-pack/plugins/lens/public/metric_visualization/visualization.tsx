@@ -60,8 +60,8 @@ const toExpression = (
         function: 'lens_metric_chart',
         arguments: {
           title: [attributes?.title || ''],
-          size: [state?.size || ''],
-          titlePosition: [state?.titlePosition || 'top'],
+          size: [state?.size || 'xl'],
+          titlePosition: [state?.titlePosition || 'bottom'],
           textAlign: [state?.textAlign || 'center'],
           description: [attributes?.description || ''],
           metricTitle: [operation?.label || ''],

@@ -94,7 +94,7 @@ export class AutoScale extends React.Component<Props, State> {
                 alignLeft: textAlign === 'left',
                 alignRight: textAlign === 'right',
                 alignCenter: textAlign === 'center',
-                [`titleSize${(size ?? 'xl').toUpperCase()}`]: true,
+                [`titleSize${size?.toUpperCase()}`]: Boolean(size),
               })}
             >
               {children}
