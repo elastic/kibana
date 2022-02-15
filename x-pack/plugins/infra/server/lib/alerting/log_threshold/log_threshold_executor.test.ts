@@ -422,7 +422,7 @@ describe('Log threshold executor', () => {
         processUngroupedResults(
           results,
           ruleParams,
-          alertsMock.createAlertInstanceFactory,
+          alertsMock.createAlertFactory.create,
           alertUpdaterMock
         );
         // First call, second argument
@@ -486,7 +486,7 @@ describe('Log threshold executor', () => {
         processGroupByResults(
           results,
           ruleParams,
-          alertsMock.createAlertInstanceFactory,
+          alertsMock.createAlertFactory.create,
           alertUpdaterMock
         );
         expect(alertUpdaterMock.mock.calls.length).toBe(2);

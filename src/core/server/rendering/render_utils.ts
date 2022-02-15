@@ -42,7 +42,7 @@ export const getStylesheetPaths = ({
           )}`,
           `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
           `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
-          `${basePath}/ui/legacy_dark_theme.css`,
+          // `${basePath}/ui/legacy_dark_theme.css`,
         ]
       : [
           `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
@@ -50,7 +50,7 @@ export const getStylesheetPaths = ({
           )}`,
           `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
           `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-          `${basePath}/ui/legacy_light_theme.css`,
+          // `${basePath}/ui/legacy_light_theme.css`,
         ]),
   ];
 };

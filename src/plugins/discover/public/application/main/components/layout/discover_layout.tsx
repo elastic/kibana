@@ -226,6 +226,8 @@ export function DiscoverLayout({
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
+        indexPatternList={indexPatternList}
+        onChangeIndexPattern={onChangeIndexPattern}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout

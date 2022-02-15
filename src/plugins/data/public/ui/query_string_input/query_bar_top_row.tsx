@@ -324,6 +324,7 @@ export const QueryBarTopRow = React.memo(
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
             className="kbnQueryBar__datePicker"
+            width="auto"
           />
         </EuiFlexItem>
       );
@@ -336,7 +337,7 @@ export const QueryBarTopRow = React.memo(
         <SuperUpdateButton
           display="fill"
           isDisabled={isDateRangeInvalid}
-          iconType={props.isDirty ? 'push' : 'refresh'}
+          iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
           aria-label="Update"
           data-test-subj="querySubmitButton"
           onClick={onClickSubmitButton}
@@ -363,26 +364,28 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderQueryInput()) return;
 
       return (
-        <EuiFlexItem>
-          <QueryStringInput
-            disableAutoFocus={props.disableAutoFocus}
-            indexPatterns={props.indexPatterns!}
-            prepend={props.prepend}
-            query={props.query!}
-            screenTitle={props.screenTitle}
-            onChange={onQueryChange}
-            onChangeQueryInputFocus={onChangeQueryInputFocus}
-            onSubmit={onInputSubmit}
-            persistedLog={persistedLog}
-            dataTestSubj={props.dataTestSubj}
-            placeholder={props.placeholder}
-            isClearable={props.isClearable}
-            iconType={props.iconType}
-            nonKqlMode={props.nonKqlMode}
-            nonKqlModeHelpText={props.nonKqlModeHelpText}
-            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-          />
-        </EuiFlexItem>
+        <>
+          <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>
+          <EuiFlexItem className="globalFilterGroup__filterFlexItem">
+            <QueryStringInput
+              disableAutoFocus={props.disableAutoFocus}
+              indexPatterns={props.indexPatterns!}
+              query={props.query!}
+              screenTitle={props.screenTitle}
+              onChange={onQueryChange}
+              onChangeQueryInputFocus={onChangeQueryInputFocus}
+              onSubmit={onInputSubmit}
+              persistedLog={persistedLog}
+              dataTestSubj={props.dataTestSubj}
+              placeholder={props.placeholder}
+              isClearable={props.isClearable}
+              iconType={props.iconType}
+              nonKqlMode={props.nonKqlMode}
+              nonKqlModeHelpText={props.nonKqlModeHelpText}
+              timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            />
+          </EuiFlexItem>
+        </>
       );
     }
 

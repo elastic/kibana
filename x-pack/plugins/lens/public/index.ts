@@ -12,7 +12,7 @@ export type {
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
 export type { XYState } from './xy_visualization/types';
-export type { DataType, OperationMetadata } from './types';
+export type { DataType, OperationMetadata, Visualization } from './types';
 export type {
   PieVisualizationState,
   PieLayerState,
@@ -61,7 +61,8 @@ export type {
   StaticValueIndexPatternColumn,
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './embeddable';
+export { layerTypes } from '../common';
 
-export type { LensPublicStart } from './plugin';
+export type { LensPublicStart, LensPublicSetup } from './plugin';
 
 export const plugin = () => new LensPlugin();

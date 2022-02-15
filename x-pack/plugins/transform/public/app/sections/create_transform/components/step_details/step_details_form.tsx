@@ -486,18 +486,20 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 aria-label={i18n.translate(
                   'xpack.transform.stepDetailsForm.destinationIngestPipelineAriaLabel',
                   {
-                    defaultMessage: 'Select an ingest pipeline',
+                    defaultMessage: 'Select an ingest pipeline (optional)',
                   }
                 )}
                 placeholder={i18n.translate(
                   'xpack.transform.stepDetailsForm.destinationIngestPipelineComboBoxPlaceholder',
                   {
-                    defaultMessage: 'Select an ingest pipeline',
+                    defaultMessage: 'Select an ingest pipeline (optional)',
                   }
                 )}
                 singleSelection={{ asPlainText: true }}
                 options={ingestPipelineNames.map((label: string) => ({ label }))}
-                selectedOptions={[{ label: destinationIngestPipeline }]}
+                selectedOptions={
+                  destinationIngestPipeline !== '' ? [{ label: destinationIngestPipeline }] : []
+                }
                 onChange={(options) => setDestinationIngestPipeline(options[0]?.label ?? '')}
               />
             </EuiFormRow>

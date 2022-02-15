@@ -192,13 +192,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
     const firstDepthGroupedFilters = groupBy(filtersWithoutLabel, 'groupId');
     const GroupBadge: JSX.Element[] = [];
-    for (const [groupId, groupedFilters] of Object.entries(firstDepthGroupedFilters)) {
+    for (const [gId, groupedFilters] of Object.entries(firstDepthGroupedFilters)) {
       const badge = (
         <FilterExpressionItem
-          groupId={groupId}
+          groupId={gId}
           groupedFilters={groupedFilters}
           indexPatterns={props?.indexPatterns}
-          onClick={() => { }}
+          onClick={() => {}}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
@@ -220,7 +220,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={groupId}
           groupedFilters={groupedByAlias[label]}
           indexPatterns={props?.indexPatterns}
-          onClick={() => { }}
+          onClick={() => {}}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           onEditFilterClick={onEditFilterClick}
@@ -336,7 +336,10 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   return (
     <EuiFlexGroup
-      className="globalFilterGroup"
+      className={classNames('globalFilterGroup', {
+        'globalFilterGroup--hasFilters':
+          props.filters.length > 0 || props.multipleFilters.length > 0,
+      })}
       gutterSize="none"
       alignItems="flexStart"
       responsive={false}

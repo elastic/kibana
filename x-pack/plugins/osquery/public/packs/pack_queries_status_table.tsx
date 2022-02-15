@@ -30,6 +30,7 @@ import {
   PieVisualizationState,
   TermsIndexPatternColumn,
 } from '../../../lens/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '../../../lens/common/constants';
 import { FilterStateStore, DataView } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
@@ -91,7 +92,7 @@ function getLensAttributes(
         },
       } as TermsIndexPatternColumn,
       'ed999e9d-204c-465b-897f-fe1a125b39ed': {
-        sourceField: 'Records',
+        sourceField: RECORDS_FIELD,
         isBucketed: false,
         dataType: 'number',
         scale: 'ratio',

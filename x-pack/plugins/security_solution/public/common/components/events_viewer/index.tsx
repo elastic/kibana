@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
@@ -29,7 +29,10 @@ import { CellValueElementProps } from '../../../timelines/components/timeline/ce
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import { useCreateFieldButton } from '../../../timelines/components/create_field_button';
+import {
+  CreateFieldEditorActions,
+  useCreateFieldButton,
+} from '../../../timelines/components/create_field_button';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -121,6 +124,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
   );
+  const editorActionsRef = useRef<CreateFieldEditorActions>(null);
+
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
@@ -137,6 +142,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     }
     return () => {
       deleteEventQuery({ id, inputId: 'global' });
+      if (editorActionsRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        editorActionsRef.current.closeEditor();
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -167,7 +176,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [id, timelineQuery, globalQuery]);
   const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
 
-  const createFieldComponent = useCreateFieldButton(scopeId, id);
+  const createFieldComponent = useCreateFieldButton(scopeId, id, editorActionsRef);
 
   return (
     <>

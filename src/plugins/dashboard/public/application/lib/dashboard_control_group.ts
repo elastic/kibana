@@ -8,7 +8,7 @@
 
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
 import { DashboardContainer } from '..';

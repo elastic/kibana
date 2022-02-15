@@ -1,0 +1,33 @@
+{
+  "id": "ux",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [
+    "features",
+    "data",
+    "licensing",
+    "triggersActionsUi",
+    "embeddable",
+    "infra",
+    "inspector",
+    "apm"
+  ],
+  "optionalPlugins": [
+    "cloud",
+    "usageCollection",
+    "taskManager",
+    "actions",
+    "alerts",
+    "observability",
+    "security",
+    "maps"
+  ],
+  "server": false,
+  "ui": true,
+  "configPath": ["xpack", "ux"],
+  "requiredBundles": ["kibanaReact", "observability", "maps"],
+  "owner": {
+    "name": "Uptime",
+    "githubTeam": "uptime"
+  }
+}

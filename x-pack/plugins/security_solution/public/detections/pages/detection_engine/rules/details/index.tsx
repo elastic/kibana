@@ -227,8 +227,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
-  // This is used to re-trigger api rule status when user de/activate rule
-  const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
   const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
@@ -514,14 +512,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [dispatch]
   );
 
-  const handleOnChangeEnabledRule = useCallback(
-    (enabled: boolean) => {
-      if (ruleEnabled == null || enabled !== ruleEnabled) {
-        setRuleEnabled(enabled);
-      }
-    },
-    [ruleEnabled, setRuleEnabled]
-  );
+  const handleOnChangeEnabledRule = useCallback((enabled: boolean) => {
+    setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
+  }, []);
 
   const goToEditRule = useCallback(
     (ev) => {

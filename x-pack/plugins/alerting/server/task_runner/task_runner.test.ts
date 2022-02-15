@@ -309,7 +309,7 @@ describe('Task Runner', () => {
             },
           ]
         `);
-    expect(call.services.alertInstanceFactory).toBeTruthy();
+    expect(call.services.alertFactory.create).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
@@ -427,8 +427,8 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices
-            .alertInstanceFactory('1')
+          executorServices.alertFactory
+            .create('1')
             .scheduleActionsWithSubGroup('default', 'subDefault');
         }
       );
@@ -708,7 +708,7 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -934,8 +934,8 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
-          executorServices.alertInstanceFactory('2').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
+          executorServices.alertFactory.create('2').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -991,7 +991,7 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -1192,7 +1192,7 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -1268,8 +1268,8 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices
-            .alertInstanceFactory('1')
+          executorServices.alertFactory
+            .create('1')
             .scheduleActionsWithSubGroup('default', 'subgroup1');
         }
       );
@@ -1350,7 +1350,7 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -1672,7 +1672,7 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -2080,10 +2080,10 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
 
           // create an instance, but don't schedule any actions, so it doesn't go active
-          executorServices.alertInstanceFactory('3');
+          executorServices.alertFactory.create('3');
         }
       );
       const taskRunner = new TaskRunner(
@@ -2186,7 +2186,7 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertInstanceFactory('1').scheduleActions('default');
+          executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -2297,7 +2297,7 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     const date = new Date().toISOString();
@@ -3692,8 +3692,8 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
-        executorServices.alertInstanceFactory('2').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -4006,8 +4006,8 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
-        executorServices.alertInstanceFactory('2').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -4251,8 +4251,8 @@ describe('Task Runner', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
-        executorServices.alertInstanceFactory('2').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
@@ -5035,7 +5035,7 @@ describe('Task Runner', () => {
             },
           ]
         `);
-    expect(call.services.alertInstanceFactory).toBeTruthy();
+    expect(call.services.alertFactory.create).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 

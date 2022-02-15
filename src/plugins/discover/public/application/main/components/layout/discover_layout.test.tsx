@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';

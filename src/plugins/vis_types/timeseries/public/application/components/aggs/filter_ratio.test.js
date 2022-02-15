@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FilterRatioAgg } from './filter_ratio';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';

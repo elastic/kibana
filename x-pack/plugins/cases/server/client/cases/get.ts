@@ -59,7 +59,7 @@ export const getCasesByAlertID = async (
   { alertID, options }: CasesByAlertIDParams,
   clientArgs: CasesClientArgs
 ): Promise<CasesByAlertId> => {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const { caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -79,7 +79,6 @@ export const getCasesByAlertID = async (
     // This will likely only return one comment saved object, the response aggregation will contain
     // the keys we need to retrieve the cases
     const commentsWithAlert = await caseService.getCaseIdsByAlertId({
-      unsecuredSavedObjectsClient,
       alertId: alertID,
       filter,
     });
@@ -100,7 +99,6 @@ export const getCasesByAlertID = async (
     }
 
     const casesInfo = await caseService.getCases({
-      unsecuredSavedObjectsClient,
       caseIds,
     });
 
@@ -157,11 +155,10 @@ export const get = async (
   { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const { caseService, logger, authorization } = clientArgs;
 
   try {
     const theCase: SavedObject<CaseAttributes> = await caseService.getCase({
-      unsecuredSavedObjectsClient,
       id,
     });
 
@@ -179,7 +176,6 @@ export const get = async (
     }
 
     const theComments = await caseService.getAllCaseComments({
-      unsecuredSavedObjectsClient,
       id,
       options: {
         sortField: 'created_at',
@@ -209,14 +205,13 @@ export const resolve = async (
   { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const { caseService, logger, authorization } = clientArgs;
 
   try {
     const {
       saved_object: resolvedSavedObject,
       ...resolveData
     }: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase({
-      unsecuredSavedObjectsClient,
       id,
     });
 
@@ -240,7 +235,6 @@ export const resolve = async (
     }
 
     const theComments = await caseService.getAllCaseComments({
-      unsecuredSavedObjectsClient,
       id: resolvedSavedObject.id,
       options: {
         sortField: 'created_at',

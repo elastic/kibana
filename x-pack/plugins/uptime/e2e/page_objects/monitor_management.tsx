@@ -88,7 +88,7 @@ export function monitorManagementPageProvider({
       } else {
         await page.click('text=Save monitor');
       }
-      return await this.findByTestSubj('uptimeAddMonitorSuccess');
+      return await this.findByText('Monitor added successfully.');
     },
 
     async fillCodeEditor(value: string) {

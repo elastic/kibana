@@ -8,7 +8,7 @@
 import React from 'react';
 import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import type { Datatable } from 'src/plugins/expressions/public';
 import { getLegendAction } from './get_legend_action';

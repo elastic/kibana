@@ -16,7 +16,7 @@ import { ElasticsearchClient } from 'kibana/server';
 import {
   ActionGroup,
   ActionGroupIdsOf,
-  AlertInstance as Alert,
+  Alert,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   AlertTypeState as RuleTypeState,

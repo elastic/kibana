@@ -683,10 +683,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
-    const containerClassName = classNames(
-      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
-      this.props.className
-    );
+    const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
     const inputClassName = classNames(
       'kbnQueryBar__textarea',
       this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null,

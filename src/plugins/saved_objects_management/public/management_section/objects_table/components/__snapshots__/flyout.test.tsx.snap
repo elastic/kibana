@@ -182,6 +182,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           },
           "delete": [MockFunction],
           "externalUrl": Object {
+            "isInternalUrl": [MockFunction],
             "validateUrl": [MockFunction],
           },
           "fetch": [MockFunction],

@@ -17,8 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useSelector } from 'react-redux';
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
@@ -27,6 +28,10 @@ import { setMonitor } from '../../../state/api';
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TestRun } from '../test_now_mode/test_now_mode';
+
+import { monitorManagementListSelector } from '../../../state/selectors';
+
+import { kibanaService } from '../../../state/kibana_service';
 
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
@@ -39,11 +44,11 @@ export interface ActionBarProps {
 export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: ActionBarProps) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const { basePath } = useContext(UptimeSettingsContext);
+  const { locations } = useSelector(monitorManagementListSelector);
 
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const { notifications } = useKibana();
+  const [isSuccessful, setIsSuccessful] = useState(false);
 
   const { data, status } = useFetcher(() => {
     if (!isSaving || !isValid) {
@@ -54,6 +59,9 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       id: monitorId ? Buffer.from(monitorId, 'base64').toString('utf8') : undefined,
     });
   }, [monitor, monitorId, isValid, isSaving]);
+
+  const hasErrors = data && Object.keys(data).length;
+  const loading = status === FETCH_STATUS.LOADING;
 
   const handleOnSave = useCallback(() => {
     if (onSave) {
@@ -75,23 +83,57 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       setIsSaving(false);
     }
     if (status === FETCH_STATUS.FAILURE) {
-      notifications.toasts.danger({
-        title: <p data-test-subj="uptimeAddMonitorFailure">{MONITOR_FAILURE_LABEL}</p>,
+      kibanaService.toasts.addDanger({
+        title: MONITOR_FAILURE_LABEL,
         toastLifeTimeMs: 3000,
       });
-    } else if (status === FETCH_STATUS.SUCCESS) {
-      notifications.toasts.success({
-        title: (
-          <p data-test-subj="uptimeAddMonitorSuccess">
-            {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL}
-          </p>
-        ),
+    } else if (status === FETCH_STATUS.SUCCESS && !hasErrors && !loading) {
+      kibanaService.toasts.addSuccess({
+        title: monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
       });
+      setIsSuccessful(true);
+    } else if (hasErrors && !loading) {
+      Object.values(data).forEach((location) => {
+        const { status: responseStatus, reason } = location.error || {};
+        kibanaService.toasts.addWarning({
+          title: i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
+            defaultMessage: `Unable to sync monitor config`,
+          }),
+          text: toMountPoint(
+            <>
+              <p>
+                {i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
+                  defaultMessage: `Your monitor was saved, but there was a problem syncing the configuration for {location}. We will automatically try again later. If this problem continues, your monitors will stop running in {location}. Please contact Support for assistance.`,
+                  values: {
+                    location: locations?.find((loc) => loc?.id === location.locationId)?.label,
+                  },
+                })}
+              </p>
+              <p>
+                {status
+                  ? i18n.translate('xpack.uptime.monitorManagement.service.error.status', {
+                      defaultMessage: 'Status: {status}. ',
+                      values: { status: responseStatus },
+                    })
+                  : null}
+                {reason
+                  ? i18n.translate('xpack.uptime.monitorManagement.service.error.reason', {
+                      defaultMessage: 'Reason: {reason}.',
+                      values: { reason },
+                    })
+                  : null}
+              </p>
+            </>
+          ),
+          toastLifeTimeMs: 30000,
+        });
+      });
+      setIsSuccessful(true);
     }
-  }, [data, status, notifications.toasts, isSaving, isValid, monitorId]);
+  }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);
 
-  return status === FETCH_STATUS.SUCCESS ? (
+  return isSuccessful ? (
     <Redirect to={MONITOR_MANAGEMENT_ROUTE} />
   ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -191,7 +233,6 @@ const MONITOR_UPDATED_SUCCESS_LABEL = i18n.translate(
   }
 );
 
-// TODO: Discuss error states with product
 const MONITOR_FAILURE_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.monitorFailureMessage',
   {

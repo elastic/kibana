@@ -38,6 +38,10 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       {
         ...newMonitor.attributes,
         id: newMonitor.id,
+        fields: {
+          config_id: newMonitor.id,
+        },
+        fields_under_root: true,
       },
     ]);
 

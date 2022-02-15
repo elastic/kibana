@@ -79,7 +79,7 @@ describe('getSplits(resp, panel, series)', () => {
 
     expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
-        id: 'SERIES:example-01',
+        id: 'SERIES╰┄►example-01',
         key: 'example-01',
         label: 'example-01',
         labelFormatted: '',
@@ -90,7 +90,7 @@ describe('getSplits(resp, panel, series)', () => {
         SIBAGG: { value: 1 },
       },
       {
-        id: 'SERIES:example-02',
+        id: 'SERIES╰┄►example-02',
         key: 'example-02',
         label: 'example-02',
         labelFormatted: '',
@@ -138,7 +138,7 @@ describe('getSplits(resp, panel, series)', () => {
     const panel = { type: 'top_n' } as Panel;
     expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
-        id: 'SERIES:example-01',
+        id: 'SERIES╰┄►example-01',
         key: 'example-01',
         label: '--example-01--',
         labelFormatted: '',
@@ -149,7 +149,7 @@ describe('getSplits(resp, panel, series)', () => {
         SIBAGG: { value: 1 },
       },
       {
-        id: 'SERIES:example-02',
+        id: 'SERIES╰┄►example-02',
         key: 'example-02',
         label: '--example-02--',
         labelFormatted: '',
@@ -200,7 +200,7 @@ describe('getSplits(resp, panel, series)', () => {
 
     expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
-        id: 'SERIES:example-01',
+        id: 'SERIES╰┄►example-01',
         key: 'example-01',
         key_as_string: 'false',
         label: '--example-01--',
@@ -212,7 +212,7 @@ describe('getSplits(resp, panel, series)', () => {
         SIBAGG: { value: 1 },
       },
       {
-        id: 'SERIES:example-02',
+        id: 'SERIES╰┄►example-02',
         key: 'example-02',
         key_as_string: 'true',
         label: '--example-02--',
@@ -256,7 +256,7 @@ describe('getSplits(resp, panel, series)', () => {
 
     expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
-        id: 'SERIES:filter-1',
+        id: 'SERIES╰┄►filter-1',
         key: 'filter-1',
         label: '200s',
         meta: { bucketSize: 10 },
@@ -265,7 +265,7 @@ describe('getSplits(resp, panel, series)', () => {
         timeseries: { buckets: [] },
       },
       {
-        id: 'SERIES:filter-2',
+        id: 'SERIES╰┄►filter-2',
         key: 'filter-2',
         label: '300s',
         splitByLabel: 'Count',

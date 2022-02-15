@@ -118,8 +118,8 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_pie/README.md[expressionPie]
-|Expression Pie plugin adds a pie renderer and function to the expression plugin. The renderer will display the Pie chart.
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_partition_vis/README.md[expressionPartitionVis]
+|Expression Partition Visualization plugin adds a partitionVis renderer and pieVis, mosaicVis, treemapVis, waffleVis functions to the expression plugin. The renderer will display the pie, waffle, treemap and mosaic charts.
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]
@@ -633,6 +633,10 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/ux/readme.md[ux]
+|https://docs.elastic.dev/kibana-dev-docs/welcome
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]

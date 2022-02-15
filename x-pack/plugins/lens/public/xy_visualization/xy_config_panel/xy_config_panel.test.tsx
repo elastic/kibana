@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from '.';
 import { AxisSettingsPopover } from './axis_settings_popover';

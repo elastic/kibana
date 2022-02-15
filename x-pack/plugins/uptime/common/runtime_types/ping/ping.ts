@@ -220,6 +220,7 @@ export const PingType = t.intersection([
     service: t.partial({
       name: t.string,
     }),
+    config_id: t.string,
   }),
 ]);
 

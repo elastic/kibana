@@ -101,6 +101,17 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
+      it('should return a 400 with an empty name', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: '  ',
+            namespace: 'default',
+          })
+          .expect(400);
+      });
+
       it('should return a 400 with an invalid namespace', async () => {
         await supertest
           .post(`/api/fleet/agent_policies`)

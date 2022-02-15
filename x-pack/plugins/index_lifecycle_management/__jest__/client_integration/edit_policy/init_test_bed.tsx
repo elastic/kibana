@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
 import { docLinksServiceMock } from 'src/core/public/mocks';
 
 import '../helpers/global_mocks';

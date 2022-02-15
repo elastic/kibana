@@ -6,7 +6,7 @@
  */
 
 import { mapKeys, snakeCase } from 'lodash/fp';
-import { AlertInstance } from '../../../../../alerting/server';
+import { Alert } from '../../../../../alerting/server';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { RuleParams } from '../schemas/rule_schemas';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
@@ -46,7 +46,7 @@ const formatAlertsForNotificationActions = (alerts: unknown[]): unknown[] => {
 };
 
 interface ScheduleNotificationActions {
-  alertInstance: AlertInstance;
+  alertInstance: Alert;
   signalsCount: number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
@@ -59,7 +59,7 @@ export const scheduleNotificationActions = ({
   resultsLink = '',
   ruleParams,
   signals,
-}: ScheduleNotificationActions): AlertInstance =>
+}: ScheduleNotificationActions): Alert =>
   alertInstance
     .replaceState({
       signals_count: signalsCount,

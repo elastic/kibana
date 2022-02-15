@@ -31,6 +31,8 @@ import {
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
+import { hydrateSavedObjects } from './hydrate_saved_object';
+import { SyntheticsMonitorSavedObject } from '../../../common/types';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -179,7 +181,15 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
+  async pushConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { config_id: string };
+      }
+    >
+  ) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
@@ -226,6 +236,32 @@ export class SyntheticsService {
     }
   }
 
+  async triggerConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { config_id: string; test_run_id: string };
+      }
+    >
+  ) {
+    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
+    const data = {
+      monitors,
+      output: await this.getOutput(request),
+    };
+
+    try {
+      return await this.apiClient.runOnce(data);
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   async deleteConfigs(request: KibanaRequest, configs: SyntheticsMonitorWithId[]) {
     const data = {
       monitors: this.formatConfigs(configs),
@@ -244,6 +280,11 @@ export class SyntheticsService {
     const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
       namespaces: ['*'],
+    });
+
+    hydrateSavedObjects({
+      monitors: findResult.saved_objects as unknown as SyntheticsMonitorSavedObject[],
+      server: this.server,
     });
 
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({

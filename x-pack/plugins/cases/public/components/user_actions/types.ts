@@ -28,7 +28,6 @@ export interface UserActionTreeProps {
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
-  renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   statusActionButton: JSX.Element | null;
   updateCase: (newCase: Case) => void;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];

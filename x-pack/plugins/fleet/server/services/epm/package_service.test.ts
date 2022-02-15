@@ -7,7 +7,7 @@
 
 jest.mock('../../routes/security');
 
-import type { MockedLogger } from '@kbn/logging/target_types/mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 
 import type {
   ElasticsearchClient,

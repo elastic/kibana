@@ -111,6 +111,13 @@ export interface IBasePath {
  */
 export interface IExternalUrl {
   /**
+   * Determines if the provided URL is an internal url.
+   *
+   * @param relativeOrAbsoluteUrl
+   */
+  isInternalUrl(relativeOrAbsoluteUrl: string): boolean;
+
+  /**
    * Determines if the provided URL is a valid location to send users.
    * Validation is based on the configured allow list in kibana.yml.
    *
