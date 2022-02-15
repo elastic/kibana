@@ -11,13 +11,14 @@ import type { RouteDefinitionParams } from '../';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineGetProfileRoute({ router, getUserProfileService }: RouteDefinitionParams) {
+export function defineGetUserProfileRoute({
+  router,
+  getUserProfileService,
+}: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/profile/{uid}',
-      options: {
-        tags: ['access:accessUserProfile', 'access:updateUserProfle'],
-      },
+      path: '/internal/security/user_profile/{uid}',
+      options: { tags: ['access:accessUserProfile'] },
       validate: {
         params: schema.object({ uid: schema.string() }),
       },

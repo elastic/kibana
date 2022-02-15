@@ -261,6 +261,7 @@ describe('PKIAuthenticationProvider', () => {
             { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
             {
               authHeaders: { authorization: 'Bearer access-token' },
+              userProfileGrant: { type: 'accessToken', accessToken: 'access-token' },
               state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
             }
           )
@@ -305,6 +306,7 @@ describe('PKIAuthenticationProvider', () => {
           { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
           {
             authHeaders: { authorization: 'Bearer access-token' },
+            userProfileGrant: { type: 'accessToken', accessToken: 'access-token' },
             state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
           }
         )
@@ -342,6 +344,7 @@ describe('PKIAuthenticationProvider', () => {
           { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
           {
             authHeaders: { authorization: 'Bearer access-token' },
+            userProfileGrant: { type: 'accessToken', accessToken: 'access-token' },
             state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
           }
         )
@@ -508,6 +511,7 @@ describe('PKIAuthenticationProvider', () => {
           { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
           {
             authHeaders: { authorization: 'Bearer access-token' },
+            userProfileGrant: { type: 'accessToken', accessToken: 'access-token' },
             state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
           }
         )

@@ -187,13 +187,13 @@ export class SecurityPlugin
     return this.anonymousAccessStart;
   };
 
-  private readonly profileService: UserProfileService;
-  private profileStart?: UserProfileServiceStart;
-  private readonly getProfileService = () => {
-    if (!this.profileStart) {
-      throw new Error(`profileStart is not registered!`);
+  private readonly userProfileService: UserProfileService;
+  private userProfileStart?: UserProfileServiceStart;
+  private readonly getUserProfileService = () => {
+    if (!this.userProfileStart) {
+      throw new Error(`userProfileStart is not registered!`);
     }
-    return this.profileStart;
+    return this.userProfileStart;
   };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -213,7 +213,9 @@ export class SecurityPlugin
       this.initializerContext.logger.get('anonymous-access'),
       this.getConfig
     );
-    this.profileService = new UserProfileService(this.initializerContext.logger.get('profile'));
+    this.userProfileService = new UserProfileService(
+      this.initializerContext.logger.get('user-profile')
+    );
   }
 
   public setup(
@@ -320,7 +322,7 @@ export class SecurityPlugin
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
-      getUserProfileService: this.getProfileService,
+      getUserProfileService: this.getUserProfileService,
     });
 
     return Object.freeze<SecurityPluginSetup>({
@@ -367,12 +369,15 @@ export class SecurityPlugin
     });
     this.session = session;
 
+    this.userProfileStart = this.userProfileService.start({ clusterClient });
+
     const config = this.getConfig();
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
       config,
       featureUsageService: this.featureUsageServiceStart,
+      userProfileService: this.userProfileStart,
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
@@ -386,8 +391,6 @@ export class SecurityPlugin
       basePath: core.http.basePath,
       spaces: spaces?.spacesService,
     });
-
-    this.profileStart = this.profileService.start(clusterClient.asInternalUser);
 
     return Object.freeze<SecurityPluginStart>({
       authc: {
