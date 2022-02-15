@@ -17,6 +17,9 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { useUserData } from '../../../../detections/components/user_info';
+
+jest.mock('../../../../detections/components/user_info');
 
 const mockTheme = getMockTheme({
   eui: {
@@ -35,6 +38,14 @@ jest.mock('@kbn/securitysolution-list-hooks');
 
 describe('ExceptionsViewer', () => {
   const ruleName = 'test rule';
+  beforeAll(() => {
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        hasIndexWrite: false,
+        canUserCRUD: false,
+      },
+    ]);
+  });
 
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
@@ -96,6 +107,9 @@ describe('ExceptionsViewer', () => {
       </ThemeProvider>
     );
 
+    expect(wrapper.children().first().children().props().children[4].props.disableActions).toEqual(
+      true
+    );
     expect(wrapper.find('[data-test-subj="loadingPanelAllRulesTable"]').exists()).toBeTruthy();
   });
 
