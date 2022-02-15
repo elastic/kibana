@@ -338,5 +338,9 @@ export function MachineLearningCommonUIProvider({
     async waitForDatePickerIndicatorLoaded() {
       await testSubjects.waitForEnabled('superDatePickerApplyTimeButton');
     },
+
+    async waitForRefreshButtonEnabled() {
+      await testSubjects.waitForEnabled('~mlRefreshPageButton');
+    },
   };
 }
