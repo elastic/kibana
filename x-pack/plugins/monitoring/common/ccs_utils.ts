@@ -9,6 +9,7 @@
 import type { MonitoringConfig } from '../server/config';
 
 export function getConfigCcs(config: MonitoringConfig): boolean {
+  // TODO: (Mat) this function can probably be removed in favor of direct config access where it's used.
   return config.ui.ccs.enabled;
 }
 /**
