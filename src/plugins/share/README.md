@@ -169,5 +169,66 @@ state object.
 
 For more ways working with locators see the `LocatorPublic` interface.
 
+
 ## Short URLs
 
+The `share` plugin has Short URL service, which allows to create Kibana short
+URLs. The service with the same interface is available, both, on the server
+and browser.
+
+When creating a short URL it is possible to use a custom short *slug*, used
+to dereference the short URL. Also, a human-readable short slug can be
+automatically generated.
+
+First, to be able to create a short URL, one needs to get hold of a locator
+reference, for which the short URL will be created. (See above section on
+*Locators* for more info.) Lets say we want to create a short URL for the
+Dashboard application, for that, we first acquire reference to the dashboard
+locator:
+
+```ts
+class MyPlugin {
+  setup(core, plugins) {
+    const dashboardLocator = plugins.dashboard.locator;
+  }
+}
+```
+
+Now you can create a short URL using your locator and the short URL service:
+
+```ts
+const shortUrls = plugins.share.url.shortUrls.get(null);
+const url = await shortUrls.create({
+  locator,
+  params: {
+    dashboardId: '123',
+  }
+});
+```
+
+You can make the short URL slug human-readable by specifying the
+`humanReadableSlug` flag:
+
+```ts
+const url = await shortUrls.create({
+  locator,
+  params: {
+    dashboardId: '123',
+  },
+  humanReadableSlug: true,
+});
+```
+
+Or you can manually specify the slug for the short URL using the `slug` option:
+
+```ts
+const url = await shortUrls.create({
+  locator,
+  params: {
+    dashboardId: '123',
+  },
+  slug: 'my-slug',
+});
+```
+
+To resolve the short URL, navigate to `/r/s/<slug>` in the browser.
