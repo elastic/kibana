@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:searchFieldsFromSource': false,
+    'doc_table:legacy': true,
   };
   describe('discover uses fields API test', function describeIndexTests() {
     before(async function () {
@@ -26,13 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.replace({ 'discover:searchFieldsFromSource': true });
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should correctly display documents', async function () {
