@@ -6,14 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getTemplates } from '../../mappings/mappings';
-import { ListComponent } from './list_component';
-
-export class TemplateAutocompleteComponent extends ListComponent {
-  constructor(name, parent) {
-    super(name, getTemplates, parent, true, true);
-  }
-  getContextKey() {
-    return 'template';
-  }
-}
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-plugin-helpers'],
+};

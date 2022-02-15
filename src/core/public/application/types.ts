@@ -636,7 +636,6 @@ export interface AppLeaveActionFactory {
 export interface Mounter {
   appRoute: string;
   appBasePath: string;
-  deepLinkPaths: Record<string, string>;
   mount: AppMount;
   exactRoute: boolean;
   unmountBeforeMounting?: boolean;
