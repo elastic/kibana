@@ -109,7 +109,7 @@ export function EditFilterModal({
   timeRangeForSuggestionsOverride?: boolean;
   initialAddFilterMode?: string;
   onRemoveFilterGroup: (groupId: string) => void;
-  saveFilters: (savedQueryMeta: SavedQueryMeta) => void;
+  saveFilters: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   savedQueryService: SavedQueryService;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
@@ -406,6 +406,31 @@ export function EditFilterModal({
     );
   };
 
+  const onSubmitWithLabel = (filters: Filter[]) => {
+    const queryMetaObj = {
+      title: customLabel,
+      description: '',
+      shouldIncludeFilters: false,
+      shouldIncludeTimefilter: false,
+      filters,
+    };
+    if (!filter.meta.alias) {
+      // if our filters had not alias before then we save them as new fiterSet
+      saveFilters(queryMetaObj, true);
+    } else {
+      const curQuery = savedQueries.find(
+        (existingQuery) => existingQuery.attributes.title === filter.meta.alias
+      );
+      saveFilters(
+        {
+          ...queryMetaObj,
+          id: curQuery?.id,
+        },
+        false
+      );
+    }
+  };
+
   const onUpdateFilter = () => {
     const { $state } = filter;
     if (!$state || !$state.store) {
@@ -432,13 +457,7 @@ export function EditFilterModal({
       );
       onSubmit([builtCustomFilter]);
       if (alias) {
-        saveFilters({
-          title: customLabel,
-          description: '',
-          shouldIncludeFilters: false,
-          shouldIncludeTimefilter: false,
-          filters: [builtCustomFilter],
-        });
+        onSubmitWithLabel([builtCustomFilter]);
       }
     } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
@@ -462,13 +481,7 @@ export function EditFilterModal({
         // onSubmit(finalFilters);
         onMultipleFiltersSubmit(localFilters, finalFilters);
         if (alias) {
-          saveFilters({
-            title: customLabel,
-            description: '',
-            shouldIncludeFilters: false,
-            shouldIncludeTimefilter: false,
-            filters: finalFilters,
-          });
+          onSubmitWithLabel(finalFilters);
         }
       }
     } else if (addFilterMode === 'saved_filters') {
