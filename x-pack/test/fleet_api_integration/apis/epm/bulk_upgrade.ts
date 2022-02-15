@@ -46,10 +46,17 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 400 if no packages are requested for upgrade', async function () {
         await supertest.post(`/api/fleet/epm/packages/_bulk`).set('kbn-xsrf', 'xxxx').expect(400);
       });
-      it('should return 403 if read only user requests upgrade', async function () {
+      it('should return 403 if user without integrations all requests upgrade', async function () {
         await supertestWithoutAuth
           .post(`/api/fleet/epm/packages/_bulk`)
-          .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(403);
+      });
+      it('should return 403 if user without fleet access requests upgrade', async function () {
+        await supertestWithoutAuth
+          .post(`/api/fleet/epm/packages/_bulk`)
+          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
           .set('kbn-xsrf', 'xxxx')
           .expect(403);
       });

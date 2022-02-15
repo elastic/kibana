@@ -194,116 +194,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const xAxisColumn = table.columns[xAxisColumnIndex];
     const yAxisColumn = table.columns[yAxisColumnIndex];
     const valueColumn = table.columns.find((v) => v.id === valueAccessor);
-
-    if (!valueColumn) {
-      // Chart is not ready
-      return null;
-    }
-
-    let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
-    if (!chartData || !chartData.length) {
-      return <EmptyPlaceholder icon={HeatmapIcon} />;
-    }
-
-    if (!yAxisColumn) {
-      // required for tooltip
-      chartData = chartData.map((row) => {
-        return {
-          ...row,
-          unifiedY: '',
-        };
-      });
-    }
-    const { min, max } = minMaxByColumnId[valueAccessor!];
-    // formatters
     const xAxisMeta = xAxisColumn?.meta;
-    const xValuesFormatter = formatFactory(xAxisMeta?.params);
-    const metricFormatter = formatFactory(
-      typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
-    );
     const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
-    const dateHistogramMeta = xAxisColumn
-      ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
-      : undefined;
-
-    // Fallback to the ordinal scale type when a single row of data is provided.
-    // Related issue https://github.com/elastic/elastic-charts/issues/1184
-    let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
-    if (isTimeBasedSwimLane && chartData.length > 1) {
-      const dateInterval = dateHistogramMeta?.interval;
-      const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
-      if (esInterval) {
-        xScale = {
-          type: ScaleType.Time,
-          interval:
-            esInterval.type === 'fixed'
-              ? {
-                  type: 'fixed',
-                  unit: esInterval.unit as ESFixedIntervalUnit,
-                  value: esInterval.value,
-                }
-              : {
-                  type: 'calendar',
-                  unit: esInterval.unit as ESCalendarIntervalUnit,
-                  value: esInterval.value,
-                },
-        };
-      }
-    }
-
-    const tooltip: TooltipProps = {
-      type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
-    };
-
-    const valueFormatter = (d: number) => {
-      let value = d;
-
-      if (args.percentageMode) {
-        const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
-        value = parseInt(percentageNumber.toString(), 10) / 100;
-      }
-      return `${metricFormatter.convert(value) ?? ''}`;
-    };
-
-    const { colors, ranges } = computeColorRanges(
-      paletteService,
-      paletteParams,
-      isDarkTheme ? '#000' : '#fff',
-      minMaxByColumnId[valueAccessor!]
-    );
-
-    // adds a very small number to the max value to make sure the max value will be included
-    const smattering = 0.00001;
-    let endValue = max + smattering;
-    if (paletteParams?.rangeMax || paletteParams?.rangeMax === 0) {
-      endValue =
-        (paletteParams?.range === 'number'
-          ? paletteParams.rangeMax
-          : min + ((max - min) * paletteParams.rangeMax) / 100) + smattering;
-    }
-
-    const overwriteColors = uiState?.get('vis.colors') ?? null;
-
-    const bands = ranges.map((start, index, array) => {
-      // by default the last range is right-open
-      let end = index === array.length - 1 ? Infinity : array[index + 1];
-      // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
-      if (args.lastRangeIsRightOpen === false) {
-        const lastBand = max === start ? Infinity : endValue;
-        end = index === array.length - 1 ? lastBand : array[index + 1];
-      }
-      const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
-        end
-      )}`;
-      const overwriteColor = overwriteColors?.[overwriteArrayIdx];
-      return {
-        // with the default continuity:above the every range is left-closed
-        start,
-        end,
-        // the current colors array contains a duplicated color at the beginning that we need to skip
-        color: overwriteColor ?? colors[index + 1],
-      };
-    });
 
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
@@ -414,6 +306,125 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       ]
     );
 
+    if (!valueColumn) {
+      // Chart is not ready
+      return null;
+    }
+
+    let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
+    if (!chartData || !chartData.length) {
+      return <EmptyPlaceholder icon={HeatmapIcon} />;
+    }
+
+    if (!yAxisColumn) {
+      // required for tooltip
+      chartData = chartData.map((row) => {
+        return {
+          ...row,
+          unifiedY: '',
+        };
+      });
+    }
+    const { min, max } = minMaxByColumnId[valueAccessor!];
+    // formatters
+    const xValuesFormatter = formatFactory(xAxisMeta?.params);
+    const metricFormatter = formatFactory(
+      typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
+    );
+    const dateHistogramMeta = xAxisColumn
+      ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
+      : undefined;
+
+    // Fallback to the ordinal scale type when a single row of data is provided.
+    // Related issue https://github.com/elastic/elastic-charts/issues/1184
+    let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
+    if (isTimeBasedSwimLane && chartData.length > 1) {
+      const dateInterval = dateHistogramMeta?.interval;
+      const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
+      if (esInterval) {
+        xScale = {
+          type: ScaleType.Time,
+          interval:
+            esInterval.type === 'fixed'
+              ? {
+                  type: 'fixed',
+                  unit: esInterval.unit as ESFixedIntervalUnit,
+                  value: esInterval.value,
+                }
+              : {
+                  type: 'calendar',
+                  unit: esInterval.unit as ESCalendarIntervalUnit,
+                  value: esInterval.value,
+                },
+        };
+      }
+    }
+
+    const tooltip: TooltipProps = {
+      type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
+    };
+
+    const valueFormatter = (d: number) => {
+      let value = d;
+
+      if (args.percentageMode) {
+        const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
+        value = parseInt(percentageNumber.toString(), 10) / 100;
+      }
+      return `${metricFormatter.convert(value) ?? ''}`;
+    };
+
+    const { colors, ranges } = computeColorRanges(
+      paletteService,
+      paletteParams,
+      isDarkTheme ? '#000' : '#fff',
+      minMaxByColumnId[valueAccessor!]
+    );
+
+    // adds a very small number to the max value to make sure the max value will be included
+    const smattering = 0.00001;
+    let endValueDistinctBounds = max + smattering;
+    if (paletteParams?.rangeMax || paletteParams?.rangeMax === 0) {
+      endValueDistinctBounds =
+        (paletteParams?.range === 'number'
+          ? paletteParams.rangeMax
+          : min + ((max - min) * paletteParams.rangeMax) / 100) + smattering;
+    }
+
+    const overwriteColors = uiState?.get('vis.colors') ?? null;
+    const hasSingleValue = max === min;
+    const bands = ranges.map((start, index, array) => {
+      const isPenultimate = index === array.length - 1;
+      const nextValue = array[index + 1];
+      // by default the last range is right-open
+      let endValue = isPenultimate ? Number.POSITIVE_INFINITY : nextValue;
+      const startValue = isPenultimate && hasSingleValue ? min : start;
+      // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
+      if (args.lastRangeIsRightOpen === false) {
+        const lastBand = hasSingleValue ? Number.POSITIVE_INFINITY : endValueDistinctBounds;
+        endValue = isPenultimate ? lastBand : nextValue;
+      }
+
+      let overwriteArrayIdx;
+
+      if (endValue === Number.POSITIVE_INFINITY) {
+        overwriteArrayIdx = `≥ ${metricFormatter.convert(startValue)}`;
+      } else {
+        overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
+          endValue
+        )}`;
+      }
+
+      const overwriteColor = overwriteColors?.[overwriteArrayIdx];
+      return {
+        // with the default continuity:above the every range is left-closed
+        start: startValue,
+        end: endValue,
+        // the current colors array contains a duplicated color at the beginning that we need to skip
+        color: overwriteColor ?? colors[index + 1],
+      };
+    });
+
     const themeOverrides: PartialTheme = {
       legend: {
         labelOptions: {
@@ -510,6 +521,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                     : NaN,
               }}
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
+              ariaLabel={args.ariaLabel}
+              ariaUseDefaultSummary={!args.ariaLabel}
             />
             <Heatmap
               id="heatmap"
@@ -531,10 +544,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               yAxisLabelName={yAxisColumn?.name}
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
               yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
-              xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
+              xAxisLabelFormatter={(v) =>
+                args.gridConfig.isXAxisLabelVisible ? `${xValuesFormatter.convert(v)}` : ''
+              }
               yAxisLabelFormatter={
                 yAxisColumn
-                  ? (v) => `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                  ? (v) =>
+                      args.gridConfig.isYAxisLabelVisible
+                        ? `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                        : ''
                   : undefined
               }
             />

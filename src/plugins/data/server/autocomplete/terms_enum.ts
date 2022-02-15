@@ -54,5 +54,5 @@ export async function termsEnumSuggestions(
     }
   );
 
-  return result.body.terms;
+  return result.terms;
 }

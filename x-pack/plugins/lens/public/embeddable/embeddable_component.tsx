@@ -53,7 +53,8 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
     | LensAttributes<'lnsDatatable', DatatableVisualizationState>
     | LensAttributes<'lnsMetric', MetricState>
     | LensAttributes<'lnsHeatmap', HeatmapVisualizationState>
-    | LensAttributes<'lnsGauge', GaugeVisualizationState>;
+    | LensAttributes<'lnsGauge', GaugeVisualizationState>
+    | LensAttributes<string, unknown>;
 };
 
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {

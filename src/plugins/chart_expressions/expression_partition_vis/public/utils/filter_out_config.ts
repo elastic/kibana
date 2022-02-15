@@ -13,7 +13,8 @@ export const filterOutConfig = (visType: ChartTypes, visConfig: PartitionVisPara
     return visConfig;
   }
 
-  const { lastLevel, truncate, ...restLabelsConfig } = visConfig.labels;
+  const { last_level: lastLevel, truncate, ...restLabelsConfig } = visConfig.labels;
+
   return {
     ...visConfig,
     labels: restLabelsConfig,

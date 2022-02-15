@@ -6,6 +6,10 @@
  */
 
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import type {
+  TransformLatestConfig,
+  TransformPivotConfig,
+} from '../../../../plugins/transform/common/types/transform';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from './index';
@@ -15,8 +19,11 @@ export default function ({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('editing', function () {
-    const transformConfigWithPivot = getPivotTransformConfig('editing');
-    const transformConfigWithLatest = getLatestTransformConfig('editing');
+    const transformConfigWithPivot: TransformPivotConfig = getPivotTransformConfig('editing');
+    const transformConfigWithLatest: TransformLatestConfig = {
+      ...getLatestTransformConfig('editing'),
+      retention_policy: { time: { field: 'order_date', max_age: '1d' } },
+    };
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
@@ -51,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         transformDescription: 'updated description',
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
+        resetRetentionPolicy: false,
         transformRetentionPolicyField: 'order_date',
         transformRetentionPolicyMaxAge: '1d',
         expected: {
@@ -73,13 +81,12 @@ export default function ({ getService }: FtrProviderContext) {
         transformDescription: 'updated description',
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
-        transformRetentionPolicyField: 'order_date',
-        transformRetentionPolicyMaxAge: '1d',
+        resetRetentionPolicy: true,
         expected: {
           messageText: 'updated transform.',
           retentionPolicy: {
-            field: '',
-            maxAge: '',
+            field: 'order_date',
+            maxAge: '1d',
           },
           row: {
             status: TRANSFORM_STATE.STOPPED,
@@ -150,30 +157,40 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           await transform.testExecution.logTestStep('should update the transform retention policy');
-          await transform.editFlyout.openTransformEditAccordionRetentionPolicySettings();
-
-          await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(
-            true
-          );
-          await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectValue(
-            testData.expected.retentionPolicy.field
-          );
-          await transform.editFlyout.setTransformEditFlyoutRetentionPolicyFieldSelectValue(
-            testData.transformRetentionPolicyField
+          await transform.editFlyout.clickTransformEditRetentionPolicySettings(
+            !testData.resetRetentionPolicy
           );
 
-          await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
-            'RetentionPolicyMaxAge',
-            true
-          );
-          await transform.editFlyout.assertTransformEditFlyoutInputValue(
-            'RetentionPolicyMaxAge',
-            testData.expected.retentionPolicy.maxAge
-          );
-          await transform.editFlyout.setTransformEditFlyoutInputValue(
-            'RetentionPolicyMaxAge',
-            testData.transformRetentionPolicyMaxAge
-          );
+          if (
+            !testData.resetRetentionPolicy &&
+            testData?.transformRetentionPolicyField &&
+            testData?.transformRetentionPolicyMaxAge
+          ) {
+            await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(
+              true
+            );
+            await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectValue(
+              testData.expected.retentionPolicy.field
+            );
+
+            await transform.editFlyout.setTransformEditFlyoutRetentionPolicyFieldSelectValue(
+              testData.transformRetentionPolicyField
+            );
+
+            await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
+              'RetentionPolicyMaxAge',
+              true
+            );
+            await transform.editFlyout.assertTransformEditFlyoutInputValue(
+              'RetentionPolicyMaxAge',
+              testData.expected.retentionPolicy.maxAge
+            );
+
+            await transform.editFlyout.setTransformEditFlyoutInputValue(
+              'RetentionPolicyMaxAge',
+              testData.transformRetentionPolicyMaxAge
+            );
+          }
         });
 
         it('updates the transform and displays it correctly in the job list', async () => {
@@ -206,6 +223,12 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep(
             'should display the messages tab and include an update message'
           );
+
+          await transform.table.assertTransformExpandedRowJson(
+            'retention_policy',
+            !testData.resetRetentionPolicy
+          );
+          await transform.table.assertTransformExpandedRowJson('updated description');
           await transform.table.assertTransformExpandedRowMessages(testData.expected.messageText);
         });
       });

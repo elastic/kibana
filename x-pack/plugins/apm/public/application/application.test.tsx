@@ -7,27 +7,19 @@
 
 import React from 'react';
 import { act } from '@testing-library/react';
-import { EuiErrorBoundary } from '@elastic/eui';
-import { mount } from 'enzyme';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
 import { AppMountParameters, DocLinksStart, HttpStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { renderApp as renderApmApp } from './';
-import { UXAppRoot } from './ux_app';
 import { disableConsoleWarning } from '../utils/test_helpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
-import { RumHome } from '../components/app/rum_dashboard/rum_home';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),
-}));
-
-jest.mock('../components/app/rum_dashboard/rum_home', () => ({
-  RumHome: () => <p>Home Mock</p>,
 }));
 
 describe('renderApp (APM)', () => {
@@ -146,23 +138,5 @@ describe('renderApp (APM)', () => {
     expect(() => {
       unmount();
     }).not.toThrowError();
-  });
-});
-
-describe('renderUxApp', () => {
-  it('has an error boundary for the UXAppRoot', async () => {
-    const uxMountProps = mockApmPluginContextValue;
-
-    const wrapper = mount(<UXAppRoot {...(uxMountProps as any)} />);
-
-    wrapper
-      .find(RumHome)
-      .simulateError(new Error('Oh no, an unexpected error!'));
-
-    expect(wrapper.find(RumHome)).toHaveLength(0);
-    expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
-    expect(wrapper.find(EuiErrorBoundary).text()).toMatch(
-      /Error: Oh no, an unexpected error!/
-    );
   });
 });

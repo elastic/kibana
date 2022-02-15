@@ -19,6 +19,7 @@ import {
   TooltipType,
   SeriesIdentifier,
 } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
 import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import {
@@ -58,7 +59,7 @@ import { VisTypePiePluginStartDependencies } from '../plugin';
 import {
   partitionVisWrapperStyle,
   partitionVisContainerStyle,
-  partitionVisContainerWithToggleStyle,
+  partitionVisContainerWithToggleStyleFactory,
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
@@ -98,8 +99,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
 
   const formatters = useMemo(
-    () => generateFormatters(visParams, visData, services.fieldFormats.deserialize),
-    [services.fieldFormats.deserialize, visData, visParams]
+    () => generateFormatters(visData, services.fieldFormats.deserialize),
+    [services.fieldFormats.deserialize, visData]
   );
 
   const showLegendDefault = useCallback(() => {
@@ -311,6 +312,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [visData.rows, metricColumn]
   );
 
+  const isEmpty = visData.rows.length === 0;
+  const isMetricEmpty = visData.rows.every((row) => !row[metricColumn.id]);
+
   /**
    * Checks whether data have negative values.
    * If so, the no data container is loaded.
@@ -323,17 +327,23 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       }),
     [visData.rows, metricColumn]
   );
+
   const flatLegend = isLegendFlat(visType, splitChartDimension);
-  const canShowPieChart = !isAllZeros && !hasNegative;
+
+  const canShowPieChart = !isEmpty && !isMetricEmpty && !isAllZeros && !hasNegative;
+
+  const { euiTheme } = useEuiTheme();
+
   const chartContainerStyle = showToggleLegendElement
-    ? partitionVisContainerWithToggleStyle
+    ? partitionVisContainerWithToggleStyleFactory(euiTheme)
     : partitionVisContainerStyle;
+
   const partitionType = getPartitionType(visType);
 
   return (
     <div css={chartContainerStyle} data-test-subj="partitionVisChart">
       {!canShowPieChart ? (
-        <VisualizationNoResults hasNegativeValues={hasNegative} />
+        <VisualizationNoResults hasNegativeValues={hasNegative} chartType={visType} />
       ) : (
         <div css={partitionVisWrapperStyle} ref={parentRef}>
           <LegendColorPickerWrapperContext.Provider
@@ -402,6 +412,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 ]}
                 baseTheme={chartBaseTheme}
                 onRenderChange={onRenderChange}
+                ariaLabel={props.visParams.ariaLabel}
+                ariaUseDefaultSummary={!props.visParams.ariaLabel}
               />
               <Partition
                 id={visType}

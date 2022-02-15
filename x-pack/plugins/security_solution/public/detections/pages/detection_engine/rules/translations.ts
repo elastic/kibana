@@ -55,7 +55,7 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
 export const EXPERIMENTAL_ON = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalOn',
   {
-    defaultMessage: 'Experimental: On',
+    defaultMessage: 'Technical preview: On',
   }
 );
 
@@ -63,14 +63,14 @@ export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
   {
     defaultMessage:
-      'The experimental rules table view allows for advanced sorting capabilities. If you experience performance issues when working with the table, you can turn this setting off.',
+      'The experimental rules table view is in technical preview and allows for advanced sorting capabilities. If you experience performance issues when working with the table, you can turn this setting off.',
   }
 );
 
 export const EXPERIMENTAL_OFF = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalOff',
   {
-    defaultMessage: 'Experimental: Off',
+    defaultMessage: 'Technical preview: Off',
   }
 );
 
@@ -85,6 +85,50 @@ export const EDIT_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.editPageTitle',
   {
     defaultMessage: 'Edit',
+  }
+);
+
+export const FEATURE_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.tourTitle',
+  {
+    defaultMessage: "What's new",
+  }
+);
+
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepDescription',
+  {
+    defaultMessage:
+      'The experimental rules table view allows for advanced sorting and filtering capabilities.',
+  }
+);
+
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepTitle',
+  {
+    defaultMessage: 'Step 1',
+  }
+);
+
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_NEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepNextButtonTitle',
+  {
+    defaultMessage: 'Ok, got it',
+  }
+);
+
+export const FEATURE_TOUR_BULK_ACTIONS_STEP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepTitle',
+  {
+    defaultMessage: 'Step 2',
+  }
+);
+
+export const FEATURE_TOUR_BULK_ACTIONS_STEP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepDescription',
+  {
+    defaultMessage:
+      'You can now bulk update index patterns and tags for multiple custom rules at once.',
   }
 );
 
@@ -247,7 +291,7 @@ export const BULK_EDIT_ERROR_TOAST_TITLE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_ERROR_TOAST_DESCIRPTION = (rulesCount: number) =>
+export const BULK_EDIT_ERROR_TOAST_DESCRIPTION = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastDescription',
     {
@@ -356,7 +400,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsComboboxHelpText',
   {
     defaultMessage:
-      'Add one or more custom identifying tags for selected rules. Press enter after each tag to begin a new one.',
+      'Add one or more tags for selected rules from the dropdown. You can also enter custom identifying tags and press Enter to begin a new one.',
   }
 );
 
@@ -364,7 +408,7 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteTagsComboboxHelpText',
   {
     defaultMessage:
-      'Delete one or more custom identifying tags for selected rules. Press enter after each tag to begin a new one.',
+      'Delete one or more tags for selected rules from the dropdown. You can also enter custom identifying tags and press Enter to begin a new one.',
   }
 );
 

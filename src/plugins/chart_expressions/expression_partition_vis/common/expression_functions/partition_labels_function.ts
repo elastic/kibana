@@ -62,9 +62,9 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
       default: 2,
     },
     // Deprecated
-    lastLevel: {
+    last_level: {
       types: ['boolean'],
-      help: i18n.translate('expressionPartitionVis.partitionLabels.function.args.lastLevel.help', {
+      help: i18n.translate('expressionPartitionVis.partitionLabels.function.args.last_level.help', {
         defaultMessage: 'Show top level labels only for multilayer pie/donut charts',
       }),
       default: false,
@@ -99,7 +99,7 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
       values: args.values,
       truncate: args.truncate,
       valuesFormat: args.valuesFormat,
-      lastLevel: args.lastLevel,
+      last_level: args.last_level,
     };
   },
 });

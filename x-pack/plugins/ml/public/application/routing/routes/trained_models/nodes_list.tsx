@@ -60,7 +60,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
               label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
-                defaultMessage: 'Experimental',
+                defaultMessage: 'Technical preview',
               })}
               size="m"
               color="hollow"
@@ -68,7 +68,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
                 'xpack.ml.navMenu.trainedModelsTabBetaTooltipContent',
                 {
                   defaultMessage:
-                    "Model Management is an experimental feature and subject to change. We'd love to hear your feedback.",
+                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
                 }
               )}
               tooltipPosition={'right'}

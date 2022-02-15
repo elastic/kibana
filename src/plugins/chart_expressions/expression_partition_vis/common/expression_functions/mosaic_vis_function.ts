@@ -85,6 +85,11 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       help: strings.getLabelsArgHelp(),
       default: `{${PARTITION_LABELS_FUNCTION}}`,
     },
+    ariaLabel: {
+      types: ['string'],
+      help: strings.getAriaLabelHelp(),
+      required: false,
+    },
   },
   fn(context, args, handlers) {
     const maxSupportedBuckets = 2;
@@ -96,8 +101,16 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       throw new Error(errors.invalidLegendPositionError(args.legendPosition));
     }
 
+    if (args.splitColumn && args.splitRow) {
+      throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
+    }
+
     const visConfig: PartitionVisParams = {
       ...args,
+      ariaLabel:
+        args.ariaLabel ??
+        (handlers.variables?.embeddableTitle as string) ??
+        handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
         metric: args.metric,

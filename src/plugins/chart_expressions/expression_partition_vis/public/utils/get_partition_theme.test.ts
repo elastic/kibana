@@ -279,7 +279,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       const specifiedDimensions = { width: 2000, height: 2000 };
       const vParams = {
         ...visParams,
-        labels: { ...visParams.labels, lastLevel: true },
+        labels: { ...visParams.labels, last_level: true },
       };
       const theme = getPartitionTheme(chartType, vParams, chartTheme, specifiedDimensions);
 

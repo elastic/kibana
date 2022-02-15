@@ -8,7 +8,9 @@
 
 import { Action } from 'history';
 import Boom from '@hapi/boom';
+import type { ButtonColor } from '@elastic/eui';
 import { ByteSizeValue } from '@kbn/config-schema';
+import type { Client } from '@elastic/elasticsearch';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
@@ -24,7 +26,6 @@ import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -44,9 +45,6 @@ import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { TransitionPromptHook } from 'history';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { TransportRequestParams } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -119,7 +117,11 @@ export enum AppLeaveActionType {
 // @public
 export interface AppLeaveConfirmAction {
     // (undocumented)
+    buttonColor?: ButtonColor;
+    // (undocumented)
     callback?: () => void;
+    // (undocumented)
+    confirmButtonText?: string;
     // (undocumented)
     text: string;
     // (undocumented)
@@ -686,6 +688,7 @@ export interface IBasePath {
 
 // @public
 export interface IExternalUrl {
+    isInternalUrl(relativeOrAbsoluteUrl: string): boolean;
     validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 }
 
@@ -751,9 +754,9 @@ export type KibanaExecutionContext = {
     readonly type: string;
     readonly name: string;
     readonly id: string;
-    readonly description: string;
+    readonly description?: string;
     readonly url?: string;
-    parent?: KibanaExecutionContext;
+    child?: KibanaExecutionContext;
 };
 
 // @public

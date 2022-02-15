@@ -55,12 +55,12 @@ export class VisualizationsPlugin
     core.uiSettings.register({
       [VISUALIZE_ENABLE_LABS_SETTING]: {
         name: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsTitle', {
-          defaultMessage: 'Enable experimental visualizations',
+          defaultMessage: 'Enable technical preview visualizations',
         }),
         value: true,
         description: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsText', {
-          defaultMessage: `Allows users to create, view, and edit experimental visualizations. If disabled,
-            only visualizations that are considered production-ready are available to the user.`,
+          defaultMessage: `Allows users to create, view, and edit visualizations that are in technical preview.
+            If disabled, only visualizations that are considered production-ready are available to the user.`,
         }),
         category: ['visualization'],
         schema: schema.boolean(),

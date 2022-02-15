@@ -24,7 +24,7 @@ export const BACK_TO_RULES = i18n.translate(
 export const EXPERIMENTAL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.experimentalDescription',
   {
-    defaultMessage: 'Experimental',
+    defaultMessage: 'Technical preview',
   }
 );
 

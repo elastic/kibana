@@ -52,6 +52,7 @@ export interface UptimeServerSetup {
   syntheticsService: SyntheticsService;
   kibanaVersion: string;
   logger: Logger;
+  uptimeEsClient: UptimeESClient;
 }
 
 export interface UptimeCorePluginsSetup {

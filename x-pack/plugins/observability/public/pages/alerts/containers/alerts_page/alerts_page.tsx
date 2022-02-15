@@ -165,7 +165,7 @@ function AlertsPage() {
       {
         id: 'dynamic-observability-alerts-table-index-pattern',
         title: indexNames.join(','),
-        fields: await plugins.data.indexPatterns.getFieldsForWildcard({
+        fields: await plugins.dataViews.getFieldsForWildcard({
           pattern: indexNames.join(','),
           allowNoIndex: true,
         }),

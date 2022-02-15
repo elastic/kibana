@@ -202,12 +202,12 @@ export function MetricsSection({ bucketSize }: Props) {
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.metrics.title', {
-        defaultMessage: 'Metrics',
+        defaultMessage: 'Hosts',
       })}
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.metrics.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Show inventory',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}

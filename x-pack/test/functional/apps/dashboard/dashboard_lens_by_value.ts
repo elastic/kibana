@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens', 'timePicker']);
 
-  const find = getService('find');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -48,9 +47,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('donut');
       await PageObjects.lens.saveAndReturn();
       await PageObjects.dashboard.waitForRenderComplete();
-
-      const partitionVisContainerExists = await find.existsByCssSelector('.partitionVisContainer');
-      expect(partitionVisContainerExists).to.be(true);
 
       const partitionVisExists = await testSubjects.exists('partitionVisChart');
       expect(partitionVisExists).to.be(true);

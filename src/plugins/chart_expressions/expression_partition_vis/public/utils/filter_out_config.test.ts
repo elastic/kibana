@@ -11,7 +11,7 @@ import { filterOutConfig } from './filter_out_config';
 
 describe('filterOutConfig', () => {
   const config = createMockPieParams();
-  const { lastLevel, truncate, ...restLabels } = config.labels;
+  const { last_level: lastLevel, truncate, ...restLabels } = config.labels;
   const configWithoutTruncateAndLastLevel = { ...config, labels: restLabels };
 
   it('returns full configuration for pie visualization', () => {

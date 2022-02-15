@@ -5,7 +5,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
   css={
     Object {
       "map": undefined,
-      "name": "1rebmxr",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
   
@@ -19,6 +19,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
 
   inset: 0;
   position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
@@ -238,6 +239,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
       >
         <ChartSplit />
         <Settings
+          ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
           flatLegend={false}
@@ -399,7 +401,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
   css={
     Object {
       "map": undefined,
-      "name": "1rebmxr",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
   
@@ -413,6 +415,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
 
   inset: 0;
   position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
@@ -664,6 +667,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
       >
         <ChartSplit />
         <Settings
+          ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
           flatLegend={false}
@@ -824,7 +828,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
   css={
     Object {
       "map": undefined,
-      "name": "1rebmxr",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
   
@@ -838,6 +842,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
 
   inset: 0;
   position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
@@ -1041,6 +1046,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
       >
         <ChartSplit />
         <Settings
+          ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
           flatLegend={false}
@@ -1202,7 +1208,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
   css={
     Object {
       "map": undefined,
-      "name": "1rebmxr",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
   
@@ -1216,6 +1222,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
 
   inset: 0;
   position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
@@ -1451,6 +1458,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
       >
         <ChartSplit />
         <Settings
+          ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
           flatLegend={false}
@@ -1611,7 +1619,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
   css={
     Object {
       "map": undefined,
-      "name": "1rebmxr",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
   
@@ -1625,6 +1633,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
 
   inset: 0;
   position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
@@ -1849,6 +1858,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
       >
         <ChartSplit />
         <Settings
+          ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
           flatLegend={false}

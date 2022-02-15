@@ -7,6 +7,7 @@
  */
 
 import { css } from '@emotion/react';
+import { EuiThemeComputed } from '@elastic/eui';
 
 export const partitionVisWrapperStyle = css({
   display: 'flex',
@@ -26,9 +27,10 @@ export const partitionVisContainerStyle = css`
   height: 100%;
 `;
 
-export const partitionVisContainerWithToggleStyle = css`
+export const partitionVisContainerWithToggleStyleFactory = (theme: EuiThemeComputed) => css`
   ${partitionVisContainerStyle}
 
   inset: 0;
   position: absolute;
+  padding: ${theme.size.s};
 `;

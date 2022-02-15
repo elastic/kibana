@@ -102,7 +102,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToJobManagement();
 
           await ml.testExecution.logTestStep('open job in anomaly explorer');
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.clickOpenJobInAnomalyExplorerButton(testData.jobConfig.job_id);

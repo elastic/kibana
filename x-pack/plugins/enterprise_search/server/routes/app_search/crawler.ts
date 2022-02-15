@@ -63,6 +63,13 @@ export function registerCrawlerRoutes({
         params: schema.object({
           name: schema.string(),
         }),
+        body: schema.object({
+          overrides: schema.maybe(
+            schema.object({
+              domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+            })
+          ),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({

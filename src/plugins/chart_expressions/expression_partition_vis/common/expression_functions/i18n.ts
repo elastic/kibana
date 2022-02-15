@@ -94,6 +94,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.waffle.function.args.showValuesInLegendHelpText', {
       defaultMessage: 'Show values in legend',
     }),
+  getAriaLabelHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.functions.args.ariaLabelHelpText', {
+      defaultMessage: 'Specifies the aria label of the chart',
+    }),
 
   getSliceSizeHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.dimension.metric', {
@@ -124,5 +128,11 @@ export const errors = {
       defaultMessage:
         "Invalid legend position: '{legendPosition}'. Supported values: {legendPositions}.",
       values: { legendPosition, legendPositions: Object.values(Position).join(', ') },
+    }),
+
+  splitRowAndSplitColumnAreSpecifiedError: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.errors.splitRowAndColumnSpecified', {
+      defaultMessage:
+        'A split row and column are specified. Expression is supporting only one of them at once.',
     }),
 };

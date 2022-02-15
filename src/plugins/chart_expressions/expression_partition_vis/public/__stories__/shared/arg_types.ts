@@ -70,7 +70,7 @@ export const argTypes: ArgTypes = {
   - position: string. Options: 'default', 'inside'. Default: 'default'.
   - values: boolean. Default: true.
   - percentDecimals: number. Default: 2.
-  - lastLevel: boolean. Default: false. DEPRECATED.
+  - last_level: boolean. Default: false. DEPRECATED.
   - truncate: number. Default: null.
   - valuesFormat: string. Options: 'percent', 'value'. Default: percent.
         `,

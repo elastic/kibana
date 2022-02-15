@@ -186,7 +186,7 @@ describe('bulkUpdateSessions', () => {
 
       expect(updated).toBeTruthy();
 
-      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' });
+      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' }, { meta: true });
       expect(so.attributes.status).toBe(SearchSessionStatus.COMPLETE);
       expect(so.attributes.status).toBe(SearchSessionStatus.COMPLETE);
       expect(so.attributes.touched).not.toBe('123');
