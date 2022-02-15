@@ -38,8 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('test metadata apis', () => {
     describe('list endpoints GET route', () => {
-      // FLAKY: https://github.com/elastic/kibana/issues/123253
-      describe.skip('with .metrics-endpoint.metadata_united_default index', () => {
+      describe('with .metrics-endpoint.metadata_united_default index', () => {
         const numberOfHostsInFixture = 2;
 
         before(async () => {
@@ -65,11 +64,11 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
 
           // wait for latest metadata transform to run
-          await new Promise((r) => setTimeout(r, 30000));
+          await new Promise((r) => setTimeout(r, 60000));
           await startTransform(getService, METADATA_UNITED_TRANSFORM);
 
           // wait for united metadata transform to run
-          await new Promise((r) => setTimeout(r, 15000));
+          await new Promise((r) => setTimeout(r, 30000));
         });
 
         after(async () => {
