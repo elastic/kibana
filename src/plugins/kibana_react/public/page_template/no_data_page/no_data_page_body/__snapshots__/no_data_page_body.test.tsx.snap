@@ -45,15 +45,13 @@ exports[`NoDataPageBody render 1`] = `
   <ActionCards
     actionCards={
       Array [
-        <ActionCard
-          child={
-            <NoDataCard
-              button="Button text"
-              onClick={[MockFunction]}
-              recommended={false}
-            />
-          }
-        />,
+        <div>
+          <NoDataCard
+            button="Button text"
+            onClick={[MockFunction]}
+            recommended={false}
+          />
+        </div>,
       ]
     }
   />

@@ -7,7 +7,6 @@
  */
 
 import { NoDataPageBody } from './no_data_page_body';
-import { ActionCard } from '../action_cards';
 import React, { ReactElement } from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { NoDataCard } from '../no_data_card';
@@ -19,8 +18,8 @@ describe('NoDataPageBody', () => {
     onClick: jest.fn(),
   };
   const el = <NoDataCard key={'key'} {...action} />;
-  const actionCards: Array<ReactElement<typeof ActionCard>> = [];
-  actionCards.push(<ActionCard key={'action'} child={el} />);
+  const actionCards: ReactElement[] = [];
+  actionCards.push(<div key={'action'}>{el}</div>);
   test('render', () => {
     const component = shallowWithIntl(
       <NoDataPageBody
