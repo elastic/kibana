@@ -196,12 +196,7 @@ describe('rule_details', () => {
       ];
 
       const details = shallow(
-        <RuleDetails
-          rule={rule}
-          ruleType={ruleType}
-          actionTypes={actionTypes}
-          {...mockRuleApis}
-        />
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       );
 
       expect(
@@ -628,12 +623,7 @@ describe('edit button', () => {
       ],
     });
     const pageHeaderProps = shallow(
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={actionTypes}
-        {...mockRuleApis}
-      />
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
     )
       .find('EuiPageHeader')
       .props() as EuiPageHeaderProps;
@@ -674,12 +664,7 @@ describe('edit button', () => {
     });
     expect(
       shallow(
-        <RuleDetails
-          rule={rule}
-          ruleType={ruleType}
-          actionTypes={actionTypes}
-          {...mockRuleApis}
-        />
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       )
         .find(EuiButtonEmpty)
         .find('[name="edit"]')
@@ -697,12 +682,7 @@ describe('edit button', () => {
       actions: [],
     });
     const pageHeaderProps = shallow(
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={actionTypes}
-        {...mockRuleApis}
-      />
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
     )
       .find('EuiPageHeader')
       .props() as EuiPageHeaderProps;
@@ -794,12 +774,7 @@ describe('broken connector indicator', () => {
       ],
     });
     const wrapper = mountWithIntl(
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={actionTypes}
-        {...mockRuleApis}
-      />
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
     );
     await act(async () => {
       await nextTick();
@@ -841,12 +816,7 @@ describe('broken connector indicator', () => {
       ],
     });
     const wrapper = mountWithIntl(
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={actionTypes}
-        {...mockRuleApis}
-      />
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
     );
     await act(async () => {
       await nextTick();
@@ -894,12 +864,7 @@ describe('broken connector indicator', () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
     hasExecuteActionsCapability.mockReturnValue(false);
     const wrapper = mountWithIntl(
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={actionTypes}
-        {...mockRuleApis}
-      />
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
     );
     await act(async () => {
       await nextTick();

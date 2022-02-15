@@ -47,8 +47,7 @@ describe('rule_conditions', () => {
       wrapper.find(EuiTitle).find(FormattedMessage).prop('defaultMessage')
     ).toMatchInlineSnapshot(`"Conditions:"`);
 
-    expect(wrapper.find('[data-test-subj="ruleConditionsHeadline"]').get(0))
-      .toMatchInlineSnapshot(`
+    expect(wrapper.find('[data-test-subj="ruleConditionsHeadline"]').get(0)).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
         data-test-subj="ruleConditionsHeadline"
