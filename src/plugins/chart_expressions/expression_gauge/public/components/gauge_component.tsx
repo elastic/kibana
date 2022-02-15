@@ -29,6 +29,8 @@ import {
   getGoalConfig,
 } from './utils';
 import './index.scss';
+import { GaugeCentralMajorMode } from '../../common/types';
+import { isBulletShape, isRoundShape } from '../../common/utils';
 
 declare global {
   interface Window {
@@ -109,18 +111,18 @@ function normalizeBands(
 }
 
 function getTitle(
-  labelMajorMode: GaugeLabelMajorMode,
-  labelMajor?: string,
+  majorMode: GaugeLabelMajorMode | GaugeCentralMajorMode,
+  major?: string,
   fallbackTitle?: string
 ) {
-  if (labelMajorMode === GaugeLabelMajorModes.NONE) {
+  if (majorMode === GaugeLabelMajorModes.NONE) {
     return '';
   }
 
-  if (labelMajorMode === GaugeLabelMajorModes.AUTO) {
-    return `${fallbackTitle || ''}   `; // added extra space for nice rendering
+  if (majorMode === GaugeLabelMajorModes.AUTO) {
+    return fallbackTitle || '';
   }
-  return `${labelMajor || fallbackTitle || ''}   `; // added extra space for nice rendering
+  return major || fallbackTitle || '';
 }
 
 // TODO: once charts handle not displaying labels when there's no space for them, it's safe to remove this
@@ -167,6 +169,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       labelMinor,
       labelMajor,
       labelMajorMode,
+      centralMajor,
+      centralMajorMode,
       ticksPosition,
     } = args;
     const table = data;
@@ -248,6 +252,19 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const ticks =
       gaugeType === GaugeShapes.CIRCLE ? totalTicks.slice(0, totalTicks.length - 1) : totalTicks;
 
+    const labelMajorTitle = getTitle(labelMajorMode, labelMajor, metricColumn?.name);
+
+    // added extra space for nice rendering
+    const majorExtraSpaces = isRoundShape(gaugeType) ? '   ' : '';
+    const minorExtraSpaces = isBulletShape(gaugeType) ? '  ' : '';
+
+    const extraTitles = isRoundShape(gaugeType)
+      ? {
+          centralMinor: tickFormatter.convert(metricValue),
+          centralMajor: getTitle(centralMajorMode, centralMajor, metricColumn?.name),
+        }
+      : {};
+
     return (
       <Chart>
         <Settings
@@ -277,10 +294,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
                 }
               : () => `rgba(255,255,255,0)`
           }
-          labelMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
-          labelMinor={labelMinor ? labelMinor + '  ' : ''} // added extra space for nice rendering
-          centralMinor={tickFormatter.convert(metricValue)}
-          centralMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
+          labelMajor={labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle}
+          labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
+          {...extraTitles}
           {...goalConfig}
         />
       </Chart>

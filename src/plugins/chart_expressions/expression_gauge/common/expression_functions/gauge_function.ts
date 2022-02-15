@@ -13,11 +13,13 @@ import type { DatatableColumn } from '../../../../expressions';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
+  GaugeCentralMajorModes,
   GaugeColorModes,
   GaugeLabelMajorModes,
   GaugeShapes,
   GaugeTicksPositions,
 } from '../constants';
+import { isRoundShape } from '../utils';
 
 export const errors = {
   invalidShapeError: () =>
@@ -148,6 +150,19 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Specifies the labelMinor of the gauge chart',
       }),
     },
+    centralMajor: {
+      types: ['string'],
+      help: i18n.translate('expressionGauge.functions.gauge.args.centralMajor.help', {
+        defaultMessage: 'Specifies the centralMajor of the gauge chart displayed inside the chart.',
+      }),
+    },
+    centralMajorMode: {
+      types: ['string'],
+      options: [GaugeLabelMajorModes.NONE, GaugeLabelMajorModes.AUTO, GaugeLabelMajorModes.CUSTOM],
+      help: i18n.translate('expressionGauge.functions.gauge.args.centralMajorMode.help', {
+        defaultMessage: 'Specifies the mode of centralMajor',
+      }),
+    },
     ariaLabel: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gaugeChart.config.ariaLabel.help', {
@@ -174,6 +189,10 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         data,
         args: {
           ...args,
+          centralMajorMode:
+            !args.centralMajorMode && isRoundShape(args.shape)
+              ? GaugeCentralMajorModes.AUTO
+              : args.centralMajorMode,
           ariaLabel:
             args.ariaLabel ??
             (handlers.variables?.embeddableTitle as string) ??

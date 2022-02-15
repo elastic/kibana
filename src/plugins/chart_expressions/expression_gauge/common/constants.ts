@@ -27,6 +27,12 @@ export const GaugeLabelMajorModes = {
   NONE: 'none',
 } as const;
 
+export const GaugeCentralMajorModes = {
+  AUTO: 'auto',
+  CUSTOM: 'custom',
+  NONE: 'none',
+} as const;
+
 export const GaugeColorModes = {
   PALETTE: 'palette',
   NONE: 'none',
