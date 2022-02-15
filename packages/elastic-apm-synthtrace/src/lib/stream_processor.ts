@@ -16,9 +16,10 @@ import { parseInterval } from './interval';
 import { dedot } from './utils/dedot';
 import { ApmElasticsearchOutputWriteTargets } from './apm/utils/get_apm_write_targets';
 import { Logger } from './utils/create_logger';
+import { Fields } from './entity';
 
-export interface StreamProcessorOptions {
-  processors: Array<(events: ApmFields[]) => ApmFields[]>;
+export interface StreamProcessorOptions<TFields extends Fields> {
+  processors: Array<(events: TFields[]) => TFields[]>;
   flushInterval?: string;
   maxBufferSize?: number;
   // the maximum source events to process, not the maximum documents outputted by the processor
@@ -26,14 +27,14 @@ export interface StreamProcessorOptions {
   logger?: Logger;
 }
 
-export class StreamProcessor {
+export class StreamProcessor<TFields extends Fields> {
   public static readonly apmProcessors = [
     getTransactionMetrics,
     getSpanDestinationMetrics,
     getBreakdownMetrics,
   ];
 
-  constructor(private readonly options: StreamProcessorOptions) {
+  constructor(private readonly options: StreamProcessorOptions<TFields>) {
     [this.intervalAmount, this.intervalUnit] = this.options.flushInterval
       ? parseInterval(this.options.flushInterval)
       : parseInterval('1m');
@@ -42,7 +43,7 @@ export class StreamProcessor {
   private readonly intervalUnit: any;
 
   // TODO move away from chunking and feed this data one by one to processors
-  *stream(...eventSources: SpanIterable[]) {
+  *stream(...eventSources: Array<SpanIterable<TFields>>) {
     const maxBufferSize = this.options.maxBufferSize ?? 10000;
     const maxSourceEvents = this.options.maxSourceEvents;
     let localBuffer = [];
@@ -106,65 +107,12 @@ export class StreamProcessor {
     }
   }
 
-  async *streamAsync(...eventSources: SpanIterable[]): AsyncIterator<ApmFields> {
-    const maxBufferSize = this.options.maxBufferSize ?? 10000;
-    const maxSourceEvents = this.options.maxSourceEvents;
-    let localBuffer = [];
-    let flushAfter: number | null = null;
-    let sourceEventsYielded = 0;
-    for (const eventSource of eventSources) {
-      const order = eventSource.order();
-      this.options.logger?.info(`order: ${order}`);
-      for (const event of eventSource) {
-        const eventDate = event['@timestamp'] as number;
-        localBuffer.push(event);
-        if (flushAfter === null && eventDate !== null) {
-          flushAfter = this.calculateFlushAfter(eventDate, order);
-        }
-
-        yield StreamProcessor.enrich(event);
-        sourceEventsYielded++;
-        if (maxSourceEvents && sourceEventsYielded % (maxSourceEvents / 10) === 0) {
-          this.options.logger?.info(`Yielded ${sourceEventsYielded} events`);
-        }
-        if (maxSourceEvents && sourceEventsYielded >= maxSourceEvents) {
-          // yielded the maximum source events, we still want the local buffer to generate derivative documents
-          break;
-        }
-        if (
-          localBuffer.length === maxBufferSize ||
-          (flushAfter != null &&
-            ((order === 'asc' && eventDate > flushAfter) ||
-              (order === 'desc' && eventDate < flushAfter)))
-        ) {
-          const e = new Date(eventDate).toISOString();
-          const f = new Date(flushAfter!).toISOString();
-          this.options.logger?.debug(
-            `flush ${localBuffer.length} documents ${order}: ${e} => ${f}`
-          );
-          for (const processor of this.options.processors) {
-            yield* processor(localBuffer).map(StreamProcessor.enrich);
-          }
-          localBuffer = [];
-          flushAfter = this.calculateFlushAfter(flushAfter, order);
-        }
-      }
-      if (maxSourceEvents && sourceEventsYielded >= maxSourceEvents) {
-        this.options.logger?.info(`Yielded maximum number of documents: ${maxSourceEvents}`);
-        break;
-      }
-    }
-    if (localBuffer.length > 0) {
-      this.options.logger?.info(`Processing remaining buffer: ${localBuffer.length} items left`);
-      for (const processor of this.options.processors) {
-        yield* processor(localBuffer).map(StreamProcessor.enrich);
-      }
-    }
+  async *streamAsync(...eventSources: Array<SpanIterable<TFields>>): AsyncIterator<ApmFields> {
+    yield* this.stream(...eventSources);
   }
-
   *streamToDocument<TDocument>(
     map: (d: ApmFields) => TDocument,
-    ...eventSources: SpanIterable[]
+    ...eventSources: Array<SpanIterable<TFields>>
   ): Generator<ApmFields> {
     for (const apmFields of this.stream(...eventSources)) {
       yield map(apmFields);
@@ -172,13 +120,13 @@ export class StreamProcessor {
   }
   async *streamToDocumentAsync<TDocument>(
     map: (d: ApmFields) => TDocument,
-    ...eventSources: SpanIterable[]
+    ...eventSources: Array<SpanIterable<TFields>>
   ): AsyncIterator<ApmFields> {
     for (const apmFields of this.stream(...eventSources)) {
       yield map(apmFields);
     }
   }
-  streamToArray(...eventSources: SpanIterable[]) {
+  streamToArray(...eventSources: Array<SpanIterable<TFields>>) {
     return Array.from<ApmFields>(this.stream(...eventSources));
   }
 
@@ -245,16 +193,16 @@ export class StreamProcessor {
   }
 }
 
-export async function* streamProcessAsync(
-  processors: Array<(events: ApmFields[]) => ApmFields[]>,
-  ...eventSources: SpanIterable[]
+export async function* streamProcessAsync<TFields>(
+  processors: Array<(events: TFields[]) => TFields[]>,
+  ...eventSources: Array<SpanIterable<TFields>>
 ) {
   return new StreamProcessor({ processors }).streamAsync(...eventSources);
 }
 
-export function streamProcessToArray(
-  processors: Array<(events: ApmFields[]) => ApmFields[]>,
-  ...eventSources: SpanIterable[]
+export function streamProcessToArray<TFields>(
+  processors: Array<(events: TFields[]) => TFields[]>,
+  ...eventSources: Array<SpanIterable<TFields>>
 ) {
   return new StreamProcessor({ processors }).streamToArray(...eventSources);
 }

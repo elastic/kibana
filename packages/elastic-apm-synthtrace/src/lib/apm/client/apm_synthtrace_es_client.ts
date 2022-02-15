@@ -76,7 +76,7 @@ export class ApmSynthtraceEsClient {
     }
   }
 
-  async index(events: SpanIterable | SpanIterable[], options?: StreamToBulkOptions) {
+  async index<TFields>(events: SpanIterable<TFields> | SpanIterable<TFields>[], options?: StreamToBulkOptions) {
     const dataStream = Array.isArray(events) ? new SpanGeneratorsUnion(events) : events;
 
     const writeTargets = await this.getWriteTargets();

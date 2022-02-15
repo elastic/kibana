@@ -44,7 +44,6 @@ describe('breakdown metrics', () => {
               .duration(500),
             javaInstance.span('GET foo', 'db', 'redis').timestamp(timestamp).duration(100)
           )
-          .serialize()
       );
 
     const productPageSpans = range
@@ -67,7 +66,6 @@ describe('breakdown metrics', () => {
                   .duration(100)
               )
           )
-          .serialize()
       );
 
     const processor = new StreamProcessor({

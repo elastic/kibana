@@ -7,12 +7,13 @@
  */
 
 import { apm, timerange } from '../../index';
+import { ApmFields } from '../../lib/apm/apm_fields';
 import { Instance } from '../../lib/apm/instance';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async (runOptions: RunOptions) => {
+const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const { logger } = getCommonServices(runOptions);
 
   const { numServices = 3 } = runOptions.scenarioOpts || {};
@@ -50,7 +51,6 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
                 .success()
                 .timestamp(timestamp)
             )
-            .serialize()
         );
 
         const failedTraceEvents = failedTimestamps.spans((timestamp) =>
@@ -62,7 +62,6 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
             .errors(
               instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
             )
-            .serialize()
         );
 
         const metricsets = range
@@ -77,7 +76,6 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
                 'system.process.cpu.total.norm.pct': 0.7,
               })
               .timestamp(timestamp)
-              .serialize()
           );
 
         return successfulTraceEvents.concat(failedTraceEvents, metricsets);

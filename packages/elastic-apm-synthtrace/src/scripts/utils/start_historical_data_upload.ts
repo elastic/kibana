@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+// import pLimit from 'p-limit';
 import { RunOptions } from './parse_run_cli_flags';
 import { getScenario } from './get_scenario';
 import { ApmSynthtraceEsClient } from '../../lib/apm';
@@ -18,13 +19,18 @@ export async function startHistoricalDataUpload(
   from: Date,
   to: Date
 ) {
+  // if we want to generate a maximum number of documents reverse generation to descend.
+  [from, to] = runOptions.maxDocs ? [to, from] : [from, to];
+
   const file = runOptions.file;
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
   const { generate, mapToIndex } = await scenario(runOptions);
-
-  // if we want to generate a maximum number of documents reverse generation to descend.
-  [from, to] = runOptions.maxDocs ? [to, from] : [from, to];
+  /*
+  const numBatches = Math.ceil((to - from) / bucketSizeInMs);
+  const limiter = pLimit(runOptions.workers);
+  return Promise.all(new Array(numBatches).fill(undefined).map((_) => limiter(processNextBatch)));
+*/
 
   logger.info(`Generating data from ${from} to ${to}`);
 
@@ -34,9 +40,9 @@ export async function startHistoricalDataUpload(
     const maxDocs = runOptions.maxDocs;
     const stream = new StreamProcessor({
       // processors: StreamProcessor.apmProcessors,
-      // processors: [StreamProcessor.apmProcessors[0], StreamProcessor.apmProcessors[1]],
+      processors: [StreamProcessor.apmProcessors[0], StreamProcessor.apmProcessors[1]],
       // processors: [StreamProcessor.apmProcessors[0]],
-      processors: [],
+      // processors: [],
       maxSourceEvents: maxDocs,
       logger,
       // }).streamToDocument((e) => e, events);

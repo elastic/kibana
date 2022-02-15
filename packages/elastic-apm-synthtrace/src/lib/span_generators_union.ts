@@ -6,40 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { ApmFields } from './apm/apm_fields';
 import { SpanIterable } from './span_iterable';
 import { merge } from './utils/merge_iterable';
 
-export class SpanGeneratorsUnion implements SpanIterable {
-  constructor(private readonly dataGenerators: SpanIterable[]) {
+export class SpanGeneratorsUnion<TFields> implements SpanIterable<TFields> {
+  constructor(private readonly dataGenerators: Array<SpanIterable<TFields>>) {
     const orders = new Set<'desc' | 'asc'>(dataGenerators.map((d) => d.order()));
     if (orders.size > 1) throw Error('Can only combine intervals with the same order()');
     this._order = orders.has('asc') ? 'asc' : 'desc';
-  }
 
-  static empty: SpanGeneratorsUnion = new SpanGeneratorsUnion([]);
+    this._ratePerMinute = dataGenerators.map((d) => d.ratePerMinute()).reduce((a, b) => a + b, 0);
+  }
 
   private readonly _order: 'desc' | 'asc';
   order() {
     return this._order;
   }
 
-  toArray(): ApmFields[] {
+  private readonly _ratePerMinute: number;
+  ratePerMinute() {
+    return this._ratePerMinute;
+  }
+
+  toArray(): TFields[] {
     return Array.from(this);
   }
 
-  concat(...iterables: SpanIterable[]) {
+  concat(...iterables: Array<SpanIterable<TFields>>): SpanGeneratorsUnion<TFields> {
     return new SpanGeneratorsUnion([...this.dataGenerators, ...iterables]);
   }
 
-  *[Symbol.iterator]() {
+  *[Symbol.iterator](): Iterator<TFields> {
     const iterator = merge(this.dataGenerators);
     for (const fields of iterator) {
       yield fields;
     }
   }
 
-  async *[Symbol.asyncIterator]() {
+  async *[Symbol.asyncIterator](): AsyncIterator<TFields> {
     const iterator = merge(this.dataGenerators);
     for await (const fields of iterator) {
       yield fields;

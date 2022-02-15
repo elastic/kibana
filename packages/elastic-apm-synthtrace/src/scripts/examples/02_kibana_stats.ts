@@ -10,8 +10,9 @@ import { stackMonitoring, timerange } from '../../index';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
-const scenario: Scenario = async (runOptions: RunOptions) => {
+const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const { logger } = getCommonServices(runOptions);
 
   if (!runOptions.writeTarget) {
@@ -28,7 +29,7 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
         .rate(1)
         .spans((timestamp) => {
           const events = logger.perf('generating_sm_events', () => {
-            return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
+            return kibanaStats.timestamp(timestamp).requests(10, 20);
           });
           return events;
         });

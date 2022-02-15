@@ -7,16 +7,35 @@
  */
 
 import { Interval } from './interval';
-import { ApmFields } from './apm/apm_fields';
 import { SpanGeneratorsUnion } from './span_generators_union';
 import { SpanIterable } from './span_iterable';
+import { Serializable } from './serializable';
 
-export class SpanGenerator implements SpanIterable {
+export class SpanGenerator<TField> implements SpanIterable<TField> {
+  private readonly _gen: () => Generator<Serializable<TField>>;
   constructor(
     private readonly interval: Interval,
-    private readonly dataGenerator: Array<(interval: Interval) => Generator<ApmFields>>
+    dataGenerator: (interval: Interval) => Generator<Serializable<TField>>
   ) {
     this._order = interval.from > interval.to ? 'desc' : 'asc';
+
+    const generator = dataGenerator(this.interval);
+    const peek = generator.next();
+    const value = peek.value;
+
+    let callCount = 0;
+    this._gen = function* () {
+      if (callCount === 0) {
+        callCount++;
+        yield value;
+        yield* generator;
+      } else {
+        yield* dataGenerator(this.interval);
+      }
+    };
+
+    const peekedNumberOfEvents = peek.done ? 0 : peek.value.serialize().length;
+    this._ratePerMinute = interval.ratePerMinute() * peekedNumberOfEvents;
   }
 
   private readonly _order: 'desc' | 'asc';
@@ -24,25 +43,30 @@ export class SpanGenerator implements SpanIterable {
     return this._order;
   }
 
-  toArray(): ApmFields[] {
+  toArray(): TField[] {
     return Array.from(this);
   }
 
-  concat(...iterables: SpanGenerator[]) {
+  concat(...iterables: Array<SpanIterable<TField>>): SpanGeneratorsUnion<TField> {
     return new SpanGeneratorsUnion([this, ...iterables]);
   }
 
+  private readonly _ratePerMinute: number;
+  ratePerMinute() {
+    return this._ratePerMinute;
+  }
+
   *[Symbol.iterator]() {
-    for (const iterator of this.dataGenerator) {
-      for (const fields of iterator(this.interval)) {
+    for (const span of this._gen()) {
+      for (const fields of span.serialize()) {
         yield fields;
       }
     }
   }
 
   async *[Symbol.asyncIterator]() {
-    for (const iterator of this.dataGenerator) {
-      for (const fields of iterator(this.interval)) {
+    for (const span of this._gen()) {
+      for (const fields of span.serialize()) {
         yield fields;
       }
     }

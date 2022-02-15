@@ -42,7 +42,6 @@ describe('span destination metrics', () => {
                   .destination('elasticsearch')
                   .success()
               )
-              .serialize()
           ),
         range
           .interval('1m')
@@ -66,7 +65,6 @@ describe('span destination metrics', () => {
                   .duration(500)
                   .success()
               )
-              .serialize()
           )
       )
       .filter((fields) => fields['metricset.name'] === 'span_destination');

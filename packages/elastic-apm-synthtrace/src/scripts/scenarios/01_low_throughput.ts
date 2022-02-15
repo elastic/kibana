@@ -8,12 +8,13 @@
 
 import { random } from 'lodash';
 import { apm, timerange } from '../../index';
+import { ApmFields } from '../../lib/apm/apm_fields';
 import { Instance } from '../../lib/apm/instance';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async (runOptions: RunOptions) => {
+const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const { logger } = getCommonServices(runOptions);
 
   const numServices = 3;
@@ -66,11 +67,10 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
                 .timestamp(timestamp + childDuration)
             );
           return !generateError
-            ? span.success().serialize()
+            ? span.success()
             : span
                 .failure()
-                .errors(instance.error(`No handler for ${url}`).timestamp(timestamp + 50))
-                .serialize();
+                .errors(instance.error(`No handler for ${url}`).timestamp(timestamp + 50));
         });
 
         return successfulTraceEvents;

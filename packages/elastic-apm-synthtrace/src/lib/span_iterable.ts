@@ -8,19 +8,28 @@
 
 import { ApmFields } from './apm/apm_fields';
 import { SpanGeneratorsUnion } from './span_generators_union';
+import { Fields } from './entity';
 
-export interface SpanIterable extends Iterable<ApmFields>, AsyncIterable<ApmFields> {
+export interface SpanIterable<TFields extends Fields>
+  extends Iterable<TFields>,
+    AsyncIterable<TFields> {
   order(): 'desc' | 'asc';
+
+  ratePerMinute(): number;
 
   toArray(): ApmFields[];
 
-  concat(...iterables: SpanIterable[]): SpanGeneratorsUnion;
+  concat(...iterables: Array<SpanIterable<TFields>>): SpanGeneratorsUnion<TFields>;
 }
 
-export class SpanArrayIterable implements SpanIterable {
-  constructor(private fields: ApmFields[]) {
+export class SpanArrayIterable<TFields extends Fields> implements SpanIterable<TFields> {
+  constructor(private fields: TFields[]) {
     const timestamps = fields.filter((f) => f['@timestamp']).map((f) => f['@timestamp']!);
     this._order = timestamps.length > 1 ? (timestamps[0] > timestamps[1] ? 'desc' : 'asc') : 'asc';
+    const sorted = timestamps.sort();
+    const [first, last] = [sorted[0], sorted.slice(-1)[0]];
+    const numberOfMinutes = Math.ceil(Math.abs(last - first) / (1000 * 60)) % 60;
+    this._ratePerMinute = sorted.length / numberOfMinutes;
   }
 
   private readonly _order: 'desc' | 'asc';
@@ -28,19 +37,24 @@ export class SpanArrayIterable implements SpanIterable {
     return this._order;
   }
 
-  async *[Symbol.asyncIterator](): AsyncIterator<ApmFields> {
+  private readonly _ratePerMinute: number;
+  ratePerMinute() {
+    return this._ratePerMinute;
+  }
+
+  async *[Symbol.asyncIterator](): AsyncIterator<TFields> {
     return this.fields[Symbol.iterator]();
   }
 
-  [Symbol.iterator](): Iterator<ApmFields> {
+  [Symbol.iterator](): Iterator<TFields> {
     return this.fields[Symbol.iterator]();
   }
 
-  concat(...iterables: SpanIterable[]): SpanGeneratorsUnion {
-    return new SpanGeneratorsUnion([this, ...iterables]);
+  concat(...iterables: Array<SpanIterable<TFields>>): SpanGeneratorsUnion<TFields> {
+    return new SpanGeneratorsUnion<TFields>([this, ...iterables]);
   }
 
-  toArray(): ApmFields[] {
+  toArray(): TFields[] {
     return this.fields;
   }
 }

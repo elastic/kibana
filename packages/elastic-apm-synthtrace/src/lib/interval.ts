@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import moment from 'moment';
+import moment, { unitOfTime } from 'moment';
 import { random } from 'lodash';
-import { ApmFields } from './apm/apm_fields';
 import { SpanIterable } from './span_iterable';
 import { SpanGenerator } from './span_generator';
+import { Serializable } from './serializable';
 
-export function parseInterval(interval: string): [number, string] {
+export function parseInterval(interval: string): [number, unitOfTime.DurationConstructor] {
   const args = interval.match(/(\d+)(s|m|h|d)/);
   if (!args || args.length < 3) {
     throw new Error('Failed to parse interval');
@@ -31,7 +31,9 @@ export interface IntervalOptions {
 
 export class Interval implements Iterable<number> {
   constructor(public readonly options: IntervalOptions) {
-    [this.intervalAmount, this.intervalUnit] = parseInterval(options.interval);
+    const parsed = parseInterval(options.interval);
+    this.intervalAmount = parsed[0];
+    this.intervalUnit = parsed[1];
     this.from = this.options.from;
     this.to = this.options.to;
   }
@@ -39,19 +41,17 @@ export class Interval implements Iterable<number> {
   public readonly to: Date;
 
   private readonly intervalAmount: number;
-  private readonly intervalUnit: any;
-  spans(map: (timestamp: number, index?: number) => ApmFields[]): SpanIterable {
-    return new SpanGenerator(this, [
-      function* (i) {
-        let index = 0;
-        for (const x of i) {
-          for (const a of map(x, index)) {
-            yield a;
-            index++;
-          }
-        }
-      },
-    ]);
+  private readonly intervalUnit: unitOfTime.DurationConstructor;
+  spans<TField>(
+    map: (timestamp: number, index?: number) => Serializable<TField>
+  ): SpanIterable<TField> {
+    return new SpanGenerator(this, function* (i) {
+      let index = 0;
+      for (const x of i) {
+        yield map(x, index);
+        index++;
+      }
+    });
   }
   rate(rate: number): Interval {
     return new Interval({ ...this.options, yieldRate: rate });
@@ -59,6 +59,19 @@ export class Interval implements Iterable<number> {
 
   randomize(rateUpper: number, intervalUpper: number): Interval {
     return new Interval({ ...this.options, intervalUpper, rateUpper });
+  }
+
+  ratePerMinute(): number {
+    const rate = this.options.rateUpper
+      ? Math.max(1, this.options.rateUpper)
+      : this.options.yieldRate ?? 1;
+
+    const interval = this.options.intervalUpper ? this.options.intervalUpper : this.intervalAmount;
+    const first = moment();
+    const last = moment(first).subtract(interval, this.intervalUnit);
+    const numberOfMinutes =
+      Math.ceil(Math.abs(last.toDate().getTime() - first.toDate().getTime()) / (1000 * 60)) % 60;
+    return rate / numberOfMinutes;
   }
 
   private yieldRateTimestamps(timestamp: number) {
