@@ -9,13 +9,17 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHideFor,
   EuiPopover,
+  EuiShowFor,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DataView } from '../../../../../../data/common';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { GetStateReturn } from '../../services/discover_state';
@@ -25,6 +29,7 @@ import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { triggerVisualizeActions } from '../sidebar/lib/visualize_trigger_utils';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
@@ -35,7 +40,7 @@ export function DiscoverChart({
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
   stateContainer,
-  isTimeBased,
+  indexPattern,
   viewMode,
   setDiscoverViewMode,
   hideChart,
@@ -46,12 +51,13 @@ export function DiscoverChart({
   savedSearchDataChart$: DataCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
   stateContainer: GetStateReturn;
-  isTimeBased: boolean;
+  indexPattern: DataView;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
   hideChart?: boolean;
   interval?: string;
 }) {
+  const isTimeBased = indexPattern.isTimeBased();
   const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -60,6 +66,13 @@ export function DiscoverChart({
     element: null,
     moveFocus: false,
   });
+
+  const onEditVisualization = useCallback(() => {
+    if (!indexPattern.timeFieldName) return;
+    const timeField = indexPattern.getFieldByName(indexPattern.timeFieldName);
+    if (!timeField) return;
+    triggerVisualizeActions(timeField, indexPattern.id, savedSearch.columns || []);
+  }, [indexPattern, savedSearch]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);
@@ -124,27 +137,71 @@ export function DiscoverChart({
           )}
           {isTimeBased && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-              <EuiPopover
-                id="dscChartOptions"
-                button={
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="gear"
-                    onClick={onShowChartOptions}
-                    data-test-subj="discoverChartOptionsToggle"
+              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiHideFor sizes={['s', 'xs', 'm']}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconType="lensApp"
+                      onClick={onEditVisualization}
+                      data-test-subj="discoverEditVisualization"
+                    >
+                      {i18n.translate('discover.editVisualizationButton', {
+                        defaultMessage: 'Edit as visualization',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiHideFor>
+                  <EuiShowFor sizes={['s', 'xs', 'm']}>
+                    <EuiButtonIcon
+                      size="xs"
+                      iconType="lensApp"
+                      onClick={onEditVisualization}
+                      data-test-subj="discoverEditVisualization"
+                      aria-label={i18n.translate('discover.editVisualizationButton', {
+                        defaultMessage: 'Edit as visualization',
+                      })}
+                    />
+                  </EuiShowFor>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    id="dscChartOptions"
+                    button={
+                      <>
+                        <EuiHideFor sizes={['s', 'xs', 'm']}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            iconType="gear"
+                            onClick={onShowChartOptions}
+                            data-test-subj="discoverChartOptionsToggle"
+                          >
+                            {i18n.translate('discover.chartOptionsButton', {
+                              defaultMessage: 'Chart options',
+                            })}
+                          </EuiButtonEmpty>
+                        </EuiHideFor>
+                        <EuiShowFor sizes={['s', 'xs', 'm']}>
+                          <EuiButtonIcon
+                            size="xs"
+                            iconType="gear"
+                            onClick={onShowChartOptions}
+                            data-test-subj="discoverChartOptionsToggle"
+                            aria-label={i18n.translate('discover.chartOptionsButton', {
+                              defaultMessage: 'Chart options',
+                            })}
+                          />
+                        </EuiShowFor>
+                      </>
+                    }
+                    isOpen={showChartOptionsPopover}
+                    closePopover={closeChartOptions}
+                    panelPaddingSize="none"
+                    anchorPosition="downLeft"
                   >
-                    {i18n.translate('discover.chartOptionsButton', {
-                      defaultMessage: 'Chart options',
-                    })}
-                  </EuiButtonEmpty>
-                }
-                isOpen={showChartOptionsPopover}
-                closePopover={closeChartOptions}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
-              </EuiPopover>
+                    <EuiContextMenu initialPanelId={0} panels={panels} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
