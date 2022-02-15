@@ -27,8 +27,10 @@ import { refreshPage } from '../../tasks/security_header';
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Marking alerts as acknowledged', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+  });
+  beforeEach(() => {
     loginAndWaitForPage(ALERTS_URL);
     createCustomRuleActivated(getNewRule());
     refreshPage();

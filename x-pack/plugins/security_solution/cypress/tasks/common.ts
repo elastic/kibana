@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { esArchiverResetKibana } from './es_archiver';
 import { RuleEcs } from '../../common/ecs/rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
@@ -117,15 +116,13 @@ export const cleanKibana = () => {
     'POST',
     `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/.lists-*,.items-*,.alerts-security.alerts-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
+    )}/.lists-*,.items-*,.alerts-security.alerts-*,.internal*/_delete_by_query?conflicts=proceed`,
     {
       query: {
         match_all: {},
       },
     }
   );
-
-  esArchiverResetKibana();
 };
 
 export const deleteCases = () => {

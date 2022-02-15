@@ -21,8 +21,10 @@ import { createCase } from '../../tasks/api_calls/cases';
 
 describe('attach timeline to case', () => {
   context('without cases created', () => {
-    beforeEach(() => {
+    before(() => {
       cleanKibana();
+    });
+    beforeEach(() => {
       createTimeline(getTimeline()).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
       });

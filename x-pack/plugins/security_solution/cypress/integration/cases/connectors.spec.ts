@@ -46,7 +46,7 @@ describe('Cases connectors', () => {
 
   const snConnector = getServiceNowConnector();
 
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
       statusCode: 200,

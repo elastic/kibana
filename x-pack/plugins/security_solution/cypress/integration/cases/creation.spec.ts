@@ -51,7 +51,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { CASES_URL } from '../../urls/navigation';
 
 describe('Cases', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
       cy

@@ -18,7 +18,7 @@ import { refreshPage } from '../../tasks/security_header';
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Alerts timeline', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
     createCustomRuleActivated(getNewRule());
