@@ -15,7 +15,9 @@ export interface SingleMetricOptions {
   disableShadow?: boolean;
   metricIcon?: IconType;
   metricIconColor?: string;
+  metricIconWidth?: string;
   metricPostfix?: string;
+  metricPostfixWidth?: string;
 }
 
 type SingleMetricProps = SingleMetricOptions & {
@@ -29,11 +31,13 @@ export function SingleMetric({
   disableShadow = true,
   metricIcon,
   metricIconColor,
+  metricIconWidth = '30px',
   metricPostfix,
+  metricPostfixWidth = '150px',
 }: SingleMetricProps) {
   let metricMaxWidth = '100%';
-  metricMaxWidth = metricIcon ? metricMaxWidth : `${metricMaxWidth} - 30px`;
-  metricMaxWidth = metricPostfix ? metricMaxWidth : `${metricMaxWidth} - 120px`;
+  metricMaxWidth = metricIcon ? `${metricMaxWidth} - ${metricIconWidth}` : metricMaxWidth;
+  metricMaxWidth = metricPostfix ? `${metricMaxWidth} - ${metricPostfixWidth}` : metricMaxWidth;
 
   return (
     <LensWrapper
@@ -47,22 +51,33 @@ export function SingleMetric({
           <EuiIcon type={metricIcon} size="l" color={metricIconColor} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem
-        style={{ maxWidth: `calc(${metricMaxWidth})` }}
-        grow={metricIcon && metricPostfix ? false : 1}
-      >
+      <EuiFlexItem style={{ maxWidth: `calc(${metricMaxWidth})` }} grow={1}>
         {children}
       </EuiFlexItem>
       {metricPostfix && (
-        <EuiFlexItem style={{ justifyContent: 'space-evenly', paddingTop: '24px' }} grow={false}>
-          <EuiTitle size="s">
-            <h3> {metricPostfix}</h3>
-          </EuiTitle>
+        <EuiFlexItem
+          style={{
+            justifyContent: 'space-evenly',
+            paddingTop: '24px',
+            maxWidth: metricPostfixWidth,
+            minWidth: 0,
+          }}
+          grow={false}
+        >
+          <StyledTitle size="m">
+            <h3>{metricPostfix}</h3>
+          </StyledTitle>
         </EuiFlexItem>
       )}
     </LensWrapper>
   );
 }
+
+const StyledTitle = styled(EuiTitle)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 const LensWrapper = styled(EuiFlexGroup)<{
   $alignLnsMetric?: string;
