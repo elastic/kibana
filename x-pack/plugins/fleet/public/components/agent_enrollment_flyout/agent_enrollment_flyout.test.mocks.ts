@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+jest.mock('../../hooks', () => {
+  return {
+    ...jest.requireActual('../../hooks'),
+    useAgentEnrollmentFlyoutData: jest.fn(),
+  };
+});
+
 jest.mock('../../hooks/use_request', () => {
   const module = jest.requireActual('../../hooks/use_request');
   return {
