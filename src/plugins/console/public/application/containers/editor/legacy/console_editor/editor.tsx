@@ -167,6 +167,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     if (initialQueryParams.load_from) {
       loadBufferFromRemote(initialQueryParams.load_from);
     } else {
+      console.log('---> updating with initialTextValue:', initialTextValue);
       editor.update(initialTextValue || DEFAULT_INPUT_VALUE);
     }
 
@@ -191,6 +192,17 @@ function EditorUI({ initialTextValue }: EditorProps) {
       }
     }
 
+    function setupOpenAI() {
+      editor.getCoreEditor().on('change', () => {
+        console.log('change has happened.');
+        const selectionRange = editor.getCoreEditor().getSelectionRange();
+        const content = editor.getCoreEditor().getLineValue(selectionRange.start.lineNumber);
+        if (content.startsWith('#')) {
+          console.log('Found commented content:', content);
+        }
+      });
+    }
+
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
@@ -198,6 +210,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
+    setupOpenAI();
 
     return () => {
       unsubscribeResizer();
