@@ -16,7 +16,7 @@ import {
 } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { SavedObjectLoader } from './services/saved_object_loader';
 import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
 import { SavedDashboardPanel } from '../common/types';
