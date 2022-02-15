@@ -265,6 +265,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     esClient,
     spaceId,
     force: request.body?.force,
+    ignoreConstraints: request.body?.ignore_constraints,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
