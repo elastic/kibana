@@ -20,10 +20,12 @@ const OVER_FIELD_EXAMPLES_COUNT = 40;
 type DtrIndex = number;
 type TimeStamp = number;
 type Value = number | undefined | null;
+
 interface Thing {
   label: string;
   value: Value;
 }
+
 interface Result {
   time: TimeStamp;
   values: Thing[];
@@ -61,7 +63,7 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
       indicesOptions
     );
 
-    const { body } = await asCurrentUser.search(json);
+    const body = await asCurrentUser.search(json);
     return processSearchResults(
       body,
       aggFieldNamePairs.map((af) => af.field)
