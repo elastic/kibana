@@ -26,9 +26,7 @@ describe('get_list', () => {
   test('it returns a list as expected if the list is found', async () => {
     const data = getSearchListMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const list = await getList({ esClient, id: LIST_ID, listIndex: LIST_INDEX });
     const expected = getListResponseMock();
     expect(list).toEqual(expected);
@@ -38,9 +36,7 @@ describe('get_list', () => {
     const data = getSearchListMock();
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const list = await getList({ esClient, id: LIST_ID, listIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });
