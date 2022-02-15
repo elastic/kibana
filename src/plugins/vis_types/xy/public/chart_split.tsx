@@ -9,47 +9,40 @@
 import React from 'react';
 import { Accessor, AccessorFn, GroupBy, SmallMultiples } from '@elastic/charts';
 import { Predicate } from '@elastic/charts/dist/common/predicate';
+import type { DatatableColumn, DatatableRow } from '../../../expressions/public';
 
-interface ChartSplitProps {
+interface ChartSplitterProps {
   splitColumnAccessor?: Accessor | AccessorFn;
   splitRowAccessor?: Accessor | AccessorFn;
+  splitDimension?: DatatableColumn;
+  visDataRows: DatatableRow[];
 }
 
-const CHART_SPLIT_ID = '__pie_chart_split__';
-export const SMALL_MULTIPLES_ID = '__pie_chart_sm__';
+const CHART_SPLIT_ID = '__xy_chart_split__';
 
-export const ChartSplit = ({ splitColumnAccessor, splitRowAccessor }: ChartSplitProps) => {
+export const ChartSplit = ({
+  splitColumnAccessor,
+  splitRowAccessor,
+  splitDimension,
+  visDataRows,
+}: ChartSplitterProps) => {
   if (!splitColumnAccessor && !splitRowAccessor) return null;
 
   return (
     <>
       <GroupBy
         id={CHART_SPLIT_ID}
-        by={(spec, datum) => {
-          const splitTypeAccessor = splitColumnAccessor || splitRowAccessor;
-          if (splitTypeAccessor) {
-            return typeof splitTypeAccessor === 'function'
-              ? splitTypeAccessor(datum)
-              : datum[splitTypeAccessor];
-          }
-          return spec.id;
-        }}
+        by={(spec, datum) => visDataRows.indexOf(datum)}
         sort={Predicate.DataIndex}
+        format={
+          splitDimension
+            ? (dataIndex) => `${visDataRows[dataIndex as number][splitDimension.id]}`
+            : undefined
+        }
       />
       <SmallMultiples
-        id={SMALL_MULTIPLES_ID}
         splitVertically={splitRowAccessor ? CHART_SPLIT_ID : undefined}
         splitHorizontally={splitColumnAccessor ? CHART_SPLIT_ID : undefined}
-        style={{
-          verticalPanelPadding: {
-            outer: 0.1,
-            inner: 0.1,
-          },
-          horizontalPanelPadding: {
-            outer: 0.1,
-            inner: 0.1,
-          },
-        }}
       />
     </>
   );

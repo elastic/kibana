@@ -32,7 +32,11 @@ import {
   PaletteRegistry,
   useActiveCursor,
 } from '../../../charts/public';
-import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/public';
+import type {
+  Datatable,
+  DatatableColumn,
+  IInterpreterRenderHandlers,
+} from '../../../expressions/public';
 import type { PersistedState } from '../../../visualizations/public';
 import { VisParams } from './types';
 import {
@@ -57,7 +61,7 @@ import {
   getComplexAccessor,
   getSplitSeriesAccessorFnMap,
 } from './utils/accessors';
-import { ChartSplitter } from './chart_splitter';
+import { ChartSplit } from './chart_split';
 
 export interface VisComponentProps {
   visParams: VisParams;
@@ -107,7 +111,8 @@ const VisComponent = (props: VisComponentProps) => {
       visData: Datatable,
       xAccessor: Accessor | AccessorFn,
       splitSeriesAccessors: Array<Accessor | AccessorFn>,
-      splitChartAccessor?: Accessor | AccessorFn
+      splitChartAccessor?: Accessor | AccessorFn,
+      splitChartDimension?: DatatableColumn
     ): ElementClickListener => {
       const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
       return (elements) => {
@@ -116,7 +121,8 @@ const VisComponent = (props: VisComponentProps) => {
             visData,
             xAccessor,
             splitSeriesAccessorFnMap,
-            splitChartAccessor
+            splitChartAccessor,
+            splitChartDimension
           )(elements as XYChartElementEvent[]);
           props.fireEvent(event);
         }
@@ -352,10 +358,11 @@ const VisComponent = (props: VisComponentProps) => {
         legendPosition={legendPosition}
       />
       <Chart size="100%" ref={chartRef}>
-        <ChartSplitter
+        <ChartSplit
           splitColumnAccessor={splitChartColumnAccessor}
           splitRowAccessor={splitChartRowAccessor}
           splitDimension={splitChartDimension}
+          visDataRows={visData.rows}
         />
         <XYSettings
           {...config}
@@ -371,7 +378,8 @@ const VisComponent = (props: VisComponentProps) => {
             visData,
             xAccessor,
             splitSeriesAccessors,
-            splitChartColumnAccessor ?? splitChartRowAccessor
+            splitChartColumnAccessor ?? splitChartRowAccessor,
+            splitChartDimension
           )}
           ariaLabel={visParams.ariaLabel}
           onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}

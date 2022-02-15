@@ -74,25 +74,17 @@ export const getTooltipData = (
     }
   });
 
-  if (
-    aspects.splitColumn &&
-    valueSeries.smHorizontalAccessorValue !== undefined &&
-    valueSeries.smHorizontalAccessorValue !== undefined
-  ) {
+  if (aspects.splitColumn?.accessor && valueSeries.smHorizontalAccessorValue !== undefined) {
     data.push({
       label: aspects.splitColumn.title,
-      value: `${valueSeries.smHorizontalAccessorValue}`,
+      value: `${value.datum[aspects.splitColumn.accessor]}`,
     });
   }
 
-  if (
-    aspects.splitRow &&
-    valueSeries.smVerticalAccessorValue !== undefined &&
-    valueSeries.smVerticalAccessorValue !== undefined
-  ) {
+  if (aspects.splitRow?.accessor && valueSeries.smVerticalAccessorValue !== undefined) {
     data.push({
       label: aspects.splitRow.title,
-      value: `${valueSeries.smVerticalAccessorValue}`,
+      value: `${value.datum[aspects.splitRow.accessor]}`,
     });
   }
 

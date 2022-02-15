@@ -16,7 +16,7 @@ import {
 } from '@elastic/charts';
 
 import { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
-import { Datatable } from '../../../../expressions/public';
+import { Datatable, DatatableColumn } from '../../../../expressions/public';
 
 export interface ClickTriggerEvent {
   name: 'filterBucket';
@@ -180,6 +180,7 @@ export const getFilterFromChartClickEventFn =
     xAccessor: Accessor | AccessorFn,
     splitSeriesAccessorFnMap?: Map<string | number, AccessorFn>,
     splitChartAccessor?: Accessor | AccessorFn,
+    splitChartDimension?: DatatableColumn,
     negate: boolean = false
   ) =>
   (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
@@ -187,7 +188,9 @@ export const getFilterFromChartClickEventFn =
 
     points.forEach((point) => {
       const [geometry, { yAccessor, splitAccessors }] = point;
-      const splitChartValue = getSplitChartValue(point[1]);
+      const splitChartValue = splitChartDimension
+        ? point[0].datum[splitChartDimension.id].toString()
+        : undefined;
       const allSplitAccessors = getAllSplitAccessors(splitAccessors, splitSeriesAccessorFnMap);
       const columns = table.columns.reduce<Array<[index: number, id: string]>>(
         columnReducer(xAccessor, yAccessor, allSplitAccessors, splitChartAccessor),
