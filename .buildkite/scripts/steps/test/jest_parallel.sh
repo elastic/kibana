@@ -2,6 +2,11 @@
 
 set -uo pipefail
 
+export CODE_COVERAGE=true
+export COVERALLS_PARALLEL=true
+
+yarn add coveralls # TODO move
+
 JOB=$BUILDKITE_PARALLEL_JOB
 JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 
@@ -10,10 +15,14 @@ JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 i=0
 exitCode=0
 
+# target/jest-coverage/lcov.info
+
 while read -r config; do
   if [ "$((i % JOB_COUNT))" -eq "$JOB" ]; then
     echo "--- $ node scripts/jest --config $config"
-    node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests
+    rm -f target/jest-coverage/lcov.info
+    node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests \
+      --coverage --coverageReporters lcov --coverageDirectory target/jest-coverage
     lastCode=$?
 
     if [ $lastCode -ne 0 ]; then
@@ -22,6 +31,11 @@ while read -r config; do
       echo "^^^ +++"
     fi
   fi
+
+  echo 'Uploading to coveralls...'
+  cat target/jest-coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  buildkite-agent meta-data set "did-upload-coveralls" 'true'
+  
 
   ((i=i+1))
 # uses heredoc to avoid the while loop being in a sub-shell thus unable to overwrite exitCode
