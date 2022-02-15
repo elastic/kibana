@@ -13,7 +13,7 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
     const playwright = getService('playwright');
     const esArchiver = getService('esArchiver');
     const kibanaServer = getService('kibanaServer');
-    const { page } = playwright.makePage({
+    const { step } = playwright.makePage({
       autoLogin: true,
       journeyName: 'promotion_tracking_dashboard',
     });
@@ -32,7 +32,7 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
       await esArchiver.unload('x-pack/test/performance/es_archives/ecommerce_sample_data');
     });
 
-    it('Go to Dashboards Page', async () => {
+    step('Go to Dashboards Page', async ({ page }) => {
       const kibanaUrl = Url.format({
         protocol: config.get('servers.kibana.protocol'),
         hostname: config.get('servers.kibana.hostname'),
@@ -43,12 +43,12 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
       await page.waitForSelector('text="Dashboards"');
     });
 
-    it('Go to Promotion Tracking Dashboard', async () => {
+    step('Go to Promotion Tracking Dashboard', async ({ page }) => {
       const promotionDashboardButton = page.locator('text="Promotion Dashboard"');
       await promotionDashboardButton.click();
     });
 
-    it('Change time range', async () => {
+    step('Change time range', async ({ page }) => {
       const beginningTimeRangeButton = page.locator(
         '[data-test-subj="superDatePickerToggleQuickMenuButton"]'
       );
@@ -58,7 +58,7 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
       await lastYearButton.click();
     });
 
-    it('Wait for visualization animations to finish', async () => {
+    step('Wait for visualization animations to finish', async ({ page }) => {
       await page.waitForFunction(() => {
         const visualizations = Array.from(document.querySelectorAll('[data-rendering-count]'));
         const visualizationElementsLoaded = visualizations.length > 0;

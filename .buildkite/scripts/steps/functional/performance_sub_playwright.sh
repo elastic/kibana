@@ -32,10 +32,16 @@ checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (P
 export TEST_PERFORMANCE_PHASE=TEST
 export ELASTIC_APM_ACTIVE=true
 
-checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Phase: TEST)" \
-  node scripts/functional_tests \
-    --debug --bail \
-    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config "test/performance/config.playwright.ts";
+journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard")
+
+for i in "${journeys[@]}"; do
+    export JOURNEY_NAME="${i}"
+    echo "JOURNEY[${JOURNEY_NAME}] is running"
+    checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Phase: TEST)" \
+      node scripts/functional_tests \
+      --debug --bail \
+      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+      --config "test/performance/config.playwright.ts";
+done
 
 kill "$esPid"

@@ -12,9 +12,10 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
     const config = getService('config');
     const playwright = getService('playwright');
     const logger = getService('log');
-    const { page } = playwright.makePage({ autoLogin: true, journeyName: 'ecommerce_dashboard' });
 
-    it('Go to Sample Data Page', async () => {
+    const { step } = playwright.makePage({ autoLogin: true, journeyName: 'ecommerce_dashboard' });
+
+    step('Go to Sample Data Page', async ({ page }) => {
       const kibanaUrl = Url.format({
         protocol: config.get('servers.kibana.protocol'),
         hostname: config.get('servers.kibana.hostname'),
@@ -25,21 +26,20 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
       await page.waitForSelector('text="More ways to add data"');
     });
 
-    it('Add Ecommerce Sample Data', async () => {
+    step('Add Ecommerce Sample Data', async ({ page }) => {
       const removeButton = page.locator('[data-test-subj=removeSampleDataSetecommerce]');
       try {
         await removeButton.click({ timeout: 1_000 });
       } catch (e) {
         logger.info('Ecommerce data does not exist');
       }
-
       const addDataButton = page.locator('[data-test-subj=addSampleDataSetecommerce]');
       if (addDataButton) {
         await addDataButton.click();
       }
     });
 
-    it('Go to Ecommerce Dashboard', async () => {
+    step('Go to Ecommerce Dashboard', async ({ page }) => {
       const viewdataBtn = page.locator('[aria-label="View Sample eCommerce orders"]');
       await viewdataBtn.click();
       const dashboardBtn = page.locator('text="Dashboard"');

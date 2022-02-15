@@ -12,9 +12,9 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
     const config = getService('config');
     const playwright = getService('playwright');
     const logger = getService('log');
-    const { page } = playwright.makePage({ autoLogin: true, journeyName: 'flights_dashboard' });
+    const { step } = playwright.makePage({ autoLogin: true, journeyName: 'flights_dashboard' });
 
-    it('Go to Sample Data Page', async () => {
+    step('Go to Sample Data Page', async ({ page }) => {
       const kibanaUrl = Url.format({
         protocol: config.get('servers.kibana.protocol'),
         hostname: config.get('servers.kibana.hostname'),
@@ -25,7 +25,7 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
       await page.waitForSelector('text="More ways to add data"');
     });
 
-    it('Add Flights Sample Data', async () => {
+    step('Add Flights Sample Data', async ({ page }) => {
       const removeButton = page.locator('[data-test-subj=removeSampleDataSetflights]');
       try {
         await removeButton.click({ timeout: 1_000 });
@@ -39,7 +39,7 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
       }
     });
 
-    it('Go to Flights Dashboard', async () => {
+    step('Go to Flights Dashboard', async ({ page }) => {
       const viewdataBtn = page.locator('[aria-label="View Sample flight data"]');
       await viewdataBtn.click();
       const dashboardBtn = page.locator('text="Dashboard"');
@@ -55,7 +55,7 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
       });
     });
 
-    it('Go to Airport Connections Visualizations Edit', async () => {
+    step('Go to Airport Connections Visualizations Edit', async ({ page }) => {
       const editButton = page.locator('[data-test-subj="dashboardEditMode"]');
       await editButton.click();
 

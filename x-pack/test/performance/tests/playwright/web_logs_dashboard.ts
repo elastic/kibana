@@ -12,9 +12,9 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
     const config = getService('config');
     const playwright = getService('playwright');
     const logger = getService('log');
-    const { page } = playwright.makePage({ autoLogin: true, journeyName: 'weblogs_dashboard' });
+    const { step } = playwright.makePage({ autoLogin: true, journeyName: 'weblogs_dashboard' });
 
-    it('Go to Sample Data Page', async () => {
+    step('Go to Sample Data Page', async ({ page }) => {
       const kibanaUrl = Url.format({
         protocol: config.get('servers.kibana.protocol'),
         hostname: config.get('servers.kibana.hostname'),
@@ -25,7 +25,7 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
       await page.waitForSelector('text="More ways to add data"');
     });
 
-    it('Add Web Logs Sample Data', async () => {
+    step('Add Web Logs Sample Data', async ({ page }) => {
       const removeButton = page.locator('[data-test-subj=removeSampleDataSetlogs]');
       try {
         await removeButton.click({ timeout: 1_000 });
@@ -39,7 +39,7 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
       }
     });
 
-    it('Go to Web Logs Dashboard', async () => {
+    step('Go to Web Logs Dashboard', async ({ page }) => {
       const viewdataBtn = page.locator('[aria-label="View Sample web logs"]');
       await viewdataBtn.click();
       const dashboardBtn = page.locator('text="Dashboard"');

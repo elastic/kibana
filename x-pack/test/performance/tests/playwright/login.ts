@@ -11,9 +11,9 @@ export default function login({ getService }: FtrProviderContext) {
   describe('Login Page', () => {
     const config = getService('config');
     const playwright = getService('playwright');
-    const { page } = playwright.makePage({ autoLogin: false, journeyName: 'login' });
+    const { step } = playwright.makePage({ autoLogin: false, journeyName: 'login' });
 
-    it('Go to Kibana login page', async () => {
+    step('Go to Kibana login page', async ({ page }) => {
       const kibanaUrl = Url.format({
         protocol: config.get('servers.kibana.protocol'),
         hostname: config.get('servers.kibana.hostname'),
@@ -23,7 +23,7 @@ export default function login({ getService }: FtrProviderContext) {
       await page?.goto(kibanaUrl);
     });
 
-    it('Login to Kibana', async () => {
+    step('Login to Kibana', async ({ page }) => {
       const usernameLocator = page.locator('[data-test-subj=loginUsername]');
       const passwordLocator = page.locator('[data-test-subj=loginPassword]');
       const submitButtonLocator = page.locator('[data-test-subj=loginSubmit]');
