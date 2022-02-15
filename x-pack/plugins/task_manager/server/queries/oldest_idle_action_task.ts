@@ -18,7 +18,7 @@ export const getOldestIdleActionTask = async (
   // Default is now - 24h
   const oneDayAgo = `now-24h`;
 
-  const response = await client.search<{ task: { runAt: string } }>(
+  const response = await (client as ElasticsearchClient).search<{ task: { runAt: string } }>(
     {
       size: 1,
       index: taskManagerIndex,
@@ -63,14 +63,14 @@ export const getOldestIdleActionTask = async (
     { ignore: [404] }
   );
 
-  if ((response.body as { error?: { status: number } }).error?.status === 404) {
+  if ((response as { error?: { status: number } }).error?.status === 404) {
     // If the index doesn't exist, fallback to default
     return oneDayAgo;
-  } else if (response.body?.hits?.hits?.length > 0) {
+  } else if (response.hits?.hits?.length > 0) {
     // If there is a search result, return it's task.runAt field
     // If there is a search result but it has no task.runAt, assume something has gone very wrong and return 0 as a safe value
     // 0 should be safest since no docs should get filtered out
-    const runAt = response.body.hits.hits[0]._source?.task?.runAt;
+    const runAt = response.hits.hits[0]._source?.task?.runAt;
     return runAt ? `${runAt}||-24h` : `0`;
   } else {
     // If no results, fallback to default

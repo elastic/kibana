@@ -16,7 +16,7 @@ interface StartBasicArg {
 
 export async function startBasic({ acknowledge, client, licensing }: StartBasicArg) {
   try {
-    const { body: response } = await client.asCurrentUser.license.postStartBasic({ acknowledge });
+    const response = await client.asCurrentUser.license.postStartBasic({ acknowledge });
     const { basic_was_started: basicWasStarted } = response;
     if (basicWasStarted) {
       await licensing.refresh();

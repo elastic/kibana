@@ -363,6 +363,7 @@ export const getDatatableVisualization = ({
                     : [],
                 reverse: false, // managed at UI level
               };
+              const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
 
               const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
 
@@ -388,6 +389,7 @@ export const getDatatableVisualization = ({
                       summaryLabel: hasNoSummaryRow
                         ? []
                         : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
+                      sortingHint: sortingHint ? [sortingHint] : [],
                     },
                   },
                 ],

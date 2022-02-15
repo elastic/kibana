@@ -43,7 +43,7 @@ export const fetchIndices =
         },
         { ignore: [404], maxRetries: 0 }
       )
-      .then(({ body }) => {
+      .then((body) => {
         return Either.right(body);
       })
       .catch(catchRetryableEsClientErrors);
