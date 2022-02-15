@@ -36,7 +36,7 @@ export const registerRecentSessionRoute = (router: IRouter) => {
         },
       });
 
-      return response.ok({ body: search.body.hits });
+      return response.ok({ body: search.hits });
     }
   );
 };

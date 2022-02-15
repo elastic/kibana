@@ -77,7 +77,7 @@ export const doSearch = async (
     },
   });
 
-  const events = search.body.hits.hits.map((hit: any) => {
+  const events = search.hits.hits.map((hit: any) => {
     // the .siem-signals-default index flattens many properties. this util unflattens them.
     hit._source = expandDottedObject(hit._source);
 
