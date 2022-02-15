@@ -15,7 +15,7 @@ import {
   withBulkRuleOperations,
   ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_rule_api_operations';
-import './alert_quick_edit_buttons.scss';
+import './rule_quick_edit_buttons.scss';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export type ComponentOpts = {
