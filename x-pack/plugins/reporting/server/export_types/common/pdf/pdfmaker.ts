@@ -204,7 +204,7 @@ export class PdfMaker {
         };
         this.worker.postMessage(generatePdfRequest, [theirPort]);
 
-        // We expect one message from the work container the PDF buffer.
+        // We expect one message from the worker generating the PDF buffer.
         myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
           if (error) {
             reject(new Error(`PDF worker returned the following error: ${error}`));
