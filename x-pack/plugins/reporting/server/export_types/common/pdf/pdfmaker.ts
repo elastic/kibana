@@ -35,6 +35,7 @@ export class PdfMaker {
   private _content: Content[];
 
   private worker?: Worker;
+  private pageCount: number = 0;
 
   protected workerModulePath = path.resolve(__dirname, './worker.js');
 
@@ -215,11 +216,16 @@ export class PdfMaker {
             reject(new Error(`Worker did not generate a PDF!`));
             return;
           }
-          resolve(data);
+          this.pageCount = data.metrics.pages;
+          resolve(data.buffer);
         });
       });
     } finally {
       await this.cleanupWorker();
     }
+  }
+
+  getPageCount(): number {
+    return this.pageCount;
   }
 }

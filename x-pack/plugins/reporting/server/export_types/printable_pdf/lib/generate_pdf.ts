@@ -7,9 +7,10 @@
 
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
-import { ReportingCore } from '../../../';
+import { mergeMap, tap } from 'rxjs/operators';
 import { ScreenshotResult } from '../../../../../screenshotting/server';
+import type { PdfMetrics } from '../../../../common/types';
+import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { ScreenshotOptions } from '../../../types';
 import { PdfMaker, PdfWorkerOutOfMemoryError } from '../../common/pdf';
@@ -25,25 +26,32 @@ const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
   return null;
 };
 
+interface PdfResult {
+  buffer: Uint8Array | null;
+  metrics?: PdfMetrics;
+  warnings: string[];
+}
+
 export function generatePdfObservable(
   reporting: ReportingCore,
   logger: LevelLogger,
   title: string,
   options: ScreenshotOptions,
   logo?: string
-): Rx.Observable<{ buffer: Uint8Array | null; warnings: string[] }> {
+): Rx.Observable<PdfResult> {
   const tracker = getTracker();
   tracker.startScreenshots();
 
   return reporting.getScreenshots(options).pipe(
-    mergeMap(async ({ layout, metrics$, results }) => {
-      metrics$.subscribe(({ cpu, memory }) => {
-        tracker.setCpuUsage(cpu);
-        tracker.setMemoryUsage(memory);
-      });
+    tap(({ metrics }) => {
+      if (metrics) {
+        tracker.setCpuUsage(metrics.cpu);
+        tracker.setMemoryUsage(metrics.memory);
+      }
       tracker.endScreenshots();
       tracker.startSetup();
-
+    }),
+    mergeMap(async ({ layout, metrics, results }) => {
       const pdfOutput = new PdfMaker(layout, logo);
       if (title) {
         const timeRange = getTimeRange(results);
@@ -103,6 +111,10 @@ export function generatePdfObservable(
       return {
         buffer,
         warnings,
+        metrics: {
+          ...metrics,
+          pages: pdfOutput.getPageCount(),
+        },
       };
     })
   );

@@ -36,7 +36,12 @@ export type GeneratePdfResponse = SuccessResponse | ErrorResponse;
 
 export interface SuccessResponse {
   error?: undefined;
-  data: Uint8Array;
+  data: {
+    buffer: Uint8Array;
+    metrics: {
+      pages: number;
+    };
+  };
 }
 
 export interface ErrorResponse {
@@ -47,6 +52,16 @@ export interface ErrorResponse {
 if (!isMainThread) {
   parentPort!.on('message', execute);
 }
+
+const getPageCount = (pdfDoc: PDFKit.PDFDocument): number => {
+  const pageRange = pdfDoc.bufferedPageRange();
+  if (!pageRange) {
+    return 0;
+  }
+  const { count, start } = pageRange;
+
+  return start + count;
+};
 
 async function execute({ data: { layout, logo, title, content }, port }: GeneratePdfRequest) {
   try {
@@ -107,7 +122,12 @@ async function execute({ data: { layout, logo, title, content }, port }: Generat
     });
 
     const successResponse: SuccessResponse = {
-      data: buffer,
+      data: {
+        buffer,
+        metrics: {
+          pages: getPageCount(pdfDoc),
+        },
+      },
     };
     port.postMessage(successResponse, [buffer.buffer /* Transfer buffer instead of copying */]);
   } catch (error) {

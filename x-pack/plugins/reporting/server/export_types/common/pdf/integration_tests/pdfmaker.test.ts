@@ -60,4 +60,28 @@ describe('PdfMaker', () => {
       await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
     });
   });
+
+  describe('getPageCount', () => {
+    it('should return zero pages on no content', () => {
+      expect(pdf.getPageCount()).toBe(0);
+    });
+
+    it('should return a number of generated pages', async () => {
+      for (let i = 0; i < 100; i++) {
+        pdf.addImage(imageBase64, { title: `${i} viz`, description: '☃️' });
+      }
+      await pdf.generate();
+
+      expect(pdf.getPageCount()).toBe(100);
+    });
+
+    it('should return a number of already flushed pages', async () => {
+      for (let i = 0; i < 100; i++) {
+        pdf.addImage(imageBase64, { title: `${i} viz`, description: '☃️' });
+      }
+      await pdf.generate();
+
+      expect(pdf.getPageCount()).toBe(100);
+    });
+  });
 });
