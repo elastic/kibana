@@ -122,7 +122,9 @@ export const buildDashboardContainer = async ({
         gridData: originalPanelState.gridData,
         type: incomingEmbeddable.type,
         explicitInput: {
-          ...originalPanelState.explicitInput,
+          ...(incomingEmbeddable.type === originalPanelState.type && {
+            ...originalPanelState.explicitInput,
+          }),
           ...incomingEmbeddable.input,
           id: incomingEmbeddable.embeddableId,
         },

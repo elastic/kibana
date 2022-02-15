@@ -42,7 +42,7 @@ export function registerSaveRoute({ router, license, lib: { handleEsError } }: R
       // For new watches, verify watch with the same ID doesn't already exist
       if (isNew) {
         try {
-          const { body: existingWatch } = await dataClient.asCurrentUser.watcher.getWatch({
+          const existingWatch = await dataClient.asCurrentUser.watcher.getWatch({
             id,
           });
           if (existingWatch.found) {
@@ -81,7 +81,7 @@ export function registerSaveRoute({ router, license, lib: { handleEsError } }: R
 
       try {
         // Create new watch
-        const { body: putResult } = await dataClient.asCurrentUser.watcher.putWatch({
+        const putResult = await dataClient.asCurrentUser.watcher.putWatch({
           id,
           active: isActive,
           body: serializedWatch,

@@ -9,8 +9,7 @@ import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataView } from 'src/plugins/data_views/public';
 import type { HttpSetup, SavedObjectReference } from 'kibana/public';
-import type { InitializationOptions, StateSetter } from '../types';
-
+import type { InitializationOptions, StateSetter, VisualizeEditorContext } from '../types';
 import {
   IndexPattern,
   IndexPatternRef,
@@ -226,7 +225,7 @@ export async function loadInitialState({
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
-  initialContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
   const { isFullEditor } = options ?? {};
@@ -237,12 +236,20 @@ export async function loadInitialState({
 
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
   const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
-
+  const indexPatternIds = [];
+  if (initialContext && 'isVisualizeAction' in initialContext) {
+    for (let layerIdx = 0; layerIdx < initialContext.layers.length; layerIdx++) {
+      const layerContext = initialContext.layers[layerIdx];
+      indexPatternIds.push(layerContext.indexPatternId);
+    }
+  } else if (initialContext) {
+    indexPatternIds.push(initialContext.indexPatternId);
+  }
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
   const usedPatterns = (
     initialContext
-      ? [initialContext.indexPatternId]
+      ? indexPatternIds
       : uniq(
           state
             ? Object.values(state.layers)
@@ -272,11 +279,9 @@ export async function loadInitialState({
   // * start with the indexPattern in context
   // * then fallback to the used ones
   // * then as last resort use a first one from not used refs
-  const availableIndexPatternIds = [
-    initialContext?.indexPatternId,
-    ...usedPatterns,
-    ...notUsedPatterns,
-  ].filter((id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]);
+  const availableIndexPatternIds = [...indexPatternIds, ...usedPatterns, ...notUsedPatterns].filter(
+    (id) => id != null && availableIndexPatterns.has(id) && indexPatterns[id]
+  );
 
   const currentIndexPatternId = availableIndexPatternIds[0];
 
