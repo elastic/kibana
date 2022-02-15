@@ -3038,6 +3038,48 @@
           },
           {
             "parentPluginId": "spaces",
+            "id": "def-server.ISpacesClient.createSavedObjectFinder",
+            "type": "Function",
+            "tags": [],
+            "label": "createSavedObjectFinder",
+            "description": [
+              "\nReturns a {@link ISavedObjectsPointInTimeFinder} to help page through\nsaved objects within the specified space."
+            ],
+            "signature": [
+              "(id: string) => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
+              "<unknown, unknown>"
+            ],
+            "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.createSavedObjectFinder.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "the id of the space to search."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
             "id": "def-server.ISpacesClient.delete",
             "type": "Function",
             "tags": [],
