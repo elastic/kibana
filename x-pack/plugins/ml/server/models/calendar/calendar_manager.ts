@@ -36,7 +36,7 @@ export class CalendarManager {
   }
 
   async getCalendar(calendarId: string) {
-    const { body } = await this._mlClient.getCalendars({
+    const body = await this._mlClient.getCalendars({
       calendar_id: calendarId,
     });
 
@@ -47,7 +47,7 @@ export class CalendarManager {
   }
 
   async getAllCalendars() {
-    const { body } = await this._mlClient.getCalendars({ body: { page: { from: 0, size: 1000 } } });
+    const body = await this._mlClient.getCalendars({ body: { page: { from: 0, size: 1000 } } });
 
     const events: ScheduledEvent[] = await this._eventManager.getAllEvents();
     const calendars: Calendar[] = body.calendars as Calendar[];
@@ -141,7 +141,7 @@ export class CalendarManager {
   }
 
   async deleteCalendar(calendarId: string) {
-    const { body } = await this._mlClient.deleteCalendar({ calendar_id: calendarId });
+    const body = await this._mlClient.deleteCalendar({ calendar_id: calendarId });
     return body;
   }
 }

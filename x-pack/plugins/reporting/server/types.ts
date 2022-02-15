@@ -12,7 +12,6 @@ import { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { Writable } from 'stream';
-import { IEventLogService } from '../../event_log/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
 import type {
@@ -96,7 +95,6 @@ export interface ExportTypeDefinition<
  * @internal
  */
 export interface ReportingSetupDeps {
-  eventLog: IEventLogService;
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
   security?: SecurityPluginSetup;

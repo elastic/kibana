@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
@@ -24,11 +23,9 @@ import {
 } from './detections.mocks';
 import { getInitialDetectionMetrics, initialDetectionRulesUsage } from './detection_rule_helpers';
 import { DetectionMetrics } from './types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('Detections Usage and Metrics', () => {
-  let esClientMock: jest.Mocked<ElasticsearchClient>;
+  let esClientMock: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mlMock: ReturnType<typeof mlServicesMock.createSetupContract>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
@@ -46,12 +43,8 @@ describe('Detections Usage and Metrics', () => {
 
     it('returns information with rule, alerts and cases', async () => {
       esClientMock.search
-        .mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({ body: getMockRuleSearchResponse() })
-        )
-        .mockResolvedValue(
-          elasticsearchClientMock.createApiResponse({ body: getMockRuleAlertsResponse(3400) })
-        );
+        .mockResponseOnce(getMockRuleSearchResponse())
+        .mockResponseOnce(getMockRuleAlertsResponse(3400));
       savedObjectsClient.find.mockResolvedValue(getMockAlertCasesResponse());
       const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 
@@ -103,14 +96,8 @@ describe('Detections Usage and Metrics', () => {
 
     it('returns information with on non elastic prebuilt rule', async () => {
       esClientMock.search
-        .mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({
-            body: getMockRuleSearchResponse('not_immutable'),
-          })
-        )
-        .mockResolvedValue(
-          elasticsearchClientMock.createApiResponse({ body: getMockRuleAlertsResponse(800) })
-        );
+        .mockResponseOnce(getMockRuleSearchResponse('not_immutable'))
+        .mockResponseOnce(getMockRuleAlertsResponse(800));
       savedObjectsClient.find.mockResolvedValue(getMockAlertCasesResponse());
       const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 
@@ -147,12 +134,8 @@ describe('Detections Usage and Metrics', () => {
 
     it('returns information with rule, no alerts and no cases', async () => {
       esClientMock.search
-        .mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({ body: getMockRuleSearchResponse() })
-        )
-        .mockResolvedValue(
-          elasticsearchClientMock.createApiResponse({ body: getMockRuleAlertsResponse(0) })
-        );
+        .mockResponseOnce(getMockRuleSearchResponse())
+        .mockResponseOnce(getMockRuleAlertsResponse(0));
       savedObjectsClient.find.mockResolvedValue(getMockAlertCasesResponse());
       const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 

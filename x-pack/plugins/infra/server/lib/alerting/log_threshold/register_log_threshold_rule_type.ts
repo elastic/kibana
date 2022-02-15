@@ -71,6 +71,13 @@ const denominatorConditionsActionVariableDescription = i18n.translate(
   }
 );
 
+const alertReasonMessageActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.alertReasonMessageActionVariableDescription',
+  {
+    defaultMessage: 'A concise description of the reason for the alert',
+  }
+);
+
 export async function registerLogThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
@@ -104,6 +111,7 @@ export async function registerLogThresholdRuleType(
         { name: 'group', description: groupByActionVariableDescription },
         // Ratio alerts
         { name: 'isRatio', description: isRatioActionVariableDescription },
+        { name: 'reason', description: alertReasonMessageActionVariableDescription },
         { name: 'ratio', description: ratioActionVariableDescription },
         { name: 'numeratorConditions', description: numeratorConditionsActionVariableDescription },
         {

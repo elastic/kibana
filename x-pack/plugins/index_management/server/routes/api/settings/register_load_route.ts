@@ -36,7 +36,7 @@ export function registerLoadRoute({ router, lib: { handleEsError } }: RouteDepen
       };
 
       try {
-        const { body: hit } = await client.asCurrentUser.indices.getSettings(params);
+        const hit = await client.asCurrentUser.indices.getSettings(params);
         return response.ok({ body: formatHit(hit) });
       } catch (error) {
         return handleEsError({ error, response });

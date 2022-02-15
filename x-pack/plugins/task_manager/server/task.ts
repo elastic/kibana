@@ -307,7 +307,12 @@ export interface ConcreteTaskInstance extends TaskInstance {
   id: string;
 
   /**
-   * The saved object version from the Elaticsearch document.
+   * @deprecated This field has been moved under schedule (deprecated) with version 7.6.0
+   */
+  interval?: string;
+
+  /**
+   * The saved object version from the Elasticsearch document.
    */
   version?: string;
 

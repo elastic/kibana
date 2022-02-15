@@ -72,7 +72,7 @@ export const getSignalVersionsByIndex = async ({
     },
   });
 
-  const aggs = response.body.aggregations as SignalVersionsAggResponse['aggregations'];
+  const aggs = response.aggregations as SignalVersionsAggResponse['aggregations'];
   const indexBuckets = aggs.signals_indices.buckets;
 
   return index.reduce<SignalVersionsByIndex>((agg, _index) => {
