@@ -351,7 +351,7 @@ describe('create_exceptions_stream_logic', () => {
       expect(result).toEqual([]);
     });
 
-    test('returns formatted comment when meta fields exist', () => {
+    test('returns formatted existing comment', () => {
       const result = manageExceptionComments([
         {
           comment: 'some old comment',
@@ -366,49 +366,20 @@ describe('create_exceptions_stream_logic', () => {
       expect(result).toEqual([
         {
           comment: 'some old comment',
-          meta: {
-            import_fields: {
-              created_at: '2020-04-20T15:25:31.830Z',
-              created_by: 'kibana',
-              updated_at: '2020-05-20T15:25:31.830Z',
-              updated_by: 'lily',
-            },
-          },
         },
       ]);
     });
 
-    test('returns formatted comment when meta fields do not exist', () => {
+    test('returns formatted new comment', () => {
       const result = manageExceptionComments([
         {
-          comment: 'some old comment',
+          comment: 'some new comment',
         },
       ]);
 
       expect(result).toEqual([
         {
-          comment: 'some old comment',
-          meta: undefined,
-        },
-      ]);
-    });
-
-    test('returns formatted comment when comment includes "item.meta"', () => {
-      const result = manageExceptionComments([
-        {
-          comment: 'some old comment',
-          meta: {
-            some_field: 'some field',
-          },
-        },
-      ]);
-
-      expect(result).toEqual([
-        {
-          comment: 'some old comment',
-          meta: {
-            some_field: 'some field',
-          },
+          comment: 'some new comment',
         },
       ]);
     });

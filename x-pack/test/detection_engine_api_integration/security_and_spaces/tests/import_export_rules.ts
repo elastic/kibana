@@ -20,7 +20,6 @@ import {
   deleteAllAlerts,
   deleteSignalsIndex,
   getSimpleRule,
-  getWebHookAction,
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
@@ -45,151 +44,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllExceptions(supertest, log);
       await deleteSignalsIndex(supertest, log);
       await deleteAllAlerts(supertest, log);
-    });
-
-    it('should be able to reimport a rule with all values filled out', async () => {
-      // create a new action
-      const { body: hookAction } = await supertest
-        .post('/api/actions/action')
-        .set('kbn-xsrf', 'true')
-        .send(getWebHookAction())
-        .expect(200);
-
-      const action = {
-        group: 'default',
-        id: hookAction.id,
-        action_type_id: hookAction.actionTypeId,
-        params: {},
-      };
-
-      // create an exception list
-      const { body: exceptionBody } = await supertest
-        .post(EXCEPTION_LIST_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getCreateExceptionListMinimalSchemaMock())
-        .expect(200);
-
-      // create an exception list item
-      await supertest
-        .post(EXCEPTION_LIST_ITEM_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getCreateExceptionListItemMinimalSchemaMock())
-        .expect(200);
-
-      await createRule(supertest, log, {
-        actions: [action],
-        name: 'Query with all possible fields filled out',
-        description: 'Kitchen Sink (everything) query that has all possible fields filled out',
-        false_positives: [
-          'https://www.example.com/some-article-about-a-false-positive',
-          'some text string about why another condition could be a false positive',
-        ],
-        rule_id: 'rule-id-everything',
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'siem-windows',
-              },
-            },
-          },
-          {
-            exists: {
-              field: 'host.hostname',
-            },
-          },
-        ],
-        enabled: false,
-        exceptions_list: [
-          {
-            id: exceptionBody.id,
-            list_id: exceptionBody.list_id,
-            type: exceptionBody.type,
-            namespace_type: exceptionBody.namespace_type,
-          },
-        ],
-        index: ['auditbeat-*', 'filebeat-*'],
-        interval: '5m',
-        query: 'user.name: root or user.name: admin',
-        output_index: '.siem-signals-default',
-        meta: {
-          anything_you_want_ui_related_or_otherwise: {
-            as_deep_structured_as_you_need: {
-              any_data_type: {},
-            },
-          },
-        },
-        language: 'kuery',
-        risk_score: 1,
-        max_signals: 100,
-        tags: ['tag 1', 'tag 2', 'any tag you want'],
-        to: 'now',
-        from: 'now-6m',
-        severity: 'high',
-        type: 'query',
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-          {
-            framework: 'Some other Framework you want',
-            tactic: {
-              id: 'some-other-id',
-              name: 'Some other name',
-              reference: 'https://example.com',
-            },
-            technique: [
-              {
-                id: 'some-other-id',
-                name: 'some other technique name',
-                reference: 'https://example.com',
-              },
-            ],
-          },
-        ],
-        references: [
-          'http://www.example.com/some-article-about-attack',
-          'Some plain text string here explaining why this is a valid thing to look out for',
-        ],
-        timeline_id: 'timeline_id',
-        timeline_title: 'timeline_title',
-        note: '# note markdown',
-        version: 1,
-      });
-
-      const { body } = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200)
-        .parse(binaryToString);
-
-      const { body: importBody } = await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true&overwrite_exceptions=true`)
-        .set('kbn-xsrf', 'true')
-        .attach('file', Buffer.from(body), 'rules.ndjson')
-        .expect(200);
-
-      expect(importBody).to.eql({
-        errors: [],
-        success: true,
-        success_count: 1,
-        exceptions_errors: [],
-        exceptions_success: true,
-        exceptions_success_count: 2,
-      });
     });
 
     it('should be able to reimport a rule referencing an exception list with existing comments', async () => {
@@ -265,12 +119,6 @@ export default ({ getService }: FtrProviderContext): void => {
           created_at: `${exceptionItemFind2.comments[0].created_at}`,
           created_by: 'elastic',
           id: `${exceptionItemFind2.comments[0].id}`,
-          meta: {
-            import_fields: {
-              created_at: `${exceptionItem.comments[0].created_at}`,
-              created_by: 'soc_manager',
-            },
-          },
         },
       ]);
     });

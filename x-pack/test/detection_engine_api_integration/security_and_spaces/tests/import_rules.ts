@@ -938,15 +938,6 @@ export default ({ getService }: FtrProviderContext): void => {
                         id: '845fc456-91ff-4530-bcc1-5b7ebd2f75b5',
                       },
                       {
-                        comment: 'This is a comment with a meta',
-                        created_at: '2022-03-04T02:27:40.938Z',
-                        created_by: 'john',
-                        id: '12345',
-                        meta: {
-                          some_field: 'meta field',
-                        },
-                      },
-                      {
                         comment: 'I decided to add a new comment',
                       },
                     ],
@@ -1017,25 +1008,6 @@ export default ({ getService }: FtrProviderContext): void => {
               created_at: `${exceptionItemBody.comments[0].created_at}`,
               created_by: 'elastic',
               id: `${exceptionItemBody.comments[0].id}`,
-              meta: {
-                import_fields: {
-                  created_at: '2022-02-04T02:27:40.938Z',
-                  created_by: 'elastic',
-                },
-              },
-            },
-            {
-              comment: 'This is a comment with a meta',
-              created_at: `${exceptionItemBody.comments[1].created_at}`,
-              created_by: 'elastic',
-              id: `${exceptionItemBody.comments[1].id}`,
-              meta: {
-                import_fields: {
-                  created_at: '2022-03-04T02:27:40.938Z',
-                  created_by: 'john',
-                },
-                some_field: 'meta field',
-              },
             },
             {
               comment: 'I decided to add a new comment',

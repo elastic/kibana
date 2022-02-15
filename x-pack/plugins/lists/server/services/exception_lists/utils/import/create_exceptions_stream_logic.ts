@@ -124,11 +124,9 @@ export const sortExceptionsStream = (): Transform => {
 
 /**
  * Updates any comments associated with exception items to resemble
- * comment creation schema. Attaches a "meta" to preserve attributes
- * passed in by the user on import that cannot be trusted but may want
- * to be preserved
+ * comment creation schema.
  * See issue for context https://github.com/elastic/kibana/issues/124742#issuecomment-1033082093
- * @returns {stream} incoming exceptions sorted into lists and items
+ * @returns {array} comments reformatted properly for import
  */
 export const manageExceptionComments = (
   comments: ImportCommentsArray | undefined
@@ -136,13 +134,9 @@ export const manageExceptionComments = (
   if (comments == null || !comments.length) {
     return [];
   } else {
-    return comments.map((item) => {
-      const { comment: itemComment } = item;
-
-      return {
-        comment: itemComment,
-      };
-    });
+    return comments.map(({ comment }) => ({
+      comment,
+    }));
   }
 };
 
