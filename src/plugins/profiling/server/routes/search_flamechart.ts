@@ -12,47 +12,56 @@ import { getRemoteRoutePaths } from '../../common';
 import { FlameGraph } from './flamegraph';
 import { newProjectTimeQuery } from './mappings';
 
-function getSampledTraceEventsIndex(
-  sampleSize: number,
-  sampleCountFromSmallestTable: number
-): [string, number, number] {
-  if (sampleCountFromSmallestTable === 0) {
-    // If this happens the returned estimatedSampleCount may be very wrong.
-    // Hardcode sampleCountFromSmallestTable to 1 else an estimatedSampleCount
-    // of zero is returned.
-    sampleCountFromSmallestTable = 1;
+export interface DownsampledEventsIndex {
+  name: string;
+  sampleRate: number;
+}
+
+const downsampledIndex = 'profiling-events-5pow';
+
+// Return the index that has between targetSampleSize..targetSampleSize*samplingFactor entries.
+// The starting point is the number of entries from the profiling-events-5pow<initialExp> index.
+//
+// More details on how the down-sampling works can be found at the write path
+//   https://github.com/elastic/prodfiler/blob/bdcc2711c6cd7e89d63b58a17329fb9fdbabe008/pf-elastic-collector/elastic.go
+export function getSampledTraceEventsIndex(
+  targetSampleSize: number,
+  sampleCountFromInitialExp: number,
+  initialExp: number
+): DownsampledEventsIndex {
+  const maxExp = 11;
+  const samplingFactor = 5;
+  const fullEventsIndex: DownsampledEventsIndex = { name: 'profiling-events', sampleRate: 1 };
+
+  if (sampleCountFromInitialExp === 0) {
+    // Take the shortcut to the full events index.
+    return fullEventsIndex;
   }
 
-  const sampleRates: number[] = [1000, 125, 25, 5, 1];
-
-  let tableName: string;
-  let sampleRate = 0;
-  let estimatedSampleCount = 0;
-
-  for (let i = 0; i < sampleRates.length; i++) {
-    sampleRate = sampleRates[i];
-
-    // Fractional floats have an inherent inaccuracy,
-    // see https://docs.python.org/3/tutorial/floatingpoint.htm) for details.
-    // Examples:
-    //   0.01 as float32: 0.009999999776482582092285156250 (< 0.01)
-    //   0.01 as float64: 0.010000000000000000208166817117 (> 0.01)
-    // But if "N / f >= 1", which is the case below as N is >= 1 and f is <= 1,
-    // we end up with the correct result (tested with a small Go program).
-    estimatedSampleCount = sampleCountFromSmallestTable * (sampleRates[0] / sampleRate);
-
-    if (estimatedSampleCount >= sampleSize) {
-      break;
+  if (sampleCountFromInitialExp >= samplingFactor * targetSampleSize) {
+    // Search in more down-sampled indexes.
+    for (let i = initialExp + 1; i <= maxExp; i++) {
+      sampleCountFromInitialExp /= samplingFactor;
+      if (sampleCountFromInitialExp < samplingFactor * targetSampleSize) {
+        return { name: downsampledIndex + i, sampleRate: 1 / samplingFactor ** i };
+      }
     }
+    // If we come here, it means that the most sparse index still holds too many items.
+    // The only problem is the query time, the result set is good.
+    return { name: downsampledIndex + 11, sampleRate: 1 / samplingFactor ** maxExp };
+  } else if (sampleCountFromInitialExp < targetSampleSize) {
+    // Search in less down-sampled indexes.
+    for (let i = initialExp -1; i >= 1; i--) {
+      sampleCountFromInitialExp *= samplingFactor;
+      if (sampleCountFromInitialExp >= targetSampleSize) {
+        return { name: downsampledIndex + i, sampleRate: 1 / samplingFactor ** i };
+      }
+    }
+
+    return fullEventsIndex;
   }
 
-  if (sampleRate === 1) {
-    tableName = 'profiling-events';
-  } else {
-    tableName = 'profiling-events-' + sampleRate.toString();
-  }
-
-  return [tableName, 1 / sampleRate, estimatedSampleCount];
+  return { name: downsampledIndex + initialExp, sampleRate: 1 / samplingFactor ** initialExp };
 }
 
 export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandlerContext>) {
@@ -71,64 +80,80 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
       },
     },
     async (context, request, response) => {
-      const { index, projectID, timeFrom, timeTo } = request.query;
-      const sampleSize = 200;
+      const { projectID, timeFrom, timeTo } = request.query;
+      const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
+      const topN = 200; // collect data for the top N unique stack traces
 
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
 
-        // const resp = await getCountResponse(context, filter);
+        // Start with counting the results in the index down-sampled by 5^6.
+        // That is in the middle of our down-sampled indexes.
+        const initialExp = 6;
         const resp = await esClient.search({
-          index: 'profiling-events-1000',
+          index: downsampledIndex + initialExp,
           body: {
             query: filter,
             size: 0,
             track_total_hits: true,
           },
         });
+        const sampleCountFromInitialExp = resp.body.hits.total.value as number;
 
-        const sampleCountFromSmallestTable = resp.body.hits.total.value as number;
+        console.log('sampleCountFromPow6', sampleCountFromInitialExp);
 
-        const [eventsIndex, sampleRate, estimatedSampleCount] = getSampledTraceEventsIndex(
-          sampleSize,
-          sampleCountFromSmallestTable
+        const eventsIndex = getSampledTraceEventsIndex(
+          targetSampleSize,
+          sampleCountFromInitialExp,
+          initialExp
         );
 
         // eslint-disable-next-line no-console
-        console.log('Index', eventsIndex, sampleRate, estimatedSampleCount);
+        console.log('EventsIndex', eventsIndex);
 
         const resEvents = await esClient.search({
-          index: eventsIndex,
+          index: eventsIndex.name,
           body: {
             size: 0,
-            query: {
-              function_score: {
-                query: filter,
-              },
-            },
+            query: filter,
             aggs: {
-              sample: {
-                sampler: {
-                  shard_size: sampleSize,
+              group_by: {
+                terms: {
+                  field: 'StackTraceID',
+                  size: topN,
                 },
                 aggs: {
-                  group_by: {
-                    terms: {
-                      field: 'StackTraceID',
-                      size: sampleSize,
+                  sum_count: {
+                    sum: {
+                      field: 'Count',
                     },
                   },
+                },
+              },
+              total_count: {
+                sum: {
+                  field: 'Count',
                 },
               },
             },
           },
         });
+        // console.log(JSON.stringify(resEvents, null, 2));
 
         const tracesDocIDs: string[] = [];
-        resEvents.body.aggregations.sample.group_by.buckets.forEach((stackTraceItem: any) => {
+        let sumCount = 0;
+        let docCount = 0;
+        resEvents.body.aggregations.group_by.buckets.forEach((stackTraceItem: any) => {
           tracesDocIDs.push(stackTraceItem.key);
+          sumCount += stackTraceItem.sum_count.value;
+          docCount += stackTraceItem.doc_count;
         });
+        const totalCount: number = resEvents.body.aggregations.total_count.value;
+        const otherDocCount: number = resEvents.body.aggregations.group_by.sum_other_doc_count;
+
+        console.log('docCount', docCount, 'otherDocCount', otherDocCount);
+        console.log('sumCount', sumCount, 'totalCount', totalCount);
 
         const resStackTraces = await esClient.mget<any>({
           index: 'profiling-stacktraces',
@@ -166,6 +191,8 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
         });
 
         const flamegraph = new FlameGraph(
+          eventsIndex.sampleRate,
+          totalCount,
           resEvents.body,
           resStackTraces.body.docs,
           resStackFrames.body.docs,

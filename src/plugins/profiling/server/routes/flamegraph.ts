@@ -59,12 +59,33 @@ function getLabel(frame: any, executable: any, type: number) {
 }
 
 export class FlameGraph {
+  // sampleRate is 1/5^N, with N being the downsampled index the events were fetched from.
+  // N=0: full events table (sampleRate is 1)
+  // N=1: downsampled by 5 (sampleRate is 0.2)
+  // ...
+  sampleRate: number;
+
+  // totalCount is the sum(Count) of all events in the filter range in the
+  // downsampled index we were looking at.
+  // To estimate how many events we have in the full events index: totalCount / sampleRate.
+  // Do the same for single entries in the events array.
+  totalCount: number;
+
   events: any;
   stacktraces: any;
   stackframes: any;
   executables: any;
 
-  constructor(events: any, stackTraces: any, stackFrames: any, executables: any) {
+  constructor(
+    sampleRate: number,
+    totalCount: number,
+    events: any,
+    stackTraces: any,
+    stackFrames: any,
+    executables: any
+  ) {
+    this.sampleRate = sampleRate;
+    this.totalCount = totalCount;
     this.events = events;
     this.stacktraces = stackTraces;
     this.stackframes = stackFrames;

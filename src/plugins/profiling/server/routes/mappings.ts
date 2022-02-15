@@ -8,7 +8,7 @@
 
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
-interface ProjectTimeQuery {
+export interface ProjectTimeQuery {
   bool: {
     filter: Array<
       | {
