@@ -28,7 +28,7 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
-import { SummaryRow } from './helpers';
+import { SummaryRow, AlertSummaryRow } from './helpers';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
@@ -58,8 +58,11 @@ const defaultDisplayFields: EventSummaryField[] = [
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: 'kibana.alert.threshold_result.count', label: ALERTS_HEADERS_THRESHOLD_COUNT },
-  { id: 'kibana.alert.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
-  { id: 'kibana.alert.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
+  { id: 'kibana.alert.threshold_result.terms.field', label: ALERTS_HEADERS_THRESHOLD_TERMS },
+  {
+    id: 'kibana.alert.threshold_result.cardinality.field',
+    label: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
+  },
 ];
 
 const processCategoryFields: EventSummaryField[] = [
@@ -169,7 +172,6 @@ export const getSummaryRows = ({
         const linkValueField =
           item.linkField != null && data.find((d) => d.field === item.linkField);
         const linkValue = getOr(null, 'originalValue.0', linkValueField);
-        const value = getOr(null, 'originalValue.0', field);
         const category = field.category ?? '';
         const fieldName = field.field ?? '';
 
@@ -192,41 +194,20 @@ export const getSummaryRows = ({
           return acc;
         }
 
-        if (item.id === 'kibana.alert.threshold_result.terms') {
-          try {
-            const terms = getOr(null, 'originalValue', field);
-            const parsedValue = terms.map((term: string) => JSON.parse(term));
-            const thresholdTerms = (parsedValue ?? []).map(
-              (entry: { field: string; value: string }) => {
-                return {
-                  title: `${entry.field} [threshold]`,
-                  description: {
-                    ...description,
-                    values: [entry.value],
-                  },
-                };
-              }
-            );
-            return [...acc, ...thresholdTerms];
-          } catch (err) {
-            return [...acc];
+        if (item.id === 'kibana.alert.threshold_result.terms.field') {
+          const enrichedInfo = enrichThresholdTerms(field, data, description);
+          if (enrichedInfo) {
+            return [...acc, ...enrichedInfo];
+          } else {
+            return acc;
           }
         }
 
-        if (item.id === 'kibana.alert.threshold_result.cardinality') {
-          try {
-            const parsedValue = JSON.parse(value);
-            return [
-              ...acc,
-              {
-                title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
-                description: {
-                  ...description,
-                  values: [`count(${parsedValue.field}) == ${parsedValue.value}`],
-                },
-              },
-            ];
-          } catch (err) {
+        if (item.id === 'kibana.alert.threshold_result.cardinality.field') {
+          const enrichedInfo = enrichThresholdCardinality(field, data, description);
+          if (enrichedInfo) {
+            return [...acc, enrichedInfo];
+          } else {
             return acc;
           }
         }
@@ -241,3 +222,66 @@ export const getSummaryRows = ({
       }, [])
     : [];
 };
+
+/**
+ * Enriches the summary data for threshold terms.
+ * For any given threshold term, it generates a row with the term's name and the associated value.
+ */
+function enrichThresholdTerms(
+  { values: termsFieldArr }: TimelineEventsDetailsItem,
+  data: TimelineEventsDetailsItem[],
+  description: AlertSummaryRow['description']
+): AlertSummaryRow[] | undefined {
+  const termsValueItem = data.find((d) => d.field === 'kibana.alert.threshold_result.terms.value');
+  const termsValueArray = termsValueItem && termsValueItem.values;
+
+  // Make sure both `fields` and `values` are an array and that they have the same length
+  if (
+    Array.isArray(termsFieldArr) &&
+    termsFieldArr.length > 0 &&
+    Array.isArray(termsValueArray) &&
+    termsFieldArr.length === termsValueArray.length
+  ) {
+    return termsFieldArr.map<AlertSummaryRow>((field, index) => {
+      const value = termsValueArray[index];
+      return {
+        title: `${field} [threshold]`,
+        description: {
+          ...description,
+          values: [value],
+        },
+      };
+    });
+  }
+}
+
+/**
+ * Enriches the summary data for threshold cardinality.
+ * Reads out the cardinality field and the value and interpolates them into a combined string value.
+ */
+function enrichThresholdCardinality(
+  { values: cardinalityFieldArr }: TimelineEventsDetailsItem,
+  data: TimelineEventsDetailsItem[],
+  description: SummaryRow['description']
+): SummaryRow | undefined {
+  const cardinalityValueItem = data.find(
+    (d) => d.field === 'kibana.alert.threshold_result.cardinality.value'
+  );
+  const cardinalityValueArray = cardinalityValueItem && cardinalityValueItem.values;
+
+  // Only return a summary row if we actually have the correct field and value
+  if (
+    Array.isArray(cardinalityFieldArr) &&
+    cardinalityFieldArr.length === 1 &&
+    Array.isArray(cardinalityValueArray) &&
+    cardinalityFieldArr.length === cardinalityValueArray.length
+  ) {
+    return {
+      title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
+      description: {
+        ...description,
+        values: [`count(${cardinalityFieldArr[0]}) >= ${cardinalityValueArray[0]}`],
+      },
+    } as SummaryRow;
+  }
+}
