@@ -6,5 +6,15 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-commonjs
-module.exports = require('@kbn/storybook').defaultConfig;
+import { getIndexTemplates } from '../../mappings/mappings';
+import { ListComponent } from './list_component';
+
+export class IndexTemplateAutocompleteComponent extends ListComponent {
+  constructor(name, parent) {
+    super(name, getIndexTemplates, parent, true, true);
+  }
+
+  getContextKey() {
+    return 'index_template';
+  }
+}
