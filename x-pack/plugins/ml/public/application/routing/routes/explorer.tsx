@@ -42,6 +42,11 @@ import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 import { MlPageHeader } from '../../components/page_header';
 import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
+import {
+  AnomalyExplorerContext,
+  AnomalyExplorerContextValue,
+} from '../../explorer/anomaly_explorer_context';
+import { useAnomalyTimelineState } from '../../explorer/anomaly_timeline_state';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -266,6 +271,15 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(loadExplorerDataConfig), selectedCells?.showTopFieldValues]);
 
+  const anomalyTimelineState = useAnomalyTimelineState();
+
+  const anomalyExplorerContext: AnomalyExplorerContextValue =
+    useMemo((): AnomalyExplorerContextValue => {
+      return {
+        anomalyTimelineState,
+      };
+    }, [anomalyTimelineState]);
+
   if (
     explorerState === undefined ||
     refresh === undefined ||
@@ -286,23 +300,25 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      {jobsWithTimeRange.length === 0 ? (
-        <AnomalyDetectionEmptyState />
-      ) : (
-        <Explorer
-          {...{
-            explorerState,
-            setSelectedCells,
-            showCharts: explorerState.showCharts,
-            severity: tableSeverity.val,
-            stoppedPartitions,
-            invalidTimeRangeError,
-            selectedJobsRunning,
-            timeBuckets,
-            timefilter,
-          }}
-        />
-      )}
+      <AnomalyExplorerContext.Provider value={anomalyExplorerContext}>
+        {jobsWithTimeRange.length === 0 ? (
+          <AnomalyDetectionEmptyState />
+        ) : (
+          <Explorer
+            {...{
+              explorerState,
+              setSelectedCells,
+              showCharts: explorerState.showCharts,
+              severity: tableSeverity.val,
+              stoppedPartitions,
+              invalidTimeRangeError,
+              selectedJobsRunning,
+              timeBuckets,
+              timefilter,
+            }}
+          />
+        )}
+      </AnomalyExplorerContext.Provider>
     </div>
   );
 };
