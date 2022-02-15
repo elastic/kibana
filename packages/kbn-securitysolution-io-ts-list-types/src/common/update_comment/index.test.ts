@@ -8,11 +8,7 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import {
-  getUpdateCommentMock,
-  getUpdateCommentsArrayMock,
-  getUpdateCommentWithMetaMock,
-} from './index.mock';
+import { getUpdateCommentMock, getUpdateCommentsArrayMock } from './index.mock';
 import {
   UpdateComment,
   updateComment,
@@ -23,7 +19,7 @@ import {
 } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-describe('CommentsUpdate', () => {
+describe('UpdateComment', () => {
   describe('updateComment', () => {
     test('it should pass validation when supplied typical comment update', () => {
       const payload = getUpdateCommentMock();
@@ -103,7 +99,7 @@ describe('CommentsUpdate', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString, meta: (object | undefined) |}>)>"',
+        'Invalid value "undefined" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -114,7 +110,7 @@ describe('CommentsUpdate', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString, meta: (object | undefined) |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -145,7 +141,7 @@ describe('CommentsUpdate', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString, meta: (object | undefined) |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });

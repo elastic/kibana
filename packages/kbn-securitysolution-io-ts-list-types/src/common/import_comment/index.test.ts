@@ -9,10 +9,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getCommentsArrayMock, getCommentsMock } from '../comment/index.mock';
-import {
-  getCreateCommentsArrayMock,
-  getCreateCommentsWithMetaMock,
-} from '../create_comment/index.mock';
+import { getCreateCommentsArrayMock } from '../create_comment/index.mock';
 import {
   importComment,
   ImportCommentsArray,
@@ -34,7 +31,7 @@ describe('ImportComment', () => {
     });
 
     test('it passes validation with a new comment', () => {
-      const payload = getCreateCommentsWithMetaMock();
+      const payload = { comment: 'new comment' };
       const decoded = importComment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -48,7 +45,7 @@ describe('ImportComment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>) | ({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>))"',
+        'Invalid value "undefined" supplied to "(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: NonEmptyString |})"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -88,7 +85,7 @@ describe('ImportComment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "Array<(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>) | ({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>))>"',
+        'Invalid value "undefined" supplied to "Array<(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: NonEmptyString |})>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -99,7 +96,7 @@ describe('ImportComment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>) | ({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>))>"',
+        'Invalid value "1" supplied to "Array<(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: NonEmptyString |})>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -130,7 +127,7 @@ describe('ImportComment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>) | ({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>))>"',
+        'Invalid value "1" supplied to "Array<(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>) | {| comment: NonEmptyString |})>"',
       ]);
       expect(message.schema).toEqual({});
     });

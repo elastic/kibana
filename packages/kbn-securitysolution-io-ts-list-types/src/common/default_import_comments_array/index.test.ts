@@ -60,7 +60,7 @@ describe('default_import_comments_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "1" supplied to "Array<(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>) | ({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>))>"',
+      'Invalid value "1" supplied to "DefaultImportComments"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -71,7 +71,7 @@ describe('default_import_comments_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "some string" supplied to "Array<(({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string, meta: (object | undefined) |}>) | ({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>))>"',
+      'Invalid value "some string" supplied to "DefaultImportComments"',
     ]);
     expect(message.schema).toEqual({});
   });
