@@ -81,8 +81,7 @@ export const ManagedInstructions = React.memo<InstructionProps>(
     });
 
     const fleetServers = useMemo(() => {
-      const policies = agentPolicies;
-      const fleetServerAgentPolicies: string[] = (policies ?? [])
+      const fleetServerAgentPolicies: string[] = agentPolicies
         .filter((pol) => policyHasFleetServer(pol))
         .map((pol) => pol.id);
       return (agents?.items ?? []).filter((agent) =>
