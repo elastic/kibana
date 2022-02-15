@@ -59,6 +59,8 @@ describe('registerTransactionDurationAlertType', () => {
       threshold: 3000000,
       triggerValue: '5,500 ms',
       interval: `5m`,
+      reason:
+        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java. Alert when > 3,000 ms.',
     });
   });
 });
