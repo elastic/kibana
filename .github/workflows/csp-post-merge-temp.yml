@@ -35,7 +35,7 @@ jobs:
           registry: ${{ env.KIBANA_REGISTRY }}
           username: ${{ env.AWS_ECR_KEY }}
           password: ${{ env.AWS_ECR_SECRET }}
-      
+
       - name: Setup node
         uses: actions/setup-node@v2
         with:
@@ -57,12 +57,12 @@ jobs:
 
       # - name: eslint
       #   run: node scripts/eslint --no-cache
-      
+
       - name: Build Kibana Docker
         run: |
           node scripts/build --docker-images --skip-docker-ubi --skip-docker-cloud -v
 # TODO Add cache for node & bootstrap actions to try speed things up. https://www.jonathan-wilkinson.com/github-actions-cache-everything
-# https://docs.github.com/en/actions/advanced-guides/caching-dependencies-to-speed-up-workflows 
+# https://docs.github.com/en/actions/advanced-guides/caching-dependencies-to-speed-up-workflows
 
       - name: Push to ECR
         id: ecr
@@ -71,7 +71,7 @@ jobs:
           access-key-id: ${{ env.AWS_ECR_KEY }}
           secret-access-key: ${{ env.AWS_ECR_SECRET }}
           region: ${{ env.AWS_ECR_REGION }}
-          local-image: docker.elastic.co/kibana/kibana:8.1.0-SNAPSHOT 
+          local-image: docker.elastic.co/kibana/kibana:8.2.0-SNAPSHOT
           image: kibana:${{ github.sha }}, kibana:csp-latest
       # - name: Notify job failure
       #   if: failure()

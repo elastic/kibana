@@ -79,6 +79,6 @@ export const RESOURCE_TYPE = i18n.translate('xpack.csp.resource_type', {
   defaultMessage: 'Resource Type',
 });
 
-export const FAILED_FINDINGS = i18n.translate('xpack.csp.failed_findings', {
-  defaultMessage: 'Failed Findings',
+export const FINDINGS = i18n.translate('xpack.csp.findings', {
+  defaultMessage: 'Findings',
 });

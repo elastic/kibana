@@ -7,27 +7,29 @@
 
 import React from 'react';
 import {
-  EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
   EuiIcon,
-  EuiTitle,
   EuiSpacer,
-  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiText,
+  EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Query } from '@kbn/es-query';
 import { useHistory } from 'react-router-dom';
 import { PartitionElementEvent } from '@elastic/charts';
+import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
-import { ComplianceTrendChart } from '../compliance_charts/compliance_trend_chart';
 import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
-import { CspHealthBadge } from '../../../components/csp_health_badge';
 import { ChartPanel } from '../../../components/chart_panel';
 import * as TEXT from '../translations';
 import { allNavigationItems } from '../../../common/navigation/constants';
 import { encodeQuery } from '../../../common/navigation/query_utils';
 import { Evaluation } from '../../../../common/types';
+import { RisksTable } from '../compliance_charts/risks_table';
+import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 
 type BenchmarksWithIcons = 'CIS Kubernetes';
 
@@ -48,7 +50,10 @@ const getBenchmarkEvaluationQuery = (name: string, evaluation: Evaluation): Quer
   query: `rule.benchmark : "${name}" and result.evaluation : "${evaluation}"`,
 });
 
+const mockClusterId = '2468540';
+
 export const BenchmarksSection = () => {
+  const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const getStats = useCloudPostureStatsApi();
   const benchmarks = getStats.isSuccess && getStats.data.benchmarksStats;
@@ -68,93 +73,71 @@ export const BenchmarksSection = () => {
   return (
     <>
       {benchmarks.map((benchmark) => (
-        <EuiPanel hasBorder hasShadow={false}>
-          <EuiFlexGrid columns={4}>
-            <EuiFlexItem
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexBasis: '20%',
-                borderRight: `1px solid lightgray`,
-              }}
-            >
-              <EuiIcon type={getBenchmarkLogo(benchmark.name)} size="xxl" />
+        <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+          <EuiFlexGroup>
+            <EuiFlexItem grow={2} style={getIntegrationBoxStyle(euiTheme)}>
+              <EuiText>
+                <h4>{benchmark.name}</h4>
+              </EuiText>
+              {INTERNAL_FEATURE_FLAGS.clusterMetaMock && (
+                <>
+                  <EuiText>
+                    <h4>{`Cluster ID ${mockClusterId}`}</h4>
+                  </EuiText>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs" color="subdue">
+                    <EuiIcon type="clock" />
+                    {'Updated 7 second ago'}
+                  </EuiText>
+                </>
+              )}
               <EuiSpacer />
-              <EuiTitle size={'s'}>
-                <h3>{benchmark.name}</h3>
-              </EuiTitle>
+              <EuiIcon type={getBenchmarkLogo(benchmark.name)} size="xxl" />
+              {INTERNAL_FEATURE_FLAGS.manageRulesMock && (
+                <>
+                  <EuiSpacer />
+                  <EuiButtonEmpty>{'Manage Rules'}</EuiButtonEmpty>
+                </>
+              )}
             </EuiFlexItem>
-            <EuiFlexItem style={{ flexBasis: '20%' }}>
-              <EuiDescriptionList
-                listItems={[
-                  {
-                    // TODO: this shows the failed/passed ratio and not the calculated score. needs product
-                    title: TEXT.COMPLIANCE_SCORE,
-                    description: (
-                      <ChartPanel
-                        hasBorder={false}
-                        isLoading={getStats.isLoading}
-                        isError={getStats.isError}
-                      >
-                        <CloudPostureScoreChart
-                          id={`${benchmark.name}_score_chart`}
-                          data={benchmark}
-                          partitionOnElementClick={(elements) =>
-                            handleElementClick(benchmark.name, elements)
-                          }
-                        />
-                      </ChartPanel>
-                    ),
-                  },
-                ]}
-              />
+            <EuiFlexItem grow={4} style={{ borderRight: '1px solid #D3DAE6' }}>
+              <ChartPanel
+                title={TEXT.COMPLIANCE_SCORE}
+                hasBorder={false}
+                isLoading={getStats.isLoading}
+                isError={getStats.isError}
+              >
+                <CloudPostureScoreChart
+                  id={`${benchmark.name}_score_chart`}
+                  data={benchmark}
+                  partitionOnElementClick={(elements) =>
+                    handleElementClick(benchmark.name, elements)
+                  }
+                />
+              </ChartPanel>
             </EuiFlexItem>
-            <EuiFlexItem style={{ flexBasis: '40%' }}>
-              <EuiDescriptionList
-                listItems={[
-                  {
-                    title: TEXT.COMPLIANCE_TREND,
-                    description: (
-                      <ChartPanel
-                        hasBorder={false}
-                        isLoading={getStats.isLoading}
-                        isError={getStats.isError}
-                      >
-                        {/* TODO: no api for this chart yet, using empty state for now. needs BE */}
-                        <ComplianceTrendChart />
-                      </ChartPanel>
-                    ),
-                  },
-                ]}
-              />
+            <EuiFlexItem grow={4}>
+              <ChartPanel
+                title={TEXT.RISKS}
+                hasBorder={false}
+                isLoading={getStats.isLoading}
+                isError={getStats.isError}
+              >
+                <RisksTable data={getStats.data.resourceTypesAggs} />
+              </ChartPanel>
             </EuiFlexItem>
-            <EuiFlexItem style={{ flexBasis: '10%' }}>
-              <EuiDescriptionList
-                listItems={[
-                  {
-                    title: TEXT.POSTURE_SCORE,
-                    // TODO: temporary until the type for this are fixed and the score is no longer optional (right now can fail if score equals 0).
-                    description: benchmark.postureScore || 'error',
-                  },
-                  {
-                    title: TEXT.STATUS,
-                    description:
-                      benchmark.postureScore !== undefined ? (
-                        <CspHealthBadge value={benchmark.postureScore} />
-                      ) : (
-                        TEXT.ERROR
-                      ),
-                  },
-                  {
-                    title: TEXT.TOTAL_FAILURES,
-                    description: benchmark.totalFailed || TEXT.ERROR,
-                  },
-                ]}
-              />
-            </EuiFlexItem>
-          </EuiFlexGrid>
+          </EuiFlexGroup>
         </EuiPanel>
       ))}
     </>
   );
 };
+
+const getIntegrationBoxStyle = (euiTheme: EuiThemeComputed) => ({
+  border: `1px solid ${euiTheme.colors.lightShade}`,
+  borderRadius: `${euiTheme.border.radius.medium} 0 0 ${euiTheme.border.radius.medium}`,
+  justifyContent: 'center',
+  alignItems: 'center',
+  background: euiTheme.colors.lightestShade,
+  padding: 0,
+});
