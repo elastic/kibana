@@ -35,16 +35,16 @@ node scripts/build \
 CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
 CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
 
-jq '
-  .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
-  .name = "'$CLOUD_DEPLOYMENT_NAME'" |
-  .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
-  .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'"
-  ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
-
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
 JSON_FILE=$(mktemp --suffix ".json")
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
+  jq '
+    .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
+    .name = "'$CLOUD_DEPLOYMENT_NAME'" |
+    .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
+    .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'"
+    ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
+
   ecctl deployment create --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
   CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
   CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
@@ -59,6 +59,11 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
 
   retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
 else
+  ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
+    .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
+    .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
+    .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'"
+    ' > /tmp/deploy.json
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
 fi
 
