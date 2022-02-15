@@ -1,0 +1,117 @@
+@value colors: '../../styles/shared/colors.css';
+@value blue, white, grey-white, soft-light, light-grey, dark-blue, soft-grey, alumi, metal from colors;
+
+@value shadows: '../../styles/shared/shadows.css';
+@value tiny-dark-shadow from shadows;
+
+.host {
+  padding: 2px;
+  background: grey-white;
+  border-radius: 16px;
+
+  display: inline-flex;
+  align-items: center;
+}
+
+.pixiSwitch {
+  min-width: 120px;
+  background: white;
+  border-radius: 4px;
+
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.pixiSwitch .option {
+  position: relative;
+
+  width: 100%;
+
+  border-radius: 4px;
+}
+
+.option {
+  padding: 6px 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: transparent;
+
+  composes: s-text from '../../styles/shared/typography.css';
+  line-height: 16px;
+  color: light-grey;
+
+  border-radius: 16px;
+  border: 1px solid transparent;
+
+  cursor: pointer;
+}
+
+.option svg {
+  stroke: alumi;
+  margin-right: 6px;
+}
+
+.option:hover:not(.active) {
+  background-color: soft-grey;
+}
+
+.option.active {
+  background-color: white;
+  border: 1px solid soft-light;
+  color: dark-blue;
+}
+
+.pixiSwitch .option.active {
+  color: white;
+  background: blue;
+}
+
+.option.active svg {
+  stroke: metal;
+}
+
+.option.disabled {
+  color: alumi;
+  pointer-events: none;
+}
+
+/* Tooltip */
+.pixiSwitch[data-tooltip]:before {
+  content: attr(data-tooltip);
+  text-align: left;
+
+  position: absolute;
+  top: 0px;
+  right: 0px;
+
+  opacity: 0;
+
+  padding: 10px;
+
+  max-width: 150px;
+
+  /* Hardocoded font-style because can't do compose here */
+  font-size: 11px;
+  letter-spacing: -0.006px;
+  line-height: 14px;
+  color: metal;
+  background: white;
+
+  border-radius: 4px;
+  box-shadow: tiny-dark-shadow;
+
+  transition: all 0.2s ease-in-out;
+}
+
+.pixiSwitch[data-tooltip]:hover:before {
+  opacity: 1;
+  top: 45px;
+}
+
+.pixiSwitch[data-tooltip]:not([data-tooltip-persistent]):before {
+  pointer-events: none;
+}

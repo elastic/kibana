@@ -1,0 +1,29 @@
+.xl-text {
+  font-size: 32px;
+  letter-spacing: -0.41px;
+  line-height: 38px;
+}
+
+.l-text {
+  font-size: 20px;
+  letter-spacing: -0.01px;
+  line-height: 24px;
+}
+
+.m-text {
+  font-size: 16px;
+  letter-spacing: -0.01px;
+  line-height: 20px;
+}
+
+.s-text {
+  font-size: 14px;
+  letter-spacing: -0.01px;
+  line-height: 16px;
+}
+
+.xs-text {
+  font-size: 11px;
+  letter-spacing: -0.006px;
+  line-height: 14px;
+}

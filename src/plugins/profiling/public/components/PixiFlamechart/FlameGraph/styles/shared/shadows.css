@@ -1,0 +1,9 @@
+@value colors: './colors.css';
+@value soft-light, alumi, grey-white, red, light-grey, metal, dark-icon from colors;
+
+@value tiny-no-blur-soft-light-bottom-shadow: 0 1px 0 soft-light;
+@value tiny-dark-shadow: 1px 2px 2px rgba(10, 12, 20, 0.03);
+@value small-dark-shadow: 0 2px 4px rgba(10, 12, 20, 0.05);
+@value medium-green-shadow: 0 2px 12px rgba(20, 180, 199, 0.2);
+@value medium-red-shadow: 0 2px 12px rgba(250, 101, 111, 0.2);
+@value big-inset-white-shadow: 0 0 0 30px #ffffff inset;
