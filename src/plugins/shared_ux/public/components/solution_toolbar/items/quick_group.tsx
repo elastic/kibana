@@ -13,14 +13,14 @@ import { i18n } from '@kbn/i18n';
 const strings = {
   QuickButtonGroup: {
     getAriaButtonLabel: (createType: string) =>
-      i18n.translate('presentationUtil.solutionToolbar.quickButton.ariaButtonLabel', {
+      i18n.translate('sharedUX.solutionToolbar.quickButton.ariaButtonLabel', {
         defaultMessage: `Create new {createType}`,
         values: {
           createType,
         },
       }),
     getLegend: () =>
-      i18n.translate('presentationUtil.solutionToolbar.quickButton.legendLabel', {
+      i18n.translate('sharedUX.solutionToolbar.quickButton.legendLabel', {
         defaultMessage: 'Quick create',
       }),
   },

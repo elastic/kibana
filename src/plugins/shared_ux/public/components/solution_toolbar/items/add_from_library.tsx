@@ -12,7 +12,7 @@ import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from './bu
 
 const strings = {
   getLibraryButtonLabel: () =>
-    i18n.translate('presentationUtil.solutionToolbar.libraryButtonLabel', {
+    i18n.translate('sharedUX.solutionToolbar.libraryButtonLabel', {
       defaultMessage: 'Add from library',
     }),
 };
