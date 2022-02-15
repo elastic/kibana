@@ -86,6 +86,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const { data, isLoading, mutateAsync, isError, isSuccess } = useMutation(
     (payload: Record<string, unknown>) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       http.post<any>('/internal/osquery/action', {
         body: JSON.stringify(payload),
       }),
@@ -226,6 +227,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
           setAdvancedContentState('open');
+        } else {
+          setFieldValue('ecs_mapping', {});
         }
       } else {
         setFieldValue('savedQueryId', null);
