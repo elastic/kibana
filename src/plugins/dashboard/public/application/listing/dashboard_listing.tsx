@@ -29,12 +29,13 @@ import {
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
-import { TableListView, useKibana, useExecutionContext } from '../../services/kibana_react';
+import { TableListView, useKibana } from '../../services/kibana_react';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
+import { useExecutionContext } from '../../../../kibana_react/public';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
