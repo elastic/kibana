@@ -72,6 +72,7 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, onDone }: Prop
       buttonContent={buttonContent}
       paddingSize="s"
       data-test-subj="expandResults"
+      initialIsOpen={true}
     >
       {isStepsLoading && <EuiText>{LOADING_STEPS}</EuiText>}
       {isStepsLoadingFailed && <EuiText color="danger">{FAILED_TO_RUN}</EuiText>}
