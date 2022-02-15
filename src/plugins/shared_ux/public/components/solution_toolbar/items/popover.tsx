@@ -45,12 +45,7 @@ export const SolutionToolbarPopover = ({
   );
 
   return (
-    <EuiPopover
-      anchorPosition="downLeft"
-      panelPaddingSize="none"
-      {...{ isOpen, button, closePopover }}
-      {...popover}
-    >
+    <EuiPopover panelPaddingSize="none" {...{ isOpen, button, closePopover }} {...popover}>
       {children({ closePopover })}
     </EuiPopover>
   );

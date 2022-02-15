@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './toolbar_button.scss';
 import React from 'react';
 import { ToolbarButton as Component } from './toolbar_button.component';
 
