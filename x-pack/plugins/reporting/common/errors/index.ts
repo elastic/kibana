@@ -50,13 +50,6 @@ export class CannotStartChromiumError extends ReportingError {
 }
 
 /**
- * The PDF worker ran out of memory while generating a PDF.
- */
-export class PDFWorkerOutOfMemoryError extends ReportingError {
-  code = 'pdf_worker_out_of_memory';
-}
-
-/**
  * While performing some reporting action, like fetching data from ES, our
  * access token expired.
  */
