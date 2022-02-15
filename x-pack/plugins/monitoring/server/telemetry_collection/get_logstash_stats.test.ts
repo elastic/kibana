@@ -38,7 +38,7 @@ describe('Get Logstash Stats', () => {
   const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
 
   beforeEach(() => {
-    searchMock.returns(Promise.resolve({ body: {} }));
+    searchMock.returns(Promise.resolve({}));
   });
 
   afterEach(() => {

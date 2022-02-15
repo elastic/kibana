@@ -22,7 +22,7 @@ export const checkIlmMigrationStatus = async ({
   const store = await reportingCore.getStore();
   const indexPattern = store.getReportingIndexPattern();
 
-  const { body: reportingIndicesSettings } = await elasticsearchClient.indices.getSettings({
+  const reportingIndicesSettings = await elasticsearchClient.indices.getSettings({
     index: indexPattern,
   });
 

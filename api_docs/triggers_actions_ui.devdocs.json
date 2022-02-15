@@ -1645,7 +1645,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"monitoring\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: ",
+              "<Prop extends \"id\" | \"monitoring\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"throttle\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -2348,7 +2348,7 @@
             "section": "def-common.AlertAction",
             "text": "AlertAction"
           },
-          "[]; alertTypeId: string; consumer: string; schedule: ",
+          "[]; throttle: string | null; alertTypeId: string; consumer: string; schedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2356,7 +2356,7 @@
             "section": "def-common.IntervalSchedule",
             "text": "IntervalSchedule"
           },
-          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
+          "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; muteAll: boolean; mutedInstanceIds: string[]; executionStatus: ",
           {
             "pluginId": "alerting",
             "scope": "common",

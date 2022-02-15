@@ -92,6 +92,37 @@ export const ComparatorToi18nMap = {
   ),
 };
 
+export const ComparatorToi18nSymbolsMap = {
+  [Comparator.GT]: '>',
+  [Comparator.GT_OR_EQ]: '≥',
+  [Comparator.LT]: '<',
+  [Comparator.LT_OR_EQ]: '≤',
+  [Comparator.EQ]: '=',
+  [Comparator.NOT_EQ]: '≠',
+  [`${Comparator.EQ}:number`]: '=',
+  [`${Comparator.NOT_EQ}:number`]: '≠',
+
+  // TODO: We could need to update the next messages to use symbols.
+  [Comparator.MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.match', {
+    defaultMessage: 'matches',
+  }),
+  [Comparator.NOT_MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.symbol.notMatch', {
+    defaultMessage: 'does not match',
+  }),
+  [Comparator.MATCH_PHRASE]: i18n.translate(
+    'xpack.infra.logs.alerting.comparator.symbol.matchPhrase',
+    {
+      defaultMessage: 'matches phrase',
+    }
+  ),
+  [Comparator.NOT_MATCH_PHRASE]: i18n.translate(
+    'xpack.infra.logs.alerting.comparator.symbol.notMatchPhrase',
+    {
+      defaultMessage: 'does not match phrase',
+    }
+  ),
+};
+
 // Alert parameters //
 export enum AlertStates {
   OK,

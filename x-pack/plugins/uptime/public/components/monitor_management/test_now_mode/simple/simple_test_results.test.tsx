@@ -14,8 +14,16 @@ import * as runOnceHooks from './use_simple_run_once_monitors';
 import { Ping } from '../../../../../common/runtime_types';
 
 describe('SimpleTestResults', function () {
+  const onDone = jest.fn();
+  let testId: string;
+
+  beforeEach(() => {
+    testId = 'test-id';
+    jest.resetAllMocks();
+  });
+
   it('should render properly', async function () {
-    render(<SimpleTestResults monitorId={'test-id'} />);
+    render(<SimpleTestResults monitorId={testId} onDone={onDone} />);
     expect(await screen.findByText('Test result')).toBeInTheDocument();
     const dataApi = (kibanaService.core as any).data.search;
 
@@ -26,7 +34,7 @@ describe('SimpleTestResults', function () {
           body: {
             query: {
               bool: {
-                filter: [{ term: { config_id: 'test-id' } }, { exists: { field: 'summary' } }],
+                filter: [{ term: { config_id: testId } }, { exists: { field: 'summary' } }],
               },
             },
             sort: [{ '@timestamp': 'desc' }],
@@ -51,7 +59,7 @@ describe('SimpleTestResults', function () {
       loading: false,
     });
 
-    render(<SimpleTestResults monitorId={'test-id'} />);
+    render(<SimpleTestResults monitorId={'test-id'} onDone={onDone} />);
 
     expect(await screen.findByText('Test result')).toBeInTheDocument();
 
@@ -60,6 +68,9 @@ describe('SimpleTestResults', function () {
     expect(await screen.findByText('151.101.2.217')).toBeInTheDocument();
     expect(await screen.findByText('Checked Jan 12, 2022 11:54:27 AM')).toBeInTheDocument();
     expect(await screen.findByText('Took 191 ms')).toBeInTheDocument();
+
+    // Calls onDone on completion
+    expect(onDone).toHaveBeenCalled();
 
     screen.debug();
   });

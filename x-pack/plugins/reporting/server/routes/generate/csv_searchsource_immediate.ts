@@ -81,14 +81,17 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         try {
           eventLog.logExecutionStart();
           const taskPromise = runTaskFn(null, req.body, context, stream, req)
-            .then(() => {
+            .then((output) => {
               logger.info(`Job output size: ${stream.bytesWritten} bytes.`);
 
               if (!stream.bytesWritten) {
                 logger.warn('CSV Job Execution created empty content result');
               }
 
-              eventLog.logExecutionComplete({ byteSize: stream.bytesWritten });
+              eventLog.logExecutionComplete({
+                ...(output.metrics ?? {}),
+                byteSize: stream.bytesWritten,
+              });
             })
             .finally(() => stream.end());
 
