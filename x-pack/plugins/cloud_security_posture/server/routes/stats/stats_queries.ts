@@ -119,7 +119,7 @@ export const getClustersQuery = (cycleId: string): SearchRequest => ({
     },
   },
   aggs: {
-    by_cluster_id: {
+    aggs_by_cluster_id: {
       terms: {
         field: 'cluster_id.keyword',
       },
@@ -133,6 +133,19 @@ export const getClustersQuery = (cycleId: string): SearchRequest => ({
         benchmark: {
           terms: {
             field: 'rule.benchmark.keyword',
+          },
+        },
+        aggs_by_resource_type: {
+          terms: {
+            field: 'resource.type.keyword',
+          },
+          aggs: {
+            failed_findings: {
+              filter: { term: { 'result.evaluation.keyword': 'failed' } },
+            },
+            passed_findings: {
+              filter: { term: { 'result.evaluation.keyword': 'passed' } },
+            },
           },
         },
       },

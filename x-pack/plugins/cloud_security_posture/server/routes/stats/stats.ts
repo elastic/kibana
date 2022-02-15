@@ -62,10 +62,18 @@ interface ClusterQueryResult {
     doc_count: number;
   };
   benchmark: AggregationsMultiBucketAggregateBase<KeyDocCount>;
+  aggs_by_resource_type: AggregationsMultiBucketAggregateBase<KeyDocCount<Evaluation>> & {
+    failed_findings: {
+      doc_count: number;
+    };
+    passed_findings: {
+      doc_count: number;
+    };
+  };
 }
 
 interface AggsByClusterId {
-  by_cluster_id: AggregationsMultiBucketAggregateBase<ClusterQueryResult>;
+  aggs_by_cluster_id: AggregationsMultiBucketAggregateBase<ClusterQueryResult>;
 }
 
 /**
@@ -116,7 +124,6 @@ export const getAllFindingsStats = async (
   const postureScore = calculatePostureScore(totalFindings, totalPassed, totalFailed);
 
   const stats = {
-    name: 'general',
     postureScore,
     totalFindings,
     totalPassed,
@@ -198,7 +205,7 @@ const getClusterAggs = async (
   cycleId: string
 ): Promise<CloudPostureStats['clusterAggs']> => {
   const queryResult = await esClient.search<unknown, AggsByClusterId>(getClustersQuery(cycleId));
-  const clusters = queryResult.body.aggregations?.by_cluster_id.buckets;
+  const clusters = queryResult.body.aggregations?.aggs_by_cluster_id.buckets;
   if (!Array.isArray(clusters)) throw new Error('missing aggregations by cluster id');
 
   return clusters.map((cluster) => {
@@ -212,13 +219,32 @@ const getClusterAggs = async (
     const totalFindings = failedFindings + passedFindings;
     const postureScore = calculatePostureScore(totalFindings, passedFindings, failedFindings);
 
+    if (postureScore === undefined) {
+      throw new Error("couldn't calculate posture score");
+    }
+
+    const resourceTypes = cluster.aggs_by_resource_type.buckets;
+    if (!Array.isArray(resourceTypes)) throw new Error('missing aggregations by resource type');
+
+    const resourceTypeAggs = resourceTypes.map((bucket) => ({
+      resourceType: bucket.key,
+      totalFindings: bucket.doc_count,
+      totalFailed: bucket.failed_findings.doc_count || 0,
+      totalPassed: bucket.passed_findings.doc_count || 0,
+    }));
+
     return {
-      clusterId: cluster.key,
-      benchmark: benchmark[0].key,
-      failedFindings,
-      passedFindings,
-      totalFindings,
-      postureScore,
+      meta: {
+        clusterId: cluster.key,
+        benchmarkName: benchmark[0].key,
+      },
+      stats: {
+        totalFailed: failedFindings,
+        totalPassed: passedFindings,
+        totalFindings,
+        postureScore,
+      },
+      resourceTypeAggs,
     };
   });
 };
