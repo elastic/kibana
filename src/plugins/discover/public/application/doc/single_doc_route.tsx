@@ -16,6 +16,7 @@ import { withQueryParams } from '../../utils/with_query_params';
 import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useExecutionContext } from '../../../../kibana_react/public';
 
 export interface SingleDocRouteProps {
   /**
@@ -36,7 +37,7 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
   const { indexPatternId, index } = useParams<DocUrlParams>();
   const breadcrumb = useMainRouteBreadcrumb();
 
-  core.executionContext.set({
+  useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'single-doc',
     id: indexPatternId || '',

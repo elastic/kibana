@@ -21,7 +21,7 @@ import { findListItems } from '../../utils/saved_visualize_utils';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
-import { useKibana, TableListView } from '../../../../kibana_react/public';
+import { useKibana, TableListView, useExecutionContext } from '../../../../kibana_react/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
@@ -97,10 +97,9 @@ export const VisualizeListing = () => {
     [application, history]
   );
 
-  executionContext.set({
+  useExecutionContext(executionContext, {
     type: 'application',
     page: 'list',
-    id: '',
   });
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);

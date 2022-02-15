@@ -22,7 +22,7 @@ import {
   CoreTheme,
   CoreStart,
 } from 'src/core/public';
-import { KibanaThemeProvider } from '../../kibana_react/public';
+import { KibanaThemeProvider, useExecutionContext } from '../../kibana_react/public';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
@@ -71,9 +71,9 @@ function DevToolsWrapper({
     breadcrumbService.setBreadcrumbs(activeDevTool.title);
   }, [activeDevTool, docTitleService, breadcrumbService]);
 
-  appServices.executionContext.set({
+  useExecutionContext(appServices.executionContext, {
     type: 'application',
-    page: activeDevTool,
+    page: activeDevTool.id,
   });
 
   return (

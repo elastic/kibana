@@ -11,7 +11,7 @@ import React, { useEffect, useMemo } from 'react';
 
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
-import { useKibana } from '../../../kibana_react/public';
+import { useKibana, useExecutionContext } from '../../../kibana_react/public';
 import {
   getDashboardBreadcrumb,
   getDashboardTitle,
@@ -48,7 +48,7 @@ export function DashboardApp({
     [core.notifications.toasts, history, uiSettings]
   );
 
-  core.executionContext.set({
+  useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'app',
     id: savedDashboardId || 'new',

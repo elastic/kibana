@@ -13,7 +13,7 @@ import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useExecutionContext, useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import { syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
 import { LensAppProps, LensAppServices } from './types';
@@ -124,7 +124,7 @@ export function App({
     setIndicateNoData(true);
   }, [setIndicateNoData]);
 
-  executionContext.set({
+  useExecutionContext(executionContext, {
     type: 'application',
     id: savedObjectId || 'new',
     page: 'editor',

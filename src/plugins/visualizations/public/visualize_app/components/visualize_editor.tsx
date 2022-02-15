@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
 
-import { useKibana } from '../../../../kibana_react/public';
+import { useExecutionContext, useKibana } from '../../../../kibana_react/public';
 import {
   useChromeVisibility,
   useSavedVisInstance,
@@ -33,7 +33,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
 
-  services.executionContext.set({
+  useExecutionContext(services.executionContext, {
     type: 'application',
     page: 'editor',
     id: visualizationIdFromUrl,

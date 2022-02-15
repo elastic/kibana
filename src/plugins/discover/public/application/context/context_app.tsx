@@ -26,6 +26,7 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useExecutionContext } from '../../../../kibana_react/public';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -41,7 +42,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  core.executionContext.set({
+  useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'context',
     id: indexPattern.id || '',

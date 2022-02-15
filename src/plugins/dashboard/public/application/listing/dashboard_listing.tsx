@@ -29,7 +29,7 @@ import {
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
-import { TableListView, useKibana } from '../../services/kibana_react';
+import { TableListView, useKibana, useExecutionContext } from '../../services/kibana_react';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
@@ -67,10 +67,9 @@ export const DashboardListing = ({
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
-  core.executionContext.set({
+  useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'list',
-    id: '',
   });
 
   // Set breadcrumbs useEffect
