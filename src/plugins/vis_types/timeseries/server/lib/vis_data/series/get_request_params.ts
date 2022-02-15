@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { i18n } from '@kbn/i18n';
 import { buildRequestBody } from './build_request_body';
 
 import type { FetchedIndexPattern, Panel, Series } from '../../../../common/types';
@@ -13,7 +13,7 @@ import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import type { SearchCapabilities } from '../../search_strategies';
+import type { SearchCapabilities, EsSearchRequest } from '../../search_strategies';
 
 export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
@@ -28,7 +28,7 @@ export async function getSeriesRequestParams(
     cachedIndexPatternFetcher,
     buildSeriesMetaParams,
   }: VisTypeTimeseriesRequestServices
-) {
+): Promise<EsSearchRequest> {
   let seriesIndex = panelIndex;
 
   if (series.override_index_pattern) {
@@ -52,6 +52,15 @@ export async function getSeriesRequestParams(
       ...request,
       runtime_mappings: seriesIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
+    },
+    trackingEsSearchMeta: {
+      requestId: series.id,
+      requestLabel: i18n.translate('visTypeTimeseries.seriesRequest.label', {
+        defaultMessage: 'Series: {id}',
+        values: {
+          id: series.id,
+        },
+      }),
     },
   };
 }

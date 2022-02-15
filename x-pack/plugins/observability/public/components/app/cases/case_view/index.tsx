@@ -15,12 +15,13 @@ import {
   useFormatUrl,
 } from '../../../../pages/cases/links';
 import { Case } from '../../../../../../cases/common';
-import { useFetchAlertData, useFetchAlertDetail } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { observabilityAppId } from '../../../../../common';
 import { LazyAlertsFlyout } from '../../../..';
+import { useFetchAlertDetail } from '../../../../pages/cases/use_fetch_alert_detail';
+import { useFetchAlertData } from '../../../../pages/cases/use_fetch_alert_data';
 
 interface Props {
   caseId: string;
