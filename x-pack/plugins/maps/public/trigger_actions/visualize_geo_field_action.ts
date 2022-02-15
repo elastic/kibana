@@ -50,7 +50,7 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     usageCollection?.reportUiCounter(
       APP_ID,
       'visualize_geo_field',
-      context.originatingApp ? `_${context.originatingApp}` : ''
+      context.originatingApp ? context.originatingApp : 'unknownOriginatingApp'
     );
 
     getCore().application.navigateToApp(app, {
