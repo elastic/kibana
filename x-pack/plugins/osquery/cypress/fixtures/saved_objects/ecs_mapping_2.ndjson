@@ -17,7 +17,7 @@
     "updated_at": "2022-02-03T08:24:52.429Z",
     "updated_by": "elastic"
   },
-  "coreMigrationVersion": "8.1.0",
+  "coreMigrationVersion": "8.0.0",
   "id": "6b819f40-84ca-11ec-991b-07bb2d53cda5",
   "references": [],
   "type": "osquery-saved-query",
