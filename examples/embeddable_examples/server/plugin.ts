@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart, DEFAULT_APP_CATEGORIES } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart, DEFAULT_APP_CATEGORIES } from '../../../src/core/server';
 import { todoSavedObject } from './todo_saved_object';
 import { bookSavedObject } from './book_saved_object';
 import { searchableListSavedObject } from './searchable_list_saved_object';
