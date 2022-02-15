@@ -90,6 +90,7 @@ export async function fetchIndexShardSize(
                         '_index',
                         'index_stats.shards.primaries',
                         'index_stats.primaries.store.size_in_bytes',
+                        'elasticsearch.index.shards.primaries',
                         'elasticsearch.index.primaries.store.size_in_bytes',
                       ],
                     },
@@ -134,15 +135,20 @@ export async function fetchIndexShardSize(
       }
       const {
         _index: monitoringIndexName,
-        _source: { index_stats: indexStats },
+        _source: { index_stats: indexStats, elasticsearch },
       } = topHit;
 
-      if (!indexStats || !indexStats.primaries) {
+      const isLegacy = !!(indexStats && indexStats.primaries);
+      const isMb = !!(elasticsearch && elasticsearch.index);
+
+      if (!isLegacy && !isMb) {
         continue;
       }
 
-      const { primaries: totalPrimaryShards } = indexStats.shards;
-      const { size_in_bytes: primaryShardSizeBytes = 0 } = indexStats.primaries.store || {};
+      const { primaries: totalPrimaryShards } =
+        indexStats?.shards || elasticsearch?.index?.shards || {};
+      const { size_in_bytes: primaryShardSizeBytes = 0 } =
+        indexStats?.primaries?.store || elasticsearch?.index?.primaries?.store || {};
       if (!primaryShardSizeBytes || !totalPrimaryShards) {
         continue;
       }
