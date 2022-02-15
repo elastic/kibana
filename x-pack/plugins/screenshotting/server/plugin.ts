@@ -15,6 +15,7 @@ import type {
   PluginInitializerContext,
 } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import type { SecurityPluginStart } from '../../security/server';
 import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './browsers';
 import { ConfigType, createConfig } from './config';
 import { Screenshots } from './screenshots';
@@ -22,6 +23,10 @@ import { getChromiumPackage } from './utils';
 
 interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;
+}
+
+interface StartDeps {
+  security: SecurityPluginStart;
 }
 
 /**
@@ -42,7 +47,9 @@ export interface ScreenshottingStart {
   getScreenshots: Screenshots['getScreenshots'];
 }
 
-export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, SetupDeps> {
+export class ScreenshottingPlugin
+  implements Plugin<void, ScreenshottingStart, SetupDeps, StartDeps>
+{
   private config: ConfigType;
   private logger: Logger;
   private screenshotMode!: ScreenshotModePluginSetup;
@@ -90,13 +97,13 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     return {};
   }
 
-  start({}: CoreStart): ScreenshottingStart {
+  start({}: CoreStart, { security }: StartDeps): ScreenshottingStart {
     return {
       diagnose: () =>
         from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
       getScreenshots: (options) =>
         from(this.screenshots).pipe(
-          switchMap((screenshots) => screenshots.getScreenshots(options))
+          switchMap((screenshots) => screenshots.getScreenshots(options, security))
         ),
     };
   }

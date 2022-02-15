@@ -8,6 +8,7 @@
   },
   "description": "Kibana Screenshotting Plugin",
   "requiredPlugins": ["screenshotMode"],
+  "optionalPlugins": ["security"],
   "configPath": ["xpack", "screenshotting"],
   "server": true
 }

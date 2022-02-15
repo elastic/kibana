@@ -10,6 +10,7 @@ import { from, of, Observable } from 'rxjs';
 import {
   catchError,
   concatMap,
+  finalize,
   first,
   map,
   mergeMap,
@@ -27,6 +28,7 @@ import type { Layout } from '../layouts';
 import { ScreenshotObservableHandler } from './observable';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { Semaphore } from './semaphore';
+import type { SecurityPluginStart } from '../../../security/server';
 
 export interface ScreenshotOptions extends ScreenshotObservableOptions {
   layout: LayoutParams;
@@ -70,7 +72,10 @@ export class Screenshots {
     this.semaphore = new Semaphore(poolSize);
   }
 
-  getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
+  getScreenshots(
+    options: ScreenshotOptions,
+    security: SecurityPluginStart
+  ): Observable<ScreenshotResult> {
     const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
     const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
     const layout = createLayout(options.layout);
@@ -82,7 +87,6 @@ export class Screenshots {
       browserTimezone,
       timeouts: { openUrl: openUrlTimeout },
     } = options;
-    const headers = { ...(options.request?.headers ?? {}), ...(options.headers ?? {}) };
 
     return this.browserDriverFactory
       .createPage(
@@ -95,7 +99,26 @@ export class Screenshots {
       )
       .pipe(
         this.semaphore.acquire(),
-        mergeMap(({ driver, unexpectedExit$, close }) => {
+        mergeMap(async (page) => {
+          const headers = { ...(options.request?.headers ?? {}), ...(options.headers ?? {}) };
+          const apiKeyResult =
+            options.request &&
+            (await security?.authc.apiKeys.grantAsInternalUser(options.request, {
+              name: 'screenshotting',
+              role_descriptors: {},
+            }));
+
+          if (apiKeyResult) {
+            const token = Buffer.from(`${apiKeyResult.id}:${apiKeyResult.api_key}`).toString(
+              'base64'
+            );
+            headers.authorization = `ApiKey ${token}`;
+            delete headers.cookie;
+          }
+
+          return { ...page, apiKeyResult, headers };
+        }),
+        mergeMap(({ apiKeyResult, close, driver, headers, unexpectedExit$ }) => {
           apmCreatePage?.end();
           unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
 
@@ -130,6 +153,13 @@ export class Screenshots {
                 }),
                 map(({ metrics }) => ({ layout, metrics, results }))
               )
+            ),
+            finalize(
+              () =>
+                apiKeyResult &&
+                security?.authc.apiKeys.invalidateAsInternalUser({
+                  ids: [apiKeyResult.id],
+                })
             )
           );
         }),
