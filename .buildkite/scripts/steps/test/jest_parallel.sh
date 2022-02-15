@@ -5,8 +5,6 @@ set -uo pipefail
 export CODE_COVERAGE=true
 export COVERALLS_PARALLEL=true
 
-yarn add coveralls # TODO move
-
 JOB=$BUILDKITE_PARALLEL_JOB
 JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 

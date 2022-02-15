@@ -128,7 +128,7 @@ export SYNTHETICS_REMOTE_KIBANA_URL
 KIBANA_BUILDBUDDY_CI_API_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibana-buildbuddy-ci-api-key)
 export KIBANA_BUILDBUDDY_CI_API_KEY
 
-COVERALLS_REPO_TOKEN=$(retry 5 5 vault read -field=token secret/kibana-issues/dev/codecov)
+COVERALLS_REPO_TOKEN=$(retry 5 5 vault read -field=token secret/kibana-issues/dev/coverall)
 export COVERALLS_REPO_TOKEN
 
 # By default, all steps should set up these things to get a full environment before running
