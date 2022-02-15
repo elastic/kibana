@@ -37,7 +37,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
     customEntryPointUrls,
     customSitemapUrls,
     entryPointUrls,
-    includeRobotsTxt,
+    includeSitemapsInRobotsTxt,
     selectedDomainUrls,
     selectedEntryPointUrls,
     selectedSitemapUrls,
@@ -48,7 +48,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
     onSelectCustomSitemapUrls,
     onSelectEntryPointUrls,
     onSelectSitemapUrls,
-    toggleIncludeRobotsTxt,
+    toggleIncludeSitemapsInRobotsTxt,
   } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   const totalSeedUrls =
@@ -123,8 +123,8 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                           }}
                         />
                       }
-                      checked={includeRobotsTxt}
-                      onChange={toggleIncludeRobotsTxt}
+                      checked={includeSitemapsInRobotsTxt}
+                      onChange={toggleIncludeSitemapsInRobotsTxt}
                     />
                   </EuiPanel>
                   <SimplifiedSelectable

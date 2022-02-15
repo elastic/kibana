@@ -25,7 +25,7 @@ export interface CrawlCustomSettingsFlyoutLogicValues {
     [key: string]: DomainConfig;
   };
   entryPointUrls: string[];
-  includeRobotsTxt: boolean;
+  includeSitemapsInRobotsTxt: boolean;
   isDataLoading: boolean;
   isFormSubmitting: boolean;
   isFlyoutVisible: boolean;
@@ -48,7 +48,7 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
   onSelectSitemapUrls(sitemapUrls: string[]): { sitemapUrls: string[] };
   showFlyout(): void;
   startCustomCrawl(): void;
-  toggleIncludeRobotsTxt(): void;
+  toggleIncludeSitemapsInRobotsTxt(): void;
 }
 
 const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): string[] => {
@@ -78,7 +78,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     onSelectMaxCrawlDepth: (maxCrawlDepth) => ({ maxCrawlDepth }),
     onSelectSitemapUrls: (sitemapUrls) => ({ sitemapUrls }),
     startCustomCrawl: true,
-    toggleIncludeRobotsTxt: true,
+    toggleIncludeSitemapsInRobotsTxt: true,
     showFlyout: true,
   }),
   reducers: () => ({
@@ -102,11 +102,12 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         onRecieveDomainConfigData: (_, { domainConfigs }) => domainConfigs,
       },
     ],
-    includeRobotsTxt: [
+    includeSitemapsInRobotsTxt: [
       true,
       {
         showFlyout: () => true,
-        toggleIncludeRobotsTxt: (includeRobotsTxt) => !includeRobotsTxt,
+        toggleIncludeSitemapsInRobotsTxt: (includeSitemapsInRobotsTxt) =>
+          !includeSitemapsInRobotsTxt,
       },
     ],
     isDataLoading: [
@@ -217,7 +218,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         max_crawl_depth: values.maxCrawlDepth,
         seed_urls: [...values.selectedEntryPointUrls, ...values.customEntryPointUrls],
         sitemap_urls: [...values.selectedSitemapUrls, ...values.customSitemapUrls],
-        sitemap_discovery_disabled: !values.includeRobotsTxt,
+        sitemap_discovery_disabled: !values.includeSitemapsInRobotsTxt,
       });
     },
   }),

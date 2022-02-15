@@ -36,7 +36,7 @@ const MOCK_VALUES = {
     'https://swiftype.com/sitemap1.xml',
     'https://swiftype.com/sitemap2.xml',
   ],
-  includeRobotsTxt: true,
+  includeSitemapsInRobotsTxt: true,
 };
 
 const MOCK_ACTIONS = {
@@ -45,7 +45,7 @@ const MOCK_ACTIONS = {
   onSelectCustomSitemapUrls: jest.fn(),
   onSelectEntryPointUrls: jest.fn(),
   onSelectSitemapUrls: jest.fn(),
-  toggleIncludeRobotsTxt: jest.fn(),
+  toggleIncludeSitemapsInRobotsTxt: jest.fn(),
 };
 
 const getAccordionBadge = (wrapper: ShallowWrapper) => {
@@ -84,7 +84,7 @@ describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
     it('allows the user to toggle whether to include robots.txt sitemaps', () => {
       expect(sitemapTab.find(EuiCheckbox).props()).toEqual(
         expect.objectContaining({
-          onChange: MOCK_ACTIONS.toggleIncludeRobotsTxt,
+          onChange: MOCK_ACTIONS.toggleIncludeSitemapsInRobotsTxt,
           checked: true,
         })
       );

@@ -32,7 +32,7 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
       domainConfigs: [],
       domainUrls: [],
       entryPointUrls: [],
-      includeRobotsTxt: true,
+      includeSitemapsInRobotsTxt: true,
       isDataLoading: true,
       isFlyoutVisible: false,
       isFormSubmitting: false,
@@ -257,7 +257,7 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
             'https://www.elastic.co/custom-sitemap1.xml',
             'https://swiftype.com/custom-sitemap2.xml',
           ],
-          includeRobotsTxt: false,
+          includeSitemapsInRobotsTxt: false,
           isDataLoading: false,
           isFlyoutVisible: false,
           selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
@@ -277,7 +277,7 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
           expect.objectContaining({
             customEntryPointUrls: [],
             customSitemapUrls: [],
-            includeRobotsTxt: true,
+            includeSitemapsInRobotsTxt: true,
             isDataLoading: true,
             isFlyoutVisible: true,
             selectedDomainUrls: [],
@@ -299,7 +299,7 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
     describe('startCustomCrawl', () => {
       it('starts a custom crawl with the user set values', async () => {
         mount({
-          includeRobotsTxt: true,
+          includeSitemapsInRobotsTxt: true,
           maxCrawlDepth: 5,
           selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
           selectedEntryPointUrls: [
@@ -329,23 +329,23 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
       });
     });
 
-    describe('toggleIncludeRobotsTxt', () => {
+    describe('toggleIncludeSitemapsInRobotsTxt', () => {
       it('toggles the flag', () => {
         mount({
-          includeRobotsTxt: false,
+          includeSitemapsInRobotsTxt: false,
         });
 
-        CrawlCustomSettingsFlyoutLogic.actions.toggleIncludeRobotsTxt();
+        CrawlCustomSettingsFlyoutLogic.actions.toggleIncludeSitemapsInRobotsTxt();
 
-        expect(CrawlCustomSettingsFlyoutLogic.values.includeRobotsTxt).toEqual(true);
+        expect(CrawlCustomSettingsFlyoutLogic.values.includeSitemapsInRobotsTxt).toEqual(true);
 
         mount({
-          includeRobotsTxt: true,
+          includeSitemapsInRobotsTxt: true,
         });
 
-        CrawlCustomSettingsFlyoutLogic.actions.toggleIncludeRobotsTxt();
+        CrawlCustomSettingsFlyoutLogic.actions.toggleIncludeSitemapsInRobotsTxt();
 
-        expect(CrawlCustomSettingsFlyoutLogic.values.includeRobotsTxt).toEqual(false);
+        expect(CrawlCustomSettingsFlyoutLogic.values.includeSitemapsInRobotsTxt).toEqual(false);
       });
     });
 
