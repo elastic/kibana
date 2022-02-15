@@ -11,13 +11,12 @@ import { NoDataViewsComponent } from './no_data_views_component';
 import { useEditors, usePermissions } from '../../../services';
 import { DataView } from '../../../../../data_views/public';
 
-export interface NoDataViewsPageProps {
+export interface Props {
   onDataViewCreated: (dataView: DataView) => void;
   dataViewsDocLink: string;
 }
 
-export const NoDataViewsPage = (props: NoDataViewsPageProps) => {
-  const { onDataViewCreated, dataViewsDocLink } = props;
+export const NoDataViewsPage = ({ onDataViewCreated, dataViewsDocLink }: Props) => {
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   useEffect(() => {

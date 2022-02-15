@@ -35,25 +35,29 @@ ConnectedComponent.argTypes = {
   openEditor: action('openEditor'),
 };
 
-export const PureComponent = () => {
+export const PureComponent = ({
+  canCreateNewDataView = true,
+  dataViewDocLinks,
+}: {
+  canCreateNewDataView: boolean;
+  dataViewDocLinks: string | undefined;
+}) => {
   return (
     <NoDataViewsComponent
-      canCreateNewDataView={true}
+      canCreateNewDataView={canCreateNewDataView}
       onClick={action('onClick')}
-      dataViewsDocLink={'https://google.com'}
+      dataViewsDocLink={dataViewDocLinks}
     />
   );
 };
 
-export const PureComponentCannotCreateDataViews = () => {
-  return (
-    <NoDataViewsComponent
-      canCreateNewDataView={false}
-      dataViewsDocLink={docLinksServiceFactory().dataViewsDocsLink}
-    />
-  );
-};
-
-export const PureComponentNoDocumentation = () => {
-  return <NoDataViewsComponent canCreateNewDataView={true} onClick={action('onClick')} />;
+PureComponent.argTypes = {
+  canCreateNewDataView: {
+    control: 'boolean',
+    defaultValue: true,
+  },
+  dataViewDocLinks: {
+    options: [docLinksServiceFactory().dataViewsDocsLink, undefined],
+    control: { type: 'radio' },
+  },
 };

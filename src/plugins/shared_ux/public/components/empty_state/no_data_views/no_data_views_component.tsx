@@ -28,7 +28,7 @@ import './no_data_views_component.scss';
 
 const Illustration = lazy(() => import('../assets/data_view_illustration'));
 
-interface NoDataViewsComponentProps {
+interface Props {
   canCreateNewDataView: boolean;
   onClick?: () => void;
   dataViewsDocLink?: string;
@@ -38,8 +38,11 @@ const createDataViewText = i18n.translate('sharedUX.noDataViewsPage.addDataViewT
   defaultMessage: 'Create Data View',
 });
 
-export const NoDataViewsComponent = (props: NoDataViewsComponentProps) => {
-  const { onClick, canCreateNewDataView, dataViewsDocLink } = props;
+export const NoDataViewsComponent = ({
+  onClick,
+  canCreateNewDataView,
+  dataViewsDocLink,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const { size } = euiTheme;
   const maxWidth = Number.parseInt(size.xxl.slice(0, -2), 10) * 19 + 'px';
