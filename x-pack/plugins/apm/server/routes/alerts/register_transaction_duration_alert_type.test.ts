@@ -48,6 +48,7 @@ describe('registerTransactionDurationAlertType', () => {
       windowUnit: 'm',
       transactionType: 'request',
       serviceName: 'opbeans-java',
+      aggregationType: 'avg',
     };
     await executor({ params });
     expect(scheduleActions).toHaveBeenCalledTimes(1);
