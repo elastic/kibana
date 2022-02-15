@@ -227,7 +227,7 @@ export const performBulkActionRoute = (
       options: {
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
         timeout: {
-          idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
+          idleSocket: moment.duration(12, 'minutes').asMilliseconds(),
         },
       },
     },
