@@ -17,15 +17,6 @@ import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_man
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert as CreatedAlert, createAlertFactory } from '../alert';
 import {
-  RuleTaskRunResultWithActions,
-  RuleTaskRunResult,
-  RuleTaskInstance,
-  TrackAlertDurationsParams,
-  GenerateNewAndRecoveredAlertEventsParams,
-  ScheduleActionsForRecoveredAlertsParams,
-  LogActiveAndRecoveredAlertsParams,
-} from '../types';
-import {
   validateRuleTypeParams,
   executionStatusFromState,
   executionStatusFromError,
@@ -74,6 +65,15 @@ import {
   Event,
 } from '../lib/create_alert_event_log_record_object';
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
+import {
+  GenerateNewAndRecoveredAlertEventsParams,
+  LogActiveAndRecoveredAlertsParams,
+  RuleTaskInstance,
+  RuleTaskRunResult,
+  RuleTaskRunResultWithActions,
+  ScheduleActionsForRecoveredAlertsParams,
+  TrackAlertDurationsParams,
+} from './types';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
