@@ -15,14 +15,22 @@ import { validate } from '../validation';
 import { MonitorNameAndLocation } from './monitor_name_location';
 import { MonitorManagementAdvancedFields } from './monitor_advanced_fields';
 
+const MIN_COLUMN_WRAP_WIDTH = '360px';
+
 export const MonitorFields = () => {
   const { monitorType } = usePolicyConfigContext();
   return (
     <EuiForm id="syntheticsServiceCreateMonitorForm" component="form">
       <CustomFields
+        minColumnWidth={MIN_COLUMN_WRAP_WIDTH}
         validate={validate[monitorType]}
         dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER]}
-        appendAdvancedFields={<MonitorManagementAdvancedFields validate={validate[monitorType]} />}
+        appendAdvancedFields={
+          <MonitorManagementAdvancedFields
+            validate={validate[monitorType]}
+            minColumnWidth={MIN_COLUMN_WRAP_WIDTH}
+          />
+        }
       >
         <MonitorNameAndLocation validate={validate[monitorType]} />
       </CustomFields>
