@@ -65,7 +65,6 @@ export async function bulkInstallPackages({
       });
 
       if (installedPackageResult) {
-        logger.debug(`Retrieved installed package for ${pkgKeyProps.name}-${pkgKeyProps.version}`);
         const {
           name,
           version,
@@ -85,8 +84,6 @@ export async function bulkInstallPackages({
 
       const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
 
-      const start = Date.now();
-      logger.debug(`Installing ${pkgkey} as part of bulk install`);
       const installResult = await installPackage({
         savedObjectsClient,
         esClient,
@@ -103,9 +100,6 @@ export async function bulkInstallPackages({
           installType: installResult.installType,
         };
       }
-
-      const end = Date.now();
-      logger.debug(`Installed ${pkgkey} in ${end - start}ms`);
       return {
         name: packageName,
         version: pkgKeyProps.version,

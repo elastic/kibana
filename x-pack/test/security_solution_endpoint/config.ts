@@ -44,9 +44,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
-        '--logging.loggers[0].name=plugins.fleet',
-        '--logging.loggers[0].level=debug',
-        '--logging.loggers[0].appenders[0]=console',
       ],
     },
     layout: {
