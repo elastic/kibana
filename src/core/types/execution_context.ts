@@ -17,7 +17,7 @@ export type KibanaExecutionContext = {
    * Kibana application initated an operation.
    * */
   readonly type: string; // 'visualization' | 'actions' | 'server' | ..;
-  /** public name of an application or an user-facing feature */
+  /** public name of an application or a user-facing feature */
   readonly name: string; // 'TSVB' | 'Lens' |  'action_execution' | ..;
   /** a stand alone, logical unit such as an application page or tab */
   readonly page?: string; //
