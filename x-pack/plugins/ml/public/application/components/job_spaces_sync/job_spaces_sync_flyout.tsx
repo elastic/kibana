@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { ml } from '../../services/ml_api_service';
-import { SyncSavedObjectResponse, SavedObjectResult } from '../../../../common/types/saved_objects';
+import { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
@@ -153,13 +153,15 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
 function getResponseCounts(resp: SyncSavedObjectResponse) {
   let successCount = 0;
   let errorCount = 0;
-  Object.values(resp).forEach((result: SavedObjectResult) => {
-    Object.values(result).forEach(({ success, error }) => {
-      if (success === true) {
-        successCount++;
-      } else if (error !== undefined) {
-        errorCount++;
-      }
+  Object.values(resp).forEach((result: SyncResult) => {
+    Object.values(result).forEach((type) => {
+      Object.values(type).forEach(({ success, error }) => {
+        if (success === true) {
+          successCount++;
+        } else if (error !== undefined) {
+          errorCount++;
+        }
+      });
     });
   });
   return { successCount, errorCount };

@@ -21,11 +21,17 @@ export interface SavedObjectResult {
   [id: string]: { success: boolean; type: JobType | TrainedModelType; error?: ErrorType };
 }
 
+export type SyncResult = {
+  [jobType in JobType | TrainedModelType]?: {
+    [id: string]: { success: boolean; error?: ErrorType };
+  };
+};
+
 export interface SyncSavedObjectResponse {
-  savedObjectsCreated: SavedObjectResult;
-  savedObjectsDeleted: SavedObjectResult;
-  datafeedsAdded: SavedObjectResult;
-  datafeedsRemoved: SavedObjectResult;
+  savedObjectsCreated: SyncResult;
+  savedObjectsDeleted: SyncResult;
+  datafeedsAdded: SyncResult;
+  datafeedsRemoved: SyncResult;
 }
 
 export interface CanDeleteJobResponse {

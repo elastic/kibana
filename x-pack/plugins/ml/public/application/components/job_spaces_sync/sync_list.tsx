@@ -17,10 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import type {
-  SyncSavedObjectResponse,
-  SavedObjectResult,
-} from '../../../../common/types/saved_objects';
+import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 
 export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {
   if (syncItems === null) {
@@ -176,28 +173,20 @@ const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItem
   return <SyncItem id="datafeedsRemoved" title={title} results={syncItems.datafeedsRemoved} />;
 };
 
-const SyncItem: FC<{ id: string; title: JSX.Element; results: SavedObjectResult }> = ({
+const SyncItem: FC<{ id: string; title: JSX.Element; results: SyncResult }> = ({
   id,
   title,
   results,
 }) => {
-  const itemsByType = Object.entries(results).reduce((acc, [item, { type }]) => {
-    if (acc[type] === undefined) {
-      acc[type] = [];
-    }
-    acc[type].push(item);
-    return acc;
-  }, {} as Record<string, string[]>);
-
   return (
     <EuiAccordion id={id} buttonContent={title} paddingSize="l">
-      {Object.entries(itemsByType).map(([type, items]) => {
+      {Object.entries(results).map(([type, items]) => {
         return (
           <>
             <EuiText size="s">
               <div style={{ fontWeight: 'bold' }}>{type}</div>
               <ul>
-                {items.map((item) => (
+                {Object.keys(items).map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
