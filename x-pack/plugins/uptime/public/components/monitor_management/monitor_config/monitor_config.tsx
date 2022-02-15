@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiFlyout, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiFlyout,
+  EuiSpacer,
+  EuiFlyoutFooter,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/contexts';
@@ -49,20 +56,20 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
     }
   };
 
-  const handleTestDone = () => {
+  const handleTestDone = useCallback(() => {
     setIsTestRunInProgress(false);
-  };
+  }, [setIsTestRunInProgress]);
 
-  const handleFlyoutClose = () => {
+  const handleFlyoutClose = useCallback(() => {
     handleTestDone();
     setIsFlyoutOpen(false);
-  };
+  }, [handleTestDone, setIsFlyoutOpen]);
 
   const flyout = isFlyoutOpen && config && (
     <EuiFlyout
       type="push"
       size="m"
-      paddingSize="l"
+      paddingSize="m"
       maxWidth="44%"
       aria-labelledby={TEST_RESULT}
       onClose={handleFlyoutClose}
@@ -73,6 +80,11 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
       <EuiFlyoutBody>
         <TestNowMode testRun={testRun} isMonitorSaved={isEdit} onDone={handleTestDone} />
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiButtonEmpty iconType="cross" onClick={handleFlyoutClose} flush="left">
+          {CLOSE_LABEL}
+        </EuiButtonEmpty>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 
@@ -95,4 +107,8 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
 
 const TEST_RESULT = i18n.translate('xpack.uptime.monitorManagement.testResult', {
   defaultMessage: 'Test result',
+});
+
+const CLOSE_LABEL = i18n.translate('xpack.uptime.monitorManagement.closeButtonLabel', {
+  defaultMessage: 'Close',
 });
