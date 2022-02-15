@@ -13957,7 +13957,6 @@
     "xpack.infra.metrics.alertFlyout.createAlertPerText": "アラートのグループ化条件（オプション）",
     "xpack.infra.metrics.alertFlyout.criticalThreshold": "アラート",
     "xpack.infra.metrics.alertFlyout.docCountNoDataDisabledHelpText": "[この設定は、ドキュメントカウントアグリゲーターには適用されません。]",
-    "xpack.infra.metrics.alertFlyout.dropPartialBucketsHelpText": "これを有効にすると、{timeSize}{timeUnit}未満の場合は、評価データの最新のバケットを破棄します。",
     "xpack.infra.metrics.alertFlyout.error.aggregationRequired": "集約が必要です。",
     "xpack.infra.metrics.alertFlyout.error.customMetricFieldRequired": "フィールドが必要です。",
     "xpack.infra.metrics.alertFlyout.error.invalidFilterQuery": "フィルタークエリは無効です。",
