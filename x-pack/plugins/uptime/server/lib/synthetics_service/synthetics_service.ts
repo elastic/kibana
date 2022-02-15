@@ -51,6 +51,9 @@ export class SyntheticsService {
 
   public locations: ServiceLocations;
 
+  private indexTemplateExists?: boolean;
+  private indexTemplateInstalling?: boolean;
+
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
@@ -70,23 +73,34 @@ export class SyntheticsService {
     //     this.apiKey = apiKey;
     //   }
     // });
-
     this.setupIndexTemplates();
   }
 
   private setupIndexTemplates() {
-    installSyntheticsIndexTemplates(this.server).then(
-      (result) => {
-        if (result.name === 'synthetics' && result.install_status === 'installed') {
-          this.logger.info('Installed synthetics index templates');
-        } else if (result.name === 'synthetics' && result.install_status === 'install_failed') {
+    if (this.indexTemplateExists) {
+      // if already installed, don't need to reinstall
+      return;
+    }
+
+    if (!this.indexTemplateInstalling) {
+      installSyntheticsIndexTemplates(this.server).then(
+        (result) => {
+          this.indexTemplateInstalling = false;
+          if (result.name === 'synthetics' && result.install_status === 'installed') {
+            this.logger.info('Installed synthetics index templates');
+            this.indexTemplateExists = true;
+          } else if (result.name === 'synthetics' && result.install_status === 'install_failed') {
+            this.logger.warn(new IndexTemplateInstallationError());
+            this.indexTemplateExists = false;
+          }
+        },
+        () => {
+          this.indexTemplateInstalling = false;
           this.logger.warn(new IndexTemplateInstallationError());
         }
-      },
-      () => {
-        this.logger.warn(new IndexTemplateInstallationError());
-      }
-    );
+      );
+      this.indexTemplateInstalling = true;
+    }
   }
 
   public registerSyncTask(taskManager: TaskManagerSetupContract) {
@@ -105,6 +119,8 @@ export class SyntheticsService {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
               const { state } = taskInstance;
+
+              service.setupIndexTemplates();
 
               getServiceLocations(service.server).then((result) => {
                 service.locations = result.locations;
@@ -283,10 +299,13 @@ export class SyntheticsService {
       perPage: 10000,
     });
 
-    hydrateSavedObjects({
-      monitors: findResult.saved_objects as unknown as SyntheticsMonitorSavedObject[],
-      server: this.server,
-    });
+    if (this.indexTemplateExists) {
+      // without mapping, querying won't make sense
+      hydrateSavedObjects({
+        monitors: findResult.saved_objects as unknown as SyntheticsMonitorSavedObject[],
+        server: this.server,
+      });
+    }
 
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
       ...attributes,
