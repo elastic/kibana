@@ -8,10 +8,11 @@
 import React, { Suspense, useCallback, useState } from 'react';
 
 import { useKibana } from '../../utils/kibana_react';
-import { useFetchAlertData, useFetchAlertDetail } from './helpers';
 import { CASES_OWNER, CASES_PATH } from './constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../..';
+import { useFetchAlertDetail } from './use_fetch_alert_detail';
+import { useFetchAlertData } from './use_fetch_alert_data';
 
 interface CasesProps {
   userCanCrud: boolean;
