@@ -1123,8 +1123,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
 
     'euiSuggest.stateUnsavedTooltip': i18n.translate('core.euiSuggest.stateUnsavedTooltip', {
-      defaultMessage:
-        'You can also utilize these additional syntax plugins to add rich content to your text.',
+      defaultMessage: 'Changes have not been saved.',
     }),
 
     'euiSuggest.stateLoading': i18n.translate('core.euiSuggest.stateLoading', {

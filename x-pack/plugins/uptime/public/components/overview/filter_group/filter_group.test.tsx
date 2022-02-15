@@ -22,7 +22,7 @@ describe('FilterGroup', () => {
       values: [],
       loading: true,
     });
-    const { getByLabelText, getByText, getAllByText } = render(<FilterGroup />);
+    const { getByLabelText, getAllByText } = render(<FilterGroup />);
 
     await waitFor(() => {
       const popoverButton = getByLabelText(popoverButtonLabel);
