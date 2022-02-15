@@ -42,6 +42,12 @@ export const errors = {
       defaultMessage: `Invalid label major mode is specified. Supported label major modes: {labelMajorModes}`,
       values: { labelMajorModes: Object.values(GaugeLabelMajorModes).join(', ') },
     }),
+  centralMajorNotSupportedForShapeError: (shape: string) =>
+    i18n.translate('expressionGauge.functions.gauge.errors.centralMajorNotSupportedForShapeError', {
+      defaultMessage:
+        'Fields "centralMajor" and "centralMajorMode" are not supported by the shape "{shape}"',
+      values: { shape },
+    }),
 };
 
 const validateAccessor = (
@@ -182,17 +188,27 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     validateAccessor(args.max, data.columns);
     validateAccessor(args.goal, data.columns);
 
+    const { centralMajor, centralMajorMode, ...restArgs } = args;
+
+    if (!isRoundShape(args.shape) && (centralMajorMode || centralMajor)) {
+      throw new Error(errors.centralMajorNotSupportedForShapeError(args.shape));
+    }
+
+    const centralMajorArgs = isRoundShape(args.shape)
+      ? {
+          centralMajorMode: !centralMajorMode ? GaugeCentralMajorModes.AUTO : centralMajorMode,
+          centralMajor,
+        }
+      : {};
+
     return {
       type: 'render',
       as: EXPRESSION_GAUGE_NAME,
       value: {
         data,
         args: {
-          ...args,
-          centralMajorMode:
-            !args.centralMajorMode && isRoundShape(args.shape)
-              ? GaugeCentralMajorModes.AUTO
-              : args.centralMajorMode,
+          ...restArgs,
+          ...centralMajorArgs,
           ariaLabel:
             args.ariaLabel ??
             (handlers.variables?.embeddableTitle as string) ??

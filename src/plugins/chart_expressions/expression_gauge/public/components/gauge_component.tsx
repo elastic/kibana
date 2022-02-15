@@ -111,7 +111,7 @@ function normalizeBands(
 }
 
 function getTitle(
-  majorMode: GaugeLabelMajorMode | GaugeCentralMajorMode,
+  majorMode?: GaugeLabelMajorMode | GaugeCentralMajorMode,
   major?: string,
   fallbackTitle?: string
 ) {
@@ -255,7 +255,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const labelMajorTitle = getTitle(labelMajorMode, labelMajor, metricColumn?.name);
 
     // added extra space for nice rendering
-    const majorExtraSpaces = isRoundShape(gaugeType) ? '   ' : '';
+    const majorExtraSpaces = isBulletShape(gaugeType) ? '   ' : '';
     const minorExtraSpaces = isBulletShape(gaugeType) ? '  ' : '';
 
     const extraTitles = isRoundShape(gaugeType)

@@ -40,7 +40,7 @@ export interface GaugeState {
   labelMajorMode: GaugeLabelMajorMode;
   labelMajor?: string;
   labelMinor?: string;
-  centralMajorMode: GaugeCentralMajorMode;
+  centralMajorMode?: GaugeCentralMajorMode;
   centralMajor?: string;
   colorMode?: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteParams>;
@@ -52,7 +52,6 @@ export type GaugeArguments = GaugeState & {
   colorMode: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteState>;
   ariaLabel?: string;
-  centralMajorMode?: GaugeCentralMajorMode;
 };
 
 export type GaugeInput = Datatable;
