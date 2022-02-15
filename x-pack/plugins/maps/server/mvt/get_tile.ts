@@ -71,6 +71,7 @@ export async function getEsTile({
               'Accept-Encoding': 'gzip',
             },
             asStream: true,
+            meta: true,
           }
         );
       }
