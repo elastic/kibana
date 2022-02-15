@@ -13,10 +13,10 @@ import {
   EuiFieldText,
   EuiCheckbox,
   EuiFormRow,
-  EuiDescribedFormGroup,
   EuiSpacer,
 } from '@elastic/eui';
 import { ComboBox } from '../combo_box';
+import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
 import { useBrowserAdvancedFieldsContext, useBrowserSimpleFieldsContext } from '../contexts';
 
@@ -27,9 +27,11 @@ import { ThrottlingFields } from './throttling_fields';
 
 interface Props {
   validate: Validation;
+  children?: React.ReactNode;
+  minColumnWidth?: string;
 }
 
-export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
+export const BrowserAdvancedFields = memo<Props>(({ validate, children, minColumnWidth }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
   const { fields: simpleFields } = useBrowserSimpleFieldsContext();
 
@@ -48,7 +50,8 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
     >
       <EuiSpacer size="m" />
       {simpleFields[ConfigKey.SOURCE_ZIP_URL] && (
-        <EuiDescribedFormGroup
+        <DescribedFormGroupWithWrap
+          minColumnWidth={minColumnWidth}
           title={
             <h4>
               <FormattedMessage
@@ -114,9 +117,10 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
               data-test-subj="syntheticsBrowserJourneyFiltersTags"
             />
           </EuiFormRow>
-        </EuiDescribedFormGroup>
+        </DescribedFormGroupWithWrap>
       )}
-      <EuiDescribedFormGroup
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -210,9 +214,10 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
             data-test-subj="syntheticsBrowserSyntheticsArgs"
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
+      </DescribedFormGroupWithWrap>
 
-      <ThrottlingFields validate={validate} />
+      <ThrottlingFields validate={validate} minColumnWidth={minColumnWidth} />
+      {children}
     </EuiAccordion>
   );
 });

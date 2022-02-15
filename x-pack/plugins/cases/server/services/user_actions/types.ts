@@ -75,7 +75,6 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  subCaseId?: string;
   attachmentId?: string;
   connectorId?: string;
   action?: UserAction;

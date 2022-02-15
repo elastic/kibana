@@ -101,7 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithRuntimeMapping.id,
         transformConfigWithRuntimeMapping
       );
-
       await transform.api.createAndRunTransform(
         transformConfigWithLatest.id,
         transformConfigWithLatest

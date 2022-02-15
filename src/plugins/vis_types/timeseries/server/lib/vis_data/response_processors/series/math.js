@@ -7,6 +7,7 @@
  */
 
 import { convertIntervalToUnit } from '../../helpers/unit_to_seconds';
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
 import { startsWith, flatten, values, first, last } from 'lodash';
@@ -20,7 +21,7 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
     // Filter the results down to only the ones that match the series.id. Sometimes
     // there will be data from other series mixed in.
     results = results.filter((s) => {
-      if (s.id.split(/:/)[0] === series.id) {
+      if (s.id.split(SERIES_SEPARATOR)[0] === series.id) {
         return false;
       }
       return true;

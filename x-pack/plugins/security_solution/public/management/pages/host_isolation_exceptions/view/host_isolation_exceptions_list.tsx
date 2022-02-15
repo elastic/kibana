@@ -50,6 +50,21 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   typeof ExceptionItem
 >;
 
+const getPaginationObject = ({
+  total = 0,
+  perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
+  page = 1,
+}: {
+  total?: number;
+  perPage?: number;
+  page?: number;
+}) => ({
+  totalItemCount: total,
+  pageSize: perPage,
+  pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+  pageIndex: page - 1,
+});
+
 export const HostIsolationExceptionsList = () => {
   const history = useHistory();
   const privileges = useUserPrivileges().endpointPrivileges;
@@ -76,7 +91,7 @@ export const HostIsolationExceptionsList = () => {
 
   const includedPoliciesParam = location.included_policies;
 
-  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList({
+  const { isLoading, isRefetching, data, error, refetch } = useFetchHostIsolationExceptionsList({
     filter: location.filter,
     page: location.page_index,
     perPage: location.page_size,
@@ -101,12 +116,11 @@ export const HostIsolationExceptionsList = () => {
     },
   });
 
-  const pagination = {
-    totalItemCount: data?.total ?? 0,
-    pageSize: data?.per_page ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
-    pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-    pageIndex: (data?.page ?? 1) - 1,
-  };
+  const pagination = getPaginationObject({
+    total: data?.total,
+    perPage: data?.per_page,
+    page: data?.page,
+  });
 
   const listItems = data?.data || [];
   const allListItems = allData?.data || [];
@@ -198,7 +212,9 @@ export const HostIsolationExceptionsList = () => {
     [navigateCallback]
   );
 
-  if ((isLoading || isLoadingAll) && !hasDataToShow) {
+  const isSearchLoading = isLoading || isRefetching;
+
+  if ((isSearchLoading || isLoadingAll) && !hasDataToShow) {
     return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLoader" />;
   }
 
@@ -278,7 +294,7 @@ export const HostIsolationExceptionsList = () => {
         itemComponentProps={handleItemComponentProps}
         onChange={handlePaginatedContentChange}
         error={error?.message}
-        loading={isLoading}
+        loading={isSearchLoading}
         pagination={pagination}
         contentClassName="host-isolation-exceptions-container"
         data-test-subj="hostIsolationExceptionsContent"

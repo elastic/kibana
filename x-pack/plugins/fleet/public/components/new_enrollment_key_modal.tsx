@@ -76,13 +76,8 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
   agentPolicies = [],
 }) => {
   const { notifications } = useStartServices();
-  const policyIdDefaultValue = agentPolicies.find((agentPolicy) => agentPolicy.is_default)?.id;
   const form = useCreateApiKeyForm(
-    policyIdDefaultValue
-      ? policyIdDefaultValue
-      : agentPolicies.length > 0
-      ? agentPolicies[0].id
-      : undefined,
+    agentPolicies.length > 0 ? agentPolicies[0].id : undefined,
     (key: EnrollmentAPIKey) => {
       onClose(key);
       notifications.toasts.addSuccess(

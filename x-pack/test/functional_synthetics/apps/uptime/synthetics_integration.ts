@@ -555,7 +555,7 @@ export default function (providerContext: FtrProviderContext) {
             config: {
               screenshots: 'on',
               schedule: '@every 3m',
-              timeout: '16s',
+              timeout: null,
               tags: [config.tags],
               throttling: '5d/3u/20l',
               'service.name': config.apmServiceName,
@@ -605,7 +605,7 @@ export default function (providerContext: FtrProviderContext) {
             config: {
               screenshots: 'on',
               schedule: '@every 3m',
-              timeout: '16s',
+              timeout: null,
               tags: [config.tags],
               throttling: '5d/3u/20l',
               'service.name': config.apmServiceName,
@@ -664,7 +664,7 @@ export default function (providerContext: FtrProviderContext) {
             config: {
               screenshots: advancedConfig.screenshots,
               schedule: '@every 3m',
-              timeout: '16s',
+              timeout: null,
               tags: [config.tags],
               throttling: '1337d/1338u/1339l',
               'service.name': config.apmServiceName,
@@ -728,7 +728,7 @@ export default function (providerContext: FtrProviderContext) {
             config: {
               screenshots: advancedConfig.screenshots,
               schedule: '@every 3m',
-              timeout: '16s',
+              timeout: null,
               tags: [config.tags],
               'service.name': config.apmServiceName,
               'source.zip_url.url': config.zipUrl,

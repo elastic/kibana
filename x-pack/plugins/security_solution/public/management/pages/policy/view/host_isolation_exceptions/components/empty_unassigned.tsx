@@ -7,27 +7,26 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { getPolicyHostIsolationExceptionsPath } from '../../../../../common/routing';
+import React, { useCallback } from 'react';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
+import { usePolicyDetailsHostIsolationExceptionsNavigateCallback } from '../../policy_hooks';
+import { useGetLinkTo } from './use_policy_host_isolation_exceptions_empty_hooks';
 
 export const PolicyHostIsolationExceptionsEmptyUnassigned = ({
   policy,
-  toHostIsolationList,
 }: {
   policy: PolicyData;
-  toHostIsolationList: string;
 }) => {
-  const history = useHistory();
-
-  const onClickPrimaryButtonHandler = () =>
-    history.push(
-      getPolicyHostIsolationExceptionsPath(policy.id, {
-        ...location,
+  const { onClickHandler, toRouteUrl } = useGetLinkTo(policy.id, policy.name);
+  const navigateCallback = usePolicyDetailsHostIsolationExceptionsNavigateCallback();
+  const onClickPrimaryButtonHandler = useCallback(
+    () =>
+      navigateCallback({
         show: 'list',
-      })
-    );
+      }),
+    [navigateCallback]
+  );
+
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt
@@ -60,7 +59,8 @@ export const PolicyHostIsolationExceptionsEmptyUnassigned = ({
               defaultMessage="Assign host isolation exceptions"
             />
           </EuiButton>,
-          <EuiLink href={toHostIsolationList}>
+          // eslint-disable-next-line @elastic/eui/href-or-on-click
+          <EuiLink onClick={onClickHandler} href={toRouteUrl}>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unassigned.secondaryAction"
               defaultMessage="Manage host isolation exceptions"

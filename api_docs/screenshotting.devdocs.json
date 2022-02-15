@@ -6,76 +6,7 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "screenshotting",
-        "id": "def-public.LayoutTypes",
-        "type": "Object",
-        "tags": [],
-        "label": "LayoutTypes",
-        "description": [
-          "\nSupported layout types."
-        ],
-        "path": "x-pack/plugins/screenshotting/common/layout.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "screenshotting",
-            "id": "def-public.LayoutTypes.PRESERVE_LAYOUT",
-            "type": "string",
-            "tags": [],
-            "label": "PRESERVE_LAYOUT",
-            "description": [],
-            "path": "x-pack/plugins/screenshotting/common/layout.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "screenshotting",
-            "id": "def-public.LayoutTypes.PRINT",
-            "type": "string",
-            "tags": [],
-            "label": "PRINT",
-            "description": [],
-            "path": "x-pack/plugins/screenshotting/common/layout.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "screenshotting",
-            "id": "def-public.LayoutTypes.CANVAS",
-            "type": "string",
-            "tags": [],
-            "label": "CANVAS",
-            "description": [],
-            "path": "x-pack/plugins/screenshotting/common/layout.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
-    "start": {
-      "parentPluginId": "screenshotting",
-      "id": "def-public.ScreenshottingStart",
-      "type": "Type",
-      "tags": [],
-      "label": "ScreenshottingStart",
-      "description": [
-        "\nStart public contract."
-      ],
-      "signature": [
-        {
-          "pluginId": "screenshotting",
-          "scope": "public",
-          "docId": "kibScreenshottingPluginApi",
-          "section": "def-public.ScreenshottingSetup",
-          "text": "ScreenshottingSetup"
-        }
-      ],
-      "path": "x-pack/plugins/screenshotting/public/plugin.tsx",
-      "deprecated": false,
-      "lifecycle": "start",
-      "initialIsOpen": true
-    }
+    "objects": []
   },
   "server": {
     "classes": [],
@@ -282,6 +213,9 @@
           ],
           "path": "x-pack/plugins/screenshotting/server/plugin.ts",
           "deprecated": false,
+          "returnComment": [
+            "Observable with screenshotting results."
+          ],
           "children": [
             {
               "parentPluginId": "screenshotting",
@@ -301,13 +235,9 @@
                   "text": "ScreenshotOptions"
                 }
               ],
-              "path": "x-pack/plugins/screenshotting/server/plugin.ts",
-              "deprecated": false,
-              "isRequired": true
+              "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+              "deprecated": false
             }
-          ],
-          "returnComment": [
-            "Observable with screenshotting results."
           ]
         }
       ],
@@ -321,22 +251,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "screenshotting",
-        "id": "def-common.Context",
-        "type": "Type",
-        "tags": [],
-        "label": "Context",
-        "description": [
-          "\nScreenshot context.\nThis is a serializable object that can be passed from the screenshotting backend and then deserialized on the target page."
-        ],
-        "signature": [
-          "{ [x: string]: unknown; }"
-        ],
-        "path": "x-pack/plugins/screenshotting/common/context.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "screenshotting",
         "id": "def-common.LayoutParams",

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { TimeExpressionSelect } from './time_expression_select';
 
 describe('TimeExpressionSelect component', () => {

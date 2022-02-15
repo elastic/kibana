@@ -431,7 +431,6 @@ export const getMockAlertCasesResponse = () => ({
       type: 'cases-comments',
       id: '3bb5cc10-9249-11eb-85b7-254c8af1a983',
       attributes: {
-        associationType: 'case',
         type: 'alert',
         alertId: '54802763917f521249c9f68d0d4be0c26cc538404c26dfed1ae7dcfa94ea2226',
         index: '.siem-signals-default-000001',

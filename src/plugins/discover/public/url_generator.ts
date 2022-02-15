@@ -12,8 +12,14 @@ import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { VIEW_MODE } from './components/view_mode_toggle';
 
+/**
+ * @deprecated
+ */
 export const DISCOVER_APP_URL_GENERATOR = 'DISCOVER_APP_URL_GENERATOR';
 
+/**
+ * @deprecated
+ */
 export interface DiscoverUrlGeneratorState {
   /**
    * Optionally set saved search ID.
@@ -87,6 +93,9 @@ interface Params {
 
 export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 
+/**
+ * @deprecated
+ */
 export class DiscoverUrlGenerator
   implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR>
 {

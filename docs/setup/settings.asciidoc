@@ -152,6 +152,9 @@ This value must be a positive integer. *Default: `30000`*
  | Time in milliseconds for {es} to wait for responses from shards.
 Set to 0 to disable. *Default: `30000`*
 
+| `elasticsearch.compression:`
+| Specifies whether {kib} should use compression for communications with {es}. *Default: `false`*
+
 | `elasticsearch.sniffInterval:`
  | Time in milliseconds between requests to check {es} for an updated list of
 nodes. *Default: `false`*

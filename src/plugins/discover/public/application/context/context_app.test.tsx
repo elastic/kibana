@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
@@ -19,6 +19,7 @@ import { indexPatternsMock } from '../../__mocks__/index_patterns';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { themeServiceMock } from '../../../../../core/public/mocks';
+import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 
 const mockFilterManager = createFilterManagerMock();
@@ -55,6 +56,7 @@ describe('ContextApp test', () => {
     },
     filterManager: mockFilterManager,
     uiSettings: uiSettingsMock,
+    storage: new LocalStorageMock({}),
   } as unknown as DiscoverServices;
 
   const defaultProps = {

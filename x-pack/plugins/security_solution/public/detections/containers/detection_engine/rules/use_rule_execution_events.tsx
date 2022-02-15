@@ -10,21 +10,18 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRuleExecutionEvents } from './api';
 import * as i18n from './translations';
 
-// TODO: https://github.com/elastic/kibana/pull/121644 clean up
 export const useRuleExecutionEvents = (ruleId: string) => {
   const { addError } = useAppToasts();
 
   return useQuery(
-    'ruleExecutionEvents',
+    ['ruleExecutionEvents', ruleId],
     async ({ signal }) => {
       const response = await fetchRuleExecutionEvents({ ruleId, signal });
       return response.events;
     },
     {
       onError: (e) => {
-        // TODO: Should it be responsible for showing toasts?
-        // TODO: Change the title
-        addError(e, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
+        addError(e, { title: i18n.RULE_EXECUTION_EVENTS_FETCH_FAILURE });
       },
     }
   );

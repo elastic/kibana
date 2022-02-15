@@ -31,5 +31,6 @@
     "TLSv1.2",
     "TLSv1.3"
   ],
-  "name": "Test HTTP Monitor 04"
+  "name": "Test HTTP Monitor 04",
+  "namespace": "testnamespace"
 }

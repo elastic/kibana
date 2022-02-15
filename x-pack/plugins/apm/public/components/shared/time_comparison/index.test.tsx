@@ -12,7 +12,7 @@ import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-} from '../../../utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { getSelectOptions, TimeComparison } from './';
 import * as urlHelpers from '../../shared/links/url_helpers';
 import moment from 'moment';

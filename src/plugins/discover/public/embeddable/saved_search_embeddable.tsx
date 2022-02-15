@@ -12,6 +12,7 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { KibanaExecutionContext } from 'kibana/public';
 import { Container, Embeddable } from '../../../embeddable/public';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
@@ -62,6 +63,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     hits?: ElasticSearchHit[];
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
+    onUpdateRowHeight?: (rowHeight?: number) => void;
   };
 
 interface SearchEmbeddableConfig {
@@ -167,14 +169,21 @@ export class SavedSearchEmbeddable
     this.searchProps!.isLoading = true;
 
     this.updateOutput({ loading: true, error: undefined });
-    const executionContext = {
+
+    const parentContext = this.input.executionContext;
+    const child: KibanaExecutionContext = {
       type: this.type,
       name: 'discover',
       id: this.savedSearch.id!,
       description: this.output.title || this.output.defaultTitle || '',
       url: this.output.editUrl,
-      parent: this.input.executionContext,
     };
+    const executionContext = parentContext
+      ? {
+          ...parentContext,
+          child,
+        }
+      : child;
 
     try {
       // Make the request
@@ -293,6 +302,10 @@ export class SavedSearchEmbeddable
       useNewFieldsApi: !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
       showTimeCol: !this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       ariaLabelledBy: 'documentsAriaLabel',
+      rowHeightState: this.input.rowHeight || this.savedSearch.rowHeight,
+      onUpdateRowHeight: (rowHeight) => {
+        this.updateInput({ rowHeight });
+      },
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -342,6 +355,7 @@ export class SavedSearchEmbeddable
           );
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
+    searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
@@ -414,9 +428,9 @@ export class SavedSearchEmbeddable
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const props = {
+      savedSearch: this.savedSearch,
       searchProps,
       useLegacyTable,
-      refs: domNode,
     };
     if (searchProps.services) {
       ReactDOM.render(

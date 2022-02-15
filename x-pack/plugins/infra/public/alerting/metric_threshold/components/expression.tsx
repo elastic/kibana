@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
 import {
   EuiAccordion,
   EuiButtonEmpty,
@@ -39,7 +38,7 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { ExpressionRow } from './expression_row';
-
+import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
@@ -66,7 +65,7 @@ export const Expressions: React.FC<Props> = (props) => {
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit | undefined>('m');
+  const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
@@ -168,7 +167,7 @@ export const Expressions: React.FC<Props> = (props) => {
           ...c,
           timeUnit: tu,
         })) || [];
-      setTimeUnit(tu as Unit);
+      setTimeUnit(tu as TimeUnitChar);
       setRuleParams('criteria', criteria as AlertParams['criteria']);
     },
     [ruleParams.criteria, setRuleParams]

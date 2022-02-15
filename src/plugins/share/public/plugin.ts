@@ -11,7 +11,6 @@ import './index.scss';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
-import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
 import {
   UrlGeneratorsService,
   UrlGeneratorsSetup,
@@ -20,8 +19,15 @@ import {
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
-import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
+import {
+  BrowserShortUrlClientFactory,
+  BrowserShortUrlClientFactoryCreateParams,
+} from './url_service/short_urls/short_url_client_factory';
+import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 import { AnonymousAccessServiceContract } from '../common';
+import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
+import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
+import type { BrowserUrlService } from './types';
 
 /** @public */
 export type SharePluginSetup = ShareMenuRegistrySetup & {
@@ -35,7 +41,7 @@ export type SharePluginSetup = ShareMenuRegistrySetup & {
   /**
    * Utilities to work with URL locators and short URLs.
    */
-  url: UrlService;
+  url: BrowserUrlService;
 
   /**
    * Accepts serialized values for extracting a locator, migrating state from a provided version against
@@ -61,7 +67,7 @@ export type SharePluginStart = ShareMenuManagerStart & {
   /**
    * Utilities to work with URL locators and short URLs.
    */
-  url: UrlService;
+  url: BrowserUrlService;
 
   /**
    * Accepts serialized values for extracting a locator, migrating state from a provided version against
@@ -76,16 +82,16 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly urlGeneratorsService = new UrlGeneratorsService();
 
   private redirectManager?: RedirectManager;
-  private url?: UrlService;
+  private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): SharePluginSetup {
-    const { application, http } = core;
+    const { http } = core;
     const { basePath } = http;
 
-    this.url = new UrlService({
+    this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
       baseUrl: basePath.get(),
       version: this.initializerContext.env.packageInfo.version,
       navigate: async ({ app, path, state }, { replace = false } = {}) => {
@@ -104,32 +110,21 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         });
         return url;
       },
-      shortUrls: () => ({
-        get: () => ({
-          create: async () => {
-            throw new Error('Not implemented');
-          },
-          get: async () => {
-            throw new Error('Not implemented');
-          },
-          delete: async () => {
-            throw new Error('Not implemented');
-          },
-          resolve: async () => {
-            throw new Error('Not implemented.');
-          },
+      shortUrls: ({ locators }) =>
+        new BrowserShortUrlClientFactory({
+          http,
+          locators,
         }),
-      }),
     });
 
     this.url.locators.create(new LegacyShortUrlLocatorDefinition());
-
-    application.register(createShortUrlRedirectApp(core, window.location, this.url));
+    this.url.locators.create(new ShortUrlRedirectLocatorDefinition());
 
     this.redirectManager = new RedirectManager({
       url: this.url,
     });
-    this.redirectManager.registerRedirectApp(core);
+    this.redirectManager.registerLocatorRedirectApp(core);
+    this.redirectManager.registerLegacyShortUrlRedirectApp(core);
 
     return {
       ...this.shareMenuRegistry.setup(),
@@ -146,12 +141,15 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   }
 
   public start(core: CoreStart): SharePluginStart {
+    const sharingContextMenuStart = this.shareContextMenu.start(
+      core,
+      this.url!,
+      this.shareMenuRegistry.start(),
+      this.anonymousAccessServiceProvider
+    );
+
     return {
-      ...this.shareContextMenu.start(
-        core,
-        this.shareMenuRegistry.start(),
-        this.anonymousAccessServiceProvider
-      ),
+      ...sharingContextMenuStart,
       urlGenerators: this.urlGeneratorsService.start(core),
       url: this.url!,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),

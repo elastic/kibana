@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';

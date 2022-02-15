@@ -10,7 +10,7 @@ import { act } from '@testing-library/react';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
-import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 
 import { AccessAgreementPage } from './access_agreement_page';

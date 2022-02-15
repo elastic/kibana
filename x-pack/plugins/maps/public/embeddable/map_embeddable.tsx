@@ -14,7 +14,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import { type Filter, compareFilters } from '@kbn/es-query';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   Embeddable,
@@ -28,7 +28,6 @@ import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/pu
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   APPLY_FILTER_TRIGGER,
-  esFilters,
   TimeRange,
   Query,
 } from '../../../../../src/plugins/data/public';
@@ -284,7 +283,7 @@ export class MapEmbeddable
     if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
-      !esFilters.compareFilters(this._getFilters(), this._prevFilters) ||
+      !compareFilters(this._getFilters(), this._prevFilters) ||
       this._getSearchSessionId() !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({

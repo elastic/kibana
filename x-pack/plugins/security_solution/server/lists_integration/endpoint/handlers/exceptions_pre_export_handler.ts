@@ -6,13 +6,52 @@
  */
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExtensionPoint } from '../../../../../lists/server';
+import { ExceptionsListPreExportServerExtension } from '../../../../../lists/server';
+import {
+  TrustedAppValidator,
+  HostIsolationExceptionsValidator,
+  EventFilterValidator,
+} from '../validators';
 
+type ValidatorCallback = ExceptionsListPreExportServerExtension['callback'];
 export const getExceptionsPreExportHandler = (
-  endpointAppContext: EndpointAppContextService
-): (ExtensionPoint & { type: 'exceptionsListPreExport' })['callback'] => {
-  return async function ({ data }) {
-    // Individual validators here
+  endpointAppContextService: EndpointAppContextService
+): ValidatorCallback => {
+  return async function ({ data, context: { request, exceptionListClient } }) {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
+    const { listId: maybeListId, id } = data;
+    let listId: string | null | undefined = maybeListId;
+
+    if (!listId && id) {
+      listId = (await exceptionListClient.getExceptionList(data))?.list_id ?? null;
+    }
+
+    if (!listId) {
+      return data;
+    }
+
+    // Validate Trusted Applications
+    if (TrustedAppValidator.isTrustedApp({ listId })) {
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreExport();
+      return data;
+    }
+    // Host Isolation Exceptions validations
+    if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreExport();
+      return data;
+    }
+
+    // Event Filter validations
+    if (EventFilterValidator.isEventFilter({ listId })) {
+      await new EventFilterValidator(endpointAppContextService, request).validatePreExport();
+      return data;
+    }
 
     return data;
   };
