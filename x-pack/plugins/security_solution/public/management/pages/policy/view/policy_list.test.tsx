@@ -11,13 +11,10 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../../com
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
 import { PolicyList } from './policy_list';
-import { POLICIES_PATH } from '../../../../../common/constants';
 
 jest.mock('../../../services/policies/policies');
 
-(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
-  sendGetEndpointSpecificPackagePoliciesMock
-);
+const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 
 describe('When on the policy list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -29,13 +26,15 @@ describe('When on the policy list page', () => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<PolicyList />));
-
-    act(() => {
-      history.push(POLICIES_PATH);
-    });
   });
+
+  afterEach(() => {
+    getPackagePolicies.mockReset();
+  });
+
   describe('and data exists', () => {
     beforeEach(async () => {
+      getPackagePolicies.mockImplementation(sendGetEndpointSpecificPackagePoliciesMock);
       render();
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
@@ -58,6 +57,86 @@ describe('When on the policy list page', () => {
       const updatedByCells = renderResult.getAllByTestId('updated-by-avatar');
       expect(updatedByCells).toBeTruthy();
       expect(updatedByCells.length).toBe(5);
+    });
+  });
+  describe('pagination', () => {
+    beforeEach(async () => {
+      getPackagePolicies.mockImplementation(async ({ page, perPage }) => {
+        const response = await sendGetEndpointSpecificPackagePoliciesMock({ page, perPage });
+        response.total = 100; // trigger the UI to show pagination
+        return response;
+      });
+      render();
+      await waitFor(() => {
+        expect(getPackagePolicies).toHaveBeenCalled();
+      });
+    });
+    it('should pass the correct page value to the api', async () => {
+      act(() => {
+        renderResult.getByTestId('pagination-button-next').click();
+      });
+      await waitFor(() => {
+        expect(getPackagePolicies).toHaveBeenCalledTimes(2);
+      });
+      expect(getPackagePolicies.mock.calls[1][1].query).toEqual({
+        page: 2,
+        perPage: 20,
+      });
+    });
+    it('should pass the correct pageSize value to the api', async () => {
+      act(() => {
+        renderResult.getByTestId('tablePaginationPopoverButton').click();
+      });
+      const pageSize10 = await renderResult.findByTestId('tablePagination-10-rows');
+      act(() => {
+        pageSize10.click();
+      });
+
+      await waitFor(() => {
+        expect(getPackagePolicies).toHaveBeenCalledTimes(2);
+      });
+      expect(getPackagePolicies.mock.calls[1][1].query).toEqual({
+        page: 1,
+        perPage: 10,
+      });
+    });
+    it('should call the api with the initial pagination values taken from the url', async () => {
+      act(() => {
+        history.push('/administration/policies?page=3&pageSize=50');
+      });
+      await waitFor(() => {
+        expect(getPackagePolicies).toHaveBeenCalledTimes(2);
+      });
+      expect(getPackagePolicies.mock.calls[1][1].query).toEqual({
+        page: 3,
+        perPage: 50,
+      });
+    });
+    it('should reset page back to 1 if the user is on a page > 1 and they change page size', async () => {
+      // setup on a different page
+      act(() => {
+        history.push('/administration/policies?page=2&pageSize=20');
+      });
+      await waitFor(() => {
+        expect(getPackagePolicies).toHaveBeenCalledTimes(2);
+      });
+
+      // change pageSize
+      act(() => {
+        renderResult.getByTestId('tablePaginationPopoverButton').click();
+      });
+      const pageSize10 = await renderResult.findByTestId('tablePagination-10-rows');
+      act(() => {
+        pageSize10.click();
+      });
+
+      await waitFor(() => {
+        expect(getPackagePolicies).toHaveBeenCalledTimes(3);
+      });
+      expect(getPackagePolicies.mock.calls[2][1].query).toEqual({
+        page: 1,
+        perPage: 10,
+      });
     });
   });
 });

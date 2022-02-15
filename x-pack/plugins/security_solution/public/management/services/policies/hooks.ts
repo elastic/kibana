@@ -23,7 +23,7 @@ export function useGetEndpointSpecificPolicies(
 ): QueryObserverResult<GetPolicyListResponse> {
   const http = useHttp();
   return useQuery<GetPolicyListResponse, ServerApiError>(
-    ['endpointSpecificPolicies'],
+    ['endpointSpecificPolicies', page, perPage],
     () => {
       return sendGetEndpointSpecificPackagePolicies(http, {
         query: {

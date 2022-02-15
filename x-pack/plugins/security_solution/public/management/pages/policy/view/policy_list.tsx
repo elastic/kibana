@@ -27,12 +27,14 @@ import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  // load the list of policies>
-  const result = useGetEndpointSpecificPolicies();
 
-  const totalItemCount = useMemo(() => {
-    return result.data ? result.data.items.length : 0;
-  }, [result]);
+  // load the list of policies
+  const result = useGetEndpointSpecificPolicies({
+    page: pagination.page,
+    perPage: pagination.pageSize,
+  });
+
+  const totalItemCount = result?.data?.total ?? 0;
 
   const policyColumns = useMemo(() => {
     const updatedAtColumnName = i18n.translate('xpack.securitySolution.policy.list.updatedAt', {
@@ -162,6 +164,12 @@ export const PolicyList = memo(() => {
     };
   }, [totalItemCount, pageSizeOptions, pagination.page, pagination.pageSize]);
 
+  const policyListErrorMessage =
+    result.error &&
+    i18n.translate('xpack.securitySolution.policy.list.errorMessage', {
+      defaultMessage: 'Error while retrieving list of policies',
+    });
+
   return (
     <AdministrationListPage
       data-test-subj="policyListPage"
@@ -169,29 +177,27 @@ export const PolicyList = memo(() => {
         defaultMessage: 'Policy List',
       })}
       subtitle={i18n.translate('xpack.securitySolution.policy.list.subtitle', {
-        defaultMessage: 'List of all the policies',
+        defaultMessage:
+          'Use endpoint policies to customize endpoint security protections and other configurations',
       })}
     >
-      {result.data && (
-        <>
-          <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
-            <FormattedMessage
-              id="xpack.securitySolution.policy.list.totalCount"
-              defaultMessage="Showing {totalItemCount, plural, one {# policy} other {# policies}}"
-              values={{ totalItemCount }}
-            />
-          </EuiText>
-          <EuiHorizontalRule margin="xs" />
-          <EuiBasicTable
-            data-test-subj="policyListTable"
-            items={result.data.items}
-            columns={policyColumns}
-            pagination={tablePagination}
-            onChange={handleTableOnChange}
-            loading={result.isLoading}
-          />
-        </>
-      )}
+      <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
+        <FormattedMessage
+          id="xpack.securitySolution.policy.list.totalCount"
+          defaultMessage="Showing {totalItemCount, plural, one {# policy} other {# policies}}"
+          values={{ totalItemCount }}
+        />
+      </EuiText>
+      <EuiHorizontalRule margin="xs" />
+      <EuiBasicTable
+        data-test-subj="policyListTable"
+        items={result?.data?.items || []}
+        columns={policyColumns}
+        pagination={tablePagination}
+        onChange={handleTableOnChange}
+        loading={result.isFetching}
+        error={result.error !== null ? policyListErrorMessage : ''}
+      />
     </AdministrationListPage>
   );
 });
