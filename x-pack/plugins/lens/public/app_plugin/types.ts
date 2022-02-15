@@ -142,4 +142,5 @@ export interface LensTopNavActions {
   showSaveModal: () => void;
   cancel: () => void;
   exportToCSV: () => void;
+  showUnderlyingData: () => void;
 }

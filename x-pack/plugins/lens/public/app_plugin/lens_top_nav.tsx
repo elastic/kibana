@@ -359,6 +359,19 @@ export const LensTopNavMenu = ({
             redirectToOrigin();
           }
         },
+        showUnderlyingData: () => {
+          // If Discover is not available, return
+          // If there's no data, return
+          if (!activeData) {
+            return;
+          }
+          // If Multiple tables, return
+          // If there are time shifts, return
+          const [datatable, ...otherTables] = Object.values(activeData);
+          if (otherTables.length || datatable) {
+            return;
+          }
+        },
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
