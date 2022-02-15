@@ -54,7 +54,6 @@ import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embedda
 import { TrainedModelsProvider } from './trained_models';
 import { TrainedModelsTableProvider } from './trained_models_table';
 import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
-import { MlNodesPanelProvider } from './ml_nodes_list';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -125,7 +124,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const swimLane = SwimLaneProvider(context);
   const trainedModels = TrainedModelsProvider(context, api, commonUI);
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
-  const mlNodesPanel = MlNodesPanelProvider(context);
 
   return {
     anomaliesTable,
@@ -175,6 +173,5 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     testResources,
     trainedModels,
     trainedModelsTable,
-    mlNodesPanel,
   };
 }

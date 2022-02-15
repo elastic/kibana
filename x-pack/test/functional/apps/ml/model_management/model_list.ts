@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await ml.securityUI.loginAsMlPowerUser();
         await ml.navigation.navigateToTrainedModels();
-        await ml.commonUI.waitForRefreshButtonEnabled();
+        await ml.trainedModelsTable.waitForRefreshButtonLoaded();
       });
 
       after(async () => {
@@ -172,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await ml.securityUI.loginAsMlViewer();
         await ml.navigation.navigateToTrainedModels();
-        await ml.commonUI.waitForRefreshButtonEnabled();
+        await ml.trainedModelsTable.waitForRefreshButtonLoaded();
       });
 
       after(async () => {

@@ -222,7 +222,7 @@ export function TrainedModelsTableProvider(
           await testSubjects.existOrFail('mlTrainedModelRowDetails', { timeout: 1000 });
         }
       });
-      await mlCommonUI.waitForRefreshButtonEnabled();
+      await this.waitForRefreshButtonLoaded();
     }
 
     public async assertTabContent(
