@@ -34,7 +34,7 @@ export const fetchFieldsStats = async (
     fields: fieldsToSample,
   });
 
-  const fieldStatsPromises = Object.entries(respMapping.body.fields)
+  const fieldStatsPromises = Object.entries(respMapping.fields)
     .map(([key, value], idx) => {
       const field: FieldValuePair = { fieldName: key, fieldValue: '' };
       const fieldTypes = Object.keys(value);
