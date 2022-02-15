@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 import { MapEmbeddablePersistableState } from './types';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
 import { extractReferences } from '../migrations/references';
-import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 
 export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
-  // console.log(JSON.stringify(state, null, ' '));
   const typedState = state as MapEmbeddablePersistableState;
 
   // by-reference embeddable
@@ -23,6 +22,7 @@ export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
   // by-value embeddable
   const { attributes, references } = extractReferences({
     attributes: typedState.attributes as MapSavedObjectAttributes,
+    embeddableId: typedState.id,
   });
 
   return {
@@ -32,4 +32,4 @@ export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
     },
     references,
   };
-}
+};

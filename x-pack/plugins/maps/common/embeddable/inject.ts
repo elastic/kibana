@@ -15,7 +15,7 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
 
   // by-reference embeddable
   if (!('attributes' in typedState) || typedState.attributes === undefined) {
-    typedState;
+    return typedState;
   }
 
   // by-value embeddable
@@ -27,4 +27,4 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
     ...typedState,
     attributes,
   };
-}
+};
