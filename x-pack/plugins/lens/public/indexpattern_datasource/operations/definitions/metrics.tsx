@@ -122,6 +122,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       return {
         ...oldColumn,
         label: labelLookup(field.displayName, oldColumn),
+        dataType: field.type,
         sourceField: field.name,
       };
     },

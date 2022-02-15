@@ -40,6 +40,8 @@ const toExpression = (
   const stops = state.palette?.params?.stops || [];
   const isCustomPalette = state.palette?.params?.name === CUSTOM_PALETTE;
 
+  const canColor = operation?.dataType === 'number';
+
   const paletteParams = {
     ...state.palette?.params,
     colors: stops.map(({ color }) => color),
@@ -65,7 +67,7 @@ const toExpression = (
           metricTitle: [operation?.label || ''],
           accessor: [state.accessor],
           mode: [attributes?.mode || 'full'],
-          colorMode: [state?.colorMode || ColorMode.None],
+          colorMode: !canColor ? [ColorMode.None] : [state?.colorMode || ColorMode.None],
           palette:
             state?.colorMode && state?.colorMode !== ColorMode.None
               ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
