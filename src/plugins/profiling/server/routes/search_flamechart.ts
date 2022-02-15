@@ -12,47 +12,44 @@ import { getRemoteRoutePaths } from '../../common';
 import { FlameGraph } from './flamegraph';
 import { newProjectTimeQuery } from './mappings';
 
+// Return the index that has between sampleSize..sampleSize*5 entries.
+// The starting point is the number of entries from the profiling-events-5pow6 index.
+// If there
 function getSampledTraceEventsIndex(
   sampleSize: number,
-  sampleCountFromSmallestTable: number
+  sampleCountFromPow6: number,
+  power: number
 ): [string, number, number] {
-  if (sampleCountFromSmallestTable === 0) {
-    // If this happens the returned estimatedSampleCount may be very wrong.
-    // Hardcode sampleCountFromSmallestTable to 1 else an estimatedSampleCount
-    // of zero is returned.
-    sampleCountFromSmallestTable = 1;
+  if (sampleCountFromPow6 <= 1) {
+    // Since 5^6 = 15625, we can take the shortcut to the full events index.
+    return ['profiling-events', 1, sampleSize];
   }
 
-  const sampleRates: number[] = [1000, 125, 25, 5, 1];
-
-  let tableName: string;
-  let sampleRate = 0;
-  let estimatedSampleCount = 0;
-
-  for (let i = 0; i < sampleRates.length; i++) {
-    sampleRate = sampleRates[i];
-
-    // Fractional floats have an inherent inaccuracy,
-    // see https://docs.python.org/3/tutorial/floatingpoint.htm) for details.
-    // Examples:
-    //   0.01 as float32: 0.009999999776482582092285156250 (< 0.01)
-    //   0.01 as float64: 0.010000000000000000208166817117 (> 0.01)
-    // But if "N / f >= 1", which is the case below as N is >= 1 and f is <= 1,
-    // we end up with the correct result (tested with a small Go program).
-    estimatedSampleCount = sampleCountFromSmallestTable * (sampleRates[0] / sampleRate);
-
-    if (estimatedSampleCount >= sampleSize) {
-      break;
+  if (sampleCountFromPow6 >= 5 * sampleSize) {
+    // Search in more down-sampled indexes.
+    for (let i = 7; i < 11; i++) {
+      sampleCountFromPow6 /= 5;
+      if (sampleCountFromPow6 < 5 * sampleSize) {
+        return ['profiling-events-5pow' + i, 1 / 5 ** i, sampleCountFromPow6];
+      }
     }
+
+    // If we come here, it means that the most sparse index still holds too many items.
+    // The only problem is the query time, the result set is good.
+    return ['profiling-events-5pow11', 1 / 5 ** 11, sampleCountFromPow6];
+  } else if (sampleCountFromPow6 < sampleSize) {
+    // Search in less down-sampled indexes.
+    for (let i = 5; i >= 1; i--) {
+      sampleCountFromPow6 *= 5;
+      if (sampleCountFromPow6 >= sampleSize) {
+        return ['profiling-events-5pow' + i, 1 / 5 ** i, sampleCountFromPow6];
+      }
+    }
+
+    return ['profiling-events', 1, sampleCountFromPow6 * 5];
   }
 
-  if (sampleRate === 1) {
-    tableName = 'profiling-events';
-  } else {
-    tableName = 'profiling-events-' + sampleRate.toString();
-  }
-
-  return [tableName, 1 / sampleRate, estimatedSampleCount];
+  return ['profiling-events', 1, sampleCountFromPow6];
 }
 
 export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandlerContext>) {
@@ -77,25 +74,29 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
 
-        // const resp = await getCountResponse(context, filter);
+        // Start with counting the results in the index down-sampled by 5^6.
+        // That is in the middle of our down-sampled indexes.
+        const pow6 = 6;
         const resp = await esClient.search({
-          index: 'profiling-events-1000',
+          index: 'profiling-events-5pow' + pow6,
           body: {
             query: filter,
             size: 0,
             track_total_hits: true,
           },
         });
+        const sampleCountFromPow6 = resp.body.hits.total.value as number;
 
-        const sampleCountFromSmallestTable = resp.body.hits.total.value as number;
+        console.log('sampleCountFromPow6', sampleCountFromPow6);
 
         const [eventsIndex, sampleRate, estimatedSampleCount] = getSampledTraceEventsIndex(
           sampleSize,
-          sampleCountFromSmallestTable
+          sampleCountFromPow6,
+          pow6
         );
 
         // eslint-disable-next-line no-console
-        console.log('Index', eventsIndex, sampleRate, estimatedSampleCount);
+        console.log('Index', eventsIndex, sampleRate, estimatedSampleCount, index);
 
         const resEvents = await esClient.search({
           index: eventsIndex,
@@ -109,7 +110,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
             aggs: {
               sample: {
                 sampler: {
-                  shard_size: sampleSize,
+                  shard_size: 100000,
                 },
                 aggs: {
                   group_by: {
@@ -123,6 +124,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
             },
           },
         });
+//        console.log(JSON.stringify(resEvents));
 
         const resTotalEvents = await esClient.search({
           index,
@@ -186,6 +188,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           index: 'profiling-executables',
           body: { ids: [...executableDocIDs] },
         });
+//        console.log(JSON.stringify(resExecutables));
 
         const flamegraph = new FlameGraph(
           resEvents.body,
