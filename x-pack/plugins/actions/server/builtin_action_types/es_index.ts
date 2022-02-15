@@ -100,7 +100,7 @@ async function executor(
   };
 
   try {
-    const { body: result } = await services.scopedClusterClient.bulk(bulkParams);
+    const result = await services.scopedClusterClient.bulk(bulkParams);
 
     const err = find(result.items, 'index.error.reason');
     if (err) {

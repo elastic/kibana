@@ -24,7 +24,7 @@ describe('finalizeMigration', () => {
 
     // @ts-expect-error stubbing what we use of the task response
     // all our reindex tasks are completed
-    esClient.tasks.get.mockResolvedValueOnce({ body: { completed: true } });
+    esClient.tasks.get.mockResponse({ completed: true });
 
     // stub out our update call to just return the attributes we passed
     (updateMigrationSavedObject as jest.Mock).mockImplementation(({ attributes }) => ({

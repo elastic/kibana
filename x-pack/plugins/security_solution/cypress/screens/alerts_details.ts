@@ -54,6 +54,12 @@ export const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 
 export const TABLE_CELL = '.euiTableRowCell';
 
+export const CELL_EXPAND_VALUE = '.euiDataGridRowCell__expandButtonIcon';
+
+export const CELL_EXPANSION_POPOVER = '[data-test-subj="euiDataGridExpansionPopover"]';
+
+export const USER_DETAILS_LINK = '[data-test-subj="data-grid-user-details"]';
+
 export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
 export const TABLE_CONTAINER = '[data-test-subj="event-fields-browser"]';

@@ -99,7 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved query management component functionality', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/124986
+    describe.skip('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
       it('should show the saved query management component when there are no saved queries', async () => {
