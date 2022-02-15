@@ -33,7 +33,7 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api', () => ({
   loadRuleTypes: jest.fn(),
   createRule: jest.fn(),
-  ruleingFrameworkHealth: jest.fn(() => ({
+  alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),

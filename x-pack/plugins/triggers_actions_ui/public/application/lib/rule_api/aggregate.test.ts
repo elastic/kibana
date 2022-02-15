@@ -64,7 +64,7 @@ describe('loadRuleAggregations', () => {
 
     const result = await loadRuleAggregations({ http, searchText: 'apples' });
     expect(result).toEqual({
-      alertExecutionStatus: {
+      ruleExecutionStatus: {
         ok: 4,
         active: 2,
         error: 1,
@@ -105,7 +105,7 @@ describe('loadRuleAggregations', () => {
       actionTypesFilter: ['action', 'type'],
     });
     expect(result).toEqual({
-      alertExecutionStatus: {
+      ruleExecutionStatus: {
         ok: 4,
         active: 2,
         error: 1,
@@ -145,7 +145,7 @@ describe('loadRuleAggregations', () => {
       typesFilter: ['foo', 'bar'],
     });
     expect(result).toEqual({
-      alertExecutionStatus: {
+      ruleExecutionStatus: {
         ok: 4,
         active: 2,
         error: 1,
@@ -187,7 +187,7 @@ describe('loadRuleAggregations', () => {
       typesFilter: ['foo', 'bar'],
     });
     expect(result).toEqual({
-      alertExecutionStatus: {
+      ruleExecutionStatus: {
         ok: 4,
         active: 2,
         error: 1,

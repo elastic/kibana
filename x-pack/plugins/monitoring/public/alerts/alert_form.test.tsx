@@ -41,7 +41,7 @@ jest.mock('../../../triggers_actions_ui/public/application/lib/action_connector_
   loadActionTypes: jest.fn(),
 }));
 
-jest.mock('../../../triggers_actions_ui/public/application/lib/alert_api', () => ({
+jest.mock('../../../triggers_actions_ui/public/application/lib/rule_api', () => ({
   loadAlertTypes: jest.fn(),
 }));
 

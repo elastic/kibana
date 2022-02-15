@@ -90,7 +90,7 @@ describe('rules', () => {
           ruleSummary={ruleSummary}
         />
       )
-        .find('[name="rulesDurationEpoch"]')
+        .find('[name="alertsDurationEpoch"]')
         .prop('value')
     ).toEqual(fake2MinutesAgo.getTime());
   });
@@ -175,15 +175,15 @@ describe('alertToListItem', () => {
       ],
     });
     const start = fake2MinutesAgo;
-    const rule: AlertStatus = {
+    const alert: AlertStatus = {
       status: 'Active',
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'testing',
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', rule)).toEqual({
-      rule: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Active', actionGroup: 'Test Action Group', healthColor: 'primary' },
       start,
       sortPriority: 0,
@@ -195,14 +195,14 @@ describe('alertToListItem', () => {
   it('handles active rules with no action group id', () => {
     const ruleType = mockRuleType();
     const start = fake2MinutesAgo;
-    const rule: AlertStatus = {
+    const alert: AlertStatus = {
       status: 'Active',
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', rule)).toEqual({
-      rule: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
       start,
       sortPriority: 0,
@@ -214,15 +214,15 @@ describe('alertToListItem', () => {
   it('handles active muted rules', () => {
     const ruleType = mockRuleType();
     const start = fake2MinutesAgo;
-    const rule: AlertStatus = {
+    const alert: AlertStatus = {
       status: 'Active',
       muted: true,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'default',
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', rule)).toEqual({
-      rule: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
       start,
       sortPriority: 0,
@@ -233,14 +233,14 @@ describe('alertToListItem', () => {
 
   it('handles active rules with start date', () => {
     const ruleType = mockRuleType();
-    const rule: AlertStatus = {
+    const alert: AlertStatus = {
       status: 'Active',
       muted: false,
       actionGroupId: 'default',
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', rule)).toEqual({
-      rule: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
       start: undefined,
       duration: 0,
@@ -251,13 +251,13 @@ describe('alertToListItem', () => {
 
   it('handles muted inactive rules', () => {
     const ruleType = mockRuleType();
-    const rule: AlertStatus = {
+    const alert: AlertStatus = {
       status: 'OK',
       muted: true,
       actionGroupId: 'default',
     };
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', rule)).toEqual({
-      rule: 'id',
+    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+      alert: 'id',
       status: { label: 'Recovered', healthColor: 'subdued' },
       start: undefined,
       duration: 0,

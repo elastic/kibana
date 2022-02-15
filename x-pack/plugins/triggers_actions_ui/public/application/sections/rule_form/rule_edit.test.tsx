@@ -29,7 +29,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../lib/rule_api', () => ({
   loadRuleTypes: jest.fn(),
   updateRule: jest.fn().mockRejectedValue({ body: { message: 'Fail message' } }),
-  ruleingFrameworkHealth: jest.fn(() => ({
+  alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),

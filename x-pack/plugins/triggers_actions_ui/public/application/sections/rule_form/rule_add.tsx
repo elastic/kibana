@@ -42,7 +42,6 @@ const RuleAdd = ({
   canChangeTrigger,
   ruleTypeId,
   initialValues,
-
   reloadRules,
   onSave,
   metadata,
@@ -123,7 +122,7 @@ const RuleAdd = ({
       // when consumers set a default value for the rule params
       setInitialRuleParams(rule.params);
     }
-  }, [rule.params, initialRuleParams, setInitialRuleParams]);
+  }, [rule.params, initialRuleParams]);
 
   const [ruleActionsErrors, setRuleActionsErrors] = useState<IErrorObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);

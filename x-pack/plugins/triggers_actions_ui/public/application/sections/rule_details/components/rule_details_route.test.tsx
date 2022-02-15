@@ -59,10 +59,9 @@ describe('rule_details_route', () => {
       await nextTick();
       wrapper.update();
     });
-
     expect(resolveRule).toHaveBeenCalledWith(rule.id);
     expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      `insightsAndRuleing/triggersActions/rule/new_id`,
+      `insightsAndAlerting/triggersActions/rule/new_id`,
       `rule`
     );
   });
@@ -101,7 +100,7 @@ describe('rule_details_route', () => {
       currentObjectId: 'new_id',
       objectNoun: 'rule',
       otherObjectId: rule.id,
-      otherObjectPath: `insightsAndRuleing/triggersActions/rule/${rule.id}`,
+      otherObjectPath: `insightsAndAlerting/triggersActions/rule/${rule.id}`,
     });
   });
 });

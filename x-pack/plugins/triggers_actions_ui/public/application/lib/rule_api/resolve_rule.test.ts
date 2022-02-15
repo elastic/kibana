@@ -77,7 +77,6 @@ describe('resolveRule', () => {
       name: 'dfsdfdsf',
       enabled: true,
       throttle: '1h',
-      alertTypeId: '.index-threshold',
       createdBy: 'elastic',
       updatedBy: 'elastic',
       createdAt: '2021-04-01T20:29:18.652Z',
@@ -86,6 +85,7 @@ describe('resolveRule', () => {
       notifyWhen: 'onThrottleInterval',
       muteAll: false,
       mutedInstanceIds: [],
+      ruleTypeId: '.index-threshold',
       scheduledTaskId: '1',
       executionStatus: { status: 'ok', lastExecutionDate: '2021-04-01T21:16:46.709Z' },
       actions: [

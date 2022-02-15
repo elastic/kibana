@@ -68,7 +68,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
       const outcome = (rule as ResolvedRule).outcome;
       if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
-        const path = basePath.prepend(`insightsAndRuleing/triggersActions/rule/${rule.id}`);
+        const path = basePath.prepend(`insightsAndAlerting/triggersActions/rule/${rule.id}`);
         spacesApi.ui.redirectLegacyUrl(
           path,
           i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun', {
@@ -78,7 +78,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alert]);
+  }, [rule]);
 
   const getLegacyUrlConflictCallout = () => {
     const outcome = (rule as ResolvedRule).outcome;
@@ -87,7 +87,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
       // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
       // callout with a warning for the user, and provide a way for them to navigate to the other rule.
       const otherRulePath = basePath.prepend(
-        `insightsAndRuleing/triggersActions/rule/${aliasTargetId}`
+        `insightsAndAlerting/triggersActions/rule/${aliasTargetId}`
       );
       return (
         <>

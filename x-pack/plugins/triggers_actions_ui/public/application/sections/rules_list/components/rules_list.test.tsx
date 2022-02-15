@@ -30,7 +30,7 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/rule_api', () => ({
   loadRules: jest.fn(),
   loadRuleTypes: jest.fn(),
-  ruleingFrameworkHealth: jest.fn(() => ({
+  alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
