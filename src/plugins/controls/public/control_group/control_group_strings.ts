@@ -26,6 +26,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.emptyState.twoLineLoadingTitle', {
         defaultMessage: '...',
       }),
+    getDismissButton: () =>
+      i18n.translate('controls.controlGroup.emptyState.dismissButton', {
+        defaultMessage: 'Dismiss',
+      }),
   },
   manageControl: {
     getFlyoutCreateTitle: () =>
