@@ -57,5 +57,12 @@ export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = (
     [navigateToUrl, currentAppId]
   );
 
-  return <Component {...otherProps} clickHandler={clickHandler} />;
+  return (
+    <Component
+      children={children}
+      className={className}
+      {...otherProps}
+      clickHandler={clickHandler}
+    />
+  );
 };

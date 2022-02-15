@@ -32,7 +32,7 @@ describe('RedirectAppLinks', () => {
         }}
       >
         <RedirectAppLinks
-          navigateToUrl={() => Promise.resolve()}
+          navigateToUrl={application.navigateToUrl}
           currentAppId$={application.currentAppId$}
         >
           <div>
@@ -43,7 +43,6 @@ describe('RedirectAppLinks', () => {
     );
 
     component.find('a').simulate('click', { button: 0, defaultPrevented: false });
-
     expect(application.navigateToUrl).toHaveBeenCalledTimes(1);
     expect(event!.defaultPrevented).toBe(true);
   });
@@ -58,12 +57,14 @@ describe('RedirectAppLinks', () => {
         }}
       >
         <RedirectAppLinks
-          navigateToUrl={() => Promise.resolve()}
+          navigateToUrl={application.navigateToUrl}
           currentAppId$={application.currentAppId$}
         >
-          <a href="/mocked-anyway">
-            <span>content</span>
-          </a>
+          <div>
+            <a href="/mocked-anyway">
+              <span>content</span>
+            </a>
+          </div>
         </RedirectAppLinks>
       </div>
     );
@@ -83,10 +84,7 @@ describe('RedirectAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectAppLinks
-          navigateToUrl={() => Promise.resolve()}
-          currentAppId$={application.currentAppId$}
-        >
+        <RedirectAppLinks navigateToUrl={jest.fn()} currentAppId$={application.currentAppId$}>
           <span>
             <a href="/mocked-anyway">content</a>
           </span>
@@ -110,10 +108,7 @@ describe('RedirectAppLinks', () => {
         }}
       >
         <a href="/mocked-anyway">
-          <RedirectAppLinks
-            navigateToUrl={() => Promise.resolve()}
-            currentAppId$={application.currentAppId$}
-          >
+          <RedirectAppLinks navigateToUrl={jest.fn()} currentAppId$={application.currentAppId$}>
             <span>content</span>
           </RedirectAppLinks>
         </a>
@@ -135,10 +130,7 @@ describe('RedirectAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectAppLinks
-          navigateToUrl={() => Promise.resolve()}
-          currentAppId$={application.currentAppId$}
-        >
+        <RedirectAppLinks navigateToUrl={jest.fn()} currentAppId$={application.currentAppId$}>
           <a href="/mocked-anyway" target="_blank">
             content
           </a>
@@ -161,10 +153,7 @@ describe('RedirectAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectAppLinks
-          navigateToUrl={() => Promise.resolve()}
-          currentAppId$={application.currentAppId$}
-        >
+        <RedirectAppLinks navigateToUrl={jest.fn()} currentAppId$={application.currentAppId$}>
           <a href="/mocked-anyway" target="_blank">
             <span onClick={(e) => e.preventDefault()}>content</span>
           </a>
@@ -187,10 +176,7 @@ describe('RedirectAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectAppLinks
-          navigateToUrl={() => Promise.resolve()}
-          currentAppId$={application.currentAppId$}
-        >
+        <RedirectAppLinks navigateToUrl={jest.fn()} currentAppId$={application.currentAppId$}>
           <a href="/mocked-anyway" target="_blank" onClick={(e) => e.stopPropagation()}>
             content
           </a>
@@ -213,10 +199,7 @@ describe('RedirectAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectAppLinks
-          navigateToUrl={() => Promise.resolve()}
-          currentAppId$={application.currentAppId$}
-        >
+        <RedirectAppLinks navigateToUrl={jest.fn()} currentAppId$={application.currentAppId$}>
           <div>
             <a href="/mocked-anyway">content</a>
           </div>
@@ -239,10 +222,7 @@ describe('RedirectAppLinks', () => {
           event = e;
         }}
       >
-        <RedirectAppLinks
-          navigateToUrl={() => Promise.resolve()}
-          currentAppId$={application.currentAppId$}
-        >
+        <RedirectAppLinks navigateToUrl={jest.fn()} currentAppId$={application.currentAppId$}>
           <div>
             <a href="/mocked-anyway">content</a>
           </div>

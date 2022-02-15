@@ -14,6 +14,7 @@ import classNames from 'classnames';
  */
 export interface Props extends React.HTMLAttributes<HTMLDivElement> {
   clickHandler: React.MouseEventHandler<HTMLElement> | undefined;
+  children?: React.ReactNode;
   className?: string;
   'data-test-subj'?: string;
 }
