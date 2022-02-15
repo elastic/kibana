@@ -41,12 +41,6 @@ function mapDispatchToProps(
     deleteFeatureFromIndex(featureId: string) {
       dispatch(deleteFeatureFromIndex(featureId));
     },
-    disableDrawState() {
-      dispatch(updateEditShape(null));
-    },
-    waitingState() {
-      dispatch(updateEditShape(DRAW_SHAPE.WAIT));
-    },
   };
 }
 

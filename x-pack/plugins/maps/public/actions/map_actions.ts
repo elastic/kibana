@@ -369,6 +369,7 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     }
 
     try {
+      dispatch(updateEditShape(DRAW_SHAPE.WAIT));
       await (layer as IVectorLayer).addFeature(geometry);
       await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
         setTimeout(() => {
@@ -400,6 +401,7 @@ export function deleteFeatureFromIndex(featureId: string) {
       return;
     }
     try {
+      dispatch(updateEditShape(DRAW_SHAPE.WAIT));
       await (layer as IVectorLayer).deleteFeature(featureId);
       await dispatch(syncDataForLayerDueToDrawing(layer)).then(() => {
         setTimeout(() => {

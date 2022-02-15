@@ -31,8 +31,6 @@ export interface ReduxStateProps {
 export interface ReduxDispatchProps {
   addNewFeatureToIndex: (geometry: Geometry | Position[]) => void;
   deleteFeatureFromIndex: (featureId: string) => void;
-  disableDrawState: () => void;
-  waitingState: () => void;
 }
 
 export interface OwnProps {
@@ -59,7 +57,6 @@ export class DrawFeatureControl extends Component<Props, {}> {
             this.props.drawMode === DRAW_MODE.DRAW_POINTS
               ? feature.geometry.coordinates
               : feature.geometry;
-          this.props.waitingState();
           this.props.addNewFeatureToIndex(featureGeom);
         }
       });
@@ -116,7 +113,6 @@ export class DrawFeatureControl extends Component<Props, {}> {
         throw Error(`Associated Elasticsearch document id not found`);
       }
       const docId = topMostFeature.properties._id;
-      this.props.waitingState();
       this.props.deleteFeatureFromIndex(docId);
     } catch (error) {
       getToasts().addWarning(
