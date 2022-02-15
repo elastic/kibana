@@ -20,7 +20,6 @@ import {
   TimeRange,
   Query,
   esFilters,
-  Filter,
   TimefilterContract,
 } from '../../../../plugins/data/public';
 import {

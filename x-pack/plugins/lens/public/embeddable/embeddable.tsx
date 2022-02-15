@@ -54,10 +54,7 @@ import {
 } from '../types';
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
-import type {
-  IBasePath,
-  KibanaExecutionContext,
-} from '../../../../../src/core/public';
+import type { IBasePath, KibanaExecutionContext } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';

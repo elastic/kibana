@@ -166,7 +166,7 @@ export class SavedSearchEmbeddable
     this.searchProps!.isLoading = true;
 
     this.updateOutput({ loading: true, error: undefined });
-    
+
     const parentContext = this.input.executionContext;
     const child: KibanaExecutionContext = {
       type: this.type,
@@ -177,11 +177,11 @@ export class SavedSearchEmbeddable
     };
 
     const executionContext = parentContext
-    ? {
-        ...parentContext,
-        child,
-      }
-    : child;
+      ? {
+          ...parentContext,
+          child,
+        }
+      : child;
 
     try {
       // Make the request
