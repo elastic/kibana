@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -15,8 +15,10 @@ import {
   EuiSpacer,
   EuiPageTemplate,
   EuiPanel,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { CoreStart } from 'kibana/public';
+import useDebounce from 'react-use/lib/useDebounce';
 import { DOCUMENT_FIELD_NAME } from '../../../plugins/lens/common/constants';
 import type { DataView } from '../../../../src/plugins/data_views/public';
 import { ViewMode } from '../../../../src/plugins/embeddable/public';
@@ -355,6 +357,14 @@ function getFieldsByType(dataView: DataView) {
 function isXYChart(attributes: TypedLensByValueInput['attributes']) {
   return attributes.visualizationType === 'lnsXY';
 }
+
+function checkAndParseSO(newSO: string) {
+  try {
+    return JSON.parse(newSO) as TypedLensByValueInput['attributes'];
+  } catch (e) {
+    // do nothing
+  }
+}
 let chartCounter = 1;
 
 export const App = (props: {
@@ -371,6 +381,8 @@ export const App = (props: {
   const [loadedCharts, addChartConfiguration] = useState<
     Array<{ id: string; attributes: TypedLensByValueInput['attributes'] }>
   >([]);
+  const [hasParsingError, setErrorFlag] = useState(false);
+  const [hasParsingErrorDebounced, setErrorDebounced] = useState(hasParsingError);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
@@ -405,19 +417,28 @@ export const App = (props: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialAttributes = useMemo(() => JSON.stringify(charts[0].attributes, null, 2), []);
 
-  const [currentSO, saveSO] = useState(initialAttributes);
+  const currentSO = useRef<string>(initialAttributes);
+  const [currentValid, saveValidSO] = useState(initialAttributes);
   const switchChartPreset = useCallback(
     (newIndex) => {
       const newChart = charts[newIndex];
-      saveSO(JSON.stringify(newChart.attributes, null, 2));
+      saveValidSO(JSON.stringify(newChart.attributes, null, 2));
     },
     [charts]
   );
 
-  const currentAttributes = useMemo(() => JSON.parse(currentSO), [currentSO]);
+  const currentAttributes = useMemo(() => {
+    try {
+      return JSON.parse(currentSO.current);
+    } catch (e) {
+      return JSON.parse(currentValid);
+    }
+  }, [currentValid, currentSO]);
 
   const isDisabled = !currentAttributes;
   const isColorDisabled = isDisabled || !isXYChart(currentAttributes);
+
+  useDebounce(() => setErrorDebounced(hasParsingError), 500, [hasParsingError]);
 
   return (
     <KibanaContextProvider services={{ uiSettings: props.core.uiSettings }}>
@@ -454,7 +475,7 @@ export const App = (props: {
                           const newColor = `rgb(${[1, 2, 3].map(() =>
                             Math.floor(Math.random() * 256)
                           )})`;
-                          saveSO(
+                          saveValidSO(
                             JSON.stringify(
                               getLensAttributes(
                                 props.defaultDataView,
@@ -648,12 +669,10 @@ export const App = (props: {
                       <EuiButton
                         aria-label="Save the preset"
                         data-test-subj="lns-example-save"
-                        isDisabled={isDisabled}
+                        isDisabled={isDisabled || hasParsingError}
                         onClick={() => {
-                          try {
-                            const attributes = JSON.parse(
-                              currentSO
-                            ) as TypedLensByValueInput['attributes'];
+                          const attributes = checkAndParseSO(currentSO.current);
+                          if (attributes) {
                             const label = `custom-chart-${chartCounter}`;
                             addChartConfiguration([
                               ...loadedCharts,
@@ -664,16 +683,19 @@ export const App = (props: {
                             ]);
                             chartCounter++;
                             alert(`The preset has been saved as "${label}"`);
-                          } catch (e) {
-                            // do nothing for now
                           }
                         }}
                       >
                         Save as preset
                       </EuiButton>
                     </EuiFlexItem>
+                    {hasParsingErrorDebounced && currentSO.current !== currentValid && (
+                      <EuiCallOut title="Error" color="danger" iconType="alert">
+                        <p>Check the spec</p>
+                      </EuiCallOut>
+                    )}
                   </EuiFlexGroup>
-                  <EuiFlexGroup style={{ height: '70vh' }}>
+                  <EuiFlexGroup style={{ height: '75vh' }} direction="column">
                     <EuiFlexItem>
                       <CodeEditor
                         languageId={HJsonLang}
@@ -681,8 +703,17 @@ export const App = (props: {
                           fontSize: 14,
                           wordWrap: 'on',
                         }}
-                        value={currentSO}
-                        onChange={saveSO}
+                        value={currentSO.current}
+                        onChange={(newSO) => {
+                          const isValid = Boolean(checkAndParseSO(newSO));
+                          setErrorFlag(!isValid);
+                          currentSO.current = newSO;
+                          if (isValid) {
+                            // reset the debounced error
+                            setErrorDebounced(isValid);
+                            saveValidSO(newSO);
+                          }
+                        }}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
