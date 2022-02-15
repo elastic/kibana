@@ -15,7 +15,7 @@ import { mergeServiceStats } from './merge_service_stats';
 
 export type ServicesItemsSetup = Setup;
 
-const MAX_NUMBER_OF_SERVICES = 500;
+const MAX_NUMBER_OF_SERVICES = 50;
 
 export async function getServicesItems({
   environment,
