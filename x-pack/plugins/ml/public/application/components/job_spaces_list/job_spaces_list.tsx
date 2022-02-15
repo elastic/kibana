@@ -28,8 +28,12 @@ interface Props {
 }
 
 const ALL_SPACES_ID = '*';
-const objectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.objectNoun', {
+const jobObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.jobObjectNoun', {
   defaultMessage: 'job',
+});
+
+const modelObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.modelObjectNoun', {
+  defaultMessage: 'trained model',
 });
 
 export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, refresh }) => {
@@ -90,7 +94,7 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
       id: jobId,
       namespaces: spaceIds,
       title: jobId,
-      noun: objectNoun,
+      noun: jobType === 'trained-model' ? modelObjectNoun : jobObjectNoun,
     },
     behaviorContext: 'outside-space',
     changeSpacesHandler,
