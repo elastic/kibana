@@ -6,12 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
 import { getApmClusterStatus } from './_get_apm_cluster_status';
-import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 
 export function apmOverviewRoute(server) {
   server.route({
@@ -33,9 +31,7 @@ export function apmOverviewRoute(server) {
     },
     async handler(req) {
       const config = server.config();
-      const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       const showCgroupMetrics = config.get('monitoring.ui.container.apm.enabled');
       if (showCgroupMetrics) {
@@ -45,8 +41,8 @@ export function apmOverviewRoute(server) {
 
       try {
         const [stats, metrics] = await Promise.all([
-          getApmClusterStatus(req, apmIndexPattern, { clusterUuid }),
-          getMetrics(req, apmIndexPattern, metricSet),
+          getApmClusterStatus(req, { clusterUuid }),
+          getMetrics(req, 'beats', metricSet),
         ]);
 
         return {

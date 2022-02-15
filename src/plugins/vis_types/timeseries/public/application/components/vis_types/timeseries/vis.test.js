@@ -10,11 +10,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import TimeseriesVisualization from './vis';
-import { setFieldFormats } from '../../../../services';
+import { setFieldFormats, setCharts, setUISettings } from '../../../../services';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import { METRIC_TYPES } from '../../../../../../../data/common';
 import { getFieldFormatsRegistry } from '../../../../../../../data/public/test_utils';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../charts/public';
 
 jest.mock('../../../../../../../data/public/services', () => ({
   getUiSettings: () => ({ get: jest.fn() }),
@@ -35,12 +36,47 @@ describe('TimeseriesVisualization', () => {
       })
     );
 
-    const setupTimeSeriesProps = (formatters, valueTemplates) => {
+    setCharts({
+      theme: {
+        useChartsTheme: () => ({
+          axes: {
+            tickLabel: {
+              padding: {
+                inner: 0,
+              },
+            },
+          },
+        }),
+        useChartsBaseTheme: () => ({
+          axes: {
+            tickLabel: {
+              padding: {
+                inner: 0,
+              },
+            },
+          },
+        }),
+      },
+      activeCursor: {},
+    });
+
+    setUISettings({
+      get: () => ({}),
+      isDefault: () => true,
+    });
+
+    const renderShallow = (formatters, valueTemplates, modelOverwrites) => {
       const series = formatters.map((formatter, index) => ({
         id: id + index,
+        label: '',
         formatter,
         value_template: valueTemplates?.[index],
         data: [],
+        lines: {
+          show: true,
+        },
+        points: {},
+        color: '#000000',
         metrics: [
           {
             type: METRIC_TYPES.AVG,
@@ -63,6 +99,7 @@ describe('TimeseriesVisualization', () => {
             id,
             series,
             use_kibana_indexes: true,
+            ...modelOverwrites,
           }}
           visData={{
             [id]: {
@@ -75,8 +112,25 @@ describe('TimeseriesVisualization', () => {
         />
       );
 
-      return timeSeriesVisualization.find(TimeSeries).props();
+      return timeSeriesVisualization;
     };
+
+    const setupTimeSeriesProps = (formatters, valueTemplates) => {
+      return renderShallow(formatters, valueTemplates).find(TimeSeries).props();
+    };
+
+    test('should enable new time axis if ignore daylight time setting is switched off', () => {
+      const component = renderShallow(['byte'], undefined, { ignore_daylight_time: false });
+      console.log(component.find('TimeSeries').dive().debug());
+      const xAxis = component.find('TimeSeries').dive().find('[id="bottom"]');
+      expect(xAxis.prop('style')).toEqual(MULTILAYER_TIME_AXIS_STYLE);
+    });
+
+    test('should disable new time axis for ignore daylight time setting', () => {
+      const component = renderShallow(['byte'], undefined, { ignore_daylight_time: true });
+      const xAxis = component.find('TimeSeries').dive().find('[id="bottom"]');
+      expect(xAxis.prop('style')).toBeUndefined();
+    });
 
     test('should return byte formatted value from yAxis formatter for single byte series', () => {
       const timeSeriesProps = setupTimeSeriesProps(['byte']);
@@ -99,7 +153,7 @@ describe('TimeseriesVisualization', () => {
 
       const yAxisFormattedValue = timeSeriesProps.yAxis[0].tickFormatter(value);
 
-      expect(yAxisFormattedValue).toBe(value);
+      expect(yAxisFormattedValue).toBe(`${value}`);
     });
 
     test('should return the same stringified number from yAxis formatter for byte and percent series', () => {
@@ -117,18 +171,6 @@ describe('TimeseriesVisualization', () => {
       expect(series[0].tickFormat(value)).toBe('500B');
       expect(series[1].tickFormat(value)).toBe('500B');
       expect(yAxis[0].tickFormatter(value)).toBe('500B');
-    });
-
-    test('should return simple number from yAxis formatter and different values from the same byte formatters, but with different value templates', () => {
-      const timeSeriesProps = setupTimeSeriesProps(
-        ['byte', 'byte'],
-        ['{{value}}', '{{value}} value']
-      );
-      const { series, yAxis } = timeSeriesProps;
-
-      expect(series[0].tickFormat(value)).toBe('500B');
-      expect(series[1].tickFormat(value)).toBe('500B value');
-      expect(yAxis[0].tickFormatter(value)).toBe(value);
     });
 
     test('should return percent formatted value from yAxis formatter and three percent formatted series with the same value templates', () => {
@@ -150,7 +192,7 @@ describe('TimeseriesVisualization', () => {
 
       expect(series[0].tickFormat(value)).toBe('500 template');
       expect(series[1].tickFormat(value)).toBe('500B template');
-      expect(yAxis[0].tickFormatter(value)).toBe(value);
+      expect(yAxis[0].tickFormatter(value)).toBe(`${value}`);
     });
 
     test('should return field formatted value for yAxis and single series with default formatter', () => {
@@ -178,7 +220,7 @@ describe('TimeseriesVisualization', () => {
       expect(series[1].tickFormat(value)).toBe('500 years');
       expect(series[2].tickFormat(value)).toBe('42 years');
       expect(series[3].tickFormat(value)).toBe('$500');
-      expect(yAxis[0].tickFormatter(value)).toBe(value);
+      expect(yAxis[0].tickFormatter(value)).toBe(`${value}`);
     });
 
     test('should return simple number from yAxis formatter and correctly formatted series values', () => {
@@ -189,7 +231,7 @@ describe('TimeseriesVisualization', () => {
       expect(series[1].tickFormat(value)).toBe('500B');
       expect(series[2].tickFormat(value)).toBe('50000%');
       expect(series[3].tickFormat(value)).toBe('$500');
-      expect(yAxis[0].tickFormatter(value)).toBe(value);
+      expect(yAxis[0].tickFormatter(value)).toBe(`${value}`);
     });
   });
 });

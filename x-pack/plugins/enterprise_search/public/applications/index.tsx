@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
@@ -40,8 +40,11 @@ export const renderApp = (
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { publicUrl, errorConnecting, ...initialData } = data;
+  const { publicUrl, errorConnectingMessage, ...initialData } = data;
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
+
+  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
   const store = getContext().store;
@@ -65,7 +68,7 @@ export const renderApp = (
   });
   const unmountHttpLogic = mountHttpLogic({
     http: core.http,
-    errorConnecting,
+    errorConnectingMessage,
     readOnlyMode: initialData.readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic();
@@ -74,12 +77,14 @@ export const renderApp = (
     <I18nProvider>
       <KibanaThemeProvider theme$={params.theme$}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <Provider store={store}>
-            <Router history={params.history}>
-              <App {...initialData} />
-              <Toasts />
-            </Router>
-          </Provider>
+          <CloudContext>
+            <Provider store={store}>
+              <Router history={params.history}>
+                <App {...initialData} />
+                <Toasts />
+              </Router>
+            </Provider>
+          </CloudContext>
         </KibanaContextProvider>
       </KibanaThemeProvider>
     </I18nProvider>,

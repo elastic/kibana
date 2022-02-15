@@ -16,6 +16,7 @@ import { EuiButton } from '@elastic/eui';
 import { CrawlerDomain, CrawlerStatus } from '../../types';
 
 import { CrawlerStatusIndicator } from './crawler_status_indicator';
+import { StartCrawlContextMenu } from './start_crawl_context_menu';
 import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';
 
 const MOCK_VALUES = {
@@ -72,9 +73,7 @@ describe('CrawlerStatusIndicator', () => {
       });
 
       const wrapper = shallow(<CrawlerStatusIndicator />);
-      expect(wrapper.is(EuiButton)).toEqual(true);
-      expect(wrapper.render().text()).toContain('Start a crawl');
-      expect(wrapper.prop('onClick')).toEqual(MOCK_ACTIONS.startCrawl);
+      expect(wrapper.is(StartCrawlContextMenu)).toEqual(true);
     });
   });
 
@@ -87,9 +86,7 @@ describe('CrawlerStatusIndicator', () => {
         });
 
         const wrapper = shallow(<CrawlerStatusIndicator />);
-        expect(wrapper.is(EuiButton)).toEqual(true);
-        expect(wrapper.render().text()).toContain('Retry crawl');
-        expect(wrapper.prop('onClick')).toEqual(MOCK_ACTIONS.startCrawl);
+        expect(wrapper.is(StartCrawlContextMenu)).toEqual(true);
       });
     });
   });

@@ -85,14 +85,44 @@ describe('AlertSummaryView', () => {
       expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
     });
   });
-  test.skip('Memory event code renders additional summary rows', () => {
+  test('Network event renders the correct summary rows', () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.category') {
+          return {
+            ...item,
+            values: ['network'],
+            originalValue: ['network'],
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    [
+      'host.name',
+      'user.name',
+      'destination.address',
+      'source.address',
+      'source.port',
+      'process.name',
+    ].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+  test('Memory event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
         if (item.category === 'event' && item.field === 'event.code') {
           return {
-            category: 'event',
-            field: 'event.code',
+            ...item,
             values: ['shellcode_thread'],
             originalValue: ['shellcode_thread'],
           };
@@ -100,34 +130,285 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { container } = render(
+    const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+    ['host.name', 'user.name', 'Target.process.executable'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
   });
-  test.skip('Behavior event code renders additional summary rows', () => {
+  test('Behavior event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
         if (item.category === 'event' && item.field === 'event.code') {
           return {
-            category: 'event',
-            field: 'event.code',
+            ...item,
             values: ['behavior'],
             originalValue: ['behavior'],
+          };
+        }
+        if (item.category === 'event' && item.field === 'event.category') {
+          return {
+            ...item,
+            values: ['malware', 'process', 'file'],
+            originalValue: ['malware', 'process', 'file'],
           };
         }
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { container } = render(
+    const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+    ['host.name', 'user.name', 'process.name'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Malware event category shows file fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.category') {
+          return {
+            ...item,
+            values: ['malware'],
+            originalValue: ['malware'],
+          };
+        }
+        return item;
+      }),
+      { category: 'file', field: 'file.name', values: ['malware.exe'] },
+      {
+        category: 'file',
+        field: 'file.hash.sha256',
+        values: ['3287rhf3847gb38fb3o984g9384g7b3b847gb'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['host.name', 'user.name', 'file.name', 'file.hash.sha256'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Ransomware event code resolves fields from the source event', () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.code') {
+          return {
+            ...item,
+            values: ['ransomware'],
+            originalValue: ['ransomware'],
+          };
+        }
+        if (item.category === 'event' && item.field === 'event.category') {
+          return {
+            ...item,
+            values: ['malware', 'process', 'file'],
+            originalValue: ['malware', 'process', 'file'],
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['host.name', 'user.name', 'process.name'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Threshold events have special fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.count',
+        values: [9001],
+        originalValue: [9001],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.value',
+        values: ['host-23084y2', '3084hf3n84p8934r8h'],
+        originalValue: ['host-23084y2', '3084hf3n84p8934r8h'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        values: ['host.name', 'host.id'],
+        originalValue: ['host.name', 'host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.value',
+        values: [9001],
+        originalValue: [9001],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    [
+      'Threshold Count',
+      'host.name [threshold]',
+      'host.id [threshold]',
+      'Threshold Cardinality',
+      'count(host.name) >= 9001',
+    ].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Threshold fields are not shown when data is malformated', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.count',
+        values: [9001],
+        originalValue: [9001],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        // This would be expected to have two entries
+        values: ['host.id'],
+        originalValue: ['host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.value',
+        values: ['host-23084y2', '3084hf3n84p8934r8h'],
+        originalValue: ['host-23084y2', '3084hf3n84p8934r8h'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.value',
+        // This would be expected to have one entry
+        values: [],
+        originalValue: [],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    ['Threshold Count'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+
+    [
+      'host.name [threshold]',
+      'host.id [threshold]',
+      'Threshold Cardinality',
+      'count(host.name) >= 9001',
+    ].forEach((fieldText) => {
+      expect(() => getByText(fieldText)).toThrow();
+    });
+  });
+
+  test('Threshold fields are not shown when data is partially missing', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        // This would be expected to have two entries
+        values: ['host.id'],
+        originalValue: ['host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    //  The `value` fields are missing here, so the enriched field info cannot be calculated correctly
+    ['host.id [threshold]', 'Threshold Cardinality', 'count(host.name) >= 9001'].forEach(
+      (fieldText) => {
+        expect(() => getByText(fieldText)).toThrow();
+      }
+    );
   });
 
   test("doesn't render empty fields", () => {

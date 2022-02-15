@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, IndexPatternField, IndexPatternsService } from 'src/plugins/data/public';
+import { DataView, DataViewField, DataViewsContract } from 'src/plugins/data_views/public';
 import { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -67,7 +67,7 @@ jest.mock('./components/field_format_editor', () => ({
 const fieldList = [
   {
     name: 'foobar',
-  } as IndexPatternField,
+  } as DataViewField,
 ];
 
 const fields = {
@@ -95,17 +95,17 @@ const field = {
 const services = {
   redirectAway: () => {},
   saveIndexPattern: async () => {},
-  indexPatternService: {} as IndexPatternsService,
+  indexPatternService: {} as DataViewsContract,
 };
 
 describe('FieldEditor', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: DataView;
 
   const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
-  mockContext.data.fieldFormats.getDefaultType = jest.fn(
+  mockContext.fieldFormats.getDefaultType = jest.fn(
     () => ({} as unknown as FieldFormatInstanceType)
   );
-  mockContext.data.fieldFormats.getByFieldType = jest.fn((fieldType) => {
+  mockContext.fieldFormats.getByFieldType = jest.fn((fieldType) => {
     if (fieldType === 'number') {
       return [{} as unknown as FieldFormatInstanceType];
     } else {
@@ -118,7 +118,7 @@ describe('FieldEditor', () => {
       fields,
       getFormatterForField: () => ({ params: () => ({}) }),
       getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
   });
 
   it('should render create new scripted field correctly', async () => {
@@ -126,7 +126,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         indexPattern,
-        spec: field as unknown as IndexPatternField,
+        spec: field as unknown as DataViewField,
         services,
       },
       mockContext
@@ -143,19 +143,19 @@ describe('FieldEditor', () => {
       name: 'test',
       script: 'doc.test.value',
     };
-    fieldList.push(testField as unknown as IndexPatternField);
+    fieldList.push(testField as unknown as DataViewField);
     indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name] as unknown as IndexPatternField;
+      return flds[name] as unknown as DataViewField;
     };
 
     const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         indexPattern,
-        spec: testField as unknown as IndexPatternField,
+        spec: testField as unknown as DataViewField,
         services,
       },
       mockContext
@@ -173,7 +173,7 @@ describe('FieldEditor', () => {
       lang: undefined,
       type: 'string',
       customLabel: 'Test',
-    } as unknown as IndexPatternField;
+    } as unknown as DataViewField;
     fieldList.push(testField);
     indexPattern.fields.getByName = (name) => {
       const flds = {
@@ -185,7 +185,7 @@ describe('FieldEditor', () => {
       ...indexPattern.fields,
       ...{
         update: (fld) => {
-          testField = fld as unknown as IndexPatternField;
+          testField = fld as unknown as DataViewField;
         },
         add: jest.fn(),
       },
@@ -197,12 +197,12 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         indexPattern,
-        spec: testField as unknown as IndexPatternField,
+        spec: testField as unknown as DataViewField,
         services: {
           redirectAway: () => {},
           indexPatternService: {
             updateSavedObject: jest.fn(() => Promise.resolve()),
-          } as unknown as IndexPatternsService,
+          } as unknown as DataViewsContract,
         },
       },
       mockContext
@@ -227,19 +227,19 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
       lang: 'testlang',
     };
-    fieldList.push(testField as unknown as IndexPatternField);
+    fieldList.push(testField as unknown as DataViewField);
     indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name] as unknown as IndexPatternField;
+      return flds[name] as unknown as DataViewField;
     };
 
     const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         indexPattern,
-        spec: testField as unknown as IndexPatternField,
+        spec: testField as unknown as DataViewField,
         services,
       },
       mockContext
@@ -256,7 +256,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         indexPattern,
-        spec: testField as unknown as IndexPatternField,
+        spec: testField as unknown as DataViewField,
         services,
       },
       mockContext
@@ -281,7 +281,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         indexPattern,
-        spec: testField as unknown as IndexPatternField,
+        spec: testField as unknown as DataViewField,
         services,
       },
       mockContext
@@ -302,7 +302,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         indexPattern,
-        spec: testField as unknown as IndexPatternField,
+        spec: testField as unknown as DataViewField,
         services,
       },
       mockContext

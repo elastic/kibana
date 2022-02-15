@@ -18,7 +18,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions
 import { createKibanaContextForPlugin } from '../hooks/use_kibana';
 import { InfraClientStartDeps } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
-import { NavigationWarningPromptProvider } from '../utils/navigation_warning_prompt';
+import { NavigationWarningPromptProvider } from '../../../observability/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 
 export const CommonInfraProviders: React.FC<{

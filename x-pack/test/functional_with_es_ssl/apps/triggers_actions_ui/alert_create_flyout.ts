@@ -105,10 +105,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/89397
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
+      await testSubjects.click('rulesTab');
+    });
+
+    afterEach(async () => {
+      // Reset the Rules tab without reloading the entire page
+      // This is safer than trying to close the alert flyout, which may or may not be open at the end of a test
+      await testSubjects.click('connectorsTab');
       await testSubjects.click('rulesTab');
     });
 
@@ -162,7 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         tags: '',
         interval: '1 min',
       });
-      expect(searchResultAfterSave.duration).to.match(/\d{2}:\d{2}:\d{2}.\d{3}/);
+      expect(searchResultAfterSave.duration).to.match(/\d{2,}:\d{2}/);
 
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);

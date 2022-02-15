@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { METRIC_JAVA_GC_TIME } from '../../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../../lib/helpers/setup_request';

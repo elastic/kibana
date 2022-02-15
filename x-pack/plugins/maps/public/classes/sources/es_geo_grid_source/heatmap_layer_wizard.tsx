@@ -17,6 +17,7 @@ import { GRID_RESOLUTION, LAYER_WIZARD_CATEGORY, RENDER_AS } from '../../../../c
 import { HeatmapLayerIcon } from '../../layers/wizards/icons/heatmap_layer_icon';
 
 export const heatmapLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGridHeatmapDescription', {
     defaultMessage: 'Geospatial data grouped in grids to show density',

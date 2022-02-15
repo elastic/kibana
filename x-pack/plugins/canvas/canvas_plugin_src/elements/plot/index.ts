@@ -12,7 +12,8 @@ export const plot: ElementFactory = () => ({
   displayName: 'Coordinate plot',
   type: 'chart',
   help: 'Mixed line, bar or dot charts',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | pointseries x="time" y="sum(price)" color="state"
 | plot defaultStyle={seriesStyle points=5}

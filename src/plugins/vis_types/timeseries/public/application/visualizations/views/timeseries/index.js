@@ -77,6 +77,7 @@ export const TimeSeries = ({
   interval,
   isLastBucketDropped,
   useLegacyTimeAxis,
+  ignoreDaylightTime,
 }) => {
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
@@ -152,7 +153,9 @@ export const TimeSeries = ({
   const shouldUseNewTimeAxis =
     series.every(
       ({ stack, bars, lines }) => (bars?.show && stack !== STACKED_OPTIONS.NONE) || lines?.show
-    ) && !useLegacyTimeAxis;
+    ) &&
+    !useLegacyTimeAxis &&
+    !ignoreDaylightTime;
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>

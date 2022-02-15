@@ -75,14 +75,14 @@ const ValueBadgeGroup = styled(EuiBadgeGroup)`
 
 interface ExceptionEntriesComponentProps {
   entries: FormattedEntry[];
-  disableDelete: boolean;
+  disableActions: boolean;
   onDelete: () => void;
   onEdit: () => void;
 }
 
 const ExceptionEntriesComponent = ({
   entries,
-  disableDelete,
+  disableActions,
   onDelete,
   onEdit,
 }: ExceptionEntriesComponentProps): JSX.Element => {
@@ -150,8 +150,7 @@ const ExceptionEntriesComponent = ({
         },
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [entries]
+    []
   );
 
   return (
@@ -181,32 +180,32 @@ const ExceptionEntriesComponent = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-            <MyActionButton grow={false}>
-              <MyEditButton
-                size="s"
-                color="primary"
-                onClick={onEdit}
-                isDisabled={disableDelete}
-                data-test-subj="exceptionsViewerEditBtn"
-              >
-                {i18n.EDIT}
-              </MyEditButton>
-            </MyActionButton>
-            <MyActionButton grow={false}>
-              <MyRemoveButton
-                size="s"
-                color="danger"
-                onClick={onDelete}
-                isLoading={disableDelete}
-                data-test-subj="exceptionsViewerDeleteBtn"
-              >
-                {i18n.REMOVE}
-              </MyRemoveButton>
-            </MyActionButton>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {!disableActions && (
+          <EuiFlexItem grow={1}>
+            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+              <MyActionButton grow={false}>
+                <MyEditButton
+                  size="s"
+                  color="primary"
+                  onClick={onEdit}
+                  data-test-subj="exceptionsViewerEditBtn"
+                >
+                  {i18n.EDIT}
+                </MyEditButton>
+              </MyActionButton>
+              <MyActionButton grow={false}>
+                <MyRemoveButton
+                  size="s"
+                  color="danger"
+                  onClick={onDelete}
+                  data-test-subj="exceptionsViewerDeleteBtn"
+                >
+                  {i18n.REMOVE}
+                </MyRemoveButton>
+              </MyActionButton>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </MyEntriesDetails>
   );

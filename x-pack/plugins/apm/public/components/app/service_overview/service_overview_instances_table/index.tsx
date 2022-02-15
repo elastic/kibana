@@ -16,7 +16,7 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import {
   PAGE_SIZE,
   SortDirection,
@@ -145,7 +145,11 @@ export function ServiceOverviewInstancesTable({
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="serviceOverviewInstancesTable"
+    >
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h2>

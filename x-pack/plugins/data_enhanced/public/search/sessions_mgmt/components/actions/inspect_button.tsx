@@ -97,7 +97,7 @@ export const createInspectActionDescriptor = (
   ),
   onClick: async () => {
     const flyout = <InspectFlyout uiSettings={core.uiSettings} searchSession={uiSession} />;
-    const overlay = core.overlays.openFlyout(toMountPoint(flyout));
+    const overlay = core.overlays.openFlyout(toMountPoint(flyout, { theme$: core.theme.theme$ }));
     await overlay.onClose;
   },
 });

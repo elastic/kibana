@@ -13,10 +13,11 @@ describe('monitoring plugin deprecations', function () {
   const deprecate = jest.fn(() => jest.fn());
   const rename = jest.fn(() => jest.fn());
   const renameFromRoot = jest.fn(() => jest.fn());
+  const unused = jest.fn(() => jest.fn());
   const fromPath = 'monitoring';
 
   beforeAll(function () {
-    const deprecations = deprecationsModule({ deprecate, rename, renameFromRoot });
+    const deprecations = deprecationsModule({ deprecate, rename, renameFromRoot, unused });
     transformDeprecations = (settings, fromPath, addDeprecation = noop) => {
       deprecations.forEach((deprecation) => deprecation(settings, fromPath, addDeprecation));
     };

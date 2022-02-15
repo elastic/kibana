@@ -123,7 +123,7 @@ describe('When on the host isolation exceptions page', () => {
         await waitForApiCall();
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
         expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
-          'Showing 1 exception'
+          'Showing 1 host isolation exception'
         );
         expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
       });
@@ -170,9 +170,10 @@ describe('When on the host isolation exceptions page', () => {
         await waitFor(() =>
           expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
             http: mockedContext.coreStart.http,
-            filter: undefined,
+            filter:
+              '(exception-list-agnostic.attributes.item_id:(*this*does*not*exists*) OR exception-list-agnostic.attributes.name:(*this*does*not*exists*) OR exception-list-agnostic.attributes.description:(*this*does*not*exists*) OR exception-list-agnostic.attributes.entries.value:(*this*does*not*exists*))',
             page: 1,
-            perPage: 1,
+            perPage: 10,
           })
         );
 
@@ -206,9 +207,9 @@ describe('When on the host isolation exceptions page', () => {
         await waitFor(() =>
           expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
             http: mockedContext.coreStart.http,
-            filter: undefined,
+            filter: `((exception-list-agnostic.attributes.tags:"policy:${firstPolicy.id}"))`,
             page: 1,
-            perPage: 1,
+            perPage: 10,
           })
         );
 
@@ -263,6 +264,48 @@ describe('When on the host isolation exceptions page', () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit`);
         render();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
+      });
+    });
+
+    describe('and the back button is present', () => {
+      beforeEach(async () => {
+        renderResult = render();
+        act(() => {
+          history.push(HOST_ISOLATION_EXCEPTIONS_PATH, {
+            onBackButtonNavigateTo: [{ appId: 'appId' }],
+            backButtonLabel: 'back to fleet',
+            backButtonUrl: '/fleet',
+          });
+        });
+      });
+
+      it('back button is present', () => {
+        const button = renderResult.queryByTestId('backToOrigin');
+        expect(button).not.toBeNull();
+        expect(button).toHaveAttribute('href', '/fleet');
+      });
+
+      it('back button is still present after push history', () => {
+        act(() => {
+          history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
+        });
+        const button = renderResult.queryByTestId('backToOrigin');
+        expect(button).not.toBeNull();
+        expect(button).toHaveAttribute('href', '/fleet');
+      });
+    });
+
+    describe('and the back button is not present', () => {
+      beforeEach(async () => {
+        renderResult = render();
+        act(() => {
+          history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
+        });
+      });
+
+      it('back button is not present when missing history params', () => {
+        const button = renderResult.queryByTestId('backToOrigin');
+        expect(button).toBeNull();
       });
     });
   });

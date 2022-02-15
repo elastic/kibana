@@ -175,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
           dateEnd: 'now/d',
           autoRefreshEnabled: true,
           refreshTelemetryHistory: true,
+          refreshEsData: true,
         })
         .expect(200);
 

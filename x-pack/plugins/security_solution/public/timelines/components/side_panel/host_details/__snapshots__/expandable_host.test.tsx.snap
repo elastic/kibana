@@ -102,6 +102,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
         ]
       }
       endDate="2020-07-08T08:20:18.966Z"
+      hostName="testHostName"
       id="hostsDetailsQuery"
       indexNames={
         Array [

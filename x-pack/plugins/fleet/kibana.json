@@ -11,5 +11,5 @@
   "requiredPlugins": ["licensing", "data", "encryptedSavedObjects", "navigation", "customIntegrations", "share", "spaces", "security"],
   "optionalPlugins": ["features", "cloud", "usageCollection", "home", "globalSearch", "telemetry"],
   "extraPublicDirs": ["common"],
-  "requiredBundles": ["kibanaReact", "esUiShared", "home", "infra", "kibanaUtils", "usageCollection"]
+  "requiredBundles": ["kibanaReact", "cloud", "esUiShared", "home", "infra", "kibanaUtils", "usageCollection"]
 }

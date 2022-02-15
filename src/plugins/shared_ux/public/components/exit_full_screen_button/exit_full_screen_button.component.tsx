@@ -9,20 +9,17 @@
 import React, { MouseEventHandler, HTMLAttributes } from 'react';
 import {
   EuiScreenReaderOnly,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiText,
   useEuiTheme,
   makeHighContrastColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import cx from 'classnames';
 
-const label = i18n.translate('sharedUX.exitFullScreenButton.exitFullScreenModeButtonAriaLabel', {
-  defaultMessage: 'Exit full screen mode',
-});
+import './exit_full_screen_button.scss';
 
 const text = i18n.translate('sharedUX.exitFullScreenButton.exitFullScreenModeButtonText', {
   defaultMessage: 'Exit full screen',
@@ -44,63 +41,40 @@ export interface Props extends Pick<HTMLAttributes<HTMLDivElement>, 'className'>
  */
 export const ExitFullScreenButton = ({ onClick, className }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const { colors, size } = euiTheme;
-
-  const textCSS = css`
-    ${makeHighContrastColor(colors.mediumShade)(colors.fullShade)};
-  `;
+  const { colors, size, border } = euiTheme;
 
   const buttonCSS = css`
-    &.euiButton {
-      &:hover,
-      &:focus,
-      &:focus-within {
-        text-decoration: none;
-      }
-      .euiButton__content {
-        padding: 0 ${size.s};
-      }
-    }
-
-    &.euiButton--text {
-      background-color: ${colors.fullShade};
-      color: ${makeHighContrastColor(colors.mediumShade)(colors.fullShade)};
-
-      &:hover,
-      &:focus,
-      &:focus-within {
-        background-color: ${colors.fullShade};
-        color: ${makeHighContrastColor(colors.lightestShade)(colors.fullShade)};
-      }
-    }
+    padding: ${size.xs} ${size.s};
+    background: ${colors.fullShade};
+    border-radius: ${border.radius.small};
+    height: ${size.xl};
+    color: ${makeHighContrastColor(colors.emptyShade)(colors.fullShade)};
+    outline-color: ${colors.emptyShade};
   `;
 
   return (
-    <div {...{ className }}>
+    <div>
       <EuiScreenReaderOnly>
         <p aria-live="polite">{description}</p>
       </EuiScreenReaderOnly>
-      <EuiButton
-        aria-label={label}
-        data-test-subj="exitFullScreenModeLogo"
-        color="text"
+      <button
         css={buttonCSS}
-        iconSide="right"
-        iconType="fullScreen"
+        className={cx('exitFullScreenButton', className)}
         onClick={onClick}
-        size="s"
+        data-test-subj="exitFullScreenModeButton"
       >
         <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoElastic" size="l" />
+          <EuiFlexItem component="span" grow={false}>
+            <EuiIcon type="logoElastic" size="m" />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="exitFullScreenModeText">
-            <EuiText size="s" css={textCSS}>
-              {text}
-            </EuiText>
+          <EuiFlexItem component="span" grow={false} data-test-subj="exitFullScreenModeText">
+            {text}
+          </EuiFlexItem>
+          <EuiFlexItem component="span" grow={false}>
+            <EuiIcon type="fullScreenExit" size="s" />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiButton>
+      </button>
     </div>
   );
 };

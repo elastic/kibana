@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { TransportResult } from '@elastic/elasticsearch';
 import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -22,6 +23,15 @@ import { ElasticsearchClientMock } from '../../../../../../../src/core/server/el
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import { RunResult } from '../../../../../task_manager/server/task';
+import {
+  ElasticsearchAssetType,
+  EsAssetReference,
+  Installation,
+} from '../../../../../fleet/common';
+
+import type { EndpointAppContext } from '../../types';
+import type { PackagePolicy } from '../../../../../fleet/common/types/models/package_policy';
+import type { PackageClient } from '../../../../../fleet/server';
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -46,14 +56,28 @@ describe('check metadata transforms task', () => {
   let mockTask: CheckMetadataTransformsTask;
   let mockCore: CoreSetup;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  beforeAll(() => {
+  let mockEndpointAppContext: EndpointAppContext;
+  beforeEach(() => {
     mockCore = coreSetupMock();
     mockTaskManagerSetup = tmSetupMock();
+    mockEndpointAppContext = createMockEndpointAppContext();
     mockTask = new CheckMetadataTransformsTask({
-      endpointAppContext: createMockEndpointAppContext(),
+      endpointAppContext: mockEndpointAppContext,
       core: mockCore,
       taskManager: mockTaskManagerSetup,
     });
+    jest
+      .spyOn(mockEndpointAppContext.service.getInternalFleetServices().packages, 'getInstallation')
+      .mockResolvedValue({
+        installed_es: [
+          { type: ElasticsearchAssetType.transform } as EsAssetReference,
+          { type: ElasticsearchAssetType.transform } as EsAssetReference,
+        ],
+      } as Installation);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('task lifecycle', () => {
@@ -104,147 +128,311 @@ describe('check metadata transforms task', () => {
         },
       } as unknown as TransportResult<TransformGetTransformStatsResponse>);
 
-    it('should stop task if transform stats response fails', async () => {
-      esClient.transform.getTransformStats.mockRejectedValue({});
-      await runTask();
-      expect(esClient.transform.getTransformStats).toHaveBeenCalledWith({
-        transform_id: METADATA_TRANSFORMS_PATTERN,
+    describe('transforms restart', () => {
+      it('should stop task if transform stats response fails', async () => {
+        esClient.transform.getTransformStats.mockRejectedValue({});
+        await runTask();
+        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
+          {
+            transform_id: METADATA_TRANSFORMS_PATTERN,
+          },
+          { meta: true }
+        );
+        expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+        expect(esClient.transform.startTransform).not.toHaveBeenCalled();
       });
-      expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
-      expect(esClient.transform.startTransform).not.toHaveBeenCalled();
+
+      it('should attempt transform restart if failing state', async () => {
+        const transformStatsResponseMock = buildFailedStatsResponse();
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
+
+        const taskResponse = (await runTask()) as RunResult;
+
+        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
+          {
+            transform_id: METADATA_TRANSFORMS_PATTERN,
+          },
+          { meta: true }
+        );
+        expect(esClient.transform.stopTransform).toHaveBeenCalledWith({
+          transform_id: failedTransformId,
+          allow_no_match: true,
+          wait_for_completion: true,
+          force: true,
+        });
+        expect(esClient.transform.startTransform).toHaveBeenCalledWith({
+          transform_id: failedTransformId,
+        });
+        expect(taskResponse?.state?.restartAttempts).toEqual({
+          [goodTransformId]: 0,
+          [failedTransformId]: 0,
+        });
+      });
+
+      it('should correctly track transform restart attempts', async () => {
+        const transformStatsResponseMock = buildFailedStatsResponse();
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
+
+        esClient.transform.stopTransform.mockRejectedValueOnce({});
+        let taskResponse = (await runTask()) as RunResult;
+        expect(taskResponse?.state?.restartAttempts).toEqual({
+          [goodTransformId]: 0,
+          [failedTransformId]: 1,
+        });
+
+        esClient.transform.startTransform.mockRejectedValueOnce({});
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        expect(taskResponse?.state?.restartAttempts).toEqual({
+          [goodTransformId]: 0,
+          [failedTransformId]: 2,
+        });
+
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        expect(taskResponse?.state?.restartAttempts).toEqual({
+          [goodTransformId]: 0,
+          [failedTransformId]: 0,
+        });
+      });
+
+      it('should correctly back off subsequent restart attempts', async () => {
+        let transformStatsResponseMock = buildFailedStatsResponse();
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
+
+        esClient.transform.stopTransform.mockRejectedValueOnce({});
+        let taskStartedAt = new Date();
+        let taskResponse = (await runTask()) as RunResult;
+        let delay = BASE_NEXT_ATTEMPT_DELAY * 60000;
+        let expectedRunAt = taskStartedAt.getTime() + delay;
+        expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
+        // we don't have the exact timestamp it uses so give a buffer
+        let expectedRunAtUpperBound = expectedRunAt + 1000;
+        expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+
+        esClient.transform.startTransform.mockRejectedValueOnce({});
+        taskStartedAt = new Date();
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        // should be exponential on second+ attempt
+        delay = BASE_NEXT_ATTEMPT_DELAY ** 2 * 60000;
+        expectedRunAt = taskStartedAt.getTime() + delay;
+        expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
+        // we don't have the exact timestamp it uses so give a buffer
+        expectedRunAtUpperBound = expectedRunAt + 1000;
+        expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+
+        esClient.transform.stopTransform.mockRejectedValueOnce({});
+        taskStartedAt = new Date();
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        // should be exponential on second+ attempt
+        delay = BASE_NEXT_ATTEMPT_DELAY ** 3 * 60000;
+        expectedRunAt = taskStartedAt.getTime() + delay;
+        expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
+        // we don't have the exact timestamp it uses so give a buffer
+        expectedRunAtUpperBound = expectedRunAt + 1000;
+        expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+
+        taskStartedAt = new Date();
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        // back to base delay after success
+        delay = BASE_NEXT_ATTEMPT_DELAY * 60000;
+        expectedRunAt = taskStartedAt.getTime() + delay;
+        expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
+        // we don't have the exact timestamp it uses so give a buffer
+        expectedRunAtUpperBound = expectedRunAt + 1000;
+        expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+
+        transformStatsResponseMock = {
+          body: {
+            transforms: [
+              {
+                id: goodTransformId,
+                state: TRANSFORM_STATES.STARTED,
+              },
+              {
+                id: failedTransformId,
+                state: TRANSFORM_STATES.STARTED,
+              },
+            ],
+          },
+        } as unknown as TransportResult<TransformGetTransformStatsResponse>;
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        // no more explicit runAt after subsequent success
+        expect(taskResponse?.runAt).toBeUndefined();
+      });
     });
 
-    it('should attempt transform restart if failing state', async () => {
-      const transformStatsResponseMock = buildFailedStatsResponse();
-      esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+    describe('transforms reinstall', () => {
+      let getRegistryPackageSpy: jest.SpyInstance;
+      let reinstallEsAssetsSpy: jest.SpyInstance;
+      let mockPackageClient: jest.Mocked<PackageClient>;
 
-      const taskResponse = (await runTask()) as RunResult;
+      beforeEach(() => {
+        jest
+          .spyOn(
+            mockEndpointAppContext.service.getEndpointMetadataService(),
+            'getAllEndpointPackagePolicies'
+          )
+          .mockResolvedValue([{} as PackagePolicy]);
 
-      expect(esClient.transform.getTransformStats).toHaveBeenCalledWith({
-        transform_id: METADATA_TRANSFORMS_PATTERN,
-      });
-      expect(esClient.transform.stopTransform).toHaveBeenCalledWith({
-        transform_id: failedTransformId,
-        allow_no_match: true,
-        wait_for_completion: true,
-        force: true,
-      });
-      expect(esClient.transform.startTransform).toHaveBeenCalledWith({
-        transform_id: failedTransformId,
-      });
-      expect(taskResponse?.state?.attempts).toEqual({
-        [goodTransformId]: 0,
-        [failedTransformId]: 0,
-      });
-    });
+        mockPackageClient = mockEndpointAppContext.service.getInternalFleetServices()
+          .packages as jest.Mocked<PackageClient>;
+        getRegistryPackageSpy = jest.spyOn(mockPackageClient, 'getRegistryPackage');
+        reinstallEsAssetsSpy = jest.spyOn(mockPackageClient, 'reinstallEsAssets');
 
-    it('should correctly track transform restart attempts', async () => {
-      const transformStatsResponseMock = buildFailedStatsResponse();
-      esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
-
-      esClient.transform.stopTransform.mockRejectedValueOnce({});
-      let taskResponse = (await runTask()) as RunResult;
-      expect(taskResponse?.state?.attempts).toEqual({
-        [goodTransformId]: 0,
-        [failedTransformId]: 1,
+        const transformStatsResponseMock = {
+          body: {
+            transforms: [
+              {
+                id: 'transform1',
+                state: TRANSFORM_STATES.STARTED,
+              },
+            ],
+            count: 1,
+          },
+        } as unknown as TransportResult<TransformGetTransformStatsResponse>;
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
       });
 
-      esClient.transform.startTransform.mockRejectedValueOnce({});
-      taskResponse = (await runTask({
-        ...MOCK_TASK_INSTANCE,
-        state: taskResponse.state,
-      })) as RunResult;
-      expect(taskResponse?.state?.attempts).toEqual({
-        [goodTransformId]: 0,
-        [failedTransformId]: 2,
+      it('should reinstall if missing transforms', async () => {
+        const expectedArgs = {
+          packageInfo: { name: 'package name' },
+          paths: ['some/test/transform/path'],
+        };
+        getRegistryPackageSpy.mockResolvedValue(expectedArgs);
+        reinstallEsAssetsSpy.mockResolvedValue([{}]);
+        await runTask();
+
+        expect(reinstallEsAssetsSpy).toHaveBeenCalledTimes(1);
+        expect(reinstallEsAssetsSpy).toHaveBeenCalledWith(
+          expectedArgs.packageInfo,
+          expectedArgs.paths
+        );
       });
 
-      taskResponse = (await runTask({
-        ...MOCK_TASK_INSTANCE,
-        state: taskResponse.state,
-      })) as RunResult;
-      expect(taskResponse?.state?.attempts).toEqual({
-        [goodTransformId]: 0,
-        [failedTransformId]: 0,
+      it('should correctly track attempts on reinstall', async () => {
+        reinstallEsAssetsSpy.mockRejectedValueOnce({}).mockRejectedValueOnce({});
+
+        let taskResponse = (await runTask()) as RunResult;
+        expect(taskResponse?.state.reinstallAttempts).toEqual(1);
+
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        expect(taskResponse?.state.reinstallAttempts).toEqual(2);
       });
-    });
 
-    it('should correctly back off subsequent restart attempts', async () => {
-      let transformStatsResponseMock = buildFailedStatsResponse();
-      esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+      it('should return correct runAt', async () => {
+        getRegistryPackageSpy.mockResolvedValue({
+          packageInfo: { name: 'package name' },
+          paths: ['some/test/transform/path'],
+        });
+        reinstallEsAssetsSpy
+          .mockRejectedValueOnce([])
+          .mockRejectedValueOnce([])
+          .mockRejectedValueOnce([])
+          .mockResolvedValueOnce([{}]);
 
-      esClient.transform.stopTransform.mockRejectedValueOnce({});
-      let taskStartedAt = new Date();
-      let taskResponse = (await runTask()) as RunResult;
-      let delay = BASE_NEXT_ATTEMPT_DELAY * 60000;
-      let expectedRunAt = taskStartedAt.getTime() + delay;
-      expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
-      // we don't have the exact timestamp it uses so give a buffer
-      let expectedRunAtUpperBound = expectedRunAt + 1000;
-      expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+        let taskStartedAt = new Date();
+        let taskResponse = (await runTask()) as RunResult;
 
-      esClient.transform.startTransform.mockRejectedValueOnce({});
-      taskStartedAt = new Date();
-      taskResponse = (await runTask({
-        ...MOCK_TASK_INSTANCE,
-        state: taskResponse.state,
-      })) as RunResult;
-      // should be exponential on second+ attempt
-      delay = BASE_NEXT_ATTEMPT_DELAY ** 2 * 60000;
-      expectedRunAt = taskStartedAt.getTime() + delay;
-      expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
-      // we don't have the exact timestamp it uses so give a buffer
-      expectedRunAtUpperBound = expectedRunAt + 1000;
-      expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+        expect(reinstallEsAssetsSpy).toHaveBeenCalledTimes(1);
 
-      esClient.transform.stopTransform.mockRejectedValueOnce({});
-      taskStartedAt = new Date();
-      taskResponse = (await runTask({
-        ...MOCK_TASK_INSTANCE,
-        state: taskResponse.state,
-      })) as RunResult;
-      // should be exponential on second+ attempt
-      delay = BASE_NEXT_ATTEMPT_DELAY ** 3 * 60000;
-      expectedRunAt = taskStartedAt.getTime() + delay;
-      expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
-      // we don't have the exact timestamp it uses so give a buffer
-      expectedRunAtUpperBound = expectedRunAt + 1000;
-      expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+        let delay = BASE_NEXT_ATTEMPT_DELAY * 60000;
+        let expectedRunAt = taskStartedAt.getTime() + delay;
+        expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
+        // we don't have the exact timestamp it uses so give a buffer
+        let expectedRunAtUpperBound = expectedRunAt + 1000;
+        expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
 
-      taskStartedAt = new Date();
-      taskResponse = (await runTask({
-        ...MOCK_TASK_INSTANCE,
-        state: taskResponse.state,
-      })) as RunResult;
-      // back to base delay after success
-      delay = BASE_NEXT_ATTEMPT_DELAY * 60000;
-      expectedRunAt = taskStartedAt.getTime() + delay;
-      expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
-      // we don't have the exact timestamp it uses so give a buffer
-      expectedRunAtUpperBound = expectedRunAt + 1000;
-      expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+        taskStartedAt = new Date();
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        expect(reinstallEsAssetsSpy).toHaveBeenCalledTimes(2);
 
-      transformStatsResponseMock = {
-        body: {
-          transforms: [
-            {
-              id: goodTransformId,
-              state: TRANSFORM_STATES.STARTED,
-            },
-            {
-              id: failedTransformId,
-              state: TRANSFORM_STATES.STARTED,
-            },
-          ],
-        },
-      } as unknown as TransportResult<TransformGetTransformStatsResponse>;
-      esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
-      taskResponse = (await runTask({
-        ...MOCK_TASK_INSTANCE,
-        state: taskResponse.state,
-      })) as RunResult;
-      // no more explicit runAt after subsequent success
-      expect(taskResponse?.runAt).toBeUndefined();
+        // should be exponential on second+ attempt
+        delay = BASE_NEXT_ATTEMPT_DELAY ** 2 * 60000;
+        expectedRunAt = taskStartedAt.getTime() + delay;
+        expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
+        // we don't have the exact timestamp it uses so give a buffer
+        expectedRunAtUpperBound = expectedRunAt + 1000;
+        expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+
+        taskStartedAt = new Date();
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        expect(reinstallEsAssetsSpy).toHaveBeenCalledTimes(3);
+
+        // should be exponential on second+ attempt
+        delay = BASE_NEXT_ATTEMPT_DELAY ** 3 * 60000;
+        expectedRunAt = taskStartedAt.getTime() + delay;
+        expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
+        // we don't have the exact timestamp it uses so give a buffer
+        expectedRunAtUpperBound = expectedRunAt + 1000;
+        expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+
+        taskStartedAt = new Date();
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        expect(reinstallEsAssetsSpy).toHaveBeenCalledTimes(4);
+
+        // back to base delay after success
+        delay = BASE_NEXT_ATTEMPT_DELAY * 60000;
+        expectedRunAt = taskStartedAt.getTime() + delay;
+        expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
+        // we don't have the exact timestamp it uses so give a buffer
+        expectedRunAtUpperBound = expectedRunAt + 1000;
+        expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+
+        const goodTransformStatsResponseMock = {
+          body: {
+            transforms: [
+              {
+                id: 'transform1',
+                state: TRANSFORM_STATES.STARTED,
+              },
+              {
+                id: 'transform2',
+                state: TRANSFORM_STATES.STARTED,
+              },
+            ],
+            count: 2,
+          },
+        } as unknown as TransportResult<TransformGetTransformStatsResponse>;
+        esClient.transform.getTransformStats.mockResponse(goodTransformStatsResponseMock.body);
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        // same since shouldn't call it when transforms are good
+        expect(reinstallEsAssetsSpy).toHaveBeenCalledTimes(4);
+        // no more explicit runAt after subsequent success
+        expect(taskResponse?.runAt).toBeUndefined();
+      });
     });
   });
 });

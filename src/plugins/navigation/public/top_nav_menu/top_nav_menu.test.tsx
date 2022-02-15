@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { MountPoint } from 'kibana/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 
 const dataShim = {
   ui: {

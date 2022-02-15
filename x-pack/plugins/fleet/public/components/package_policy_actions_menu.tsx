@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 
-import { useAgentPolicyRefresh, useCapabilities, useLink } from '../hooks';
+import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -36,7 +36,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
-  const hasWriteCapabilities = useCapabilities().write;
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
@@ -57,9 +57,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    ...(showAddAgent
+    ...(showAddAgent && !agentPolicy.is_managed
       ? [
           <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsAddAgentItem"
             icon="plusInCircle"
             onClick={() => {
               setIsActionsMenuOpen(false);
@@ -75,7 +76,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         ]
       : []),
     <EuiContextMenuItem
-      disabled={!hasWriteCapabilities}
+      data-test-subj="PackagePolicyActionsEditItem"
+      disabled={!canWriteIntegrationPolicies}
       icon="pencil"
       href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
@@ -88,7 +90,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      disabled={!packagePolicy.hasUpgrade}
+      data-test-subj="PackagePolicyActionsUpgradeItem"
+      disabled={!packagePolicy.hasUpgrade || !canWriteIntegrationPolicies}
       icon="refresh"
       href={upgradePackagePolicyHref}
       key="packagePolicyUpgrade"
@@ -113,7 +116,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         {(deletePackagePoliciesPrompt) => {
           return (
             <DangerEuiContextMenuItem
-              disabled={!hasWriteCapabilities}
+              data-test-subj="PackagePolicyActionsDeleteItem"
+              disabled={!canWriteIntegrationPolicies}
               icon="trash"
               onClick={() => {
                 deletePackagePoliciesPrompt([packagePolicy.id], () => {

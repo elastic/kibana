@@ -11,7 +11,7 @@ import { getFindResultWithSingleHit } from '../routes/__mocks__/request_response
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
-import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+
 jest.mock('./patch_rules');
 
 describe.each([
@@ -19,12 +19,10 @@ describe.each([
   ['RAC', true],
 ])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    ruleStatusClient = ruleExecutionLogClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
   });
 
@@ -45,7 +43,6 @@ describe.each([
       rulesClient,
       savedObjectsClient,
       'default',
-      ruleStatusClient,
       [{ ...prepackagedRule, actions }],
       outputIndex,
       isRuleRegistryEnabled
@@ -77,7 +74,6 @@ describe.each([
       rulesClient,
       savedObjectsClient,
       'default',
-      ruleStatusClient,
       [{ ...prepackagedRule, ...updatedThreatParams }],
       'output-index',
       isRuleRegistryEnabled

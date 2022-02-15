@@ -12,7 +12,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../__fixtures__/real_hits.js';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
 import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
@@ -23,10 +23,10 @@ import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
-
-jest.mock('../../../../kibana_services', () => ({
-  getServices: () => mockDiscoverServices,
-}));
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { BehaviorSubject } from 'rxjs';
+import { FetchStatus } from '../../../types';
+import { AvailableFields$ } from '../../utils/use_saved_search';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
@@ -49,6 +49,11 @@ function getCompProps(): DiscoverSidebarProps {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
+
   return {
     columns: ['extension'],
     fieldCounts,
@@ -59,7 +64,6 @@ function getCompProps(): DiscoverSidebarProps {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
-    services: mockDiscoverServices,
     state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
@@ -67,6 +71,9 @@ function getCompProps(): DiscoverSidebarProps {
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    createNewDataView: jest.fn(),
+    onDataViewCreated: jest.fn(),
+    availableFields$,
   };
 }
 
@@ -76,7 +83,11 @@ describe('discover sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
-    comp = mountWithIntl(<DiscoverSidebar {...props} />);
+    comp = mountWithIntl(
+      <KibanaContextProvider services={mockDiscoverServices}>
+        <DiscoverSidebar {...props} />
+      </KibanaContextProvider>
+    );
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {

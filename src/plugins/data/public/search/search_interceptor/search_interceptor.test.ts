@@ -8,7 +8,7 @@
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup, CoreStart } from '../../../../../core/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../core/public/mocks';
 import { IEsSearchRequest } from '../../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../../../kibana_utils/public';
@@ -120,6 +120,7 @@ describe('SearchInterceptor', () => {
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
       session: sessionService,
+      theme: themeServiceMock.createSetupContract(),
     });
   });
 

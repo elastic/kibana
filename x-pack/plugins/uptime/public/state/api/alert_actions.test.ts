@@ -50,7 +50,7 @@ describe('Alert Actions factory', () => {
             eventAction: 'trigger',
             severity: 'error',
             summary:
-              'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
+              'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} from {{state.observerLocation}} {{{state.statusMessage}}} The latest error message is {{{state.latestErrorMessage}}}',
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
@@ -75,7 +75,7 @@ describe('Alert Actions factory', () => {
           eventAction: 'trigger',
           severity: 'error',
           summary:
-            'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
+            'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} from {{state.observerLocation}} {{{state.statusMessage}}} The latest error message is {{{state.latestErrorMessage}}}',
         },
       },
     ]);
@@ -93,7 +93,7 @@ describe('Alert Actions factory', () => {
             eventAction: 'trigger',
             severity: 'error',
             summary:
-              'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
+              'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} from {{state.observerLocation}} {{{state.statusMessage}}} The latest error message is {{{state.latestErrorMessage}}}',
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
@@ -118,7 +118,7 @@ describe('Alert Actions factory', () => {
           eventAction: 'trigger',
           severity: 'error',
           summary:
-            'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}',
+            'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} from {{state.observerLocation}} {{{state.statusMessage}}} The latest error message is {{{state.latestErrorMessage}}}',
         },
       },
     ]);

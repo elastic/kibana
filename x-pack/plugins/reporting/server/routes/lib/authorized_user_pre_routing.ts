@@ -30,12 +30,13 @@ export const authorizedUserPreRouting = <P, Q, B>(
 ): RequestHandler<P, Q, B, ReportingRequestHandlerContext, RouteMethod> => {
   const { logger, security } = reporting.getPluginSetupDeps();
 
-  return (context, req, res) => {
+  return async (context, req, res) => {
+    const { security: securityStart } = await reporting.getPluginStartDeps();
     try {
       let user: ReportingRequestUser = false;
       if (security && security.license.isEnabled()) {
         // find the authenticated user, or null if security is not enabled
-        user = getUser(req, security);
+        user = getUser(req, securityStart);
         if (!user) {
           // security is enabled but the user is null
           return res.unauthorized({ body: `Sorry, you aren't authenticated` });

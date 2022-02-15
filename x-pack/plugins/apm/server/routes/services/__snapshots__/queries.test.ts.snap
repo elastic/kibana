@@ -187,6 +187,7 @@ Array [
     "apm": Object {
       "events": Array [
         "metric",
+        "error",
       ],
     },
     "body": Object {

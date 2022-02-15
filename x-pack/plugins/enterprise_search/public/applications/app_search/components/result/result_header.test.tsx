@@ -24,6 +24,7 @@ describe('ResultHeader', () => {
   };
   const props = {
     showScore: false,
+    showClick: false,
     isMetaEngine: false,
     resultMeta,
     actions: [],
@@ -66,6 +67,18 @@ describe('ResultHeader', () => {
     it('does not render score if showScore is false', () => {
       const wrapper = shallow(<ResultHeader {...props} showScore={false} />);
       expect(wrapper.find('[data-test-subj="ResultScore"]').exists()).toBe(false);
+    });
+  });
+
+  describe('clicks', () => {
+    it('renders clicks if showClick is true', () => {
+      const wrapper = shallow(<ResultHeader {...props} showClick />);
+      expect(wrapper.find('[data-test-subj="ResultClicks"]').exists()).toBe(true);
+    });
+
+    it(' does not render clicks if showClick is false', () => {
+      const wrapper = shallow(<ResultHeader {...props} showClick={false} />);
+      expect(wrapper.find('[data-test-subj="ResultClicks"]').exists()).toBe(false);
     });
   });
 

@@ -22,6 +22,7 @@ const getHostsTabPath = () =>
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
+  `${HostsTableType.risk}|` +
   `${HostsTableType.alerts})`;
 
 const getHostDetailsTabPath = () =>
@@ -30,20 +31,12 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
+  `${HostsTableType.risk}|` +
   `${HostsTableType.alerts})`;
 
 export const HostsContainer = React.memo(() => {
   return (
     <Switch>
-      <Route
-        exact
-        strict
-        path={HOSTS_PATH}
-        render={({ location: { search = '' } }) => (
-          <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
-        )}
-      />
-
       <Route path={`${HOSTS_PATH}/ml-hosts`}>
         <MlHostConditionalContainer />
       </Route>
@@ -72,6 +65,13 @@ export const HostsContainer = React.memo(() => {
               search,
             }}
           />
+        )}
+      />
+
+      <Route
+        path={HOSTS_PATH}
+        render={({ location: { search = '' } }) => (
+          <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
         )}
       />
     </Switch>

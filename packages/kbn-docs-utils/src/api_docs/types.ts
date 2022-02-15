@@ -234,6 +234,12 @@ export interface ReferencedDeprecationsByPlugin {
   [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
 }
 
+// A mapping of plugin owner to it's plugin deprecation list.
+export interface ReferencedDeprecationsByTeam {
+  // Key is the plugin owner.
+  [key: string]: ReferencedDeprecationsByPlugin;
+}
+
 export interface UnreferencedDeprecationsByPlugin {
   // Key is the plugin id.
   [key: string]: ApiDeclaration[];

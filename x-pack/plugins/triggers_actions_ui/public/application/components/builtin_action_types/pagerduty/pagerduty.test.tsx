@@ -105,4 +105,28 @@ describe('pagerduty action params validation', () => {
       },
     });
   });
+
+  test('action params validation fails when the timestamp is invalid', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: '2011-05-99T03:30-07',
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+    };
+
+    const expected = [expect.stringMatching(/^Timestamp must be a valid date/)];
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: expect.arrayContaining(expected),
+      },
+    });
+  });
 });

@@ -13,19 +13,31 @@ import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from './get_index_patterns';
+import { Globals } from '../../static_globals';
 
-export function getClusterLicense(req: LegacyRequest, esIndexPattern: string, clusterUuid: string) {
-  checkParam(esIndexPattern, 'esIndexPattern in getClusterLicense');
+// is this being used anywhere?  not called within the app
+export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
+  const dataset = 'cluster_stats';
+  const moduleType = 'elasticsearch';
+  const indexPattern = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    dataset,
+    ccs: req.payload.ccs,
+  });
 
   const params = {
-    index: esIndexPattern,
+    index: indexPattern,
     size: 1,
     ignore_unavailable: true,
     filter_path: ['hits.hits._source.license'],
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        type: 'cluster_stats',
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         clusterUuid,
         metric: ElasticsearchMetric.getMetricFields(),
       }),

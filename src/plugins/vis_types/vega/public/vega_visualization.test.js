@@ -49,7 +49,7 @@ describe('VegaVisualizations', () => {
     mockHeight = jest.spyOn($.prototype, 'height').mockImplementation(() => mockedHeightValue);
   };
 
-  const mockGetServiceSettings = async () => {
+  const mockGetServiceSettings = () => {
     return {};
   };
 

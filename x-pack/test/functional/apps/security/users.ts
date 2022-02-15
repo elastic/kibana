@@ -44,7 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // In Cloud default users are defined in file realm, such users aren't exposed through the Users API.
       if (isCloudEnvironment()) {
-        expect(Object.keys(users)).to.eql(['test_user']);
+        expect(users).to.not.have.property('elastic');
+        expect(users).to.not.have.property('kibana_system');
+        expect(users).to.not.have.property('kibana');
       } else {
         expect(users.elastic.roles).to.eql(['superuser']);
         expect(users.elastic.reserved).to.be(true);
@@ -201,7 +203,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('Deactivate/Activate user', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/118728
+      describe.skip('Deactivate/Activate user', () => {
         it('deactivates user when confirming', async () => {
           await PageObjects.security.deactivatesUser(optionalUser);
           const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');

@@ -15,7 +15,7 @@ import {
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
-import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 
 // Paths that must skip the no data screen
@@ -51,7 +51,7 @@ export function ApmMainTemplate({
   const ObservabilityPageTemplate = observability.navigation.PageTemplate;
 
   const { data } = useFetcher((callApmApi) => {
-    return callApmApi({ endpoint: 'GET /internal/apm/has_data' });
+    return callApmApi('GET /internal/apm/has_data');
   }, []);
 
   const noDataConfig = getNoDataConfig({

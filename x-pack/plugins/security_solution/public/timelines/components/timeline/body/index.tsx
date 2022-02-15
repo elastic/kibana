@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
+import { noop, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import {
@@ -89,6 +89,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     setSelected,
     clearSelected,
     onRuleChange,
+    show,
     showCheckboxes,
     refetch,
     renderCellValue,
@@ -99,6 +100,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     leadingControlColumns = [],
     trailingControlColumns = [],
   }) => {
+    const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
@@ -142,6 +144,19 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         onSelectAll({ isSelected: true });
       }
     }, [isSelectAllChecked, onSelectAll, selectAll]);
+
+    useEffect(() => {
+      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
+        columnHeaders.forEach(({ id: columnId }) => {
+          if (browserFields.base?.fields?.[columnId] == null) {
+            const [category] = columnId.split('.');
+            if (browserFields[category]?.fields?.[columnId] == null) {
+              dispatch(timelineActions.removeColumn({ id, columnId }));
+            }
+          }
+        });
+      }
+    }, [browserFields, columnHeaders, dispatch, id]);
 
     const enabledRowRenderers = useMemo(() => {
       if (
@@ -230,6 +245,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
               onSelectAll={onSelectAll}
+              show={show}
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
@@ -284,7 +300,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     prevProps.renderCellValue === nextProps.renderCellValue &&
     prevProps.rowRenderers === nextProps.rowRenderers &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
-    prevProps.tabType === nextProps.tabType
+    prevProps.tabType === nextProps.tabType &&
+    prevProps.show === nextProps.show
 );
 
 BodyComponent.displayName = 'BodyComponent';
@@ -307,6 +324,7 @@ const makeMapStateToProps = () => {
       pinnedEventIds,
       selectedEventIds,
       showCheckboxes,
+      show,
     } = timeline;
 
     return {
@@ -319,6 +337,7 @@ const makeMapStateToProps = () => {
       pinnedEventIds,
       selectedEventIds,
       showCheckboxes,
+      show,
     };
   };
   return mapStateToProps;

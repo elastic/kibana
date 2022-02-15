@@ -21,18 +21,25 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       dateEnd: schema.string(),
       autoRefreshEnabled: schema.boolean(),
       autorefreshInterval: schema.number(),
+      refreshEsData: schema.maybe(schema.boolean()),
       refreshTelemetryHistory: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ savedObjectsClient, uptimeEsClient, request }): Promise<any> => {
     const pageView = request.body as PageViewParams;
     if (pageView.refreshTelemetryHistory) {
+      // this is primarily only used for API testing
       KibanaTelemetryAdapter.clearLocalTelemetry();
     }
-    await KibanaTelemetryAdapter.countNoOfUniqueMonitorAndLocations(
-      uptimeEsClient,
-      savedObjectsClient
-    );
+
+    if (pageView.refreshEsData) {
+      // this is primarily only used for API testing
+
+      await KibanaTelemetryAdapter.countNoOfUniqueMonitorAndLocations(
+        uptimeEsClient,
+        savedObjectsClient
+      );
+    }
     await KibanaTelemetryAdapter.countNoOfUniqueFleetManagedMonitors(uptimeEsClient);
     return KibanaTelemetryAdapter.countPageView(pageView as PageViewParams);
   },

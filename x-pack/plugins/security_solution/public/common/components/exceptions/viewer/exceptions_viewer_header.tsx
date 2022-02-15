@@ -133,7 +133,7 @@ const ExceptionsViewerHeaderComponent = ({
         />
       </EuiFlexItem>
 
-      {supportedListTypes.length < 2 && (
+      {supportedListTypes.length === 1 && (
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="exceptionsHeaderAddExceptionBtn"

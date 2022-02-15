@@ -16,7 +16,6 @@ import { useGetCases } from '../../containers/use_get_cases';
 import { CaseDetailsLink } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
-import { isSubCase } from '../all_cases/helpers';
 import { MarkdownRenderer } from '../markdown_editor';
 import { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
@@ -67,11 +66,7 @@ export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesPr
         <EuiFlexGroup key={c.id} gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <CaseDetailsLink
-                detailName={isSubCase(c) ? c.caseParentId : c.id}
-                title={c.title}
-                subCaseId={isSubCase(c) ? c.id : undefined}
-              >
+              <CaseDetailsLink detailName={c.id} title={c.title}>
                 <TruncatedText text={c.title} />
               </CaseDetailsLink>
             </EuiText>
@@ -91,3 +86,4 @@ export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesPr
     </>
   );
 };
+RecentCasesComp.displayName = 'RecentCasesComp';

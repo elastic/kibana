@@ -47,9 +47,7 @@ export function apmInstanceRoute(server) {
 
       try {
         const [metrics, apmSummary] = await Promise.all([
-          getMetrics(req, apmIndexPattern, metricSet, [
-            { term: { 'beats_stats.beat.uuid': apmUuid } },
-          ]),
+          getMetrics(req, 'beats', metricSet, [{ term: { 'beats_stats.beat.uuid': apmUuid } }]),
           getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid }),
         ]);
 

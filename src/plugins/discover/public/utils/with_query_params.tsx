@@ -9,20 +9,12 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
-import { DiscoverRouteProps } from '../application/types';
 import { DiscoverError } from '../components/common/error_alert';
 
-function useQuery() {
-  const { search } = useLocation();
-  return useMemo(() => new URLSearchParams(search), [search]);
-}
-
-export const withQueryParams = <P extends DiscoverRouteProps>(
-  Component: React.ComponentType<P>,
-  requiredParams: string[]
-) => {
-  return (routeProps: DiscoverRouteProps) => {
-    const query = useQuery();
+export function withQueryParams<T>(Component: React.ComponentType<T>, requiredParams: string[]) {
+  return () => {
+    const { search } = useLocation();
+    const query = useMemo(() => new URLSearchParams(search), [search]);
 
     const missingParamNames = useMemo(
       () => requiredParams.filter((currentParamName) => !query.get(currentParamName)),
@@ -42,6 +34,6 @@ export const withQueryParams = <P extends DiscoverRouteProps>(
     const queryProps = Object.fromEntries(
       requiredParams.map((current) => [[current], query.get(current)])
     );
-    return <Component {...queryProps} {...routeProps} />;
+    return <Component {...queryProps} />;
   };
-};
+}

@@ -26,10 +26,10 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );
@@ -40,7 +40,7 @@ describe('AllRules', () => {
     );
   });
 
-  it('does not render total selected and bulk actions when "showBulkActions" is false', () => {
+  it('does not render total selected and bulk actions when "hasBulkActions" is false', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
@@ -48,10 +48,10 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions={false}
+          hasBulkActions={false}
         />
       </ThemeProvider>
     );
@@ -71,10 +71,10 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );
@@ -90,10 +90,10 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );
@@ -110,10 +110,10 @@ describe('AllRules', () => {
           onRefresh={mockRefresh}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );
@@ -132,10 +132,10 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={mockSwitch}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );

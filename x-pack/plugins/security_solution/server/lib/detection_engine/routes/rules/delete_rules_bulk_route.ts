@@ -25,6 +25,7 @@ import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { deleteRules } from '../../rules/delete_rules';
 import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
 
 type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
 type Handler = RequestHandler<
@@ -52,14 +53,9 @@ export const deleteRulesBulkRoute = (
   };
   const handler: Handler = async (context, request, response) => {
     const siemResponse = buildSiemResponse(response);
-
-    const rulesClient = context.alerting?.getRulesClient();
-
-    if (!rulesClient) {
-      return siemResponse.error({ statusCode: 404 });
-    }
-
-    const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+    const rulesClient = context.alerting.getRulesClient();
+    const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
+    const savedObjectsClient = context.core.savedObjects.client;
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {
@@ -76,23 +72,27 @@ export const deleteRulesBulkRoute = (
 
         try {
           const rule = await readRules({ rulesClient, id, ruleId, isRuleRegistryEnabled });
-          if (!rule) {
+          const migratedRule = await legacyMigrate({
+            rulesClient,
+            savedObjectsClient,
+            rule,
+          });
+          if (!migratedRule) {
             return getIdBulkError({ id, ruleId });
           }
 
-          const ruleStatus = await ruleStatusClient.getCurrentStatus({
-            ruleId: rule.id,
-            spaceId: context.securitySolution.getSpaceId(),
-          });
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(migratedRule.id);
+
           await deleteRules({
-            ruleId: rule.id,
+            ruleId: migratedRule.id,
             rulesClient,
-            ruleStatusClient,
+            ruleExecutionLog,
           });
+
           return transformValidateBulkError(
             idOrRuleIdOrUnknown,
-            rule,
-            ruleStatus,
+            migratedRule,
+            ruleExecutionSummary,
             isRuleRegistryEnabled
           );
         } catch (err) {

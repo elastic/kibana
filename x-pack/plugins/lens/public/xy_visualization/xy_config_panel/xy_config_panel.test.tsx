@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from '.';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -271,7 +271,7 @@ describe('XY Config panels', () => {
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
-      expect(options!.map(({ label }) => label)).toEqual(['Auto', 'Bottom', 'Top']);
+      expect(options!.map(({ label }) => label)).toEqual(['Bottom', 'Auto', 'Top']);
     });
 
     test('shows the default axis side options when not in horizontal mode', () => {
@@ -295,7 +295,7 @@ describe('XY Config panels', () => {
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
-      expect(options!.map(({ label }) => label)).toEqual(['Auto', 'Left', 'Right']);
+      expect(options!.map(({ label }) => label)).toEqual(['Left', 'Auto', 'Right']);
     });
 
     test('sets the color of a dimension to the color from palette service if not set explicitly', () => {

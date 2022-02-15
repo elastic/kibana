@@ -209,6 +209,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFiel
     />
   );
 };
+JiraFieldsComponent.displayName = 'JiraFields';
 
 // eslint-disable-next-line import/no-default-export
 export { JiraFieldsComponent as default };

@@ -2,75 +2,63 @@
 
 exports[`CalendarsList Renders calendar list with calendars 1`] = `
 <Fragment>
-  <NavigationMenu
-    tabId="settings"
-  />
-  <EuiPage
-    className="mlCalendarList"
+  <div
     data-test-subj="mlPageCalendarManagement"
   >
-    <EuiPageBody>
-      <EuiPageContent
-        className="mlCalendarList__content"
-        horizontalPosition="center"
-        verticalPosition="center"
-      >
-        <CalendarsListHeaderUI
-          refreshCalendars={[Function]}
-          totalCount={2}
-        />
-        <CalendarsListTable
-          calendarsList={
-            Array [
+    <CalendarsListHeaderUI
+      refreshCalendars={[Function]}
+      totalCount={2}
+    />
+    <CalendarsListTable
+      calendarsList={
+        Array [
+          Object {
+            "calendar_id": "farequote-calendar",
+            "description": "test ",
+            "events": Array [
               Object {
                 "calendar_id": "farequote-calendar",
-                "description": "test ",
-                "events": Array [
-                  Object {
-                    "calendar_id": "farequote-calendar",
-                    "description": "Downtime feb 9 2017 10:10 to 10:30",
-                    "end_time": 1486657800000,
-                    "event_id": "Ee-YgGcBxHgQWEhCO_xj",
-                    "start_time": 1486656600000,
-                  },
-                ],
-                "events_length": 1,
-                "job_ids": Array [
-                  "farequote",
-                ],
-                "job_ids_string": "farequote",
+                "description": "Downtime feb 9 2017 10:10 to 10:30",
+                "end_time": 1486657800000,
+                "event_id": "Ee-YgGcBxHgQWEhCO_xj",
+                "start_time": 1486656600000,
               },
+            ],
+            "events_length": 1,
+            "job_ids": Array [
+              "farequote",
+            ],
+            "job_ids_string": "farequote",
+          },
+          Object {
+            "calendar_id": "this-is-a-new-calendar",
+            "description": "new calendar",
+            "events": Array [
               Object {
                 "calendar_id": "this-is-a-new-calendar",
-                "description": "new calendar",
-                "events": Array [
-                  Object {
-                    "calendar_id": "this-is-a-new-calendar",
-                    "description": "New event!",
-                    "end_time": 1544162400000,
-                    "event_id": "ehWKhGcBqHkXuWNrIrSV",
-                    "start_time": 1544076000000,
-                  },
-                ],
-                "events_length": 1,
-                "job_ids": Array [
-                  "test",
-                ],
-                "job_ids_string": "test",
+                "description": "New event!",
+                "end_time": 1544162400000,
+                "event_id": "ehWKhGcBqHkXuWNrIrSV",
+                "start_time": 1544076000000,
               },
-            ]
-          }
-          canCreateCalendar={true}
-          canDeleteCalendar={true}
-          itemsSelected={false}
-          loading={false}
-          mlNodesAvailable={true}
-          onDeleteClick={[Function]}
-          setSelectedCalendarList={[Function]}
-        />
-      </EuiPageContent>
-    </EuiPageBody>
-  </EuiPage>
+            ],
+            "events_length": 1,
+            "job_ids": Array [
+              "test",
+            ],
+            "job_ids_string": "test",
+          },
+        ]
+      }
+      canCreateCalendar={true}
+      canDeleteCalendar={true}
+      itemsSelected={false}
+      loading={false}
+      mlNodesAvailable={true}
+      onDeleteClick={[Function]}
+      setSelectedCalendarList={[Function]}
+    />
+  </div>
   <HelpMenu
     docLink={[MockFunction]}
   />

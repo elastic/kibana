@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/goto/.+$');
+          const re = new RegExp(baseUrl + '/app/r/s/.+$');
           await PageObjects.share.checkShortenUrl();
           await retry.try(async () => {
             const actualUrl = await PageObjects.share.getSharedUrl();
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
-        const re = new RegExp(baseUrl + '/goto/.+$');
+        const re = new RegExp(baseUrl + '/app/r/s/.+$');
         await PageObjects.share.checkShortenUrl();
         let actualUrl: string = '';
         await retry.try(async () => {
@@ -172,7 +172,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it("sharing hashed url shouldn't crash the app", async () => {
         const currentUrl = await browser.getCurrentUrl();
-        const timeBeforeReload = await PageObjects.timePicker.getTimeConfig();
         await browser.clearSessionStorage();
         await browser.get(currentUrl, false);
         await retry.waitFor('discover to open', async () => {
@@ -183,10 +182,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Unable to completely restore the URL, be sure to use the share functionality.'
           );
           await toasts.dismissAllToasts();
-          const timeAfterReload = await PageObjects.timePicker.getTimeConfig();
-          expect(timeBeforeReload.start).not.to.be(timeAfterReload.start);
-          expect(timeBeforeReload.end).not.to.be(timeAfterReload.end);
-          await PageObjects.timePicker.setDefaultAbsoluteRange();
           return true;
         });
       });

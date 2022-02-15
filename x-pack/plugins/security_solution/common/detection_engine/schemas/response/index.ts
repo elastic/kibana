@@ -6,6 +6,7 @@
  */
 
 export * from './error_schema';
+export * from './get_rule_execution_events_response';
 export * from './import_rules_schema';
 export * from './prepackaged_rules_schema';
 export * from './prepackaged_rules_status_schema';

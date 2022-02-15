@@ -11,7 +11,6 @@ import {
   getFindResultWithSingleHit,
   getAlertMock,
   getBasicEmptySearchResponse,
-  getBasicNoShardsSearchResponse,
 } from '../__mocks__/request_responses';
 import { configMock, requestContextMock, serverMock } from '../__mocks__';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
@@ -71,15 +70,10 @@ jest.mock('../../../timeline/routes/prepackaged_timelines/install_prepackaged_ti
   };
 });
 
-// Failing with rule registry enabled
-describe.skip.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('add_prepackaged_rules_route - %s', (_, isRuleRegistryEnabled) => {
+describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let mockExceptionsClient: ExceptionListClient;
-  const testif = isRuleRegistryEnabled ? test.skip : test;
   const defaultConfig = context.securitySolution.getConfig();
 
   beforeEach(() => {
@@ -88,13 +82,11 @@ describe.skip.each([
     mockExceptionsClient = listMock.getExceptionListClient();
 
     context.securitySolution.getConfig.mockImplementation(() =>
-      configMock.withRuleRegistryEnabled(defaultConfig, isRuleRegistryEnabled)
+      configMock.withRuleRegistryEnabled(defaultConfig, true)
     );
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(true));
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(true, getQueryRuleParams()));
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
@@ -112,54 +104,11 @@ describe.skip.each([
   });
 
   describe('status codes', () => {
-    test('returns 200 when creating with a valid actionClient and rulesClient', async () => {
+    test('returns 200', async () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
-    });
-
-    test('returns 404 if rulesClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({
-        message: 'Not Found',
-        status_code: 404,
-      });
-    });
-
-    test('it returns a 400 if the index does not exist when rule registry not enabled', async () => {
-      const request = addPrepackagedRulesRequest();
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          getBasicNoShardsSearchResponse()
-        )
-      );
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
-      if (!isRuleRegistryEnabled) {
-        expect(response.body).toEqual({
-          status_code: 400,
-          message: expect.stringContaining(
-            'Pre-packaged rules cannot be installed until the signals index is created'
-          ),
-        });
-      }
-    });
-
-    test('returns 404 if siem client is unavailable', async () => {
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
-      const response = await server.inject(
-        addPrepackagedRulesRequest(),
-        // @ts-expect-error
-        contextWithoutSecuritySolution
-      );
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
   });
 
@@ -190,20 +139,6 @@ describe.skip.each([
         timelines_updated: 0,
       });
     });
-
-    testif(
-      'catches errors if signals index does not exist when rule registry not enabled',
-      async () => {
-        context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
-        );
-        const request = addPrepackagedRulesRequest();
-        const response = await server.inject(request, context);
-
-        expect(response.status).toEqual(500);
-        expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
-      }
-    );
   });
 
   test('should install prepackaged timelines', async () => {

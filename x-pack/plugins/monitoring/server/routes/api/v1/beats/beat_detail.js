@@ -49,9 +49,7 @@ export function beatsDetailRoute(server) {
       try {
         const [summary, metrics] = await Promise.all([
           getBeatSummary(req, beatsIndexPattern, summaryOptions),
-          getMetrics(req, beatsIndexPattern, metricSet, [
-            { term: { 'beats_stats.beat.uuid': beatUuid } },
-          ]),
+          getMetrics(req, 'beats', metricSet, [{ term: { 'beats_stats.beat.uuid': beatUuid } }]),
         ]);
 
         return {

@@ -136,6 +136,22 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
     return { total, savedQueries };
   };
 
+  const getAllSavedQueries = async () => {
+    const finder = context.core.savedObjects.client.createPointInTimeFinder<SavedQueryAttributes>({
+      type: 'query',
+      perPage: 100,
+    });
+
+    const savedObjects: Array<SavedObject<SavedQueryAttributes>> = [];
+    for await (const response of finder.find()) {
+      savedObjects.push(...(response.saved_objects ?? []));
+    }
+    await finder.close();
+
+    const savedQueries = savedObjects.map(injectReferences);
+    return { total: savedQueries.length, savedQueries };
+  };
+
   const deleteSavedQuery = (id: string) => {
     return context.core.savedObjects.client.delete('query', id);
   };
@@ -146,6 +162,7 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
     get: getSavedQuery,
     count: getSavedQueriesCount,
     find: findSavedQueries,
+    getAll: getAllSavedQueries,
     delete: deleteSavedQuery,
   };
 }

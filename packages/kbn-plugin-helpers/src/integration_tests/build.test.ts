@@ -60,7 +60,12 @@ it('builds a generated plugin into a viable archive', async () => {
     }
   );
 
-  expect(buildProc.all).toMatchInlineSnapshot(`
+  expect(
+    buildProc.all
+      ?.split('\n')
+      .filter((l) => !l.includes('failed to reach ci-stats service'))
+      .join('\n')
+  ).toMatchInlineSnapshot(`
     " info deleting the build and target directories
      info running @kbn/optimizer
      │ info initialized, 0 bundles cached

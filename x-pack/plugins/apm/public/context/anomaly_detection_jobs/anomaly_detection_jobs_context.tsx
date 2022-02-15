@@ -13,7 +13,7 @@ import {
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../license/use_license_context';
 
@@ -45,9 +45,7 @@ export function AnomalyDetectionJobsContextProvider({
       if (!isAuthorized) {
         return;
       }
-      return callApmApi({
-        endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
-      });
+      return callApmApi(`GET /internal/apm/settings/anomaly-detection/jobs`);
     },
     [isAuthorized],
     { showToastOnError: false }

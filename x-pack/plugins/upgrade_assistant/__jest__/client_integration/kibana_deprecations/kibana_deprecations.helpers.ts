@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, AsyncTestBedConfig, findTestSubject } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
+  findTestSubject,
+} from '@kbn/test-jest-helpers';
 import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 

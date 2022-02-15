@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
-import * as mocks from './test_mocks';
-// import { RecoveredActionGroup } from '../../../../../alerting/common';
-import {
-  alertsMock,
-  AlertServicesMock,
-  AlertInstanceMock,
-} from '../../../../../alerting/server/mocks';
-import { LifecycleAlertServices } from '../../../../../rule_registry/server';
-import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
-import { createLifecycleRuleExecutorMock } from '../../../../../rule_registry/server/utils/create_lifecycle_rule_executor_mock';
-import { InfraSources } from '../../sources';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '../../../../../alerting/server';
+// import { RecoveredActionGroup } from '../../../../../alerting/common';
+import {
+  AlertInstanceMock,
+  AlertServicesMock,
+  alertsMock,
+} from '../../../../../alerting/server/mocks';
+import { LifecycleAlertServices } from '../../../../../rule_registry/server';
+import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
+import { createLifecycleRuleExecutorMock } from '../../../../../rule_registry/server/utils/create_lifecycle_rule_executor_mock';
 import {
   Aggregators,
   Comparator,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
-} from './types';
+} from '../../../../common/alerting/metrics';
+import { InfraSources } from '../../sources';
+import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
+import * as mocks from './test_mocks';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -51,6 +49,7 @@ const initialRuleState: TestRuleState = {
 
 const mockOptions = {
   alertId: '',
+  executionId: '',
   startedAt: new Date(),
   previousStartedAt: null,
   state: {
@@ -157,9 +156,10 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toContain('current value is 1');
-      expect(action.reason).toContain('threshold of 0.75');
+      expect(action.reason).toContain('is 1');
+      expect(action.reason).toContain('Alert when > 0.75');
       expect(action.reason).toContain('test.metric.1');
+      expect(action.reason).toContain('in the last 1 min');
     });
   });
 
@@ -342,10 +342,14 @@ describe('The metric threshold alert type', () => {
       expect(reasons.length).toBe(2);
       expect(reasons[0]).toContain('test.metric.1');
       expect(reasons[1]).toContain('test.metric.2');
-      expect(reasons[0]).toContain('current value is 1');
-      expect(reasons[1]).toContain('current value is 3');
-      expect(reasons[0]).toContain('threshold of 1');
-      expect(reasons[1]).toContain('threshold of 3');
+      expect(reasons[0]).toContain('is 1');
+      expect(reasons[1]).toContain('is 3');
+      expect(reasons[0]).toContain('Alert when >= 1');
+      expect(reasons[1]).toContain('Alert when >= 3');
+      expect(reasons[0]).toContain('in the last 1 min');
+      expect(reasons[1]).toContain('in the last 1 min');
+      expect(reasons[0]).toContain('for all hosts');
+      expect(reasons[1]).toContain('for all hosts');
     });
   });
   describe('querying with the count aggregator', () => {
@@ -713,8 +717,8 @@ describe('The metric threshold alert type', () => {
       await execute();
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toContain('current value is 100%');
-      expect(action.reason).toContain('threshold of 75%');
+      expect(action.reason).toContain('is 100%');
+      expect(action.reason).toContain('Alert when > 75%');
       expect(action.threshold.condition0[0]).toBe('75%');
       expect(action.value.condition0).toBe('100%');
     });
@@ -747,6 +751,14 @@ describe('The metric threshold alert type', () => {
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
+  alerting: {
+    inventory_threshold: {
+      group_by_page_size: 100,
+    },
+    metric_threshold: {
+      group_by_page_size: 100,
+    },
+  },
   inventory: {
     compositeSize: 2000,
   },
@@ -770,43 +782,39 @@ const services: AlertServicesMock & LifecycleAlertServices<AlertState, AlertCont
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };
-services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
-  const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
 
-  if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
+services.scopedClusterClient.asCurrentUser.search.mockResponseImplementation(
+  (params?: any): any => {
+    const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
 
-  if (params.index === 'empty-response') return mocks.emptyMetricResponse;
+    if (params.index === 'alternatebeat-*') return { body: mocks.changedSourceIdResponse(from) };
 
-  const metric = params?.body.query.bool.filter[1]?.exists.field;
-  if (metric === 'test.metric.3') {
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      params?.body.aggs.aggregatedIntervals?.aggregations.aggregatedValueMax
-        ? mocks.emptyRateResponse
-        : mocks.emptyMetricResponse
-    );
-  }
-  if (params?.body.aggs.groupings) {
-    if (params?.body.aggs.groupings.composite.after) {
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        mocks.compositeEndResponse
-      );
+    if (params.index === 'empty-response') return { body: mocks.emptyMetricResponse };
+
+    const metric = params?.body.query.bool.filter[1]?.exists.field;
+    if (metric === 'test.metric.3') {
+      return {
+        body: params?.body.aggs.aggregatedIntervals?.aggregations.aggregatedValueMax
+          ? mocks.emptyRateResponse
+          : mocks.emptyMetricResponse,
+      };
+    }
+    if (params?.body.aggs.groupings) {
+      if (params?.body.aggs.groupings.composite.after) {
+        return { body: mocks.compositeEndResponse };
+      }
+      if (metric === 'test.metric.2') {
+        return { body: mocks.alternateCompositeResponse(from) };
+      }
+      return { body: mocks.basicCompositeResponse(from) };
     }
     if (metric === 'test.metric.2') {
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        mocks.alternateCompositeResponse(from)
-      );
+      return { body: mocks.alternateMetricResponse() };
     }
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.basicCompositeResponse(from)
-    );
+    return { body: mocks.basicMetricResponse() };
   }
-  if (metric === 'test.metric.2') {
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.alternateMetricResponse()
-    );
-  }
-  return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse());
-});
+);
+
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
   if (sourceId === 'alternate')
     return {
@@ -826,9 +834,9 @@ services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId
 });
 
 const alertInstances = new Map<string, AlertTestInstance>();
-services.alertInstanceFactory.mockImplementation((instanceID: string) => {
+services.alertFactory.create.mockImplementation((instanceID: string) => {
   const newAlertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertInstanceFactory(),
+    instance: alertsMock.createAlertFactory.create(),
     actionQueue: [],
     state: {},
   };
@@ -895,7 +903,9 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toBeAlertAction(action?: Action): R;
+
       toBeNoDataAction(action?: Action): R;
+
       toBeErrorAction(action?: Action): R;
     }
   }

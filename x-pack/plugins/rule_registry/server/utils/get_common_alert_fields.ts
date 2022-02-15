@@ -11,6 +11,7 @@ import {
   ALERT_UUID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TYPE_ID,
@@ -26,6 +27,7 @@ import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 const commonAlertFieldNames = [
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TYPE_ID,
@@ -47,6 +49,7 @@ export const getCommonAlertFields = (
   return {
     [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
     [ALERT_RULE_CONSUMER]: options.rule.consumer,
+    [ALERT_RULE_EXECUTION_UUID]: options.executionId,
     [ALERT_RULE_NAME]: options.rule.name,
     [ALERT_RULE_PRODUCER]: options.rule.producer,
     [ALERT_RULE_TYPE_ID]: options.rule.ruleTypeId,

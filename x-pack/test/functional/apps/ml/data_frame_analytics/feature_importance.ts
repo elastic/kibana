@@ -183,6 +183,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      for (const testData of testDataList) {
+        await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
+      }
     });
 
     for (const testData of testDataList) {

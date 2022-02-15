@@ -15,10 +15,9 @@ import { ErrorConnecting } from './';
 
 describe('ErrorConnecting', () => {
   it('renders', () => {
-    const wrapper = shallow(<ErrorConnecting errorConnectingMessage="I am an error" />);
+    const wrapper = shallow(<ErrorConnecting />);
 
     const errorStatePrompt = wrapper.find(ErrorStatePrompt);
     expect(errorStatePrompt).toHaveLength(1);
-    expect(errorStatePrompt.prop('errorConnectingMessage')).toEqual('I am an error');
   });
 });

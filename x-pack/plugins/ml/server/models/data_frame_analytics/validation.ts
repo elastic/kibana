@@ -259,7 +259,7 @@ async function getValidationCheckMessages(
   }
 
   try {
-    const { body } = await asCurrentUser.search<ValidationSearchResult>({
+    const body = await asCurrentUser.search<ValidationSearchResult>({
       index,
       size: 0,
       track_total_hits: true,

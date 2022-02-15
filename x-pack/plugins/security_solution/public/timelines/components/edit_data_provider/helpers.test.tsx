@@ -49,7 +49,10 @@ describe('helpers', () => {
             { label: 'auditd.data.a2' },
           ],
         },
-        { label: 'base', options: [{ label: '@timestamp' }] },
+        {
+          label: 'base',
+          options: [{ label: '@timestamp' }, { label: '_id' }, { label: 'message' }],
+        },
         {
           label: 'client',
           options: [
@@ -81,7 +84,19 @@ describe('helpers', () => {
             { label: 'destination.port' },
           ],
         },
-        { label: 'event', options: [{ label: 'event.end' }] },
+        {
+          label: 'event',
+          options: [
+            { label: 'event.end' },
+            { label: 'event.action' },
+            { label: 'event.category' },
+            { label: 'event.severity' },
+          ],
+        },
+        {
+          label: 'host',
+          options: [{ label: 'host.name' }],
+        },
         {
           label: 'nestedField',
           options: [
@@ -94,6 +109,10 @@ describe('helpers', () => {
           ],
         },
         { label: 'source', options: [{ label: 'source.ip' }, { label: 'source.port' }] },
+        {
+          label: 'user',
+          options: [{ label: 'user.name' }],
+        },
       ]);
     });
   });

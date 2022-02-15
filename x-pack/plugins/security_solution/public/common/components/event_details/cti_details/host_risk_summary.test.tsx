@@ -20,6 +20,7 @@ describe('HostRiskSummary', () => {
       isModuleEnabled: true,
       result: [
         {
+          '@timestamp': '1641902481',
           host: {
             name: 'test-host-name',
           },
@@ -63,6 +64,7 @@ describe('HostRiskSummary', () => {
       isModuleEnabled: false,
       result: [
         {
+          '@timestamp': '1641902530',
           host: {
             name: 'test-host-name',
           },

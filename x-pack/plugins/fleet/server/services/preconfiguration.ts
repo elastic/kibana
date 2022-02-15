@@ -21,11 +21,9 @@ import type {
   PreconfiguredOutput,
   PackagePolicy,
 } from '../../common';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
 import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
-import {
-  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_LATEST_KEYWORD,
-} from '../constants';
+import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
@@ -172,19 +170,25 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     );
   }
 
+  const packagesToInstall = packages.map((pkg) =>
+    pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
+  );
+
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: soClient,
     esClient,
-    packagesToInstall: packages.map((pkg) =>
-      pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
-    ),
+    packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     spaceId,
+    // During setup, we'll try to install preconfigured packages from the versions bundled with Kibana
+    // whenever possible
+    preferredSource: 'bundled',
   });
 
   const fulfilledPackages = [];
   const rejectedPackages: PreconfigurationError[] = [];
+
   for (let i = 0; i < preconfiguredPackages.length; i++) {
     const packageResult = preconfiguredPackages[i];
     if ('error' in packageResult) {
@@ -334,7 +338,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       const packagePoliciesToAdd = installedPackagePolicies.filter((installablePackagePolicy) => {
         return !(agentPolicyWithPackagePolicies?.package_policies as PackagePolicy[]).some(
-          (packagePolicy) => packagePolicy.name === installablePackagePolicy.name
+          (packagePolicy) =>
+            (packagePolicy.id !== undefined && packagePolicy.id === installablePackagePolicy.id) ||
+            packagePolicy.name === installablePackagePolicy.name
         );
       });
 
@@ -344,7 +350,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         policy!,
         packagePoliciesToAdd!,
         defaultOutput,
-        !created
+        true
       );
 
       // Add the is_managed flag after configuring package policies to avoid errors
@@ -381,7 +387,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             }),
           }
     ),
-    packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
+    packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
   };
 }

@@ -7,7 +7,7 @@
 
 import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicAlertInstance } from './alert_instance';
+import { PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -33,6 +33,7 @@ import {
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
+  RuleMonitoring,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
@@ -73,9 +74,9 @@ export interface AlertServices<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > extends Services {
-  alertInstanceFactory: (
-    id: string
-  ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+  alertFactory: {
+    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+  };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   search: IAbortableClusterClient;
@@ -89,6 +90,7 @@ export interface AlertExecutorOptions<
   ActionGroupIds extends string = never
 > {
   alertId: string;
+  executionId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
@@ -189,6 +191,7 @@ export interface AlertMeta extends SavedObjectAttributes {
 // delete any previous error if the current status has no error
 export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
+  numberOfTriggeredActions?: number;
   lastExecutionDate: string;
   lastDuration?: number;
   error: null | {
@@ -238,6 +241,7 @@ export interface RawRule extends SavedObjectAttributes {
   mutedInstanceIds: string[];
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
+  monitoring?: RuleMonitoring;
 }
 
 export type AlertInfoParams = Pick<

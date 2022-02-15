@@ -40,6 +40,8 @@ const prepareGrid = (params: HeatmapVisParams) => {
   const gridConfig = buildExpressionFunction('heatmap_grid', {
     isCellLabelVisible: params.valueAxes?.[0].labels.show ?? false,
     isXAxisLabelVisible: true,
+    isYAxisTitleVisible: true,
+    isXAxisTitleVisible: true,
   });
 
   return buildExpression([gridConfig]);

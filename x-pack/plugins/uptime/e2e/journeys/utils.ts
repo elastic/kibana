@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Page } from '@elastic/synthetics';
-import { byTestId } from './uptime.journey';
+import { expect, Page } from '@elastic/synthetics';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
   while (true) {
@@ -15,13 +14,41 @@ export async function waitForLoadingToFinish({ page }: { page: Page }) {
   }
 }
 
-export async function loginToKibana({ page }: { page: Page }) {
-  await page.fill('[data-test-subj=loginUsername]', 'elastic', {
+export async function loginToKibana({
+  page,
+  user,
+}: {
+  page: Page;
+  user?: { username: string; password: string };
+}) {
+  await page.fill('[data-test-subj=loginUsername]', user?.username ?? 'elastic', {
     timeout: 60 * 1000,
   });
-  await page.fill('[data-test-subj=loginPassword]', 'changeme');
+
+  await page.fill('[data-test-subj=loginPassword]', user?.password ?? 'changeme');
 
   await page.click('[data-test-subj=loginSubmit]');
 
   await waitForLoadingToFinish({ page });
 }
+
+export const byTestId = (testId: string) => {
+  return `[data-test-subj=${testId}]`;
+};
+
+export const assertText = async ({ page, text }: { page: Page; text: string }) => {
+  await page.waitForSelector(`text=${text}`);
+  expect(await page.$(`text=${text}`)).toBeTruthy();
+};
+
+export const assertNotText = async ({ page, text }: { page: Page; text: string }) => {
+  expect(await page.$(`text=${text}`)).toBeFalsy();
+};
+
+export const getQuerystring = (params: object) => {
+  return Object.entries(params)
+    .map(([key, value]) => encodeURIComponent(key) + '=' + encodeURIComponent(value))
+    .join('&');
+};
+
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

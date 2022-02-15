@@ -114,7 +114,7 @@ It allows you to monitor the performance of thousands of applications in real ti
         'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
         {
           defaultMessage:
-            'An APM index pattern is required for some features in the APM UI.',
+            'An APM data view is required for some features in the APM UI.',
         }
       ),
     } as TutorialSchema;

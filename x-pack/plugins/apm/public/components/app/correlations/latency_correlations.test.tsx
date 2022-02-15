@@ -25,7 +25,7 @@ import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { fromQuery } from '../../shared/Links/url_helpers';
+import { fromQuery } from '../../shared/links/url_helpers';
 
 import { LatencyCorrelations } from './latency_correlations';
 

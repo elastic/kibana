@@ -32,9 +32,6 @@ export const configSchema = schema.object({
     logs: schema.object({
       index: schema.string({ defaultValue: 'filebeat-*' }),
     }),
-    metricbeat: schema.object({
-      index: schema.string({ defaultValue: 'metricbeat-*' }),
-    }),
     max_bucket_size: schema.number({ defaultValue: 10000 }),
     elasticsearch: monitoringElasticsearchConfigSchema,
     container: schema.object({
@@ -58,7 +55,6 @@ export const configSchema = schema.object({
     }),
   }),
   cluster_alerts: schema.object({
-    allowedSpaces: schema.arrayOf(schema.string(), { defaultValue: ['default'] }),
     enabled: schema.boolean({ defaultValue: true }),
     email_notifications: schema.object({
       enabled: schema.boolean({ defaultValue: true }),

@@ -15,20 +15,19 @@ import {
   CasesFindRequest,
   CasesFindRequestRt,
   throwErrors,
-  caseStatuses,
   CasesFindResponseRt,
   excess,
 } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
-import { transformCases } from '../../common/utils';
+import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import { CasesClientArgs } from '..';
 
 /**
- * Retrieves a case and optionally its comments and sub case comments.
+ * Retrieves a case and optionally its comments.
  *
  * @ignore
  */
@@ -36,7 +35,7 @@ export const find = async (
   params: CasesFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
-  const { unsecuredSavedObjectsClient, caseService, authorization, logger } = clientArgs;
+  const { caseService, authorization, logger } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -52,41 +51,31 @@ export const find = async (
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
       status: queryParams.status,
-      caseType: queryParams.type,
       owner: queryParams.owner,
     };
 
-    const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
-    const cases = await caseService.findCasesGroupedByID({
-      unsecuredSavedObjectsClient,
-      caseOptions: {
-        ...queryParams,
-        ...caseQueries.case,
-        searchFields:
-          queryParams.searchFields != null
-            ? Array.isArray(queryParams.searchFields)
-              ? queryParams.searchFields
-              : [queryParams.searchFields]
-            : queryParams.searchFields,
-        fields: includeFieldsRequiredForAuthentication(queryParams.fields),
-      },
-      subCaseOptions: caseQueries.subCase,
+    const statusStatsOptions = constructQueryOptions({
+      ...queryArgs,
+      status: undefined,
+      authorizationFilter,
     });
+    const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
 
-    ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
-
-    // casesStatuses are bounded by us. No need to limit concurrent calls.
-    const [openCases, inProgressCases, closedCases] = await Promise.all([
-      ...caseStatuses.map((status) => {
-        const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
-        return caseService.findCaseStatusStats({
-          unsecuredSavedObjectsClient,
-          caseOptions: statusQuery.case,
-          subCaseOptions: statusQuery.subCase,
-          ensureSavedObjectsAreAuthorized,
-        });
+    const [cases, statusStats] = await Promise.all([
+      caseService.findCasesGroupedByID({
+        caseOptions: {
+          ...queryParams,
+          ...caseQueryOptions,
+          searchFields: asArray(queryParams.searchFields),
+          fields: includeFieldsRequiredForAuthentication(queryParams.fields),
+        },
+      }),
+      caseService.getCaseStatusStats({
+        searchOptions: statusStatsOptions,
       }),
     ]);
+
+    ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
     return CasesFindResponseRt.encode(
       transformCases({
@@ -94,9 +83,9 @@ export const find = async (
         page: cases.page,
         perPage: cases.perPage,
         total: cases.total,
-        countOpenCases: openCases,
-        countInProgressCases: inProgressCases,
-        countClosedCases: closedCases,
+        countOpenCases: statusStats.open,
+        countInProgressCases: statusStats['in-progress'],
+        countClosedCases: statusStats.closed,
       })
     );
   } catch (error) {

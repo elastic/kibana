@@ -57,6 +57,7 @@ describe('saved_searches_utils', () => {
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
+          "rowHeight": undefined,
           "searchSource": SearchSource {
             "dependencies": Object {
               "getConfig": [MockFunction],
@@ -130,6 +131,7 @@ describe('saved_searches_utils', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
+          "rowHeight": undefined,
           "sort": Array [
             Array [
               "a",

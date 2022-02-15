@@ -8,8 +8,8 @@
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { Exception } from '../../../../../typings/es_schemas/raw/error_raw';
-import { Stacktrace } from '../../../shared/Stacktrace';
-import { CauseStacktrace } from '../../../shared/Stacktrace/cause_stacktrace';
+import { Stacktrace } from '../../../shared/stacktrace';
+import { CauseStacktrace } from '../../../shared/stacktrace/cause_stacktrace';
 
 interface ExceptionStacktraceProps {
   codeLanguage?: string;

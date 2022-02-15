@@ -11,20 +11,21 @@ import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 import { getTimezone } from '../get_timezone';
 import { LegacyRequest } from '../../types';
+import { INDEX_PATTERN_TYPES } from '../../../common/constants';
 
 type Metric = string | { keys: string | string[]; name: string };
 
 // TODO: Switch to an options object argument here
 export async function getMetrics(
   req: LegacyRequest,
-  indexPattern: string,
+  moduleType: INDEX_PATTERN_TYPES,
   metricSet: Metric[] = [],
   filters: Array<Record<string, any>> = [],
   metricOptions: Record<string, any> = {},
   numOfBuckets: number = 0,
   groupBy: string | Record<string, any> | null = null
 ) {
-  checkParam(indexPattern, 'indexPattern in details/getMetrics');
+  checkParam(moduleType, 'moduleType in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
   const config = req.server.config();
@@ -53,7 +54,7 @@ export async function getMetrics(
 
       return Promise.all(
         metricNames.map((metricName) => {
-          return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, {
+          return getSeries(req, moduleType, metricName, metricOptions, filters, groupBy, {
             min,
             max,
             bucketSize,

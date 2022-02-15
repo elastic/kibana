@@ -18,7 +18,7 @@ import readline from 'readline';
 import Fs from 'fs';
 
 import { RunWithCommands, createFlagError, CA_CERT_PATH } from '@kbn/dev-utils';
-import { readConfigFile, KbnClient } from '@kbn/test';
+import { readConfigFile, KbnClient, EsVersion } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 
 import { EsArchiver } from './es_archiver';
@@ -45,7 +45,7 @@ export function runCli() {
       if (typeof configPath !== 'string') {
         throw createFlagError('--config must be a string');
       }
-      const config = await readConfigFile(log, Path.resolve(configPath));
+      const config = await readConfigFile(log, EsVersion.getDefault(), Path.resolve(configPath));
       statsMeta.set('ftrConfigPath', configPath);
 
       let esUrl = flags['es-url'];

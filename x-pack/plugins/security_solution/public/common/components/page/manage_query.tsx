@@ -7,7 +7,7 @@
 
 import { Position } from '@elastic/charts';
 import { omit } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { inputsModel } from '../../store';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
@@ -23,26 +23,51 @@ export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery
 
 export function manageQuery<T>(
   WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
-): React.ComponentClass<OwnProps & T> {
-  class ManageQuery extends React.PureComponent<OwnProps & T> {
-    static displayName: string;
-    public componentDidUpdate(prevProps: OwnProps) {
-      const { loading, id, refetch, setQuery, inspect = null } = this.props;
-      setQuery({ id, inspect, loading, refetch });
-    }
+): React.FC<OwnProps & T> {
+  const ManageQuery = (props: OwnProps & T) => {
+    const { loading, id, refetch, setQuery, deleteQuery, inspect = null } = props;
+    useQueryInspector({
+      queryId: id,
+      loading,
+      refetch,
+      setQuery,
+      deleteQuery,
+      inspect,
+    });
 
-    public componentWillUnmount() {
-      const { deleteQuery, id } = this.props;
-      if (deleteQuery) {
-        deleteQuery({ id });
-      }
-    }
+    const otherProps = omit(['refetch', 'setQuery'], props);
+    return <WrappedComponent {...(otherProps as T)} />;
+  };
 
-    public render() {
-      const otherProps = omit(['refetch', 'setQuery'], this.props);
-      return <WrappedComponent {...(otherProps as T)} />;
-    }
-  }
   ManageQuery.displayName = `ManageQuery (${WrappedComponent?.displayName ?? 'Unknown'})`;
   return ManageQuery;
 }
+
+interface UseQueryInspectorTypes extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
+  queryId: string;
+  legendPosition?: Position;
+  loading: boolean;
+  refetch: inputsModel.Refetch;
+  inspect?: inputsModel.InspectQuery | null;
+}
+
+export const useQueryInspector = ({
+  setQuery,
+  deleteQuery,
+  refetch,
+  inspect,
+  loading,
+  queryId,
+}: UseQueryInspectorTypes) => {
+  useEffect(() => {
+    setQuery({ id: queryId, inspect: inspect ?? null, loading, refetch });
+  }, [deleteQuery, setQuery, queryId, refetch, inspect, loading]);
+
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: queryId });
+      }
+    };
+  }, [deleteQuery, queryId]);
+};

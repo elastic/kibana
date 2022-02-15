@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import uuid from 'uuid';
 
@@ -30,10 +31,11 @@ interface AlertsCountPanelProps {
   filters?: Filter[];
   query?: Query;
   signalIndexName: string | null;
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
-  ({ filters, query, signalIndexName }) => {
+  ({ filters, query, signalIndexName, runtimeMappings }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
     // create a unique, but stable (across re-renders) query id
@@ -70,13 +72,21 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       request,
       refetch,
     } = useQueryAlerts<{}, AlertsCountAggregation>({
-      query: getAlertsCountQuery(selectedStackByOption, from, to, additionalFilters),
+      query: getAlertsCountQuery(
+        selectedStackByOption,
+        from,
+        to,
+        additionalFilters,
+        runtimeMappings
+      ),
       indexName: signalIndexName,
     });
 
     useEffect(() => {
-      setAlertsQuery(getAlertsCountQuery(selectedStackByOption, from, to, additionalFilters));
-    }, [setAlertsQuery, selectedStackByOption, from, to, additionalFilters]);
+      setAlertsQuery(
+        getAlertsCountQuery(selectedStackByOption, from, to, additionalFilters, runtimeMappings)
+      );
+    }, [setAlertsQuery, selectedStackByOption, from, to, additionalFilters, runtimeMappings]);
 
     useInspectButton({
       setQuery,

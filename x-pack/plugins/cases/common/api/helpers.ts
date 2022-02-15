@@ -11,10 +11,7 @@ import {
   CASE_COMMENTS_URL,
   CASE_USER_ACTIONS_URL,
   CASE_COMMENT_DETAILS_URL,
-  SUB_CASE_DETAILS_URL,
-  SUB_CASES_URL,
   CASE_PUSH_URL,
-  SUB_CASE_USER_ACTIONS_URL,
   CASE_CONFIGURE_DETAILS_URL,
   CASE_ALERTS_URL,
 } from '../constants';
@@ -27,14 +24,6 @@ export const getCaseDetailsMetricsUrl = (id: string): string => {
   return CASE_METRICS_DETAILS_URL.replace('{case_id}', id);
 };
 
-export const getSubCasesUrl = (caseID: string): string => {
-  return SUB_CASES_URL.replace('{case_id}', caseID);
-};
-
-export const getSubCaseDetailsUrl = (caseID: string, subCaseId: string): string => {
-  return SUB_CASE_DETAILS_URL.replace('{case_id}', caseID).replace('{sub_case_id}', subCaseId);
-};
-
 export const getCaseCommentsUrl = (id: string): string => {
   return CASE_COMMENTS_URL.replace('{case_id}', id);
 };
@@ -45,10 +34,6 @@ export const getCaseCommentDetailsUrl = (caseId: string, commentId: string): str
 
 export const getCaseUserActionUrl = (id: string): string => {
   return CASE_USER_ACTIONS_URL.replace('{case_id}', id);
-};
-
-export const getSubCaseUserActionUrl = (caseID: string, subCaseId: string): string => {
-  return SUB_CASE_USER_ACTIONS_URL.replace('{case_id}', caseID).replace('{sub_case_id}', subCaseId);
 };
 
 export const getCasePushUrl = (caseId: string, connectorId: string): string => {

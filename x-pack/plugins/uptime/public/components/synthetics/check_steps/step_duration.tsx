@@ -16,6 +16,7 @@ import { StepFieldTrend } from './step_field_trend';
 import { microToSec } from '../../../lib/formatting';
 
 interface Props {
+  compactView?: boolean;
   step: JourneyStep;
   durationPopoverOpenIndex: number | null;
   setDurationPopoverOpenIndex: (val: number | null) => void;
@@ -25,6 +26,7 @@ export const StepDuration = ({
   step,
   durationPopoverOpenIndex,
   setDurationPopoverOpenIndex,
+  compactView = false,
 }: Props) => {
   const component = useMemo(
     () => (
@@ -44,7 +46,7 @@ export const StepDuration = ({
   const button = (
     <EuiButtonEmpty
       onMouseEnter={() => setDurationPopoverOpenIndex(step.synthetics.step?.index ?? null)}
-      iconType="visArea"
+      iconType={compactView ? undefined : 'visArea'}
     >
       {i18n.translate('xpack.uptime.synthetics.step.duration', {
         defaultMessage: '{value} seconds',

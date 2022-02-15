@@ -177,6 +177,7 @@ export const TrustedAppsGrid = memo(() => {
             children: DELETE_TRUSTED_APP_ACTION_LABEL,
           },
         ],
+        hideDescription: !trustedApp.description,
       };
     }
 

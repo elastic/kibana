@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / typedoc_interfaces
+[Cases Client API Interface](../README.md) / typedoc\_interfaces
 
 # Module: typedoc\_interfaces
 
@@ -7,20 +7,22 @@ can be very large. These types are equivalent to the io-ts aliases.
 
 ## Table of contents
 
+### Namespaces
+
+- [\_internal\_namespace](typedoc_interfaces._internal_namespace.md)
+
 ### Interfaces
 
-- [IAllCommentsResponse](../interfaces/typedoc_interfaces.iallcommentsresponse.md)
-- [ICasePostRequest](../interfaces/typedoc_interfaces.icasepostrequest.md)
-- [ICaseResponse](../interfaces/typedoc_interfaces.icaseresponse.md)
-- [ICaseUserActionsResponse](../interfaces/typedoc_interfaces.icaseuseractionsresponse.md)
-- [ICasesConfigurePatch](../interfaces/typedoc_interfaces.icasesconfigurepatch.md)
-- [ICasesConfigureRequest](../interfaces/typedoc_interfaces.icasesconfigurerequest.md)
-- [ICasesConfigureResponse](../interfaces/typedoc_interfaces.icasesconfigureresponse.md)
-- [ICasesFindRequest](../interfaces/typedoc_interfaces.icasesfindrequest.md)
-- [ICasesFindResponse](../interfaces/typedoc_interfaces.icasesfindresponse.md)
-- [ICasesPatchRequest](../interfaces/typedoc_interfaces.icasespatchrequest.md)
-- [ICasesResponse](../interfaces/typedoc_interfaces.icasesresponse.md)
-- [ICommentsResponse](../interfaces/typedoc_interfaces.icommentsresponse.md)
-- [ISubCaseResponse](../interfaces/typedoc_interfaces.isubcaseresponse.md)
-- [ISubCasesFindResponse](../interfaces/typedoc_interfaces.isubcasesfindresponse.md)
-- [ISubCasesResponse](../interfaces/typedoc_interfaces.isubcasesresponse.md)
+- [IAllCommentsResponse](../interfaces/typedoc_interfaces.IAllCommentsResponse.md)
+- [ICasePostRequest](../interfaces/typedoc_interfaces.ICasePostRequest.md)
+- [ICaseResolveResponse](../interfaces/typedoc_interfaces.ICaseResolveResponse.md)
+- [ICaseResponse](../interfaces/typedoc_interfaces.ICaseResponse.md)
+- [ICaseUserActionsResponse](../interfaces/typedoc_interfaces.ICaseUserActionsResponse.md)
+- [ICasesConfigurePatch](../interfaces/typedoc_interfaces.ICasesConfigurePatch.md)
+- [ICasesConfigureRequest](../interfaces/typedoc_interfaces.ICasesConfigureRequest.md)
+- [ICasesConfigureResponse](../interfaces/typedoc_interfaces.ICasesConfigureResponse.md)
+- [ICasesFindRequest](../interfaces/typedoc_interfaces.ICasesFindRequest.md)
+- [ICasesFindResponse](../interfaces/typedoc_interfaces.ICasesFindResponse.md)
+- [ICasesPatchRequest](../interfaces/typedoc_interfaces.ICasesPatchRequest.md)
+- [ICasesResponse](../interfaces/typedoc_interfaces.ICasesResponse.md)
+- [ICommentsResponse](../interfaces/typedoc_interfaces.ICommentsResponse.md)

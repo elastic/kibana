@@ -6,13 +6,12 @@
  */
 
 import moment from 'moment';
-
 import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 
 // @ts-expect-error
-import { getDefaultWorkpad } from '../../state/defaults';
+import { getDefaultWorkpad, getExportedWorkpad } from '../../state/defaults';
 import { CanvasWorkpadService } from '../workpad';
-import { CanvasTemplate } from '../../../types';
+import { CanvasTemplate, CanvasWorkpad } from '../../../types';
 
 type CanvasWorkpadServiceFactory = PluginServiceFactory<CanvasWorkpadService>;
 
@@ -94,6 +93,7 @@ export const findNoTemplates =
       .then(() => getNoTemplates());
   };
 
+export const importWorkpad = (workpad: CanvasWorkpad) => Promise.resolve(workpad);
 export const getNoTemplates = () => ({ templates: [] });
 export const getSomeTemplates = () => ({ templates });
 
@@ -103,6 +103,7 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = () => ({
     Promise.resolve({ outcome: 'exactMatch', workpad: { ...getDefaultWorkpad(), id } }),
   findTemplates: findNoTemplates(),
   create: (workpad) => Promise.resolve(workpad),
+  import: (workpad) => importWorkpad(workpad),
   createFromTemplate: (_templateId: string) => Promise.resolve(getDefaultWorkpad()),
   find: findNoWorkpads(),
   remove: (_id: string) => Promise.resolve(),

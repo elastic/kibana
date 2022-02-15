@@ -9,7 +9,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { FieldTypeIcon } from './field_type_icon';
-import { JOB_FIELD_TYPES } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 
 describe('FieldTypeIcon', () => {
   test(`render component when type matches a field type`, () => {

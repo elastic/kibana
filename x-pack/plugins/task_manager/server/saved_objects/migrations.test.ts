@@ -108,6 +108,68 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('8.2.0', () => {
+    test('resets attempts and status of a "failed" alerting tasks without schedule interval', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'failed',
+        schedule: undefined,
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          attempts: 0,
+          status: 'idle',
+        },
+      });
+    });
+
+    test('resets attempts and status of a "running" alerting tasks without schedule interval', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'running',
+        schedule: undefined,
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          attempts: 0,
+          status: 'idle',
+        },
+      });
+    });
+
+    test('does not update the tasks that are not "failed"', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'idle',
+        attempts: 3,
+        schedule: undefined,
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('does not update the tasks that are not "failed" and has a schedule', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        status: 'idle',
+        attempts: 3,
+        schedule: { interval: '1000' },
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {

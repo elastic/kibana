@@ -10,6 +10,8 @@ import { find } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from './get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /**
  * Augment the {@clusters} with their cluster state's from the {@code response}.
@@ -46,13 +48,7 @@ export function handleResponse(
  *
  * If there is no cluster state available for any cluster, then it will be returned without any cluster state information.
  */
-export function getClustersState(
-  req: LegacyRequest,
-  esIndexPattern: string,
-  clusters: ElasticsearchModifiedSource[]
-) {
-  checkParam(esIndexPattern, 'esIndexPattern in cluster/getClustersHealth');
-
+export function getClustersState(req: LegacyRequest, clusters: ElasticsearchModifiedSource[]) {
   const clusterUuids = clusters
     .filter((cluster) => !cluster.cluster_state || !cluster.elasticsearch?.cluster?.stats?.state)
     .map((cluster) => cluster.cluster_uuid || cluster.elasticsearch?.cluster?.id);
@@ -63,8 +59,14 @@ export function getClustersState(
     return Promise.resolve(clusters);
   }
 
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    ccs: req.payload.ccs,
+  });
+
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: clusterUuids.length,
     ignore_unavailable: true,
     filter_path: [

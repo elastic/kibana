@@ -7,6 +7,8 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+
+import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
@@ -19,6 +21,7 @@ import type {
   KibanaRequest,
   ServiceStatus,
   ElasticsearchClient,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
@@ -80,15 +83,14 @@ import {
   agentPolicyService,
   packagePolicyService,
   AgentServiceImpl,
+  PackageServiceImpl,
 } from './services';
 import { registerFleetUsageCollector } from './collectors/register';
-import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
 import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
-import { fetchFindLatestPackage } from './services/epm/registry';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -170,8 +172,6 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
-
-  fetchFindLatestPackage: typeof fetchFindLatestPackage;
 }
 
 export class FleetPlugin
@@ -193,6 +193,7 @@ export class FleetPlugin
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
 
   private agentService?: AgentService;
+  private packageService?: PackageService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -223,14 +224,16 @@ export class FleetPlugin
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
-    // TODO: Flesh out privileges
     if (deps.features) {
       deps.features.registerKibanaFeature({
-        id: PLUGIN_ID,
-        name: 'Fleet and Integrations',
+        id: `fleetv2`,
+        name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
-        app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
+        app: [PLUGIN_ID],
         catalogue: ['fleet'],
+        privilegesTooltip: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
+          defaultMessage: 'All Spaces is required for Fleet access.',
+        }),
         reserved: {
           description:
             'Privilege to setup Fleet packages and configured policies. Intended for use by the elastic/fleet-server service account only.',
@@ -251,24 +254,64 @@ export class FleetPlugin
         },
         privileges: {
           all: {
-            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`, `integrations-all`, `integrations-read`],
-            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
+            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
+            app: [PLUGIN_ID],
+            requireAllSpaces: true,
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
             },
-            ui: ['show', 'read', 'write'],
+            ui: ['read', 'all'],
           },
           read: {
-            api: [`${PLUGIN_ID}-read`, `integrations-read`],
-            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
-            catalogue: ['fleet'], // TODO: check if this is actually available to read user
+            api: [`${PLUGIN_ID}-read`],
+            app: [PLUGIN_ID],
+            catalogue: ['fleet'],
+            requireAllSpaces: true,
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
             },
-            ui: ['show', 'read'],
+            ui: ['read'],
+            disabled: true,
+          },
+        },
+      });
+
+      deps.features.registerKibanaFeature({
+        id: 'fleet', // for BWC
+        name: 'Integrations',
+        category: DEFAULT_APP_CATEGORIES.management,
+        app: [INTEGRATIONS_PLUGIN_ID],
+        catalogue: ['fleet'],
+        privilegesTooltip: i18n.translate(
+          'xpack.fleet.serverPlugin.integrationsPrivilegesTooltip',
+          {
+            defaultMessage: 'All Spaces is required for All Integrations access.',
+          }
+        ),
+        privileges: {
+          all: {
+            api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
+            app: [INTEGRATIONS_PLUGIN_ID],
+            catalogue: ['fleet'],
+            requireAllSpaces: true,
+            savedObject: {
+              all: allSavedObjectTypes,
+              read: [],
+            },
+            ui: ['read', 'all'],
+          },
+          read: {
+            api: [`${INTEGRATIONS_PLUGIN_ID}-read`],
+            app: [INTEGRATIONS_PLUGIN_ID],
+            catalogue: ['fleet'],
+            savedObject: {
+              all: [],
+              read: allSavedObjectTypes,
+            },
+            ui: ['read'],
           },
         },
       });
@@ -407,15 +450,14 @@ export class FleetPlugin
       },
       fleetSetupCompleted: () => fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
-      packageService: {
-        getInstallation,
-        ensureInstalledPackage,
-      },
+      packageService: this.setupPackageService(
+        core.elasticsearch.client.asInternalUser,
+        new SavedObjectsClient(core.savedObjects.createInternalRepository())
+      ),
       agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
       agentPolicyService: {
         get: agentPolicyService.get,
         list: agentPolicyService.list,
-        getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
         getByIds: agentPolicyService.getByIDs,
       },
@@ -426,7 +468,6 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
-      fetchFindLatestPackage,
     };
   }
 
@@ -444,5 +485,29 @@ export class FleetPlugin
 
     this.agentService = new AgentServiceImpl(internalEsClient);
     return this.agentService;
+  }
+
+  private setupPackageService(
+    internalEsClient: ElasticsearchClient,
+    internalSoClient: SavedObjectsClientContract
+  ): PackageService {
+    if (this.packageService) {
+      return this.packageService;
+    }
+
+    this.packageService = new PackageServiceImpl(
+      internalEsClient,
+      internalSoClient,
+      this.getLogger()
+    );
+    return this.packageService;
+  }
+
+  private getLogger(): Logger {
+    if (!this.logger) {
+      this.logger = this.initializerContext.logger.get();
+    }
+
+    return this.logger;
   }
 }

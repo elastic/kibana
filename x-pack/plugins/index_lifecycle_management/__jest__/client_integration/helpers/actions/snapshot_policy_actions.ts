@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test/target_types/jest';
+import type { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
 const createSetWaitForSnapshotAction = (testBed: TestBed) => async (snapshotPolicyName: string) => {

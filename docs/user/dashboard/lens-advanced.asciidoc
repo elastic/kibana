@@ -297,6 +297,9 @@ image::images/lens_time_shift.png[Line chart with week-over-week sales compariso
 
 . Click *Save and return*.
 
+Time shifts can be used on any metric. The special shift *previous* will show the time window preceding the currently selected one in the time picker in the top right, spanning the same duration.
+For example, if *Last 7 days* is selected in the time picker, *previous* will show data from 14 days ago to 7 days ago. This mode can't be used together with date histograms.
+
 [float]
 [[compare-time-as-percent]]
 ==== Analyze the percent change between time ranges

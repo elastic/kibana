@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_UPDATED_AT,
@@ -120,6 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(signal._source).eql({
         '@timestamp': signal._source['@timestamp'],
+        [ALERT_RULE_EXECUTION_UUID]: signal._source[ALERT_RULE_EXECUTION_UUID],
         [ALERT_UUID]: signal._source[ALERT_UUID],
         [VERSION]: signal._source[VERSION],
         actual: [1],

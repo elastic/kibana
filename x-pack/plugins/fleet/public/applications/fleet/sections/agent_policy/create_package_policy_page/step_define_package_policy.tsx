@@ -27,7 +27,7 @@ import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../services
 import { Loading } from '../../../components';
 import { useStartServices, useGetPackagePolicies } from '../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { SO_SEARCH_LIMIT } from '../../../../../../common';
+import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../../../../common';
 
 import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
@@ -50,12 +50,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
+  isUpdate?: boolean;
 }> = memo(
   ({
     agentPolicy,
     packageInfo,
     packagePolicy,
     integrationToEnable,
+    isUpdate,
     updatePackagePolicy,
     validationResults,
     submitAttempted,
@@ -88,7 +90,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Update package policy's package and agent policy info
     useEffect(() => {
-      if (isLoadingPackagePolicies) {
+      if (isUpdate || isLoadingPackagePolicies) {
         return;
       }
       const pkg = packagePolicy.package;
@@ -97,20 +99,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
       // If package has changed, create shell package policy with input&stream values based on package info
       if (currentPkgKey !== pkgKey) {
-        // Retrieve highest number appended to package policy name and increment it by one
-        const pkgPoliciesNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-        const pkgPoliciesWithMatchingNames = packagePolicyData?.items
-          ? packagePolicyData.items
-              .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-              .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-              .sort((a, b) => a - b)
-          : [];
-
-        const incrementedName = `${packageInfo.name}-${
-          pkgPoliciesWithMatchingNames.length
-            ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-            : 1
-        }`;
+        const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
         updatePackagePolicy(
           packageToPackagePolicy(
@@ -133,6 +122,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         });
       }
     }, [
+      isUpdate,
       packagePolicy,
       agentPolicy,
       packageInfo,
