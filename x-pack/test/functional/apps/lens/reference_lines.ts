@@ -93,9 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('lnsXY_yReferenceLineRightPanel > lns-dimensionTrigger');
       expect(
-        await find.existsByCssSelector(
-          '[data-test-subj="lnsXY_fill_below"][class$="isSelected"]'
-        )
+        await find.existsByCssSelector('[data-test-subj="lnsXY_fill_below"][class$="isSelected"]')
       ).to.be(true);
       await PageObjects.lens.closeDimensionEditor();
     });
@@ -113,9 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         )
       ).click();
       expect(
-        await find.existsByCssSelector(
-          '[data-test-subj="lnsXY_fill_below"][class$="isSelected"]'
-        )
+        await find.existsByCssSelector('[data-test-subj="lnsXY_fill_below"][class$="isSelected"]')
       ).to.be(true);
       await PageObjects.lens.closeDimensionEditor();
     });
