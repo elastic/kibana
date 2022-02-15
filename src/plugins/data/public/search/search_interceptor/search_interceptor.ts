@@ -25,6 +25,7 @@ import {
   CoreSetup,
   CoreStart,
   IHttpFetchError,
+  KibanaExecutionContext,
   ThemeServiceSetup,
   ToastsSetup,
 } from 'kibana/public';
@@ -307,7 +308,7 @@ export class SearchInterceptor {
             executionContext: {
               ...executionContext,
               ...this.deps.executionContext.getAll(),
-            },
+            } as KibanaExecutionContext,
           }),
         },
         abortSignal
