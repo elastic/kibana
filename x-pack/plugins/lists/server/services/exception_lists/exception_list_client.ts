@@ -958,8 +958,8 @@ export class ExceptionListClient {
    *   filter,
    *   executeFunctionOnStream,
    *   namespaceType,
-   *   maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
-   *   perPage: 1_000,
+   *   maxSize: 10_000, // NOTE: This is unbounded if it is "undefined"
+   *   perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
    *   sortField,
    *   sortOrder,
    *   exe
@@ -1014,8 +1014,8 @@ export class ExceptionListClient {
    *   filter,
    *   executeFunctionOnStream,
    *   namespaceType,
-   *   maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
-   *   perPage: 1_000,
+   *   maxSize: 10_000, // NOTE: This is unbounded if it is "undefined"
+   *   perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
    *   sortField,
    *   sortOrder,
    *   exe
@@ -1068,8 +1068,8 @@ export class ExceptionListClient {
    *   filter,
    *   executeFunctionOnStream,
    *   namespaceType,
-   *   maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
-   *   perPage: 1_000,
+   *   maxSize: 10_000, // NOTE: This is unbounded if it is "undefined"
+   *   perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
    *   sortField,
    *   sortOrder,
    *   exe
@@ -1124,8 +1124,8 @@ export class ExceptionListClient {
    *   valueListId,
    *   executeFunctionOnStream,
    *   namespaceType,
-   *   maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
-   *   perPage: 1_000,
+   *   maxSize: 10_000, // NOTE: This is unbounded if it is "undefined"
+   *   perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
    *   sortField,
    *   sortOrder,
    *   exe

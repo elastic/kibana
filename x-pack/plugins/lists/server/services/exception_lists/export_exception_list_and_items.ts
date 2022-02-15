@@ -59,7 +59,7 @@ export const exportExceptionListAndItems = async ({
       listId: exceptionList.list_id,
       maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
       namespaceType: exceptionList.namespace_type,
-      perPage: 1_000,
+      perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
       savedObjectsClient,
       sortField: 'exception-list.created_at',
       sortOrder: 'desc',

@@ -58,7 +58,7 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
           await exceptionLists.findValueListExceptionListItemsPointInTimeFinder({
             executeFunctionOnStream,
             maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
-            perPage: 1_000,
+            perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
             sortField: undefined,
             sortOrder: undefined,
             valueListId: id,
@@ -165,7 +165,7 @@ const getReferencedExceptionLists = async (
     filter: `(${filter})`,
     maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
     namespaceType: ['agnostic', 'single'],
-    perPage: 1_000,
+    perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
     sortField: undefined,
     sortOrder: undefined,
   });

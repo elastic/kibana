@@ -7,17 +7,36 @@
  */
 
 import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
-import { search_after } from '.';
+import { searchAfterOrUndefined } from '.';
 
+import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-describe('pitOrUndefined', () => {
+describe('searchAfter', () => {
   test('it will validate a correct search_after', () => {
     const payload = ['test-1', 'test-2'];
-    const decoded = search_after.decode(payload);
+    const decoded = searchAfterOrUndefined.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it will validate with the value of "undefined"', () => {
+    const obj = t.exact(
+      t.type({
+        search_after: searchAfterOrUndefined,
+      })
+    );
+    const payload: t.TypeOf<typeof obj> = {
+      search_after: undefined,
+    };
+    const decoded = obj.decode({
+      pit_id: undefined,
+    });
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -26,11 +45,11 @@ describe('pitOrUndefined', () => {
 
   test('it will fail to validate an incorrect search_after', () => {
     const payload = 'foo';
-    const decoded = search_after.decode(payload);
+    const decoded = searchAfterOrUndefined.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "foo" supplied to "Array<string>"',
+      'Invalid value "foo" supplied to "(Array<string> | undefined)"',
     ]);
     expect(message.schema).toEqual({});
   });

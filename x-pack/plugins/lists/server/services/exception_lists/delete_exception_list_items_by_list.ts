@@ -49,7 +49,7 @@ export const getExceptionListItemIds = async ({
     listId,
     maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
     namespaceType,
-    perPage: 1_000,
+    perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
     savedObjectsClient,
     sortField: 'tie_breaker_id',
     sortOrder: 'desc',

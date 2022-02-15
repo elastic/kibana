@@ -9,6 +9,7 @@
 import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
 import { pitOrUndefined } from '.';
 
+import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
@@ -18,6 +19,24 @@ describe('pitOrUndefined', () => {
   test('it will validate a correct pit', () => {
     const payload = { id: '123', keepAlive: '1m' };
     const decoded = pitOrUndefined.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it will validate with the value of "undefined"', () => {
+    const obj = t.exact(
+      t.type({
+        pit_id: pitOrUndefined,
+      })
+    );
+    const payload: t.TypeOf<typeof obj> = {
+      pit_id: undefined,
+    };
+    const decoded = obj.decode({
+      pit_id: undefined,
+    });
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
