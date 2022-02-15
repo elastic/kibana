@@ -264,7 +264,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           actual={formattedActual}
           tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
           bands={bands}
-          ticks={ticks.slice(0, ticks.length - 1)}
+          ticks={ticks}
           bandFillColor={
             colorMode === GaugeColorModes.PALETTE && colors
               ? (val) => {
@@ -279,6 +279,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           }
           labelMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
           labelMinor={labelMinor ? labelMinor + '  ' : ''} // added extra space for nice rendering
+          centralMinor={tickFormatter.convert(metricValue)}
+          centralMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
           {...goalConfig}
         />
       </Chart>
