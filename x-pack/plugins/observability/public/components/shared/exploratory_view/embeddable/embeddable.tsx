@@ -20,7 +20,7 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { observabilityFeatureId } from '../../../../../common';
-import { SingleMetric } from './single_metric';
+import { SingleMetric, SingleMetricOptions } from './single_metric';
 
 export interface ExploratoryEmbeddableProps {
   appId?: 'security' | 'observability';
@@ -33,14 +33,12 @@ export interface ExploratoryEmbeddableProps {
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   isSingleMetric?: boolean;
   legendIsVisible?: boolean;
-  metricIcon?: string;
-  metricIconColor?: string;
-  metricPostfix?: string;
   onBrushEnd?: (param: { range: number[] }) => void;
   owner?: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
   showCalculationMethod?: boolean;
+  singleMetricOptions?: SingleMetricOptions;
   title: string | JSX.Element;
   withActions?: boolean | ActionTypes[];
 }
@@ -63,14 +61,12 @@ export default function Embeddable({
   isSingleMetric = false,
   legendIsVisible,
   lens,
-  metricIcon,
-  metricIconColor,
-  metricPostfix,
   onBrushEnd,
   owner = observabilityFeatureId,
   reportConfigMap = {},
   reportType,
   showCalculationMethod = false,
+  singleMetricOptions,
   title,
   withActions = true,
 }: ExploratoryEmbeddableComponentProps) {
@@ -152,11 +148,7 @@ export default function Embeddable({
         {appendTitle}
       </EuiFlexGroup>
       {isSingleMetric && (
-        <SingleMetric
-          metricIcon={metricIcon}
-          metricIconColor={metricIconColor}
-          metricPostfix={metricPostfix}
-        >
+        <SingleMetric {...singleMetricOptions}>
           <LensComponent
             id="exploratoryView-singleMetric"
             style={{ height: '100%' }}

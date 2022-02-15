@@ -6,18 +6,21 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, IconType } from '@elastic/eui';
 import styled from 'styled-components';
 
-export interface SingleMetricProps {
+export interface SingleMetricOptions {
   alignLnsMetric?: string;
-  children: JSX.Element;
   disableBorder?: boolean;
   disableShadow?: boolean;
-  metricIcon?: string;
+  metricIcon?: IconType;
   metricIconColor?: string;
   metricPostfix?: string;
 }
+
+type SingleMetricProps = SingleMetricOptions & {
+  children: JSX.Element;
+};
 
 export function SingleMetric({
   alignLnsMetric = 'flex-start',
