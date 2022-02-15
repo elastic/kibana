@@ -318,7 +318,7 @@ export class MonitoringPlugin
         const method = options.method;
         const handler = async (
           context: RequestHandlerContextMonitoringPlugin,
-          req: KibanaRequest<any, any, any, any>,
+          req: KibanaRequest<any, any, any>,
           res: KibanaResponseFactory
         ) => {
           const plugins = (await getCoreServices())[1];
