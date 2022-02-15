@@ -9,14 +9,13 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { Geometry, Position } from 'geojson';
-import { DRAW_SHAPE } from '../../../../../common/constants';
 import {
   DrawFeatureControl,
   ReduxDispatchProps,
   ReduxStateProps,
   OwnProps,
 } from './draw_feature_control';
-import { addNewFeatureToIndex, deleteFeatureFromIndex, updateEditShape } from '../../../../actions';
+import { addNewFeatureToIndex, deleteFeatureFromIndex } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 import { getEditState, getLayerById } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
