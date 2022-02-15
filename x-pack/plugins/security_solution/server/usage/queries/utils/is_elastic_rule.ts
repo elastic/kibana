@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { MlJobUsageMetric } from './ml_jobs/types';
-import type { RuleAdoption } from './rules/types';
+import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 
-export interface DetectionMetrics {
-  ml_jobs: MlJobUsageMetric;
-  detection_rules: RuleAdoption;
-}
+export const isElasticRule = (tags: string[] = []) =>
+  tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);

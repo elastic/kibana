@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import type { MlJobUsageMetric } from './ml_jobs/types';
-import type { RuleAdoption } from './rules/types';
+import type { MlJobUsage } from './types';
 
-export interface DetectionMetrics {
-  ml_jobs: MlJobUsageMetric;
-  detection_rules: RuleAdoption;
-}
+/**
+ * Default ml job usage count
+ */
+export const getInitialMlJobUsage = (): MlJobUsage => ({
+  custom: {
+    enabled: 0,
+    disabled: 0,
+  },
+  elastic: {
+    enabled: 0,
+    disabled: 0,
+  },
+});
