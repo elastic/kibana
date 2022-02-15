@@ -17,7 +17,7 @@ import {
 } from '../../../../../../../../src/plugins/ui_actions/public';
 import { ObservabilityAppServices } from '../../../../application/types';
 
-export type ActionTypes = 'explore' | 'save' | 'addToCase';
+export type ActionTypes = 'explore' | 'save' | 'addToCase' | 'openInLens';
 
 export function useActions({
   withActions,
