@@ -58,6 +58,9 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRu
 export const isSiemSignalsRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
 
+export const isDetectionEngineAADRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
+  (Object.values(ruleTypeMappings) as string[]).includes(doc.attributes.alertTypeId);
+
 /**
  * Returns true if the alert type is that of "siem.notifications" which is a legacy notification system that was deprecated in 7.16.0
  * in favor of using the newer alerting notifications system.
@@ -129,13 +132,17 @@ export function getMigrations(
   const migrationRules800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addThreatIndicatorPathToThreatMatchRules, fixInventoryThresholdGroupId)
+    pipeMigrations(
+      addThreatIndicatorPathToThreatMatchRules,
+      addSecuritySolutionAADRuleTypes,
+      fixInventoryThresholdGroupId
+    )
   );
 
   const migrationRules801 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addSecuritySolutionAADRuleTypes)
+    pipeMigrations(addSecuritySolutionAADRuleTypeTags)
   );
 
   return {
@@ -664,15 +671,34 @@ function addSecuritySolutionAADRuleTypes(
         ...doc,
         attributes: {
           ...doc.attributes,
-          tags: doc.attributes.enabled
-            ? [...(doc.attributes.tags ?? []), 'auto_disabled_8.0.1']
-            : doc.attributes.tags ?? [],
           alertTypeId: ruleTypeMappings[ruleType],
           enabled: false,
           params: {
             ...doc.attributes.params,
             outputIndex: '',
           },
+        },
+      }
+    : doc;
+}
+
+function addSecuritySolutionAADRuleTypeTags(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const ruleType = doc.attributes.params.type;
+  return isDetectionEngineAADRuleType(doc) && isRuleType(ruleType)
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          // If the rule is disabled at this point, then the rule has not been re-enabled after
+          // running the 8.0.0 migrations. If `doc.attributes.scheduledTaskId` exists, then the
+          // rule was enabled prior to running the migration. Thus we know we should add the
+          // tag to indicate it was auto-disabled.
+          tags:
+            !doc.attributes.enabled && doc.attributes.scheduledTaskId
+              ? [...(doc.attributes.tags ?? []), 'auto_disabled_8.0']
+              : doc.attributes.tags ?? [],
         },
       }
     : doc;

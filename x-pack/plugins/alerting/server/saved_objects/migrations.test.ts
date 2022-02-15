@@ -2058,107 +2058,176 @@ describe('successful migrations', () => {
     });
 
     test('doesnt change AAD rule params if not a siem.signals rule', () => {
-      const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
       const alert = getMockData(
         { params: { outputIndex: 'output-index', type: 'query' }, alertTypeId: 'not.siem.signals' },
         true
       );
-      expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
-        'not.siem.signals'
-      );
-      expect(migration801(alert, migrationContext).attributes.enabled).toEqual(true);
-      expect(migration801(alert, migrationContext).attributes.tags).toEqual(['foo']);
-      expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual(
-        'output-index'
-      );
+      const migratedAlert = migration800(alert, migrationContext);
+      expect(migratedAlert.attributes.alertTypeId).toEqual('not.siem.signals');
+      expect(migratedAlert.attributes.enabled).toEqual(true);
+      expect(migratedAlert.attributes.tags).toEqual(['foo']);
+      expect(migratedAlert.attributes.params.outputIndex).toEqual('output-index');
     });
 
     test.each(Object.keys(ruleTypeMappings) as RuleType[])(
-      'Changes AAD rule params accordingly if rule is a siem.signals %p rule',
+      'changes AAD rule params accordingly if rule is a siem.signals %p rule',
       (ruleType) => {
-        const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
+        const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
         const alert = getMockData(
           { params: { outputIndex: 'output-index', type: ruleType }, alertTypeId: 'siem.signals' },
           true
         );
-        expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
-          ruleTypeMappings[ruleType]
-        );
-        expect(migration801(alert, migrationContext).attributes.enabled).toEqual(false);
-        expect(migration801(alert, migrationContext).attributes.tags).toEqual([
-          'foo',
-          'auto_disabled_8.0.1',
-        ]);
-        expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual('');
+        const migratedAlert = migration800(alert, migrationContext);
+        expect(migratedAlert.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+        expect(migratedAlert.attributes.enabled).toEqual(false);
+        expect(migratedAlert.attributes.tags).toEqual(['foo']);
+        expect(migratedAlert.attributes.params.outputIndex).toEqual('');
       }
     );
 
-    test.each(Object.keys(ruleTypeMappings) as RuleType[])(
-      'Does not update %p rule tags if rule is disabled',
-      (ruleType) => {
-        const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
-        const alert = getMockData(
-          {
-            params: { outputIndex: 'output-index', type: ruleType },
-            alertTypeId: 'siem.signals',
-            enabled: false,
-          },
-          true
-        );
-        expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
-          ruleTypeMappings[ruleType]
-        );
-        expect(migration801(alert, migrationContext).attributes.enabled).toEqual(false);
-        expect(migration801(alert, migrationContext).attributes.tags).toEqual(['foo']);
-        expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual('');
-      }
-    );
+    describe('8.0.1', () => {
+      describe.each(Object.keys(ruleTypeMappings) as RuleType[])(
+        'auto_disabled %p rule tags',
+        (ruleType) => {
+          const alert717Enabled = getMockData(
+            {
+              params: { outputIndex: 'output-index', type: ruleType },
+              alertTypeId: 'siem.signals',
+              enabled: true,
+              scheduledTaskId: 'abcd',
+            },
+            true
+          );
+          const alert717Disabled = getMockData(
+            {
+              params: { outputIndex: 'output-index', type: ruleType },
+              alertTypeId: 'siem.signals',
+              enabled: false,
+            },
+            true
+          );
+          const alert800 = getMockData(
+            {
+              params: { outputIndex: '', type: ruleType },
+              alertTypeId: ruleTypeMappings[ruleType],
+              enabled: false,
+              scheduledTaskId: 'abcd',
+            },
+            true
+          );
 
-    test.each(Object.keys(ruleTypeMappings) as RuleType[])(
-      'Updates %p rule tags correctly if tags are undefined',
-      (ruleType) => {
-        const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
-        const alert = getMockData(
-          {
-            params: { outputIndex: 'output-index', type: ruleType },
-            alertTypeId: 'siem.signals',
-            tags: undefined,
-          },
-          true
-        );
-        expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
-          ruleTypeMappings[ruleType]
-        );
-        expect(migration801(alert, migrationContext).attributes.enabled).toEqual(false);
-        expect(migration801(alert, migrationContext).attributes.tags).toEqual([
-          'auto_disabled_8.0.1',
-        ]);
-        expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual('');
-      }
-    );
+          test('Does not update rule tags if rule has already been enabled', () => {
+            const migrations = getMigrations(encryptedSavedObjectsSetup, isPreconfigured);
+            const migration800 = migrations['8.0.0'];
+            const migration801 = migrations['8.0.1'];
 
-    test.each(Object.keys(ruleTypeMappings) as RuleType[])(
-      'Updates %p rule tags correctly if tags are null',
-      (ruleType) => {
-        const migration801 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.1'];
-        const alert = getMockData(
-          {
-            params: { outputIndex: 'output-index', type: ruleType },
-            alertTypeId: 'siem.signals',
-            tags: null,
-          },
-          true
-        );
-        expect(migration801(alert, migrationContext).attributes.alertTypeId).toEqual(
-          ruleTypeMappings[ruleType]
-        );
-        expect(migration801(alert, migrationContext).attributes.enabled).toEqual(false);
-        expect(migration801(alert, migrationContext).attributes.tags).toEqual([
-          'auto_disabled_8.0.1',
-        ]);
-        expect(migration801(alert, migrationContext).attributes.params.outputIndex).toEqual('');
-      }
-    );
+            // migrate to 8.0.0
+            const migratedAlert800 = migration800(alert717Enabled, migrationContext);
+            expect(migratedAlert800.attributes.enabled).toEqual(false);
+
+            // reenable rule
+            migratedAlert800.attributes.enabled = true;
+
+            // migrate to 8.0.1
+            const migratedAlert801 = migration801(migratedAlert800, migrationContext);
+
+            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+            expect(migratedAlert801.attributes.enabled).toEqual(true);
+            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+            // tags not updated
+            expect(migratedAlert801.attributes.tags).toEqual(['foo']);
+          });
+
+          test('Does not update rule tags if rule was already disabled before upgrading to 8.0', () => {
+            const migrations = getMigrations(encryptedSavedObjectsSetup, isPreconfigured);
+            const migration800 = migrations['8.0.0'];
+            const migration801 = migrations['8.0.1'];
+
+            // migrate to 8.0.0
+            const migratedAlert800 = migration800(alert717Disabled, migrationContext);
+            expect(migratedAlert800.attributes.enabled).toEqual(false);
+
+            // migrate to 8.0.1
+            const migratedAlert801 = migration801(migratedAlert800, migrationContext);
+
+            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+            expect(migratedAlert801.attributes.enabled).toEqual(false);
+            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+            // tags not updated
+            expect(migratedAlert801.attributes.tags).toEqual(['foo']);
+          });
+
+          test('Updates rule tags if rule was auto-disabled in 8.0 upgrade and not reenabled', () => {
+            const migrations = getMigrations(encryptedSavedObjectsSetup, isPreconfigured);
+            const migration800 = migrations['8.0.0'];
+            const migration801 = migrations['8.0.1'];
+
+            // migrate to 8.0.0
+            const migratedAlert800 = migration800(alert717Enabled, migrationContext);
+            expect(migratedAlert800.attributes.enabled).toEqual(false);
+
+            // migrate to 8.0.1
+            const migratedAlert801 = migration801(migratedAlert800, migrationContext);
+
+            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+            expect(migratedAlert801.attributes.enabled).toEqual(false);
+            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+            // tags updated
+            expect(migratedAlert801.attributes.tags).toEqual(['foo', 'auto_disabled_8.0']);
+          });
+
+          test('Updates rule tags correctly if tags are undefined', () => {
+            const migrations = getMigrations(encryptedSavedObjectsSetup, isPreconfigured);
+            const migration801 = migrations['8.0.1'];
+
+            const alert = {
+              ...alert800,
+              attributes: {
+                ...alert800.attributes,
+                tags: undefined,
+              },
+            };
+
+            // migrate to 8.0.1
+            const migratedAlert801 = migration801(alert, migrationContext);
+
+            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+            expect(migratedAlert801.attributes.enabled).toEqual(false);
+            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+            // tags updated
+            expect(migratedAlert801.attributes.tags).toEqual(['auto_disabled_8.0']);
+          });
+
+          test('Updates rule tags correctly if tags are null', () => {
+            const migrations = getMigrations(encryptedSavedObjectsSetup, isPreconfigured);
+            const migration801 = migrations['8.0.1'];
+
+            const alert = {
+              ...alert800,
+              attributes: {
+                ...alert800.attributes,
+                tags: null,
+              },
+            };
+
+            // migrate to 8.0.1
+            const migratedAlert801 = migration801(alert, migrationContext);
+
+            expect(migratedAlert801.attributes.alertTypeId).toEqual(ruleTypeMappings[ruleType]);
+            expect(migratedAlert801.attributes.enabled).toEqual(false);
+            expect(migratedAlert801.attributes.params.outputIndex).toEqual('');
+
+            // tags updated
+            expect(migratedAlert801.attributes.tags).toEqual(['auto_disabled_8.0']);
+          });
+        }
+      );
+    });
 
     describe('Metrics Inventory Threshold rule', () => {
       test('Migrates incorrect action group spelling', () => {
