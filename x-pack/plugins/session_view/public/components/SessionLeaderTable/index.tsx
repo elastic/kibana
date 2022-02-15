@@ -86,7 +86,7 @@ startDate.setDate(new Date().getDate() - 7);
 const DEFAULT_END_DATE = new Date().toISOString();
 const DEFAULT_START_DATE = startDate.toISOString();
 
-const DEFAULT_INDEX_NAMES = ['cmd_entry_leader*'];
+const DEFAULT_INDEX_NAMES = ['logs-endpoint.events.process-default*'];
 
 const DEFAULT_ITEMS_PER_PAGE = [10, 25, 50];
 

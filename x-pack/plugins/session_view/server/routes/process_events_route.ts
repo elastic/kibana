@@ -57,7 +57,7 @@ export const doSearch = async (
     siemSignalsExists = false;
   }
 
-  const indices = ['cmd'];
+  const indices = ['logs-endpoint.events.process-default'];
 
   if (siemSignalsExists) {
     indices.push('.siem-signals-default');

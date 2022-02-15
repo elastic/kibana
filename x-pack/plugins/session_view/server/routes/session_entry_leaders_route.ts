@@ -23,7 +23,7 @@ export const sessionEntryLeadersRoute = (router: IRouter) => {
       const { id } = request.query;
 
       const result = await client.get({
-        index: 'cmd_entry_leader',
+        index: 'logs-endpoint.events.process-default',
         id,
       });
 

@@ -36,7 +36,7 @@ export const SessionViewPage = (props: RouteComponentProps) => {
     () => {
       return http.get<RecentSessionResults>(RECENT_SESSION_ROUTE, {
         query: {
-          indexes: ['cmd*', '.siem-signals*'],
+          indexes: ['logs-endpoint.events.process-default*', '.siem-signals*'],
         },
       });
     },
