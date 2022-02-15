@@ -8,11 +8,7 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import {
-  getCreateCommentsArrayMock,
-  getCreateCommentsMock,
-  getCreateCommentsWithMetaMock,
-} from './index.mock';
+import { getCreateCommentsArrayMock, getCreateCommentsMock } from './index.mock';
 import {
   CreateComment,
   createComment,
@@ -34,22 +30,13 @@ describe('CreateComment', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it passes validation with a comment with "meta"', () => {
-      const payload = getCreateCommentsWithMetaMock();
-      const decoded = createComment.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
-    });
-
     test('it fails validation when undefined', () => {
       const payload = undefined;
       const decoded = createComment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>)"',
+        'Invalid value "undefined" supplied to "{| comment: NonEmptyString |}"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -97,7 +84,7 @@ describe('CreateComment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>)>"',
+        'Invalid value "undefined" supplied to "Array<{| comment: NonEmptyString |}>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -108,7 +95,7 @@ describe('CreateComment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>)>"',
+        'Invalid value "1" supplied to "Array<{| comment: NonEmptyString |}>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -139,7 +126,7 @@ describe('CreateComment', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| meta: (object | undefined) |}>)>"',
+        'Invalid value "1" supplied to "Array<{| comment: NonEmptyString |}>"',
       ]);
       expect(message.schema).toEqual({});
     });

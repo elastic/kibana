@@ -19,7 +19,6 @@ import {
   ImportExceptionListItemSchemaDecoded,
   ImportExceptionListSchemaDecoded,
   ImportExceptionsListSchema,
-  comment,
   importExceptionListItemSchema,
   importExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -138,31 +137,10 @@ export const manageExceptionComments = (
     return [];
   } else {
     return comments.map((item) => {
-      const { comment: itemComment, meta } = item;
-      if (comment.is(item)) {
-        const {
-          created_at: createdAt,
-          created_by: createdBy,
-          updated_at: updatedAt,
-          updated_by: updatedBy,
-        } = item;
+      const { comment: itemComment } = item;
 
-        return {
-          comment: itemComment,
-          meta: {
-            ...meta,
-            import_fields: {
-              created_at: createdAt,
-              created_by: createdBy,
-              updated_at: updatedAt,
-              updated_by: updatedBy,
-            },
-          },
-        };
-      }
       return {
         comment: itemComment,
-        meta: meta ? { ...meta } : undefined,
       };
     });
   }

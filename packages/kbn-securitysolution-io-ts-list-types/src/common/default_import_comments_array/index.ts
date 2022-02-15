@@ -11,8 +11,8 @@ import { Either } from 'fp-ts/lib/Either';
 import { importComment, ImportCommentsArray } from '../import_comment';
 
 /**
- * Types the ImportCommentsArray as:
- *   - If null or undefined, then a default array of type entry will be set
+ * Types the DefaultImportCommentsArray as:
+ *   - If null or undefined, then a default array of type ImportCommentsArray will be set
  */
 export const DefaultImportCommentsArray = new t.Type<
   ImportCommentsArray,
@@ -21,7 +21,7 @@ export const DefaultImportCommentsArray = new t.Type<
 >(
   'DefaultImportComments',
   t.array(importComment).is,
-  (input): Either<t.Errors, ImportCommentsArray> =>
-    input == null ? t.success([]) : t.array(importComment).decode(input),
+  (input, context): Either<t.Errors, ImportCommentsArray> =>
+    input == null ? t.success([]) : t.array(importComment).validate(input, context),
   t.identity
 );

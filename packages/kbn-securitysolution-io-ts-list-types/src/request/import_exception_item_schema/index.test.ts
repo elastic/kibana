@@ -57,32 +57,6 @@ describe('import_list_item_schema', () => {
     });
   });
 
-  test('it should validate a typical item request with comments that include a meta', () => {
-    const payload = {
-      ...getImportExceptionsListItemSchemaMock(),
-      comments: [getCommentsWithMetaMock()],
-    };
-    const decoded = importExceptionListItemSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({
-      ...getImportExceptionsListItemSchemaDecodedMock(),
-      comments: [
-        {
-          comment: 'some old comment',
-          created_at: '2020-04-20T15:25:31.830Z',
-          created_by: 'some user',
-          id: 'uuid_here',
-          meta: {
-            any_key: 'test',
-          },
-        },
-      ],
-    });
-  });
-
   test('it should NOT accept an undefined for "item_id"', () => {
     const payload: Partial<ReturnType<typeof getImportExceptionsListItemSchemaMock>> =
       getImportExceptionsListItemSchemaMock();

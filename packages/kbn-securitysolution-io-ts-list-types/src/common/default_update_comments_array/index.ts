@@ -12,7 +12,7 @@ import { updateCommentsArray, UpdateCommentsArray } from '../update_comment';
 
 /**
  * Types the DefaultUpdateComments as:
- *   - If null or undefined, then a default array of type entry will be set
+ *   - If null or undefined, then a default array of type UpdateCommentsArray will be set
  */
 export const DefaultUpdateCommentsArray = new t.Type<
   UpdateCommentsArray,
@@ -21,7 +21,7 @@ export const DefaultUpdateCommentsArray = new t.Type<
 >(
   'DefaultUpdateComments',
   updateCommentsArray.is,
-  (input): Either<t.Errors, UpdateCommentsArray> =>
-    input == null ? t.success([]) : updateCommentsArray.decode(input),
+  (input, context): Either<t.Errors, UpdateCommentsArray> =>
+    input == null ? t.success([]) : updateCommentsArray.validate(input, context),
   t.identity
 );

@@ -34,15 +34,6 @@ describe('CommentsUpdate', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should pass validation when supplied typical comment update with "meta"', () => {
-      const payload = getUpdateCommentWithMetaMock();
-      const decoded = updateComment.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
-    });
-
     test('it should fail validation when supplied an undefined for "comment"', () => {
       const payload = getUpdateCommentMock();
       // @ts-expect-error
