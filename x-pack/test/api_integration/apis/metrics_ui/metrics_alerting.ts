@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { MetricExpressionParams } from '../../../../plugins/infra/common/alerting/metrics';
+import {
+  Comparator,
+  MetricExpressionParams,
+} from '../../../../plugins/infra/common/alerting/metrics';
 import { getElasticsearchMetricQuery } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/metric_query';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -18,6 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
     ({
       aggType,
       timeUnit: 'm',
+      threshold: [0],
+      comparator: Comparator.GT_OR_EQ,
       timeSize: 5,
       ...(aggType !== 'count' ? { metric: 'test.metric' } : {}),
     } as MetricExpressionParams);
