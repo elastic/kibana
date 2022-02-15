@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ComponentStrings } from '../../../i18n/components';
 import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from './button';
 
-const { SolutionToolbar: strings } = ComponentStrings;
+const strings = {
+  getLibraryButtonLabel: () =>
+    i18n.translate('presentationUtil.solutionToolbar.libraryButtonLabel', {
+      defaultMessage: 'Add from library',
+    }),
+};
 
 export type Props = Omit<SolutionToolbarButtonProps, 'iconType' | 'label'>;
 

@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import './toolbar_button.scss';
 import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
 import classNames from 'classnames';
 

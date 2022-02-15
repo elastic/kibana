@@ -8,10 +8,23 @@
 
 import React from 'react';
 import { EuiButtonGroup, htmlIdGenerator, EuiButtonGroupOptionProps } from '@elastic/eui';
-import { ComponentStrings } from '../../../i18n/components';
+import { i18n } from '@kbn/i18n';
 
-const { QuickButtonGroup: strings } = ComponentStrings;
-
+const strings = {
+  QuickButtonGroup: {
+    getAriaButtonLabel: (createType: string) =>
+      i18n.translate('presentationUtil.solutionToolbar.quickButton.ariaButtonLabel', {
+        defaultMessage: `Create new {createType}`,
+        values: {
+          createType,
+        },
+      }),
+    getLegend: () =>
+      i18n.translate('presentationUtil.solutionToolbar.quickButton.legendLabel', {
+        defaultMessage: 'Quick create',
+      }),
+  },
+};
 export interface QuickButtonProps extends Pick<EuiButtonGroupOptionProps, 'iconType'> {
   createType: string;
   onClick: () => void;
@@ -26,7 +39,7 @@ type Option = EuiButtonGroupOptionProps & Omit<QuickButtonProps, 'createType'>;
 export const QuickButtonGroup = ({ buttons }: Props) => {
   const buttonGroupOptions: Option[] = buttons.map((button: QuickButtonProps, index) => {
     const { createType: label, ...rest } = button;
-    const title = strings.getAriaButtonLabel(label);
+    const title = strings.QuickButtonGroup.getAriaButtonLabel(label);
 
     return {
       ...rest,
@@ -46,7 +59,7 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
     <EuiButtonGroup
       buttonSize="m"
       className="quickButtonGroup"
-      legend={strings.getLegend()}
+      legend={strings.QuickButtonGroup.getLegend()}
       options={buttonGroupOptions}
       onChange={onChangeIconsMulti}
       type="multi"

@@ -15,13 +15,5 @@ export interface Props extends Omit<SolutionToolbarButtonProps, 'primary'> {
 }
 
 export const PrimaryActionButton = ({ isDarkModeEnabled, ...props }: Props) => (
-  <SolutionToolbarButton
-    primary={true}
-    className={`solutionToolbar__primaryButton ${
-      isDarkModeEnabled
-        ? 'solutionToolbar__primaryButton--dark'
-        : 'solutionToolbar__primaryButton--light'
-    }`}
-    {...props}
-  />
+  <SolutionToolbarButton primary={true} {...props} />
 );
