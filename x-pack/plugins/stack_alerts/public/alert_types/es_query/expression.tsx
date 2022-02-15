@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTitle,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 import { DocLinksStart, HttpSetup } from 'kibana/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -383,6 +384,13 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         onChangeWindowUnit={(selectedWindowUnit: string) =>
           setParam('timeWindowUnit', selectedWindowUnit)
         }
+      />
+      <EuiIconTip
+        position="right"
+        type="questionInCircle"
+        content={i18n.translate('xpack.alertTypes.esQuery.forTheLastTooltip', {
+          defaultMessage: 'The data range defined here applies only to the first rule check.',
+        })}
       />
       <EuiSpacer />
     </Fragment>
