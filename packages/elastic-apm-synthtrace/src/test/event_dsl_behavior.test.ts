@@ -26,7 +26,7 @@ describe('DSL invocations', () => {
   const iterable = range
     .interval('1m')
     .rate(1)
-    .spans((timestamp, index) =>
+    .generator((timestamp, index) =>
       javaInstance
         .transaction(`GET /api/product/${index}/${globalSeq++}`)
         .duration(1000)

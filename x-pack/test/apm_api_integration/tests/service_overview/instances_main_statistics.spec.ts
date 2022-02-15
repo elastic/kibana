@@ -321,7 +321,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
 
           return synthtraceEsClient.index([
-            interval.rate(GO_A_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_SUCCESS).generator((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
                 .success()
@@ -329,7 +329,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
             ),
-            interval.rate(GO_A_INSTANCE_RATE_FAILURE).spans((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_FAILURE).generator((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
                 .failure()
@@ -337,7 +337,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
             ),
-            interval.rate(GO_B_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
+            interval.rate(GO_B_INSTANCE_RATE_SUCCESS).generator((timestamp) =>
               goInstanceB
                 .transaction('GET /api/product/list')
                 .success()
@@ -345,7 +345,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
             ),
-            interval.rate(JAVA_INSTANCE_RATE).spans((timestamp) =>
+            interval.rate(JAVA_INSTANCE_RATE).generator((timestamp) =>
               javaInstance
                 .transaction('GET /api/product/list')
                 .success()

@@ -27,7 +27,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
   return range
     .interval('1s')
     .rate(1)
-    .spans((timestamp) => [
+    .generator((timestamp) => [
       opbeansJava
         .transaction('GET /api/product')
         .timestamp(timestamp)

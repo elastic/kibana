@@ -29,7 +29,7 @@ export function generateData({
   return range
     .interval('2m')
     .rate(1)
-    .spans((timestamp) => [
+    .generator((timestamp) => [
       service1
         .transaction('GET /apple 🍎 ')
         .timestamp(timestamp)

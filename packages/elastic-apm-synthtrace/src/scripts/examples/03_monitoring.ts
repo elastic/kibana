@@ -31,11 +31,11 @@ const scenario: Scenario<StackMonitoringFields> = async (runOptions: RunOptions)
       const range = timerange(from, to);
       const interval = range.interval('10s').rate(1);
       return interval
-        .spans((timestamp) =>
+        .generator((timestamp) =>
           logger.perf('generating_es_events', () => clusterStats.timestamp(timestamp).indices(115))
         )
         .merge(
-          interval.spans((timestamp) =>
+          interval.generator((timestamp) =>
             logger.perf('generating_kb_events', () =>
               kibanaStats.timestamp(timestamp).requests(10, 20)
             )

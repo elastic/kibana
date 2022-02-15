@@ -32,7 +32,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         apm.service(`opbeans-go-${index}`, 'production', 'go').instance('instance')
       );
       const instanceSpans = (instance: Instance) => {
-        const successfulTraceEvents = successfulTimestamps.spans((timestamp) =>
+        const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
           instance
             .transaction(transactionName)
             .timestamp(timestamp)
@@ -53,7 +53,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             )
         );
 
-        const failedTraceEvents = failedTimestamps.spans((timestamp) =>
+        const failedTraceEvents = failedTimestamps.generator((timestamp) =>
           instance
             .transaction(transactionName)
             .timestamp(timestamp)
@@ -67,7 +67,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         const metricsets = range
           .interval('30s')
           .rate(1)
-          .spans((timestamp) =>
+          .generator((timestamp) =>
             instance
               .appMetrics({
                 'system.memory.actual.free': 800,

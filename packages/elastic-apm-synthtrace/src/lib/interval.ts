@@ -42,7 +42,7 @@ export class Interval implements Iterable<number> {
 
   private readonly intervalAmount: number;
   private readonly intervalUnit: unitOfTime.DurationConstructor;
-  spans<TField>(
+  generator<TField>(
     map: (timestamp: number, index?: number) => Serializable<TField> | Array<Serializable<TField>>
   ): EntityIterable<TField> {
     return new EntityGenerator(this, function* (i) {

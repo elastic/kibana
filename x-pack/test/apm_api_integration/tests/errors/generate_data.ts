@@ -41,7 +41,7 @@ export async function generateData({
     return timerange(start, end)
       .interval(interval)
       .rate(transaction.successRate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
           .transaction(transaction.name)
           .timestamp(timestamp)
@@ -52,7 +52,7 @@ export async function generateData({
         timerange(start, end)
           .interval(interval)
           .rate(transaction.failureRate)
-          .spans((timestamp) =>
+          .generator((timestamp) =>
             serviceGoProdInstance
               .transaction(transaction.name)
               .errors(

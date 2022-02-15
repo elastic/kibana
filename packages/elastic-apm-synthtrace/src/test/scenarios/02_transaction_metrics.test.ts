@@ -36,11 +36,11 @@ describe('transaction metrics', () => {
         range
           .interval('1m')
           .rate(25)
-          .spans((timestamp) => span(timestamp).success()),
+          .generator((timestamp) => span(timestamp).success()),
         range
           .interval('1m')
           .rate(50)
-          .spans((timestamp) => span(timestamp).failure())
+          .generator((timestamp) => span(timestamp).failure())
       )
       .filter((fields) => fields['metricset.name'] === 'transaction');
   });

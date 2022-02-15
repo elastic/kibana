@@ -94,7 +94,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoProdInstance
                   .transaction(transactionName)
                   .timestamp(timestamp)
@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_ERROR_RATE)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoProdInstance
                   .transaction(transactionName)
                   .duration(1000)

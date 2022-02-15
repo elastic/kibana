@@ -40,7 +40,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];
 
       const instanceSpans = (instance: Instance, url: string, index: number) => {
-        const successfulTraceEvents = successfulTimestamps.spans((timestamp) => {
+        const successfulTraceEvents = successfulTimestamps.generator((timestamp) => {
           const mod = index % 4;
           const randomHigh = random(100, mod * 1000);
           const randomLow = random(10, randomHigh / 10 + mod * 3);

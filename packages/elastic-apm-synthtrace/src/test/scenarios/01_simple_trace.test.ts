@@ -27,7 +27,7 @@ describe('simple trace', () => {
     iterable = range
       .interval('1m')
       .rate(1)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         javaInstance
           .transaction('GET /api/product/list')
           .duration(1000)

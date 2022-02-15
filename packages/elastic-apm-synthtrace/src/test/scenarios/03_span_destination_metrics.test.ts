@@ -29,7 +29,7 @@ describe('span destination metrics', () => {
         range
           .interval('1m')
           .rate(25)
-          .spans((timestamp) =>
+          .generator((timestamp) =>
             javaInstance
               .transaction('GET /api/product/list')
               .duration(1000)
@@ -47,7 +47,7 @@ describe('span destination metrics', () => {
         range
           .interval('1m')
           .rate(50)
-          .spans((timestamp) =>
+          .generator((timestamp) =>
             javaInstance
               .transaction('GET /api/product/list')
               .duration(1000)

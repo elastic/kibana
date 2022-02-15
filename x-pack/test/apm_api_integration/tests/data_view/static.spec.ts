@@ -142,7 +142,7 @@ function generateApmData(synthtrace: ApmSynthtraceEsClient) {
     range
       .interval('1s')
       .rate(1)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         instance.transaction('GET /api').timestamp(timestamp).duration(30).success()
       ),
   ]);

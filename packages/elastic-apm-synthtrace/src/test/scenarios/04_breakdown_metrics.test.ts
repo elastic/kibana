@@ -32,7 +32,7 @@ describe('breakdown metrics', () => {
     const listSpans = range
       .interval('30s')
       .rate(LIST_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         javaInstance
           .transaction('GET /api/product/list')
           .timestamp(timestamp)
@@ -49,7 +49,7 @@ describe('breakdown metrics', () => {
     const productPageSpans = range
       .interval('30s')
       .rate(ID_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         javaInstance
           .transaction('GET /api/product/:id')
           .timestamp(timestamp)

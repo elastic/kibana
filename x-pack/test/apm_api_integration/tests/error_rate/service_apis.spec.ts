@@ -131,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductList)
                 .timestamp(timestamp)
@@ -141,7 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_ERROR_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductList)
                 .duration(1000)
@@ -151,7 +151,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_ID_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductId)
                 .timestamp(timestamp)
@@ -161,7 +161,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_ID_ERROR_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductId)
                 .duration(1000)

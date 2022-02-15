@@ -33,12 +33,12 @@ describe('Merging streams', () => {
     const iterable = range
       .interval('1m')
       .rate(1)
-      .spans(() => new Doc('metric'))
+      .generator(() => new Doc('metric'))
       .merge(
         range
           .interval('1m')
           .rate(4)
-          .spans(() => new Doc('transaction'))
+          .generator(() => new Doc('transaction'))
       );
 
     events = iterable.toArray();

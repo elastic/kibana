@@ -27,7 +27,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       return range
         .interval('30s')
         .rate(1)
-        .spans((timestamp) => {
+        .generator((timestamp) => {
           const events = logger.perf('generating_sm_events', () => {
             return kibanaStats.timestamp(timestamp).requests(10, 20);
           });

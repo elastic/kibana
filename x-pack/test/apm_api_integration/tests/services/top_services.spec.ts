@@ -98,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         return synthtrace.index([
           transactionInterval
             .rate(config.multiple.prod.rps)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               multipleEnvServiceProdInstance
                 .transaction('GET /api')
                 .timestamp(timestamp)
@@ -107,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ),
           transactionInterval
             .rate(config.multiple.dev.rps)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               multipleEnvServiceDevInstance
                 .transaction('GET /api')
                 .timestamp(timestamp)
@@ -116,14 +116,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ),
           transactionInterval
             .rate(config.multiple.prod.rps)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               multipleEnvServiceDevInstance
                 .transaction('non-request', 'rpc')
                 .timestamp(timestamp)
                 .duration(config.multiple.prod.duration)
                 .success()
             ),
-          metricInterval.rate(1).spans((timestamp) =>
+          metricInterval.rate(1).generator((timestamp) =>
             metricOnlyInstance
               .appMetrics({
                 'system.memory.actual.free': 1,
@@ -135,7 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ),
           errorInterval
             .rate(1)
-            .spans((timestamp) => errorOnlyInstance.error('Foo').timestamp(timestamp)),
+            .generator((timestamp) => errorOnlyInstance.error('Foo').timestamp(timestamp)),
         ]);
       });
 
