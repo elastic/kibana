@@ -8,9 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiIcon } from '@elastic/eui';
-import { hasIcon } from './reference_line_panel';
 
-export const icons = [
+export function hasIcon(icon: string | undefined): icon is string {
+  return icon != null && icon !== 'empty';
+}
+
+const icons = [
   {
     value: 'empty',
     label: i18n.translate('xpack.lens.xyChart.iconSelect.noIconLabel', {

@@ -46,10 +46,9 @@ export function DimensionEditor(
   const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
-  const isHorizontal = isHorizontalChart(state.layers);
 
   if (isReferenceLayer(layer)) {
-    return <ReferenceLinePanel {...props} isHorizontal={isHorizontal} />;
+    return <ReferenceLinePanel {...props} />;
   }
 
   const axisMode =
@@ -70,6 +69,8 @@ export function DimensionEditor(
       </>
     );
   }
+
+  const isHorizontal = isHorizontalChart(state.layers);
 
   return (
     <>
