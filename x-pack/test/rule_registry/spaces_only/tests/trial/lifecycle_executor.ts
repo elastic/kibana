@@ -36,10 +36,7 @@ import { cleanupRegistryIndices } from '../../../common/lib/helpers/cleanup_regi
 
 // eslint-disable-next-line import/no-default-export
 export default function createLifecycleExecutorApiTest({ getService }: FtrProviderContext) {
-  // The getService('es') client returns the body of the transport requests.
-  // Where the client provided by Kibana returns the request response with headers, body, statusCode... etc.
-  // This cluster client will behave like the KibanaClient.
-  const es = getService('cluster_client');
+  const es = getService('es');
 
   const log = getService('log');
 
