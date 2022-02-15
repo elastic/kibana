@@ -510,20 +510,22 @@ export default ({ getService }: FtrProviderContext) => {
           enabled: true,
           severity: 'low',
           tags: ['tag1', 'tag2'],
-          version: '3',
+          version: 3,
         });
         expect(removeServerGeneratedProperties(body[1])).to.eql({
           ...getSimpleRuleOutput(),
+          rule_id: 'rule-2',
           enabled: false,
           severity: 'low',
           tags: ['auto_disabled_8.0.1'],
-          version: '2',
+          version: 2,
         });
         expect(removeServerGeneratedProperties(body[2])).to.eql({
           ...getSimpleRuleOutput(),
+          rule_id: 'rule-3',
           enabled: true,
           tags: ['tag1'],
-          version: '2',
+          version: 2,
         });
       });
     });
