@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from '../../../../../../../src/plugins/expressions/public';
-import { FramePublicAPI, Visualization } from '../../../types';
+import { DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../../types';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -38,6 +38,7 @@ import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualiza
 import { LensRootStore, setState } from '../../../state_management';
 import { getLensInspectorService } from '../../../lens_inspector_service';
 import { inspectorPluginMock } from '../../../../../../../src/plugins/inspector/public/mocks';
+import { enableAutoApply } from '../../../state_management/lens_slice';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -175,6 +176,78 @@ describe('workspace_panel', () => {
       | lens_merge_tables layerIds=\\"first\\" tables={datasource}
       | testVis"
     `);
+  });
+
+  it('should use applied state when available (when auto-apply is disabled)', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    framePublicAPI.appliedDatasourceLayers = {
+      first: { ...mockDatasource.publicAPIMock, applied: true } as DatasourcePublicAPI,
+    };
+
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+
+    const toExpression = jest.fn(
+      (
+        state: unknown,
+        datasourceLayers: Record<string, DatasourcePublicAPI>,
+        attributes?: Partial<{ title: string; description: string }>
+      ) => 'testVis'
+    );
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />,
+      {
+        preloadedState: {
+          appliedState: {
+            visualization: {
+              activeId: 'some-id',
+              state: { applied: true },
+            },
+            datasourceStates: {
+              [mockDatasource.id]: { isLoading: false, state: { applied: true } },
+            },
+          },
+        },
+      }
+    );
+
+    instance = mounted.instance;
+
+    expect(toExpression).toHaveBeenCalledTimes(1);
+    const [appliedVisualizationState, appliedDatasourceLayers] = toExpression.mock.calls[0];
+    expect((appliedVisualizationState as { applied: boolean }).applied).toBe(true);
+    expect(
+      (appliedDatasourceLayers?.first as DatasourcePublicAPI & { applied: boolean }).applied
+    ).toBe(true);
+
+    // have to do this part manually in the test, but in the application it will happen in the frame API selector which will be called in the parent component tree
+    instance.setProps({
+      framePublicAPI: { ...framePublicAPI, appliedDatasourceLayers: undefined },
+    });
+    toExpression.mockClear();
+
+    mounted.lensStore.dispatch(enableAutoApply());
+
+    expect(toExpression).toHaveBeenCalledTimes(1);
+    const [visualizationState, datasourceLayers] = toExpression.mock.calls[0];
+    expect((visualizationState as { applied: boolean }).applied).toBeUndefined();
+    expect(
+      (datasourceLayers?.first as DatasourcePublicAPI & { applied: boolean }).applied
+    ).toBeUndefined();
   });
 
   it('should execute a trigger on expression event', async () => {
