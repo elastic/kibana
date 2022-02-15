@@ -58,7 +58,7 @@ export function LoadSavedFilterSetModal({
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={onCancel}>
-                  {i18n.translate('xpack.lens.palette.saveModal.cancelLabel', {
+                  {i18n.translate('data.filter.loadSavedFilterSetModal.cancelLabel', {
                     defaultMessage: 'Cancel',
                   })}
                 </EuiButtonEmpty>
