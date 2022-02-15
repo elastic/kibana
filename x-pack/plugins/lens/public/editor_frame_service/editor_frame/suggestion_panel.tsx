@@ -411,7 +411,7 @@ export function SuggestionPanel({
                   rollbackToCurrentVisualization();
                 } else {
                   setLastSelectedSuggestion(index);
-                  switchToSuggestion(dispatchLens, suggestion);
+                  switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
                 }
               }}
               selected={index === lastSelectedSuggestion}

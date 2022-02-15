@@ -233,7 +233,10 @@ export function switchToSuggestion(
     Suggestion,
     'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId'
   >,
-  clearStagedPreview?: boolean
+  options?: {
+    clearStagedPreview?: boolean;
+    applyImmediately?: boolean;
+  }
 ) {
   dispatchLens(
     switchVisualization({
@@ -243,10 +246,12 @@ export function switchToSuggestion(
         datasourceState: suggestion.datasourceState,
         datasourceId: suggestion.datasourceId!,
       },
-      clearStagedPreview,
+      clearStagedPreview: options?.clearStagedPreview,
     })
   );
-  dispatchLens(applyChanges());
+  if (options?.applyImmediately) {
+    dispatchLens(applyChanges());
+  }
 }
 
 export function getTopSuggestionForField(

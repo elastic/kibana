@@ -288,7 +288,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(dispatchLens, suggestionForDraggedField, true);
+      switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
     }
   }, [suggestionForDraggedField, expressionExists, dispatchLens]);
 
