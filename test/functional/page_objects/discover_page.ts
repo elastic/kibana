@@ -276,6 +276,11 @@ export class DiscoverPageObject extends FtrService {
     return result[usedCellIdx];
   }
 
+  public async clickDocTableRowToggle(rowIndex: number = 0) {
+    const docTable = await this.getDocTable();
+    await docTable.clickRowToggle({ rowIndex });
+  }
+
   public async skipToEndOfDocTable() {
     // add the focus to the button to make it appear
     const skipButton = await this.testSubjects.find('discoverSkipTableButton');
