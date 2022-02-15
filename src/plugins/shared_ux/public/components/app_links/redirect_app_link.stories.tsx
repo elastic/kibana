@@ -34,7 +34,7 @@ export const ConnectedComponent = () => {
         >
           <EuiButton data-test-subj="homeAddData" fill iconType="plusInCircle">
             <FormattedMessage
-              id="home.addData.addDataButtonLabel"
+              id="sharedUX.addData.addDataButtonLabel"
               defaultMessage="Add integrations"
             />
           </EuiButton>
