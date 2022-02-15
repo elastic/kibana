@@ -22,7 +22,11 @@ import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
-import { ExecutionContextContainer, ExecutionContextSetup, KibanaExecutionContext } from '../execution_context';
+import {
+  ExecutionContextContainer,
+  ExecutionContextSetup,
+  KibanaExecutionContext,
+} from '../execution_context';
 
 interface Params {
   basePath: IBasePath;
