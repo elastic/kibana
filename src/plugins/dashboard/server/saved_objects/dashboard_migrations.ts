@@ -32,6 +32,7 @@ import {
   MigrateFunctionsObject,
 } from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
+import { migrateMapEmbeddable } from './migrate_map_embeddable';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -249,6 +250,9 @@ export const createDashboardSavedObjectTypeMigrations = (
     // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'] ?? identity),
 
     '7.14.0': flow(replaceIndexPatternReference),
+
+    '7.17.1': flow(migrateMapEmbeddable),
+    '8.0.1': flow(migrateMapEmbeddable),
   };
 
   return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
