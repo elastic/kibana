@@ -9,29 +9,49 @@ import { i18n } from '@kbn/i18n';
 import { getDataViewsService } from './kibana_services';
 import { checkIndexExists } from './api';
 
-export function checkIndexPatternValid(name: string) {
-  const byteLength = encodeURI(name).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;
-  const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
-  const indexPatternInvalid =
-    byteLength > 255 || // name can't be greater than 255 bytes
-    name !== name.toLowerCase() || // name should be lowercase
-    name === '.' ||
-    name === '..' || // name can't be . or ..
-    name.match(/^[-_+]/) !== null || // name can't start with these chars
-    name.match(reg) !== null; // name can't contain these chars
-  return !indexPatternInvalid;
+const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
+
+const byteLength = (indexName: string) => {
+  return encodeURI(indexName).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1 > 255;
+};
+
+export function checkIndexPatternValid(indexName: string) {
+  if (byteLength(indexName)) {
+    return i18n.translate('xpack.fileUpload.indexNameLong', {
+      defaultMessage:
+        'Cannot be longer than 255 bytes (note it is bytes, so multi-byte characters will count towards the 255 limit faster).',
+    });
+  }
+
+  if (indexName !== indexName.toLowerCase()) {
+    return i18n.translate('xpack.fileUpload.indexNameLowercase', {
+      defaultMessage: 'Index name should be lowercase.',
+    });
+  }
+
+  if (indexName === '.' || indexName === '..') {
+    return i18n.translate('xpack.fileUpload.indexNameNoDots', {
+      defaultMessage: `Index name can't be . or ..`,
+    });
+  }
+
+  if (indexName.match(/^[-_+]/) !== null) {
+    return i18n.translate('xpack.fileUpload.indexNameNoCharsAtStart', {
+      defaultMessage: `Index name can't start with these chars: - _ +`,
+    });
+  }
+
+  if (indexName.match(reg) !== null) {
+    return i18n.translate('xpack.fileUpload.indexNameNoSpecificChars', {
+      defaultMessage: `Index name can't contain spaces or these chars: \ / * ? < > | , # "`,
+    });
+  }
 }
 
 export const validateIndexName = async (indexName: string) => {
   if (!indexName) {
     return i18n.translate('xpack.fileUpload.indexNameRequired', {
       defaultMessage: 'Index name required',
-    });
-  }
-
-  if (!checkIndexPatternValid(indexName)) {
-    return i18n.translate('xpack.fileUpload.indexNameContainsIllegalCharactersErrorMessage', {
-      defaultMessage: 'Index name contains illegal characters.',
     });
   }
 
@@ -48,4 +68,6 @@ export const validateIndexName = async (indexName: string) => {
       defaultMessage: 'Index name already exists.',
     });
   }
+
+  return checkIndexPatternValid(indexName);
 };

@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import { ResultsLinks } from '../../../common/components/results_links';
 import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
@@ -329,32 +328,13 @@ export class ImportView extends Component {
     });
   };
 
-  onIndexChange = (e) => {
-    const index = e.target.value;
+  onIndexChange = (index, error) => {
     this.setState({
       index,
-      checkingValidIndex: true,
+      checkingValidIndex: error && error.length > 0 ? false : true,
+      indexNameError: error,
     });
-    this.debounceIndexCheck(index);
   };
-
-  debounceIndexCheck = debounce(async (index) => {
-    if (index === '') {
-      this.setState({ checkingValidIndex: false });
-      return;
-    }
-
-    const exists = await this.props.fileUpload.checkIndexExists(index);
-    const indexNameError = exists ? (
-      <FormattedMessage
-        id="xpack.dataVisualizer.file.importView.indexNameAlreadyExistsErrorMessage"
-        defaultMessage="Index name already exists"
-      />
-    ) : (
-      isIndexNameValid(index)
-    );
-    this.setState({ checkingValidIndex: false, indexNameError });
-  }, 500);
 
   onDataViewChange = (e) => {
     const name = e.target.value;
@@ -485,7 +465,7 @@ export class ImportView extends Component {
       indexNameError !== '' ||
       (createDataView === true && dataViewNameError !== '') ||
       initialized === true ||
-      checkingValidIndex === true;
+      checkingValidIndex === '';
 
     return (
       <EuiPage data-test-subj="dataVisualizerPageFileImport">
@@ -673,70 +653,6 @@ function getDefaultState(state, results, capabilities) {
     combinedFields,
     createDataView,
   };
-}
-
-function byteLength(name) {
-  return encodeURI(name).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1 > 255;
-}
-
-const listOfErrors = {
-  longName: (
-    <FormattedMessage
-      id="xpack.dataVisualizer.file.importView.longName"
-      defaultMessage="Index name can't be greater than 255 bytes"
-    />
-  ),
-  lowercaseName: (
-    <FormattedMessage
-      id="xpack.dataVisualizer.file.importView.lowercaseName"
-      defaultMessage="Index name should be lowercase"
-    />
-  ),
-  noDots: (
-    <FormattedMessage
-      id="xpack.dataVisualizer.file.importView.noDots"
-      defaultMessage="Index name can't be . or .."
-    />
-  ),
-  noCharsAtStart: (
-    <FormattedMessage
-      id="xpack.dataVisualizer.file.importView.noCharsAtStart"
-      defaultMessage="Index name can't start with these chars: - _ +"
-    />
-  ),
-  noSpecificChars: (
-    <FormattedMessage
-      id="xpack.dataVisualizer.file.importView.noSpecificChars"
-      defaultMessage="Index name can't contain spaces or these chars: \ / * ? < > | , #"
-    />
-  ),
-};
-
-function isIndexNameValid(name) {
-  const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
-  let error = '';
-
-  if (byteLength(name)) {
-    error = listOfErrors.longName;
-  }
-
-  if (name !== name.toLowerCase()) {
-    error = listOfErrors.lowercaseName;
-  }
-
-  if (name === '.' || name === '..') {
-    error = listOfErrors.noDots;
-  }
-
-  if (name.match(/^[-_+]/) !== null) {
-    error = listOfErrors.noCharsAtStart;
-  }
-
-  if (name.match(reg) !== null) {
-    error = listOfErrors.noSpecificChars;
-  }
-
-  return error;
 }
 
 function isDataViewNameValid(name, dataViewNames, index) {

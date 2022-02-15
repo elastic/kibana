@@ -17,3 +17,4 @@ export function setStartServices(core: CoreStart, plugins: DataVisualizerStartDe
 
 export const getCoreStart = () => coreStart;
 export const getPluginsStart = () => pluginsStart;
+export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;

@@ -14,7 +14,7 @@ import { validateIndexName } from '../../validate_index_name';
 export interface Props {
   indexName: string;
   indexNameError?: string;
-  onIndexNameChange: (name: string, error?: string) => void;
+  onIndexNameChange: (name: string, error: string) => void;
   onIndexNameValidationStart: () => void;
   onIndexNameValidationEnd: () => void;
 }
@@ -32,7 +32,7 @@ export class IndexNameForm extends Component<Props> {
 
   _onIndexNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     const indexName = event.target.value;
-    this.props.onIndexNameChange(indexName);
+    this.props.onIndexNameChange(indexName, '');
     this._validateIndexName(indexName);
     this.props.onIndexNameValidationStart();
   };
@@ -43,7 +43,7 @@ export class IndexNameForm extends Component<Props> {
       return;
     }
     this.props.onIndexNameValidationEnd();
-    this.props.onIndexNameChange(indexName, indexNameError);
+    this.props.onIndexNameChange(indexName, indexNameError ? indexNameError : '');
   }, 500);
 
   render() {

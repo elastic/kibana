@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
@@ -23,6 +22,7 @@ import { CombinedField, CombinedFieldsForm } from '../../../common/components/co
 import { JsonEditor, EDITOR_MODE } from '../json_editor';
 import { CreateDataViewToolTip } from './create_data_view_tooltip';
 const EDITOR_HEIGHT = '300px';
+import { getIndexNameFormComponent } from '../../../../kibana_services';
 
 interface Props {
   index: string;
@@ -67,37 +67,17 @@ export const AdvancedSettings: FC<Props> = ({
   results,
   canCreateDataView,
 }) => {
+  const IndexNameForm = getIndexNameFormComponent();
+
   return (
     <React.Fragment>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.indexNameLabel"
-            defaultMessage="Index name"
-          />
-        }
-        isInvalid={indexNameError !== ''}
-        error={[indexNameError]}
-      >
-        <EuiFieldText
-          placeholder={i18n.translate(
-            'xpack.dataVisualizer.file.advancedImportSettings.indexNamePlaceholder',
-            {
-              defaultMessage: 'index name',
-            }
-          )}
-          value={index}
-          disabled={initialized === true}
-          onChange={onIndexChange}
-          isInvalid={indexNameError !== ''}
-          aria-label={i18n.translate(
-            'xpack.dataVisualizer.file.advancedImportSettings.indexNameAriaLabel',
-            {
-              defaultMessage: 'Index name, required field',
-            }
-          )}
-        />
-      </EuiFormRow>
+      <IndexNameForm
+        indexName={index}
+        indexNameError={indexNameError}
+        onIndexNameChange={onIndexChange}
+        onIndexNameValidationStart={() => {}}
+        onIndexNameValidationEnd={() => {}}
+      />
 
       <EuiSpacer size="m" />
 

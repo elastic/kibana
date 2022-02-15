@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
-import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
+import { EuiCheckbox, EuiSpacer } from '@elastic/eui';
 import {
   CombinedField,
   CombinedFieldsReadOnlyForm,
 } from '../../../common/components/combined_fields';
 import { CreateDataViewToolTip } from './create_data_view_tooltip';
+import { getIndexNameFormComponent } from '../../../../kibana_services';
 
 interface Props {
   index: string;
@@ -37,38 +37,17 @@ export const SimpleSettings: FC<Props> = ({
   combinedFields,
   canCreateDataView,
 }) => {
+  const IndexNameForm = getIndexNameFormComponent();
+
   return (
     <React.Fragment>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.simpleImportSettings.indexNameFormRowLabel"
-            defaultMessage="Index name"
-          />
-        }
-        isInvalid={indexNameError !== ''}
-        error={[indexNameError]}
-      >
-        <EuiFieldText
-          placeholder={i18n.translate(
-            'xpack.dataVisualizer.file.simpleImportSettings.indexNamePlaceholder',
-            {
-              defaultMessage: 'index name',
-            }
-          )}
-          value={index}
-          disabled={initialized === true}
-          onChange={onIndexChange}
-          isInvalid={indexNameError !== ''}
-          aria-label={i18n.translate(
-            'xpack.dataVisualizer.file.simpleImportSettings.indexNameAriaLabel',
-            {
-              defaultMessage: 'Index name, required field',
-            }
-          )}
-          data-test-subj="dataVisualizerFileIndexNameInput"
-        />
-      </EuiFormRow>
+      <IndexNameForm
+        indexName={index}
+        indexNameError={indexNameError}
+        onIndexNameChange={onIndexChange}
+        onIndexNameValidationStart={() => {}}
+        onIndexNameValidationEnd={() => {}}
+      />
 
       <EuiSpacer size="m" />
 
