@@ -126,7 +126,7 @@ export function EditFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(findGroupsCount(currentEditFilters));
+  const [groupsCount, setGroupsCount] = useState<number>(currentEditFilters[currentEditFilters?.length - 1].groupCount ?? 0);
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [submitDisabled, setSubmitDisabled] = useState(false);
 
@@ -138,13 +138,6 @@ export function EditFilterModal({
     };
     fetchQueries();
   }, [savedQueryService]);
-
-  function findGroupsCount(filters: Filter[]) {
-    debugger
-    const groups = groupBy(filters, 'groupId');
-    const arr = Object.entries(groups);
-    return 1;
-  }
 
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
