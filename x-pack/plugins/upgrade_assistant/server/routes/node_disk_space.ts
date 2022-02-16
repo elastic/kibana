@@ -13,6 +13,7 @@ import { RouteDependencies } from '../types';
 
 interface NodeWithLowDiskSpace {
   nodeId: string;
+  nodeName: string;
   used: string;
   lowDiskWatermarkSetting: string;
 }
@@ -43,10 +44,10 @@ const getLowDiskWatermarkSetting = (clusterSettings: ClusterGetSettingsResponse)
   return undefined;
 };
 
-export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
-      path: `${API_BASE_PATH}/disk_space`,
+      path: `${API_BASE_PATH}/node_disk_space`,
       validate: false,
     },
     versionCheckHandlerWrapper(
@@ -82,7 +83,8 @@ export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: Route
               const { total_in_bytes: totalInBytes, available_in_bytes: availableInBytes } =
                 byteStats;
 
-              // The low disk watermark setting can be configured as a percentage or bytes value
+              // Regex to determine if the low disk watermark setting is configured as a percentage value
+              // Elasticsearch accepts a percentage or bytes value
               const isLowDiskWatermarkPercentage = /^(\d+|(\.\d+))(\.\d+)?%$/.test(
                 lowDiskWatermarkSetting!
               );
@@ -102,7 +104,8 @@ export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: Route
                 ) {
                   nodesWithLowDiskSpace.push({
                     nodeId,
-                    used: `${percentageUsed}%`,
+                    nodeName: node.name,
+                    used: `${Math.round(percentageUsed)}%`,
                     lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
                   });
                 }
@@ -125,7 +128,8 @@ export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: Route
                 ) {
                   nodesWithLowDiskSpace.push({
                     nodeId,
-                    used: `${percentageUsed}%`,
+                    nodeName: node.name,
+                    used: `${Math.round(percentageUsed)}%`,
                     lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
                   });
                 }
@@ -136,7 +140,7 @@ export function registerDiskSpaceRoute({ router, lib: { handleEsError } }: Route
           }
 
           // If the low disk watermark setting is undefined, send empty array
-          // This may occur if the setting is configured in elasticsearch.yml
+          // This could occur if the setting is configured in elasticsearch.yml
           return response.ok({ body: [] });
         } catch (error) {
           return handleEsError({ error, response });

@@ -79,6 +79,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 }> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
   const {
     services: {
+      api,
       core: { docLinks },
     },
   } = useAppContext();
@@ -88,6 +89,8 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   const isCompleted = status === ReindexStatus.completed;
   const hasFetchFailed = status === ReindexStatus.fetchFailed;
   const hasReindexingFailed = status === ReindexStatus.failed;
+
+  const { data: nodes } = api.useLoadNodeDiskSpace();
 
   return (
     <Fragment>
@@ -107,6 +110,45 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             />
           </Fragment>
         )}
+
+        {nodes && nodes.length > 0 && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              data-test-subj="lowDiskSpaceCallout"
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceCalloutTitle"
+                  defaultMessage="Nodes with low disk space"
+                />
+              }
+            >
+              <>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceCalloutDescription"
+                  defaultMessage="Disk usage is close to exceeding the low watermark, which may prevent reindexing. The following nodes are impacted:"
+                />
+
+                <EuiSpacer size="s" />
+
+                <ul>
+                  {nodes.map(({ nodeName, used, nodeId }) => (
+                    <li key={nodeId} data-test-subj="impactedNodeListItem">
+                      {nodeName}: {used}{' '}
+                      <FormattedMessage
+                        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.lowDiskSpaceUsedText"
+                        defaultMessage="used"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
         {(hasFetchFailed || hasReindexingFailed) && (
           <>
             <EuiCallOut
@@ -132,6 +174,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
             <EuiSpacer />
           </>
         )}
+
         <EuiText>
           <p>
             <FormattedMessage

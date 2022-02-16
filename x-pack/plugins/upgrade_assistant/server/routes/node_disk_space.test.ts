@@ -14,7 +14,7 @@ jest.mock('../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 
-import { registerDiskSpaceRoute } from './disk_space';
+import { registerNodeDiskSpaceRoute } from './node_disk_space';
 
 describe('Disk space API', () => {
   let mockRouter: MockRouter;
@@ -26,14 +26,14 @@ describe('Disk space API', () => {
       router: mockRouter,
       lib: { handleEsError },
     };
-    registerDiskSpaceRoute(routeDependencies);
+    registerNodeDiskSpaceRoute(routeDependencies);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  describe('GET /api/upgrade_assistant/disk_space', () => {
+  describe('GET /api/upgrade_assistant/node_disk_space', () => {
     beforeEach(() => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.nodes.stats as jest.Mock
@@ -70,7 +70,7 @@ describe('Disk space API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/disk_space',
+        pathPattern: '/api/upgrade_assistant/node_disk_space',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -97,7 +97,7 @@ describe('Disk space API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/disk_space',
+        pathPattern: '/api/upgrade_assistant/node_disk_space',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -124,7 +124,7 @@ describe('Disk space API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/disk_space',
+        pathPattern: '/api/upgrade_assistant/node_disk_space',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -153,7 +153,7 @@ describe('Disk space API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/disk_space',
+        pathPattern: '/api/upgrade_assistant/node_disk_space',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -180,7 +180,7 @@ describe('Disk space API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/disk_space',
+        pathPattern: '/api/upgrade_assistant/node_disk_space',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -203,7 +203,7 @@ describe('Disk space API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/disk_space',
+        pathPattern: '/api/upgrade_assistant/node_disk_space',
       })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
 
       expect(resp.status).toEqual(200);
@@ -219,7 +219,7 @@ describe('Disk space API', () => {
         await expect(
           routeDependencies.router.getHandler({
             method: 'get',
-            pathPattern: '/api/upgrade_assistant/disk_space',
+            pathPattern: '/api/upgrade_assistant/node_disk_space',
           })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
         ).rejects.toThrow('scary error!');
       });
@@ -244,7 +244,7 @@ describe('Disk space API', () => {
         await expect(
           routeDependencies.router.getHandler({
             method: 'get',
-            pathPattern: '/api/upgrade_assistant/disk_space',
+            pathPattern: '/api/upgrade_assistant/node_disk_space',
           })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
         ).rejects.toThrow('scary error!');
       });
