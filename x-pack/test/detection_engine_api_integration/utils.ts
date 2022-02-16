@@ -1049,8 +1049,8 @@ export const countDownTest = async (
  * and error about the race condition.
  * rule a second attempt. It only re-tries adding the rule if it encounters a conflict once.
  * @param supertest The supertest deps
- * @param rule The rule to create
  * @param log The tooling logger
+ * @param rule The rule to create
  */
 export const createRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
