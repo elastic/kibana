@@ -191,7 +191,7 @@ export const getSections = ({
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
         {
-          defaultMessage: 'View sample document',
+          defaultMessage: 'View transaction in Discover',
         }
       ),
       href: getDiscoverHref({
