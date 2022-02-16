@@ -88,6 +88,9 @@ export type MlGetDFAParams =
   | Parameters<MlClient['putDataFrameAnalytics']>;
 
 export type MlGetTrainedModelParams =
+  | Parameters<MlClient['putTrainedModel']>
+  | Parameters<MlClient['deleteTrainedModel']>
   | Parameters<MlClient['getTrainedModels']>
   | Parameters<MlClient['getTrainedModelsStats']>
-  | Parameters<MlClient['putTrainedModel']>; // this is incomplete!!!!!!!
+  | Parameters<MlClient['startTrainedModelDeployment']>
+  | Parameters<MlClient['stopTrainedModelDeployment']>;
