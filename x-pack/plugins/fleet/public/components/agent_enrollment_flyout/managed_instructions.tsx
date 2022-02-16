@@ -66,6 +66,7 @@ export const ManagedInstructions = React.memo<InstructionProps>(
     isFleetServerPolicySelected,
     settings,
     refreshAgentPolicies,
+    isLoadingAgentPolicies,
   }) => {
     const fleetStatus = useFleetStatus();
 
@@ -81,8 +82,7 @@ export const ManagedInstructions = React.memo<InstructionProps>(
     });
 
     const fleetServers = useMemo(() => {
-      const policies = agentPolicies;
-      const fleetServerAgentPolicies: string[] = (policies ?? [])
+      const fleetServerAgentPolicies: string[] = agentPolicies
         .filter((pol) => policyHasFleetServer(pol))
         .map((pol) => pol.id);
       return (agents?.items ?? []).filter((agent) =>
@@ -162,7 +162,10 @@ export const ManagedInstructions = React.memo<InstructionProps>(
       return null;
     }
 
-    if (fleetStatus.isReady && (isLoadingAgents || fleetServers.length > 0)) {
+    if (
+      fleetStatus.isReady &&
+      (isLoadingAgents || isLoadingAgentPolicies || fleetServers.length > 0)
+    ) {
       return (
         <>
           <EuiText>
