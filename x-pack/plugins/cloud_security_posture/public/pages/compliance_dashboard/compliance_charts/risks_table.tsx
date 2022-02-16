@@ -63,13 +63,13 @@ const mockData = [
 ];
 
 export interface RisksTableProps {
-  data: CloudPostureStats['resourceTypesAggs'];
+  data: CloudPostureStats['resourcesTypes'];
 }
 
 const maxRisks = 5;
 
-export const getTop5Risks = (resourceTypesAggs: CloudPostureStats['resourceTypesAggs']) => {
-  const filtered = resourceTypesAggs.filter((x) => x.totalFailed > 0);
+export const getTop5Risks = (resourcesTypes: CloudPostureStats['resourcesTypes']) => {
+  const filtered = resourcesTypes.filter((x) => x.totalFailed > 0);
   const sorted = filtered.slice().sort((first, second) => second.totalFailed - first.totalFailed);
 
   return sorted.slice(0, maxRisks);
@@ -85,7 +85,7 @@ const getResourceTypeFailedFindingsQuery = (resourceType: string): Query => ({
   query: `resource.type : "${resourceType}" and result.evaluation : "${RULE_FAILED}" `,
 });
 
-export const RisksTable = ({ data: resourceTypesAggs }: RisksTableProps) => {
+export const RisksTable = ({ data: resourcesTypes }: RisksTableProps) => {
   const { push } = useHistory();
 
   const handleCellClick = useCallback(
@@ -129,7 +129,7 @@ export const RisksTable = ({ data: resourceTypesAggs }: RisksTableProps) => {
     [handleCellClick]
   );
 
-  if (!resourceTypesAggs) return null;
+  if (!resourcesTypes) return null;
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
@@ -137,9 +137,7 @@ export const RisksTable = ({ data: resourceTypesAggs }: RisksTableProps) => {
         <EuiBasicTable<ResourceTypeAgg>
           rowHeader="resourceType"
           items={
-            INTERNAL_FEATURE_FLAGS.risksMock
-              ? getTop5Risks(mockData)
-              : getTop5Risks(resourceTypesAggs)
+            INTERNAL_FEATURE_FLAGS.risksMock ? getTop5Risks(mockData) : getTop5Risks(resourcesTypes)
           }
           columns={columns}
         />

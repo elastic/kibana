@@ -56,7 +56,7 @@ export const BenchmarksSection = () => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const getStats = useCloudPostureStatsApi();
-  const clusters = getStats.isSuccess && getStats.data.clusterAggs;
+  const clusters = getStats.isSuccess && getStats.data.clusters;
   if (!clusters) return null;
 
   const handleElementClick = (clusterId: string, elements: PartitionElementEvent[]) => {

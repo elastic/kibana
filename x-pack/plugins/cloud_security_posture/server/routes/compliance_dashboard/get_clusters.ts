@@ -15,14 +15,10 @@ import {
   getResourceTypeFromAggs,
   resourceTypeAggQuery,
   ResourceTypeQueryResult,
-} from './get_resource_type_aggs';
+} from './get_resources_types';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
-import { calculatePostureScore } from './stats';
-
-export interface KeyDocCount<TKey = string> {
-  key: TKey;
-  doc_count: number;
-}
+import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
+import { KeyDocCount } from './compliance_dashboard';
 
 interface ClusterBucket extends ResourceTypeQueryResult, KeyDocCount {
   failed_findings: {
@@ -53,27 +49,22 @@ export const getClustersQuery = (cycleId: string): SearchRequest => ({
         field: 'cluster_id.keyword',
       },
       aggs: {
-        failed_findings: {
-          filter: { term: { 'result.evaluation.keyword': 'failed' } },
-        },
-        passed_findings: {
-          filter: { term: { 'result.evaluation.keyword': 'passed' } },
-        },
         benchmarks: {
           terms: {
             field: 'rule.benchmark.keyword',
           },
         },
         ...resourceTypeAggQuery,
+        ...findingsEvaluationAggsQuery,
       },
     },
   },
 });
 
-export const getClusterAggs = async (
+export const getClusters = async (
   esClient: ElasticsearchClient,
   cycleId: string
-): Promise<CloudPostureStats['clusterAggs']> => {
+): Promise<CloudPostureStats['clusters']> => {
   const queryResult = await esClient.search<unknown, ClustersQueryResult>(
     getClustersQuery(cycleId)
   );
@@ -81,7 +72,7 @@ export const getClusterAggs = async (
   if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
 
   return clusters.map((cluster) => {
-    // get benchmark used by cluster
+    // get cluster's meta data
     const benchmarks = cluster.benchmarks.buckets;
     if (!Array.isArray(benchmarks)) throw new Error('missing aggs by benchmarks per cluster');
 
@@ -90,24 +81,16 @@ export const getClusterAggs = async (
       benchmarkName: benchmarks[0].key,
     };
 
-    // get cluster stats TODO: create shared function for stats calculations
-    const failedFindings = cluster.failed_findings.doc_count;
-    const passedFindings = cluster.passed_findings.doc_count;
-    const totalFindings = failedFindings + passedFindings;
-    const postureScore = calculatePostureScore(totalFindings, passedFindings, failedFindings);
-    if (postureScore === undefined) throw new Error("couldn't calculate posture score");
-
-    const stats = {
-      totalFailed: failedFindings,
-      totalPassed: passedFindings,
-      totalFindings,
-      postureScore,
-    };
+    // get cluster's stats
+    if (!cluster.failed_findings || !cluster.passed_findings)
+      throw new Error('missing findings evaluations per cluster');
+    const stats = getStatsFromFindingsEvaluationsAggs(cluster);
 
     // get cluster's resource types aggs
-    const resourceTypes = cluster.aggs_by_resource_type.buckets;
-    if (!Array.isArray(resourceTypes)) throw new Error('missing aggs by resource type per cluster');
-    const resourceTypeAggs = getResourceTypeFromAggs(resourceTypes);
+    const resourceTypesAggs = cluster.aggs_by_resource_type.buckets;
+    if (!Array.isArray(resourceTypesAggs))
+      throw new Error('missing aggs by resource type per cluster');
+    const resourceTypeAggs = getResourceTypeFromAggs(resourceTypesAggs);
 
     return {
       meta,

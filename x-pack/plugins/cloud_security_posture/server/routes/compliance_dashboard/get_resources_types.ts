@@ -11,10 +11,8 @@ import {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { CloudPostureStats, Evaluation } from '../../../common/types';
-import { KeyDocCount } from './stats';
+import { KeyDocCount } from './compliance_dashboard';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
-
-type AggsByResourceType = Aggregation<ResourceTypeBucket>;
 
 export interface ResourceTypeQueryResult {
   aggs_by_resource_type: Aggregation<ResourceTypeBucket>;
@@ -59,7 +57,7 @@ export const getRisksEsQuery = (cycleId: string): SearchRequest => ({
 
 export const getResourceTypeFromAggs = (
   queryResult: ResourceTypeBucket[]
-): CloudPostureStats['resourceTypesAggs'] =>
+): CloudPostureStats['resourcesTypes'] =>
   queryResult.map((bucket) => ({
     resourceType: bucket.key,
     totalFindings: bucket.doc_count,
@@ -67,10 +65,10 @@ export const getResourceTypeFromAggs = (
     totalPassed: bucket.passed_findings.doc_count || 0,
   }));
 
-export const getResourceTypesAggs = async (
+export const getResourcesTypes = async (
   esClient: ElasticsearchClient,
   cycleId: string
-): Promise<CloudPostureStats['resourceTypesAggs']> => {
+): Promise<CloudPostureStats['resourcesTypes']> => {
   const resourceTypesQueryResult = await esClient.search<unknown, ResourceTypeQueryResult>(
     getRisksEsQuery(cycleId)
   );

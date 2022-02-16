@@ -6,13 +6,13 @@
  */
 
 import type { IRouter } from '../../../../../src/core/server';
-import { defineGetStatsRoute } from './stats/stats';
+import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compliance_dashboard';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineFindingsIndexRoute as defineGetFindingsIndexRoute } from './findings/findings';
 import { CspAppContext } from '../plugin';
 
 export function defineRoutes(router: IRouter, cspContext: CspAppContext) {
-  defineGetStatsRoute(router, cspContext);
+  defineGetComplianceDashboardRoute(router, cspContext);
   defineGetFindingsIndexRoute(router, cspContext);
   defineGetBenchmarksRoute(router, cspContext);
 }
