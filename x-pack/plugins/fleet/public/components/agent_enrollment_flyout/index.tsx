@@ -66,8 +66,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
-  const { agentPolicies, isLoadingAgentPolicies, refreshAgentPolicies } =
-    useAgentEnrollmentFlyoutData();
+  const {
+    agentPolicies,
+    isLoadingInitialAgentPolicies,
+    isLoadingAgentPolicies,
+    refreshAgentPolicies,
+  } = useAgentEnrollmentFlyoutData();
 
   useEffect(() => {
     async function checkPolicyIsFleetServer() {
@@ -144,7 +148,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           ) : undefined
         }
       >
-        {isLoadingAgentPolicies ? (
+        {isLoadingInitialAgentPolicies ? (
           <Loading />
         ) : mode === 'managed' ? (
           <ManagedInstructions
@@ -155,6 +159,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             viewDataStep={viewDataStep}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
             refreshAgentPolicies={refreshAgentPolicies}
+            isLoadingAgentPolicies={isLoadingAgentPolicies}
           />
         ) : (
           <StandaloneInstructions

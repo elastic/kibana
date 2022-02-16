@@ -122,7 +122,7 @@ describe('<AgentEnrollmentFlyout />', () => {
     (useAgentEnrollmentFlyoutData as jest.Mock).mockReturnValue?.({
       agentPolicies: [],
       refreshAgentPolicies: jest.fn(),
-      isLoadingAgentPolicies: true,
+      isLoadingInitialAgentPolicies: true,
     });
 
     await act(async () => {
