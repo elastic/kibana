@@ -166,7 +166,7 @@ export function WorkspacePanelWrapper({
               <EuiFlexItem>
                 <EuiFlexGroup
                   alignItems="center"
-                  justifyContent="flexEnd"
+                  justifyContent="flexStart"
                   gutterSize="s"
                   responsive={false}
                 >
@@ -177,28 +177,31 @@ export function WorkspacePanelWrapper({
                       })}
                       checked={autoApplyEnabled}
                       onChange={toggleAutoApply}
+                      compressed={true}
                       className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
                       data-test-subj="lensToggleAutoApply"
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <div>
-                      <EuiButton
-                        disabled={autoApplyEnabled || changesApplied}
-                        fill
-                        className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-                        iconType="play"
-                        onClick={() => dispatchLens(applyChanges())}
-                        size="s"
-                        data-test-subj="lensApplyChanges"
-                      >
-                        <FormattedMessage
-                          id="xpack.lens.editorFrame.applyChangesLabel"
-                          defaultMessage="Apply"
-                        />
-                      </EuiButton>
-                    </div>
-                  </EuiFlexItem>
+                  {!autoApplyEnabled && (
+                    <EuiFlexItem grow={false}>
+                      <div>
+                        <EuiButton
+                          disabled={autoApplyEnabled || changesApplied}
+                          fill
+                          className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+                          iconType="play"
+                          onClick={() => dispatchLens(applyChanges())}
+                          size="s"
+                          data-test-subj="lensApplyChanges"
+                        >
+                          <FormattedMessage
+                            id="xpack.lens.editorFrame.applyChangesLabel"
+                            defaultMessage="Apply"
+                          />
+                        </EuiButton>
+                      </div>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

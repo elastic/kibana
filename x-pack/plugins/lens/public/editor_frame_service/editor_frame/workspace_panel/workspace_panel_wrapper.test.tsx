@@ -100,8 +100,15 @@ describe('workspace_panel_wrapper', () => {
         this.applyChangesButton.simulate('click');
       }
 
-      public get canApplyChanges() {
-        return !this.applyChangesButton.prop('disabled');
+      public get applyChangesExists() {
+        return this.applyChangesButton.exists();
+      }
+
+      public get applyChangesDisabled() {
+        if (!this.applyChangesExists) {
+          throw Error('apply changes button doesnt exist');
+        }
+        return this.applyChangesButton.prop('disabled');
       }
     }
 
@@ -132,17 +139,19 @@ describe('workspace_panel_wrapper', () => {
 
       expect(selectAutoApplyEnabled(store.getState())).toBeFalsy();
       expect(harness.autoApplySwitchOn).toBeFalsy();
-      expect(harness.canApplyChanges).toBeFalsy();
+      expect(harness.applyChangesExists).toBeTruthy();
 
       harness.toggleAutoApply();
 
       expect(selectAutoApplyEnabled(store.getState())).toBeTruthy();
       expect(harness.autoApplySwitchOn).toBeTruthy();
+      expect(harness.applyChangesExists).toBeFalsy();
 
       harness.toggleAutoApply();
 
       expect(selectAutoApplyEnabled(store.getState())).toBeFalsy();
       expect(harness.autoApplySwitchOn).toBeFalsy();
+      expect(harness.applyChangesExists).toBeTruthy();
     });
 
     it('apply-changes button works', () => {
@@ -150,7 +159,7 @@ describe('workspace_panel_wrapper', () => {
       harness.update();
 
       expect(selectAutoApplyEnabled(store.getState())).toBeFalsy();
-      expect(harness.canApplyChanges).toBeFalsy();
+      expect(harness.applyChangesDisabled).toBeTruthy();
 
       // make a change
       store.dispatch(
@@ -161,11 +170,11 @@ describe('workspace_panel_wrapper', () => {
       );
       harness.update();
 
-      expect(harness.canApplyChanges).toBeTruthy();
+      expect(harness.applyChangesDisabled).toBeFalsy();
 
       harness.applyChanges();
 
-      expect(harness.canApplyChanges).toBeFalsy();
+      expect(harness.applyChangesDisabled).toBeTruthy();
     });
 
     it('enabling auto apply while having unapplied changes works', () => {
@@ -179,15 +188,15 @@ describe('workspace_panel_wrapper', () => {
       );
       harness.update();
 
-      expect(harness.canApplyChanges).toBeTruthy();
+      expect(harness.applyChangesDisabled).toBeFalsy();
       expect(harness.autoApplySwitchOn).toBeFalsy();
+      expect(harness.applyChangesExists).toBeTruthy();
 
       // enable auto apply
       harness.toggleAutoApply();
 
-      expect(harness.canApplyChanges).toBeFalsy();
-      // apply changes button should now be disabled
       expect(harness.autoApplySwitchOn).toBeTruthy();
+      expect(harness.applyChangesExists).toBeFalsy();
     });
   });
 });
