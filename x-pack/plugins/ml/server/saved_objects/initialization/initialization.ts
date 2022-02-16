@@ -106,10 +106,8 @@ export function jobSavedObjectsInitializationFactory(
     // });
     // return body.count > 0;
 
-    const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ count: number }>();
-    const { body: dfaJobs } = await client.asInternalUser.ml.getDataFrameAnalytics<{
-      count: number;
-    }>();
+    const adJobs = await client.asInternalUser.ml.getJobs();
+    const dfaJobs = await client.asInternalUser.ml.getDataFrameAnalytics();
     return adJobs.count > 0 || dfaJobs.count > 0;
   }
 

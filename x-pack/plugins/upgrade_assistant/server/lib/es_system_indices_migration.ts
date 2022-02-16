@@ -31,7 +31,7 @@ export const convertFeaturesToIndicesArray = (
 export const getESSystemIndicesMigrationStatus = async (
   client: ElasticsearchClient
 ): Promise<SystemIndicesMigrationStatus> => {
-  const { body } = await client.transport.request({
+  const body = await client.transport.request({
     method: 'GET',
     path: '/_migration/system_features',
   });
@@ -42,7 +42,7 @@ export const getESSystemIndicesMigrationStatus = async (
 export const startESSystemIndicesMigration = async (
   client: ElasticsearchClient
 ): Promise<SystemIndicesMigrationStarted> => {
-  const { body } = await client.transport.request({
+  const body = await client.transport.request({
     method: 'POST',
     path: '/_migration/system_features',
   });
