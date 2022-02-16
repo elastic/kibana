@@ -10,7 +10,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MetricVisValue } from './metric_value';
-import { MetricOptions, MetricStyle } from '../../common/types';
+import { MetricOptions, MetricStyle, VisParams } from '../../common/types';
+import { LabelPosition } from '../../common/constants';
 
 const baseMetric: MetricOptions = { label: 'Foo', value: 'foo', lightText: false };
 const font: MetricStyle = {
@@ -24,6 +25,12 @@ const font: MetricStyle = {
   /* stylelint-enable */
 };
 
+const labelConfig: VisParams['metric']['labels'] = {
+  show: true,
+  position: LabelPosition.BOTTOM,
+  style: { spec: {}, type: 'style', css: '' },
+};
+
 describe('MetricVisValue', () => {
   it('should be wrapped in button if having a click listener', () => {
     const component = shallow(
@@ -32,6 +39,7 @@ describe('MetricVisValue', () => {
         metric={baseMetric}
         onFilter={() => {}}
         colorFullBackground={false}
+        labelConfig={labelConfig}
       />
     );
     expect(component.find('button').exists()).toBe(true);
@@ -39,7 +47,12 @@ describe('MetricVisValue', () => {
 
   it('should not be wrapped in button without having a click listener', () => {
     const component = shallow(
-      <MetricVisValue style={font} metric={baseMetric} colorFullBackground={false} />
+      <MetricVisValue
+        style={font}
+        metric={baseMetric}
+        colorFullBackground={false}
+        labelConfig={labelConfig}
+      />
     );
     expect(component.find('button').exists()).toBe(false);
   });
@@ -52,6 +65,7 @@ describe('MetricVisValue', () => {
         metric={baseMetric}
         onFilter={onFilter}
         colorFullBackground={false}
+        labelConfig={labelConfig}
       />
     );
     component.simulate('click');
@@ -60,7 +74,12 @@ describe('MetricVisValue', () => {
 
   it('should not add -isfilterable class if onFilter is not provided', () => {
     const component = shallow(
-      <MetricVisValue style={font} metric={baseMetric} colorFullBackground={false} />
+      <MetricVisValue
+        style={font}
+        metric={baseMetric}
+        colorFullBackground={false}
+        labelConfig={labelConfig}
+      />
     );
     component.simulate('click');
     expect(component.find('.mtrVis__container-isfilterable')).toHaveLength(0);
@@ -74,6 +93,7 @@ describe('MetricVisValue', () => {
         metric={baseMetric}
         onFilter={onFilter}
         colorFullBackground={false}
+        labelConfig={labelConfig}
       />
     );
     component.simulate('click');
@@ -87,6 +107,7 @@ describe('MetricVisValue', () => {
         metric={baseMetric}
         onFilter={() => {}}
         colorFullBackground={true}
+        labelConfig={labelConfig}
       />
     );
     expect(component.find('.mtrVis__container-isfull').exists()).toBe(true);

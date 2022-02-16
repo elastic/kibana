@@ -132,9 +132,9 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         onFilter={
           this.props.visParams.dimensions.bucket ? () => this.filterBucket(index) : undefined
         }
-        showLabel={this.props.visParams.metric.labels.show}
         autoScale={this.props.visParams.metric.autoScale}
         colorFullBackground={this.props.visParams.metric.colorFullBackground}
+        labelConfig={this.props.visParams.metric.labels}
       />
     );
   };

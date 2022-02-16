@@ -58,6 +58,8 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
             namespaceType,
             page,
             perPage,
+            pit: undefined,
+            searchAfter: undefined,
             sortField,
             sortOrder,
           });

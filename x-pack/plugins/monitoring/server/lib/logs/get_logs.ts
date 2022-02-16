@@ -20,6 +20,7 @@ import { getTimezone } from '../get_timezone';
 import { detectReasonFromException } from './detect_reason_from_exception';
 import { LegacyRequest } from '../../types';
 import { FilebeatResponse } from '../../../common/types/filebeat';
+import { MonitoringConfig } from '../../config';
 
 interface Log {
   timestamp?: string | number;
@@ -69,7 +70,7 @@ async function handleResponse(
 }
 
 export async function getLogs(
-  config: { get: (key: string) => any },
+  config: MonitoringConfig,
   req: LegacyRequest,
   filebeatIndexPattern: string,
   {
@@ -99,7 +100,7 @@ export async function getLogs(
 
   const params = {
     index: filebeatIndexPattern,
-    size: Math.min(50, config.get('monitoring.ui.elasticsearch.logFetchCount')),
+    size: Math.min(50, config.ui.elasticsearch.logFetchCount),
     filter_path: [
       'hits.hits._source.message',
       'hits.hits._source.log.level',

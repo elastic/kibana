@@ -8,13 +8,13 @@
 
 import React, { CSSProperties } from 'react';
 import classNames from 'classnames';
-import type { MetricOptions, MetricStyle } from '../../common/types';
+import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
 interface MetricVisValueProps {
   metric: MetricOptions;
   onFilter?: () => void;
-  showLabel?: boolean;
   style: MetricStyle;
+  labelConfig: MetricVisParam['labels'];
   colorFullBackground: boolean;
   autoScale?: boolean;
 }
@@ -23,7 +23,7 @@ export const MetricVisValue = ({
   style,
   metric,
   onFilter,
-  showLabel,
+  labelConfig,
   colorFullBackground,
   autoScale,
 }: MetricVisValueProps) => {
@@ -58,7 +58,16 @@ export const MetricVisValue = ({
          */
         dangerouslySetInnerHTML={{ __html: metric.value }} // eslint-disable-line react/no-danger
       />
-      {showLabel && <div>{metric.label}</div>}
+      {labelConfig.show && (
+        <div
+          style={{
+            ...(labelConfig.style.spec as CSSProperties),
+            order: labelConfig.position === 'top' ? -1 : 2,
+          }}
+        >
+          {metric.label}
+        </div>
+      )}
     </div>
   );
 
