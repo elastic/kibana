@@ -18,7 +18,7 @@ import {
 } from './methods';
 import { CasesUiConfigType } from '../common/ui/types';
 import { getCasesContextLazy } from './methods/get_cases_context';
-import { useCasesAddToNewCasesFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 
 /**
  * @public
@@ -44,7 +44,7 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
       getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
       getCreateCaseFlyoutNoProvider: getCreateCaseFlyoutLazyNoProvider,
       hooks: {
-        getUseCasesAddToNewCasesFlyout: useCasesAddToNewCasesFlyout,
+        getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
       },
     };
   }

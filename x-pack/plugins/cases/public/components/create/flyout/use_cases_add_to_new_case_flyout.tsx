@@ -9,7 +9,7 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CreateCaseFlyoutProps } from './create_case_flyout';
 
-export const useCasesAddToNewCasesFlyout = (props: CreateCaseFlyoutProps) => {
+export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
   const context = useCasesContext();
   const closeFlyout = () => {
     context.dispatch({
@@ -42,4 +42,4 @@ export const useCasesAddToNewCasesFlyout = (props: CreateCaseFlyoutProps) => {
   };
 };
 
-export type UseCasesAddToNewCasesFlyout = typeof useCasesAddToNewCasesFlyout;
+export type UseCasesAddToNewCaseFlyout = typeof useCasesAddToNewCaseFlyout;

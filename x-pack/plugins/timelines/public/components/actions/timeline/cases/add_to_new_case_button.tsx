@@ -36,7 +36,7 @@ const AddToNewCaseButtonComponent: React.FC<AddToNewCaseButtonProps> = ({
     onClose,
   });
   const { cases } = useKibana<TimelinesStartServices>().services;
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCasesFlyout({
+  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
     attachments: caseAttachments,
     afterCaseCreated: onCaseCreated,
     onSuccess: onCaseSuccess,
