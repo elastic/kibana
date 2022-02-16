@@ -32,12 +32,9 @@ uploaded a file, or added sample data,
 you get a data view for free, and can start exploring your data.
 If you loaded your own data, follow these steps to create a data view.
 
-. Open the main menu, then select *Discover*.
+. Open the main menu, then click *Stack Management > Data Views*.
 
-. Click the ellipsis icon (...), and then click *Create new data view*.
-+
-[role="screenshot"]
-image:discover/images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
+. Click *Create data view*.
 
 . Start typing in the *name* field, and {kib} looks for the names of
 indices, data streams, and aliases that match your input.
