@@ -153,7 +153,7 @@ describe('SuperUser - Packs', () => {
     });
 
     it('enable changing saved queries and ecs_mappings', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      preparePack(PACK_NAME);
       cy.contains(/^Edit$/).click();
 
       findAndClickButton('Add query');
