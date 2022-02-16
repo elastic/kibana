@@ -46,7 +46,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     : true;
 
   const dispatchLens = useLensDispatch();
-  const setDatasourceState: StateSetter<unknown, { applyImmediately: boolean }> = useMemo(() => {
+  const setDatasourceState: StateSetter<unknown, { applyImmediately?: boolean }> = useMemo(() => {
     return (updater: unknown | ((prevState: unknown) => unknown), options) => {
       dispatchLens(
         updateDatasourceState({

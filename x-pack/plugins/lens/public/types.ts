@@ -366,7 +366,7 @@ export interface DatasourcePublicAPI {
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
-  setState: StateSetter<T, { applyImmediately: boolean }>;
+  setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
@@ -405,13 +405,13 @@ export type ParamEditorCustomProps = Record<string, unknown> & { label?: string 
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
-  setState: (
-    newState: Parameters<StateSetter<T>>[0],
-    publishToVisualization?: {
+  setState: StateSetter<
+    T,
+    {
       isDimensionComplete?: boolean;
       forceRender?: boolean;
     }
-  ) => void;
+  >;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -454,7 +454,13 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   groupId: string;
   columnId: string;
   state: T;
-  setState: StateSetter<T>;
+  setState: StateSetter<
+    T,
+    {
+      isDimensionComplete?: boolean;
+      forceRender?: boolean;
+    }
+  >;
   dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
