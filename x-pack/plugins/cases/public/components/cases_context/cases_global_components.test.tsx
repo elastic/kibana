@@ -8,7 +8,7 @@
 import React from 'react';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { getCreateCaseFlyoutLazyNoProvider } from '../../methods/get_create_case_flyout';
-import { CasesContextUI } from './cases_context_ui';
+import { CasesGlobalComponents } from './cases_global_components';
 
 jest.mock('../../methods/get_create_case_flyout');
 
@@ -32,7 +32,7 @@ describe('Cases context UI', () => {
           },
         },
       };
-      appMock.render(<CasesContextUI state={state} />);
+      appMock.render(<CasesGlobalComponents state={state} />);
       expect(getCreateCaseFlyoutLazyNoProviderMock).toHaveBeenCalledWith({ attachments: [] });
     });
     it('should not render the create case flyout when isFlyoutOpen is true', async () => {
@@ -41,7 +41,7 @@ describe('Cases context UI', () => {
           isFlyoutOpen: false,
         },
       };
-      appMock.render(<CasesContextUI state={state} />);
+      appMock.render(<CasesGlobalComponents state={state} />);
       expect(getCreateCaseFlyoutLazyNoProviderMock).not.toHaveBeenCalled();
     });
   });

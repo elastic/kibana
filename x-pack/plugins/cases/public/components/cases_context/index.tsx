@@ -13,10 +13,10 @@ import { useApplication } from './use_application';
 import {
   CasesContextStoreAction,
   casesContextReducer,
-  initialCasesContextState,
+  getInitialCasesContextState,
 } from './cases_context_reducer';
 import { CasesContextFeatures, CasesFeatures } from '../../containers/types';
-import { CasesContextUI } from './cases_context_ui';
+import { CasesGlobalComponents } from './cases_global_components';
 
 export interface CasesContextValue {
   owner: string[];
@@ -45,7 +45,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {} },
 }) => {
   const { appId, appTitle } = useApplication();
-  const [state, dispatch] = useReducer(casesContextReducer, initialCasesContextState());
+  const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
   const [value, setValue] = useState<CasesContextStateValue>(() => ({
     owner,
     userCanCrud,
@@ -76,7 +76,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
-      <CasesContextUI state={state} />
+      <CasesGlobalComponents state={state} />
       {children}
     </CasesContext.Provider>
   ) : null;
