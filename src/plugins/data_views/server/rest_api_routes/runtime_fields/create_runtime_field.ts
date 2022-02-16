@@ -49,6 +49,12 @@ export const createRuntimeField = async ({
     throw new Error(`Field [name = ${name}] already exists.`);
   }
 
+  const firstNameSegment = name.split('.')[0];
+
+  if (dataView.fields.getByName(firstNameSegment) || dataView.getRuntimeField(firstNameSegment)) {
+    throw new Error(`Field [name = ${firstNameSegment}] already exists.`);
+  }
+
   const createdRuntimeFields = dataView.addRuntimeField(name, runtimeField);
 
   await dataViewsService.updateSavedObject(dataView);

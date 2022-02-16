@@ -4,15 +4,9 @@ exports[`IndexPattern addRuntimeField and removeRuntimeField add and remove comp
 Object {
   "fields": Object {
     "a": Object {
-      "customLabel": undefined,
-      "format": undefined,
-      "popularity": 0,
       "type": "keyword",
     },
     "b": Object {
-      "customLabel": undefined,
-      "format": undefined,
-      "popularity": 0,
       "type": "long",
     },
   },
@@ -25,9 +19,6 @@ Object {
 
 exports[`IndexPattern addRuntimeField and removeRuntimeField add and remove runtime field as new field 1`] = `
 Object {
-  "customLabel": undefined,
-  "format": undefined,
-  "popularity": 0,
   "script": Object {
     "source": "emit('hello world');",
   },

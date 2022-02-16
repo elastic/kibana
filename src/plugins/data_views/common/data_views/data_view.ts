@@ -387,9 +387,10 @@ export class DataView implements IIndexPattern {
             ...acc,
             [subFieldName]: {
               type: subField.type,
-              format: this.getFormatterForFieldNoDefault(fieldFullName)?.toJSON(),
-              customLabel: dataViewField.customLabel,
-              popularity: dataViewField.count,
+              // todo I'm not sure why were doing this.
+              // format: this.getFormatterForFieldNoDefault(fieldFullName)?.toJSON(),
+              // customLabel: dataViewField.customLabel,
+              // popularity: dataViewField.count,
             },
           };
         },
@@ -398,12 +399,14 @@ export class DataView implements IIndexPattern {
 
       runtimeField.fields = subFields;
     } else {
-      const dataViewField = this.getFieldByName(name);
+      // const dataViewField = this.getFieldByName(name);
+      /*
       if (dataViewField) {
         runtimeField.customLabel = dataViewField.customLabel;
         runtimeField.popularity = dataViewField.count;
         runtimeField.format = this.getFormatterForFieldNoDefault(name)?.toJSON();
       }
+      */
     }
 
     return runtimeField;
@@ -463,6 +466,7 @@ export class DataView implements IIndexPattern {
         });
       }
     }
+
     delete this.runtimeFieldMap[name];
   }
 
@@ -514,9 +518,7 @@ export class DataView implements IIndexPattern {
     if (fieldObject) {
       if (!newCount) fieldObject.deleteCount();
       else fieldObject.count = newCount;
-      return;
     }
-
     this.setFieldAttrs(fieldName, 'count', newCount);
   }
 
@@ -579,6 +581,7 @@ export class DataView implements IIndexPattern {
     return dataViewFields;
   }
 
+  // todo this only does primitive types, no composite
   private updateOrAddRuntimeField(
     fieldName: string,
     fieldType: RuntimeType,
@@ -605,7 +608,14 @@ export class DataView implements IIndexPattern {
     }
 
     // Apply configuration to the field
-    this.setFieldCustomLabel(fieldName, config.customLabel);
+    if (config.customLabel || config.customLabel === null) {
+      this.setFieldCustomLabel(fieldName, config.customLabel);
+    }
+
+    if (config.popularity || config.popularity === null) {
+      this.setFieldCount(fieldName, config.popularity);
+    }
+
     if (config.format) {
       this.setFieldFormat(fieldName, config.format);
     } else if (config.format === null) {
