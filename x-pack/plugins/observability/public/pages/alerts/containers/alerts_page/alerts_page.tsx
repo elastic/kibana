@@ -20,7 +20,7 @@ import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/pa
 import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useAlertIndexNames } from '../../../../hooks/use_alert_indexNames';
+import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useTimefilterService } from '../../../../hooks/use_timefilter_service';

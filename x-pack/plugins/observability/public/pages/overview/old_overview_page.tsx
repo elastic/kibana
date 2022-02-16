@@ -19,7 +19,7 @@ import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { useAlertIndexNames } from '../../hooks/use_alert_indexNames';
+import { useAlertIndexNames } from '../../hooks/use_alert_index_names';
 import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { getBucketSize } from '../../utils/get_bucket_size';
