@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { initialDetectionRulesUsage, updateDetectionRuleUsage } from './detection_rule_helpers';
-import { DetectionRuleMetric, DetectionRulesTypeUsage } from './types';
+import type { RuleMetric, RulesTypeUsage } from './types';
+import { updateRuleUsage } from './update_usage';
+import { getInitialRulesUsage } from './get_initial_usage';
 
 interface StubRuleOptions {
   ruleType: string;
@@ -26,7 +27,7 @@ const createStubRule = ({
   caseCount,
   hasLegacyNotification,
   hasNotification,
-}: StubRuleOptions): DetectionRuleMetric => ({
+}: StubRuleOptions): RuleMetric => ({
   rule_name: 'rule-name',
   rule_id: 'id-123',
   rule_type: ruleType,
@@ -53,10 +54,10 @@ describe('Detections Usage and Metrics', () => {
         hasLegacyNotification: false,
         hasNotification: false,
       });
-      const usage = updateDetectionRuleUsage(stubRule, initialDetectionRulesUsage);
+      const usage = updateRuleUsage(stubRule, getInitialRulesUsage());
 
-      expect(usage).toEqual<DetectionRulesTypeUsage>({
-        ...initialDetectionRulesUsage,
+      expect(usage).toEqual<RulesTypeUsage>({
+        ...getInitialRulesUsage(),
         elastic_total: {
           alerts: 1,
           cases: 1,
@@ -127,14 +128,14 @@ describe('Detections Usage and Metrics', () => {
         hasNotification: false,
       });
 
-      let usage = updateDetectionRuleUsage(stubEqlRule, initialDetectionRulesUsage);
-      usage = updateDetectionRuleUsage(stubQueryRuleOne, usage);
-      usage = updateDetectionRuleUsage(stubQueryRuleTwo, usage);
-      usage = updateDetectionRuleUsage(stubMachineLearningOne, usage);
-      usage = updateDetectionRuleUsage(stubMachineLearningTwo, usage);
+      let usage = updateRuleUsage(stubEqlRule, getInitialRulesUsage());
+      usage = updateRuleUsage(stubQueryRuleOne, usage);
+      usage = updateRuleUsage(stubQueryRuleTwo, usage);
+      usage = updateRuleUsage(stubMachineLearningOne, usage);
+      usage = updateRuleUsage(stubMachineLearningTwo, usage);
 
-      expect(usage).toEqual<DetectionRulesTypeUsage>({
-        ...initialDetectionRulesUsage,
+      expect(usage).toEqual<RulesTypeUsage>({
+        ...getInitialRulesUsage(),
         custom_total: {
           alerts: 5,
           cases: 12,
@@ -242,8 +243,8 @@ describe('Detections Usage and Metrics', () => {
             alertCount: 0,
             caseCount: 0,
           });
-          const usage = updateDetectionRuleUsage(rule1, initialDetectionRulesUsage) as ReturnType<
-            typeof updateDetectionRuleUsage
+          const usage = updateRuleUsage(rule1, getInitialRulesUsage()) as ReturnType<
+            typeof updateRuleUsage
           > & { [key: string]: unknown };
           expect(usage[ruleType]).toEqual(
             expect.objectContaining({
@@ -264,8 +265,8 @@ describe('Detections Usage and Metrics', () => {
             alertCount: 0,
             caseCount: 0,
           });
-          const usageAddedByOne = updateDetectionRuleUsage(rule2, usage) as ReturnType<
-            typeof updateDetectionRuleUsage
+          const usageAddedByOne = updateRuleUsage(rule2, usage) as ReturnType<
+            typeof updateRuleUsage
           > & { [key: string]: unknown };
 
           expect(usageAddedByOne[ruleType]).toEqual(
