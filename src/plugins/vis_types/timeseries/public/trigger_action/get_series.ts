@@ -144,6 +144,19 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       metricsArray = getFormulaSeries(formula);
       break;
     }
+    case 'top_hit': {
+      const currentMetric = metrics[metricIdx];
+      // We can only support top_hit with size 1
+      if (currentMetric?.size && Number(currentMetric?.size) !== 1) {
+        return null;
+      }
+      const formula = getFormulaEquivalent(currentMetric, metrics);
+      if (!formula) {
+        return null;
+      }
+      metricsArray = getFormulaSeries(formula) as VisualizeEditorLayersContext['metrics'];
+      break;
+    }
     default: {
       const timeScale = getTimeScale(metrics[metricIdx]);
       metricsArray = [

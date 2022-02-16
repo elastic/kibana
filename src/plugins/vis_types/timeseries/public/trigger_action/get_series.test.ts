@@ -299,6 +299,41 @@ describe('getSeries', () => {
     ]);
   });
 
+  test('should return the correct formula config for a top_hit size 1 aggregation', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'top_hit',
+        field: 'day_of_week_i',
+        size: 1,
+      },
+    ] as Metric[];
+    const config = getSeries(metric);
+    expect(config).toStrictEqual([
+      {
+        agg: 'formula',
+        fieldName: 'document',
+        isFullReference: true,
+        params: {
+          formula: 'last_value(day_of_week_i)',
+        },
+      },
+    ]);
+  });
+
+  test('should return null for a top_hit size >1 aggregation', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'top_hit',
+        field: 'day_of_week_i',
+        size: 2,
+      },
+    ] as Metric[];
+    const config = getSeries(metric);
+    expect(config).toBeNull();
+  });
+
   test('should return the correct formula for the math aggregation with percentiles as variables', () => {
     const metric = [
       {
