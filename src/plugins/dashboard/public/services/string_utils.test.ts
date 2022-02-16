@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { StringUtils } from './string_utils';
+import { upperFirst } from './string_utils';
 
-describe('StringUtils class', () => {
-  describe('static upperFirst', () => {
+describe('StringUtils', () => {
+  describe('upperFirst', () => {
     test('should converts the first character of string to upper case', () => {
-      expect(StringUtils.upperFirst()).toBe('');
-      expect(StringUtils.upperFirst('')).toBe('');
+      expect(upperFirst()).toBe('');
+      expect(upperFirst('')).toBe('');
 
-      expect(StringUtils.upperFirst('Fred')).toBe('Fred');
-      expect(StringUtils.upperFirst('fred')).toBe('Fred');
-      expect(StringUtils.upperFirst('FRED')).toBe('FRED');
+      expect(upperFirst('Fred')).toBe('Fred');
+      expect(upperFirst('fred')).toBe('Fred');
+      expect(upperFirst('FRED')).toBe('FRED');
     });
   });
 });
