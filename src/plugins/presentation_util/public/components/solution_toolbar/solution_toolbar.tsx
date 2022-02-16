@@ -30,11 +30,10 @@ interface NamedSlots {
 
 export interface Props {
   isDarkModeEnabled?: boolean;
-  isControlsEnabled?: boolean;
   children: NamedSlots;
 }
 
-export const SolutionToolbar = ({ isDarkModeEnabled, isControlsEnabled, children }: Props) => {
+export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
   const {
     primaryActionButton,
     quickButtonGroup,
@@ -67,9 +66,7 @@ export const SolutionToolbar = ({ isDarkModeEnabled, isControlsEnabled, children
           {addFromLibraryButton ? (
             <EuiFlexItem grow={false}>{addFromLibraryButton}</EuiFlexItem>
           ) : null}
-          {isControlsEnabled && addControlButton ? (
-            <EuiFlexItem grow={false}>{addControlButton}</EuiFlexItem>
-          ) : null}
+          {addControlButton ? <EuiFlexItem grow={false}>{addControlButton}</EuiFlexItem> : null}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

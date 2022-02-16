@@ -586,7 +586,7 @@ export function DashboardTopNav({
       {dashboardState.viewMode !== ViewMode.VIEW ? (
         <>
           <EuiHorizontalRule margin="none" />
-          <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME} isControlsEnabled={true}>
+          <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
             {{
               primaryActionButton: (
                 <PrimaryActionButton
