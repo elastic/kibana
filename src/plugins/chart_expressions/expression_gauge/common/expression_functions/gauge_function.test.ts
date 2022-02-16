@@ -7,9 +7,10 @@
  */
 
 import { gaugeFunction } from './gauge_function';
-import type { GaugeArguments } from '..';
+import { GaugeArguments, GaugeShapes } from '..';
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { GaugeColorModes, GaugeLabelMajorModes, GaugeTicksPositions } from '../constants';
 
 describe('interpreter/functions#gauge', () => {
   const fn = functionWrapper(gaugeFunction());
@@ -22,13 +23,13 @@ describe('interpreter/functions#gauge', () => {
     ],
   };
   const args: GaugeArguments = {
-    ticksPosition: 'auto',
-    labelMajorMode: 'custom',
+    ticksPosition: GaugeTicksPositions.AUTO,
+    labelMajorMode: GaugeLabelMajorModes.CUSTOM,
     labelMajor: 'title',
-    shape: 'horizontalBullet',
-    colorMode: 'none',
-    minAccessor: 'col-1-2',
-    metricAccessor: 'col-0-1',
+    shape: GaugeShapes.HORIZONTAL_BULLET,
+    colorMode: GaugeColorModes.NONE,
+    min: 'col-1-2',
+    metric: 'col-0-1',
   };
 
   it('returns an object with the correct structure', () => {
