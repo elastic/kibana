@@ -156,7 +156,7 @@ you can use to build a structured query.
 Search the ecommerce data for documents where the country matches US:
 
 . Enter `g`, and then select *geoip.country_iso_code*.
-. Select *:* for equals some value* and *US*, and then click *Update*.
+. Select *:* for equals some value and *US*, and then click *Update*.
 . For a more complex search, try:
 +
 ```ts
