@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
 import type {
   FoundExceptionListItemSchema,
-  Id,
   NamespaceTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
+  PitOrUndefined,
+  SearchAfterOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -19,18 +20,13 @@ import type {
   EmptyStringArrayDecoded,
   NonEmptyStringArrayDecoded,
 } from '@kbn/securitysolution-io-ts-types';
-import {
-  SavedObjectType,
-  exceptionListAgnosticSavedObjectType,
-  exceptionListSavedObjectType,
-  getSavedObjectTypes,
-} from '@kbn/securitysolution-list-utils';
+import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 
-import { escapeQuotes } from '../utils/escape_query';
-import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';
+import { getExceptionListsItemFilter } from './utils/get_exception_lists_item_filter';
 
 interface FindExceptionListItemsOptions {
   listId: NonEmptyStringArrayDecoded;
@@ -38,9 +34,11 @@ interface FindExceptionListItemsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
+  pit: PitOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
+  searchAfter: SearchAfterOrUndefined;
 }
 
 export const findExceptionListsItem = async ({
@@ -49,7 +47,9 @@ export const findExceptionListsItem = async ({
   savedObjectsClient,
   filter,
   page,
+  pit,
   perPage,
+  searchAfter,
   sortField,
   sortOrder,
 }: FindExceptionListItemsOptions): Promise<FoundExceptionListItemSchema | null> => {
@@ -73,6 +73,8 @@ export const findExceptionListsItem = async ({
       filter: getExceptionListsItemFilter({ filter, listId, savedObjectType }),
       page,
       perPage,
+      pit,
+      searchAfter,
       sortField,
       sortOrder,
       type: savedObjectType,
@@ -81,57 +83,4 @@ export const findExceptionListsItem = async ({
       savedObjectsFindResponse,
     });
   }
-};
-
-export const getExceptionListsItemFilter = ({
-  filter,
-  listId,
-  savedObjectType,
-}: {
-  listId: NonEmptyStringArrayDecoded;
-  filter: EmptyStringArrayDecoded;
-  savedObjectType: SavedObjectType[];
-}): string => {
-  return listId.reduce((accum, singleListId, index) => {
-    const escapedListId = escapeQuotes(singleListId);
-    const listItemAppend = `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: "${escapedListId}")`;
-    const listItemAppendWithFilter =
-      filter[index] != null ? `(${listItemAppend} AND ${filter[index]})` : listItemAppend;
-    if (accum === '') {
-      return listItemAppendWithFilter;
-    } else {
-      return `${accum} OR ${listItemAppendWithFilter}`;
-    }
-  }, '');
-};
-
-interface FindValueListExceptionListsItems {
-  valueListId: Id;
-  savedObjectsClient: SavedObjectsClientContract;
-  perPage: PerPageOrUndefined;
-  page: PageOrUndefined;
-  sortField: SortFieldOrUndefined;
-  sortOrder: SortOrderOrUndefined;
-}
-
-export const findValueListExceptionListItems = async ({
-  valueListId,
-  savedObjectsClient,
-  page,
-  perPage,
-  sortField,
-  sortOrder,
-}: FindValueListExceptionListsItems): Promise<FoundExceptionListItemSchema | null> => {
-  const escapedValueListId = escapeQuotes(valueListId);
-  const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-    filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:"${escapedValueListId}") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:"${escapedValueListId}") `,
-    page,
-    perPage,
-    sortField,
-    sortOrder,
-    type: [exceptionListSavedObjectType, exceptionListAgnosticSavedObjectType],
-  });
-  return transformSavedObjectsToFoundExceptionListItem({
-    savedObjectsFindResponse,
-  });
 };
