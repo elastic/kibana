@@ -13,7 +13,11 @@ import { withSuspense } from './utility';
  * The Lazily-loaded `ExitFullScreenButton` component.  Consumers should use `React.Suspennse` or the
  * `withSuspense` HOC to load this component.
  */
-export const LazyExitFullScreenButton = React.lazy(() => import('./exit_full_screen_button'));
+export const LazyExitFullScreenButton = React.lazy(() =>
+  import('./exit_full_screen_button').then(({ ExitFullScreenButton }) => ({
+    default: ExitFullScreenButton,
+  }))
+);
 
 /**
  * A `ExitFullScreenButton` component that is wrapped by the `withSuspense` HOC.  This component can
