@@ -4,7 +4,7 @@
   ],
   "description": "Detects the use of Windows API functions that are commonly abused by malware and security tools to load malicious code or inject it into remote processes.",
   "false_positives": [
-    "Legitimate Powershell Scripts that make use of these Functions"
+    "Legitimate PowerShell scripts that make use of these functions."
   ],
   "from": "now-9m",
   "index": [
@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential Process Injection via PowerShell",
-  "note": "## Triage and analysis.\n\n### Investigating Potential Process Injection via PowerShell\n\nPowerShell is one of the main tools used by system administrators for automation, report routines, and other tasks.\n\nPowerShell also has solid capabilities to make the interaction with the Win32 API in an uncomplicated and reliable way,\nlike the execution of inline C# code, PSReflect, Get-ProcAddress, etc.\n\nRed Team tooling and Malware Developers take advantage of these capabilities to develop stagers and loaders that inject\npayloads directly into the memory, without touching the disk.\n\n#### Possible investigation steps:\n\n- Examine script content that triggered the detection. \n- Investigate script execution chain (parent process tree)\n- Inspect any file or network events from the suspicious powershell host process instance.\n- If the action is suspicious for the user, check for any other activities done by the user in the last 48 hours.\n\n### False Positive Analysis\n\n- Verify whether the script content is malicious/harmful.\n\n### Related Rules\n\n- PowerShell PSReflect Script - 56f2e9b5-4803-4e44-a0a4-a52dc79d57fe\n\n### Response and Remediation\n\n- Immediate response should be taken to validate, investigate, and potentially contain the activity to prevent further\npost-compromise behavior.\n\n## Config\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nAdministrative Templates > \nWindows PowerShell > \nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+  "note": "## Triage and analysis.\n\n### Investigating Potential Process Injection via PowerShell\n\nPowerShell is one of the main tools used by system administrators for automation, report routines, and other tasks.\n\nPowerShell also has solid capabilities to make the interaction with the Win32 API in an uncomplicated and reliable way,\nlike the execution of inline C# code, PSReflect, Get-ProcAddress, etc.\n\nRed Team tooling and malware developers take advantage of these capabilities to develop stagers and loaders that inject\npayloads directly into the memory, without touching the disk.\n\n#### Possible investigation steps:\n\n- Examine script content that triggered the detection. \n- Investigate script execution chain (parent process tree).\n- Inspect any file or network events from the suspicious PowerShell host process instance.\n- If the action is suspicious for the user, check for any other activities done by the user in the last 48 hours.\n\n### False Positive Analysis\n\n- Verify whether the script content is malicious/harmful.\n\n### Related Rules\n\n- PowerShell PSReflect Script - 56f2e9b5-4803-4e44-a0a4-a52dc79d57fe\n\n### Response and Remediation\n\n- Immediate response should be taken to validate, investigate, and potentially contain the activity to prevent further\npost-compromise behavior.\n\n## Config\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nAdministrative Templates > \nWindows PowerShell > \nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
   "query": "event.category:process and \n  powershell.file.script_block_text : (\n   (VirtualAlloc or VirtualAllocEx or VirtualProtect or LdrLoadDll or LoadLibrary or LoadLibraryA or\n      LoadLibraryEx or GetProcAddress or OpenProcess or OpenProcessToken or AdjustTokenPrivileges) and\n   (WriteProcessMemory or CreateRemoteThread or NtCreateThreadEx or CreateThread or QueueUserAPC or\n      SuspendThread or ResumeThread)\n  )\n",
   "references": [
     "https://github.com/EmpireProject/Empire/blob/master/data/module_source/management/Invoke-PSInject.ps1",
@@ -62,5 +62,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }
