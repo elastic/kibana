@@ -8,7 +8,7 @@
 
 import { noop } from 'lodash';
 import { Collector } from './collector';
-import { CollectorSet } from './collector_set';
+import { CollectorSet, CollectorSetConfig } from './collector_set';
 import { UsageCollector } from './usage_collector';
 
 import {
@@ -16,10 +16,17 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
   httpServerMock,
+  executionContextServiceMock,
 } from '../../../../core/server/mocks';
 
 describe('CollectorSet', () => {
   const logger = loggingSystemMock.createLogger();
+  const executionContext = executionContextServiceMock.createSetupContract();
+
+  const collectorSetConfig: CollectorSetConfig = {
+    logger,
+    executionContext,
+  };
 
   const loggerSpies = {
     debug: jest.spyOn(logger, 'debug'),
@@ -38,7 +45,7 @@ describe('CollectorSet', () => {
     const req = void 0; // No need to instantiate any KibanaRequest in these tests
 
     it('should throw an error if non-Collector type of object is registered', () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = new CollectorSet(collectorSetConfig);
       const registerPojo = () => {
         collectors.registerCollector({
           type: 'type_collector_test',
@@ -53,7 +60,7 @@ describe('CollectorSet', () => {
     });
 
     it('should throw when 2 collectors with the same type are registered', () => {
-      const collectorSet = new CollectorSet({ logger });
+      const collectorSet = new CollectorSet(collectorSetConfig);
       collectorSet.registerCollector(
         new Collector(logger, { type: 'test_duplicated', fetch: () => 1, isReady: () => true })
       );
@@ -73,7 +80,7 @@ describe('CollectorSet', () => {
     it('should log debug status of fetching from the collector', async () => {
       // @ts-expect-error we are just mocking the output of any call
       mockEsClient.ping.mockResolvedValue({ passTest: 1000 });
-      const collectors = new CollectorSet({ logger });
+      const collectors = new CollectorSet(collectorSetConfig);
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
@@ -108,7 +115,7 @@ describe('CollectorSet', () => {
     });
 
     it('should gracefully handle a collector fetch method throwing an error', async () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = new CollectorSet(collectorSetConfig);
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
@@ -138,7 +145,7 @@ describe('CollectorSet', () => {
     });
 
     it('should not break if isReady is not a function', async () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = new CollectorSet(collectorSetConfig);
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
@@ -167,7 +174,7 @@ describe('CollectorSet', () => {
     });
 
     it('should not break if isReady is not provided', async () => {
-      const collectors = new CollectorSet({ logger });
+      const collectors = new CollectorSet(collectorSetConfig);
       collectors.registerCollector(
         // @ts-expect-error we are intentionally sending it wrong.
         new Collector(logger, {
@@ -199,7 +206,7 @@ describe('CollectorSet', () => {
     let collectorSet: CollectorSet;
 
     beforeEach(() => {
-      collectorSet = new CollectorSet({ logger });
+      collectorSet = new CollectorSet(collectorSetConfig);
     });
 
     it('should snake_case and convert field names to api standards', () => {
@@ -261,7 +268,7 @@ describe('CollectorSet', () => {
   });
 
   describe('makeStatsCollector', () => {
-    const collectorSet = new CollectorSet({ logger });
+    const collectorSet = new CollectorSet(collectorSetConfig);
     test('TS should hide kibanaRequest when not opted-in', () => {
       collectorSet.makeStatsCollector({
         type: 'MY_TEST_COLLECTOR',
@@ -326,7 +333,7 @@ describe('CollectorSet', () => {
   });
 
   describe('makeUsageCollector', () => {
-    const collectorSet = new CollectorSet({ logger });
+    const collectorSet = new CollectorSet(collectorSetConfig);
     describe('TS validations', () => {
       describe('when types are inferred', () => {
         test('TS should hide kibanaRequest when not opted-in', () => {
@@ -529,10 +536,14 @@ describe('CollectorSet', () => {
   });
 
   describe('bulkFetch', () => {
-    const collectorSetConfig = { logger, maximumWaitTimeForAllCollectorsInS: 1 };
-    let collectorSet = new CollectorSet(collectorSetConfig);
+    const collectorSetConfigWithMaxTime: CollectorSetConfig = {
+      logger,
+      executionContext,
+      maximumWaitTimeForAllCollectorsInS: 1,
+    };
+    let collectorSet = new CollectorSet(collectorSetConfigWithMaxTime);
     afterEach(() => {
-      collectorSet = new CollectorSet(collectorSetConfig);
+      collectorSet = new CollectorSet(collectorSetConfigWithMaxTime);
     });
 
     it('skips collectors that are not ready', async () => {
