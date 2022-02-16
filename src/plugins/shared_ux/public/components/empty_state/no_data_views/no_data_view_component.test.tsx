@@ -21,9 +21,7 @@ describe('<NoDataViewsComponent />', () => {
         dataViewsDocLink={'dummy'}
       />
     );
-
     expect(component.find(EuiPanel).length).toBe(1);
-    expect(component.find('svg').length).toBe(1);
     expect(component.find(EuiButton).length).toBe(1);
     expect(component.find(DocumentationLink).length).toBe(1);
   });
@@ -39,7 +37,7 @@ describe('<NoDataViewsComponent />', () => {
       <NoDataViewsComponent onClick={jest.fn()} canCreateNewDataView={true} />
     );
 
-    expect(component.find(EuiButton).length).toBe(0);
+    expect(component.find(DocumentationLink).length).toBe(0);
   });
 
   test('onClick', () => {
