@@ -1,0 +1,16 @@
+format_version: 1.0.0
+name: deprecated
+title: Package install/update test
+description: This is a package for testing deprecated packages
+version: 0.1.0
+categories: []
+release: beta
+type: integration
+license: basic
+
+conditions:
+  # Version number is not compatible with current version
+  elasticsearch:
+    version: '^1.0.0'
+  kibana:
+    version: '^1.0.0'
