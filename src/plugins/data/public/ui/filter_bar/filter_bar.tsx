@@ -119,8 +119,22 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     const newMultipleFilters = multipleFilters.filter(
       (filter) => !groupIds.includes(filter.groupId)
     );
+    multipleFilters.splice(indexOfCurFilter, 1, ...mergedFilters);
 
-    const filtersNew = newMultipleFilters.concat(mergedFilters);
+    // when user adds new filters in edit modal they should appear near of editing filter
+    let gId: number = 0;
+    let reserveGroupId: number;
+    const updatedMultipleFilters = multipleFilters.map((filter, idx) => {
+      if (filter.groupId !== reserveGroupId) {
+        reserveGroupId = filter.groupId;
+        gId++;
+      }
+      return {
+        ...filter,
+        groupId: gId,
+        id: idx,
+      };
+    });
 
     // const indexOfCurFilter = multipleFilters.findIndex(
     //   (f) => Number(f.groupId) === Number(groupId)
@@ -146,7 +160,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     const filters = [...props.filters, ...buildFilters];
     props?.onFiltersUpdated?.(filters);
 
-    props?.onMultipleFiltersUpdated?.(filtersNew);
+    props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
 
     props.toggleEditFilterModal?.(false);
   }

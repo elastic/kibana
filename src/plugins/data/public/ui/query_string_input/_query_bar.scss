@@ -106,6 +106,7 @@
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
+
   &.kbnQueryBar__textarea--hasAppend {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
@@ -130,6 +131,7 @@
   }
 
   @include euiFormControlWithIcon($isIconOptional: true);
+
   ~ .euiFormControlLayoutIcons {
     // By default form control layout icon is vertically centered, but our textarea
     // can expand to be multi-line, so we position it with padding that matches

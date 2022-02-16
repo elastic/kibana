@@ -31,6 +31,7 @@ import {
   EuiText,
   EuiIcon,
   EuiFieldText,
+  EuiBadge,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -120,7 +121,6 @@ export function AddFilterModal({
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
   const [groupsCount, setGroupsCount] = useState<number>(1);
-
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [submitDisabled, setSubmitDisabled] = useState(false);
 
@@ -129,17 +129,18 @@ export function AddFilterModal({
       field: undefined,
       operator: undefined,
       value: undefined,
+      // find the max groupId and id and start from + 1
       groupId: multipleFilters?.length
         ? Math.max.apply(
-          Math,
-          multipleFilters.map((f) => f.groupId)
-        ) + 1
+            Math,
+            multipleFilters.map((f) => f.groupId)
+          ) + 1
         : 1,
       id: multipleFilters?.length
         ? Math.max.apply(
-          Math,
-          multipleFilters.map((f) => f.id)
-        ) + 1
+            Math,
+            multipleFilters.map((f) => f.id)
+          ) + 1
         : 0,
       subGroupId: 1,
       relationship: undefined,
@@ -173,15 +174,15 @@ export function AddFilterModal({
         value: undefined,
         groupId: multipleFilters?.length
           ? Math.max.apply(
-            Math,
-            multipleFilters.map((f) => f.groupId)
-          ) + 1
+              Math,
+              multipleFilters.map((f) => f.groupId)
+            ) + 1
           : 1,
         id: multipleFilters?.length
           ? Math.max.apply(
-            Math,
-            multipleFilters.map((f) => f.id)
-          ) + 1
+              Math,
+              multipleFilters.map((f) => f.id)
+            ) + 1
           : 0,
         subGroupId: 1,
       },
@@ -409,7 +410,6 @@ export function AddFilterModal({
       return; // typescript validation
     }
     const alias = customLabel || null;
-
     if (alias && isLabelDuplicated()) {
       setSubmitDisabled(true);
       return;
@@ -568,7 +568,7 @@ export function AddFilterModal({
                                     const subGroupId =
                                       filtersOnGroup.length > 2
                                         ? localfilter?.subGroupId ?? 0
-                                        : localfilter?.subGroupId ?? 0;
+                                        : (localfilter?.subGroupId ?? 0) + 1;
                                     const updatedLocalFilter = {
                                       ...localfilter,
                                       relationship: 'AND',
@@ -586,8 +586,10 @@ export function AddFilterModal({
                                         operator: undefined,
                                         value: undefined,
                                         relationship: undefined,
-                                        groupId: filtersOnGroup.length > 1 ? localFilters[localFilters.length - 1].groupId
-                                          : localFilters[localFilters.length - 1].groupId + 1,
+                                        groupId:
+                                          filtersOnGroup.length > 1
+                                            ? localFilters[localFilters.length - 1].groupId
+                                            : localFilters[localFilters.length - 1].groupId + 1,
                                         subGroupId,
                                         groupsCount,
                                         id: Number(multipleFilters?.length) + localFilters.length,

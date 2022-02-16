@@ -185,15 +185,15 @@ export function EditFilterModal({
         value: undefined,
         groupId: multipleFilters?.length
           ? Math.max.apply(
-            Math,
-            multipleFilters.map((f) => f.groupId)
-          ) + 1
+              Math,
+              multipleFilters.map((f) => f.groupId)
+            ) + 1
           : 1,
         id: multipleFilters?.length
           ? Math.max.apply(
-            Math,
-            multipleFilters.map((f) => f.id)
-          ) + 1
+              Math,
+              multipleFilters.map((f) => f.id)
+            ) + 1
           : 0,
         subGroupId: 1,
       },
@@ -311,11 +311,11 @@ export function EditFilterModal({
           placeholder={
             selectedField
               ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                defaultMessage: 'Operator',
-              })
+                  defaultMessage: 'Operator',
+                })
               : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                defaultMessage: 'Waiting',
-              })
+                  defaultMessage: 'Waiting',
+                })
           }
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
@@ -443,7 +443,6 @@ export function EditFilterModal({
       return; // typescript validation
     }
     const alias = customLabel || null;
-
     if (alias && !filter.meta.alias && isLabelDuplicated()) {
       setSubmitDisabled(true);
       return;
@@ -524,8 +523,8 @@ export function EditFilterModal({
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                  ? 'kbnQueryBar__filterModalGroups'
-                  : '';
+                ? 'kbnQueryBar__filterModalGroups'
+                : '';
             return (
               <>
                 <div className={classNames(classes)}>
@@ -547,15 +546,18 @@ export function EditFilterModal({
                             </EuiFlexGroup>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-
                             <EuiFlexGroup responsive={false} justifyContent="center">
                               {subGroup.length < 2 && (
                                 <EuiFlexItem grow={false}>
                                   <EuiButtonIcon
                                     onClick={() => {
-                                      const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
+                                      const updatedLocalFilter = {
+                                        ...localfilter,
+                                        relationship: 'OR',
+                                      };
                                       const idx = localFilters.findIndex(
-                                        (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                                        (f) =>
+                                          f.id === localfilter.id && f.groupId === Number(groupId)
                                       );
                                       const subGroupId = (localfilter?.subGroupId ?? 0) + 1;
                                       if (subGroup.length < 2) {
@@ -602,7 +604,8 @@ export function EditFilterModal({
                                       subGroupId: filtersOnGroup.length > 1 ? subGroupId : 1,
                                     };
                                     const idx = localFilters.findIndex(
-                                      (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                                      (f) =>
+                                        f.id === localfilter.id && f.groupId === Number(groupId)
                                     );
                                     localFilters[idx] = updatedLocalFilter;
                                     const maxExistingGroupIdValue: number = Math.max.apply(
