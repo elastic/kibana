@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
@@ -17,6 +17,7 @@ import type {
   IInterpreterRenderHandlers,
   Datatable,
 } from '../../../../src/plugins/expressions/public';
+import type { VisualizeEditorLayersContext } from '../../../../src/plugins/visualizations/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type { Query } from '../../../../src/plugins/data/public';
@@ -165,6 +166,33 @@ export interface InitializationOptions {
   isFullEditor?: boolean;
 }
 
+interface AxisExtents {
+  mode: string;
+  lowerBound?: number;
+  upperBound?: number;
+}
+
+export interface VisualizeEditorContext {
+  layers: VisualizeEditorLayersContext[];
+  configuration: ChartSettings;
+  savedObjectId?: string;
+  embeddableId?: string;
+  vizEditorOriginatingAppUrl?: string;
+  originatingApp?: string;
+  isVisualizeAction: boolean;
+  type: string;
+}
+
+interface ChartSettings {
+  fill?: string;
+  legend?: Record<string, boolean | string>;
+  gridLinesVisibility?: Record<string, boolean>;
+  extents?: {
+    yLeftExtent: AxisExtents;
+    yRightExtent: AxisExtents;
+  };
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -177,7 +205,7 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext,
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext,
     options?: InitializationOptions
   ) => Promise<T>;
 
@@ -246,6 +274,10 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     field: unknown,
     filterFn: (layerId: string) => boolean
+  ) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForVisualizeCharts: (
+    state: T,
+    context: VisualizeEditorLayersContext[]
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
     state: T,
@@ -529,6 +561,31 @@ interface VisualizationDimensionChangeProps<T> {
   prevState: T;
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
 }
+export interface Suggestion {
+  visualizationId: string;
+  datasourceState?: unknown;
+  datasourceId?: string;
+  columns: number;
+  score: number;
+  title: string;
+  visualizationState: unknown;
+  previewExpression?: Ast | string;
+  previewIcon: IconType;
+  hide?: boolean;
+  changeType: TableChangeType;
+  keptLayerIds: string[];
+}
+
+interface VisualizationConfigurationFromContextChangeProps<T> {
+  layerId: string;
+  prevState: T;
+  context: VisualizeEditorLayersContext;
+}
+
+interface VisualizationStateFromContextChangeProps {
+  suggestions: Suggestion[];
+  context: VisualizeEditorContext;
+}
 
 /**
  * Object passed to `getSuggestions` of a visualization.
@@ -746,6 +803,19 @@ export interface Visualization<T = unknown> {
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
 
   /**
+   * Update the configuration for the visualization. This is used to update the state
+   */
+  updateLayersConfigurationFromContext?: (
+    props: VisualizationConfigurationFromContextChangeProps<T>
+  ) => T;
+
+  /**
+   * Update the visualization state from the context.
+   */
+  getVisualizationSuggestionFromContext?: (
+    props: VisualizationStateFromContextChangeProps
+  ) => Suggestion;
+  /**
    * Additional editor that gets rendered inside the dimension popover.
    * This can be used to configure dimension-specific options
    */
@@ -892,5 +962,5 @@ export type LensTopNavMenuEntryGenerator = (props: {
   visualizationState: unknown;
   query: Query;
   filters: Filter[];
-  initialContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }) => undefined | TopNavMenuData;

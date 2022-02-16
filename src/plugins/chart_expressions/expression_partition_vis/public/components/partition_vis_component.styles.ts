@@ -6,26 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiThemeComputed } from '@elastic/eui';
 
 export const partitionVisWrapperStyle = css({
   display: 'flex',
   flex: '1 1 auto',
   minHeight: 0,
   minWidth: 0,
+  width: '100%',
+  height: '100%',
 });
 
-export const partitionVisContainerStyleFactory = (theme: EuiThemeComputed) => css`
-  ${partitionVisWrapperStyle};
-
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: ${theme.size.s};
+export const partitionVisContainerStyle = css`
+  min-height: 0;
+  min-width: 0;
   margin-left: auto;
   margin-right: auto;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+`;
+
+export const partitionVisContainerWithToggleStyleFactory = (theme: EuiThemeComputed) => css`
+  ${partitionVisContainerStyle}
+
+  inset: 0;
+  position: absolute;
+  padding: ${theme.size.s};
 `;

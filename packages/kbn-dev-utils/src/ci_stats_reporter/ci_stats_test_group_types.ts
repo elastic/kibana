@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CiStatsMetadata } from './ci_stats_reporter';
+import type { CiStatsMetadata } from './ci_stats_metadata';
 
 export type CiStatsTestResult = 'fail' | 'pass' | 'skip';
 export type CiStatsTestType =
