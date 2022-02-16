@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;

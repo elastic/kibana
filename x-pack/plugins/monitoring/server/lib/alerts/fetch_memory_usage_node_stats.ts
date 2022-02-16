@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMemoryUsageNodeStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 export async function fetchMemoryUsageNodeStats(
   esClient: ElasticsearchClient,

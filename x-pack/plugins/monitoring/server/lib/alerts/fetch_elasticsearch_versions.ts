@@ -7,6 +7,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 export async function fetchElasticsearchVersions(
   esClient: ElasticsearchClient,

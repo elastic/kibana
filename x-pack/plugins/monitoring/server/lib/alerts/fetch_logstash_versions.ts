@@ -7,6 +7,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface ESAggResponse {
   key: string;

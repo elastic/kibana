@@ -7,6 +7,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertLicense, AlertCluster } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 export async function fetchLicenses(
   esClient: ElasticsearchClient,
