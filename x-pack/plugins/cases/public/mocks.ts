@@ -16,7 +16,7 @@ const createStartContract = (): jest.Mocked<CasesUiStart> => ({
   getRecentCases: jest.fn(),
   getCreateCaseFlyoutNoProvider: jest.fn(),
   hooks: {
-    getUseCasesAddToNewCasesFlyout: jest.fn(),
+    getUseCasesAddToNewCaseFlyout: jest.fn(),
   },
 });
 

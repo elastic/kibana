@@ -25,7 +25,7 @@ import type {
 } from './methods';
 import { GetCasesContextProps } from './methods/get_cases_context';
 import { CreateCaseFlyoutProps } from './components/create/flyout';
-import { UseCasesAddToNewCasesFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -94,6 +94,6 @@ export interface CasesUiStart {
    */
   getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
   hooks: {
-    getUseCasesAddToNewCasesFlyout: UseCasesAddToNewCasesFlyout;
+    getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
   };
 }
