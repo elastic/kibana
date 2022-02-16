@@ -68,6 +68,10 @@ interface IReportingAPI {
   verifyScreenCapture(): Promise<DiagnoseResponse>;
 }
 
+/**
+ * Client class for interacting with Reporting APIs
+ * @implements IReportingAPI
+ */
 export class ReportingAPIClient implements IReportingAPI {
   constructor(
     private http: HttpSetup,
