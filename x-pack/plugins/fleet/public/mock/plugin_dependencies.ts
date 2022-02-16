@@ -28,7 +28,7 @@ export const createSetupDepsMock = () => {
 export const createStartDepsMock = () => {
   return {
     data: dataPluginMock.createStartContract(),
-    fieldFormats: fieldFormatsServiceMock.create().start(),
+    fieldFormats: fieldFormatsServiceMock.createStartContract() as any,
     navigation: navigationPluginMock.createStartContract(),
     customIntegrations: customIntegrationsMock.createStart(),
     share: sharePluginMock.createStartContract(),
