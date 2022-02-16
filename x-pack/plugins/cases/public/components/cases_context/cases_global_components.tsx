@@ -9,7 +9,7 @@ import React from 'react';
 import { getCreateCaseFlyoutLazyNoProvider } from '../../methods';
 import { CasesContextState } from './cases_context_reducer';
 
-export const CasesContextUI = React.memo(({ state }: { state: CasesContextState }) => {
+export const CasesGlobalComponents = React.memo(({ state }: { state: CasesContextState }) => {
   return (
     <>
       {state.createCaseFlyout.isFlyoutOpen && state.createCaseFlyout.props !== undefined
@@ -18,4 +18,4 @@ export const CasesContextUI = React.memo(({ state }: { state: CasesContextState 
     </>
   );
 });
-CasesContextUI.displayName = 'CasesContextUi';
+CasesGlobalComponents.displayName = 'CasesContextUi';
