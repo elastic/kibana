@@ -118,6 +118,25 @@ describe('<AgentEnrollmentFlyout />', () => {
     jest.clearAllMocks();
   });
 
+  it('should show loading when agent policies are loading', async () => {
+    (useAgentEnrollmentFlyoutData as jest.Mock).mockReturnValue?.({
+      agentPolicies: [],
+      refreshAgentPolicies: jest.fn(),
+      isLoadingAgentPolicies: true,
+    });
+
+    await act(async () => {
+      testBed = await setup({
+        onClose: jest.fn(),
+      });
+      testBed.component.update();
+    });
+
+    const { exists } = testBed;
+    expect(exists('agentEnrollmentFlyout')).toBe(true);
+    expect(exists('loadingSpinner')).toBe(true);
+  });
+
   describe('managed instructions', () => {
     it('uses the agent policy selection step', async () => {
       const { exists } = testBed;
