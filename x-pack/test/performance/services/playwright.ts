@@ -48,6 +48,7 @@ export class PlaywrightService extends FtrService {
     this.lifecycle.cleanup.add(async () => {
       apm.flush();
       await setTimeout(5000);
+      await this.browser?.close();
     });
   }
 

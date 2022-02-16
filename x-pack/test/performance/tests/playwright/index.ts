@@ -6,9 +6,12 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Performance tests', () => {
-    const { JOURNEY_NAME } = process.env;
-    loadTestFile(require.resolve(`./${JOURNEY_NAME}`));
+    loadTestFile(require.resolve('./login'));
+    loadTestFile(require.resolve('./ecommerce_dashboard'));
+    loadTestFile(require.resolve('./flight_dashboard'));
+    loadTestFile(require.resolve('./web_logs_dashboard'));
+    loadTestFile(require.resolve('./promotion_tracking_dashboard'));
   });
 }
