@@ -7,11 +7,11 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { Installation, PackageInfo } from '../../common';
+import type { Installation } from '../../common';
 
 import { shouldUpgradePolicies, upgradeManagedPackagePolicies } from './managed_package_policies';
 import { packagePolicyService } from './package_policy';
-import { getPackageInfo, getInstallation } from './epm/packages';
+import { getInstallation } from './epm/packages';
 
 jest.mock('./package_policy');
 jest.mock('./epm/packages');
@@ -30,7 +30,6 @@ describe('upgradeManagedPackagePolicies', () => {
   afterEach(() => {
     (packagePolicyService.get as jest.Mock).mockReset();
     (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockReset();
-    (getPackageInfo as jest.Mock).mockReset();
     (getInstallation as jest.Mock).mockReset();
     (packagePolicyService.upgrade as jest.Mock).mockReset();
   });
@@ -69,17 +68,10 @@ describe('upgradeManagedPackagePolicies', () => {
       }
     );
 
-    (getPackageInfo as jest.Mock).mockImplementationOnce(
-      ({ savedObjectsClient, pkgName, pkgVersion }) => ({
-        name: pkgName,
-        version: pkgVersion,
-        keepPoliciesUpToDate: false,
-      })
-    );
-
     (getInstallation as jest.Mock).mockResolvedValueOnce({
       id: 'test-installation',
       version: '0.0.1',
+      keep_policies_up_to_date: false,
     });
 
     await upgradeManagedPackagePolicies(soClient, esClient, ['non-managed-package-id']);
@@ -121,17 +113,10 @@ describe('upgradeManagedPackagePolicies', () => {
       }
     );
 
-    (getPackageInfo as jest.Mock).mockImplementationOnce(
-      ({ savedObjectsClient, pkgName, pkgVersion }) => ({
-        name: pkgName,
-        version: pkgVersion,
-        keepPoliciesUpToDate: true,
-      })
-    );
-
     (getInstallation as jest.Mock).mockResolvedValueOnce({
       id: 'test-installation',
       version: '1.0.0',
+      keep_policies_up_to_date: true,
     });
 
     await upgradeManagedPackagePolicies(soClient, esClient, ['managed-package-id']);
@@ -177,17 +162,10 @@ describe('upgradeManagedPackagePolicies', () => {
         }
       );
 
-      (getPackageInfo as jest.Mock).mockImplementationOnce(
-        ({ savedObjectsClient, pkgName, pkgVersion }) => ({
-          name: pkgName,
-          version: pkgVersion,
-          keepPoliciesUpToDate: true,
-        })
-      );
-
       (getInstallation as jest.Mock).mockResolvedValueOnce({
         id: 'test-installation',
         version: '1.0.0',
+        keep_policies_up_to_date: true,
       });
 
       const result = await upgradeManagedPackagePolicies(soClient, esClient, [
@@ -229,19 +207,12 @@ describe('shouldUpgradePolicies', () => {
   describe('package policy is up-to-date', () => {
     describe('keep_policies_up_to_date is true', () => {
       it('returns false', () => {
-        const packageInfo = {
-          version: '1.0.0',
-          keepPoliciesUpToDate: true,
-        };
-
         const installedPackage = {
           version: '1.0.0',
+          keep_policies_up_to_date: true,
         };
 
-        const result = shouldUpgradePolicies(
-          packageInfo as PackageInfo,
-          installedPackage as Installation
-        );
+        const result = shouldUpgradePolicies('1.0.0', installedPackage as Installation);
 
         expect(result).toBe(false);
       });
@@ -249,19 +220,12 @@ describe('shouldUpgradePolicies', () => {
 
     describe('keep_policies_up_to_date is false', () => {
       it('returns false', () => {
-        const packageInfo = {
-          version: '1.0.0',
-          keepPoliciesUpToDate: false,
-        };
-
         const installedPackage = {
           version: '1.0.0',
+          keep_policies_up_to_date: false,
         };
 
-        const result = shouldUpgradePolicies(
-          packageInfo as PackageInfo,
-          installedPackage as Installation
-        );
+        const result = shouldUpgradePolicies('1.0.0', installedPackage as Installation);
 
         expect(result).toBe(false);
       });
@@ -271,19 +235,12 @@ describe('shouldUpgradePolicies', () => {
   describe('package policy is out-of-date', () => {
     describe('keep_policies_up_to_date is true', () => {
       it('returns true', () => {
-        const packageInfo = {
-          version: '1.0.0',
-          keepPoliciesUpToDate: true,
-        };
-
         const installedPackage = {
           version: '1.1.0',
+          keep_policies_up_to_date: true,
         };
 
-        const result = shouldUpgradePolicies(
-          packageInfo as PackageInfo,
-          installedPackage as Installation
-        );
+        const result = shouldUpgradePolicies('1.0.0', installedPackage as Installation);
 
         expect(result).toBe(true);
       });
@@ -291,19 +248,12 @@ describe('shouldUpgradePolicies', () => {
 
     describe('keep_policies_up_to_date is false', () => {
       it('returns false', () => {
-        const packageInfo = {
-          version: '1.0.0',
-          keepPoliciesUpToDate: false,
-        };
-
         const installedPackage = {
           version: '1.1.0',
+          keep_policies_up_to_date: false,
         };
 
-        const result = shouldUpgradePolicies(
-          packageInfo as PackageInfo,
-          installedPackage as Installation
-        );
+        const result = shouldUpgradePolicies('1.0.0', installedPackage as Installation);
 
         expect(result).toBe(false);
       });

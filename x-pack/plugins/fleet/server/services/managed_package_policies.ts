@@ -8,14 +8,10 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import semverGte from 'semver/functions/gte';
 
-import type {
-  Installation,
-  PackageInfo,
-  UpgradePackagePolicyDryRunResponseItem,
-} from '../../common';
+import type { Installation, UpgradePackagePolicyDryRunResponseItem } from '../../common';
 
 import { appContextService } from './app_context';
-import { getInstallation, getPackageInfo } from './epm/packages';
+import { getInstallation } from './epm/packages';
 import { packagePolicyService } from './package_policy';
 
 export interface UpgradeManagedPackagePoliciesResult {
@@ -42,12 +38,6 @@ export const upgradeManagedPackagePolicies = async (
       continue;
     }
 
-    const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: packagePolicy.package.name,
-      pkgVersion: packagePolicy.package.version,
-    });
-
     const installedPackage = await getInstallation({
       savedObjectsClient: soClient,
       pkgName: packagePolicy.package.name,
@@ -62,7 +52,7 @@ export const upgradeManagedPackagePolicies = async (
       continue;
     }
 
-    if (shouldUpgradePolicies(packageInfo, installedPackage)) {
+    if (shouldUpgradePolicies(packagePolicy.package.version, installedPackage)) {
       // Since upgrades don't report diffs/errors, we need to perform a dry run first in order
       // to notify the user of any granular policy upgrade errors that occur during Fleet's
       // preconfiguration check
@@ -101,13 +91,13 @@ export const upgradeManagedPackagePolicies = async (
 };
 
 export function shouldUpgradePolicies(
-  packageInfo: PackageInfo,
+  packagePolicyPackageVersion: string,
   installedPackage: Installation
 ): boolean {
   const isPolicyVersionGteInstalledVersion = semverGte(
-    packageInfo.version,
+    packagePolicyPackageVersion,
     installedPackage.version
   );
 
-  return !isPolicyVersionGteInstalledVersion && !!packageInfo.keepPoliciesUpToDate;
+  return !isPolicyVersionGteInstalledVersion && !!installedPackage.keep_policies_up_to_date;
 }
