@@ -5,29 +5,18 @@
  * 2.0.
  */
 
-import { map, truncate } from 'lodash';
+import { truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import { Logger } from 'src/core/server';
+import { Headers, Logger } from 'src/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
 } from '../../../../../../src/plugins/screenshot_mode/server';
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
-
-export interface ConditionalHeadersConditions {
-  protocol: string;
-  hostname: string;
-  port: number;
-  basePath: string;
-}
-
-export interface ConditionalHeaders {
-  headers: Record<string, string>;
-  conditions: ConditionalHeadersConditions;
-}
+import { stripUnsafeHeaders } from './strip_unsafe_headers';
 
 export type Context = Record<string, unknown>;
 
@@ -52,8 +41,8 @@ export interface Viewport {
 }
 
 interface OpenOptions {
-  conditionalHeaders: ConditionalHeaders;
   context?: Context;
+  headers: Headers;
   waitForSelector: string;
   timeout: number;
 }
@@ -104,6 +93,7 @@ export class HeadlessChromiumDriver {
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
     private config: ConfigType,
+    private basePath: string,
     private readonly page: Page
   ) {}
 
@@ -123,7 +113,7 @@ export class HeadlessChromiumDriver {
    */
   async open(
     url: string,
-    { conditionalHeaders, context, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
+    { headers, context, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
     logger: Logger
   ): Promise<void> {
     logger.info(`opening url ${url}`);
@@ -142,7 +132,7 @@ export class HeadlessChromiumDriver {
     }
 
     await this.page.setRequestInterception(true);
-    this.registerListeners(conditionalHeaders, logger);
+    this.registerListeners(url, headers, logger);
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
     if (this.config.browser.chromium.inspect) {
@@ -243,14 +233,13 @@ export class HeadlessChromiumDriver {
     });
   }
 
-  private registerListeners(conditionalHeaders: ConditionalHeaders, logger: Logger) {
+  private registerListeners(url: string, customHeaders: Headers, logger: Logger) {
     if (this.listenersAttached) {
       return;
     }
 
-    // @ts-ignore
     // FIXME: retrieve the client in open() and  pass in the client
-    const client = this.page._client;
+    const client = this.page.client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -277,19 +266,17 @@ export class HeadlessChromiumDriver {
         return;
       }
 
-      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
+      if (this._shouldUseCustomHeaders(url, interceptedUrl)) {
         logger.trace(`Using custom headers for ${interceptedUrl}`);
-        const headers = map(
-          {
-            ...interceptedRequest.request.headers,
-            ...conditionalHeaders.headers,
-            [KBN_SCREENSHOT_MODE_HEADER]: 'true',
-          },
-          (value, name) => ({
-            name,
-            value,
-          })
-        );
+        const headers = Object.entries({
+          ...interceptedRequest.request.headers,
+          ...stripUnsafeHeaders(customHeaders),
+          [KBN_SCREENSHOT_MODE_HEADER]: 'true',
+        }).flatMap(([name, rawValue]) => {
+          const values = Array.isArray(rawValue) ? rawValue : [rawValue ?? ''];
+
+          return values.map((value) => ({ name, value }));
+        });
 
         try {
           await client.send('Fetch.continueRequest', {
@@ -353,13 +340,27 @@ export class HeadlessChromiumDriver {
     );
   }
 
-  private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
-    const { hostname, protocol, port, pathname } = parseUrl(url);
+  private _shouldUseCustomHeaders(sourceUrl: string, targetUrl: string) {
+    const {
+      hostname: sourceHostname,
+      protocol: sourceProtocol,
+      port: sourcePort,
+    } = parseUrl(sourceUrl);
+    const {
+      hostname: targetHostname,
+      protocol: targetProtocol,
+      port: targetPort,
+      pathname: targetPathname,
+    } = parseUrl(targetUrl);
+
+    if (targetPathname === null) {
+      throw new Error(`URL missing pathname: ${targetUrl}`);
+    }
 
     // `port` is null in URLs that don't explicitly state it,
     // however we can derive the port from the protocol (http/https)
     // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
-    const derivedPort = (() => {
+    const derivedPort = (protocol: string | null, port: string | null, url: string) => {
       if (port) {
         return port;
       }
@@ -372,36 +373,15 @@ export class HeadlessChromiumDriver {
         return '443';
       }
 
-      return null;
-    })();
-
-    if (derivedPort === null) throw new Error(`URL missing port: ${url}`);
-    if (pathname === null) throw new Error(`URL missing pathname: ${url}`);
+      throw new Error(`URL missing port: ${url}`);
+    };
 
     return (
-      hostname === conditions.hostname &&
-      protocol === `${conditions.protocol}:` &&
-      this._shouldUseCustomHeadersForPort(conditions, derivedPort) &&
-      pathname.startsWith(`${conditions.basePath}/`)
+      sourceHostname === targetHostname &&
+      sourceProtocol === targetProtocol &&
+      derivedPort(sourceProtocol, sourcePort, sourceUrl) ===
+        derivedPort(targetProtocol, targetPort, targetUrl) &&
+      targetPathname.startsWith(`${this.basePath}/`)
     );
-  }
-
-  private _shouldUseCustomHeadersForPort(
-    conditions: ConditionalHeadersConditions,
-    port: string | undefined
-  ) {
-    if (conditions.protocol === 'http' && conditions.port === 80) {
-      return (
-        port === undefined || port === null || port === '' || port === conditions.port.toString()
-      );
-    }
-
-    if (conditions.protocol === 'https' && conditions.port === 443) {
-      return (
-        port === undefined || port === null || port === '' || port === conditions.port.toString()
-      );
-    }
-
-    return port === conditions.port.toString();
   }
 }
