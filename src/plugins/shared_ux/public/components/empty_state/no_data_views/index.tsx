@@ -7,7 +7,6 @@
  */
 
 import { NoDataViewsPage } from './no_data_views_page';
-export type { NoDataViewsPageProps } from './no_data_views_page';
 export { NoDataViewsPage } from './no_data_views_page';
 
 // eslint-disable-next-line import/no-default-export
