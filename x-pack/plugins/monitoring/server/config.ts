@@ -80,7 +80,7 @@ export const configSchema = schema.object({
 });
 
 export class MonitoringElasticsearchConfig extends ElasticsearchConfig {
-  public readonly logFetchCount?: number;
+  public readonly logFetchCount: number;
 
   constructor(rawConfig: TypeOf<typeof monitoringElasticsearchConfigSchema>) {
     super(rawConfig as ElasticsearchConfigType);
