@@ -6,7 +6,6 @@
  */
 
 import {
-  Client,
   TransportRequestOptions,
   TransportResult,
   TransportRequestOptionsWithMeta,
@@ -22,6 +21,7 @@ import type {
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClientWithChild } from '../types';
 
 export interface WrapScopedClusterClientOpts {
   scopedClusterClient: IScopedClusterClient;
@@ -34,10 +34,6 @@ export function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): ISco
     asInternalUser: wrapEsClient(scopedClusterClient.asInternalUser, abortController),
     asCurrentUser: wrapEsClient(scopedClusterClient.asCurrentUser, abortController),
   };
-}
-
-export interface ElasticsearchClientWithChild extends ElasticsearchClient {
-  child: Client['child'];
 }
 
 function wrapEsClient(

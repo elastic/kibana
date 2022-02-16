@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert } from './alert';
@@ -12,7 +13,7 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
-import { AlertInstanceContext, AlertInstanceState } from './types';
+import { AlertInstanceContext, AlertInstanceState, ElasticsearchClientWithChild } from './types';
 
 export { rulesClientMock };
 
@@ -71,14 +72,27 @@ const createAlertServicesMock = <
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 >() => {
   const alertFactoryMockCreate = createAlertFactoryMock.create<InstanceState, InstanceContext>();
+  const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+
+  const childAsInternalUserClient = elasticsearchServiceMock.createElasticsearchClient();
+  const childAsCurrentUserClient = elasticsearchServiceMock.createElasticsearchClient();
+  (
+    scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
+  ).child.mockReturnValue(childAsInternalUserClient as unknown as Client);
+  (
+    scopedClusterClient.asCurrentUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
+  ).child.mockReturnValue(childAsCurrentUserClient as unknown as Client);
+
   return {
     alertFactory: {
       create: jest.fn().mockReturnValue(alertFactoryMockCreate),
     },
     savedObjectsClient: savedObjectsClientMock.create(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    scopedClusterClient,
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
+    childAsInternalUserClient,
+    childAsCurrentUserClient,
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;

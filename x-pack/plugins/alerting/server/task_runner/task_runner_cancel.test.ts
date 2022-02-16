@@ -85,7 +85,6 @@ describe('Task Runner Cancel', () => {
   afterAll(() => fakeTimer.restore());
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-  const services = alertsMock.createAlertServices();
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -167,6 +166,8 @@ describe('Task Runner Cancel', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    // Important to call alertsMock.createAlertServices after resetting mocks so .child is mocked
+    const services = alertsMock.createAlertServices();
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);

@@ -7,10 +7,8 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
-import {
-  wrapScopedClusterClient,
-  ElasticsearchClientWithChild,
-} from './wrap_scoped_cluster_client';
+import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
+import { ElasticsearchClientWithChild } from '../types';
 
 const esQuery = {
   body: { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } },
