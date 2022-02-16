@@ -738,7 +738,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 788,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });
@@ -865,7 +865,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 788,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });
@@ -921,10 +921,6 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_THRESHOLD_RESULT]: {
               terms: [
                 {
-                  field: 'event.module',
-                  value: 'system',
-                },
-                {
                   field: 'host.id',
                   value: '2ab45fc1c41e4c84bbd02202a7e5761f',
                 },
@@ -932,55 +928,16 @@ export default ({ getService }: FtrProviderContext) => {
                   field: 'process.name',
                   value: 'sshd',
                 },
+                {
+                  field: 'event.module',
+                  value: 'system',
+                },
               ],
               count: 21,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T20:22:03.561Z',
             },
           });
         });
-      });
-    });
-
-    /**
-     * Here we test that 8.0.x alerts can be generated on legacy (pre-8.x) alerts.
-     */
-    describe('Signals generated from legacy signals', async () => {
-      beforeEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await createSignalsIndex(supertest, log);
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
-        );
-      });
-
-      afterEach(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
-        );
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
-      });
-
-      it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const rule: QueryCreateSchema = {
-          ...getRuleForSignalTesting([`.siem-signals-*`]),
-        };
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-        expect(signalsOpen.hits.hits.length).greaterThan(0);
-      });
-
-      it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: QueryCreateSchema = {
-          ...getRuleForSignalTesting([`.alerts-security.alerts-default`]),
-        };
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-        expect(signalsOpen.hits.hits.length).greaterThan(0);
       });
     });
 
