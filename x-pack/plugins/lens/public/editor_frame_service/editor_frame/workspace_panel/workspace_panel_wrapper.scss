@@ -32,6 +32,11 @@
   &.lnsWorkspacePanelWrapper--fullscreen {
     margin-bottom: 0;
   }
+
+}
+
+.lnsWorkspaceToolbar--fullscreen {
+  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
 }
 
 .lnsWorkspacePanel__dragDrop {

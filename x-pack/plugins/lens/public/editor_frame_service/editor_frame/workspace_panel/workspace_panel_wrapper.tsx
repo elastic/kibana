@@ -124,17 +124,20 @@ export function WorkspacePanelWrapper({
           responsive={false}
           wrap={true}
           justifyContent="spaceBetween"
+          className={classNames({
+            'lnsWorkspaceToolbar--fullscreen': isFullscreen,
+          })}
         >
-          {!isFullscreen ? (
-            <EuiFlexItem grow={true}>
-              <EuiFlexGroup
-                gutterSize="m"
-                direction="row"
-                responsive={false}
-                wrap={true}
-                justifyContent="spaceBetween"
-                className="lnsWorkspacePanelWrapper__toolbar"
-              >
+          <EuiFlexItem grow={true}>
+            <EuiFlexGroup
+              gutterSize="m"
+              direction="row"
+              responsive={false}
+              wrap={true}
+              justifyContent="spaceBetween"
+              className="lnsWorkspacePanelWrapper__toolbar"
+            >
+              {!isFullscreen && (
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="m" justifyContent="flexStart">
                     <EuiFlexItem grow={false}>
@@ -159,46 +162,47 @@ export function WorkspacePanelWrapper({
                     )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup
-                    alignItems="center"
-                    justifyContent="flexEnd"
-                    gutterSize="s"
-                    responsive={false}
-                    // ref={resizeRef as Ref<HTMLDivElement | HTMLSpanElement>}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        label={i18n.translate('xpack.lens.editorFrame.autoApply', {
-                          defaultMessage: 'Auto-apply',
-                        })}
-                        checked={autoApplyEnabled}
-                        onChange={toggleAutoApply}
+              )}
+              <EuiFlexItem>
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="flexEnd"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      label={i18n.translate('xpack.lens.editorFrame.autoApply', {
+                        defaultMessage: 'Auto-apply',
+                      })}
+                      checked={autoApplyEnabled}
+                      onChange={toggleAutoApply}
+                      className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+                      data-test-subj="lensToggleAutoApply"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <div>
+                      <EuiButton
+                        disabled={autoApplyEnabled || changesApplied}
+                        fill
                         className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <div>
-                        <EuiButton
-                          disabled={autoApplyEnabled || changesApplied}
-                          fill
-                          className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-                          iconType="play"
-                          onClick={() => dispatchLens(applyChanges())}
-                          size="s"
-                        >
-                          <FormattedMessage
-                            id="xpack.lens.editorFrame.applyChangesLabel"
-                            defaultMessage="Apply"
-                          />
-                        </EuiButton>
-                      </div>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
+                        iconType="play"
+                        onClick={() => dispatchLens(applyChanges())}
+                        size="s"
+                        data-test-subj="lensApplyChanges"
+                      >
+                        <FormattedMessage
+                          id="xpack.lens.editorFrame.applyChangesLabel"
+                          defaultMessage="Apply"
+                        />
+                      </EuiButton>
+                    </div>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {warningMessages && warningMessages.length ? (
               <WarningsPopover>{warningMessages}</WarningsPopover>
