@@ -19,6 +19,8 @@ import {
 import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../../common/config';
 
+const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
+
 export interface ServiceData {
   monitors: Array<Partial<MonitorFields>>;
   output: {
@@ -29,6 +31,7 @@ export interface ServiceData {
 }
 
 export class ServiceAPIClient {
+  private readonly authorization: string;
   public locations: ServiceLocations;
   private logger: Logger;
   private readonly config: ServiceConfig;
@@ -36,7 +39,15 @@ export class ServiceAPIClient {
 
   constructor(logger: Logger, config: ServiceConfig, kibanaVersion: string) {
     this.config = config;
+    const { username, password } = config;
+    this.username = username;
     this.kibanaVersion = kibanaVersion;
+
+    if (username && password) {
+      this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
+    } else {
+      this.authorization = '';
+    }
 
     this.logger = logger;
     this.locations = [];
@@ -77,7 +88,7 @@ export class ServiceAPIClient {
     method: 'POST' | 'PUT' | 'DELETE',
     { monitors: allMonitors, output, runOnce }: ServiceData
   ) {
-    if (process.env.NODE_ENV === 'test') {
+    if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
       return;
     }
@@ -92,6 +103,12 @@ export class ServiceAPIClient {
         method,
         url: url + (runOnce ? '/run' : '/monitors'),
         data: { monitors: monitorsStreams, output, stack_version: this.kibanaVersion },
+        headers:
+          process.env.NODE_ENV !== 'production' && this.authorization
+            ? {
+                Authorization: this.authorization,
+              }
+            : undefined,
         httpsAgent: this.getHttpsAgent(),
       });
     };
