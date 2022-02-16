@@ -8,7 +8,7 @@
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 import { MapEmbeddablePersistableState } from './types';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
-import { injectReferences } from '../migrations/references';
+import { extractReferences, injectReferences } from '../migrations/references';
 
 export const inject: EmbeddableRegistryDefinition['inject'] = (state, references) => {
   const typedState = state as MapEmbeddablePersistableState;
@@ -19,12 +19,26 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
   }
 
   // by-value embeddable
-  const { attributes } = injectReferences({
-    attributes: typedState.attributes as MapSavedObjectAttributes,
-    references,
-  });
-  return {
-    ...typedState,
-    attributes,
-  };
+  try {
+    // run embeddable state through extract logic to ensure any state with hard coded ids is replace with refNames
+    // refName generation will produce consistent values allowing inject logic to then replace refNames with current ids.
+    const { attributes: attributesWithNoHardCodedIds } = extractReferences({
+      attributes: typedState.attributes as MapSavedObjectAttributes,
+    });
+
+    const { attributes: attributesWithInjectedIds } = injectReferences({
+      attributes: attributesWithNoHardCodedIds,
+      references,
+    });
+    return {
+      ...typedState,
+      attributes: attributesWithInjectedIds,
+    };
+  } catch (error) {
+    // inject exception prevents entire dashboard from display
+    // Instead of throwing, swallow error and let dashboard display
+    // Errors will surface in map panel. Any layer that failed injection will surface the error in the legend
+    // Users can then manually edit map to resolve any problems.
+    return typedState;
+  }
 };

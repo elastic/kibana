@@ -32,19 +32,6 @@ export const embeddableMigrations = {
       return state;
     }
   },
-  '7.17.1': (state: SerializableRecord) => {
-    try {
-      const { attributes } = extractReferences(state as { attributes: MapSavedObjectAttributes });
-      return {
-        ...state,
-        attributes,
-      } as SerializableRecord;
-    } catch (e) {
-      // Do not failed migration
-      // Maps application can display error when viewed
-      return state;
-    }
-  },
   '8.0.0': (state: SerializableRecord) => {
     try {
       return {
