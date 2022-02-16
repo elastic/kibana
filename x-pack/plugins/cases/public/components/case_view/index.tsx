@@ -435,9 +435,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       isLoadingUserActions={isLoadingUserActions}
                       onShowAlertDetails={onShowAlertDetails}
                       onUpdateField={onUpdateField}
-                      renderInvestigateInTimelineActionComponent={
-                        timelineUi?.renderInvestigateInTimelineActionComponent
-                      }
                       statusActionButton={
                         caseData.type !== CaseType.collection && userCanCrud ? (
                           <StatusActionButton
