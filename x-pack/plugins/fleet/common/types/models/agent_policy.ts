@@ -75,7 +75,7 @@ export interface FullAgentPolicyOutputPermissions {
   };
 }
 
-export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'api_key'> & {
+export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
   [key: string]: any;
 };
 
