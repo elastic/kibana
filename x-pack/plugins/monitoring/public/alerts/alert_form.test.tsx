@@ -117,7 +117,7 @@ describe('alert_form', () => {
 
       const initialAlert = {
         name: 'test',
-        alertTypeId: ruleType.id,
+        ruleTypeId: ruleType.id,
         params: {},
         consumer: ALERTS_FEATURE_ID,
         schedule: {
@@ -152,13 +152,13 @@ describe('alert_form', () => {
     });
 
     it('renders alert name', async () => {
-      const alertNameField = wrapper.find('[data-test-subj="alertNameInput"]');
+      const alertNameField = wrapper.find('[data-test-subj="ruleNameInput"]');
       expect(alertNameField.exists()).toBeTruthy();
       expect(alertNameField.first().prop('value')).toBe('test');
     });
 
     it('renders registered selected alert type', async () => {
-      const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedAlertTypeTitle"]');
+      const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedRuleTypeTitle"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
     });
 
