@@ -79,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(url).to.contain(`/rules`);
 
           // Verify content
-          await testSubjects.existOrFail('alertsList');
+          await testSubjects.existOrFail('rulesList');
         });
 
         it('navigates to an alert details page', async () => {
