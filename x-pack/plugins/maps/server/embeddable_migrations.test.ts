@@ -17,7 +17,7 @@ describe('saved object migrations and embeddable migrations', () => {
     });
     const embeddableMigrationVersions = Object.keys(embeddableMigrations).filter((key) => {
       // filter out embeddable only migration keys
-      return !['7.17.1', '8.0.1'].includes(key);
+      return !['8.0.1'].includes(key);
     });
     expect(savedObjectMigrationVersions.sort()).toEqual(embeddableMigrationVersions.sort());
   });
