@@ -22,7 +22,7 @@ import type { Duration } from 'moment';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
-import { isUndefined, omit, omitBy } from 'lodash';
+import { isUndefined, omitBy } from 'lodash';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import type { InternalExecutionContextSetup } from '../execution_context';
