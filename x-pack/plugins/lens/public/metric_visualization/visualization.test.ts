@@ -300,8 +300,17 @@ describe('metric_visualization', () => {
                   "full",
                 ],
                 "palette": Array [],
+                "size": Array [
+                  "xl",
+                ],
+                "textAlign": Array [
+                  "center",
+                ],
                 "title": Array [
                   "",
+                ],
+                "titlePosition": Array [
+                  "bottom",
                 ],
               },
               "function": "lens_metric_chart",
