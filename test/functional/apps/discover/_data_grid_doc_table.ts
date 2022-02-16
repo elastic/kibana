@@ -69,12 +69,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
-        const cell = await dataGrid.getCellElement(0, 2);
+        const cell = await dataGrid.getCellElement(1, 3);
         const text = await cell.getVisibleText();
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      const docCell = await dataGrid.getCellElement(0, 3);
+      const docCell = await dataGrid.getCellElement(1, 4);
       await docCell.click();
       const expandCellContentButton = await docCell.findByClassName(
         'euiDataGridRowCell__expandButtonIcon'
@@ -86,9 +86,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const text = await monacoEditor.getCodeEditorValue();
         const flyoutJson = JSON.parse(text);
         expandDocId = flyoutJson._id;
+        log.debug(`expanded document id: ${expandDocId}`);
         return expandDocId === 'AU_x3_g4GFA8no6QjkYX';
       });
-      log.debug(`expanded document id: ${expandDocId}`);
 
       await dataGrid.clickRowToggle();
       await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
