@@ -50,6 +50,11 @@ export const VisualizeListing = () => {
   const closeNewVisModal = useRef(() => {});
   const listingLimit = savedObjectsPublic.settings.getListingLimit();
 
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'list',
+  });
+
   useEffect(() => {
     if (pathname === '/new') {
       // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
@@ -96,11 +101,6 @@ export const VisualizeListing = () => {
     },
     [application, history]
   );
-
-  useExecutionContext(executionContext, {
-    type: 'application',
-    page: 'list',
-  });
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
   const tableColumns = useMemo(

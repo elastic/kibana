@@ -44,7 +44,10 @@ export class ExecutionContextService
     this.contract = {
       context$: this.context$,
       clear: () => {
-        this.context$.next({});
+        this.context$.next({
+          url: window.location.pathname,
+          name: this.appId,
+        });
       },
       set: (c: ExecutionContext) => {
         const newVal = {
@@ -71,8 +74,8 @@ export class ExecutionContextService
     // Track app id changes and clear context on app change
     this.subscription.add(
       curApp$.pipe(distinctUntilChanged()).subscribe((appId) => {
-        start.clear();
         this.appId = appId;
+        start.clear();
       })
     );
 
