@@ -45,11 +45,7 @@ export async function fetchNodesFromClusterStats(
       query: {
         bool: {
           filter: [
-            {
-              term: {
-                type: 'cluster_stats',
-              },
-            },
+            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {
@@ -78,7 +74,7 @@ export async function fetchNodesFromClusterStats(
                   },
                 ],
                 _source: {
-                  includes: ['cluster_state.nodes_hash', 'cluster_state.nodes'],
+                  includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.nodes'],
                 },
                 size: 2,
               },
@@ -111,8 +107,12 @@ export async function fetchNodesFromClusterStats(
     const indexName = hits[0]._index;
     nodes.push({
       clusterUuid,
-      recentNodes: formatNode(hits[0]._source.cluster_state?.nodes),
-      priorNodes: formatNode(hits[1]._source.cluster_state?.nodes),
+      recentNodes: formatNode(
+        hits[0]._source.cluster_state?.nodes || hits[0]._source.elasticsearch.cluster.stats.nodes
+      ),
+      priorNodes: formatNode(
+        hits[1]._source.cluster_state?.nodes || hits[1]._source.elasticsearch.cluster.stats.nodes
+      ),
       ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
     });
   }

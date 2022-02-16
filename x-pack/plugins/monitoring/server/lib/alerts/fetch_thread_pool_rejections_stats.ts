@@ -24,7 +24,12 @@ const getTopHits = (threadType: string, order: 'asc' | 'desc') => ({
       },
     ],
     _source: {
-      includes: [`node_stats.thread_pool.${threadType}.rejected`, 'source_node.name'],
+      includes: [
+        `node_stats.thread_pool.${threadType}.rejected`,
+        `elasticsearch.node.stats.thread_pool.${threadType}.rejected.count`,
+        'source_node.name',
+        'elasticsearch.node.name',
+      ],
     },
     size: 1,
   },
@@ -53,11 +58,7 @@ export async function fetchThreadPoolRejectionStats(
                 cluster_uuid: clustersIds,
               },
             },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
@@ -126,8 +127,11 @@ export async function fetchThreadPoolRejectionStats(
       }
 
       const rejectedPath = `_source.node_stats.thread_pool.${threadType}.rejected`;
-      const newRejectionCount = Number(get(mostRecentDoc, rejectedPath));
-      const oldRejectionCount = Number(get(leastRecentDoc, rejectedPath));
+      const rejectedPathEcs = `_source.elasticsearch.node.stats.thread_pool.${threadType}.rejected.count`;
+      const newRejectionCount =
+        Number(get(mostRecentDoc, rejectedPath)) || Number(get(mostRecentDoc, rejectedPathEcs));
+      const oldRejectionCount =
+        Number(get(leastRecentDoc, rejectedPath)) || Number(get(leastRecentDoc, rejectedPathEcs));
 
       if (invalidNumberValue(newRejectionCount) || invalidNumberValue(oldRejectionCount)) {
         continue;
@@ -138,7 +142,10 @@ export async function fetchThreadPoolRejectionStats(
           ? newRejectionCount
           : newRejectionCount - oldRejectionCount;
       const indexName = mostRecentDoc._index;
-      const nodeName = get(mostRecentDoc, '_source.source_node.name') || node.key;
+      const nodeName =
+        get(mostRecentDoc, '_source.source_node.name') ||
+        get(mostRecentDoc, '_source.elasticsearch.node.name') ||
+        node.key;
       const nodeStat = {
         rejectionCount,
         type: threadType,

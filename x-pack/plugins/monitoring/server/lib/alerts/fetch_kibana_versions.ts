@@ -32,11 +32,7 @@ export async function fetchKibanaVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'kibana_stats',
-              },
-            },
+            createDatasetFilter('kibana_stats', 'stats', 'kibana.stats'),
             {
               range: {
                 timestamp: {

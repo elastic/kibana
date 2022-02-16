@@ -32,11 +32,7 @@ export async function fetchMemoryUsageNodeStats(
                 cluster_uuid: clustersIds,
               },
             },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {

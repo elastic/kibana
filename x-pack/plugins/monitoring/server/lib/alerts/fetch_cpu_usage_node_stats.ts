@@ -48,11 +48,7 @@ export async function fetchCpuUsageNodeStats(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
