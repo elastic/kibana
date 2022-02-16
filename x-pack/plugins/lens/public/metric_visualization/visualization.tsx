@@ -21,6 +21,7 @@ import type { MetricConfig, MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
+import { MetricToolbar } from './metric_config_panel';
 
 export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -63,6 +64,9 @@ const toExpression = (
         function: 'lens_metric_chart',
         arguments: {
           title: [attributes?.title || ''],
+          size: [state?.size || 'xl'],
+          titlePosition: [state?.titlePosition || 'bottom'],
+          textAlign: [state?.textAlign || 'center'],
           description: [attributes?.description || ''],
           metricTitle: [operation?.label || ''],
           accessor: [state.accessor],
@@ -192,6 +196,17 @@ export const getMetricVisualization = ({
 
   removeDimension({ prevState }) {
     return { ...prevState, accessor: undefined, colorMode: ColorMode.None, palette: undefined };
+  },
+
+  renderToolbar(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <MetricToolbar state={props.state} setState={props.setState} frame={props.frame} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   renderDimensionEditor(domElement, props) {
