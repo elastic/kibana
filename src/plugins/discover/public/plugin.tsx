@@ -59,6 +59,7 @@ import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 import { useDiscoverServices } from './utils/use_discover_services';
+import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -277,6 +278,13 @@ export class DiscoverPlugin
       ),
     });
 
+    const { setTrackedUrl, restorePreviousUrl, stopUrlTracker, appMounted, appUnMounted } =
+      initializeKbnUrlTracking(baseUrl, core, this.appStateUpdater, plugins);
+    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
+    this.stopUrlTracking = () => {
+      stopUrlTracker();
+    };
+
     core.application.register({
       id: 'discover',
       title: 'Discover',
@@ -287,13 +295,6 @@ export class DiscoverPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, discoverStartPlugins] = await core.getStartServices();
-        const { initializeKbnUrlTracking } = await import('./utils/initialize_kbn_url_tracking');
-        const { setTrackedUrl, restorePreviousUrl, stopUrlTracker, appMounted, appUnMounted } =
-          initializeKbnUrlTracking(baseUrl, coreStart, this.appStateUpdater, discoverStartPlugins);
-        setUrlTracker({ setTrackedUrl, restorePreviousUrl });
-        this.stopUrlTracking = () => {
-          stopUrlTracker();
-        };
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();

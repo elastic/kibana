@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AppUpdater, CoreStart } from 'kibana/public';
+import { AppUpdater, CoreSetup } from 'kibana/public';
 import type { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { isFilterPinned } from '@kbn/es-query';
 import { createKbnUrlTracker, replaceUrlHashQuery } from '../../../kibana_utils/public';
 import { getScopedHistory } from '../kibana_services';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../url_generator';
-import { DiscoverStartPlugins } from '../plugin';
+import type { DiscoverSetupPlugins } from '../plugin';
 
 /**
  * It creates the kbn url tracker for Discover to listens to history changes and optionally to global state
@@ -20,9 +19,9 @@ import { DiscoverStartPlugins } from '../plugin';
  */
 export function initializeKbnUrlTracking(
   baseUrl: string,
-  core: CoreStart,
+  core: CoreSetup,
   navLinkUpdater$: BehaviorSubject<AppUpdater>,
-  plugins: DiscoverStartPlugins
+  plugins: DiscoverSetupPlugins
 ) {
   const {
     appMounted,
@@ -47,10 +46,13 @@ export function initializeKbnUrlTracking(
           filter(
             ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
           ),
-          map(({ state }) => ({
-            ...state,
-            filters: state.filters?.filter(isFilterPinned),
-          }))
+          map(async ({ state }) => {
+            const { isFilterPinned } = await import('@kbn/es-query');
+            return {
+              ...state,
+              filters: state.filters?.filter(isFilterPinned),
+            };
+          })
         ),
       },
     ],
