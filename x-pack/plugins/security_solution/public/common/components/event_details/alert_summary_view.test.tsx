@@ -128,6 +128,183 @@ describe('AlertSummaryView', () => {
     expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
   });
 
+  test('Threshold events have special fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.count',
+        values: [9001],
+        originalValue: [9001],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.value',
+        values: ['host-23084y2', '3084hf3n84p8934r8h'],
+        originalValue: ['host-23084y2', '3084hf3n84p8934r8h'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        values: ['host.name', 'host.id'],
+        originalValue: ['host.name', 'host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.value',
+        values: [9001],
+        originalValue: [9001],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    [
+      'Threshold Count',
+      'host.name [threshold]',
+      'host.id [threshold]',
+      'Threshold Cardinality',
+      'count(host.name) >= 9001',
+    ].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Threshold fields are not shown when data is malformated', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.count',
+        values: [9001],
+        originalValue: [9001],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        // This would be expected to have two entries
+        values: ['host.id'],
+        originalValue: ['host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.value',
+        values: ['host-23084y2', '3084hf3n84p8934r8h'],
+        originalValue: ['host-23084y2', '3084hf3n84p8934r8h'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.value',
+        // This would be expected to have one entry
+        values: [],
+        originalValue: [],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    ['Threshold Count'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+
+    [
+      'host.name [threshold]',
+      'host.id [threshold]',
+      'Threshold Cardinality',
+      'count(host.name) >= 9001',
+    ].forEach((fieldText) => {
+      expect(() => getByText(fieldText)).toThrow();
+    });
+  });
+
+  test('Threshold fields are not shown when data is partially missing', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        // This would be expected to have two entries
+        values: ['host.id'],
+        originalValue: ['host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    //  The `value` fields are missing here, so the enriched field info cannot be calculated correctly
+    ['host.id [threshold]', 'Threshold Cardinality', 'count(host.name) >= 9001'].forEach(
+      (fieldText) => {
+        expect(() => getByText(fieldText)).toThrow();
+      }
+    );
+  });
+
   test("doesn't render empty fields", () => {
     const renderProps = {
       ...props,

@@ -14,11 +14,18 @@ export async function waitForLoadingToFinish({ page }: { page: Page }) {
   }
 }
 
-export async function loginToKibana({ page }: { page: Page }) {
-  await page.fill('[data-test-subj=loginUsername]', 'elastic', {
+export async function loginToKibana({
+  page,
+  user,
+}: {
+  page: Page;
+  user?: { username: string; password: string };
+}) {
+  await page.fill('[data-test-subj=loginUsername]', user?.username ?? 'elastic', {
     timeout: 60 * 1000,
   });
-  await page.fill('[data-test-subj=loginPassword]', 'changeme');
+
+  await page.fill('[data-test-subj=loginPassword]', user?.password ?? 'changeme');
 
   await page.click('[data-test-subj=loginSubmit]');
 

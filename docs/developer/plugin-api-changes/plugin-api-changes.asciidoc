@@ -1,0 +1,53 @@
+[[plugin-api-changes]]
+== Plugin API changes in {minor-version}
+++++
+<titleabbrev>Plugin API changes</titleabbrev>
+++++
+
+This page discusses the plugin API changes that you need to be aware of when migrating
+your application to {kib} {minor-version}.
+
+[[breaking_plugin_v8.0.0_113950]]
+.Client upgraded to v8.0
+[%collapsible]
+====
+
+{es} service provides the new version of the `elasticsearch-js` library.
+https://github.com/elastic/elasticsearch-js/issues/1542[This issue]
+lists all changes, including the breaking changes.
+
+Refer to https://github.com/elastic/kibana/pull/113950[#113950]
+
+====
+
+[[breaking_plugin_v8.0.0_112505]]
+.Support for deprecated `kbn-system-api` header removed
+[%collapsible]
+====
+
+{kib} removed support for the deprecated `kbn-system-api` header.
+Use the `asSystemRequest` flag instead:
+
+```js
+const response = await core.http.get({
+  path: '/url',
+  asSystemRequest: true,
+});
+```
+
+Refer to https://github.com/elastic/kibana/pull/112505[#112505]
+
+====
+
+[[breaking_plugin_v8.0.0_82643]]
+.`IndexPatterns.create` removed
+[%collapsible]
+====
+
+`IndexPatterns.create` has been removed in favor of `IndexPatterns.createAndSave`
+to enforce saving index patterns. This eliminates the
+creation of an index pattern that can't be referenced by other saved objects or {kib} apps.
+
+Refer to https://github.com/elastic/kibana/pull/82643[#82643]
+
+====

@@ -84,6 +84,9 @@ export function decorateMochaUi(log, lifecycle, context, { isDockerGroup, rootTa
 
             this._tags = [...this._tags, ...tagsToAdd];
           };
+          this.onlyEsVersion = (semver) => {
+            this._esVersionRequirement = semver;
+          };
 
           provider.call(this);
 

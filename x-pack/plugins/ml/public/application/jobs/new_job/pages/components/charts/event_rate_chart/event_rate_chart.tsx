@@ -90,6 +90,7 @@ export const EventRateChart: FC<Props> = ({
             yAccessors={['value']}
             data={eventRateChartData}
             color={barColor}
+            timeZone="local"
           />
         </Chart>
       </LoadingWrapper>

@@ -65,18 +65,33 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
+// When `throwIfNotFound` is true or undefined, return type will never be undefined.
+export async function fetchFindLatestPackage(
+  packageName: string,
+  options?: { ignoreConstraints?: boolean; throwIfNotFound?: true }
+): Promise<RegistrySearchResult>;
+export async function fetchFindLatestPackage(
+  packageName: string,
+  options: { ignoreConstraints?: boolean; throwIfNotFound: false }
+): Promise<RegistrySearchResult | undefined>;
+export async function fetchFindLatestPackage(
+  packageName: string,
+  options?: { ignoreConstraints?: boolean; throwIfNotFound?: boolean }
+): Promise<RegistrySearchResult | undefined> {
+  const { ignoreConstraints = false, throwIfNotFound = true } = options ?? {};
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
-  setKibanaVersion(url);
+  if (!ignoreConstraints) {
+    setKibanaVersion(url);
+  }
 
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
     return searchResults[0];
-  } else {
-    throw new PackageNotFoundError(`${packageName} not found`);
+  } else if (throwIfNotFound) {
+    throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
   }
 }
 
@@ -116,10 +131,8 @@ function setKibanaVersion(url: URL) {
   }
 
   const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
+  if (kibanaVersion) {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
 }

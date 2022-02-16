@@ -425,6 +425,7 @@ export interface CoreServicesUsageData {
             docsDeleted: number;
             storeSizeBytes: number;
             primaryStoreSizeBytes: number;
+            savedObjectsDocsCount: number;
         }[];
         legacyUrlAliases: {
             activeCount: number;
@@ -1312,9 +1313,9 @@ export type KibanaExecutionContext = {
     readonly type: string;
     readonly name: string;
     readonly id: string;
-    readonly description: string;
+    readonly description?: string;
     readonly url?: string;
-    parent?: KibanaExecutionContext;
+    child?: KibanaExecutionContext;
 };
 
 // @public

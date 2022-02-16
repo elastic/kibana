@@ -12,13 +12,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
+import type { SavedObjectAttributes, KibanaExecutionContext } from 'kibana/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IndexPattern,
   TimeRange,
   Query,
   esFilters,
-  Filter,
   TimefilterContract,
 } from '../../../../plugins/data/public';
 import {
@@ -41,7 +42,6 @@ import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { SavedObjectAttributes } from '../../../../core/types';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
@@ -386,14 +386,20 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
-    const context = {
+    const parentContext = this.parent?.getInput().executionContext;
+    const child: KibanaExecutionContext = {
       type: 'visualization',
       name: this.vis.type.title,
       id: this.vis.id ?? 'an_unsaved_vis',
       description: this.vis.title || this.input.title || this.vis.type.name,
       url: this.output.editUrl,
-      parent: this.parent?.getInput().executionContext,
     };
+    const context = parentContext
+      ? {
+          ...parentContext,
+          child,
+        }
+      : child;
 
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
@@ -450,10 +456,8 @@ export class VisualizeEmbeddable
     const input = {
       savedVis: this.vis.serialize(),
     };
-    if (this.getTitle()) {
-      input.savedVis.title = this.getTitle();
-    }
     delete input.savedVis.id;
+    _.unset(input, 'savedVis.title');
     return new Promise<VisualizeByValueInput>((resolve) => {
       resolve({ ...(input as VisualizeByValueInput) });
     });

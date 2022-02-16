@@ -30,7 +30,9 @@ export interface RuleSearchResult {
     tags: string[];
     createdAt: string;
     updatedAt: string;
+    muteAll: boolean | undefined | null;
     params: DetectionRuleParms;
+    actions: unknown[];
   };
 }
 
@@ -55,8 +57,11 @@ interface FeatureTypeUsage {
   disabled: number;
   alerts: number;
   cases: number;
+  legacy_notifications_enabled: number;
+  legacy_notifications_disabled: number;
+  notifications_enabled: number;
+  notifications_disabled: number;
 }
-
 export interface DetectionRulesTypeUsage {
   query: FeatureTypeUsage;
   threshold: FeatureTypeUsage;
@@ -65,7 +70,6 @@ export interface DetectionRulesTypeUsage {
   threat_match: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
-  legacy_notifications: LegacyNotifications;
 }
 
 export interface MlJobsUsage {
@@ -129,6 +133,8 @@ export interface DetectionRuleMetric {
   updated_on: string;
   alert_count_daily: number;
   cases_count_total: number;
+  has_legacy_notification: boolean;
+  has_notification: boolean;
 }
 
 export interface AlertsAggregationResponse {
@@ -148,8 +154,8 @@ export interface CasesSavedObject {
   alertId: string;
   index: string;
   rule: {
-    id: string;
-    name: string;
+    id: string | null;
+    name: string | null;
   };
 }
 
@@ -161,12 +167,4 @@ export interface MlJobUsage {
 export interface DetectionRuleAdoption {
   detection_rule_detail: DetectionRuleMetric[];
   detection_rule_usage: DetectionRulesTypeUsage;
-}
-
-/**
- * The legacy notifications that are still in use.
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
-export interface LegacyNotifications {
-  total: number;
 }

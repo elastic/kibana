@@ -233,7 +233,6 @@ function ErrorGroupList({
       })}
       items={mainStatistics}
       columns={columns}
-      initialPageSize={25}
       initialSortField="occurrences"
       initialSortDirection="desc"
       sortItems={false}

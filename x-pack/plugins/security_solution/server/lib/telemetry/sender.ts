@@ -286,6 +286,14 @@ export class TelemetryEventsSender {
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
       this.logger.debug(`Error sending events: ${err}`);
+      const errorStatus = err?.response?.status;
+      if (errorStatus !== undefined && errorStatus !== null) {
+        this.telemetryUsageCounter?.incrementCounter({
+          counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+          counterType: errorStatus.toString(),
+          incrementBy: 1,
+        });
+      }
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',

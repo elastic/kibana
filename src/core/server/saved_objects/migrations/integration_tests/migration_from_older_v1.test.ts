@@ -94,6 +94,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
             {
               name: 'root',
               appenders: ['file'],
+              level: 'info',
             },
           ],
         },

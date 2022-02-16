@@ -24,7 +24,7 @@ import {
 import { DiscoverServices } from '../../../../../build_services';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { FetchStatus } from '../../../../types';
-import { DataDocuments$ } from '../../services/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../services/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../view_mode_toggle';
 
@@ -94,6 +94,10 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       fetchStatus: FetchStatus.COMPLETE,
       result: hits as ElasticSearchHit[],
     }) as DataDocuments$,
+    availableFields$: new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      fields: [] as string[],
+    }) as AvailableFields$,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
@@ -105,6 +109,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    onDataViewCreated: jest.fn(),
   };
 }
 

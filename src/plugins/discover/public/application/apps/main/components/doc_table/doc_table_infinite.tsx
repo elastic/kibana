@@ -118,7 +118,7 @@ export const DocTableInfinite = (props: DocTableProps) => {
 
   const onBackToTop = useCallback(() => {
     const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
-    const focusElem = document.querySelector('.dscTable') as HTMLElement;
+    const focusElem = document.querySelector('.dscSkipButton') as HTMLElement;
     focusElem.focus();
 
     // Only the desktop one needs to target a specific container

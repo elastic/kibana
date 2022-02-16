@@ -25,7 +25,7 @@ import * as i18n from './translations';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment } from '../add_comment';
-import { Case, Ecs } from '../../../common/ui/types';
+import { Case, UseFetchAlertData } from '../../../common/ui/types';
 import { CaseUserActions } from '../../../common/ui';
 import {
   ActionConnector,
@@ -77,7 +77,7 @@ export interface UserActionTreeProps {
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   statusActionButton: JSX.Element | null;
   updateCase: (newCase: Case) => void;
-  useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
+  useFetchAlertData: UseFetchAlertData;
   userCanCrud: boolean;
 }
 
@@ -172,9 +172,12 @@ export const UserActionTree = React.memo(
     const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
       useLensDraftComment();
 
-    const [loadingAlertData, manualAlertsData] = useFetchAlertData(
-      getManualAlertIdsWithNoRuleId(caseData.comments)
+    const alertIdsWithoutRuleInfo = useMemo(
+      () => getManualAlertIdsWithNoRuleId(caseData.comments),
+      [caseData.comments]
     );
+
+    const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
 
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
@@ -413,7 +416,7 @@ export const UserActionTree = React.memo(
                   return comments;
                 }
 
-                const alertField: Ecs | undefined = manualAlertsData[alertId];
+                const alertField: unknown | undefined = manualAlertsData[alertId];
                 const ruleId = getRuleId(comment, alertField);
                 const ruleName = getRuleName(comment, alertField);
 

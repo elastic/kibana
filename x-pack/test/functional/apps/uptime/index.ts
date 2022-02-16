@@ -59,7 +59,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./locations'));
       loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./certificates'));
-      loadTestFile(require.resolve('./synthetics_integration'));
     });
 
     describe('with generated data but no data reset', () => {

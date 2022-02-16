@@ -210,11 +210,13 @@ describe('GroupLogic', () => {
     describe('deleteGroup', () => {
       beforeEach(() => {
         GroupLogic.actions.onInitializeGroup(group);
+        GroupLogic.actions.showConfirmDeleteModal();
       });
       it('deletes a group', async () => {
         http.delete.mockReturnValue(Promise.resolve(true));
 
         GroupLogic.actions.deleteGroup();
+        expect(GroupLogic.values.confirmDeleteModalVisible).toEqual(false);
         expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/groups/123');
 
         await nextTick();

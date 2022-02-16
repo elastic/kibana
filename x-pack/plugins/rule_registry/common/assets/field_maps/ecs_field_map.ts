@@ -415,21 +415,6 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
-  'data_stream.dataset': {
-    type: 'constant_keyword',
-    array: false,
-    required: false,
-  },
-  'data_stream.namespace': {
-    type: 'constant_keyword',
-    array: false,
-    required: false,
-  },
-  'data_stream.type': {
-    type: 'constant_keyword',
-    array: false,
-    required: false,
-  },
   'destination.address': {
     type: 'keyword',
     array: false,

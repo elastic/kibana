@@ -13,11 +13,15 @@ export const filterSource = (doc: SignalSourceHit): Partial<RACAlert> => {
   const docSource = doc._source ?? {};
   const {
     event,
+    kibana,
+    signal,
     threshold_result: siemSignalsThresholdResult,
     [ALERT_THRESHOLD_RESULT]: alertThresholdResult,
     ...filteredSource
   } = docSource || {
     event: null,
+    kibana: null,
+    signal: null,
     threshold_result: null,
     [ALERT_THRESHOLD_RESULT]: null,
   };

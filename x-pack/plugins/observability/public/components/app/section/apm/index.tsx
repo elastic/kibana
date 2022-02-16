@@ -142,6 +142,7 @@ export function APMSection({ bucketSize }: Props) {
               xAccessor={'x'}
               yAccessors={['y']}
               color={transactionsColor}
+              timeZone="local"
             />
             <Axis
               id="y-axis"
