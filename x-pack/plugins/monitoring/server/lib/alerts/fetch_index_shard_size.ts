@@ -90,6 +90,7 @@ export async function fetchIndexShardSize(
                         '_index',
                         'index_stats.shards.primaries',
                         'index_stats.primaries.store.size_in_bytes',
+                        'elasticsearch.index.shards.primaries',
                         'elasticsearch.index.primaries.store.size_in_bytes',
                       ],
                     },
@@ -132,10 +133,8 @@ export async function fetchIndexShardSize(
       if (!topHit || !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
         continue;
       }
-      const {
-        _index: monitoringIndexName,
-        _source: { index_stats: indexStats },
-      } = topHit;
+      const { _index: monitoringIndexName, _source } = topHit;
+      const indexStats = _source.index_stats || _source.elasticsearch?.index;
 
       if (!indexStats || !indexStats.primaries) {
         continue;
