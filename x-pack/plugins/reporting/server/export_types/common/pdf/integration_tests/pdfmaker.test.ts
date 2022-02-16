@@ -41,7 +41,7 @@ describe('PdfMaker', () => {
     /**
      * Leave this test skipped! It is a proof-of-concept for demonstrating that
      * we correctly handle a worker OOM error. Due to the variability of when
-     * Node will terminate the worker thread due to exceeding resource resource
+     * Node will terminate the worker thread for exceeding resource
      * limits we cannot guarantee this test will always execute in a reasonable
      * amount of time.
      */
