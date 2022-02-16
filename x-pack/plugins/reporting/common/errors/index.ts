@@ -7,19 +7,15 @@
 
 /* eslint-disable max-classes-per-file */
 
-abstract class ReportingError extends Error {
-  protected abstract code: string;
+export abstract class ReportingError extends Error {
+  public abstract code: string;
 
-  constructor(private details?: string) {
+  constructor(public details?: string) {
     super();
   }
 
   public get message(): string {
     return `ReportingError "${this.code}"`;
-  }
-
-  public getDetails(): undefined | string {
-    return this.details;
   }
 
   public toString() {
@@ -55,6 +51,10 @@ export class CannotStartChromiumError extends ReportingError {
  */
 export class AuthenticationExpiredError extends ReportingError {
   code = 'authentication_expired';
+}
+
+export class QueueTimeoutError extends ReportingError {
+  code = 'queue_timeout_error';
 }
 
 /**
