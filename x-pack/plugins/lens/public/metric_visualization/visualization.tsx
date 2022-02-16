@@ -23,6 +23,8 @@ import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
 
+export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+
 const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricState,
@@ -38,6 +40,8 @@ const toExpression = (
 
   const stops = state.palette?.params?.stops || [];
   const isCustomPalette = state.palette?.params?.name === CUSTOM_PALETTE;
+
+  const canColor = operation?.dataType === 'number';
 
   const paletteParams = {
     ...state.palette?.params,
@@ -67,7 +71,7 @@ const toExpression = (
           metricTitle: [operation?.label || ''],
           accessor: [state.accessor],
           mode: [attributes?.mode || 'full'],
-          colorMode: [state?.colorMode || ColorMode.None],
+          colorMode: !canColor ? [ColorMode.None] : [state?.colorMode || ColorMode.None],
           palette:
             state?.colorMode && state?.colorMode !== ColorMode.None
               ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
@@ -155,7 +159,8 @@ export const getMetricVisualization = ({
               ]
             : [],
           supportsMoreColumns: !props.state.accessor,
-          filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+          filterOperations: (op: OperationMetadata) =>
+            !op.isBucketed && supportedTypes.has(op.dataType),
           enableDimensionEditor: true,
           required: true,
         },

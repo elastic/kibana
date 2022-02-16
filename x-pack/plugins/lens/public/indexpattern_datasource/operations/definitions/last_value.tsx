@@ -39,7 +39,16 @@ function ofName(name: string, timeShift: string | undefined) {
   );
 }
 
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+const supportedTypes = new Set([
+  'string',
+  'boolean',
+  'number',
+  'ip',
+  'date',
+  'ip_range',
+  'number_range',
+  'date_range',
+]);
 
 export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
   if (!indexPattern) {

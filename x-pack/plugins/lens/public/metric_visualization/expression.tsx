@@ -145,7 +145,13 @@ export function MetricChart({
 
   return (
     <VisualizationContainer className="lnsMetricExpression__container" style={color}>
-      <AutoScale key={value} titlePosition={titlePosition} textAlign={textAlign} size={size}>
+      <AutoScale
+        key={value}
+        titlePosition={titlePosition}
+        textAlign={textAlign}
+        size={size}
+        minScale={mode === 'full' ? undefined : 0.05}
+      >
         {mode === 'full' && (
           <div
             data-test-subj="lns_metric_title"
