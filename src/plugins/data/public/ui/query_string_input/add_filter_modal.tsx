@@ -23,15 +23,12 @@ import {
   EuiModalBody,
   EuiTabs,
   EuiTab,
-  EuiForm,
   EuiPanel,
-  EuiSpacer,
   EuiHorizontalRule,
   EuiButtonIcon,
   EuiText,
   EuiIcon,
   EuiFieldText,
-  EuiBadge,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -185,6 +182,7 @@ export function AddFilterModal({
             ) + 1
           : 0,
         subGroupId: 1,
+        groupsCount,
       },
     ]);
     setGroupsCount(1);

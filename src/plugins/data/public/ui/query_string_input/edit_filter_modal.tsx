@@ -30,6 +30,7 @@ import {
   EuiModalBody,
   EuiTabs,
   EuiTab,
+  EuiPanel,
   EuiForm,
   EuiHorizontalRule,
   EuiButtonIcon,
@@ -125,7 +126,7 @@ export function EditFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(filter.groupCount ?? 0);
+  const [groupsCount, setGroupsCount] = useState<number>(currentEditFilters[currentEditFilters?.length - 1].groupCount ?? 0);
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [submitDisabled, setSubmitDisabled] = useState(false);
 
@@ -513,10 +514,12 @@ export function EditFilterModal({
       }
 
       const temp = (
-        <div
+        <EuiPanel
+          color="subdued"
           className={classNames(
             filtersInGroup > 1 && groupsCount > 1 ? 'kbnQueryBar__filterModalGroups' : ''
           )}
+          paddingSize="s"
         >
           {subGroups.map((subGroup, subGroupIdx) => {
             const classes =
@@ -727,7 +730,7 @@ export function EditFilterModal({
               </>
             );
           })}
-        </div>
+        </EuiPanel>
       );
       GroupComponent.push(temp);
     }

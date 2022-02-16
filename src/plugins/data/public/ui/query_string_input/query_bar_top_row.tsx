@@ -415,7 +415,7 @@ export const QueryBarTopRow = React.memo(
           id,
           relationship: selectedFilters[idx].relationship,
           subGroupId: selectedFilters[idx].subGroupId,
-          groupCount
+          groupCount: selectedFilters[idx].groupsCount,
         };
       });
 
