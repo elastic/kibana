@@ -6,14 +6,16 @@
  */
 
 /**
- * We expected metricset and dataset to match but it appears to be the case that
- * dataset is the full {product}.{metricset}, whereas metricset doesn't include
+ * We expected metricset and dataset to be aligned where dataset
+ * is the full {product}.{metricset}, whereas metricset doesn't include
  * the product, e.g. dataset is elasticsearch.cluster_stats and metricset is
  * just cluster_stats.
  *
- * TODO: Consider having this function accept "product" and "metricset", and
- * concatenate them together to form the dataset, to avoid repetition, or
- * provide types to narrow the valid values for dataset and metricset.
+ * Unfortunately, this doesn't *always* seem to be the case, and sometimes
+ * the "metricset" value is different. For this reason, we've left these
+ * two as separate arguments to this function, at least until this is resolved.
+ *
+ * More info: https://github.com/elastic/kibana/pull/119112/files#r772605936
  *
  * @param  {string} type matches legacy data
  * @param  {string} metricset matches standalone beats
