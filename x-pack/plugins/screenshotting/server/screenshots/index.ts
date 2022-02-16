@@ -18,7 +18,7 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
+import type { KibanaRequest, Logger } from 'src/core/server';
 import { LayoutParams } from '../../common';
 import type { ConfigType } from '../config';
 import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
@@ -30,6 +30,11 @@ import { Semaphore } from './semaphore';
 
 export interface ScreenshotOptions extends ScreenshotObservableOptions {
   layout: LayoutParams;
+
+  /**
+   * Source Kibana request object from where the headers will be extracted.
+   */
+  request?: KibanaRequest;
 }
 
 export interface ScreenshotResult {
@@ -77,6 +82,7 @@ export class Screenshots {
       browserTimezone,
       timeouts: { openUrl: openUrlTimeout },
     } = options;
+    const headers = { ...(options.request?.headers ?? {}), ...(options.headers ?? {}) };
 
     return this.browserDriverFactory
       .createPage(
@@ -93,7 +99,10 @@ export class Screenshots {
           apmCreatePage?.end();
           unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
 
-          const screen = new ScreenshotObservableHandler(driver, this.logger, layout, options);
+          const screen = new ScreenshotObservableHandler(driver, this.logger, layout, {
+            ...options,
+            headers,
+          });
 
           return from(options.urls).pipe(
             concatMap((url, index) =>
