@@ -209,6 +209,10 @@ exports[`Error SPAN_NAME 1`] = `undefined`;
 
 exports[`Error SPAN_SELF_TIME_SUM 1`] = `undefined`;
 
+exports[`Error SPAN_SERVICE_TARGET_NAME 1`] = `undefined`;
+
+exports[`Error SPAN_SERVICE_TARGET_TYPE 1`] = `undefined`;
+
 exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
@@ -453,6 +457,10 @@ exports[`Span SPAN_ID 1`] = `"span id"`;
 exports[`Span SPAN_NAME 1`] = `"span name"`;
 
 exports[`Span SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
+exports[`Span SPAN_SERVICE_TARGET_NAME 1`] = `undefined`;
+
+exports[`Span SPAN_SERVICE_TARGET_TYPE 1`] = `undefined`;
 
 exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
@@ -712,6 +720,10 @@ exports[`Transaction SPAN_ID 1`] = `undefined`;
 exports[`Transaction SPAN_NAME 1`] = `undefined`;
 
 exports[`Transaction SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
+exports[`Transaction SPAN_SERVICE_TARGET_NAME 1`] = `undefined`;
+
+exports[`Transaction SPAN_SERVICE_TARGET_TYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 

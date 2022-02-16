@@ -6,19 +6,20 @@
  */
 
 import { EventOutcome } from '../../../common/event_outcome';
-import {
-  EVENT_OUTCOME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-} from '../../../common/elasticsearch_fieldnames';
+import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 export async function getErrorRateChartsForBackend({
-  backendName,
+  resourceIdentifierFields,
   setup,
   start,
   end,
@@ -26,7 +27,7 @@ export async function getErrorRateChartsForBackend({
   kuery,
   offset,
 }: {
-  backendName: string;
+  resourceIdentifierFields: Record<string, string>;
   setup: Setup;
   start: number;
   end: number;
@@ -42,6 +43,12 @@ export async function getErrorRateChartsForBackend({
     offset,
   });
 
+  const resourceIdentifierTerms = Object.entries(resourceIdentifierFields).map(
+    (x) => {
+      return termQuery(x[0], x[1])[0];
+    }
+  );
+
   const response = await apmEventClient.search('get_error_rate_for_backend', {
     apm: {
       events: [ProcessorEvent.metric],
@@ -54,7 +61,7 @@ export async function getErrorRateChartsForBackend({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...rangeQuery(startWithOffset, endWithOffset),
-            { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
+            ...resourceIdentifierTerms,
             {
               terms: {
                 [EVENT_OUTCOME]: [EventOutcome.success, EventOutcome.failure],

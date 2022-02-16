@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
+// import { SPAN_SERVICE_TARGET_TYPE } from '../../../../../plugin/apm/common/elasticsearch_fieldnames';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -21,7 +22,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: `GET /internal/apm/backends/metadata`,
       params: {
         query: {
-          backendName: dataConfig.span.destination,
+          resourceIdentifierFields: JSON.stringify({
+            'span.destination.service.resource': dataConfig.span.destination,
+          }),
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
         },

@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const { start, end } = archives[archiveName];
 
   function getName(node: Node) {
-    return node.type === NodeType.service ? node.serviceName : node.backendName;
+    return node.type === NodeType.service ? node.serviceName : node.displayName;
   }
 
   registry.when(

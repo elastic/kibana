@@ -18,6 +18,8 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_SERVICE_TARGET_TYPE,
+  SPAN_SERVICE_TARGET_NAME,
   SPAN_ID,
   SPAN_SUBTYPE,
   SPAN_TYPE,
@@ -30,7 +32,8 @@ import { Node, NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 
 type Destination = {
-  backendName: string;
+  displayName: string;
+  resourceIdentifierFields: Record<string, string>;
   spanId: string;
   spanType: string;
   spanSubtype: string;
@@ -69,58 +72,122 @@ export const getDestinationMap = ({
       offset,
     });
 
-    const response = await apmEventClient.search('get_exit_span_samples', {
-      apm: {
-        events: [ProcessorEvent.span],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...filter,
-              ...excludeRumExitSpansQuery(),
-            ],
-          },
+    const response = await apmEventClient.search(
+      'get_exit_span_samples_by_service_target',
+      {
+        apm: {
+          events: [ProcessorEvent.span],
         },
-        aggs: {
-          connections: {
-            composite: {
-              size: 10000,
-              sources: asMutableArray([
-                {
-                  backendName: {
-                    terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
-                  },
-                },
-                // make sure we get samples for both successful
-                // and failed calls
-                { eventOutcome: { terms: { field: EVENT_OUTCOME } } },
-              ] as const),
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { exists: { field: SPAN_SERVICE_TARGET_TYPE } },
+                ...rangeQuery(startWithOffset, endWithOffset),
+                ...filter,
+                ...excludeRumExitSpansQuery(),
+              ],
             },
-            aggs: {
-              sample: {
-                top_metrics: {
-                  size: 1,
-                  metrics: asMutableArray([
-                    { field: SPAN_TYPE },
-                    { field: SPAN_SUBTYPE },
-                    { field: SPAN_ID },
-                  ] as const),
-                  sort: [
-                    {
-                      '@timestamp': 'asc' as const,
+          },
+          aggs: {
+            connections: {
+              composite: {
+                size: 10000,
+                sources: asMutableArray([
+                  {
+                    targetType: {
+                      terms: { field: SPAN_SERVICE_TARGET_TYPE },
                     },
-                  ],
+                  },
+                  {
+                    targetName: {
+                      terms: { field: SPAN_SERVICE_TARGET_NAME },
+                    },
+                  },
+                  // make sure we get samples for both successful
+                  // and failed calls
+                  { eventOutcome: { terms: { field: EVENT_OUTCOME } } },
+                ] as const),
+              },
+              aggs: {
+                sample: {
+                  top_metrics: {
+                    size: 1,
+                    metrics: asMutableArray([
+                      { field: SPAN_TYPE },
+                      { field: SPAN_SUBTYPE },
+                      { field: SPAN_ID },
+                    ] as const),
+                    sort: [
+                      {
+                        '@timestamp': 'asc' as const,
+                      },
+                    ],
+                  },
                 },
               },
             },
           },
         },
-      },
-    });
+      }
+    );
+
+    const response2 = await apmEventClient.search(
+      'get_exit_span_samples_by_service_resource',
+      {
+        apm: {
+          events: [ProcessorEvent.span],
+        },
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
+                ...rangeQuery(startWithOffset, endWithOffset),
+                ...filter,
+                ...excludeRumExitSpansQuery(),
+              ],
+            },
+          },
+          aggs: {
+            connections: {
+              composite: {
+                size: 10000,
+                sources: asMutableArray([
+                  {
+                    destinationServiceResource: {
+                      terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                    },
+                  },
+                  // make sure we get samples for both successful
+                  // and failed calls
+                  { eventOutcome: { terms: { field: EVENT_OUTCOME } } },
+                ] as const),
+              },
+              aggs: {
+                sample: {
+                  top_metrics: {
+                    size: 1,
+                    metrics: asMutableArray([
+                      { field: SPAN_TYPE },
+                      { field: SPAN_SUBTYPE },
+                      { field: SPAN_ID },
+                    ] as const),
+                    sort: [
+                      {
+                        '@timestamp': 'asc' as const,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      }
+    );
 
     const destinationsBySpanId = new Map<string, Destination>();
 
@@ -130,7 +197,30 @@ export const getDestinationMap = ({
       const spanId = sample[SPAN_ID] as string;
 
       destinationsBySpanId.set(spanId, {
-        backendName: bucket.key.backendName as string,
+        displayName: bucket.key.targetName
+          ? `${bucket.key.targetType}/${bucket.key.targetName}`
+          : (bucket.key.targetType as string),
+        resourceIdentifierFields: {
+          [SPAN_SERVICE_TARGET_TYPE]: bucket.key.targetType as string,
+          [SPAN_SERVICE_TARGET_NAME]: bucket.key.targetName as string,
+        },
+        spanId,
+        spanType: (sample[SPAN_TYPE] as string | null) || '',
+        spanSubtype: (sample[SPAN_SUBTYPE] as string | null) || '',
+      });
+    });
+
+    response2.aggregations?.connections.buckets.forEach((bucket) => {
+      const sample = bucket.sample.top[0].metrics;
+
+      const spanId = sample[SPAN_ID] as string;
+
+      destinationsBySpanId.set(spanId, {
+        displayName: bucket.key.destinationServiceResource as string,
+        resourceIdentifierFields: {
+          [SPAN_DESTINATION_SERVICE_RESOURCE]: bucket.key
+            .destinationServiceResource as string,
+        },
         spanId,
         spanType: (sample[SPAN_TYPE] as string | null) || '',
         spanSubtype: (sample[SPAN_SUBTYPE] as string | null) || '',
@@ -192,8 +282,11 @@ export const getDestinationMap = ({
     const nodesByBackendName = new Map<string, Node>();
 
     destinationsBySpanId.forEach((destination) => {
+      const destinationIdentifierHash = objectHash(
+        destination.resourceIdentifierFields
+      );
       const existingDestination =
-        nodesByBackendName.get(destination.backendName) ?? {};
+        nodesByBackendName.get(destinationIdentifierHash) ?? {};
 
       const mergedDestination = {
         ...existingDestination,
@@ -211,15 +304,16 @@ export const getDestinationMap = ({
         };
       } else {
         node = {
-          backendName: mergedDestination.backendName,
+          displayName: mergedDestination.displayName,
+          resourceIdentifierFields: mergedDestination.resourceIdentifierFields,
           spanType: mergedDestination.spanType,
           spanSubtype: mergedDestination.spanSubtype,
-          id: objectHash({ backendName: mergedDestination.backendName }),
+          id: objectHash({ target: destinationIdentifierHash }),
           type: NodeType.backend,
         };
       }
 
-      nodesByBackendName.set(destination.backendName, node);
+      nodesByBackendName.set(destinationIdentifierHash, node);
     });
 
     return nodesByBackendName;

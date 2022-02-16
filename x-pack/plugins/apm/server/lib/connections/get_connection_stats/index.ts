@@ -8,6 +8,7 @@
 import { ValuesType } from 'utility-types';
 import { merge } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import objectHash from 'object-hash';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup } from '../../helpers/setup_request';
 import { getStats } from './get_stats';
@@ -53,7 +54,11 @@ export function getConnectionStats({
 
     const statsWithLocationIds = allMetrics.map((statsItem) => {
       const { from, timeseries, value } = statsItem;
-      const to = destinationMap.get(statsItem.to.backendName) ?? statsItem.to;
+      const destinationIdentifierHash = objectHash(
+        statsItem.to.resourceIdentifierFields
+      );
+
+      const to = destinationMap.get(destinationIdentifierHash) ?? statsItem.to;
 
       const location = collapseBy === 'upstream' ? from : to;
 

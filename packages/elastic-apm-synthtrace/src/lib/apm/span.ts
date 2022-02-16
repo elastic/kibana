@@ -38,4 +38,10 @@ export class Span extends BaseSpan {
 
     return this;
   }
+
+  destinationWithServiceTarget(type: string, name: string) {
+    this.fields['test.span.service.target.type'] = type;
+    this.fields['test.span.service.target.name'] = name;
+    return this;
+  }
 }

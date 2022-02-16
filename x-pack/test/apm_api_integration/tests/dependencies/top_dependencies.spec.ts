@@ -74,7 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const { span } = dataConfig;
 
           expect(location.type).to.be(NodeType.backend);
-          expect(location.backendName).to.be(span.destination);
+          expect(location.displayName).to.be(span.destination);
           expect(location.spanType).to.be(span.type);
           expect(location.spanSubtype).to.be(span.subType);
           expect(location).to.have.property('id');

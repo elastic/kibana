@@ -75,6 +75,9 @@ export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT =
 export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM =
   'span.destination.service.response_time.sum.us';
 
+export const SPAN_SERVICE_TARGET_TYPE = 'test.span.service.target.type';
+export const SPAN_SERVICE_TARGET_NAME = 'test.span.service.target.name';
+
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 

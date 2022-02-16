@@ -66,7 +66,10 @@ export function BackendInventoryDependenciesTable() {
           type={location.spanType}
           subtype={location.spanSubtype}
           query={{
-            backendName: location.backendName,
+            displayName: location.displayName,
+            resourceIdentifierFields: JSON.stringify(
+              location.resourceIdentifierFields
+            ),
             comparisonEnabled,
             comparisonType,
             environment,

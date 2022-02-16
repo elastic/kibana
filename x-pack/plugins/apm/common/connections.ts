@@ -25,7 +25,8 @@ export interface ServiceNode extends NodeBase {
 
 export interface BackendNode extends NodeBase {
   type: NodeType.backend;
-  backendName: string;
+  displayName: string;
+  resourceIdentifierFields: Record<string, string>;
   spanType: string;
   spanSubtype: string;
 }
@@ -67,5 +68,5 @@ export interface ConnectionStatsItemWithComparisonData {
 }
 
 export function getNodeName(node: Node) {
-  return node.type === NodeType.service ? node.serviceName : node.backendName;
+  return node.type === NodeType.service ? node.serviceName : node.displayName;
 }

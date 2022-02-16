@@ -75,7 +75,7 @@ export function BackendContents({
     ? apmRouter.link('/backends/overview', {
         query: {
           ...query,
-          backendName,
+          displayName: backendName,
         } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
       })
     : undefined;

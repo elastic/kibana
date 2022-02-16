@@ -20,7 +20,7 @@ interface Props {
 
 export function BackendDetailTemplate({ title, children }: Props) {
   const {
-    query: { backendName, rangeFrom, rangeTo },
+    query: { displayName, resourceIdentifierFields, rangeFrom, rangeTo },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -34,14 +34,14 @@ export function BackendDetailTemplate({ title, children }: Props) {
       return callApmApi('GET /internal/apm/backends/metadata', {
         params: {
           query: {
-            backendName,
+            resourceIdentifierFields,
             start,
             end,
           },
         },
       });
     },
-    [backendName, start, end]
+    [resourceIdentifierFields, start, end]
   );
 
   const { data: { metadata } = {} } = backendMetadataFetch;
@@ -53,7 +53,7 @@ export function BackendDetailTemplate({ title, children }: Props) {
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle size="l">
-                <h1>{backendName}</h1>
+                <h1>{displayName}</h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

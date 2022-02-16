@@ -79,6 +79,8 @@ export type ApmFields = Fields &
     'span.destination.service.type': string;
     'span.destination.service.response_time.sum.us': number;
     'span.destination.service.response_time.count': number;
+    'test.span.service.target.type': string;
+    'test.span.service.target.name': string;
     'span.self_time.count': number;
     'span.self_time.sum.us': number;
     'cloud.provider': string;

@@ -19,6 +19,8 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+  SPAN_SERVICE_TARGET_TYPE,
+  SPAN_SERVICE_TARGET_NAME,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_SUBTYPE,
   SPAN_TYPE,
@@ -54,114 +56,124 @@ export const getStats = async ({
     offset,
   });
 
-  const response = await apmEventClient.search('get_connection_stats', {
-    apm: {
-      events: [ProcessorEvent.metric],
-    },
-    body: {
-      track_total_hits: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...filter,
-            {
-              exists: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...excludeRumExitSpansQuery(),
-          ],
-        },
+  const response = await apmEventClient.search(
+    'get_connection_stats_by_service_target',
+    {
+      apm: {
+        events: [ProcessorEvent.metric],
       },
-      aggs: {
-        connections: {
-          composite: {
-            size: 10000,
-            sources: asMutableArray([
+      body: {
+        track_total_hits: true,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...filter,
               {
-                serviceName: {
-                  terms: {
-                    field: SERVICE_NAME,
-                  },
+                exists: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
                 },
               },
-              {
-                backendName: {
-                  terms: {
-                    field: SPAN_DESTINATION_SERVICE_RESOURCE,
-                  },
-                },
-              },
-            ] as const),
+              ...rangeQuery(startWithOffset, endWithOffset),
+              ...excludeRumExitSpansQuery(),
+            ],
           },
-          aggs: {
-            sample: {
-              top_metrics: {
-                size: 1,
-                metrics: asMutableArray([
-                  {
-                    field: SERVICE_ENVIRONMENT,
+        },
+        aggs: {
+          connections: {
+            composite: {
+              size: 10000,
+              sources: asMutableArray([
+                {
+                  serviceName: {
+                    terms: {
+                      field: SERVICE_NAME,
+                    },
                   },
-                  {
-                    field: AGENT_NAME,
-                  },
-                  {
-                    field: SPAN_TYPE,
-                  },
-                  {
-                    field: SPAN_SUBTYPE,
-                  },
-                ] as const),
-                sort: {
-                  '@timestamp': 'desc',
                 },
-              },
+                {
+                  targetType: {
+                    terms: {
+                      field: SPAN_SERVICE_TARGET_TYPE,
+                    },
+                  },
+                },
+                {
+                  targetName: {
+                    terms: {
+                      field: SPAN_SERVICE_TARGET_NAME,
+                    },
+                  },
+                },
+              ] as const),
             },
-            total_latency_sum: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-              },
-            },
-            total_latency_count: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: getBucketSize({
-                  start: startWithOffset,
-                  end: endWithOffset,
-                  numBuckets,
-                  minBucketSize: 60,
-                }).intervalString,
-                extended_bounds: {
-                  min: startWithOffset,
-                  max: endWithOffset,
-                },
-              },
-              aggs: {
-                latency_sum: {
-                  sum: {
-                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+            aggs: {
+              sample: {
+                top_metrics: {
+                  size: 1,
+                  metrics: asMutableArray([
+                    {
+                      field: SERVICE_ENVIRONMENT,
+                    },
+                    {
+                      field: AGENT_NAME,
+                    },
+                    {
+                      field: SPAN_TYPE,
+                    },
+                    {
+                      field: SPAN_SUBTYPE,
+                    },
+                  ] as const),
+                  sort: {
+                    '@timestamp': 'desc',
                   },
                 },
-                count: {
-                  sum: {
-                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+              },
+              total_latency_sum: {
+                sum: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+                },
+              },
+              total_latency_count: {
+                sum: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                },
+              },
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: getBucketSize({
+                    start: startWithOffset,
+                    end: endWithOffset,
+                    numBuckets,
+                    minBucketSize: 60,
+                  }).intervalString,
+                  extended_bounds: {
+                    min: startWithOffset,
+                    max: endWithOffset,
                   },
                 },
-                [EVENT_OUTCOME]: {
-                  terms: {
-                    field: EVENT_OUTCOME,
+                aggs: {
+                  latency_sum: {
+                    sum: {
+                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+                    },
                   },
-                  aggs: {
-                    count: {
-                      sum: {
-                        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                  count: {
+                    sum: {
+                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                    },
+                  },
+                  [EVENT_OUTCOME]: {
+                    terms: {
+                      field: EVENT_OUTCOME,
+                    },
+                    aggs: {
+                      count: {
+                        sum: {
+                          field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                        },
                       },
                     },
                   },
@@ -171,61 +183,249 @@ export const getStats = async ({
           },
         },
       },
-    },
+    }
+  );
+
+  const response2 = await apmEventClient.search(
+    'get_connection_stats_by_service_response',
+    {
+      apm: {
+        events: [ProcessorEvent.metric],
+      },
+      body: {
+        track_total_hits: true,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...filter,
+              {
+                exists: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                },
+              },
+              ...rangeQuery(startWithOffset, endWithOffset),
+              ...excludeRumExitSpansQuery(),
+            ],
+          },
+        },
+        aggs: {
+          connections: {
+            composite: {
+              size: 10000,
+              sources: asMutableArray([
+                {
+                  serviceName: {
+                    terms: {
+                      field: SERVICE_NAME,
+                    },
+                  },
+                },
+                {
+                  destinationServiceResource: {
+                    terms: {
+                      field: SPAN_DESTINATION_SERVICE_RESOURCE,
+                    },
+                  },
+                },
+              ] as const),
+            },
+            aggs: {
+              sample: {
+                top_metrics: {
+                  size: 1,
+                  metrics: asMutableArray([
+                    {
+                      field: SERVICE_ENVIRONMENT,
+                    },
+                    {
+                      field: AGENT_NAME,
+                    },
+                    {
+                      field: SPAN_TYPE,
+                    },
+                    {
+                      field: SPAN_SUBTYPE,
+                    },
+                  ] as const),
+                  sort: {
+                    '@timestamp': 'desc',
+                  },
+                },
+              },
+              total_latency_sum: {
+                sum: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+                },
+              },
+              total_latency_count: {
+                sum: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                },
+              },
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: getBucketSize({
+                    start: startWithOffset,
+                    end: endWithOffset,
+                    numBuckets,
+                    minBucketSize: 60,
+                  }).intervalString,
+                  extended_bounds: {
+                    min: startWithOffset,
+                    max: endWithOffset,
+                  },
+                },
+                aggs: {
+                  latency_sum: {
+                    sum: {
+                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+                    },
+                  },
+                  count: {
+                    sum: {
+                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                    },
+                  },
+                  [EVENT_OUTCOME]: {
+                    terms: {
+                      field: EVENT_OUTCOME,
+                    },
+                    aggs: {
+                      count: {
+                        sum: {
+                          field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }
+  );
+
+  const test1 = response.aggregations?.connections.buckets.map((bucket) => {
+    const sample = bucket.sample.top[0].metrics;
+    const serviceName = bucket.key.serviceName as string;
+
+    const resourceIdentifierFields = {
+      [SPAN_SERVICE_TARGET_TYPE]: bucket.key.targetType as string,
+      [SPAN_SERVICE_TARGET_NAME]: bucket.key.targetName as string,
+    };
+
+    return {
+      from: {
+        id: objectHash({ serviceName }),
+        serviceName,
+        environment: (sample[SERVICE_ENVIRONMENT] ||
+          ENVIRONMENT_NOT_DEFINED.value) as string,
+        agentName: sample[AGENT_NAME] as AgentName,
+        type: NodeType.service as const,
+      },
+      to: {
+        id: objectHash(resourceIdentifierFields),
+        displayName: bucket.key.targetName
+          ? `${bucket.key.targetType}/${bucket.key.targetName}`
+          : (bucket.key.targetType as string),
+        resourceIdentifierFields,
+        spanType: sample[SPAN_TYPE] as string,
+        spanSubtype: (sample[SPAN_SUBTYPE] || '') as string,
+        type: NodeType.backend as const,
+      },
+      value: {
+        count: sum(
+          bucket.timeseries.buckets.map(
+            (dateBucket) => dateBucket.count.value ?? 0
+          )
+        ),
+        latency_sum: sum(
+          bucket.timeseries.buckets.map(
+            (dateBucket) => dateBucket.latency_sum.value ?? 0
+          )
+        ),
+        error_count: sum(
+          bucket.timeseries.buckets.flatMap(
+            (dateBucket) =>
+              dateBucket[EVENT_OUTCOME].buckets.find(
+                (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+              )?.count.value ?? 0
+          )
+        ),
+      },
+      timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
+        x: dateBucket.key + offsetInMs,
+        count: dateBucket.count.value ?? 0,
+        latency_sum: dateBucket.latency_sum.value ?? 0,
+        error_count:
+          dateBucket[EVENT_OUTCOME].buckets.find(
+            (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+          )?.count.value ?? 0,
+      })),
+    };
   });
 
-  return (
-    response.aggregations?.connections.buckets.map((bucket) => {
-      const sample = bucket.sample.top[0].metrics;
-      const serviceName = bucket.key.serviceName as string;
-      const backendName = bucket.key.backendName as string;
+  const test2 = response2.aggregations?.connections.buckets.map((bucket) => {
+    const sample = bucket.sample.top[0].metrics;
+    const serviceName = bucket.key.serviceName as string;
 
-      return {
-        from: {
-          id: objectHash({ serviceName }),
-          serviceName,
-          environment: (sample[SERVICE_ENVIRONMENT] ||
-            ENVIRONMENT_NOT_DEFINED.value) as string,
-          agentName: sample[AGENT_NAME] as AgentName,
-          type: NodeType.service as const,
-        },
-        to: {
-          id: objectHash({ backendName }),
-          backendName,
-          spanType: sample[SPAN_TYPE] as string,
-          spanSubtype: (sample[SPAN_SUBTYPE] || '') as string,
-          type: NodeType.backend as const,
-        },
-        value: {
-          count: sum(
-            bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.count.value ?? 0
-            )
-          ),
-          latency_sum: sum(
-            bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.latency_sum.value ?? 0
-            )
-          ),
-          error_count: sum(
-            bucket.timeseries.buckets.flatMap(
-              (dateBucket) =>
-                dateBucket[EVENT_OUTCOME].buckets.find(
-                  (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-                )?.count.value ?? 0
-            )
-          ),
-        },
-        timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
-          x: dateBucket.key + offsetInMs,
-          count: dateBucket.count.value ?? 0,
-          latency_sum: dateBucket.latency_sum.value ?? 0,
-          error_count:
-            dateBucket[EVENT_OUTCOME].buckets.find(
-              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-            )?.count.value ?? 0,
-        })),
-      };
-    }) ?? []
-  );
+    const resourceIdentifierFields = {
+      [SPAN_DESTINATION_SERVICE_RESOURCE]: bucket.key
+        .destinationServiceResource as string,
+    };
+
+    return {
+      from: {
+        id: objectHash({ serviceName }),
+        serviceName,
+        environment: (sample[SERVICE_ENVIRONMENT] ||
+          ENVIRONMENT_NOT_DEFINED.value) as string,
+        agentName: sample[AGENT_NAME] as AgentName,
+        type: NodeType.service as const,
+      },
+      to: {
+        id: objectHash(resourceIdentifierFields),
+        displayName: bucket.key.destinationServiceResource as string,
+        resourceIdentifierFields,
+        spanType: sample[SPAN_TYPE] as string,
+        spanSubtype: (sample[SPAN_SUBTYPE] || '') as string,
+        type: NodeType.backend as const,
+      },
+      value: {
+        count: sum(
+          bucket.timeseries.buckets.map(
+            (dateBucket) => dateBucket.count.value ?? 0
+          )
+        ),
+        latency_sum: sum(
+          bucket.timeseries.buckets.map(
+            (dateBucket) => dateBucket.latency_sum.value ?? 0
+          )
+        ),
+        error_count: sum(
+          bucket.timeseries.buckets.flatMap(
+            (dateBucket) =>
+              dateBucket[EVENT_OUTCOME].buckets.find(
+                (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+              )?.count.value ?? 0
+          )
+        ),
+      },
+      timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
+        x: dateBucket.key + offsetInMs,
+        count: dateBucket.count.value ?? 0,
+        latency_sum: dateBucket.latency_sum.value ?? 0,
+        error_count:
+          dateBucket[EVENT_OUTCOME].buckets.find(
+            (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+          )?.count.value ?? 0,
+      })),
+    };
+  });
+
+  return [...(test1 ?? []), ...(test2 ?? [])];
 };
