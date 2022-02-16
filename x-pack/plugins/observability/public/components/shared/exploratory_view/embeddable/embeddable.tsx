@@ -35,7 +35,7 @@ export interface ExploratoryEmbeddableProps {
   isSingleMetric?: boolean;
   legendIsVisible?: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
-  owner?: string;
+  caseOwner?: string;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
   showCalculationMethod?: boolean;
@@ -63,7 +63,7 @@ export default function Embeddable({
   legendIsVisible,
   lens,
   onBrushEnd,
-  owner = observabilityFeatureId,
+  caseOwner = observabilityFeatureId,
   reportConfigMap = {},
   reportType,
   showCalculationMethod = false,
@@ -192,7 +192,7 @@ export default function Embeddable({
         autoOpen={isAddToCaseOpen}
         setAutoOpen={setAddToCaseOpen}
         appId={appId}
-        owner={owner}
+        owner={caseOwner}
       />
     </Wrapper>
   );

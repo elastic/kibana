@@ -107,11 +107,11 @@ describe('Embeddable', () => {
     const { container, getByText } = render(
       <Embeddable
         appId={mockAppId}
+        caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        owner={mockOwner}
-        lens={mockLens}
         indexPatterns={mockIndexPatterns}
+        lens={mockLens}
         reportType={mockReportType}
         title={mockTitle}
         withActions={mockActions}
@@ -125,11 +125,11 @@ describe('Embeddable', () => {
     const { container } = render(
       <Embeddable
         appId={mockAppId}
+        caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        owner={mockOwner}
-        lens={mockLens}
         indexPatterns={mockIndexPatterns}
+        lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
       />
@@ -143,11 +143,11 @@ describe('Embeddable', () => {
     const { container } = render(
       <Embeddable
         appId={mockAppId}
+        caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        owner={mockOwner}
-        lens={mockLens}
         indexPatterns={mockIndexPatterns}
+        lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
       />
@@ -178,13 +178,13 @@ describe('Embeddable', () => {
     const { container } = render(
       <Embeddable
         appId={mockAppId}
+        caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        owner={mockOwner}
-        lens={mockLens}
         indexPatterns={mockIndexPatterns}
-        reportType={mockReportType}
         isSingleMetric={true}
+        lens={mockLens}
+        reportType={mockReportType}
         withActions={mockActions}
       />
     );
@@ -210,13 +210,13 @@ describe('Embeddable', () => {
     render(
       <Embeddable
         appId={mockAppId}
+        caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        owner={mockOwner}
-        lens={mockLens}
         indexPatterns={mockIndexPatterns}
-        reportType={mockReportType}
         isSingleMetric={true}
+        lens={mockLens}
+        reportType={mockReportType}
         withActions={mockActions}
       />
     );
@@ -224,6 +224,6 @@ describe('Embeddable', () => {
     expect((AddToCaseAction as jest.Mock).mock.calls[0][0].timeRange).toEqual(mockTimeRange);
     expect((AddToCaseAction as jest.Mock).mock.calls[0][0].appId).toEqual(mockAppId);
     expect((AddToCaseAction as jest.Mock).mock.calls[0][0].lensAttributes).toEqual(mockLensAttrs);
-    expect((AddToCaseAction as jest.Mock).mock.calls[0][0].owner).toEqual(mockOwner);
+    expect((AddToCaseAction as jest.Mock).mock.calls[0][0].caseOwner).toEqual(mockOwner);
   });
 });
