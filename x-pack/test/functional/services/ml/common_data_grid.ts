@@ -65,18 +65,18 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
     },
 
     async assertEuiDataGridNotEmpty(tableSubj: string) {
-      const dataGridRows = await this.getDataGridCells(tableSubj);
-      expect(dataGridRows.length).to.be.greaterThan(
+      const dataGridCells = await this.getDataGridCells(tableSubj);
+      expect(dataGridCells.length).to.be.greaterThan(
         0,
-        `EuiDataGrid '${tableSubj}' should have at least one row (got '${dataGridRows.length}')`
+        `EuiDataGrid '${tableSubj}' should have at least one row (got '${dataGridCells.length}')`
       );
     },
 
     async assertEuiDataGridEmpty(tableSubj: string) {
-      const dataGridRows = await this.getDataGridCells(tableSubj);
-      expect(dataGridRows.length).to.eql(
+      const dataGridCells = await this.getDataGridCells(tableSubj);
+      expect(dataGridCells.length).to.eql(
         0,
-        `EuiDataGrid '${tableSubj}' should be empty (got '${dataGridRows.length} rows')`
+        `EuiDataGrid '${tableSubj}' should be empty (got '${dataGridCells.length} rows')`
       );
     },
 
