@@ -61,26 +61,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    // flaky https://github.com/elastic/kibana/issues/94889
-    it.skip('should show popover with expanded cell content by click on expand button', async () => {
+    it('should show popover with expanded cell content by click on expand button', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
-      const documentCell = await dataGrid.getCellElement(1, 3);
-      await documentCell.click();
-      const expandCellContentButton = await documentCell.findByClassName(
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
+        const cell = await dataGrid.getCellElement(1, 3);
+        const text = await cell.getVisibleText();
+        log.debug(`row document timestamp: ${text}`);
+        return text === 'Sep 22, 2015 @ 23:50:13.253';
+      });
+      const docCell = await dataGrid.getCellElement(1, 4);
+      await docCell.click();
+      const expandCellContentButton = await docCell.findByClassName(
         'euiDataGridRowCell__expandButtonIcon'
       );
       await expandCellContentButton.click();
-      const popoverJson = await monacoEditor.getCodeEditorValue();
+      let expandDocId = '';
 
-      log.debug('open expanded document flyout to get json');
+      await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
+        const text = await monacoEditor.getCodeEditorValue();
+        const flyoutJson = JSON.parse(text);
+        expandDocId = flyoutJson._id;
+        log.debug(`expanded document id: ${expandDocId}`);
+        return expandDocId === 'AU_x3_g4GFA8no6QjkYX';
+      });
+
       await dataGrid.clickRowToggle();
       await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
-      const flyoutJson = await monacoEditor.getCodeEditorValue();
 
-      expect(popoverJson).to.be(flyoutJson);
+      await retry.waitForWithTimeout(
+        'document id in flyout matching the expanded document id',
+        5000,
+        async () => {
+          const text = await monacoEditor.getCodeEditorValue();
+          const flyoutJson = JSON.parse(text);
+          log.debug(`flyout document id: ${flyoutJson._id}`);
+          return flyoutJson._id === expandDocId;
+        }
+      );
     });
 
     it('should show popover with expanded cell content by click on expand button on embeddable', async () => {
