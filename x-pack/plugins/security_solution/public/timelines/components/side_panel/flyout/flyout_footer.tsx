@@ -12,7 +12,7 @@ import { ACTIVE_PANEL } from '../event_details';
 import { TimelineEventsDetailsItem } from '../../../../../../timelines/common';
 import { Ecs } from '../../../../../common/ecs';
 
-interface IProps {
+export interface IProps {
   activePanel: ACTIVE_PANEL | null;
   detailsData: TimelineEventsDetailsItem[] | null;
   ecsData: Ecs | null;
@@ -50,10 +50,16 @@ const EventDetailsFlyoutFooterComponent: React.FC<IProps> = ({
   };
   switch (activePanel) {
     case ACTIVE_PANEL.OSQUERY:
-      return <OsqueryEventDetailsFooter handlePanelChange={handlePanelChange} />;
+      return (
+        <OsqueryEventDetailsFooter
+          handlePanelChange={handlePanelChange}
+          data-test-subj={'flyout-footer-osquery'}
+        />
+      );
     default:
       return (
         <EventDetailsFooter
+          data-test-subj={'flyout-footer-default'}
           detailsData={detailsData}
           detailsEcsData={ecsData}
           expandedEvent={expandedEvent}

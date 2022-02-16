@@ -19,7 +19,7 @@ const OsqueryActionWrapper = styled.div`
   padding: 8px;
 `;
 
-interface IProps {
+export interface IProps {
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
   expandedEvent: {
@@ -68,13 +68,14 @@ const EventDetailsFlyoutBodyComponent: React.FC<IProps> = ({
   switch (activePanel) {
     case ACTIVE_PANEL.OSQUERY:
       return (
-        <OsqueryActionWrapper>
+        <OsqueryActionWrapper data-test-subj={'flyout-body-osquery'}>
           {osquery?.OsqueryAction?.({ agentId, formType: 'steps' })}
         </OsqueryActionWrapper>
       );
     case ACTIVE_PANEL.HOST_ISOLATION:
       return (
         <HostIsolationPanel
+          data-test-subj={'flyout-body-host-isolation'}
           details={detailsData}
           cancelCallback={showAlertDetails}
           successCallback={handleIsolationActionSuccess}
@@ -84,6 +85,7 @@ const EventDetailsFlyoutBodyComponent: React.FC<IProps> = ({
     default:
       return (
         <ExpandableEvent
+          data-test-subj={'flyout-body-default'}
           browserFields={browserFields}
           detailsData={detailsData}
           event={expandedEvent}
