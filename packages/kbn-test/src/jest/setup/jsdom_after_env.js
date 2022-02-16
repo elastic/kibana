@@ -13,3 +13,7 @@
 
 import 'jest-styled-components';
 import '@testing-library/jest-dom';
+
+import './steps/mocks';
+import './steps/mocks_jsdom';
+import './steps/react_testing_library';

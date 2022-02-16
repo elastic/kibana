@@ -6,35 +6,24 @@
  * Side Public License, v 1.
  */
 
-const preset = require('../jest-preset');
+const preset = require('../jest_integration_jsdom/jest-preset');
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   ...preset,
-  testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
-  testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
-    (pattern) => !pattern.includes('integration_tests')
-  ),
+
+  // The paths to modules that run some code to configure or set up the testing environment before each test
+  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/jest/setup/integration_setup.js'],
+
+  // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/integration_after_env.js',
   ],
-  reporters: [
-    'default',
-    [
-      '@kbn/test/target_node/jest/junit_reporter',
-      {
-        rootDirectory: '.',
-        reportName: 'Jest Integration Tests',
-      },
-    ],
-    [
-      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
-      {
-        testGroupType: 'Jest Integration Tests',
-      },
-    ],
-  ],
-  coverageReporters: !!process.env.CI
-    ? [['json', { file: 'jest-integration.json' }]]
-    : ['html', 'text'],
+
+  // A list of paths to snapshot serializer modules Jest should use for snapshot testing
+  snapshotSerializers: [],
+
+  // The test environment that will be used for testing
+  testEnvironment: 'node',
 };

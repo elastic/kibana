@@ -23,17 +23,6 @@
  * The mocks that are enabled that way live inside the `__mocks__` folders beside their implementation files.
  */
 
-jest.mock('moment-timezone', () => {
-  // We always want to mock the timezone moment-timezone guesses, since otherwise
-  // test results might be depending on which time zone you are running them.
-  // Using that mock we always make sure moment.tz.guess is always returning the same
-  // timezone in all tests.
-  const moment = jest.requireActual('moment-timezone');
-  moment.tz.guess = () => 'America/New_York';
-  moment.tz.setDefault('America/New_York');
-  return moment;
-});
-
 jest.mock('@elastic/eui/lib/services/react', () => {
   // `enqueueStateChange` is an EUI method to batch queued functions that trigger React `setState` calls.
   // This is for performance, but when used in certain Jest scernarios it can be nondeterministic.

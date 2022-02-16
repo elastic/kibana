@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_integration_jsdom',
-  rootDir: '../..',
-  roots: ['<rootDir>/src/core'],
-};
+/* eslint-env jest */
+
+import './steps/mocks';
+
+/**
+ * Set the default timeout for the integration test suite to 10 minutes
+ */
+jest.setTimeout(10 * 60 * 1000);

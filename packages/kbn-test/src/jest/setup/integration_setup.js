@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-/* eslint-env jest */
-
-/**
- * Set the default timeout for the integration test suite to 10 minutes
- */
-jest.setTimeout(10 * 60 * 1000);
+import './steps/babel_polyfill';

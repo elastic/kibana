@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_integration_jsdom',
-  rootDir: '../..',
-  roots: ['<rootDir>/src/core'],
-};
+import './steps/babel_polyfill';
+import './steps/polyfills_jsdom';
+import './steps/enzyme';

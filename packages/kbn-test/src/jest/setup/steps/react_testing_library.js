@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import '@testing-library/jest-dom';
 /**
  * PLEASE NOTE:
  * Importing '@testing-library/react' registers an `afterEach(cleanup)` side effect.
