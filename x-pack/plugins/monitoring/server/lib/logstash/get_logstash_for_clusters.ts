@@ -44,7 +44,7 @@ export function getLogstashForClusters(
 ) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
-  const config = req.server.config();
+  const config = req.server.config;
 
   const dataset = 'node_stats';
   const type = 'logstash_stats';
@@ -59,6 +59,7 @@ export function getLogstashForClusters(
   return Promise.all(
     clusters.map((cluster) => {
       const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
+      const maxBucketSize = config.ui.max_bucket_size;
       const params = {
         index: indexPatterns,
         size: 0,
@@ -77,7 +78,7 @@ export function getLogstashForClusters(
             logstash_uuids: {
               terms: {
                 field: 'logstash_stats.logstash.uuid',
-                size: config.get('monitoring.ui.max_bucket_size'),
+                size: maxBucketSize,
               },
               aggs: {
                 latest_report: {
@@ -136,7 +137,7 @@ export function getLogstashForClusters(
             logstash_versions: {
               terms: {
                 field: 'logstash_stats.logstash.version',
-                size: config.get('monitoring.ui.max_bucket_size'),
+                size: maxBucketSize,
               },
             },
             pipelines_nested: {
@@ -152,7 +153,7 @@ export function getLogstashForClusters(
                 queue_types: {
                   terms: {
                     field: 'logstash_stats.pipelines.queue.type',
-                    size: config.get('monitoring.ui.max_bucket_size'),
+                    size: maxBucketSize,
                   },
                   aggs: {
                     num_pipelines: {
@@ -177,7 +178,7 @@ export function getLogstashForClusters(
                 queue_types: {
                   terms: {
                     field: 'logstash.node.stats.pipelines.queue.type',
-                    size: config.get('monitoring.ui.max_bucket_size'),
+                    size: maxBucketSize,
                   },
                   aggs: {
                     num_pipelines: {
