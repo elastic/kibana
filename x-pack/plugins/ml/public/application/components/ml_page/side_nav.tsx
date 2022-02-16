@@ -45,7 +45,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           },
         }
       : undefined;
-  }, [globalState]);
+  }, [globalState?.refreshInterval]);
 
   const redirectToTab = useCallback(
     async (defaultPathId: MlLocatorParams['page']) => {
@@ -223,7 +223,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         forceOpen: true,
       };
     },
-    [activeRoute?.path]
+    [activeRoute?.path, redirectToTab]
   );
 
   return useMemo(() => tabsDefinition.map(getTabItem), [tabsDefinition, getTabItem]);

@@ -4,7 +4,7 @@
   ],
   "description": "Identifies a Logging bucket deletion in Google Cloud Platform (GCP). Log buckets are containers that store and organize log data. A deleted bucket stays in a pending state for 7 days, and Logging continues to route logs to the bucket during that time. To stop routing logs to a deleted bucket, the log sinks can be deleted that have the bucket as a destination, or the filter for the sinks can be modified to stop routing logs to the deleted bucket. An adversary may delete a log bucket to evade detection.",
   "false_positives": [
-    "Logging bucket deletions may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Logging bucket deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Logging bucket deletions may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Logging bucket deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "index": [
     "filebeat-*",
@@ -49,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }
