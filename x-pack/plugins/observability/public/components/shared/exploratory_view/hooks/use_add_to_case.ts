@@ -45,7 +45,7 @@ export const useAddToCase = ({
   appId,
   owner = observabilityFeatureId,
 }: AddToCaseProps & {
-  appId?: 'security' | 'observability';
+  appId?: 'securitySolutionUI' | 'observability';
   getToastText: (thaCase: Case) => MountPoint<HTMLElement>;
 }) => {
   const [isSaving, setIsSaving] = useState(false);

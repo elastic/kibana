@@ -24,13 +24,13 @@ import { observabilityFeatureId } from '../../../../../common';
 import { SingleMetric, SingleMetricOptions } from './single_metric';
 
 export interface ExploratoryEmbeddableProps {
-  appId?: 'security' | 'observability';
+  appId?: 'securitySolutionUI' | 'observability';
   appendTitle?: JSX.Element;
   attributes?: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   customHeight?: string | number;
-  customLensAttrs?: any;
-  customTimeRange?: { from: string; to: string };
+  customLensAttrs?: any; // Takes LensAttributes
+  customTimeRange?: { from: string; to: string }; // requred if rendered with LensAttributes
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   isSingleMetric?: boolean;
   legendIsVisible?: boolean;
@@ -40,7 +40,7 @@ export interface ExploratoryEmbeddableProps {
   reportType: ReportViewType;
   showCalculationMethod?: boolean;
   singleMetricOptions?: SingleMetricOptions;
-  title: string | JSX.Element;
+  title?: string | JSX.Element;
   withActions?: boolean | ActionTypes[];
 }
 
@@ -77,7 +77,7 @@ export default function Embeddable({
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
 
-  const series = Object.entries(attributes)[0][1];
+  const series = Object.entries(attributes)[0]?.[1];
 
   const [operationType, setOperationType] = useState(series?.operationType);
   const theme = useTheme();
@@ -97,7 +97,7 @@ export default function Embeddable({
   } catch (error) {}
 
   const attributesJSON = customLensAttrs ?? lensAttributes?.getJSON();
-
+  const timeRange = customTimeRange ?? series?.time;
   if (typeof axisTitlesVisibility !== 'undefined') {
     (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
       axisTitlesVisibility;
@@ -115,7 +115,7 @@ export default function Embeddable({
     setIsSaveOpen,
     setAddToCaseOpen,
     lensAttributes: attributesJSON,
-    timeRange: customTimeRange ?? series?.time,
+    timeRange,
   });
 
   if (!attributesJSON && layerConfigs.length < 1) {
@@ -130,7 +130,7 @@ export default function Embeddable({
     <Wrapper $customHeight={customHeight}>
       <EuiFlexGroup alignItems="center" gutterSize="none">
         {title && (
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="exploratoryView-title">
             <EuiTitle size="xs">
               <h3>{title}</h3>
             </EuiTitle>
@@ -146,15 +146,16 @@ export default function Embeddable({
             />
           </EuiFlexItem>
         )}
-        {appendTitle}
+        {appendTitle && appendTitle}
       </EuiFlexGroup>
 
       {isSingleMetric && (
         <SingleMetric {...singleMetricOptions}>
           <LensComponent
             id="exploratoryView-singleMetric"
+            data-test-subj="exploratoryView-singleMetric"
             style={{ height: '100%' }}
-            timeRange={customTimeRange ?? series?.time}
+            timeRange={timeRange}
             attributes={attributesJSON}
             onBrushEnd={onBrushEnd}
             withDefaultActions={Boolean(withActions)}
@@ -166,8 +167,9 @@ export default function Embeddable({
       {!isSingleMetric && (
         <LensComponent
           id="exploratoryView"
+          data-test-subj="exploratoryView"
           style={{ height: '100%' }}
-          timeRange={customTimeRange ?? series?.time}
+          timeRange={timeRange}
           attributes={attributesJSON}
           onBrushEnd={onBrushEnd}
           withDefaultActions={Boolean(withActions)}

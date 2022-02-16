@@ -32,7 +32,7 @@ export function useActions({
   withActions?: boolean | ActionTypes[];
   reportType: ReportViewType;
   attributes: AllSeries;
-  appId?: 'security' | 'observability';
+  appId?: 'securitySolutionUI' | 'observability';
   setIsSaveOpen: (val: boolean) => void;
   setAddToCaseOpen: (val: boolean) => void;
   timeRange: { from: string; to: string };

@@ -21,7 +21,7 @@ import { observabilityFeatureId, observabilityAppId } from '../../../../../commo
 import { parseRelativeDate } from '../components/date_range_picker';
 
 export interface AddToCaseProps {
-  appId?: 'security' | 'observability';
+  appId?: 'securitySolutionUI' | 'observability';
   autoOpen?: boolean;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
   owner?: string;
