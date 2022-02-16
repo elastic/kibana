@@ -251,7 +251,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           predicate: (record) =>
             Boolean(
               record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:TSVB:bcb63b50-4c89-11e8-b3d7-01146121b73d'
+                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:metrics:bcb63b50-4c89-11e8-b3d7-01146121b73d'
               )
             ),
           retry,
@@ -268,7 +268,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
               child: {
                 type: 'visualization',
-                name: 'TSVB',
+                name: 'metrics',
                 id: 'bcb63b50-4c89-11e8-b3d7-01146121b73d',
                 description: '[Flights] Delays & Cancellations',
                 url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
@@ -278,13 +278,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      // application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b
       it('propagates context for Vega visualizations', async () => {
         await assertLogContains({
           description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
           predicate: (record) =>
             Boolean(
               record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:Vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'
+                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'
               )
             ),
           retry,
@@ -301,7 +302,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
               child: {
                 type: 'visualization',
-                name: 'Vega',
+                name: 'vega',
                 id: 'ed78a660-53a0-11e8-acbd-0be0ad9d822b',
                 description: '[Flights] Airport Connections (Hover Over Airport)',
                 url: '/app/visualize#/edit/ed78a660-53a0-11e8-acbd-0be0ad9d822b',
@@ -317,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           predicate: (record) =>
             Boolean(
               record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:Tag cloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
+                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:tagcloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
               )
             ),
           retry,
@@ -334,7 +335,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
               child: {
                 type: 'visualization',
-                name: 'Tag cloud',
+                name: 'tagcloud',
                 id: '293b5a30-4c8f-11e8-b3d7-01146121b73d',
                 description: '[Flights] Destination Weather',
                 url: '/app/visualize#/edit/293b5a30-4c8f-11e8-b3d7-01146121b73d',
@@ -350,7 +351,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           predicate: (record) =>
             Boolean(
               record.http?.request?.id?.includes(
-                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:Vertical bar:9886b410-4c8b-11e8-b3d7-01146121b73d'
+                'kibana:application:dashboard:7adfa750-4c81-11e8-b3d7-01146121b73d;visualization:histogram:9886b410-4c8b-11e8-b3d7-01146121b73d'
               )
             ),
           retry,
@@ -367,7 +368,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               url: '/view/7adfa750-4c81-11e8-b3d7-01146121b73d',
               child: {
                 type: 'visualization',
-                name: 'Vertical bar',
+                name: 'histogram',
                 id: '9886b410-4c8b-11e8-b3d7-01146121b73d',
                 description: '[Flights] Delay Buckets',
                 url: '/app/visualize#/edit/9886b410-4c8b-11e8-b3d7-01146121b73d',
