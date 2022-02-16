@@ -8,18 +8,16 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHideFor,
   EuiPopover,
-  EuiShowFor,
+  EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataView } from '../../../../../../data/common';
+import type { DataView } from '../../../../../../data/common';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { GetStateReturn } from '../../services/discover_state';
@@ -139,59 +137,41 @@ export function DiscoverChart({
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiHideFor sizes={['s', 'xs', 'm']}>
-                    <EuiButtonEmpty
-                      size="xs"
-                      iconType="lensApp"
-                      onClick={onEditVisualization}
-                      data-test-subj="discoverEditVisualization"
-                    >
-                      {i18n.translate('discover.editVisualizationButton', {
-                        defaultMessage: 'Edit as visualization',
-                      })}
-                    </EuiButtonEmpty>
-                  </EuiHideFor>
-                  <EuiShowFor sizes={['s', 'xs', 'm']}>
+                  <EuiToolTip
+                    content={i18n.translate('discover.editVisualizationButton', {
+                      defaultMessage: 'Edit visualization',
+                    })}
+                  >
                     <EuiButtonIcon
                       size="xs"
                       iconType="lensApp"
                       onClick={onEditVisualization}
                       data-test-subj="discoverEditVisualization"
                       aria-label={i18n.translate('discover.editVisualizationButton', {
-                        defaultMessage: 'Edit as visualization',
+                        defaultMessage: 'Edit visualization',
                       })}
                     />
-                  </EuiShowFor>
+                  </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     id="dscChartOptions"
                     button={
-                      <>
-                        <EuiHideFor sizes={['s', 'xs', 'm']}>
-                          <EuiButtonEmpty
-                            size="xs"
-                            iconType="gear"
-                            onClick={onShowChartOptions}
-                            data-test-subj="discoverChartOptionsToggle"
-                          >
-                            {i18n.translate('discover.chartOptionsButton', {
-                              defaultMessage: 'Chart options',
-                            })}
-                          </EuiButtonEmpty>
-                        </EuiHideFor>
-                        <EuiShowFor sizes={['s', 'xs', 'm']}>
-                          <EuiButtonIcon
-                            size="xs"
-                            iconType="gear"
-                            onClick={onShowChartOptions}
-                            data-test-subj="discoverChartOptionsToggle"
-                            aria-label={i18n.translate('discover.chartOptionsButton', {
-                              defaultMessage: 'Chart options',
-                            })}
-                          />
-                        </EuiShowFor>
-                      </>
+                      <EuiToolTip
+                        content={i18n.translate('discover.chartOptionsButton', {
+                          defaultMessage: 'Chart options',
+                        })}
+                      >
+                        <EuiButtonIcon
+                          size="xs"
+                          iconType="gear"
+                          onClick={onShowChartOptions}
+                          data-test-subj="discoverChartOptionsToggle"
+                          aria-label={i18n.translate('discover.chartOptionsButton', {
+                            defaultMessage: 'Chart options',
+                          })}
+                        />
+                      </EuiToolTip>
                     }
                     isOpen={showChartOptionsPopover}
                     closePopover={closeChartOptions}

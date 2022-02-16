@@ -9,7 +9,8 @@
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
+import type { DataView } from '../../../../../../data/common';
+import { setHeaderActionMenuMounter, setUiActions } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
@@ -21,6 +22,7 @@ import { Chart } from './point_series';
 import { DiscoverChart } from './discover_chart';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -86,7 +88,12 @@ function mountComponent(isTimeBased: boolean = false) {
   }) as DataCharts$;
 
   const props = {
-    isTimeBased,
+    indexPattern: {
+      isTimeBased: () => isTimeBased,
+      id: '123',
+      getFieldByName: () => ({ type: 'date', name: 'timefield' }),
+      timeFieldName: 'timefield',
+    } as unknown as DataView,
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchDataChart$: charts$,
@@ -111,8 +118,27 @@ describe('Discover chart', () => {
     const component = mountComponent();
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
-  test('render with filefield', () => {
+
+  test('render with timefield', () => {
     const component = mountComponent(true);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="discoverEditVisualization"]').exists()).toBeTruthy();
+  });
+
+  test('triggers ui action on click', () => {
+    const fn = jest.fn();
+    setUiActions({
+      getTrigger: () => ({
+        exec: fn,
+      }),
+    } as unknown as UiActionsStart);
+    const component = mountComponent(true);
+    component.find('[data-test-subj="discoverEditVisualization"]').first().simulate('click');
+    expect(fn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatternId: '123',
+        fieldName: 'timefield',
+      })
+    );
   });
 });
