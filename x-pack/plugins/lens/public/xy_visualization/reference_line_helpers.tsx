@@ -311,7 +311,7 @@ export const getReferenceSupportedLayer = (
       !filledDataLayers.length ||
       (!dataLayers.some(layerHasNumberHistogram) &&
         dataLayers.every(({ accessors }) => !accessors.length)),
-    tooltipContent: filledDataLayers.length
+    toolTipContent: filledDataLayers.length
       ? undefined
       : i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabelDisabledHelp', {
           defaultMessage: 'Add some data to enable reference layer',
