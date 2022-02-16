@@ -77,7 +77,7 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'created-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText>{name}</EuiText>
+                <EuiText size="s">{name}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -110,7 +110,7 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'updated-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText>{name}</EuiText>
+                <EuiText size="s">{name}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
