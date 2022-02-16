@@ -459,7 +459,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     title={
                       <h2>
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.rules.disabledRuleTitle"
+                          id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRuleTitle"
                           defaultMessage="Disabled Rule"
                         />
                       </h2>
@@ -468,7 +468,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                       <>
                         <p>
                           <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.ruleDetails.ruleInstances.disabledRule"
+                            id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRule"
                             defaultMessage="This rule is disabled and cannot be displayed."
                           />
                         </p>

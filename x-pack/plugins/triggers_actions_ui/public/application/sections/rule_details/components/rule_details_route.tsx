@@ -94,7 +94,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
           <EuiSpacer />
           {spacesApi.ui.components.getLegacyUrlConflict({
             objectNoun: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+              'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
               {
                 defaultMessage: 'rule',
               }
@@ -157,7 +157,7 @@ export async function getRuleData(
   } catch (e) {
     toasts.addDanger({
       title: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.unableToLoadRuleMessage',
+        'xpack.triggersActionsUI.sections.ruleDetails.unableToLoadRuleMessage',
         {
           defaultMessage: 'Unable to load rule: {message}',
           values: {

@@ -61,12 +61,12 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
       return parseInt(await alertDurationEpoch.getAttribute('value'), 10);
     },
     async clickAlertMuteButton(alert: string) {
-      const muteAlertButton = await testSubjects.find(`muteRuleButton_${alert}`);
+      const muteAlertButton = await testSubjects.find(`muteAlertButton_${alert}`);
       await muteAlertButton.click();
     },
     async ensureAlertMuteState(alert: string, isMuted: boolean) {
       await retry.try(async () => {
-        const muteAlertButton = await testSubjects.find(`muteRuleButton_${alert}`);
+        const muteAlertButton = await testSubjects.find(`muteAlertButton_${alert}`);
         log.debug(`checked:${await muteAlertButton.getAttribute('aria-checked')}`);
         expect(await muteAlertButton.getAttribute('aria-checked')).to.eql(
           isMuted ? 'true' : 'false'

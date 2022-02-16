@@ -38,7 +38,7 @@ export const AlertMutedSwitch: React.FunctionComponent<ComponentOpts> = ({
         setIsMuted(!isMuted);
         setIsUpdating(false);
       }}
-      data-test-subj={`muteRuleButton_${alert.alert}`}
+      data-test-subj={`muteAlertButton_${alert.alert}`}
       showLabel={false}
       label="mute"
     />

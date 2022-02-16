@@ -62,7 +62,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToMuteRulesMessage',
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToMuteRulesMessage',
           {
             defaultMessage: 'Failed to mute rule(s)',
           }
@@ -82,7 +82,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToUnmuteRulesMessage',
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToUnmuteRulesMessage',
           {
             defaultMessage: 'Failed to unmute rule(s)',
           }
@@ -102,7 +102,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToEnableRulesMessage',
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToEnableRulesMessage',
           {
             defaultMessage: 'Failed to enable rule(s)',
           }
@@ -122,7 +122,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDisableRulesMessage',
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDisableRulesMessage',
           {
             defaultMessage: 'Failed to disable rule(s)',
           }
@@ -142,7 +142,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDeleteRulesMessage',
+          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDeleteRulesMessage',
           {
             defaultMessage: 'Failed to delete rule(s)',
           }
@@ -165,7 +165,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
             data-test-subj="muteAll"
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
+              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.muteAllTitle"
               defaultMessage="Mute"
             />
           </EuiButtonEmpty>
@@ -180,7 +180,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
             data-test-subj="unmuteAll"
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
+              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.unmuteAllTitle"
               defaultMessage="Unmute"
             />
           </EuiButtonEmpty>
@@ -195,7 +195,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
             data-test-subj="enableAll"
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
+              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle"
               defaultMessage="Enable"
             />
           </EuiButtonEmpty>
@@ -210,7 +210,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
             data-test-subj="disableAll"
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
+              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle"
               defaultMessage="Disable"
             />
           </EuiButtonEmpty>
@@ -227,7 +227,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           className="actBulkActionPopover__deleteAll"
         >
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteAllTitle"
             defaultMessage="Delete"
           />
         </EuiButtonEmpty>
