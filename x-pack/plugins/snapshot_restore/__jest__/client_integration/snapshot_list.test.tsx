@@ -155,6 +155,17 @@ describe('<SnapshotList />', () => {
           });
         });
 
+        test('term search with a date is parsed', async () => {
+          await setSearchText('2022.02.10');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'snapshot',
+            searchValue: '2022.02.10',
+            searchMatch: 'must',
+            searchOperator: 'eq',
+          });
+        });
+
         test('excluding term search is converted to partial excluding snapshot search', async () => {
           await setSearchText('-test_snapshot');
           expect(useLoadSnapshots).lastCalledWith({
