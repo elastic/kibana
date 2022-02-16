@@ -220,21 +220,19 @@ export function getAlertType(
     }
 
     const { getRecoveredAlerts } = services.alertFactory.done();
-    if (getRecoveredAlerts) {
-      for (const recoveredAlert of getRecoveredAlerts()) {
-        const alertId = recoveredAlert.getId();
-        logger.debug(`setting context for recovered alert ${alertId}`);
-        const baseContext: BaseActionContext = {
-          date,
-          value: unmetGroupValues[alertId] ?? 0,
-          group: alertId,
-          conditions: `${agg} is NOT ${getHumanReadableComparator(
-            params.thresholdComparator
-          )} ${params.threshold.join(' and ')}`,
-        };
-        const recoveryContext = addMessages(options, baseContext, params, true);
-        recoveredAlert.setContext(recoveryContext);
-      }
+    for (const recoveredAlert of getRecoveredAlerts()) {
+      const alertId = recoveredAlert.getId();
+      logger.debug(`setting context for recovered alert ${alertId}`);
+      const baseContext: BaseActionContext = {
+        date,
+        value: unmetGroupValues[alertId] ?? 0,
+        group: alertId,
+        conditions: `${agg} is NOT ${getHumanReadableComparator(
+          params.thresholdComparator
+        )} ${params.threshold.join(' and ')}`,
+      };
+      const recoveryContext = addMessages(options, baseContext, params, true);
+      recoveredAlert.setContext(recoveryContext);
     }
   }
 }

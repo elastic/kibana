@@ -72,7 +72,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         scheduleActions,
       } as any;
     },
-    done: () => ({}),
+    done: () => ({ getRecoveredAlerts: () => [] }),
   };
 
   return {

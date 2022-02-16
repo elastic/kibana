@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from 'src/core/server';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert } from './alert';
 import { getRecoveredAlerts } from '../lib';
@@ -14,7 +15,7 @@ export interface AlertFactoryDoneUtils<
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string
 > {
-  getRecoveredAlerts?: () => Array<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
+  getRecoveredAlerts: () => Array<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
 }
 
 export interface CreateAlertFactoryOpts<
@@ -23,6 +24,7 @@ export interface CreateAlertFactoryOpts<
   ActionGroupIds extends string
 > {
   alerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
+  logger: Logger;
   canSetRecoveryContext?: boolean;
 }
 
@@ -32,6 +34,7 @@ export function createAlertFactory<
   ActionGroupIds extends string
 >({
   alerts,
+  logger,
   canSetRecoveryContext = false,
 }: CreateAlertFactoryOpts<InstanceState, InstanceContext, ActionGroupIds>) {
   // Keep track of which alerts we started with so we can determine which have recovered
@@ -50,16 +53,21 @@ export function createAlertFactory<
     },
     done: (): AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds> => {
       isDone = true;
-      return canSetRecoveryContext === true
-        ? {
-            getRecoveredAlerts: () => {
-              const recoveredAlerts = getRecoveredAlerts(alerts, initialAlertIds);
-              return Object.keys(recoveredAlerts ?? []).map(
-                (alertId: string) => recoveredAlerts[alertId]
-              );
-            },
+      return {
+        getRecoveredAlerts: () => {
+          if (!canSetRecoveryContext) {
+            logger.debug(
+              `Set doesSetRecoveryContext to true on rule type to get access to recovered alerts.`
+            );
+            return [];
           }
-        : {};
+
+          const recoveredAlerts = getRecoveredAlerts(alerts, initialAlertIds);
+          return Object.keys(recoveredAlerts ?? []).map(
+            (alertId: string) => recoveredAlerts[alertId]
+          );
+        },
+      };
     },
   };
 }

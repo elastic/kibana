@@ -180,8 +180,6 @@ Because this determination occurs after rule type executors have completed execu
 
 Then, the following code would be added within a rule type executor. As you can see, when the rule type is finished creating and scheduling actions for active alerts, it should call `done()` on the alertFactory. This will give the executor access to the list recovered alerts for this execution cycle, for which it can iterate and set context.
 
-The following code would be within a rule type. As you can see `cpuUsage` will replace the state of the alert and `server` is the context for the alert to execute. The difference between the two is that `cpuUsage` will be accessible at the next execution.
-
 ```
 // Create and schedule actions for active alerts
 for (const i = 0; i < 5; ++i) {
@@ -193,15 +191,14 @@ for (const i = 0; i < 5; ++i) {
 }
 
 // Call done() to gain access to recovery utils
+// If `doesSetRecoveryContext` is set to `false`, getRecoveredAlerts() returns an empty list
 const { getRecoveredAlerts } = alertsFactory.done();
 
-if (getRecoveredAlerts) {
-	for (const alert of getRecoveredAlerts()) {
-		const alertId = alert.getId();
-		alert.setContext({
-			server: <set something useful here>
-		})
-	}
+for (const alert of getRecoveredAlerts()) {
+	const alertId = alert.getId();
+	alert.setContext({
+		server: <set something useful here>
+	})
 }
 ```
 ## Licensing

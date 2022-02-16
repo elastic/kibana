@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory } from './create_alert_factory';
 import { getRecoveredAlerts } from '../lib';
@@ -15,6 +16,7 @@ jest.mock('../lib', () => ({
 }));
 
 let clock: sinon.SinonFakeTimers;
+const logger = loggingSystemMock.create().get();
 
 describe('createAlertFactory()', () => {
   beforeAll(() => {
@@ -26,6 +28,7 @@ describe('createAlertFactory()', () => {
   test('creates new alerts for ones not passed in', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
+      logger,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -46,6 +49,7 @@ describe('createAlertFactory()', () => {
       alerts: {
         '1': alert,
       },
+      logger,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -67,6 +71,7 @@ describe('createAlertFactory()', () => {
     const alerts = {};
     const alertFactory = createAlertFactory({
       alerts,
+      logger,
     });
     alertFactory.create('1');
     expect(alerts).toMatchInlineSnapshot(`
@@ -82,6 +87,7 @@ describe('createAlertFactory()', () => {
   test('throws error when creating alerts after done() is called', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
+      logger,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -101,7 +107,7 @@ describe('createAlertFactory()', () => {
     );
   });
 
-  test('returns recovery context functions when setsRecoveryContext is true', () => {
+  test('returns recovered alerts when setsRecoveryContext is true', () => {
     (getRecoveredAlerts as jest.Mock).mockReturnValueOnce({
       z: {
         id: 'z',
@@ -116,6 +122,7 @@ describe('createAlertFactory()', () => {
     });
     const alertFactory = createAlertFactory({
       alerts: {},
+      logger,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -138,6 +145,7 @@ describe('createAlertFactory()', () => {
     (getRecoveredAlerts as jest.Mock).mockReturnValueOnce({});
     const alertFactory = createAlertFactory({
       alerts: {},
+      logger,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -150,7 +158,6 @@ describe('createAlertFactory()', () => {
     });
 
     const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
-    expect(getRecoveredAlertsFn).toBeDefined();
     const recoveredAlerts = getRecoveredAlertsFn!();
     expect(Array.isArray(recoveredAlerts)).toBe(true);
     expect(recoveredAlerts.length).toEqual(0);
@@ -160,6 +167,7 @@ describe('createAlertFactory()', () => {
     (getRecoveredAlerts as jest.Mock).mockReturnValueOnce(null);
     const alertFactory = createAlertFactory({
       alerts: {},
+      logger,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -172,15 +180,15 @@ describe('createAlertFactory()', () => {
     });
 
     const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
-    expect(getRecoveredAlertsFn).toBeDefined();
     const recoveredAlerts = getRecoveredAlertsFn!();
     expect(Array.isArray(recoveredAlerts)).toBe(true);
     expect(recoveredAlerts.length).toEqual(0);
   });
 
-  test('returns undefined recovery context functions when setsRecoveryContext is false', () => {
+  test('returns empty array if recovered alerts exist but setsRecoveryContext is false', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
+      logger,
       canSetRecoveryContext: false,
     });
     const result = alertFactory.create('1');
@@ -193,6 +201,11 @@ describe('createAlertFactory()', () => {
     });
 
     const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
-    expect(getRecoveredAlertsFn).not.toBeDefined();
+    const recoveredAlerts = getRecoveredAlertsFn!();
+    expect(Array.isArray(recoveredAlerts)).toBe(true);
+    expect(recoveredAlerts.length).toEqual(0);
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Set doesSetRecoveryContext to true on rule type to get access to recovered alerts.`
+    );
   });
 });

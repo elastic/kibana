@@ -7,7 +7,7 @@
 
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { Alert } from './alert';
+import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
@@ -64,7 +64,17 @@ const createAlertFactoryMock = {
 
     return mock as unknown as AlertInstanceMock<InstanceState, InstanceContext>;
   },
-  done: () => {},
+  done: <
+    InstanceState extends AlertInstanceState = AlertInstanceState,
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+    ActionGroupIds extends string = string
+  >() => {
+    const mock = {
+      getRecoveredAlerts: jest.fn(),
+    };
+    mock.getRecoveredAlerts.mockReturnValue([]);
+    return mock as unknown as AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
+  },
 };
 
 const createAbortableSearchClientMock = () => {
@@ -87,10 +97,11 @@ const createAlertServicesMock = <
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 >() => {
   const alertFactoryMockCreate = createAlertFactoryMock.create<InstanceState, InstanceContext>();
+  const alertFactoryMockDone = createAlertFactoryMock.done<InstanceState, InstanceContext, never>();
   return {
     alertFactory: {
       create: jest.fn().mockReturnValue(alertFactoryMockCreate),
-      done: jest.fn().mockReturnValue({}),
+      done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),

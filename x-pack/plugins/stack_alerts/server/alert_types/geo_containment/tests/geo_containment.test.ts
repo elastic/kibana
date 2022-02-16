@@ -40,7 +40,7 @@ const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => 
     );
     return alertInstance;
   },
-  done: () => ({}),
+  done: () => ({ getRecoveredAlerts: () => [] }),
 });
 
 describe('geo_containment', () => {
