@@ -6,7 +6,7 @@
  */
 
 /**
- * We expected metricset and dataset to be aligned where dataset
+ * We expect that metricset and dataset will be aligned where dataset
  * is the full {product}.{metricset}, whereas metricset doesn't include
  * the product, e.g. dataset is elasticsearch.cluster_stats and metricset is
  * just cluster_stats.
