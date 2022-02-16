@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-export class StringUtils {
-  /**
-   * Returns a version of the string with the first letter capitalized.
-   * @param str {string}
-   * @returns {string}
-   */
-  public static upperFirst(str: string = ''): string {
-    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
-  }
-}
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-test'],
+};
