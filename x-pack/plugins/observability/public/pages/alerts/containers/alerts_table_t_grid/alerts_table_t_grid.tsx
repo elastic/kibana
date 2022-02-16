@@ -385,7 +385,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       footerText: translations.alertsTable.footerTextLabel,
       onStateChange,
       query: {
-        query: kuery,
+        query: kuery ?? '',
         language: 'kuery',
       },
       renderCellValue: getRenderCellValue({ setFlyoutAlert }),
