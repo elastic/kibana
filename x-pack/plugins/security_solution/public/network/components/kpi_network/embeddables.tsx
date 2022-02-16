@@ -118,7 +118,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   customLensAttrs={customLensAttrs.kpiNetworkEvents}
                   customTimeRange={timerange}
                   isSingleMetric={true}
-                  metricIconColor="#6092c0"
                   onBrushEnd={onBrushEnd}
                 />
               </EuiPanel>
@@ -131,7 +130,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   customLensAttrs={customLensAttrs.kpiDnsQueries}
                   customTimeRange={timerange}
                   isSingleMetric={true}
-                  metricIconColor="#6092c0"
                   onBrushEnd={onBrushEnd}
                 />
               </EuiPanel>
@@ -147,7 +145,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   customLensAttrs={customLensAttrs.kpiUniqueFlowIds}
                   customTimeRange={timerange}
                   isSingleMetric={true}
-                  metricIconColor="#6092c0"
                   onBrushEnd={onBrushEnd}
                 />
               </EuiPanel>
@@ -160,7 +157,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   customLensAttrs={customLensAttrs.kpiTlsHandshakes}
                   customTimeRange={timerange}
                   isSingleMetric={true}
-                  metricIconColor="#6092c0"
                   onBrushEnd={onBrushEnd}
                 />
               </EuiPanel>
@@ -185,11 +181,13 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       dataTypesIndexPatterns={dataTypesIndexPatterns}
                       customLensAttrs={customLensAttrs.kpiUniquePrivateIpsSourceMetric}
                       customTimeRange={timerange}
-                      metricIcon="visMapCoordinate"
-                      metricPostfix={SOURCE_UNIT_LABEL}
-                      metricIconColor="#d36086"
                       onBrushEnd={onBrushEnd}
                       isSingleMetric={true}
+                      singleMetricOptions={{
+                        metricIcon: 'visMapCoordinate',
+                        metricIconColor: '#d36086',
+                        metricPostfix: SOURCE_UNIT_LABEL,
+                      }}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -213,11 +211,13 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       customLensAttrs={customLensAttrs.kpiUniquePrivateIpsDestinationMetric}
                       customTimeRange={timerange}
                       dataTypesIndexPatterns={dataTypesIndexPatterns}
-                      metricIcon="visMapCoordinate"
-                      metricIconColor="#9170b8"
-                      metricPostfix={DESTINATION_UNIT_LABEL}
                       onBrushEnd={onBrushEnd}
                       isSingleMetric={true}
+                      singleMetricOptions={{
+                        metricIcon: 'visMapCoordinate',
+                        metricIconColor: '#9170b8',
+                        metricPostfix: DESTINATION_UNIT_LABEL,
+                      }}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

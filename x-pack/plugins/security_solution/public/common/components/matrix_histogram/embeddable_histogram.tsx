@@ -5,7 +5,19 @@
  * 2.0.
  */
 import React from 'react';
+import { IconType } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+
+export interface SingleMetricOptions {
+  alignLnsMetric?: string;
+  disableBorder?: boolean;
+  disableShadow?: boolean;
+  metricIcon?: IconType;
+  metricIconColor?: string;
+  metricIconWidth?: string;
+  metricPostfix?: string;
+  metricPostfixWidth?: string;
+}
 
 const configs = {
   alignLnsMetric: 'flex-start',
@@ -30,11 +42,9 @@ interface EmbeddableHistogramProps {
   customTimeRange: { from: string; to: string };
   dataTypesIndexPatterns: string;
   isSingleMetric: boolean;
-  metricIcon?: string;
-  metricIconColor?: string;
-  metricPostfix?: string;
   onBrushEnd?: (param: { range: number[] }) => void;
   title?: string | JSX.Element;
+  singleMetricOptions?: SingleMetricOptions;
 }
 
 export const EmbeddableHistogram = (props: EmbeddableHistogramProps) => {

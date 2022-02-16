@@ -71,7 +71,6 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
     }),
     [from, to]
   );
-
   const dispatch = useDispatch();
 
   const { patternList, dataViewId } = useSourcererDataView();

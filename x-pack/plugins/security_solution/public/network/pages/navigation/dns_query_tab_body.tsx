@@ -157,7 +157,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
       />
       <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>
         <EmbeddableHistogram
-          appId="security"
           appendTitle={appendTitle}
           title={title}
           dataTypesIndexPatterns={patternList?.join(',')}
