@@ -10,6 +10,7 @@ import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts'
 import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { Globals } from '../../static_globals';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 type TopHitType = ElasticsearchResponseHit & {
   _source: { index_stats?: Partial<ElasticsearchIndexStats> };
@@ -41,12 +42,8 @@ export async function fetchIndexShardSize(
       size: 0,
       query: {
         bool: {
-          must: [
-            {
-              match: {
-                type: 'index_stats',
-              },
-            },
+          filter: [
+            createDatasetFilter('index_stats', 'index', 'elasticsearch.index'),
             {
               range: {
                 timestamp: {
@@ -86,6 +83,8 @@ export async function fetchIndexShardSize(
                         '_index',
                         'index_stats.shards.primaries',
                         'index_stats.primaries.store.size_in_bytes',
+                        'elasticsearch.index.shards.primaries',
+                        'elasticsearch.index.primaries.store.size_in_bytes',
                       ],
                     },
                     size: 1,
@@ -127,10 +126,8 @@ export async function fetchIndexShardSize(
       if (!topHit || !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
         continue;
       }
-      const {
-        _index: monitoringIndexName,
-        _source: { index_stats: indexStats },
-      } = topHit;
+      const { _index: monitoringIndexName, _source } = topHit;
+      const indexStats = _source.index_stats || _source.elasticsearch?.index;
 
       if (!indexStats || !indexStats.primaries) {
         continue;
