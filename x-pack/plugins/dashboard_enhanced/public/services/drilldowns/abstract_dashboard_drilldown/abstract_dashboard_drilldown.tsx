@@ -69,7 +69,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
     dashboardId: '',
     useCurrentFilters: true,
     useCurrentDateRange: true,
-    openInNewTab: false
+    openInNewTab: false,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
@@ -88,11 +88,10 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
 
   public readonly execute = async (config: Config, context: Context) => {
     if (config.openInNewTab) {
-    	window.open(await this.getHref(config,context),'_blank')
-    	}
-    else {
-    	const { app, path, state } = await this.getLocation(config, context, false);
-    	await this.params.start().core.application.navigateToApp(app, {path,state,});
+      window.open(await this.getHref(config, context), '_blank');
+    } else {
+      const { app, path, state } = await this.getLocation(config, context, false);
+      await this.params.start().core.application.navigateToApp(app, { path, state });
     }
   };
 
