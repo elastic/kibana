@@ -143,10 +143,20 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     //   };
     // });
 
-    const filters = [...props.filters, ...buildFilters];
-    props?.onFiltersUpdated?.(filters);
-
     props?.onMultipleFiltersUpdated?.(filtersNew);
+
+    const filters = [...props.filters, ...buildFilters];
+    const updatedFilters: Filter[] = [];
+
+    filtersNew.forEach((filter) => {
+      filters.forEach((f) => {
+        if (isEqual(f.query, filter.query)) {
+          updatedFilters.push(f);
+        }
+      });
+    });
+
+    props?.onFiltersUpdated?.(updatedFilters);
 
     props.toggleEditFilterModal?.(false);
   }
