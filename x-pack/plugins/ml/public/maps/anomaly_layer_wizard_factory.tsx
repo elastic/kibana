@@ -11,6 +11,7 @@ import type { StartServicesAccessor } from 'kibana/public';
 import type { LayerWizard, RenderWizardArguments } from '../../../maps/public';
 import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../maps/common';
 import { SEVERITY_COLOR_RAMP } from '../../common';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
 import {
   VectorLayerDescriptor,
@@ -45,18 +46,23 @@ export class AnomalyLayerWizardFactory {
     this.canGetJobs = canGetJobs;
   }
 
-  private async getServices(): Promise<{ mlJobsService: MlApiServices['jobs'] }> {
-    const [coreStart] = await this.getStartServices();
+  private async getServices(): Promise<{ mlJobsService: MlApiServices['jobs'], mlLocator: any }> {
+    const [coreStart, pluginStart] = await this.getStartServices();
     const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs');
 
     const httpService = new HttpService(coreStart.http);
     const mlJobsService = jobsApiProvider(httpService);
+    const mlLocator = pluginStart.share.url.locators.get(ML_APP_LOCATOR);
 
-    return { mlJobsService };
+    return { mlJobsService, mlLocator };
   }
 
   public async create(): Promise<LayerWizard> {
-    const { mlJobsService } = await this.getServices();
+    const { mlJobsService, mlLocator } = await this.getServices();
+    const jobsManagementPath = await mlLocator.getUrl({
+      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    })
+
     const { anomalyLayerWizard } = await import('./anomaly_layer_wizard');
 
     anomalyLayerWizard.getIsDisabled = () => !this.canGetJobs;
@@ -92,6 +98,8 @@ export class AnomalyLayerWizardFactory {
         <CreateAnomalySourceEditor
           onSourceConfigChange={onSourceConfigChange}
           mlJobsService={mlJobsService}
+          jobsManagementPath={jobsManagementPath}
+          canGetJobs={this.canGetJobs}
         />
       );
     };
