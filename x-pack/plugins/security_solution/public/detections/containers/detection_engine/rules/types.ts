@@ -236,18 +236,41 @@ export interface BulkActionProps<Action extends BulkAction> {
   edit?: BulkActionEditPayload[];
 }
 
-export interface BulkActionResult {
-  success: boolean;
-  rules_count: number;
+export interface BulkActionSummary {
+  failed: number;
+  succeeded: number;
+  total: number;
 }
 
-export type BulkActionResponse<Action extends BulkAction> = {
-  [BulkAction.delete]: BulkActionResult;
-  [BulkAction.disable]: BulkActionResult;
-  [BulkAction.enable]: BulkActionResult;
-  [BulkAction.duplicate]: BulkActionResult;
+export interface BulkActionResult {
+  updated: Rule[];
+  created: Rule[];
+  deleted: Rule[];
+}
+
+export interface BulkActionAggregatedError {
+  message: string;
+  status_code: number;
+  rules: Array<{ id: string; name?: string }>;
+}
+
+export interface BulkActionResponse {
+  success?: boolean;
+  rules_count?: number;
+  attributes: {
+    summary: BulkActionSummary;
+    results: BulkActionResult;
+    errors?: BulkActionAggregatedError[];
+  };
+}
+
+export type BulkActionResponseMap<Action extends BulkAction> = {
+  [BulkAction.delete]: BulkActionResponse;
+  [BulkAction.disable]: BulkActionResponse;
+  [BulkAction.enable]: BulkActionResponse;
+  [BulkAction.duplicate]: BulkActionResponse;
   [BulkAction.export]: Blob;
-  [BulkAction.edit]: BulkActionResult;
+  [BulkAction.edit]: BulkActionResponse;
 }[Action];
 
 export interface BasicFetchProps {

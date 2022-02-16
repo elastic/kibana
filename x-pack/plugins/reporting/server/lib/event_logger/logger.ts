@@ -9,6 +9,7 @@ import deepMerge from 'deepmerge';
 import { LogMeta } from 'src/core/server';
 import { LevelLogger } from '../';
 import { PLUGIN_ID } from '../../../common/constants';
+import type { TaskRunMetrics } from '../../../common/types';
 import { IReport } from '../store';
 import { ActionType } from './';
 import { EcsLogAdapter } from './adapter';
@@ -25,9 +26,8 @@ import {
 } from './types';
 
 /** @internal */
-export interface ExecutionCompleteMetrics {
+export interface ExecutionCompleteMetrics extends TaskRunMetrics {
   byteSize: number;
-  csvRows?: number;
 }
 
 export interface IReportingEventLogger {
@@ -102,13 +102,26 @@ export function reportingEventLoggerFactory(logger: LevelLogger) {
       return event;
     }
 
-    logExecutionComplete({ byteSize, csvRows }: ExecutionCompleteMetrics): CompletedExecution {
+    logExecutionComplete({
+      byteSize,
+      csv,
+      pdf,
+      png,
+    }: ExecutionCompleteMetrics): CompletedExecution {
       const message = `completed ${this.report.jobtype} execution`;
       this.completionLogger.stopTiming();
       const event = deepMerge(
         {
           message,
-          kibana: { reporting: { actionType: ActionType.EXECUTE_COMPLETE, byteSize, csvRows } },
+          kibana: {
+            reporting: {
+              actionType: ActionType.EXECUTE_COMPLETE,
+              byteSize,
+              csv,
+              pdf,
+              png,
+            },
+          },
         } as Partial<CompletedExecution>,
         this.eventObj
       );
