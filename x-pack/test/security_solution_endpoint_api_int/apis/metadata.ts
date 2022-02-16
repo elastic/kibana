@@ -37,7 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('test metadata apis', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('test metadata apis', () => {
     before(async () => {
       await endpointTestResources.setMetadataTransformFrequency('1s');
     });
