@@ -31,7 +31,7 @@ node scripts/docs.js --open
 
 REST APIs should be documented using the following recommended formats:
 
-* https://raw.githubusercontent.com/elastic/docs/master/shared/api-ref-ex.asciidoc[API doc templaate]
+* https://raw.githubusercontent.com/elastic/docs/master/shared/api-ref-ex.asciidoc[API doc template]
 * https://raw.githubusercontent.com/elastic/docs/master/shared/api-definitions-ex.asciidoc[API object definition template]
 
 [discrete]
