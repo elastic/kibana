@@ -7,15 +7,17 @@
 
 import React, { useEffect, useReducer, useCallback, Reducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '../../../../observability/public';
 import { ConfigKey } from '../../../common/runtime_types';
 import { getMonitors } from '../../state/actions';
 import { monitorManagementListSelector } from '../../state/selectors';
-import {
-  MonitorManagementList,
-  MonitorManagementListPageState,
-} from '../../components/monitor_management/monitor_list/monitor_list';
+import { MonitorManagementListPageState } from '../../components/monitor_management/monitor_list/monitor_list';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
+import { useInlineErrors } from '../../components/monitor_management/hooks/use_inline_errors';
+import { MonitorListTabs } from '../../components/monitor_management/monitor_list/list_tabs';
+import { AllMonitors } from '../../components/monitor_management/monitor_list/all_monitors';
+import { InvalidMonitors } from '../../components/monitor_management/monitor_list/invalid_monitors';
 
 export const MonitorManagementPage: React.FC = () => {
   const [pageState, dispatchPageAction] = useReducer<typeof monitorManagementPageReducer>(
@@ -47,17 +49,34 @@ export const MonitorManagementPage: React.FC = () => {
 
   const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementListPageState;
 
+  const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
+  const { errorSummaries } = useInlineErrors(viewType === 'invalid');
+
   useEffect(() => {
     dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortField, sortOrder }));
   }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder]);
 
   return (
-    <MonitorManagementList
-      pageState={pageState}
-      monitorList={monitorList}
-      onPageStateChange={onPageStateChange}
-      onUpdate={onUpdate}
-    />
+    <>
+      <MonitorListTabs errorSummaries={errorSummaries ?? []} />
+      {viewType === 'all' ? (
+        <AllMonitors
+          pageState={pageState}
+          monitorList={monitorList}
+          onPageStateChange={onPageStateChange}
+          onUpdate={onUpdate}
+          errorSummaries={errorSummaries}
+        />
+      ) : (
+        <InvalidMonitors
+          pageState={pageState}
+          monitorList={monitorList}
+          onPageStateChange={onPageStateChange}
+          onUpdate={onUpdate}
+          errorSummaries={errorSummaries}
+        />
+      )}
+    </>
   );
 };
 

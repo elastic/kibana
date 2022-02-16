@@ -21,6 +21,7 @@ import {
   FetchMonitorManagementListQueryArgs,
   ICMPSimpleFields,
   MonitorFields,
+  Ping,
   ServiceLocations,
   SyntheticsMonitorWithId,
   TCPSimpleFields,
@@ -34,6 +35,7 @@ import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 import { MonitorTags } from './tags';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { InlineError } from './inline_error';
 
 export interface MonitorManagementListPageState {
   pageIndex: number;
@@ -47,6 +49,7 @@ interface Props {
   monitorList: MonitorManagementListState;
   onPageStateChange: (state: MonitorManagementListPageState) => void;
   onUpdate: () => void;
+  errorSummaries: Ping[];
 }
 
 export const MonitorManagementList = ({
@@ -58,13 +61,18 @@ export const MonitorManagementList = ({
   },
   onPageStateChange,
   onUpdate,
+  errorSummaries,
 }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
   const isXl = useBreakpoints().up('xl');
 
   const { total } = list as MonitorManagementListState['list'];
   const monitors: SyntheticsMonitorWithId[] = useMemo(
-    () => list.monitors.map((monitor) => ({ ...monitor.attributes, id: monitor.id })),
+    () =>
+      list.monitors.map((monitor) => ({
+        ...monitor.attributes,
+        id: monitor.id,
+      })),
     [list.monitors]
   );
 
@@ -90,7 +98,7 @@ export const MonitorManagementList = ({
     pageIndex: pageIndex - 1, // page index for EuiBasicTable is base 0
     pageSize,
     totalItemCount: total || 0,
-    pageSizeOptions: [10, 25, 50, 100],
+    pageSizeOptions: [5, 10, 25, 50, 100],
   };
 
   const sorting: EuiTableSortingType<SyntheticsMonitorWithId> = {
@@ -185,6 +193,15 @@ export const MonitorManagementList = ({
         defaultMessage: 'Actions',
       }),
       render: (id: string) => <Actions id={id} isDisabled={!canEdit} onUpdate={onUpdate} />,
+    },
+    {
+      align: 'right' as const,
+      field: 'id',
+      name: '',
+      render: (id: string) => {
+        const errorSummary = errorSummaries?.find((summary) => summary.config_id === id);
+        return errorSummary ? <InlineError errorSummary={errorSummary} /> : null;
+      },
     },
   ] as Array<EuiBasicTableColumn<SyntheticsMonitorWithId>>;
 

@@ -75,7 +75,9 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, onDone }: Prop
       initialIsOpen={true}
     >
       {isStepsLoading && <EuiText>{LOADING_STEPS}</EuiText>}
-      {isStepsLoadingFailed && <EuiText color="danger">{FAILED_TO_RUN}</EuiText>}
+      {isStepsLoadingFailed && (
+        <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
+      )}
 
       {stepEnds.length > 0 && stepListData?.steps && (
         <StepsList

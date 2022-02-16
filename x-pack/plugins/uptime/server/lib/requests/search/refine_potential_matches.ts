@@ -90,6 +90,7 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
         name: latest.monitor?.name,
         type: latest.monitor?.type,
         duration: latest.monitor?.duration,
+        checkGroup: latest.monitor?.check_group,
       },
       url: latest.url ?? {},
       summary: {
@@ -104,6 +105,7 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
         geo: { name: summaryPings.map((p) => p.observer?.geo?.name ?? '').filter((n) => n !== '') },
       },
       service: summaryPings.find((p) => p.service?.name)?.service,
+      error: latest.error,
     },
   };
 };

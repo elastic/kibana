@@ -123,7 +123,8 @@ export const MonitorListComponent: ({
             state: {
               timestamp,
               summaryPings,
-              monitor: { type, duration },
+              monitor: { type, duration, checkGroup },
+              error: summaryError,
             },
             configId,
           }: MonitorSummary
@@ -137,6 +138,8 @@ export const MonitorListComponent: ({
               monitorType={type}
               duration={duration?.us}
               monitorId={monitorId}
+              checkGroup={checkGroup}
+              summaryError={summaryError}
             />
           );
         },

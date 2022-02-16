@@ -46,6 +46,7 @@ import { createNavigationRegistry, NavigationEntry } from './services/navigation
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -269,6 +270,7 @@ export class Plugin
         PageTemplate,
       },
       createExploratoryViewUrl,
+      getAppDataView: getAppDataView(pluginsStart.data),
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
     };
   }

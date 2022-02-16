@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -14,14 +14,13 @@ import {
   EuiFlexItem,
   EuiText,
   EuiToolTip,
-  EuiBadge,
   EuiSpacer,
   EuiHighlight,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { parseTimestamp } from '../parse_timestamp';
-import { DataStream, Ping } from '../../../../../common/runtime_types';
+import { DataStream, Ping, PingError } from '../../../../../common/runtime_types';
 import {
   STATUS,
   SHORT_TIMESPAN_LOCALE,
@@ -29,22 +28,24 @@ import {
   SHORT_TS_LOCALE,
 } from '../../../../../common/constants';
 
-import { UptimeThemeContext } from '../../../../contexts';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
 import { MonitorProgress } from './progress/monitor_progress';
 import { refreshedMonitorSelector } from '../../../../state/reducers/monitor_list';
 import { testNowRunSelector } from '../../../../state/reducers/test_now_runs';
 import { clearTestNowMonitorAction } from '../../../../state/actions';
+import { StatusBadge } from './status_badge';
 
 interface MonitorListStatusColumnProps {
   configId?: string;
   monitorId?: string;
+  checkGroup?: string;
   status: string;
   monitorType: string;
   timestamp: string;
   duration?: number;
   summaryPings: Ping[];
+  summaryError?: PingError;
 }
 
 const StatusColumnFlexG = styled(EuiFlexGroup)`
@@ -167,14 +168,12 @@ export const MonitorListStatusColumn = ({
   monitorId,
   status,
   duration,
+  checkGroup,
+  summaryError,
   summaryPings = [],
   timestamp: tsString,
 }: MonitorListStatusColumnProps) => {
   const timestamp = parseTimestamp(tsString);
-
-  const {
-    colors: { dangerBehindText },
-  } = useContext(UptimeThemeContext);
 
   const { statusMessage, locTooltip } = getLocationStatus(summaryPings, status);
 
@@ -204,12 +203,12 @@ export const MonitorListStatusColumn = ({
               stopProgressTrack={stopProgressTrack}
             />
           ) : (
-            <EuiBadge
-              className="eui-textCenter"
-              color={status === STATUS.UP ? 'success' : dangerBehindText}
-            >
-              {getHealthMessage(status)}
-            </EuiBadge>
+            <StatusBadge
+              status={status}
+              checkGroup={checkGroup}
+              summaryError={summaryError}
+              monitorType={monitorType}
+            />
           )}
         </EuiFlexItem>
       </StatusColumnFlexG>

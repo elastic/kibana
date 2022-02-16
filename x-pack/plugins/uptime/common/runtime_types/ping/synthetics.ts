@@ -79,6 +79,9 @@ export const JourneyStepType = t.intersection([
       }),
     }),
     synthetics: SyntheticsDataType,
+    error: t.type({
+      message: t.string,
+    }),
   }),
   t.type({
     _id: t.string,
