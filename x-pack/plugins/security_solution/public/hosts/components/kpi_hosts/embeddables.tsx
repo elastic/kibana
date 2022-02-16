@@ -36,6 +36,9 @@ import {
   SOURCE_UNIT_LABEL,
   DESTINATION_UNIT_LABEL,
 } from '../../../network/components/kpi_network/unique_private_ips/translations';
+import { UNIQUE_IPS } from './unique_ips/translations';
+import { USER_AUTHENTICATIONS } from './authentications/translations';
+import { HOSTS } from './hosts/translations';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -115,7 +118,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
           paddingSize="m"
         >
           <EuiTitle size="xs">
-            <h3>{'Hosts'}</h3>
+            <h3>{HOSTS}</h3>
           </EuiTitle>
           <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
             <EuiSplitPanel.Inner paddingSize="none" style={{ width: '100%' }}>
@@ -156,7 +159,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
           paddingSize="m"
         >
           <EuiTitle size="xs">
-            <h3>{'User authentications'}</h3>
+            <h3>{USER_AUTHENTICATIONS}</h3>
           </EuiTitle>
           <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
             <StyledInnerPannel paddingSize="none">
@@ -227,7 +230,7 @@ export const ExploratoryChartsComponents = ({ from, to, inputsModelId = 'global'
           paddingSize="m"
         >
           <EuiTitle size="xs">
-            <h3>{'Unique IPs'}</h3>
+            <h3>{UNIQUE_IPS}</h3>
           </EuiTitle>
           <EuiSplitPanel.Outer direction="row" grow={true} color="transparent" hasBorder={false}>
             <StyledInnerPannel paddingSize="none">
