@@ -6,7 +6,15 @@
  */
 
 /**
- * metricset and dataset should match but there are currently exceptions which could just be bugs
+ * We expected metricset and dataset to match but it appears to be the case that
+ * dataset is the full {product}.{metricset}, whereas metricset doesn't include
+ * the product, e.g. dataset is elasticsearch.cluster_stats and metricset is
+ * just cluster_stats.
+ *
+ * TODO: Consider having this function accept "product" and "metricset", and
+ * concatenate them together to form the dataset, to avoid repetition, or
+ * provide types to narrow the valid values for dataset and metricset.
+ *
  * @param  {string} type matches legacy data
  * @param  {string} metricset matches standalone beats
  * @param  {string} dataset matches agent integration data streams
