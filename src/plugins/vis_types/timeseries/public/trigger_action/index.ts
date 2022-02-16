@@ -14,7 +14,7 @@ import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { getDataSourceInfo } from './get_datasource_info';
 import { getFieldType } from './get_field_type';
-import { getSeries } from './get_series';
+// import { getSeries } from './get_series';
 import { getYExtents } from './get_extents';
 
 const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
@@ -61,6 +61,8 @@ export const triggerTSVBtoLensConfiguration = async (
     if (layer.stacked === 'percent') {
       chartType = layerChartType !== 'line' ? `${layerChartType}_percentage_stacked` : 'line';
     }
+
+    const { getSeries } = await import('./get_series');
 
     // handle multiple metrics
     let metricsArray = getSeries(layer.metrics);
