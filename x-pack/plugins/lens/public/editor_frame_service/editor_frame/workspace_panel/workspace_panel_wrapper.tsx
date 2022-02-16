@@ -124,9 +124,6 @@ export function WorkspacePanelWrapper({
           responsive={false}
           wrap={true}
           justifyContent="spaceBetween"
-          className={classNames({
-            'lnsWorkspaceToolbar--fullscreen': isFullscreen,
-          })}
         >
           <EuiFlexItem grow={true}>
             <EuiFlexGroup
@@ -135,7 +132,10 @@ export function WorkspacePanelWrapper({
               responsive={false}
               wrap={true}
               justifyContent="spaceBetween"
-              className="lnsWorkspacePanelWrapper__toolbar"
+              className={classNames('lnsWorkspacePanelWrapper__toolbar', {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                'lnsWorkspacePanelWrapper__toolbar--fullscreen': isFullscreen,
+              })}
             >
               {!isFullscreen && (
                 <EuiFlexItem grow={false}>
