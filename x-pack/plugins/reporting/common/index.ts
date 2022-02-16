@@ -5,5 +5,15 @@
  * 2.0.
  */
 
-export { getSharedComponents } from './get_shared_components';
-export type { ApplicationProps } from './get_shared_components';
+/**
+ * Common types that are documented in the Public API
+ */
+export type {
+  BaseParams,
+  BaseParamsV2,
+  BasePayload,
+  BasePayloadV2,
+  JobAppParamsPDF,
+  JobAppParamsPDFV2,
+  LocatorParams,
+} from './types';
