@@ -12,6 +12,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,
@@ -95,6 +96,40 @@ export function EnvironmentField({
         placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
           defaultMessage: 'Select environment',
         })}
+      />
+    </PopoverExpression>
+  );
+}
+
+export function TransactionNameField({
+  currentValue,
+  onChange,
+}: {
+  currentValue: string;
+  onChange: (value?: string) => void;
+}) {
+  const label = i18n.translate('xpack.apm.alerting.fields.transactionName', {
+    defaultMessage: 'Transaction',
+  });
+  return (
+    <PopoverExpression value={currentValue || allOption.value} title={label}>
+      <SuggestionsSelect
+        allOption={allOption}
+        field={TRANSACTION_NAME}
+        defaultValue={currentValue}
+        customOptionText={i18n.translate(
+          'xpack.apm.transactionNameSelectCustomOptionText',
+          {
+            defaultMessage: 'Add \\{searchValue\\} as a new transaction name',
+          }
+        )}
+        onChange={onChange}
+        placeholder={i18n.translate(
+          'xpack.apm.transactionNameSelectPlaceholder',
+          {
+            defaultMessage: 'Select transaction name',
+          }
+        )}
       />
     </PopoverExpression>
   );

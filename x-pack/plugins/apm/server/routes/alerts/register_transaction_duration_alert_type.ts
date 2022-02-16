@@ -46,6 +46,7 @@ import { RegisterRuleDependencies } from './register_apm_alerts';
 const paramsSchema = schema.object({
   serviceName: schema.string(),
   transactionType: schema.string(),
+  transactionName: schema.string(),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),

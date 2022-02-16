@@ -26,6 +26,7 @@ import {
   IsAboveField,
   ServiceField,
   TransactionTypeField,
+  TransactionNameField,
 } from '../fields';
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
@@ -37,6 +38,7 @@ export interface RuleParams {
   serviceName: string;
   threshold: number;
   transactionType: string;
+  transactionName: string;
   windowSize: number;
   windowUnit: string;
 }
@@ -125,7 +127,6 @@ export function TransactionDurationAlertTrigger(props: Props) {
       params.windowUnit,
     ]
   );
-
   const latencyChartPreview = data?.latencyChartPreview ?? [];
 
   const maxY = getMaxY([{ data: latencyChartPreview }]);
@@ -153,6 +154,10 @@ export function TransactionDurationAlertTrigger(props: Props) {
     <TransactionTypeField
       currentValue={params.transactionType}
       onChange={(value) => setRuleParams('transactionType', value)}
+    />,
+    <TransactionNameField
+      currentValue={params.transactionName}
+      onChange={(value) => setRuleParams('transactionName', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
