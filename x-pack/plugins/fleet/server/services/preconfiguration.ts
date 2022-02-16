@@ -181,9 +181,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     spaceId,
-    // During setup, we'll try to install preconfigured packages from the versions bundled with Kibana
-    // whenever possible
-    preferredSource: 'bundled',
   });
 
   const fulfilledPackages = [];
