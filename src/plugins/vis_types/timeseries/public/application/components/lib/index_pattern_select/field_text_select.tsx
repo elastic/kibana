@@ -37,7 +37,7 @@ export const FieldTextSelect = ({
 
   useDebounce(
     () => {
-      if (inputValue !== indexPatternString) {
+      if ((inputValue ?? '') !== (indexPatternString ?? '')) {
         onIndexChange(inputValue);
       }
     },

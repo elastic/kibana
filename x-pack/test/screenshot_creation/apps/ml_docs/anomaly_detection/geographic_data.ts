@@ -229,7 +229,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(ecommerceGeoJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(ecommerceGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
@@ -260,7 +259,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(weblogGeoJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(weblogGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();

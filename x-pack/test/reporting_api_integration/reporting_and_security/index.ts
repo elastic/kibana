@@ -12,9 +12,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('Reporting APIs', function () {
     this.tags('ciGroup2');
 
+    const esVersion = getService('esVersion');
+
     before(async () => {
       const reportingAPI = getService('reportingAPI');
-      await reportingAPI.logTaskManagerHealth();
+      if (esVersion.matchRange('<=7')) {
+        await reportingAPI.logTaskManagerHealth();
+      }
+
       await reportingAPI.createDataAnalystRole();
       await reportingAPI.createTestReportingUserRole();
       await reportingAPI.createDataAnalyst();

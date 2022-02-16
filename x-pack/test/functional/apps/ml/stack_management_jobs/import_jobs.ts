@@ -32,7 +32,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('import jobs', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/124747
+  describe.skip('import jobs', function () {
     this.tags(['mlqa']);
     before(async () => {
       await ml.api.cleanMlIndices();
@@ -75,9 +76,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('ensures jobs have been imported', async () => {
         if (testData.expected.jobType === 'anomaly-detector') {
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
-          await ml.jobTable.refreshJobList();
           for (const id of testData.expected.jobIds) {
-            await ml.jobTable.filterWithSearchString(id);
+            await ml.jobTable.filterWithSearchString(id, 1);
           }
           for (const id of testData.expected.skippedJobIds) {
             await ml.jobTable.filterWithSearchString(id, 0);

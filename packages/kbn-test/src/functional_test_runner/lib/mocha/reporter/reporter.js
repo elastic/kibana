@@ -9,7 +9,7 @@
 import { format } from 'util';
 
 import Mocha from 'mocha';
-import { ToolingLogTextWriter } from '@kbn/dev-utils';
+import { ToolingLogTextWriter, CiStatsReporter } from '@kbn/dev-utils';
 import moment from 'moment';
 
 import { recordLog, snapshotLogsForRunnable, setupJUnitReportGeneration } from '../../../../mocha';
@@ -17,11 +17,13 @@ import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
+import { setupCiStatsFtrTestGroupReporter } from './ci_stats_ftr_reporter';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
-  const failureMetadata = getService('failureMetadata');
+  const lifecycle = getService('lifecycle');
+  const testMetadata = getService('testMetadata');
   let originalLogWriters;
   let reporterCaptureStartTime;
 
@@ -45,8 +47,22 @@ export function MochaReporterProvider({ getService }) {
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
-          getTestMetadata: (t) => failureMetadata.get(t),
         });
+      }
+
+      if (config.get('mochaReporter.sendToCiStats')) {
+        const reporter = CiStatsReporter.fromEnv(log);
+        if (!reporter.hasBuildConfig()) {
+          log.warning('ci-stats reporter config is not available so test results will not be sent');
+        } else {
+          setupCiStatsFtrTestGroupReporter({
+            reporter,
+            config,
+            lifecycle,
+            runner,
+            testMetadata,
+          });
+        }
       }
     }
 

@@ -57,7 +57,6 @@ import {
 } from '../lib/create_alert_event_log_record_object';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
-
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
 
@@ -379,41 +378,32 @@ export class TaskRunner<
         alertLabel,
       });
 
-      const instancesToExecute =
-        notifyWhen === 'onActionGroupChange'
-          ? Object.entries(instancesWithScheduledActions).filter(
-              ([alertInstanceName, alertInstance]: [
-                string,
-                AlertInstance<InstanceState, InstanceContext>
-              ]) => {
-                const shouldExecuteAction =
-                  alertInstance.scheduledActionGroupOrSubgroupHasChanged();
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
-                  );
-                }
-                return shouldExecuteAction;
-              }
-            )
-          : Object.entries(instancesWithScheduledActions).filter(
-              ([alertInstanceName, alertInstance]: [
-                string,
-                AlertInstance<InstanceState, InstanceContext>
-              ]) => {
-                const throttled = alertInstance.isThrottled(throttle);
-                const muted = mutedInstanceIdsSet.has(alertInstanceName);
-                const shouldExecuteAction = !throttled && !muted;
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
-                      muted ? 'muted' : 'throttled'
-                    }`
-                  );
-                }
-                return shouldExecuteAction;
-              }
+      const instancesToExecute = Object.entries(instancesWithScheduledActions).filter(
+        ([alertName, alertInstance]: [string, AlertInstance<InstanceState, InstanceContext>]) => {
+          const throttled = alertInstance.isThrottled(throttle);
+          const muted = mutedInstanceIdsSet.has(alertName);
+          let shouldExecuteAction = true;
+
+          if (throttled || muted) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertName}' in alert ${alertLabel}: instance is ${
+                muted ? 'muted' : 'throttled'
+              }`
             );
+          } else if (
+            notifyWhen === 'onActionGroupChange' &&
+            !alertInstance.scheduledActionGroupOrSubgroupHasChanged()
+          ) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertName}' in alert ${alertLabel}: alert is active but action group has not changed`
+            );
+          }
+
+          return shouldExecuteAction;
+        }
+      );
 
       await Promise.all(
         instancesToExecute.map(

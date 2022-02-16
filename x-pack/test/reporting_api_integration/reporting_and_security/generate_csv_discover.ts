@@ -13,11 +13,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
+  const esVersion = getService('esVersion');
 
   describe('Generate CSV from SearchSource', function () {
-    this.onlyEsVersion('<=7');
+    let csvFile: string;
 
-    it(`exported CSV file matches snapshot`, async () => {
+    before(async () => {
       await reportingAPI.initEcommerce();
 
       const fromTime = '2019-06-20T00:00:00.000Z';
@@ -67,11 +68,23 @@ export default function ({ getService }: FtrProviderContext) {
       // wait for the the pending job to complete
       await reportingAPI.waitForJobToFinish(downloadPath);
 
-      const csvFile = await reportingAPI.getCompletedJobOutput(downloadPath);
-      expectSnapshot(csvFile).toMatch();
+      csvFile = (await reportingAPI.getCompletedJobOutput(downloadPath)) as string;
+    });
 
+    after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+    });
+
+    const itIf7 = esVersion.matchRange('<8') ? it : it.skip;
+    const itIf8 = esVersion.matchRange('>=8') ? it : it.skip;
+
+    itIf7(`exported CSV file matches snapshot (7.17)`, async () => {
+      expectSnapshot(csvFile).toMatch();
+    });
+
+    itIf8(`exported CSV file matches snapshot (8.0)`, async () => {
+      expectSnapshot(csvFile).toMatch();
     });
   });
 }

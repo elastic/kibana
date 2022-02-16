@@ -74,6 +74,7 @@ describe('ES search strategy', () => {
           ...params,
           ignore_unavailable: true,
           track_total_hits: true,
+          enable_fields_emulation: true,
         });
         done();
       });
@@ -89,6 +90,7 @@ describe('ES search strategy', () => {
         expect(mockApiCaller.mock.calls[0][0]).toEqual({
           ...params,
           track_total_hits: true,
+          enable_fields_emulation: true,
         });
         done();
       });
@@ -126,6 +128,7 @@ describe('ES search strategy', () => {
     expect(mockApiCaller.mock.calls[0][0]).toEqual({
       ...params,
       track_total_hits: true,
+      enable_fields_emulation: true,
     });
     expect(mockedApiCaller.abort).toBeCalled();
   });

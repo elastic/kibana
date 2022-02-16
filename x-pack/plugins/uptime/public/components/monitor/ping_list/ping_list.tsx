@@ -172,7 +172,12 @@ export const PingList = () => {
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      render: (duration: number) => formatDuration(duration),
+      render: (duration: number | null) =>
+        duration ? (
+          formatDuration(duration)
+        ) : (
+          <span data-test-subj="ping-list-duration-unavailable-tool-tip">{'--'}</span>
+        ),
     },
     {
       field: 'error.type',
