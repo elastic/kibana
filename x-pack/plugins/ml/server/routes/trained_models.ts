@@ -270,7 +270,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           'access:ml:canViewMlNodes',
           'access:ml:canGetDataFrameAnalytics',
           'access:ml:canGetJobs',
-          'access:canGetTrainedModels',
+          'access:ml:canGetTrainedModels',
         ],
       },
     },
