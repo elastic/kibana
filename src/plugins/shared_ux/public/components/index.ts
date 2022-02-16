@@ -14,6 +14,8 @@ import { withSuspense } from './utility';
  * `withSuspense` HOC to load this component.
  */
 export const LazyExitFullScreenButton = React.lazy(() => import('./exit_full_screen_button'));
+export const LazyMarkdownSimple = React.lazy(() => import('./markdown/markdown_simple'));
+export const LazyMarkdown = React.lazy(() => import('./markdown/markdown'));
 
 /**
  * A `ExitFullScreenButton` component that is wrapped by the `withSuspense` HOC.  This component can
@@ -21,3 +23,5 @@ export const LazyExitFullScreenButton = React.lazy(() => import('./exit_full_scr
  * a predefined fallback and error boundary.
  */
 export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
+export const Markdown = withSuspense(LazyMarkdown);
+export const MarkdownSimple = withSuspense(LazyMarkdownSimple);
