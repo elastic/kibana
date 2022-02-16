@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Snapshot and Restore', () => {
     loadTestFile(require.resolve('./policies'));
     loadTestFile(require.resolve('./snapshots'));
+    loadTestFile(require.resolve('./repositories'));
   });
 }

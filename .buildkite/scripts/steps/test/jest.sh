@@ -10,4 +10,4 @@ is_test_execution_step
 
 echo '--- Jest'
 checks-reporter-with-killswitch "Jest Unit Tests $((BUILDKITE_PARALLEL_JOB+1))" \
-  .buildkite/scripts/steps/test/jest_parallel.sh
+  .buildkite/scripts/steps/test/jest_parallel.sh jest.config.js
