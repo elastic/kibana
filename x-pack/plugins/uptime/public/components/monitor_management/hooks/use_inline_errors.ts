@@ -12,11 +12,14 @@ import { monitorManagementListSelector, selectDynamicSettings } from '../../../s
 import { useEsSearch } from '../../../../../observability/public';
 import { Ping } from '../../../../common/runtime_types';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
+import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 
 export function useInlineErrors(onlyInvalidMonitors?: boolean) {
   const monitorList = useSelector(monitorManagementListSelector);
 
   const { settings } = useSelector(selectDynamicSettings);
+
+  const { lastRefresh } = useUptimeRefreshContext();
 
   const configIds = monitorList.list.monitors.map((monitor) => monitor.id);
 
@@ -71,7 +74,7 @@ export function useInlineErrors(onlyInvalidMonitors?: boolean) {
         sort: [{ '@timestamp': 'desc' }],
       },
     },
-    [settings?.heartbeatIndices, monitorList],
+    [settings?.heartbeatIndices, monitorList, lastRefresh],
     { name: 'getInvalidMonitors' }
   );
 

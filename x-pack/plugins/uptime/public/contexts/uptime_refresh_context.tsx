@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 
 interface UptimeRefreshContext {
   lastRefresh: number;
@@ -35,3 +35,5 @@ export const UptimeRefreshContextProvider: React.FC = ({ children }) => {
 
   return <UptimeRefreshContext.Provider value={value} children={children} />;
 };
+
+export const useUptimeRefreshContext = () => useContext(UptimeRefreshContext);

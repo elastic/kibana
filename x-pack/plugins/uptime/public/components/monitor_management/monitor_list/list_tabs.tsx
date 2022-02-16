@@ -17,9 +17,18 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, Fragment, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Ping } from '../../../../common/runtime_types';
+import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 
-export const MonitorListTabs = ({ errorSummaries }: { errorSummaries: Ping[] }) => {
+export const MonitorListTabs = ({
+  errorSummaries,
+  onUpdate,
+}: {
+  errorSummaries: Ping[];
+  onUpdate: () => void;
+}) => {
   const [selectedTabId, setSelectedTabId] = useState('all');
+
+  const { refreshApp } = useUptimeRefreshContext();
 
   const history = useHistory();
 
@@ -80,7 +89,14 @@ export const MonitorListTabs = ({ errorSummaries }: { errorSummaries: Ping[] }) 
         <EuiTabs>{renderTabs()}</EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon iconType="refresh" aria-label={REFRESH_LABEL} />
+        <EuiButtonIcon
+          iconType="refresh"
+          aria-label={REFRESH_LABEL}
+          onClick={() => {
+            onUpdate();
+            refreshApp();
+          }}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

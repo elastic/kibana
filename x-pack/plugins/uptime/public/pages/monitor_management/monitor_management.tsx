@@ -58,7 +58,7 @@ export const MonitorManagementPage: React.FC = () => {
 
   return (
     <>
-      <MonitorListTabs errorSummaries={errorSummaries ?? []} />
+      <MonitorListTabs errorSummaries={errorSummaries ?? []} onUpdate={onUpdate} />
       {viewType === 'all' ? (
         <AllMonitors
           pageState={pageState}
