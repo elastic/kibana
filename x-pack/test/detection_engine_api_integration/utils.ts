@@ -668,6 +668,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   enabled: false,
   index: ['auditbeat-*', 'filebeat-*'],
   interval: '5m',
+  output_index: '.siem-signals-default',
   meta: {
     anything_you_want_ui_related_or_otherwise: {
       as_deep_structured_as_you_need: {
@@ -756,6 +757,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   index: ['auditbeat-*', 'filebeat-*'],
   immutable: false,
   interval: '5m',
+  output_index: '.siem-signals-default',
   meta: {
     anything_you_want_ui_related_or_otherwise: {
       as_deep_structured_as_you_need: {
