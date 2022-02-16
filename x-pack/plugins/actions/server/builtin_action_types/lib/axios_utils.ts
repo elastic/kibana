@@ -37,6 +37,7 @@ export const request = async <T = unknown>({
   return await axios(url, {
     ...rest,
     method,
+    headers: rest.headers ? rest.headers : undefined,
     data: data ?? {},
     // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
     httpAgent,
