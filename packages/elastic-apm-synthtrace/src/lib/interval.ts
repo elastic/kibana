@@ -75,7 +75,7 @@ export class Interval implements Iterable<number> {
     const first = moment();
     const last = moment(first).subtract(interval, this.intervalUnit);
     const numberOfMinutes =
-      Math.ceil(Math.abs(last.toDate().getTime() - first.toDate().getTime()) / (1000 * 60)) % 60;
+      (Math.abs(last.toDate().getTime() - first.toDate().getTime()) / (1000 * 60)) % 60;
     return rate / numberOfMinutes;
   }
 

@@ -24,6 +24,7 @@ describe('rate per minute calculations', () => {
   const i1r3 = range.interval('1m').rate(3);
   const i5r6 = range.interval('5m').rate(6);
   const i30r6 = range.interval('30m').rate(6);
+  const i1sr3 = range.interval('1s').rate(3);
 
   beforeEach(() => {
     const javaService = apm.service('opbeans-java', 'production', 'java');
@@ -67,5 +68,8 @@ describe('rate per minute calculations', () => {
   });
   it('interval of 6 per 30 minutes returns 6/30', () => {
     expect(i30r6.ratePerMinute()).toEqual(6 / 30);
+  });
+  it('interval of 3 per second returns 60 * 3', () => {
+    expect(i1sr3.ratePerMinute()).toEqual(60 * 3);
   });
 });
