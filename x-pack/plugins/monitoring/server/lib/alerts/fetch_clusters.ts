@@ -57,7 +57,7 @@ export async function fetchClusters(
     },
   };
 
-  const response = await esClient.search(params);
+  const { body: response } = await esClient.search(params);
 
   return get(response, 'hits.hits', []).map((hit: any) => {
     const clusterName: string =
