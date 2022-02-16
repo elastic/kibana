@@ -35,7 +35,7 @@ const getRecentMonitoringDocuments = async (
   indexPatterns: Record<string, string>,
   clusterUuid?: string,
   nodeUuid?: string,
-  size?: string
+  size?: number
 ) => {
   const start = get(req.payload, 'timeRange.min') || `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`;
   const end = get(req.payload, 'timeRange.max') || 'now';
@@ -431,9 +431,9 @@ export const getCollectionStatus = async (
   nodeUuid?: string,
   skipLiveData?: boolean
 ) => {
-  const config = req.server.config();
-  const kibanaUuid = config.get('server.uuid');
-  const size = config.get('monitoring.ui.max_bucket_size');
+  const config = req.server.config;
+  const kibanaUuid = req.server.instanceUuid;
+  const size = config.ui.max_bucket_size;
   const hasPermissions = await hasNecessaryPermissions(req);
 
   if (!hasPermissions) {
