@@ -63,6 +63,11 @@ export interface AlertAggregations {
   ruleMutedStatus: { muted: number; unmuted: number };
 }
 
+export interface MappedParams extends SavedObjectAttributes {
+  risk_score?: number;
+  severity?: number;
+}
+
 export interface Alert<Params extends AlertTypeParams = never> {
   id: string;
   enabled: boolean;
@@ -73,6 +78,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   schedule: IntervalSchedule;
   actions: AlertAction[];
   params: Params;
+  mapped_params: MappedParams;
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;

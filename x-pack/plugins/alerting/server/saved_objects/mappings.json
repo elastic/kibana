@@ -53,6 +53,16 @@
         "type": "flattened",
         "ignore_above": 4096
       },
+      "mapped_params": {
+        "properties": {
+          "risk_score": {
+            "type": "float"
+          },
+          "severity": {
+            "type": "keyword"
+          }
+        }
+      },
       "scheduledTaskId": {
         "type": "keyword"
       },
