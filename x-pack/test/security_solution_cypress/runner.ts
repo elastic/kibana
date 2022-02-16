@@ -13,6 +13,11 @@ import { withProcRunner } from '@kbn/dev-utils';
 import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
+const paths = [
+  './cypress/integration/detection_rules/bulk_edit_rules.spec.ts',
+  './cypress/integration/detection_rules/links.spec.ts',
+];
+
 export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
@@ -23,7 +28,7 @@ export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrPr
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:run'],
+      args: ['cypress:run:spec'],
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
@@ -31,6 +36,7 @@ export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrPr
         CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
         CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+        SPEC_LIST: paths.join(','),
         ...process.env,
       },
       wait: true,

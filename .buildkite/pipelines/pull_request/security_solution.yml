@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_solution.sh
-    label: 'Security Solution Tests #1'
+    label: 'Security Solution Tests #EXP'
     agents:
       queue: ci-group-6
     depends_on: build
@@ -10,13 +10,13 @@ steps:
         - exit_status: '*'
           limit: 1
           
-  - command: .buildkite/scripts/steps/functional/security_solution.sh
-    label: 'Security Solution Tests #2'
-    agents:
-      queue: ci-group-6
-    depends_on: build
-    timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+  # - command: .buildkite/scripts/steps/functional/security_solution.sh
+  #   label: 'Security Solution Tests #2'
+  #   agents:
+  #     queue: ci-group-6
+  #   depends_on: build
+  #   timeout_in_minutes: 120
+  #   retry:
+  #     automatic:
+  #       - exit_status: '*'
+  #         limit: 1
