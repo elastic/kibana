@@ -441,6 +441,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          filters={this.props.filters!}
+          onFiltersUpdated={this.props.onFiltersUpdated}
         />
       );
     }

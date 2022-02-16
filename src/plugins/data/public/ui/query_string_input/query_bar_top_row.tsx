@@ -8,12 +8,11 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,14 +22,20 @@ import {
   EuiIconProps,
   EuiButtonIcon,
   OnRefreshProps,
+  EuiPopover,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../common';
 import { getQueryLog } from '../../query';
+import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item';
+import { FilterEditor } from '../filter_bar/filter_editor';
 import type { PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
+import { fetchIndexPatterns } from './fetch_index_patterns';
 import { shallowEqual } from '../../utils/shallow_equal';
 
 const SuperDatePicker = React.memo(
@@ -71,6 +76,8 @@ export interface QueryBarTopRowProps {
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
+  filters: Filter[];
+  onFiltersUpdated?: (filters: Filter[]) => void;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -111,9 +118,12 @@ export const QueryBarTopRow = React.memo(
 
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
+    const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
+    const [dataViews, setDataviews] = useState<IIndexPattern[]>([]);
 
     const kibana = useKibana<IDataPluginServices>();
-    const { uiSettings, storage, appName } = kibana.services;
+    const { uiSettings, storage, appName, usageCollection, data } = kibana.services;
+    const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
 
     const queryLanguage = props.query && props.query.language;
     const queryRef = useRef<Query | undefined>(props.query);
@@ -338,6 +348,81 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
+    useEffect(() => {
+      const fetchDataViews = async () => {
+        const stringPatterns = props.indexPatterns?.filter(
+          (indexPattern) => typeof indexPattern === 'string'
+        ) as string[];
+        const objectPatterns = props.indexPatterns?.filter(
+          (indexPattern) => typeof indexPattern !== 'string'
+        ) as IIndexPattern[];
+
+        const objectPatternsFromStrings = (await fetchIndexPatterns(
+          data.indexPatterns,
+          stringPatterns
+        )) as IIndexPattern[];
+        setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
+      };
+      if (props.indexPatterns) {
+        fetchDataViews();
+      }
+    }, [data.indexPatterns, props.indexPatterns]);
+
+    function onAdd(filter: Filter) {
+      reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
+      setIsAddFilterPopoverOpen(false);
+      const filters = [...props.filters, filter];
+      props?.onFiltersUpdated?.(filters);
+    }
+
+    const renderAddFilter = () => {
+      const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
+      const [dataView] = dataViews;
+      const index = dataView && dataView.id;
+      const newFilter = buildEmptyFilter(isPinned, index);
+
+      const button = (
+        <EuiButtonIcon
+          display="fill"
+          iconType="plusInCircleFilled"
+          aria-label="Add filter"
+          data-test-subj="addFilter"
+          onClick={() => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen)}
+          size="m"
+          color="text"
+        />
+      );
+
+      return (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            id="addFilterPopover"
+            button={button}
+            isOpen={isAddFilterPopoverOpen}
+            closePopover={() => setIsAddFilterPopoverOpen(false)}
+            anchorPosition="downLeft"
+            panelPaddingSize="none"
+            initialFocus=".filterEditor__hiddenItem"
+            ownFocus
+            repositionOnScroll
+          >
+            <EuiFlexItem grow={false}>
+              <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
+                <FilterEditor
+                  filter={newFilter}
+                  indexPatterns={dataViews}
+                  onSubmit={onAdd}
+                  onCancel={() => setIsAddFilterPopoverOpen(false)}
+                  key={JSON.stringify(newFilter)}
+                  timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                />
+              </div>
+            </EuiFlexItem>
+          </EuiPopover>
+        </EuiFlexItem>
+      );
+    };
+
     function renderQueryInput() {
       if (!shouldRenderQueryInput()) return;
 
@@ -378,6 +463,7 @@ export const QueryBarTopRow = React.memo(
         justifyContent="flexEnd"
       >
         {renderQueryInput()}
+        {renderAddFilter()}
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}
