@@ -59,7 +59,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
     return Promise.resolve(client);
   };
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125848
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
   describe.skip('createLifecycleExecutor', () => {
     let ruleDataClient: IRuleDataClient;
     before(async () => {
