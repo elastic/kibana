@@ -39,7 +39,7 @@ const SPACE_ID = 'space1';
 export default function registryRulesApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125848
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
   describe.skip('Rule Registry API', () => {
     describe('with write permissions', () => {
       it('does not bootstrap indices on plugin startup', async () => {
