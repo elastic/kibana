@@ -45,7 +45,7 @@ export const getThreatList = async ({
     )
   );
 
-  const { body: response } = await esClient.search<
+  const response = await esClient.search<
     ThreatListDoc,
     Record<string, estypes.AggregationsAggregate>
   >({
@@ -80,7 +80,7 @@ export const getThreatListCount = async ({
     index,
     exceptionItems
   );
-  const { body: response } = await esClient.count({
+  const response = await esClient.count({
     body: {
       query: queryFilter,
     },
