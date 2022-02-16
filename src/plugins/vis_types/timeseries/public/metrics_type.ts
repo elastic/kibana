@@ -26,6 +26,7 @@ import {
 } from '../../../visualizations/public';
 import { getDataStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
+import { triggerTSVBtoLensConfiguration } from './trigger_action';
 import type { IndexPatternValue, Panel } from '../common/types';
 import { RequestAdapter } from '../../../inspector/public';
 
@@ -58,7 +59,7 @@ async function withDefaultIndexPattern(
   const { indexPatterns } = getDataStart();
 
   const defaultIndex = await indexPatterns.getDefault();
-  if (!defaultIndex || !defaultIndex.id) return vis;
+  if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
   vis.params.index_pattern = {
     id: defaultIndex.id,
   };
@@ -166,6 +167,12 @@ export const metricsVisDefinition: VisTypeDefinition<
       return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
     }
     return [];
+  },
+  navigateToLens: async (params?: VisParams) => {
+    const triggerConfiguration = params
+      ? await triggerTSVBtoLensConfiguration(params as Panel)
+      : null;
+    return triggerConfiguration;
   },
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),

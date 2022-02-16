@@ -96,10 +96,22 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.get('/api/fleet/epm/packages/endpoint/0.1.0.1.2.3').expect(400);
     });
 
-    it('allows user with only read permission to access', async () => {
+    it('allows user with only fleet permission to access', async () => {
       await supertestWithoutAuth
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
-        .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+        .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+        .expect(200);
+    });
+    it('allows user with only integrations permission to access', async () => {
+      await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
+        .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
+        .expect(200);
+    });
+    it('allows user with integrations read permission to access', async () => {
+      await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
+        .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
         .expect(200);
     });
 

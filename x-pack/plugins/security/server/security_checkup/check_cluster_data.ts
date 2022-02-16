@@ -17,7 +17,7 @@ export const createClusterDataCheck = () => {
           format: 'json',
           h: ['index', 'docs.count'],
         });
-        clusterHasUserData = indices.body.some((indexCount) => {
+        clusterHasUserData = indices.some((indexCount) => {
           const isInternalIndex =
             indexCount.index?.startsWith('.') || indexCount.index?.startsWith('kibana_sample_');
 
