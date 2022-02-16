@@ -357,7 +357,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           <EuiIconTip
             position="right"
             type="questionInCircle"
-            content={i18n.translate('xpack.alertTypes.esQuery.forTheLastTooltip', {
+            content={i18n.translate('xpack.stackAlerts.esQuery.ui.conditionPrompt.toolTip', {
               defaultMessage: 'The time window defined below applies only to the first rule check.',
             })}
           />
