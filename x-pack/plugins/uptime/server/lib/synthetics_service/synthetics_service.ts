@@ -296,7 +296,7 @@ export class SyntheticsService {
     const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
       namespaces: ['*'],
-      perPage: 10000,
+      perPage: 500,
     });
 
     if (this.indexTemplateExists) {
