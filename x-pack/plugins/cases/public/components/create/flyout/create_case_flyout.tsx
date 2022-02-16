@@ -11,12 +11,14 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 
 import * as i18n from '../translations';
 import { Case } from '../../../../common/ui/types';
-import { CreateCaseForm } from '../form';
+import { CreateCaseForm, CreateCaseAttachment } from '../form';
+import { UsePostComment } from '../../../containers/use_post_comment';
 
 export interface CreateCaseFlyoutProps {
-  afterCaseCreated?: (theCase: Case) => Promise<void>;
+  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   onClose: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
+  attachments?: CreateCaseAttachment;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -63,33 +65,36 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess }) => (
-    <>
-      <GlobalStyle />
-      <StyledFlyout
-        onClose={onClose}
-        data-test-subj="create-case-flyout"
-        // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
-        maskProps={{ className: maskOverlayClassName }}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>{i18n.CREATE_CASE_TITLE}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <StyledEuiFlyoutBody>
-          <FormWrapper>
-            <CreateCaseForm
-              afterCaseCreated={afterCaseCreated}
-              onCancel={onClose}
-              onSuccess={onSuccess}
-              withSteps={false}
-            />
-          </FormWrapper>
-        </StyledEuiFlyoutBody>
-      </StyledFlyout>
-    </>
-  )
+  ({ afterCaseCreated, onClose, onSuccess, attachments }) => {
+    return (
+      <>
+        <GlobalStyle />
+        <StyledFlyout
+          onClose={onClose}
+          data-test-subj="create-case-flyout"
+          // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
+          maskProps={{ className: maskOverlayClassName }}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>{i18n.CREATE_CASE_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <StyledEuiFlyoutBody>
+            <FormWrapper>
+              <CreateCaseForm
+                afterCaseCreated={afterCaseCreated}
+                attachments={attachments}
+                onCancel={onClose}
+                onSuccess={onSuccess}
+                withSteps={false}
+              />
+            </FormWrapper>
+          </StyledEuiFlyoutBody>
+        </StyledFlyout>
+      </>
+    );
+  }
 );
 
 CreateCaseFlyout.displayName = 'CreateCaseFlyout';

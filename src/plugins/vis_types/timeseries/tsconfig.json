@@ -10,6 +10,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "../../../../typings/**/*",
     "*.ts"
   ],
   "references": [

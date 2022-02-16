@@ -6,9 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -85,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
          When the api key is updated before / while the rule is executing, the alert
          executor no longer has access to a service to update the rule status
          saved object in Elasticsearch. Because of this, we cannot set the rule into
-         a 'failure' state, so the user ends up seeing 'going to run' as that is the
+         a 'failure' state, so the user ends up seeing 'running' as that is the
          last status set for the rule before it erupts in an error that cannot be
          recorded inside of the executor.
 
@@ -112,7 +114,12 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, log, body.id, 'partial failure');
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            body.id,
+            RuleExecutionStatus['partial failure']
+          );
 
           const { body: rule } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
@@ -135,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, log, body.id, 'succeeded');
+          await waitForRuleSuccessOrStatus(supertest, log, body.id, RuleExecutionStatus.succeeded);
         });
 
         it('should create a single rule without an input index', async () => {
@@ -299,7 +306,12 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyId = body.id;
 
         await waitForAlertToComplete(supertest, log, bodyId);
-        await waitForRuleSuccessOrStatus(supertest, log, bodyId, 'partial failure');
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          bodyId,
+          RuleExecutionStatus['partial failure']
+        );
         await sleep(5000);
 
         const { body: rule } = await supertest
@@ -327,7 +339,12 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(supertest, log, bodyId, 'partial failure');
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          bodyId,
+          RuleExecutionStatus['partial failure']
+        );
         await sleep(5000);
         await waitForSignalsToBePresent(supertest, log, 2, [bodyId]);
 

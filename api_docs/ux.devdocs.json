@@ -1,0 +1,42 @@
+{
+  "id": "ux",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "ux",
+      "id": "def-public.UxPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "UxPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/ux/public/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

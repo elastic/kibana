@@ -62,7 +62,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await uptimeService.navigation.goToCertificates();
       });
 
-      describe('page', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/114215
+      describe.skip('page', () => {
         beforeEach(async () => {
           await uptimeService.navigation.goToCertificates();
           await uptimeService.navigation.refreshApp();

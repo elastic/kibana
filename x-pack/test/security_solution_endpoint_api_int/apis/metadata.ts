@@ -64,11 +64,11 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
 
           // wait for latest metadata transform to run
-          await new Promise((r) => setTimeout(r, 30000));
+          await new Promise((r) => setTimeout(r, 60000));
           await startTransform(getService, METADATA_UNITED_TRANSFORM);
 
           // wait for united metadata transform to run
-          await new Promise((r) => setTimeout(r, 15000));
+          await new Promise((r) => setTimeout(r, 30000));
         });
 
         after(async () => {

@@ -26,6 +26,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/__mocks__/**/*',
@@ -59,6 +60,9 @@ export const IGNORE_FILE_GLOBS = [
   'packages/elastic-safer-lodash-set/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
+
+  // Bundled package names typically use a format like ${pkgName}-${pkgVersion}, so don't lint them
+  'x-pack/plugins/fleet/server/bundled_packages/**/*',
 
   // Bazel default files
   '**/WORKSPACE.bazel',

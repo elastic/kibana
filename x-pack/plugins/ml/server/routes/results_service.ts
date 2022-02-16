@@ -284,7 +284,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobIds, query } = request.body;
-        const { body } = await mlClient.anomalySearch(query, jobIds);
+        const body = await mlClient.anomalySearch(query, jobIds);
         return response.ok({
           body,
         });

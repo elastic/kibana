@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [user_actions/client](../modules/user_actions_client.md) / UserActionGet
+[Cases Client API Interface](../README.md) / [user\_actions/client](../modules/user_actions_client.md) / UserActionGet
 
 # Interface: UserActionGet
 
@@ -10,25 +10,16 @@ Parameters for retrieving user actions for a particular case
 
 ### Properties
 
-- [caseId](user_actions_client.useractionget.md#caseid)
-- [subCaseId](user_actions_client.useractionget.md#subcaseid)
+- [caseId](user_actions_client.UserActionGet.md#caseid)
 
 ## Properties
 
 ### caseId
 
-• **caseId**: *string*
+• **caseId**: `string`
 
 The ID of the case
 
-Defined in: [user_actions/client.ts:19](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/user_actions/client.ts#L19)
+#### Defined in
 
-___
-
-### subCaseId
-
-• `Optional` **subCaseId**: *string*
-
-If specified then a sub case will be used for finding all the user actions
-
-Defined in: [user_actions/client.ts:23](https://github.com/elastic/kibana/blob/a80791aa4cc/x-pack/plugins/cases/server/client/user_actions/client.ts#L23)
+[x-pack/plugins/cases/server/client/user_actions/client.ts:19](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/user_actions/client.ts#L19)

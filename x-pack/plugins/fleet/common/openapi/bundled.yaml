@@ -396,6 +396,8 @@ paths:
               properties:
                 force:
                   type: boolean
+                ignore_constraints:
+                  type: boolean
     put:
       summary: Packages - Update
       tags: []
@@ -1850,7 +1852,11 @@ components:
             - type: number
         is_default:
           type: boolean
+          deprecated: true
         is_default_fleet_server:
+          type: boolean
+          deprecated: true
+        has_fleet_server:
           type: boolean
         data_output_id:
           type: string
@@ -2359,6 +2365,8 @@ components:
       title: New agent policy
       type: object
       properties:
+        id:
+          type: string
         name:
           type: string
         namespace:
@@ -2372,6 +2380,9 @@ components:
             enum:
               - metrics
               - logs
+      required:
+        - name
+        - namespace
     new_package_policy:
       title: New package policy
       type: object

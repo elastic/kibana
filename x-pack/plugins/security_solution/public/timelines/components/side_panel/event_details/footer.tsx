@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { find, get, isEmpty } from 'lodash/fp';
+import { find } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
@@ -19,7 +19,6 @@ import { useEventFilterModal } from '../../../../detections/components/alerts_ta
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../../common/ecs';
-import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 
 interface EventDetailsFooterProps {
@@ -82,11 +81,6 @@ export const EventDetailsFooterComponent = React.memo(
       [detailsData]
     );
 
-    const eventIds = useMemo(
-      () => (isEmpty(expandedEvent?.eventId) ? null : [expandedEvent?.eventId]),
-      [expandedEvent?.eventId]
-    );
-
     const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
       newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
     };
@@ -113,21 +107,15 @@ export const EventDetailsFooterComponent = React.memo(
     const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
       useEventFilterModal();
 
-    const { alertsEcsData } = useFetchEcsAlertsData({
-      alertIds: eventIds,
-      skip: expandedEvent?.eventId == null,
-    });
-
-    const ecsData = detailsEcsData ?? get(0, alertsEcsData);
     return (
       <>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              {ecsData && (
+              {detailsEcsData && (
                 <TakeActionDropdown
                   detailsData={detailsData}
-                  ecsData={ecsData}
+                  ecsData={detailsEcsData}
                   handleOnEventClosed={handleOnEventClosed}
                   isHostIsolationPanelOpen={isHostIsolationPanelOpen}
                   loadingEventDetails={loadingEventDetails}
@@ -156,8 +144,8 @@ export const EventDetailsFooterComponent = React.memo(
               onConfirm={onAddExceptionConfirm}
             />
           )}
-        {isAddEventFilterModalOpen && ecsData != null && (
-          <EventFiltersFlyout data={ecsData} onCancel={closeAddEventFilterModal} />
+        {isAddEventFilterModalOpen && detailsEcsData != null && (
+          <EventFiltersFlyout data={detailsEcsData} onCancel={closeAddEventFilterModal} />
         )}
       </>
     );

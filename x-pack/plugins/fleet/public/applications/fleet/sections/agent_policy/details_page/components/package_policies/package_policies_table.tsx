@@ -189,6 +189,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="PackagePoliciesTableUpgradeButton"
                       size="s"
                       minWidth="0"
                       isDisabled={!canWriteIntegrationPolicies}
@@ -275,6 +276,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     state: { forAgentPolicyId: agentPolicy.id },
                   });
                 }}
+                data-test-subj="addPackagePolicyButton"
               >
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.addPackagePolicyButtonText"

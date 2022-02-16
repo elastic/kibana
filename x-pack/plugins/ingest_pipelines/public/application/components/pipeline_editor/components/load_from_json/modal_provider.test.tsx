@@ -18,7 +18,7 @@ jest.mock('lodash', () => {
   };
 });
 
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 const setup = ({ onDone }: { onDone: OnDoneLoadJsonHandler }) => {
   return registerTestBed(

@@ -51,7 +51,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const { displayErrorToast } = useToastNotificationService();
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const [items, setItems] = useState<NodeItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
@@ -82,6 +82,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
           defaultMessage: 'Nodes fetch failed',
         })
       );
+      setIsLoading(false);
     }
   }, [itemIdToExpandedRowMap]);
 
@@ -157,6 +158,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
         label: i18n.translate('xpack.ml.trainedModels.nodesList.totalAmountLabel', {
           defaultMessage: 'Total machine learning nodes',
         }),
+        'data-test-subj': 'mlTotalNodesCount',
       },
     };
   }, [items]);
@@ -189,7 +191,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   }
 
   return (
-    <>
+    <div data-test-subj={'mlNodesOverviewPanel'}>
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         {nodesStats && (
@@ -218,6 +220,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
           data-test-subj={isLoading ? 'mlNodesTable loading' : 'mlNodesTable loaded'}
         />
       </div>
-    </>
+    </div>
   );
 };

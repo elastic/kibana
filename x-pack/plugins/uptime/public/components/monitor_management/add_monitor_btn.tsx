@@ -11,15 +11,16 @@ import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { MONITOR_ADD_ROUTE } from '../../../common/constants';
 
-export const AddMonitorBtn = () => {
+export const AddMonitorBtn = ({ isDisabled }: { isDisabled: boolean }) => {
   const history = useHistory();
 
   return (
     <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false} data-test-subj="addMonitorButton">
       <EuiButton
         fill
+        isDisabled={isDisabled}
         iconType="plus"
-        data-test-subj="superDatePickerApplyTimeButton"
+        data-test-subj="addMonitorBtn"
         href={history.createHref({
           pathname: MONITOR_ADD_ROUTE,
         })}

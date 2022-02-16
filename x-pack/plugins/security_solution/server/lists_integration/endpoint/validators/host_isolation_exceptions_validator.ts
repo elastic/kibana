@@ -7,9 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { BaseValidator } from './base_validator';
+import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
-
 import { ExceptionItemLikeOptions } from '../types';
 
 import {
@@ -17,6 +16,7 @@ import {
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
 import { isValidIPv4OrCIDR } from '../../../../common/endpoint/utils/is_valid_ip';
+import { OperatingSystem } from '../../../../common/endpoint/types';
 
 function validateIp(value: string) {
   if (!isValidIPv4OrCIDR(value)) {
@@ -41,6 +41,19 @@ const HostIsolationDataSchema = schema.object(
     unknowns: 'ignore',
   }
 );
+
+// use the baseSchema and overwrite the os_type
+// to accept all OSs in the list for host isolation exception
+const HostIsolationBasicDataSchema = BasicEndpointExceptionDataSchema.extends({
+  osTypes: schema.arrayOf(
+    schema.oneOf([
+      schema.literal(OperatingSystem.WINDOWS),
+      schema.literal(OperatingSystem.LINUX),
+      schema.literal(OperatingSystem.MAC),
+    ]),
+    { minSize: 3, maxSize: 3 }
+  ),
+});
 
 export class HostIsolationExceptionsValidator extends BaseValidator {
   static isHostIsolationException(item: { listId: string }): boolean {
@@ -100,9 +113,8 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   }
 
   private async validateHostIsolationData(item: ExceptionItemLikeOptions): Promise<void> {
-    await this.validateBasicData(item);
-
     try {
+      HostIsolationBasicDataSchema.validate(item);
       HostIsolationDataSchema.validate(item);
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);

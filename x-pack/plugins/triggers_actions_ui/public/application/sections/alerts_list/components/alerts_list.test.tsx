@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -18,6 +18,8 @@ import {
   ALERTS_FEATURE_ID,
   parseDuration,
 } from '../../../../../../alerting/common';
+import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
+
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
@@ -180,22 +182,22 @@ describe('alerts_list component with items', () => {
           history: [
             {
               success: true,
-              duration: 100,
+              duration: 1000000,
             },
             {
               success: true,
-              duration: 200,
+              duration: 200000,
             },
             {
               success: false,
-              duration: 300,
+              duration: 300000,
             },
           ],
           calculated_metrics: {
             success_ratio: 0.66,
-            p50: 200,
-            p95: 300,
-            p99: 300,
+            p50: 200000,
+            p95: 300000,
+            p99: 300000,
           },
         },
       },
@@ -227,18 +229,18 @@ describe('alerts_list component with items', () => {
           history: [
             {
               success: true,
-              duration: 100,
+              duration: 100000,
             },
             {
               success: true,
-              duration: 500,
+              duration: 500000,
             },
           ],
           calculated_metrics: {
             success_ratio: 1,
             p50: 0,
-            p95: 100,
-            p99: 500,
+            p95: 100000,
+            p99: 500000,
           },
         },
       },
@@ -458,7 +460,7 @@ describe('alerts_list component with items', () => {
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(
-      'The length of time it took for the rule to run.'
+      'The length of time it took for the rule to run (mm:ss).'
     );
 
     // Status column
@@ -508,14 +510,24 @@ describe('alerts_list component with items', () => {
     ).toBeTruthy();
 
     let percentiles = wrapper.find(
-      `EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] span[data-test-subj="${Percentiles.P50}Percentile"]`
+      `EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
     );
 
     mockedAlertsData.forEach((rule, index) => {
       if (typeof rule.monitoring?.execution.calculated_metrics.p50 === 'number') {
+        // Ensure the table cells are getting the correct values
         expect(percentiles.at(index).text()).toEqual(
-          `${rule.monitoring.execution.calculated_metrics.p50}ms`
+          getFormattedDuration(rule.monitoring.execution.calculated_metrics.p50)
         );
+        // Ensure the tooltip is showing the correct content
+        expect(
+          wrapper
+            .find(
+              'EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] [data-test-subj="rule-duration-format-tooltip"]'
+            )
+            .at(index)
+            .props().content
+        ).toEqual(getFormattedMilliseconds(rule.monitoring.execution.calculated_metrics.p50));
       } else {
         expect(percentiles.at(index).text()).toEqual('N/A');
       }
@@ -581,13 +593,13 @@ describe('alerts_list component with items', () => {
     ).toBeTruthy();
 
     percentiles = wrapper.find(
-      `EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] span[data-test-subj="${Percentiles.P95}Percentile"]`
+      `EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]`
     );
 
     mockedAlertsData.forEach((rule, index) => {
       if (typeof rule.monitoring?.execution.calculated_metrics.p95 === 'number') {
         expect(percentiles.at(index).text()).toEqual(
-          `${rule.monitoring.execution.calculated_metrics.p95}ms`
+          getFormattedDuration(rule.monitoring.execution.calculated_metrics.p95)
         );
       } else {
         expect(percentiles.at(index).text()).toEqual('N/A');

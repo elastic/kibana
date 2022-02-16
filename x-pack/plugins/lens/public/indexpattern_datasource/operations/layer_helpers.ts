@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { partition, mapValues, pickBy } from 'lodash';
+import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { Query } from 'src/plugins/data/common';
+import type { VisualizeEditorLayersContext } from '../../../../../../src/plugins/visualizations/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -38,7 +39,9 @@ import {
 } from './definitions/column_types';
 import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../common/expressions';
+import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
+import { isSortableByColumn } from './definitions/terms/helpers';
 
 interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -57,6 +60,9 @@ interface ColumnChange {
   shouldResetLabel?: boolean;
   shouldCombineField?: boolean;
   incompleteParams?: ColumnAdvancedParams;
+  incompleteFieldName?: string;
+  incompleteFieldOperation?: OperationType;
+  columnParams?: Record<string, unknown>;
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
 
@@ -190,6 +196,9 @@ export function insertNewColumn({
   targetGroup,
   shouldResetLabel,
   incompleteParams,
+  incompleteFieldName,
+  incompleteFieldOperation,
+  columnParams,
   initialParams,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
@@ -218,6 +227,7 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
+
     return updateDefaultLabels(
       addOperationFn(
         layer,
@@ -247,12 +257,30 @@ export function insertNewColumn({
       }
 
       const newId = generateId();
+      if (incompleteFieldOperation && incompleteFieldName) {
+        const validFields = indexPattern.fields.filter(
+          (validField) => validField.name === incompleteFieldName
+        );
+        tempLayer = insertNewColumn({
+          layer: tempLayer,
+          columnId: newId,
+          op: incompleteFieldOperation,
+          indexPattern,
+          field: validFields[0] ?? documentField,
+          visualizationGroups,
+          columnParams,
+          targetGroup,
+        });
+      }
       if (validOperations.length === 1) {
         const def = validOperations[0];
 
-        const validFields =
+        let validFields =
           def.input === 'field' ? indexPattern.fields.filter(def.getPossibleOperationForField) : [];
 
+        if (incompleteFieldName) {
+          validFields = validFields.filter((validField) => validField.name === incompleteFieldName);
+        }
         if (def.input === 'none') {
           tempLayer = insertNewColumn({
             layer: tempLayer,
@@ -293,14 +321,14 @@ export function insertNewColumn({
     const isBucketed = Boolean(possibleOperation.isBucketed);
 
     const addOperationFn = isBucketed ? addBucket : addMetric;
+    const buildColumnFn = columnParams
+      ? operationDefinition.buildColumn(
+          { ...baseOptions, layer: tempLayer, referenceIds },
+          columnParams
+        )
+      : operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds });
     return updateDefaultLabels(
-      addOperationFn(
-        tempLayer,
-        operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds }),
-        columnId,
-        visualizationGroups,
-        targetGroup
-      ),
+      addOperationFn(tempLayer, buildColumnFn, columnId, visualizationGroups, targetGroup),
       indexPattern
     );
   }
@@ -359,7 +387,7 @@ export function insertNewColumn({
     };
   }
 
-  const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field });
+  const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field }, columnParams);
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
   return updateDefaultLabels(
@@ -422,6 +450,7 @@ export function replaceColumn({
         op,
         field,
         visualizationGroups,
+        incompleteParams: previousColumn,
       });
 
       // if the formula label is not the default one, propagate it to the new operation
@@ -1106,6 +1135,29 @@ export function getMetricOperationTypes(field: IndexPatternField) {
   });
 }
 
+export function updateColumnLabel<C extends GenericIndexPatternColumn>({
+  layer,
+  columnId,
+  customLabel,
+}: {
+  layer: IndexPatternLayer;
+  columnId: string;
+  customLabel: string;
+}): IndexPatternLayer {
+  const oldColumn = layer.columns[columnId];
+  return {
+    ...layer,
+    columns: {
+      ...layer.columns,
+      [columnId]: {
+        ...oldColumn,
+        label: customLabel ? customLabel : oldColumn.label,
+        customLabel: Boolean(customLabel),
+      },
+    } as Record<string, GenericIndexPatternColumn>,
+  };
+}
+
 export function updateColumnParam<C extends GenericIndexPatternColumn>({
   layer,
   columnId,
@@ -1505,4 +1557,235 @@ export function getManagedColumnsFrom(
     queue.push(...allNodes[nextId]);
   }
   return store.filter(([, column]) => column);
+}
+
+export function computeLayerFromContext(
+  isLast: boolean,
+  metricsArray: VisualizeEditorLayersContext['metrics'],
+  indexPattern: IndexPattern,
+  format?: string,
+  customLabel?: string
+): IndexPatternLayer {
+  let layer: IndexPatternLayer = {
+    indexPatternId: indexPattern.id,
+    columns: {},
+    columnOrder: [],
+  };
+  if (isArray(metricsArray)) {
+    const metricContext = metricsArray.shift();
+    const field = metricContext
+      ? indexPattern.getFieldByName(metricContext.fieldName) ?? documentField
+      : documentField;
+
+    const operation = metricContext?.agg;
+    // Formula should be treated differently from other operations
+    if (operation === 'formula') {
+      const operationDefinition = operationDefinitionMap.formula as OperationDefinition<
+        FormulaIndexPatternColumn,
+        'managedReference'
+      >;
+      const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+      let newColumn = operationDefinition.buildColumn({
+        indexPattern,
+        layer: tempLayer,
+      }) as FormulaIndexPatternColumn;
+      let filterBy = metricContext?.params?.kql
+        ? { query: metricContext?.params?.kql, language: 'kuery' }
+        : undefined;
+      if (metricContext?.params?.lucene) {
+        filterBy = metricContext?.params?.lucene
+          ? { query: metricContext?.params?.lucene, language: 'lucene' }
+          : undefined;
+      }
+      newColumn = {
+        ...newColumn,
+        ...(filterBy && { filter: filterBy }),
+        params: {
+          ...newColumn.params,
+          ...metricContext?.params,
+        },
+      } as FormulaIndexPatternColumn;
+      layer = metricContext?.params?.formula
+        ? insertOrReplaceFormulaColumn(generateId(), newColumn, tempLayer, {
+            indexPattern,
+          }).layer
+        : tempLayer;
+    } else {
+      const columnId = generateId();
+      // recursive function to build the layer
+      layer = insertNewColumn({
+        op: operation as OperationType,
+        layer: isLast
+          ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
+          : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern),
+        columnId,
+        field: !metricContext?.isFullReference ? field ?? documentField : undefined,
+        columnParams: metricContext?.params ?? undefined,
+        incompleteFieldName: metricContext?.isFullReference ? field?.name : undefined,
+        incompleteFieldOperation: metricContext?.isFullReference
+          ? metricContext?.pipelineAggType
+          : undefined,
+        indexPattern,
+        visualizationGroups: [],
+      });
+      if (metricContext) {
+        metricContext.accessor = columnId;
+      }
+    }
+  }
+
+  // update the layer with the custom label and the format
+  let columnIdx = 0;
+  for (const [columnId, column] of Object.entries(layer.columns)) {
+    if (format) {
+      layer = updateColumnParam({
+        layer,
+        columnId,
+        paramName: 'format',
+        value: {
+          id: format,
+          params: {
+            decimals: 0,
+          },
+        },
+      });
+    }
+
+    // for percentiles I want to update all columns with the custom label
+    if (customLabel && column.operationType === 'percentile') {
+      layer = updateColumnLabel({
+        layer,
+        columnId,
+        customLabel,
+      });
+    } else if (customLabel && columnIdx === Object.keys(layer.columns).length - 1) {
+      layer = updateColumnLabel({
+        layer,
+        columnId,
+        customLabel,
+      });
+    }
+    columnIdx++;
+  }
+  return layer;
+}
+
+export function getSplitByTermsLayer(
+  indexPattern: IndexPattern,
+  splitField: IndexPatternField,
+  dateField: IndexPatternField | undefined,
+  layer: VisualizeEditorLayersContext
+): IndexPatternLayer {
+  const { termsParams, metrics, timeInterval, splitWithDateHistogram } = layer;
+  const copyMetricsArray = [...metrics];
+  const computedLayer = computeLayerFromContext(
+    metrics.length === 1,
+    copyMetricsArray,
+    indexPattern,
+    layer.format,
+    layer.label
+  );
+
+  const columnId = generateId();
+  let termsLayer = insertNewColumn({
+    op: splitWithDateHistogram ? 'date_histogram' : 'terms',
+    layer: insertNewColumn({
+      op: 'date_histogram',
+      layer: computedLayer,
+      columnId: generateId(),
+      field: dateField,
+      indexPattern,
+      visualizationGroups: [],
+      columnParams: {
+        interval: timeInterval,
+      },
+    }),
+    columnId,
+    field: splitField,
+    indexPattern,
+    visualizationGroups: [],
+  });
+  const termsColumnParams = termsParams as TermsIndexPatternColumn['params'];
+  if (termsColumnParams) {
+    for (const [param, value] of Object.entries(termsColumnParams)) {
+      let paramValue = value;
+      if (param === 'orderBy') {
+        const [existingMetricColumn] = Object.keys(termsLayer.columns).filter((colId) =>
+          isSortableByColumn(termsLayer, colId)
+        );
+
+        paramValue = (
+          termsColumnParams.orderBy.type === 'column' && existingMetricColumn
+            ? {
+                type: 'column',
+                columnId: existingMetricColumn,
+              }
+            : { type: 'alphabetical', fallback: true }
+        ) as TermsIndexPatternColumn['params']['orderBy'];
+      }
+      termsLayer = updateColumnParam({
+        layer: termsLayer,
+        columnId,
+        paramName: param,
+        value: paramValue,
+      });
+    }
+  }
+  return termsLayer;
+}
+
+export function getSplitByFiltersLayer(
+  indexPattern: IndexPattern,
+  dateField: IndexPatternField | undefined,
+  layer: VisualizeEditorLayersContext
+): IndexPatternLayer {
+  const { splitFilters, metrics, timeInterval } = layer;
+  const filterParams = splitFilters?.map((param) => {
+    const query = param.filter ? param.filter.query : '';
+    const language = param.filter ? param.filter.language : 'kuery';
+    return {
+      input: {
+        query,
+        language,
+      },
+      label: param.label ?? '',
+    };
+  });
+  const copyMetricsArray = [...metrics];
+  const computedLayer = computeLayerFromContext(
+    metrics.length === 1,
+    copyMetricsArray,
+    indexPattern,
+    layer.format,
+    layer.label
+  );
+  const columnId = generateId();
+  let filtersLayer = insertNewColumn({
+    op: 'filters',
+    layer: insertNewColumn({
+      op: 'date_histogram',
+      layer: computedLayer,
+      columnId: generateId(),
+      field: dateField,
+      indexPattern,
+      visualizationGroups: [],
+      columnParams: {
+        interval: timeInterval,
+      },
+    }),
+    columnId,
+    field: undefined,
+    indexPattern,
+    visualizationGroups: [],
+  });
+
+  if (filterParams) {
+    filtersLayer = updateColumnParam({
+      layer: filtersLayer,
+      columnId,
+      paramName: 'filters',
+      value: filterParams,
+    });
+  }
+  return filtersLayer;
 }

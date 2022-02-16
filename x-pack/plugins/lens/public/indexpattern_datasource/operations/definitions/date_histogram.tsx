@@ -250,6 +250,7 @@ export const dateHistogramOperation: OperationDefinition<
                         };
                         setInterval(newInterval);
                       }}
+                      step={1}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>

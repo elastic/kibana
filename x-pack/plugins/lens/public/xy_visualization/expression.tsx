@@ -665,6 +665,8 @@ export function XYChart({
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
+        ariaLabel={args.ariaLabel}
+        ariaUseDefaultSummary={!args.ariaLabel}
       />
 
       <Axis

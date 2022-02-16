@@ -276,6 +276,7 @@ export {
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
   SavedObjectsUtils,
+  mergeSavedObjectMigrationMaps,
 } from './saved_objects';
 
 export type {

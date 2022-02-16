@@ -15,10 +15,11 @@ import {
   GaugeLabelMajorMode,
   GaugeTicksPosition,
   GaugeLabelMajorModes,
+  GaugeColorModes,
 } from '../../common';
 import { GaugeShapes, GaugeTicksPositions } from '../../common';
 import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
-import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
+import { getAccessorsFromArgs, getMaxValue, getMinValue, getValueFromAccessor } from './utils';
 import './index.scss';
 declare global {
   interface Window {
@@ -29,7 +30,11 @@ declare global {
   }
 }
 
-function normalizeColors({ colors, stops, range }: CustomPaletteState, min: number) {
+function normalizeColors(
+  { colors, stops, range, rangeMin, rangeMax }: CustomPaletteState,
+  min: number,
+  max: number
+) {
   if (!colors) {
     return;
   }
@@ -37,23 +42,61 @@ function normalizeColors({ colors, stops, range }: CustomPaletteState, min: numb
     stops.filter((stop, i) => (range === 'percent' ? stop < 0 : stop < min)).length,
     0
   );
-  return colors.slice(colorsOutOfRangeSmaller);
+  let updatedColors = colors.slice(colorsOutOfRangeSmaller);
+
+  let correctMin = rangeMin;
+  let correctMax = rangeMax;
+  if (range === 'percent') {
+    correctMin = min + rangeMin * ((max - min) / 100);
+    correctMax = min + rangeMax * ((max - min) / 100);
+  }
+
+  if (correctMin > min && isFinite(correctMin)) {
+    updatedColors = [`rgba(255,255,255,0)`, ...updatedColors];
+  }
+
+  if (correctMax < max && isFinite(correctMax)) {
+    updatedColors = [...updatedColors, `rgba(255,255,255,0)`];
+  }
+
+  return updatedColors;
 }
 
 function normalizeBands(
-  { colors, stops, range }: CustomPaletteState,
+  { colors, stops, range, rangeMax, rangeMin }: CustomPaletteState,
   { min, max }: { min: number; max: number }
 ) {
   if (!stops.length) {
     const step = (max - min) / colors.length;
     return [min, ...colors.map((_, i) => min + (i + 1) * step)];
   }
+  let firstRanges = [min];
+  let lastRanges = [max];
+  let correctMin = rangeMin;
+  let correctMax = rangeMax;
   if (range === 'percent') {
-    const filteredStops = stops.filter((stop) => stop >= 0 && stop <= 100);
-    return [min, ...filteredStops.map((step) => min + step * ((max - min) / 100)), max];
+    correctMin = min + rangeMin * ((max - min) / 100);
+    correctMax = min + rangeMax * ((max - min) / 100);
+  }
+
+  if (correctMin > min && isFinite(correctMin)) {
+    firstRanges = [min, correctMin];
+  }
+
+  if (correctMax < max && isFinite(correctMax)) {
+    lastRanges = [correctMax, max];
+  }
+
+  if (range === 'percent') {
+    const filteredStops = stops.filter((stop) => stop > 0 && stop < 100);
+    return [
+      ...firstRanges,
+      ...filteredStops.map((step) => min + step * ((max - min) / 100)),
+      ...lastRanges,
+    ];
   }
   const orderedStops = stops.filter((stop, i) => stop < max && stop > min);
-  return [min, ...orderedStops, max];
+  return [...firstRanges, ...orderedStops, ...lastRanges];
 }
 
 function getTitle(
@@ -61,9 +104,11 @@ function getTitle(
   labelMajor?: string,
   fallbackTitle?: string
 ) {
-  if (labelMajorMode === GaugeLabelMajorModes.none) {
+  if (labelMajorMode === GaugeLabelMajorModes.NONE) {
     return '';
-  } else if (labelMajorMode === GaugeLabelMajorModes.auto) {
+  }
+
+  if (labelMajorMode === GaugeLabelMajorModes.AUTO) {
     return `${fallbackTitle || ''}   `; // added extra space for nice rendering
   }
   return `${labelMajor || fallbackTitle || ''}   `; // added extra space for nice rendering
@@ -89,7 +134,7 @@ function getTicks(
   range: [number, number],
   colorBands?: number[]
 ) {
-  if (ticksPosition === GaugeTicksPositions.bands && colorBands) {
+  if (ticksPosition === GaugeTicksPositions.BANDS && colorBands) {
     return colorBands && getTicksLabels(colorBands);
   }
   const TICKS_NO = 3;
@@ -108,7 +153,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
   ({ data, args, formatFactory, chartsThemeService }) => {
     const {
       shape: subtype,
-      metricAccessor,
       palette,
       colorMode,
       labelMinor,
@@ -116,32 +160,35 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       labelMajorMode,
       ticksPosition,
     } = args;
-    if (!metricAccessor) {
+    const table = data;
+    const accessors = getAccessorsFromArgs(args, table.columns);
+
+    if (!accessors || !accessors.metric) {
       // Chart is not ready
       return null;
     }
 
     const chartTheme = chartsThemeService.useChartsTheme();
 
-    const table = data;
-    const metricColumn = table.columns.find((col) => col.id === metricAccessor);
+    const metricColumn = table.columns.find((col) => col.id === accessors.metric);
 
     const chartData = table.rows.filter(
-      (v) => typeof v[metricAccessor!] === 'number' || Array.isArray(v[metricAccessor!])
+      (v) => typeof v[accessors.metric!] === 'number' || Array.isArray(v[accessors.metric!])
     );
     const row = chartData?.[0];
 
-    const metricValue = getValueFromAccessor('metricAccessor', row, args);
+    const metricValue = args.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
 
-    const icon = subtype === GaugeShapes.horizontalBullet ? GaugeIconHorizontal : GaugeIconVertical;
+    const icon =
+      subtype === GaugeShapes.HORIZONTAL_BULLET ? GaugeIconHorizontal : GaugeIconVertical;
 
     if (typeof metricValue !== 'number') {
       return <EmptyPlaceholder icon={icon} />;
     }
 
-    const goal = getValueFromAccessor('goalAccessor', row, args);
-    const min = getMinValue(row, args);
-    const max = getMaxValue(row, args);
+    const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
+    const min = getMinValue(row, accessors);
+    const max = getMaxValue(row, accessors);
 
     if (min === max) {
       return (
@@ -155,7 +202,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           }
         />
       );
-    } else if (min > max) {
+    }
+
+    if (min > max) {
       return (
         <EmptyPlaceholder
           icon={icon}
@@ -179,7 +228,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             },
           }
     );
-    const colors = palette?.params?.colors ? normalizeColors(palette.params, min) : undefined;
+    const colors = palette?.params?.colors ? normalizeColors(palette.params, min, max) : undefined;
     const bands: number[] = (palette?.params as CustomPaletteState)
       ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
       : [min, max];
@@ -189,22 +238,29 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     return (
       <Chart>
-        <Settings debugState={window._echDebugStateFlag ?? false} theme={chartTheme} />
+        <Settings
+          debugState={window._echDebugStateFlag ?? false}
+          theme={chartTheme}
+          ariaLabel={args.ariaLabel}
+          ariaUseDefaultSummary={!args.ariaLabel}
+        />
         <Goal
           id="goal"
           subtype={subtype}
-          base={min}
-          target={goal && goal >= min && goal <= max ? goal : undefined}
+          base={bands[0]}
+          target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
           actual={formattedActual}
           tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
           bands={bands}
           ticks={getTicks(ticksPosition, [min, max], bands)}
           bandFillColor={
-            colorMode === 'palette' && colors
+            colorMode === GaugeColorModes.PALETTE && colors
               ? (val) => {
                   const index = bands && bands.indexOf(val.value) - 1;
                   return colors && index >= 0 && colors[index]
                     ? colors[index]
+                    : val.value <= bands[0]
+                    ? colors[0]
                     : colors[colors.length - 1];
                 }
               : () => `rgba(255,255,255,0)`
