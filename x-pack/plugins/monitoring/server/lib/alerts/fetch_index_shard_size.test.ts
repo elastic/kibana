@@ -186,7 +186,6 @@ describe('fetchIndexShardSize', () => {
                           '_index',
                           'index_stats.shards.primaries',
                           'index_stats.primaries.store.size_in_bytes',
-                          'elasticsearch.index.shards.primaries',
                           'elasticsearch.index.primaries.store.size_in_bytes',
                         ],
                       },
