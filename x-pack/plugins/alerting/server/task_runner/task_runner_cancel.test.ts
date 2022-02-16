@@ -174,6 +174,7 @@ describe('Task Runner Cancel', () => {
       .requireMock('../lib/wrap_scoped_cluster_client')
       .createWrappedScopedClusterClientFactory.mockReturnValue({
         client: () => services.scopedClusterClient,
+        getStats: () => ({ numQueries: 3, totalQueryDurationMs: 23423, totalSearchDurationMs: 33 }),
       });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
@@ -302,7 +303,10 @@ describe('Task Runner Cancel', () => {
           rule: {
             execution: {
               metrics: {
+                number_of_queries: 3,
                 number_of_triggered_actions: 0,
+                total_query_duration_ms: 23423,
+                total_search_duration_ms: 33,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -480,7 +484,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"searchStats":{"numQueries":3,"totalQueryDurationMs":23423,"totalSearchDurationMs":33},"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -565,7 +569,10 @@ describe('Task Runner Cancel', () => {
           rule: {
             execution: {
               metrics: {
+                number_of_queries: 3,
                 number_of_triggered_actions: 0,
+                total_query_duration_ms: 23423,
+                total_search_duration_ms: 33,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
@@ -627,7 +634,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"searchStats":{"numQueries":3,"totalQueryDurationMs":23423,"totalSearchDurationMs":33},"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -822,7 +829,10 @@ describe('Task Runner Cancel', () => {
           rule: {
             execution: {
               metrics: {
+                number_of_queries: 3,
                 number_of_triggered_actions: 1,
+                total_query_duration_ms: 23423,
+                total_search_duration_ms: 33,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },

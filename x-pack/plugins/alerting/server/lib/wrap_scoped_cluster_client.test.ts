@@ -145,6 +145,6 @@ describe('wrapScopedClusterClient', () => {
 
     const stats = wrappedSearchClientFactory.getStats();
     expect(stats.numQueries).toEqual(3);
-    expect(stats.totalQueryDuration).toEqual(999);
+    expect(stats.totalQueryDurationMs).toEqual(999);
   });
 });

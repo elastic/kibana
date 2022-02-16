@@ -37,7 +37,7 @@ import {
   RuleMonitoringHistory,
   RawRuleExecutionStatus,
   AlertAction,
-  RuleTaskStateWithActions,
+  RuleExecutionState,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { getExecutionSuccessRatio, getExecutionDurationPercentiles } from '../lib/monitoring';
@@ -80,8 +80,8 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   },
 });
 
-interface RuleTaskRunResultWithActions {
-  state: RuleTaskStateWithActions;
+interface RuleExecutionRunResult {
+  state: RuleExecutionState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }
@@ -297,7 +297,7 @@ export class TaskRunner<
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string,
     event: Event
-  ): Promise<RuleTaskStateWithActions> {
+  ): Promise<RuleExecutionState> {
     const {
       alertTypeId,
       consumer,
@@ -424,6 +424,8 @@ export class TaskRunner<
       name: rule.name,
     };
 
+    const searchStats = wrappedScopedClusterClient.getStats();
+
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
     const alertsWithScheduledActions = pickBy(
       alerts,
@@ -535,6 +537,7 @@ export class TaskRunner<
     }
 
     return {
+      searchStats,
       triggeredActions,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
@@ -570,9 +573,7 @@ export class TaskRunner<
     return this.executeAlerts(fakeRequest, rule, validatedParams, executionHandler, spaceId, event);
   }
 
-  async loadRuleAttributesAndRun(
-    event: Event
-  ): Promise<Resultable<RuleTaskRunResultWithActions, Error>> {
+  async loadRuleAttributesAndRun(event: Event): Promise<Resultable<RuleExecutionRunResult, Error>> {
     const {
       params: { alertId: ruleId, spaceId },
     } = this.taskInstance;
@@ -634,7 +635,7 @@ export class TaskRunner<
     }
     return {
       monitoring: asOk(rule.monitoring),
-      state: await promiseResult<RuleTaskStateWithActions, Error>(
+      state: await promiseResult<RuleExecutionState, Error>(
         this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
       ),
       schedule: asOk(
@@ -709,9 +710,9 @@ export class TaskRunner<
         return getDefaultRuleMonitoring();
       }) ?? getDefaultRuleMonitoring();
 
-    const executionStatus = map<RuleTaskStateWithActions, ElasticsearchError, AlertExecutionStatus>(
+    const executionStatus = map<RuleExecutionState, ElasticsearchError, AlertExecutionStatus>(
       state,
-      (ruleTaskState) => executionStatusFromState(ruleTaskState),
+      (ruleExecutionState) => executionStatusFromState(ruleExecutionState),
       (err: ElasticsearchError) => executionStatusFromError(err)
     );
 
@@ -764,6 +765,25 @@ export class TaskRunner<
       );
     }
 
+    // Copy search stats into event log
+    if (executionStatus.searchStats) {
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.number_of_queries',
+        executionStatus.searchStats.numQueries ?? 0
+      );
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.total_query_duration_ms',
+        executionStatus.searchStats.totalQueryDurationMs ?? 0
+      );
+      set(
+        event,
+        'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+        executionStatus.searchStats.totalSearchDurationMs ?? 0
+      );
+    }
+
     ruleMonitoring.execution.history.push(monitoringHistory);
     ruleMonitoring.execution.calculated_metrics = {
       success_ratio: getExecutionSuccessRatio(ruleMonitoring),
@@ -784,20 +804,19 @@ export class TaskRunner<
       });
     }
 
-    const transformStateForTaskState = (
-      stateWithActions: RuleTaskStateWithActions
+    const transformExecutionStateToTaskState = (
+      executionState: RuleExecutionState
     ): RuleTaskState => {
       return {
-        ...omit(stateWithActions, 'triggeredActions'),
+        ...omit(executionState, ['triggeredActions', 'searchStats']),
         previousStartedAt: startedAt,
       };
     };
 
     return {
-      state: map<RuleTaskStateWithActions, ElasticsearchError, RuleTaskState>(
+      state: map<RuleExecutionState, ElasticsearchError, RuleTaskState>(
         state,
-        (stateWithActions: RuleTaskStateWithActions) =>
-          transformStateForTaskState(stateWithActions),
+        (executionState: RuleExecutionState) => transformExecutionStateToTaskState(executionState),
         (err: ElasticsearchError) => {
           const message = `Executing Rule ${spaceId}:${
             this.ruleType.id
@@ -1235,8 +1254,8 @@ function logActiveAndRecoveredAlerts<
  * so that we can treat each field independantly
  */
 async function errorAsRuleTaskRunResult(
-  future: Promise<Resultable<RuleTaskRunResultWithActions, Error>>
-): Promise<Resultable<RuleTaskRunResultWithActions, Error>> {
+  future: Promise<Resultable<RuleExecutionRunResult, Error>>
+): Promise<Resultable<RuleExecutionRunResult, Error>> {
   try {
     return await future;
   } catch (e) {
