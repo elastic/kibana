@@ -36,7 +36,7 @@ export function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): ISco
   };
 }
 
-interface ElasticsearchClientWithChild extends ElasticsearchClient {
+export interface ElasticsearchClientWithChild extends ElasticsearchClient {
   child: Client['child'];
 }
 
