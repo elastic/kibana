@@ -41,8 +41,8 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
   onOpenInNewTab,
   onSearchChange,
   isLoading,
-  error: DashboardDrilldownConfigProps,
-}) => {
+  error,
+}: DashboardDrilldownConfigProps) => {
   const selectedTitle = dashboards.find((item) => item.value === activeDashboardId)?.label || '';
 
   return (
