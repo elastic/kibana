@@ -17,7 +17,7 @@ import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from './index
 import type { MapConfig } from '../config';
 import { createEMSSettings } from '../common/ems_settings';
 import type { LicensingPluginStart } from '../../../../x-pack/plugins/licensing/public';
-import { createEMSClientLazy } from './lazy_load_bundle';
+import { createEMSClient } from './create_ems_client';
 
 interface MapsEmsStartPublicDependencies {
   licensing?: LicensingPluginStart;
@@ -49,9 +49,9 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
       createEMSSettings: () => {
         return createEMSSettings(mapConfig, getIsEnterprisePlus);
       },
-      createEMSClient: async () => {
+      createEMSClient: () => {
         const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
-        return createEMSClientLazy(emsSettings, kibanaVersion);
+        return createEMSClient(emsSettings, kibanaVersion);
       },
     };
   }

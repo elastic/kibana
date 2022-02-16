@@ -8,7 +8,7 @@
 
 import type { IServiceSettings } from './service_settings_types';
 
-let lazyLoaded: () => Promise<IServiceSettings>;
+let lazyLoaded: () => IServiceSettings;
 
 export async function getServiceSettingsLazy(): Promise<IServiceSettings> {
   if (lazyLoaded) {

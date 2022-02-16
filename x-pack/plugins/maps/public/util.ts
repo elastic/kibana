@@ -36,7 +36,7 @@ let emsClient: EMSClient | null = null;
 let latestLicenseId: string | undefined;
 async function getEMSClient(): Promise<EMSClient> {
   if (!emsClient) {
-    emsClient = await getMapsEmsStart().createEMSClient();
+    emsClient = getMapsEmsStart().createEMSClient();
   }
   const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {

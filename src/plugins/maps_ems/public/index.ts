@@ -25,5 +25,5 @@ export interface MapsEmsPluginPublicSetup {}
 export interface MapsEmsPluginPublicStart {
   config: MapConfig;
   createEMSSettings(): EMSSettings;
-  createEMSClient(): Promise<EMSClient>;
+  createEMSClient(): EMSClient;
 }

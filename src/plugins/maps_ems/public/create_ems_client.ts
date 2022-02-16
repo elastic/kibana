@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
-import { EMS_APP_NAME, EMSSettings } from '../../common';
+import { EMS_APP_NAME, EMSSettings } from '../common';
 
 export function createEMSClient(emsSettings: EMSSettings, kbnVersion: string): EMSClient {
   return new EMSClient({
