@@ -42,13 +42,8 @@ export const TYPE_COLUMN_WIDTH = 50;
  * Returns the CSS class name for the title of a category shown in the left
  * side field browser
  */
-export const getCategoryPaneCategoryClassName = ({
-  categoryId,
-  timelineId,
-}: {
-  categoryId: string;
-  timelineId: string;
-}): string => `field-browser-category-pane-${categoryId}-${timelineId}`;
+export const getCategoryFilterClassName = ({ timelineId }: { timelineId: string }): string =>
+  `categories-filter-button-${timelineId}`;
 
 /**
  * Returns the CSS class name for the title of a category shown in the right
@@ -204,7 +199,30 @@ export const resetButtonHasFocus = (containerElement: HTMLElement | null): boole
     containerElement?.querySelector<HTMLDivElement>(`.${RESET_FIELDS_CLASS_NAME}`)
   );
 
-export const scrollCategoriesPane = ({
+// export const scrollCategoriesPane = ({
+//   containerElement,
+//   selectedCategoryId,
+//   timelineId,
+// }: {
+//   containerElement: HTMLElement | null;
+//   selectedCategoryId: string;
+//   timelineId: string;
+// }) => {
+//   if (selectedCategoryId !== '') {
+//     const selectedCategories =
+//       containerElement?.getElementsByClassName(
+//         getCategoryFilterClassName({
+//           timelineId,
+//         })
+//       ) ?? [];
+
+//     if (selectedCategories.length > 0) {
+//       selectedCategories[0].scrollIntoView();
+//     }
+//   }
+// };
+
+export const focusCategoriesFilter = ({
   containerElement,
   selectedCategoryId,
   timelineId,
@@ -216,32 +234,7 @@ export const scrollCategoriesPane = ({
   if (selectedCategoryId !== '') {
     const selectedCategories =
       containerElement?.getElementsByClassName(
-        getCategoryPaneCategoryClassName({
-          categoryId: selectedCategoryId,
-          timelineId,
-        })
-      ) ?? [];
-
-    if (selectedCategories.length > 0) {
-      selectedCategories[0].scrollIntoView();
-    }
-  }
-};
-
-export const focusCategoriesPane = ({
-  containerElement,
-  selectedCategoryId,
-  timelineId,
-}: {
-  containerElement: HTMLElement | null;
-  selectedCategoryId: string;
-  timelineId: string;
-}) => {
-  if (selectedCategoryId !== '') {
-    const selectedCategories =
-      containerElement?.getElementsByClassName(
-        getCategoryPaneCategoryClassName({
-          categoryId: selectedCategoryId,
+        getCategoryFilterClassName({
           timelineId,
         })
       ) ?? [];
@@ -341,7 +334,7 @@ export const onSearchInputFocusChanging = ({
 }) =>
   shiftKey
     ? focusCloseButton(containerElement)
-    : focusCategoriesPane({ containerElement, selectedCategoryId, timelineId });
+    : focusCategoriesFilter({ containerElement, selectedCategoryId, timelineId });
 
 export const onViewAllFocusChanging = ({
   containerElement,
@@ -355,7 +348,7 @@ export const onViewAllFocusChanging = ({
   timelineId: string;
 }) =>
   shiftKey
-    ? focusCategoriesPane({ containerElement, selectedCategoryId, timelineId })
+    ? focusCategoriesFilter({ containerElement, selectedCategoryId, timelineId })
     : focusCategoryTable(containerElement);
 
 export const onResetButtonFocusChanging = ({

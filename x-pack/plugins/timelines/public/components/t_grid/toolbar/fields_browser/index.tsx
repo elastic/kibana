@@ -35,6 +35,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   columnHeaders,
   browserFields,
   createFieldComponent,
+  fieldTableColumns,
   width,
 }) => {
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -48,9 +49,10 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
   const [isSearching, setIsSearching] = useState(false);
   /** this category will be displayed in the right-hand pane of the field browser */
-  const [selectedCategoryId, setSelectedCategoryId] = useState(DEFAULT_CATEGORY_NAME);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   /** show the field browser */
   const [show, setShow] = useState(false);
+
   useEffect(() => {
     return () => {
       if (inputTimeoutId.current !== 0) {
@@ -71,7 +73,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     setFilterInput('');
     setFilteredBrowserFields(null);
     setIsSearching(false);
-    setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
+    setSelectedCategoryIds([]);
     setShow(false);
   }, []);
 
@@ -92,24 +94,24 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
         setFilteredBrowserFields(newFilteredBrowserFields);
         setIsSearching(false);
 
-        const newSelectedCategoryId =
-          newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
-            ? DEFAULT_CATEGORY_NAME
-            : Object.keys(newFilteredBrowserFields)
-                .sort()
-                .reduce<string>(
-                  (selected, category) =>
-                    newFilteredBrowserFields[category].fields != null &&
-                    newFilteredBrowserFields[selected].fields != null &&
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    Object.keys(newFilteredBrowserFields[category].fields!).length >
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      Object.keys(newFilteredBrowserFields[selected].fields!).length
-                      ? category
-                      : selected,
-                  Object.keys(newFilteredBrowserFields)[0]
-                );
-        setSelectedCategoryId(newSelectedCategoryId);
+        // const newSelectedCategoryIds =
+        //   newFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0
+        //     ? DEFAULT_CATEGORY_NAME
+        //     : Object.keys(newFilteredBrowserFields)
+        //         .sort()
+        //         .reduce<string>(
+        //           (selected, category) =>
+        //             newFilteredBrowserFields[category].fields != null &&
+        //             newFilteredBrowserFields[selected].fields != null &&
+        //             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        //             Object.keys(newFilteredBrowserFields[category].fields!).length >
+        //               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        //               Object.keys(newFilteredBrowserFields[selected].fields!).length
+        //               ? category
+        //               : selected,
+        //           Object.keys(newFilteredBrowserFields)[0]
+        //         );
+        // setSelectedCategoryIds(newSelectedCategoryIds);
       }, INPUT_TIMEOUT);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -142,17 +144,18 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
         <FieldsBrowser
           browserFields={browserFieldsWithDefaultCategory}
           createFieldComponent={createFieldComponent}
+          fieldTableColumns={fieldTableColumns}
           columnHeaders={columnHeaders}
           filteredBrowserFields={
             filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
           }
           isSearching={isSearching}
-          onCategorySelected={setSelectedCategoryId}
+          setSelectedCategoryIds={setSelectedCategoryIds}
           onHide={onHide}
           onSearchInputChange={updateFilter}
           restoreFocusTo={customizeColumnsButtonRef}
           searchInput={filterInput}
-          selectedCategoryId={selectedCategoryId}
+          selectedCategoryIds={selectedCategoryIds}
           timelineId={timelineId}
           width={width}
         />

@@ -30,10 +30,8 @@ import { getColumnsWithTimestamp } from '../../../utils/helpers';
 import type { BrowserFields } from '../../../../../common/search_strategy';
 import type { OnUpdateColumns } from '../../../../../common/types';
 
-const CategoryName = styled.span<{ bold: boolean }>`
-  .euiText {
-    font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
-  }
+export const CategoryName = styled.span<{ bold: boolean }>`
+  font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
 `;
 
 CategoryName.displayName = 'CategoryName';

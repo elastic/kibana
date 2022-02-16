@@ -56,6 +56,18 @@ export const DESCRIPTION_FOR_FIELD = (field: string) =>
     defaultMessage: 'Description for field {field}:',
   });
 
+export const NAME = i18n.translate('xpack.timelines.fieldBrowser.fieldName', {
+  defaultMessage: 'Name',
+});
+
+export const RUNTIME = i18n.translate('xpack.timelines.fieldBrowser.runtimeLabel', {
+  defaultMessage: 'Runtime',
+});
+
+export const RUNTIME_FIELD = i18n.translate('xpack.timelines.fieldBrowser.runtimeTitle', {
+  defaultMessage: 'Runtime Field',
+});
+
 export const FIELD = i18n.translate('xpack.timelines.fieldBrowser.fieldLabel', {
   defaultMessage: 'Field',
 });
@@ -64,10 +76,14 @@ export const FIELDS = i18n.translate('xpack.timelines.fieldBrowser.fieldsTitle',
   defaultMessage: 'Fields',
 });
 
+export const FIELDS_SHOWING = i18n.translate('xpack.timelines.fieldBrowser.fieldsCountShowing', {
+  defaultMessage: 'Showing',
+});
+
 export const FIELDS_COUNT = (totalCount: number) =>
   i18n.translate('xpack.timelines.fieldBrowser.fieldsCountTitle', {
     values: { totalCount },
-    defaultMessage: '{totalCount} {totalCount, plural, =1 {field} other {fields}}',
+    defaultMessage: '{totalCount, plural, =1 {field} other {fields}}',
   });
 
 export const FILTER_PLACEHOLDER = i18n.translate('xpack.timelines.fieldBrowser.filterPlaceholder', {

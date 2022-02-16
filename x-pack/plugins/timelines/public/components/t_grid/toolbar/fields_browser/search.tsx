@@ -72,7 +72,7 @@ export const Search = React.memo<Props>(
         value={searchInput}
         fullWidth
       />
-      <CountRow filteredBrowserFields={filteredBrowserFields} />
+      {/* <CountRow filteredBrowserFields={filteredBrowserFields} /> */}
     </>
   )
 );

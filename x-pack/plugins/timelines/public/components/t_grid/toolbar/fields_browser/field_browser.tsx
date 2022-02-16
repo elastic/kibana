@@ -28,8 +28,8 @@ import {
   isTab,
   stopPropagationAndPreventDefault,
 } from '../../../../../common/utils/accessibility';
-import { CategoriesPane } from './categories_pane';
-import { FieldsPane } from './fields_pane';
+// import { CategoriesPane } from './categories_pane';
+// import { FieldsPane } from './fields_pane';
 import { Search } from './search';
 
 import {
@@ -41,20 +41,25 @@ import {
   onFieldsBrowserTabPressed,
   PANES_FLEX_GROUP_WIDTH,
   RESET_FIELDS_CLASS_NAME,
-  scrollCategoriesPane,
 } from './helpers';
 import type { FieldBrowserProps } from './types';
 import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
 
 import * as i18n from './translations';
 import { useDeepEqualSelector } from '../../../../hooks/use_selector';
+import { CategoriesSelector } from './categories_selector';
+import { FieldTable } from './field_table';
+import { CategoriesBadges } from './categories_badges';
 
 const PanesFlexGroup = styled(EuiFlexGroup)`
   width: ${PANES_FLEX_GROUP_WIDTH}px;
 `;
 PanesFlexGroup.displayName = 'PanesFlexGroup';
 
-type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> & {
+type Props = Pick<
+  FieldBrowserProps,
+  'timelineId' | 'browserFields' | 'fieldTableColumns' | 'width'
+> & {
   /**
    * The current timeline column headers
    */
@@ -78,12 +83,12 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> &
   /**
    * The category selected on the left-hand side of the field browser
    */
-  selectedCategoryId: string;
+  selectedCategoryIds: string[];
   /**
    * Invoked when the user clicks on the name of a category in the left-hand
    * side of the field browser
    */
-  onCategorySelected: (categoryId: string) => void;
+  setSelectedCategoryIds: (categoryIds: string[]) => void;
   /**
    * Hides the field browser when invoked
    */
@@ -110,20 +115,21 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   filteredBrowserFields,
   createFieldComponent: CreateField,
   isSearching,
-  onCategorySelected,
+  setSelectedCategoryIds,
   onSearchInputChange,
   onHide,
   restoreFocusTo,
+  fieldTableColumns = [],
   searchInput,
-  selectedCategoryId,
+  selectedCategoryIds,
   timelineId,
   width = FIELD_BROWSER_WIDTH,
 }) => {
   const dispatch = useDispatch();
-  const containerElement = useRef<HTMLDivElement | null>(null);
 
   const onUpdateColumns = useCallback(
-    (columns) => dispatch(tGridActions.updateColumns({ id: timelineId, columns })),
+    (columns: ColumnHeaderOptions[]) =>
+      dispatch(tGridActions.updateColumns({ id: timelineId, columns })),
     [dispatch, timelineId]
   );
 
@@ -153,45 +159,9 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     [onSearchInputChange]
   );
 
-  const scrollViewsAndFocusInput = useCallback(() => {
-    scrollCategoriesPane({
-      containerElement: containerElement.current,
-      selectedCategoryId,
-      timelineId,
-    });
-
-    // always re-focus the input to enable additional filtering
-    focusSearchInput({
-      containerElement: containerElement.current,
-      timelineId,
-    });
-  }, [selectedCategoryId, timelineId]);
-
-  useEffect(() => {
-    scrollViewsAndFocusInput();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategoryId, timelineId]);
-
-  const onKeyDown = useCallback(
-    (keyboardEvent: React.KeyboardEvent) => {
-      if (isEscape(keyboardEvent)) {
-        stopPropagationAndPreventDefault(keyboardEvent);
-        closeAndRestoreFocus();
-      } else if (isTab(keyboardEvent)) {
-        onFieldsBrowserTabPressed({
-          containerElement: containerElement.current,
-          keyboardEvent,
-          selectedCategoryId,
-          timelineId,
-        });
-      }
-    },
-    [closeAndRestoreFocus, containerElement, selectedCategoryId, timelineId]
-  );
-
   return (
     <EuiModal onClose={closeAndRestoreFocus} style={{ width, maxWidth: width }}>
-      <div data-test-subj="fields-browser-container" onKeyDown={onKeyDown} ref={containerElement}>
+      <div data-test-subj="fields-browser-container">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <h1>{i18n.FIELDS_BROWSER}</h1>
@@ -199,7 +169,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFlexGroup gutterSize="none">
+          <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
               <Search
                 data-test-subj="header"
@@ -211,14 +181,39 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <CategoriesSelector
+                data-test-subj="categories-selector"
+                filteredBrowserFields={filteredBrowserFields}
+                setSelectedCategoryIds={setSelectedCategoryIds}
+                selectedCategoryIds={selectedCategoryIds}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               {CreateField && dataViewId != null && dataViewId.length > 0 && (
                 <CreateField onClick={onHide} />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
 
+          <CategoriesBadges
+            selectedCategoryIds={selectedCategoryIds}
+            setSelectedCategoryIds={setSelectedCategoryIds}
+          />
+
           <EuiSpacer size="l" />
-          <PanesFlexGroup alignItems="flexStart" gutterSize="none" justifyContent="spaceBetween">
+
+          <FieldTable
+            data-test-subj="field-table"
+            timelineId={timelineId}
+            columnHeaders={columnHeaders}
+            filteredBrowserFields={filteredBrowserFields}
+            searchInput={searchInput}
+            selectedCategoryIds={selectedCategoryIds}
+            fieldTableColumns={fieldTableColumns}
+            // onUpdateColumns={onUpdateColumns}
+          />
+
+          {/* <PanesFlexGroup alignItems="flexStart" gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <CategoriesPane
                 data-test-subj="left-categories-pane"
@@ -243,7 +238,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
                 width={FIELDS_PANE_WIDTH}
               />
             </EuiFlexItem>
-          </PanesFlexGroup>
+          </PanesFlexGroup> */}
         </EuiModalBody>
 
         <EuiModalFooter>

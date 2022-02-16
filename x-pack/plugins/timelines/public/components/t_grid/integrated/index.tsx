@@ -134,6 +134,9 @@ export interface TGridIntegratedProps {
   start: string;
   tGridEventRenderedViewEnabled: boolean;
   trailingControlColumns?: ControlColumnProps[];
+
+  // fieldBrowserOptions?: FieldBrowserOptions;
+  
   unit?: (n: number) => string;
 }
 

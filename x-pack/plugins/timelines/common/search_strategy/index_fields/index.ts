@@ -11,6 +11,7 @@ import type {
   IEsSearchRequest,
   IEsSearchResponse,
   FieldSpec,
+  RuntimeField,
 } from '../../../../../../src/plugins/data/common';
 import type { DocValueFields, Maybe } from '../common';
 
@@ -71,6 +72,7 @@ export interface BrowserField {
   type: string;
   subType?: IFieldSubType;
   readFromDocValues: boolean;
+  runtimeField?: RuntimeField;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
