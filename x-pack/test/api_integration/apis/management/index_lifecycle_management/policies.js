@@ -32,7 +32,9 @@ export default function ({ getService }) {
 
   const { addPolicyToIndex } = registerIndexHelpers({ supertest });
 
-  describe('policies', () => {
+  describe('policies', function () {
+    this.onlyEsVersion('<=7');
+
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {

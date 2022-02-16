@@ -106,17 +106,22 @@ class PackagePolicyService {
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
+      skipUniqueNameVerification?: boolean;
+      overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
-    const existingPoliciesWithName = await this.list(soClient, {
-      perPage: 1,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
-    });
+    if (!options?.skipUniqueNameVerification) {
+      const existingPoliciesWithName = await this.list(soClient, {
+        perPage: 1,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
+      });
 
-    // Check that the name does not exist already
-    if (existingPoliciesWithName.items.length > 0) {
-      throw new IngestManagerError('There is already a package with the same name');
+      // Check that the name does not exist already
+      if (existingPoliciesWithName.items.length > 0) {
+        throw new IngestManagerError('There is already an integration policy with the same name');
+      }
     }
+
     let elasticsearch: PackagePolicy['elasticsearch'];
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
@@ -375,7 +380,7 @@ class PackagePolicyService {
     const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
 
     if (filtered.length > 0) {
-      throw new IngestManagerError('There is already a package with the same name');
+      throw new IngestManagerError('There is already an integration policy with the same name');
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -488,6 +493,7 @@ class PackagePolicyService {
             title: packagePolicy.package?.title || '',
             version: packagePolicy.package?.version || '',
           },
+          policy_id: packagePolicy.policy_id,
         });
       } catch (error) {
         result.push({
@@ -1288,7 +1294,7 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
 
     // Ensure that any value from the original object is persisted on the newly merged resulting object,
     // even if we merge other data about the given variable
-    if (keepOriginalValue && originalVar?.value) {
+    if (keepOriginalValue && originalVar?.value !== undefined) {
       result.vars[name].value = originalVar.value;
     }
   }
@@ -1313,7 +1319,7 @@ export async function incrementPackageName(
     ? packagePolicyData.items
         .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
         .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort()
+        .sort((a, b) => a - b)
     : [];
 
   return `${packageName}-${

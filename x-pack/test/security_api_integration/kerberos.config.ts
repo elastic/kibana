@@ -29,6 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.token.timeout=15s',
+        'xpack.security.authc.realms.kerberos.kerb1.order=0',
         `xpack.security.authc.realms.kerberos.kerb1.keytab.path=${kerberosKeytabPath}`,
       ],
 

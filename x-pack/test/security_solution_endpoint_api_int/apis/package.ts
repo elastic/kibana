@@ -66,7 +66,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('Endpoint package', () => {
+  describe('Endpoint package', function () {
+    this.onlyEsVersion('<=7');
+
     describe('network processors', () => {
       let networkIndexData: InsertedEvents;
 

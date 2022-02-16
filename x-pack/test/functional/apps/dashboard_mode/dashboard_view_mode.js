@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
         await security.testUser.restoreDefaults();
       });
 
-      it('shows only the dashboard app link', async () => {
+      it.skip('shows only the dashboard app link', async () => {
         await security.testUser.setRoles(['test_logstash_reader', 'kibana_dashboard_only_user']);
         await PageObjects.header.waitUntilLoadingHasFinished();
         const appLinks = await appsMenu.readLinks();
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
         expect(currentUrl).to.contain('dashboards');
       });
 
-      it('does not show the create dashboard button', async () => {
+      it.skip('does not show the create dashboard button', async () => {
         const createNewButtonExists = await testSubjects.exists('newItemButton');
         expect(createNewButtonExists).to.be(false);
       });
@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
         expect(fullScreenMenuItemExists).to.be(true);
       });
 
-      it('does not show the edit menu item', async () => {
+      it.skip('does not show the edit menu item', async () => {
         const editMenuItemExists = await testSubjects.exists('dashboardEditMode');
         expect(editMenuItemExists).to.be(false);
       });
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }) {
         expect(shareMenuItemExists).to.be(true);
       });
 
-      it(`Permalinks doesn't show create short-url button`, async () => {
+      it.skip(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlMissingOrFail();
       });

@@ -26,6 +26,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const ml = getService('ml');
   const PageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
@@ -679,7 +680,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformId(transformId: string) {
-      await testSubjects.setValue('transformIdInput', transformId, { clearWithKeyboard: true });
+      await ml.commonUI.setValueWithChecks('transformIdInput', transformId, {
+        clearWithKeyboard: true,
+      });
       await this.assertTransformIdValue(transformId);
     },
 
@@ -699,7 +702,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformDescription(transformDescription: string) {
-      await testSubjects.setValue('transformDescriptionInput', transformDescription, {
+      await ml.commonUI.setValueWithChecks('transformDescriptionInput', transformDescription, {
         clearWithKeyboard: true,
       });
       await this.assertTransformDescriptionValue(transformDescription);
@@ -721,7 +724,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDestinationIndex(destinationIndex: string) {
-      await testSubjects.setValue('transformDestinationIndexInput', destinationIndex, {
+      await ml.commonUI.setValueWithChecks('transformDestinationIndexInput', destinationIndex, {
         clearWithKeyboard: true,
       });
       await this.assertDestinationIndexValue(destinationIndex);
@@ -752,6 +755,57 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Continuous mode switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertRetentionPolicySwitchExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicySwitch`, { allowHidden: true });
+    },
+
+    async assertRetentionPolicySwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute('transformRetentionPolicySwitch', 'aria-checked')) ===
+        'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Retention policy switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertRetentionPolicyFieldSelectExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicyDateFieldSelect`, {
+        allowHidden: true,
+      });
+    },
+
+    async assertRetentionPolicyFieldSelectValue(expectedValue: string) {
+      await testSubjects.existOrFail(`transformRetentionPolicyDateFieldSelect`, {
+        timeout: 1000,
+      });
+      const actualValue = await testSubjects.getAttribute(
+        'transformRetentionPolicyDateFieldSelect',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Retention policy field option value should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async assertRetentionPolicyMaxAgeInputExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicyMaxAgeInput`, {
+        allowHidden: true,
+      });
+    },
+
+    async assertRetentionsPolicyMaxAgeValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        'transformRetentionPolicyMaxAgeInput',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform retention policy max age input text should be '${expectedValue}' (got '${actualValue}')`
       );
     },
 

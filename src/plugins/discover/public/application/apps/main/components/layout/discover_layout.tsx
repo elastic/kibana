@@ -276,7 +276,6 @@ export function DiscoverLayout({
                 >
                   <EuiFlexItem grow={false}>
                     <DiscoverChartMemoized
-                      state={state}
                       resetSavedSearch={resetSavedSearch}
                       savedSearch={savedSearch}
                       savedSearchDataChart$={charts$}
@@ -284,6 +283,8 @@ export function DiscoverLayout({
                       services={services}
                       stateContainer={stateContainer}
                       isTimeBased={isTimeBased}
+                      hideChart={state.hideChart}
+                      interval={state.interval}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />

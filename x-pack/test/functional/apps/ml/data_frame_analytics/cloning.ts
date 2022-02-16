@@ -159,6 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.deleteIndices(testData.job.dest!.index as string);
           await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
           await ml.testResources.deleteIndexPatternByTitle(cloneDestIndex);
+          await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
         });
 
         it('opens the existing job in the data frame analytics job wizard', async () => {

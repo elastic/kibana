@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function upgradeCheckup({ loadTestFile }: FtrProviderContext) {
   describe('Upgrade Assistant', function upgradeAssistantTestSuite() {
     this.tags('ciGroup4');
+    this.onlyEsVersion('<=7');
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./deprecation_pages'));

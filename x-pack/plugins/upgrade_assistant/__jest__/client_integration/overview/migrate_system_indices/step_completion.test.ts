@@ -8,83 +8,79 @@
 import { act } from 'react-dom/test-utils';
 
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
-import { setupEnvironment, advanceTime, kibanaVersion } from '../../helpers';
+import { setupEnvironment, advanceTime } from '../../helpers';
 import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../common/constants';
 
-if (kibanaVersion.major >= 8 || kibanaVersion.minor > 16) {
-  describe('Overview - Migrate system indices - Step completion', () => {
-    let testBed: OverviewTestBed;
-    const { server, httpRequestsMockHelpers } = setupEnvironment();
+describe('Overview - Migrate system indices - Step completion', () => {
+  let testBed: OverviewTestBed;
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
-    afterAll(() => {
-      server.restore();
+  afterAll(() => {
+    server.restore();
+  });
+
+  test(`It's complete when no upgrade is needed`, async () => {
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      migration_status: 'NO_MIGRATION_NEEDED',
     });
 
-    test(`It's complete when no upgrade is needed`, async () => {
+    await act(async () => {
+      testBed = await setupOverviewPage();
+    });
+
+    const { exists, component } = testBed;
+
+    component.update();
+
+    expect(exists(`migrateSystemIndicesStep-complete`)).toBe(true);
+  });
+
+  test(`It's incomplete when migration is needed`, async () => {
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+      migration_status: 'MIGRATION_NEEDED',
+    });
+
+    await act(async () => {
+      testBed = await setupOverviewPage();
+    });
+
+    const { exists, component } = testBed;
+
+    component.update();
+
+    expect(exists(`migrateSystemIndicesStep-incomplete`)).toBe(true);
+  });
+
+  describe('Poll for new status', () => {
+    beforeEach(async () => {
+      jest.useFakeTimers();
+
+      // First request should make the step be incomplete
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
+        migration_status: 'IN_PROGRESS',
+      });
+
+      testBed = await setupOverviewPage();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('renders step as complete when a upgraded needed status is followed by a no upgrade needed', async () => {
+      const { exists } = testBed;
+
+      expect(exists('migrateSystemIndicesStep-incomplete')).toBe(true);
+
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'NO_MIGRATION_NEEDED',
       });
 
-      await act(async () => {
-        testBed = await setupOverviewPage();
-      });
+      // Resolve the polling timeout.
+      await advanceTime(SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS);
+      testBed.component.update();
 
-      const { exists, component } = testBed;
-
-      component.update();
-
-      expect(exists(`migrateSystemIndicesStep-complete`)).toBe(true);
-    });
-
-    test(`It's incomplete when migration is needed`, async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-        migration_status: 'MIGRATION_NEEDED',
-      });
-
-      await act(async () => {
-        testBed = await setupOverviewPage();
-      });
-
-      const { exists, component } = testBed;
-
-      component.update();
-
-      expect(exists(`migrateSystemIndicesStep-incomplete`)).toBe(true);
-    });
-
-    describe('Poll for new status', () => {
-      beforeEach(async () => {
-        jest.useFakeTimers();
-
-        // First request should make the step be incomplete
-        httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-          migration_status: 'IN_PROGRESS',
-        });
-
-        testBed = await setupOverviewPage();
-      });
-
-      afterEach(() => {
-        jest.useRealTimers();
-      });
-
-      test('renders step as complete when a upgraded needed status is followed by a no upgrade needed', async () => {
-        const { exists } = testBed;
-
-        expect(exists('migrateSystemIndicesStep-incomplete')).toBe(true);
-
-        httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-          migration_status: 'NO_MIGRATION_NEEDED',
-        });
-
-        // Resolve the polling timeout.
-        await advanceTime(SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS);
-        testBed.component.update();
-
-        expect(exists('migrateSystemIndicesStep-complete')).toBe(true);
-      });
+      expect(exists('migrateSystemIndicesStep-complete')).toBe(true);
     });
   });
-} else {
-  test(`System indices migration is disabled for ${kibanaVersion.version}`, () => undefined);
-}
+});

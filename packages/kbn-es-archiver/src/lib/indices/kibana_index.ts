@@ -114,7 +114,6 @@ export async function cleanKibanaIndices({
             bool: {
               must_not: {
                 ids: {
-                  type: '_doc',
                   values: ['space:default'],
                 },
               },
@@ -159,7 +158,6 @@ export async function createDefaultSpace({
   await client.create(
     {
       index,
-      type: '_doc',
       id: 'space:default',
       refresh: 'wait_for',
       body: {

@@ -51,7 +51,9 @@ export const useDataGridHeightHack = (pageSize: number, rowCount: number) => {
         setHeight(DATA_GRID_HEIGHT_BY_PAGE_SIZE[pageSize]);
       } else if (rowCount <= pageSize) {
         // This is unnecessary if we add rowCount > pageSize below
-        setHeight(dataGridRowHeight * rowCount + (headerSectionHeight + additionalFiltersHeight));
+        setHeight(
+          dataGridRowHeight * (rowCount + 1) + (headerSectionHeight + additionalFiltersHeight)
+        );
       } else if (
         // rowCount > pageSize && // This will fix the issue but is always full height so has a lot of empty state
         gridVirtualized &&

@@ -80,7 +80,7 @@ export const EnrichedDataRow: React.FC<{ field: string | undefined; value: React
     <EuiFlexItem style={{ flexShrink: 0 }} grow={false}>
       <EnrichmentFieldTitle title={field} />
     </EuiFlexItem>
-    <EuiFlexItem>{value}</EuiFlexItem>
+    <EuiFlexItem className="eui-textBreakWord">{value}</EuiFlexItem>
   </StyledEuiFlexGroup>
 );
 

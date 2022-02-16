@@ -33,7 +33,7 @@ import {
 import type { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { handleOldSettings } from './handle_old_settings';
-import { getTelemetrySavedObject } from './telemetry_repository';
+import { getTelemetrySavedObject, TelemetrySavedObject } from './telemetry_repository';
 import { getTelemetryOptIn, getTelemetryChannelEndpoint } from '../common/telemetry_config';
 
 interface TelemetryPluginsDepsSetup {
@@ -141,7 +141,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       getIsOptedIn: async () => {
         await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
         const internalRepository = new SavedObjectsClient(savedObjectsInternalRepository);
-        const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
+        let telemetrySavedObject: TelemetrySavedObject = false; // if an error occurs while fetching opt-in status, a `false` result indicates that Kibana cannot opt-in
+        try {
+          telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
+        } catch (err) {
+          this.logger.debug('Failed to check telemetry opt-in status: ' + err.message);
+        }
         const config = await this.config$.pipe(take(1)).toPromise();
         const allowChangingOptInStatus = config.allowChangingOptInStatus;
         const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;

@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
 
-  describe('lens rollup tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/121842
+  describe.skip('lens rollup tests', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/data');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/config');

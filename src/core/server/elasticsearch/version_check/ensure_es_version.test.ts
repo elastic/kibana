@@ -69,11 +69,11 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('returns isCompatible=false for an incompatible node without http publish address', async () => {
-    const nodesInfo = createNodesInfoWithoutHTTP('6.1.1');
+    const nodesInfo = createNodesInfoWithoutHTTP('7.1.1');
     const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
     expect(result.isCompatible).toBe(false);
     expect(result.message).toMatchInlineSnapshot(
-      `"This version of Kibana (v5.1.0) is incompatible with the following Elasticsearch nodes in your cluster: v6.1.1 @ undefined (ip)"`
+      `"This version of Kibana (v5.1.0) is incompatible with the following Elasticsearch nodes in your cluster: v7.1.1 @ undefined (ip)"`
     );
   });
 

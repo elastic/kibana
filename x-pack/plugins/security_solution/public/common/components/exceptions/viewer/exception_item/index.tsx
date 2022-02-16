@@ -38,10 +38,12 @@ export interface ExceptionItemProps {
   onEditException: (item: ExceptionListItemSchema) => void;
   showName?: boolean;
   showModified?: boolean;
+  disableActions: boolean;
   'data-test-subj'?: string;
 }
 
 const ExceptionItemComponent = ({
+  disableActions,
   loadingItemIds,
   exceptionItem,
   commentsAccordionId,
@@ -78,7 +80,7 @@ const ExceptionItemComponent = ({
     return getFormattedComments(exceptionItem.comments);
   }, [exceptionItem.comments]);
 
-  const disableDelete = useMemo((): boolean => {
+  const disableItemActions = useMemo((): boolean => {
     const foundItems = loadingItemIds.filter(({ id }) => id === exceptionItem.id);
     return foundItems.length > 0;
   }, [loadingItemIds, exceptionItem.id]);
@@ -96,7 +98,7 @@ const ExceptionItemComponent = ({
               showName={showName}
             />
             <ExceptionEntries
-              disableDelete={disableDelete}
+              disableActions={disableItemActions || disableActions}
               entries={entryItems}
               onDelete={handleDelete}
               onEdit={handleEdit}

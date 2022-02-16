@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { useMemo } from 'react';
 import {
   AllSeries,
@@ -31,19 +30,17 @@ export const combineTimeRanges = (
   }
 
   allSeries.forEach((series) => {
-    if (
-      series.dataType &&
-      series.selectedMetricField &&
-      !isEmpty(series.reportDefinitions) &&
-      series.time
-    ) {
+    if (series.dataType && series.selectedMetricField && series.time) {
       const seriesFrom = parseRelativeDate(series.time.from)!;
       const seriesTo = parseRelativeDate(series.time.to, { roundUp: true })!;
 
-      if (!to || seriesTo > parseRelativeDate(to, { roundUp: true })) {
+      const currentLatest = parseRelativeDate(to, { roundUp: true });
+      if (!to || (currentLatest && seriesTo > currentLatest)) {
         to = series.time.to;
       }
-      if (!from || seriesFrom < parseRelativeDate(from)) {
+
+      const currentEarliest = parseRelativeDate(from);
+      if (!from || (currentEarliest && seriesFrom < currentEarliest)) {
         from = series.time.from;
       }
     }

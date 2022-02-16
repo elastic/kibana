@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
     });
 
     const jobId = `egs_1_${Date.now()}`;

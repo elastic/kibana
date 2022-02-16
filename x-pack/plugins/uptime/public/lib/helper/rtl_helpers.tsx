@@ -9,7 +9,7 @@ import React, { ReactElement, ReactNode } from 'react';
 import { of } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -46,6 +46,7 @@ interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<Extra
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {
   history?: History;
+  path?: string;
 }
 
 type Url =
@@ -60,6 +61,7 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
   renderOptions?: Omit<RenderOptions, 'queries'>;
   state?: Partial<AppState>;
   url?: Url;
+  path?: string;
 }
 
 function getSetting<T = any>(key: string): T {
@@ -87,9 +89,14 @@ const mockAppUrls: Record<string, string> = {
 };
 
 /* default mock core */
+interface UsageCollectionMock {
+  usageCollection: { reportUiCounter: Function };
+}
 const defaultCore = coreMock.createStart();
 const mockCore: () => Partial<CoreStart> = () => {
-  const core: Partial<CoreStart & ClientPluginsStart & { storage: IStorageWrapper }> = {
+  const core: Partial<
+    CoreStart & ClientPluginsStart & UsageCollectionMock & { storage: IStorageWrapper }
+  > = {
     ...defaultCore,
     application: {
       ...defaultCore.application,
@@ -109,6 +116,9 @@ const mockCore: () => Partial<CoreStart> = () => {
       ...defaultCore.uiSettings,
       get: getSetting,
       get$: setSetting$,
+    },
+    usageCollection: {
+      reportUiCounter: () => {},
     },
     triggersActionsUi: triggersActionsUiMock.createStart(),
     storage: createMockStore(),
@@ -144,18 +154,45 @@ export function MockKibanaProvider<ExtraCore>({
 export function MockRouter<ExtraCore>({
   children,
   core,
+  path,
   history = createMemoryHistory(),
   kibanaProps,
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
       <MockKibanaProvider core={core} kibanaProps={kibanaProps}>
-        {children}
+        <Route path={path}>{children}</Route>
       </MockKibanaProvider>
     </Router>
   );
 }
 configure({ testIdAttribute: 'data-test-subj' });
+
+export const MockRedux = ({
+  state,
+  history = createMemoryHistory(),
+  children,
+  path,
+}: {
+  state: Partial<AppState>;
+  history?: History;
+  children: React.ReactNode;
+  path?: string;
+  useRealStore?: boolean;
+}) => {
+  const testState: AppState = {
+    ...mockState,
+    ...state,
+  };
+
+  return (
+    <MountWithReduxProvider state={testState}>
+      <MockRouter path={path} history={history}>
+        {children}
+      </MockRouter>
+    </MountWithReduxProvider>
+  );
+};
 
 /* Custom react testing library render */
 export function render<ExtraCore>(
@@ -167,7 +204,9 @@ export function render<ExtraCore>(
     renderOptions,
     state,
     url,
-  }: RenderRouterOptions<ExtraCore> = {}
+    path,
+    useRealStore,
+  }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
 ) {
   const testState: AppState = {
     ...mockState,
@@ -180,8 +219,8 @@ export function render<ExtraCore>(
 
   return {
     ...reactTestLibRender(
-      <MountWithReduxProvider state={testState}>
-        <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
+      <MountWithReduxProvider state={testState} useRealStore={useRealStore}>
+        <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
           {ui}
         </MockRouter>
       </MountWithReduxProvider>,

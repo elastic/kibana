@@ -110,7 +110,6 @@ export default ({ getService }: FtrProviderContext) => {
           _id: 'NoxgpHkBqbdrfX07MqXV',
           result: 'updated',
           _shards: { total: 2, successful: 1, failed: 0 },
-          _type: '_doc',
           _primary_term: 1,
         });
       });

@@ -10,7 +10,7 @@
 In {ecloud}, {fleet} flags are already configured.
 ====
 
-You can configure `xpack.fleet` settings in your `kibana.yml`. 
+You can configure `xpack.fleet` settings in your `kibana.yml`.
 By default, {fleet} is enabled. To use {fleet}, you also need to configure {kib} and {es} hosts.
 
 See the {fleet-guide}/index.html[{fleet}] docs for more information.
@@ -24,7 +24,7 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
   | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
   Set to `true` (default) to enable {fleet}. 
 | `xpack.fleet.agents.enabled` {ess-icon}
-  | Set to `true` (default) to enable {fleet}. 
+  | Set to `true` (default) to enable {fleet}.
 |===
 
 [[fleet-data-visualizer-settings]]
@@ -36,7 +36,8 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 | `xpack.fleet.registryUrl`
   | The address to use to reach the {package-manager} registry.
 | `xpack.fleet.registryProxyUrl`
-  | The proxy address to use to reach the {package-manager} registry.
+  | The proxy address to use to reach the {package-manager} registry if an internet connection is not directly available.
+  Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details.
 
 |===
 
@@ -65,7 +66,7 @@ want {fleet} to load up by default.
 | `xpack.fleet.packages`
   | List of integrations that are installed when the {fleet} app starts
   up for the first time. Required properties are:
-  
+
   `name`:: Name of the integration from the package registry.
   `version`:: Either an exact semantic version, or the keyword `latest` to fetch
   the latest integration version.
@@ -78,7 +79,7 @@ Required properties are:
   `name`:: Policy name.
 
 Optional properties are:
-  
+
   `description`:: Text description of this policy.
   `namespace`:: String identifying this policy's namespace.
   `monitoring_enabled`:: List of keywords that specify the monitoring data to collect.

@@ -132,7 +132,6 @@ describe('esArchiver: createCreateIndexStream()', () => {
 
       sinon.assert.calledWith(client.indices.create as sinon.SinonSpy, {
         index: 'index',
-        include_type_name: false,
         body: {
           settings: undefined,
           mappings: undefined,

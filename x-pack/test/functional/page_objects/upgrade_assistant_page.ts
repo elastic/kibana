@@ -56,6 +56,10 @@ export class UpgradeAssistantPageObject extends FtrService {
     });
   }
 
+  async isDeprecationLoggingEnabled(): Promise<boolean> {
+    return await this.testSubjects.exists('externalLinksTitle');
+  }
+
   async clickResetLastCheckpointButton() {
     return await this.retry.try(async () => {
       await this.testSubjects.click('resetLastStoredDate');

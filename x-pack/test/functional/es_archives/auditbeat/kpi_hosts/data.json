@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "index": "auditbeat-7.0.0-alpha1-2018.11.27",
-    "type": "doc",
+    "type": "_doc",
     "id": "Rs93UmcBTFzn_XoLWT6M",
     "source": {
       "@timestamp": "2018-11-27T00:00:11.544Z",
@@ -67,7 +67,7 @@
   "type": "doc",
   "value": {
     "index": "auditbeat-7.0.0-alpha1-2018.11.27",
-    "type": "doc",
+    "type": "_doc",
     "id": "6Nr4UmcBTFzn_XoL4l6d",
     "source": {
       "@timestamp": "2018-11-27T02:21:40.914Z",
@@ -132,7 +132,7 @@
   "type": "doc",
   "value": {
     "index": "auditbeat-7.0.0-alpha1-2018.11.27",
-    "type": "doc",
+    "type": "_doc",
     "id": "sdwQU2cBTFzn_XoLA1gL",
     "source": {
       "@timestamp": "2018-11-27T02:46:56.545Z",

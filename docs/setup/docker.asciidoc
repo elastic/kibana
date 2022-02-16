@@ -4,8 +4,8 @@
 <titleabbrev>Install with Docker </titleabbrev>
 ++++
 
-Docker images for Kibana are available from the Elastic Docker registry. The
-base image is https://hub.docker.com/_/centos/[centos:7].
+Docker images for {kib} are available from the Elastic Docker registry. The
+base image is https://hub.docker.com/_/ubuntu[ubuntu:20.04].
 
 A list of all published Docker images and tags is available at
 https://www.docker.elastic.co[www.docker.elastic.co]. The source code is in

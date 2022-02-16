@@ -30,7 +30,7 @@ export enum RESTRICTIONS_KEYS {
   WHITE_LISTED_TIMERANGE_MODES = 'whiteListedTimerangeModes',
 }
 
-interface UIRestrictions {
+export interface UIRestrictions {
   '*': boolean;
   [restriction: string]: boolean;
 }

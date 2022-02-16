@@ -9,7 +9,7 @@ import { ElasticsearchClient, Logger } from 'kibana/server';
 import { SearchHit, SearchResponse } from '@elastic/elasticsearch/api/types';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
-import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../common/endpoint/constants';
+import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
   ActivityLog,
@@ -293,7 +293,7 @@ const hasEndpointResponseDoc = async ({
   const response = await esClient
     .search<LogsEndpointActionResponse>(
       {
-        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
         size: 10000,
         body: {
           query: {

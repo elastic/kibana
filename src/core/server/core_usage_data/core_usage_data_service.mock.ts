@@ -138,6 +138,7 @@ const createStartContractMock = () => {
                 alias: 'test_index',
                 primaryStoreSizeBytes: 1,
                 storeSizeBytes: 1,
+                savedObjectsDocsCount: 1,
               },
             ],
             legacyUrlAliases: {

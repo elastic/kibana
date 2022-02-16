@@ -32,7 +32,6 @@ export function createIndexDocRecordsStream(
           ops.set(body, {
             [operation]: {
               _index: doc.index,
-              _type: doc.type,
               _id: doc.id,
             },
           });

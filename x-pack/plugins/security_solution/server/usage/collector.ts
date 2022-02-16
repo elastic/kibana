@@ -10,6 +10,8 @@ import { CollectorFetchContext } from '../../../../../src/plugins/usage_collecti
 import { CollectorDependencies } from './types';
 import { fetchDetectionsMetrics } from './detections';
 import { SAVED_OBJECT_TYPES } from '../../../cases/common/constants';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRuleActionsSavedObjectType } from '../lib/detection_engine/rule_actions/legacy_saved_object_mappings';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
@@ -18,8 +20,12 @@ export interface UsageData {
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
   return core.getStartServices().then(async ([coreStart]) => {
-    // note: we include the cases hidden types here otherwise we would not be able to query them. If at some point cases is not considered a hidden type this can be removed
-    return coreStart.savedObjects.createInternalRepository(SAVED_OBJECT_TYPES);
+    // note: we include the "cases" and "alert" hidden types here otherwise we would not be able to query them. If at some point cases and alert is not considered a hidden type this can be removed
+    return coreStart.savedObjects.createInternalRepository([
+      'alert',
+      legacyRuleActionsSavedObjectType,
+      ...SAVED_OBJECT_TYPES,
+    ]);
   });
 }
 
@@ -51,6 +57,22 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of cases attached to query detection rule alerts' },
               },
+              legacy_notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications enabled' },
+              },
+              legacy_notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications disabled' },
+              },
+              notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
+              notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
             },
             threshold: {
               enabled: {
@@ -71,6 +93,22 @@ export const registerCollector: RegisterCollector = ({
                   description: 'Number of cases attached to threshold detection rule alerts',
                 },
               },
+              legacy_notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications enabled' },
+              },
+              legacy_notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications disabled' },
+              },
+              notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
+              notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
             },
             eql: {
               enabled: { type: 'long', _meta: { description: 'Number of eql rules enabled' } },
@@ -82,6 +120,22 @@ export const registerCollector: RegisterCollector = ({
               cases: {
                 type: 'long',
                 _meta: { description: 'Number of cases attached to eql detection rule alerts' },
+              },
+              legacy_notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications enabled' },
+              },
+              legacy_notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications disabled' },
+              },
+              notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
+              notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
               },
             },
             machine_learning: {
@@ -103,6 +157,22 @@ export const registerCollector: RegisterCollector = ({
                   description: 'Number of cases attached to machine_learning detection rule alerts',
                 },
               },
+              legacy_notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications enabled' },
+              },
+              legacy_notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications disabled' },
+              },
+              notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
+              notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
             },
             threat_match: {
               enabled: {
@@ -123,6 +193,22 @@ export const registerCollector: RegisterCollector = ({
                   description: 'Number of cases attached to threat_match detection rule alerts',
                 },
               },
+              legacy_notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications enabled' },
+              },
+              legacy_notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications disabled' },
+              },
+              notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
+              notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
             },
             elastic_total: {
               enabled: { type: 'long', _meta: { description: 'Number of elastic rules enabled' } },
@@ -138,6 +224,22 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of cases attached to elastic detection rule alerts' },
               },
+              legacy_notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications enabled' },
+              },
+              legacy_notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications disabled' },
+              },
+              notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
+              notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
             },
             custom_total: {
               enabled: { type: 'long', _meta: { description: 'Number of custom rules enabled' } },
@@ -149,6 +251,22 @@ export const registerCollector: RegisterCollector = ({
               cases: {
                 type: 'long',
                 _meta: { description: 'Number of cases attached to custom detection rule alerts' },
+              },
+              legacy_notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications enabled' },
+              },
+              legacy_notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications disabled' },
+              },
+              notifications_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
+              },
+              notifications_disabled: {
+                type: 'long',
+                _meta: { description: 'Number of notifications enabled' },
               },
             },
           },
@@ -191,6 +309,14 @@ export const registerCollector: RegisterCollector = ({
               cases_count_total: {
                 type: 'long',
                 _meta: { description: 'The number of total cases generated by a rule' },
+              },
+              has_legacy_notification: {
+                type: 'boolean',
+                _meta: { description: 'True if this rule has a legacy notification' },
+              },
+              has_notification: {
+                type: 'boolean',
+                _meta: { description: 'True if this rule has a notification' },
               },
             },
           },

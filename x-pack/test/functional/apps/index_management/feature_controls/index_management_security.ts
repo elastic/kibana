@@ -15,7 +15,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe('security', () => {
+  describe('security', function () {
+    this.onlyEsVersion('<=7');
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');

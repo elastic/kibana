@@ -17,7 +17,9 @@ export default function ({ getService }) {
 
   const { getIndexMapping } = registerHelpers({ supertest });
 
-  describe('mapping', () => {
+  describe('mapping', function () {
+    this.onlyEsVersion('<=7');
+
     after(() => Promise.all([cleanUpEsResources()]));
 
     it('should fetch the index mapping', async () => {

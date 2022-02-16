@@ -132,6 +132,8 @@ export default function ({ getService }: FtrProviderContext) {
       }
       await ml.testResources.cleanMLSavedObjects();
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
     });
 
     for (const testData of testDataList) {
@@ -172,7 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToStackManagementJobsListPage();
 
           // AD
-          await ml.jobTable.filterWithSearchString(testData.adJobId);
+          await ml.jobTable.filterWithSearchString(testData.adJobId, 1);
           await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, [
             testData.initialSpace,
           ]);
@@ -216,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // AD
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
-          await ml.jobTable.filterWithSearchString(testData.adJobId);
+          await ml.jobTable.filterWithSearchString(testData.adJobId, 1);
           await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, expectedJobRowSpaces);
 
           // DFA

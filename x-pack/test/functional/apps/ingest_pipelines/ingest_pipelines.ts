@@ -22,6 +22,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
+    this.onlyEsVersion('<=7');
+
     before(async () => {
       await security.testUser.setRoles(['ingest_pipelines_user']);
       await pageObjects.common.navigateToApp('ingestPipelines');

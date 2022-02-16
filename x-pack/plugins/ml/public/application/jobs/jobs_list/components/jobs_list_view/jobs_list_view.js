@@ -18,7 +18,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { debounce } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -43,11 +42,6 @@ import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/cons
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 
 let blockingJobsRefreshTimeout = null;
-
-const filterJobsDebounce = debounce((jobsSummaryList, filterClauses, callback) => {
-  const ss = filterJobs(jobsSummaryList, filterClauses);
-  callback(ss);
-}, 500);
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsListView extends Component {
@@ -282,19 +276,10 @@ export class JobsListView extends Component {
       return;
     }
 
-    if (this._isFiltersSet === true) {
-      filterJobsDebounce(this.state.jobsSummaryList, filterClauses, (jobsSummaryList) => {
-        this.setState({ filteredJobsSummaryList: jobsSummaryList, filterClauses }, () => {
-          this.refreshSelectedJobs();
-        });
-      });
-    } else {
-      // first use after page load, do not debounce.
-      const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
-      this.setState({ filteredJobsSummaryList, filterClauses }, () => {
-        this.refreshSelectedJobs();
-      });
-    }
+    const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+    this.setState({ filteredJobsSummaryList, filterClauses }, () => {
+      this.refreshSelectedJobs();
+    });
 
     this._isFiltersSet = true;
   };

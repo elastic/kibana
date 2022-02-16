@@ -218,7 +218,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       defaults.isRetentionPolicyEnabled
     );
     const [retentionPolicyDateField, setRetentionPolicyDateField] = useState(
-      isRetentionPolicyAvailable ? dateFieldNames[0] : ''
+      isRetentionPolicyAvailable ? defaults.retentionPolicyDateField : ''
     );
     const [retentionPolicyMaxAge, setRetentionPolicyMaxAge] = useState(
       defaults.retentionPolicyMaxAge

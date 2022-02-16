@@ -85,15 +85,17 @@ export async function loadAction({
   progress.deactivate();
   const result = stats.toJSON();
 
+  const indicesWithDocs: string[] = [];
   for (const [index, { docs }] of Object.entries(result)) {
     if (docs && docs.indexed > 0) {
       log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+      indicesWithDocs.push(index);
     }
   }
 
   await client.indices.refresh(
     {
-      index: '_all',
+      index: indicesWithDocs.join(','),
       allow_no_indices: true,
     },
     {

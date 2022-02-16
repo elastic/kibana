@@ -682,6 +682,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');
+  const esVersion = getService('esVersion');
 
   describe('Timeline Details', () => {
     before(
@@ -703,7 +704,12 @@ export default function ({ getService }: FtrProviderContext) {
         },
         strategy: 'timelineSearchStrategy',
       });
-      expect(sortBy(detailsData, 'field')).to.eql(sortBy(EXPECTED_DATA, 'field'));
+
+      const expectedData = esVersion.matchRange('>=8')
+        ? sortBy(EXPECTED_DATA, 'field').filter((f) => f.field !== '_type')
+        : sortBy(EXPECTED_DATA, 'field');
+
+      expect(sortBy(detailsData, 'field')).to.eql(expectedData);
     });
 
     it('Make sure that we get kpi data', async () => {

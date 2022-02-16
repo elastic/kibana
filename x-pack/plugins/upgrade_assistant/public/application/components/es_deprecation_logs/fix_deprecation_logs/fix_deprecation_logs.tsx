@@ -38,7 +38,7 @@ const i18nTexts = {
   apiCompatibilityNoteBody: (docLink: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.apiCompatibilityNoteBody"
-      defaultMessage="We recommend you resolve all deprecation issues before upgrading to the next major version of Elastic. If needed, you can apply API compatibility headers to requests that use deprecated features. {learnMoreLink}."
+      defaultMessage="We recommend you resolve all deprecation issues before upgrading. If needed, you can apply API compatibility headers to requests that use deprecated features. {learnMoreLink}."
       values={{
         learnMoreLink: (
           <EuiLink href={docLink} target="_blank">

@@ -40,6 +40,7 @@ import {
   IErrorObject,
   AlertTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
+import { FilterQuery, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
@@ -70,7 +71,6 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 import { ExpressionChart } from './expression_chart';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
-export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 export interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
@@ -85,7 +85,7 @@ type Props = Omit<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
-      filterQuery?: string | symbol;
+      filterQuery?: FilterQuery;
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;

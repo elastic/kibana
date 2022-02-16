@@ -49,7 +49,31 @@ export class ReindexWorker {
   private readonly log: Logger;
   private readonly security: SecurityPluginStart;
 
-  constructor(
+  public static create(
+    client: SavedObjectsClientContract,
+    credentialStore: CredentialStore,
+    clusterClient: IClusterClient,
+    log: Logger,
+    licensing: LicensingPluginSetup,
+    security: SecurityPluginStart
+  ): ReindexWorker {
+    if (ReindexWorker.workerSingleton) {
+      log.debug(`More than one ReindexWorker cannot be created, returning existing worker.`);
+    } else {
+      ReindexWorker.workerSingleton = new ReindexWorker(
+        client,
+        credentialStore,
+        clusterClient,
+        log,
+        licensing,
+        security
+      );
+    }
+
+    return ReindexWorker.workerSingleton;
+  }
+
+  private constructor(
     private client: SavedObjectsClientContract,
     private credentialStore: CredentialStore,
     private clusterClient: IClusterClient,
@@ -60,10 +84,6 @@ export class ReindexWorker {
     this.log = log.get('reindex_worker');
     this.security = security;
 
-    if (ReindexWorker.workerSingleton) {
-      throw new Error(`More than one ReindexWorker cannot be created.`);
-    }
-
     const callAsInternalUser = this.clusterClient.asInternalUser;
 
     this.reindexService = reindexServiceFactory(
@@ -72,8 +92,6 @@ export class ReindexWorker {
       log,
       this.licensing
     );
-
-    ReindexWorker.workerSingleton = this;
   }
 
   /**

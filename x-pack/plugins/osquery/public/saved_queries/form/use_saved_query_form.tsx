@@ -54,7 +54,7 @@ export const useSavedQueryForm = ({
         try {
           await handleSubmit({
             ...formData,
-            ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
+            ecs_mapping: ecsFieldValue,
           });
           // eslint-disable-next-line no-empty
         } catch (e) {}

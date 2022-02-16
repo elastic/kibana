@@ -383,7 +383,7 @@ export default function ({ getService, getPageObjects }) {
           'date',
           { format: 'date', datePattern: 'YYYY-MM-DD HH:00' },
           '1',
-          "doc['utc_time'].value.getMillis() + (1000) * 60 * 60"
+          "doc['utc_time'].value.toInstant().toEpochMilli() + (1000) * 60 * 60"
         );
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(

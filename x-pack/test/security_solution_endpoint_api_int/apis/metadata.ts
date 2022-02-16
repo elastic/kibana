@@ -241,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             (ip: string) => ip === targetEndpointIp
           );
           expect(resultIp).to.eql([targetEndpointIp]);
-          expect(body.hosts[0].metadata.event.created).to.eql(1634656952181);
+          expect(body.hosts[0].metadata.event.created).to.eql(1642522686057);
           expect(body.hosts.length).to.eql(1);
           expect(body.request_page_size).to.eql(10);
           expect(body.request_page_index).to.eql(0);
@@ -283,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
           expect(resultHostId).to.eql(targetEndpointId);
           expect(resultElasticAgentId).to.eql(targetElasticAgentId);
-          expect(body.hosts[0].metadata.event.created).to.eql(1634656952181);
+          expect(body.hosts[0].metadata.event.created).to.eql(1642522686057);
           expect(body.hosts[0].host_status).to.eql('unhealthy');
           expect(body.hosts.length).to.eql(1);
           expect(body.request_page_size).to.eql(10);

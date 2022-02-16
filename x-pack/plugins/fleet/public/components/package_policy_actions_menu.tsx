@@ -57,7 +57,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    ...(showAddAgent
+    ...(showAddAgent && !agentPolicy.is_managed
       ? [
           <EuiContextMenuItem
             icon="plusInCircle"

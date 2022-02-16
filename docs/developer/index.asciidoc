@@ -31,7 +31,6 @@ include::advanced/index.asciidoc[]
 
 include::plugin-list.asciidoc[]
 
-include::plugin-api-changes/plugin-api-changes-7_12.asciidoc[]
+include::plugin-api-changes/plugin-api-changes.asciidoc[]
 
 include::telemetry.asciidoc[]
-

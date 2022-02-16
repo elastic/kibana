@@ -61,7 +61,14 @@ YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yar
 export YARN_VERSION
 
 if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
-  npm install -g "yarn@^${YARN_VERSION}"
+  rm -rf "$(npm root -g)/yarn" # in case the directory is in a bad state
+  if [[ ! $(npm install -g "yarn@^${YARN_VERSION}") ]]; then
+    # If this command is terminated early, e.g. because the build was cancelled in buildkite,
+    # a yarn directory is left behind in a bad state that can cause all subsequent installs to fail
+    rm -rf "$(npm root -g)/yarn"
+    echo "Trying again to install yarn..."
+    npm install -g "yarn@^${YARN_VERSION}"
+  fi
 fi
 
 yarn config set yarn-offline-mirror "$YARN_OFFLINE_CACHE"

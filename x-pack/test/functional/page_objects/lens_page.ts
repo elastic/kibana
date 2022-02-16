@@ -203,7 +203,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector('lnsWorkspace')
       );
       await this.waitForLensDragDropToFinish();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForVisualization();
     },
 
     /**
@@ -473,6 +473,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async useFixAction() {
       await testSubjects.click('errorFixAction');
+      await this.waitForVisualization();
     },
 
     async isTopLevelAggregation() {

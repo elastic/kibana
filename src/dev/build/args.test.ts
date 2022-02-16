@@ -28,10 +28,10 @@ it('build default and oss dist for current platform, without packages, by defaul
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createDockerUbuntu": false,
         "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -55,10 +55,10 @@ it('builds packages if --all-platforms is passed', () => {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerCentOS": true,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": true,
+        "createDockerUbuntu": true,
         "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -82,10 +82,10 @@ it('limits packages if --rpm passed with --all-platforms', () => {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createDockerUbuntu": false,
         "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -109,10 +109,10 @@ it('limits packages if --deb passed with --all-platforms', () => {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerCentOS": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createDockerUbuntu": false,
         "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -137,10 +137,10 @@ it('limits packages if --docker passed with --all-platforms', () => {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": true,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": true,
+        "createDockerUbuntu": true,
         "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -172,10 +172,10 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": true,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createDockerUbuntu": true,
         "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
@@ -193,17 +193,17 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
   `);
 });
 
-it('limits packages if --all-platforms passed with --skip-docker-centos', () => {
-  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-centos']))
+it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-ubuntu']))
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerCentOS": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": true,
+        "createDockerUbuntu": false,
         "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,

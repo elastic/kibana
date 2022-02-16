@@ -18,6 +18,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
 
   describe('Overview Page', function () {
     this.tags('skipFirefox');
+    this.onlyEsVersion('<=7');
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);

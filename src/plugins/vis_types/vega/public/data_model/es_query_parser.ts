@@ -10,6 +10,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isPlainObject } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
+import { Assign } from 'utility-types';
 import { TimeCache } from './time_cache';
 import { SearchAPI } from './search_api';
 import {
@@ -22,6 +23,7 @@ import {
   Query,
   ContextVarsObject,
 } from './types';
+import { dateHistogramInterval } from '../../../../data/common';
 
 const TIMEFILTER: string = '%timefilter%';
 const AUTOINTERVAL: string = '%autointerval%';
@@ -226,7 +228,16 @@ export class EsQueryParser {
    * @param {*} obj
    * @param {boolean} isQuery - if true, the `obj` belongs to the req's query portion
    */
-  _injectContextVars(obj: Query | estypes.SearchRequest['body']['aggs'], isQuery: boolean) {
+  _injectContextVars(
+    obj: Assign<
+      Query | estypes.SearchRequest['body']['aggs'],
+      {
+        interval?: { '%autointerval%': true | number } | string;
+      }
+    >,
+    isQuery: boolean,
+    key?: string
+  ) {
     if (obj && typeof obj === 'object') {
       if (Array.isArray(obj)) {
         // For arrays, replace MUST_CLAUSE and MUST_NOT_CLAUSE string elements
@@ -270,27 +281,32 @@ export class EsQueryParser {
           const subObj = (obj as ContextVarsObject)[prop];
           if (!subObj || typeof obj !== 'object') continue;
 
-          // replace "interval": { "%autointerval%": true|integer } with
-          // auto-generated range based on the timepicker
-          if (prop === 'interval' && subObj[AUTOINTERVAL]) {
-            let size = subObj[AUTOINTERVAL];
-            if (size === true) {
-              size = 50; // by default, try to get ~80 values
-            } else if (typeof size !== 'number') {
-              throw new Error(
-                i18n.translate('visTypeVega.esQueryParser.autointervalValueTypeErrorMessage', {
-                  defaultMessage: '{autointerval} must be either {trueValue} or a number',
-                  values: {
-                    autointerval: `"${AUTOINTERVAL}"`,
-                    trueValue: 'true',
-                  },
-                })
-              );
+          // replace "interval" with ES acceptable fixed_interval / calendar_interval
+          if (prop === 'interval' && key === 'date_histogram') {
+            let intervalString: string;
+            if (typeof subObj === 'string') {
+              intervalString = subObj;
+            } else if (subObj[AUTOINTERVAL]) {
+              let size = subObj[AUTOINTERVAL];
+              if (size === true) {
+                size = 50; // by default, try to get ~80 values
+              } else if (typeof size !== 'number') {
+                throw new Error(
+                  i18n.translate('visTypeVega.esQueryParser.autointervalValueTypeErrorMessage', {
+                    defaultMessage: '{autointerval} must be either {trueValue} or a number',
+                    values: {
+                      autointerval: `"${AUTOINTERVAL}"`,
+                      trueValue: 'true',
+                    },
+                  })
+                );
+              }
+              const { max, min } = this._timeCache.getTimeBounds();
+              intervalString = EsQueryParser._roundInterval((max - min) / size);
             }
-            const bounds = this._timeCache.getTimeBounds();
-            (obj as ContextVarsObject).interval = EsQueryParser._roundInterval(
-              (bounds.max - bounds.min) / size
-            );
+
+            Object.assign(obj, dateHistogramInterval(intervalString));
+            delete obj.interval;
             continue;
           }
 
@@ -306,7 +322,7 @@ export class EsQueryParser {
               this._createRangeFilter(subObj);
               continue;
             case undefined:
-              this._injectContextVars(subObj, isQuery);
+              this._injectContextVars(subObj, isQuery, prop);
               continue;
             default:
               throw new Error(

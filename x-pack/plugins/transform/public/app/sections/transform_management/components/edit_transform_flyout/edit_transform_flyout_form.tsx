@@ -55,7 +55,9 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   );
 
   const retentionDateFieldOptions = useMemo(() => {
-    return Array.isArray(dateFieldNames) ? dateFieldNames.map((text: string) => ({ text })) : [];
+    return Array.isArray(dateFieldNames)
+      ? dateFieldNames.map((text: string) => ({ text, value: text }))
+      : [];
   }, [dateFieldNames]);
 
   return (
@@ -180,6 +182,11 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
                   value={formFields.retentionPolicyField.value}
                   onChange={(e) =>
                     dispatch({ field: 'retentionPolicyField', value: e.target.value })
+                  }
+                  hasNoInitialSelection={
+                    !retentionDateFieldOptions
+                      .map((d) => d.text)
+                      .includes(formFields.retentionPolicyField.value)
                   }
                 />
               </EuiFormRow>

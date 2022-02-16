@@ -97,6 +97,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/usage_collection/config.ts'),
   require.resolve('../test/fleet_functional/config.ts'),
   require.resolve('../test/examples/config.ts'),
-  require.resolve('../test/performance/config.ts'),
   require.resolve('../test/functional_execution_context/config.ts'),
 ]);

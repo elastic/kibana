@@ -34,7 +34,9 @@ export default function ({ getService }) {
     clearCache,
   } = registerHelpers({ supertest });
 
-  describe('indices', () => {
+  describe('indices', function () {
+    this.onlyEsVersion('<=7');
+
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {

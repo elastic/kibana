@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
@@ -55,6 +56,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             testData.datafeedConfig
           );
           await PageObjects.common.navigateToApp('dashboard');
+        });
+
+        after(async () => {
+          await ml.testResources.deleteDashboardByTitle(testData.dashboardTitle);
         });
 
         it('can open job selection flyout', async () => {

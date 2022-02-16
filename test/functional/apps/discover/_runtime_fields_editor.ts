@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.save();
   };
 
-  // Failing: https://github.com/elastic/kibana/issues/111922
-  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
+  describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -63,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows creation of a new field', async function () {
       await createRuntimeField('runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitFor('fieldNames to include runtimefield', async () => {
+      await retry.waitForWithTimeout('fieldNames to include runtimefield', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
         return fieldNames.includes('runtimefield');
       });
@@ -76,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.confirmSave();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.waitFor('fieldNames to include edits', async () => {
+      await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
         return fieldNames.includes('runtimefield edited');
       });
@@ -105,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.removeField('delete');
       await fieldEditor.confirmDelete();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitFor('fieldNames to include edits', async () => {
+      await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
         return !fieldNames.includes('delete');
       });
@@ -127,16 +126,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[idxToClick].click();
       });
 
-      await retry.waitFor('doc viewer is displayed with runtime field', async () => {
-        const hasDocHit = await testSubjects.exists('doc-hit');
-        if (!hasDocHit) {
-          // Maybe loading has not completed
-          throw new Error('test subject doc-hit is not yet displayed');
-        }
-        const runtimeFieldsRow = await testSubjects.exists('tableDocViewRow-discover runtimefield');
+      await retry.waitForWithTimeout(
+        'doc viewer is displayed with runtime field',
+        5000,
+        async () => {
+          const hasDocHit = await testSubjects.exists('doc-hit');
+          if (!hasDocHit) {
+            // Maybe loading has not completed
+            throw new Error('test subject doc-hit is not yet displayed');
+          }
+          const runtimeFieldsRow = await testSubjects.exists(
+            'tableDocViewRow-discover runtimefield'
+          );
 
-        return hasDocHit && runtimeFieldsRow;
-      });
+          return hasDocHit && runtimeFieldsRow;
+        }
+      );
     });
   });
 }

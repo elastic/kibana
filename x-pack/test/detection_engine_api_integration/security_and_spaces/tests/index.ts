@@ -70,5 +70,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     describe('', function () {
       loadTestFile(require.resolve('./alerts/index'));
     });
+
+    describe('', function () {
+      loadTestFile(require.resolve('./telemetry/index'));
+    });
   });
 };
