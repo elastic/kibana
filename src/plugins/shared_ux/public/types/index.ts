@@ -10,7 +10,6 @@
 
 import { FC } from 'react';
 import { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
-import { DocLinksStart } from 'kibana/public';
 
 /** @internal */
 export interface SharedUXPluginSetup {}
@@ -31,6 +30,5 @@ export interface SharedUXPluginSetupDeps {}
 
 /** @internal */
 export interface SharedUXPluginStartDeps {
-  docLinks: DocLinksStart;
   dataViewEditor: DataViewEditorStart;
 }

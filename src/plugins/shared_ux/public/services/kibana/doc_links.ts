@@ -18,6 +18,6 @@ export type DocLinksServiceFactory = KibanaPluginServiceFactory<
 /**
  * A factory function for creating a Kibana-based implementation of `SharedUXEditorsService`.
  */
-export const docLinksServiceFactory: DocLinksServiceFactory = ({ startPlugins }) => ({
-  dataViewsDocsLink: startPlugins.docLinks.links?.indexPatterns?.introduction,
+export const docLinksServiceFactory: DocLinksServiceFactory = ({ coreStart }) => ({
+  dataViewsDocsLink: coreStart.docLinks.links.indexPatterns?.introduction,
 });
