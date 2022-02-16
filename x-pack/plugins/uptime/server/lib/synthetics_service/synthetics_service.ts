@@ -96,7 +96,6 @@ export class SyntheticsService {
       [SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE]: {
         title: 'Synthetics Service - Sync Saved Monitors',
         description: 'This task periodically pushes saved monitors to Synthetics Service.',
-        timeout: '1m',
         maxAttempts: 3,
         maxConcurrency: 1,
 
@@ -285,6 +284,8 @@ export class SyntheticsService {
       perPage: 500,
     });
 
+    const start = Date.now();
+
     for (const monitor of encryptedMonitors) {
       const decryptedMonitor = await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitor>(
         syntheticsMonitor.name,
@@ -292,6 +293,16 @@ export class SyntheticsService {
       );
       monitors.push(decryptedMonitor);
     }
+
+    const end = Date.now();
+    const duration = end - start;
+
+    this.logger.info(`Decrypted ${monitors.length} monitors. Took ${duration} miliseconds`, {
+      event: {
+        duration,
+      },
+      monitors: monitors.length,
+    });
 
     hydrateSavedObjects({
       monitors: monitors as unknown as SyntheticsMonitorSavedObject[],
