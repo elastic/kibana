@@ -493,7 +493,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 version: policyInfo.packageInfo.version,
               },
             },
-            artifact_manifest: agentFullPolicy.inputs[0].artifact_manifest,
+            artifact_manifest: agentFullPolicyUpdated.inputs[0].artifact_manifest,
           }),
         ]);
       });
