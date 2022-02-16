@@ -1,0 +1,136 @@
+[[plugin-api-changes]]
+== Plugin API changes in {minor-version}
+++++
+<titleabbrev>Plugin API changes</titleabbrev>
+++++
+
+This page discusses the plugin API changes that you need to be aware of when migrating
+your application to {kib} {minor-version}.
+
+[[breaking_plugin_v8.1.0_119932]]
+.`execution_context` enabled by default
+[%collapsible]
+====
+
+In a distributed environment, it can be hard to understand what {kib} entity
+initiated a request to the {es} server. To overcome this problem, we introduced
+`execution_context` to attach domain-specific metadata to every request.
+
+`execution_context` propagates specified metadata from the {kib} browser app
+or {kib} server to the {es} server through the `x-opaque-id` header emitted to the
+{es} https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-slowlog.html[slow logs].
+For details, check the https://www.elastic.co/guide/en/kibana/master/kibana-troubleshooting-trace-query.html[troubleshooting guide].
+
+The `execution_context` has the following interface:
+
+```typescript
+export type KibanaExecutionContext = {
+  /** {kib} application initated an operation.*/
+  readonly type: string; // 'visualization' | 'actions' | 'server' | ..;
+  /** public name of a user-facing feature */
+  readonly name: string; // 'TSVB' | 'Lens' |  'action_execution' | ..;
+  /** unique value to identify the source */
+  readonly id: string;
+  /** human readable description. For example, a vis title, action name */
+  readonly description: string;
+  /** in browser - url to navigate to a current page, on server - endpoint path, for task: task SO url */
+  readonly url?: string;
+  /** a context that spawned the current context. */
+  parent?: KibanaExecutionContext;
+};
+```
+
+A {kib} plugin can attach request-specific metadata to an outbound HTTP request
+on the client side as follows:
+
+```js
+const parentContext = {
+  type: 'my-app',
+  name: 'my-plugin-ui-feature',
+  id: '42',
+  description: 'Retrieve number of X for Y',
+};
+async function getData() {
+  return await http.get('...', { headers: new ExecutionContextContainer(parentContext).toHeader() });
+```
+
+On the server-side, you must wrap an async operation with the `withContext` helper:
+
+```js
+ const chainB = service.withContext({
+  type: 'my-app-server',
+  name: 'my-plugin-server-feature',
+  id: '43',
+  description: 'Query Z',
+  },
+ async () => {
+   return  await esClient.search(...);
+ }
+);
+```
+
+Then, in {es} `slow logs`, you might find that a request was initiated by `my-plugin-ui-feature`
+of `my-app` application and proxied through `my-plugin-server-feature` of `my-app-server` app:
+
+```js
+x-opaque-id: ${requestId};kibana:my-app:my-plugin-ui-feature:42;my-app-server:my-plugin-server-feature:42
+```
+
+Refer to https://github.com/elastic/kibana/pull/119932[#119932].
+
+====
+
+[[breaking_plugin_v8.1.0_118969]]
+.Validations added for Saved Object types
+[%collapsible]
+====
+
+Saved objects now support optional validation schemas using `@kbn/config-schema`.
+
+When a validation schema is provided during type registration, it is used to
+validate subsequent calls to the `SavedObjectClient` `create` and `bulkCreate` APIs.
+Validation schemas are not currently enforced on `update` operations.
+
+We recommend adding a new validation schema any time attributes are added, removed,
+or changed in your Saved Object type. This schema helps protect data integrity
+by preventing users from inadvertently importing malformed objects.
+
+```ts
+import { SavedObjectsValidationMap } from 'src/core/server';
+
+const validationMap: SavedObjectsValidationMap = {
+  '8.0.0': schema.object({
+    foo: schema.string(),
+  }),
+  '8.1.0': schema.object({
+    foo: schema.string({
+      minLength: 2,
+      validate(value) {
+        if (!/^[a-z]+$/.test(value)) {
+          return 'must be lowercase letters only';
+        }
+      }
+    }),
+  }),
+};
+
+coreSetup.savedObjects.registerType({
+  name: 'my-type',
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: {
+    properties: {
+      foo: { type: 'text' },
+    },
+  },
+  migrations: {
+    '8.1.0': (doc) => ({ ...doc, attributes: { ...doc.attributes, foo: doc.attributes.foo.toLowerCase() } }),
+  },
+  schemas: validationMap,
+});
+
+```
+
+Refer to https://github.com/elastic/kibana/pull/118969[#118969].
+
+====
