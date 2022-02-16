@@ -26,7 +26,7 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
     expect(result).toBe(true);
   });
 
-  it('should return false for the different value_template series formatters', () => {
+  it('should return true for the different value_template series formatters', () => {
     const seriesModel = [
       {
         formatter: DATA_FORMATTERS.PERCENT,
@@ -39,13 +39,13 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
     ] as Series[];
     const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
 
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 
   it('should return true for the same field formatters', () => {
     const seriesModel = [
-      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ field: 'someField' }] },
-      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ field: 'someField' }] },
+      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ type: 'avg', field: 'someField' }] },
+      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ type: 'avg', field: 'someField' }] },
     ] as Series[];
     const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
 
@@ -54,11 +54,11 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
 
   it('should return false for the different field formatters', () => {
     const seriesModel = [
-      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ field: 'someField' }] },
+      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ type: 'avg', field: 'someField' }] },
       {
         formatter: DATA_FORMATTERS.DEFAULT,
 
-        metrics: [{ field: 'anotherField' }],
+        metrics: [{ id: 'avg', field: 'anotherField' }],
       },
     ] as Series[];
     const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
@@ -71,9 +71,12 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
       {
         formatter: DATA_FORMATTERS.DEFAULT,
 
-        metrics: [{ field: 'someField' }, { field: 'field' }],
+        metrics: [
+          { type: 'avg', field: 'someField' },
+          { type: 'avg', field: 'field' },
+        ],
       },
-      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ field: 'someField' }] },
+      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ type: 'avg', field: 'someField' }] },
     ] as Series[];
     const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
 
