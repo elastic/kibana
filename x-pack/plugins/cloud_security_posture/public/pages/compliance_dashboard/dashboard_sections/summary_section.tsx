@@ -58,7 +58,7 @@ export const SummarySection = () => {
         >
           <CloudPostureScoreChart
             id="cloud_posture_score_chart"
-            data={getStats.data}
+            data={getStats.data.stats}
             partitionOnElementClick={handleElementClick}
           />
         </ChartPanel>

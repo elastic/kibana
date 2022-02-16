@@ -23,12 +23,8 @@ export interface ResourceTypeAgg extends FindingsResults {
   resourceType: string;
 }
 
-export interface BenchmarkStats extends Stats {
-  name: string;
-}
-
-export interface CloudPostureStats extends Stats {
-  benchmarksStats: BenchmarkStats[];
+export interface CloudPostureStats {
+  stats: Stats;
   resourceTypesAggs: ResourceTypeAgg[];
   clusterAggs: Array<{
     meta: {

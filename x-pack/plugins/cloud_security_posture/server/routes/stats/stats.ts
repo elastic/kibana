@@ -6,21 +6,16 @@
  */
 
 import type { ElasticsearchClient, IRouter } from 'src/core/server';
-import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsMultiBucketAggregateBase as Aggregation } from '@elastic/elasticsearch/lib/api/types';
 import { number, UnknownRecord } from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { BenchmarkStats, CloudPostureStats, Evaluation, Score } from '../../../common/types';
-import {
-  getBenchmarksQuery,
-  getClustersQuery,
-  getFindingsEsQuery,
-  getLatestFindingQuery,
-  getRisksEsQuery,
-} from './stats_queries';
+import type { BenchmarkStats, CloudPostureStats, Score } from '../../../common/types';
+import { getBenchmarksQuery, getFindingsEsQuery, getLatestFindingQuery } from './stats_queries';
 import { RULE_FAILED, RULE_PASSED } from '../../constants';
 import { STATS_ROUTE_PATH } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
+import { getResourceTypesAggs } from './get_resource_type_aggs';
+import { getClusterAggs } from './get_cluster_aggs';
 
 // TODO: use a schema decoder
 function assertBenchmarkStats(v: unknown): asserts v is BenchmarkStats {
@@ -39,41 +34,9 @@ interface LastCycle {
   cycle_id: string;
 }
 
-interface KeyDocCount<TKey = string> {
+export interface KeyDocCount<TKey = string> {
   key: TKey;
   doc_count: number;
-}
-
-interface ResourceTypeBucket {
-  resource_types: AggregationsMultiBucketAggregateBase<{
-    key: string;
-    doc_count: number;
-    bucket_evaluation: AggregationsMultiBucketAggregateBase<KeyDocCount<Evaluation>>;
-  }>;
-}
-
-interface ClusterQueryResult {
-  key: string;
-  doc_count: number;
-  failed_findings: {
-    doc_count: number;
-  };
-  passed_findings: {
-    doc_count: number;
-  };
-  benchmark: AggregationsMultiBucketAggregateBase<KeyDocCount>;
-  aggs_by_resource_type: AggregationsMultiBucketAggregateBase<KeyDocCount<Evaluation>> & {
-    failed_findings: {
-      doc_count: number;
-    };
-    passed_findings: {
-      doc_count: number;
-    };
-  };
-}
-
-interface AggsByClusterId {
-  aggs_by_cluster_id: AggregationsMultiBucketAggregateBase<ClusterQueryResult>;
 }
 
 /**
@@ -81,7 +44,11 @@ interface AggsByClusterId {
  */
 export const roundScore = (value: number): Score => Number((value * 100).toFixed(1));
 
-const calculatePostureScore = (total: number, passed: number, failed: number): Score | undefined =>
+export const calculatePostureScore = (
+  total: number,
+  passed: number,
+  failed: number
+): Score | undefined =>
   passed + failed === 0 || total === undefined ? undefined : roundScore(passed / (passed + failed));
 
 const getLatestCycleId = async (esClient: ElasticsearchClient) => {
@@ -97,7 +64,7 @@ const getLatestCycleId = async (esClient: ElasticsearchClient) => {
 export const getBenchmarks = async (esClient: ElasticsearchClient) => {
   const queryResult = await esClient.search<
     {},
-    { benchmarks: AggregationsMultiBucketAggregateBase<Pick<KeyDocCount, 'key'>> }
+    { benchmarks: Aggregation<Pick<KeyDocCount, 'key'>> }
   >(getBenchmarksQuery());
   const benchmarksBuckets = queryResult.body.aggregations?.benchmarks;
 
@@ -135,120 +102,6 @@ export const getAllFindingsStats = async (
   return stats;
 };
 
-export const getBenchmarksStats = async (
-  esClient: ElasticsearchClient,
-  cycleId: string,
-  benchmarks: string[]
-): Promise<BenchmarkStats[]> => {
-  const benchmarkPromises = benchmarks.map((benchmark) => {
-    const benchmarkFindings = esClient.count(getFindingsEsQuery(cycleId, undefined, benchmark));
-    const benchmarkPassedFindings = esClient.count(
-      getFindingsEsQuery(cycleId, RULE_PASSED, benchmark)
-    );
-    const benchmarkFailedFindings = esClient.count(
-      getFindingsEsQuery(cycleId, RULE_FAILED, benchmark)
-    );
-
-    return Promise.all([benchmarkFindings, benchmarkPassedFindings, benchmarkFailedFindings]).then(
-      ([benchmarkFindingsResult, benchmarkPassedFindingsResult, benchmarkFailedFindingsResult]) => {
-        const totalFindings = benchmarkFindingsResult.body.count;
-        const totalPassed = benchmarkPassedFindingsResult.body.count;
-        const totalFailed = benchmarkFailedFindingsResult.body.count;
-        const postureScore = calculatePostureScore(totalFindings, totalPassed, totalFailed);
-
-        const stats = {
-          name: benchmark,
-          postureScore,
-          totalFindings,
-          totalPassed,
-          totalFailed,
-        };
-
-        assertBenchmarkStats(stats);
-        return stats;
-      }
-    );
-  });
-
-  return Promise.all(benchmarkPromises);
-};
-
-export const getResourceTypesAggs = async (
-  esClient: ElasticsearchClient,
-  cycleId: string
-): Promise<CloudPostureStats['resourceTypesAggs']> => {
-  const resourceTypesQueryResult = await esClient.search<unknown, ResourceTypeBucket>(
-    getRisksEsQuery(cycleId)
-  );
-
-  const resourceTypesAggs = resourceTypesQueryResult.body.aggregations?.resource_types.buckets;
-  if (!Array.isArray(resourceTypesAggs)) throw new Error('missing resources types buckets');
-
-  return resourceTypesAggs.map((bucket) => {
-    const evalBuckets = bucket.bucket_evaluation.buckets;
-    if (!Array.isArray(evalBuckets)) throw new Error('missing resources types evaluations buckets');
-
-    const failedBucket = evalBuckets.find((evalBucket) => evalBucket.key === RULE_FAILED);
-    const passedBucket = evalBuckets.find((evalBucket) => evalBucket.key === RULE_PASSED);
-
-    return {
-      resourceType: bucket.key,
-      totalFindings: bucket.doc_count,
-      totalFailed: failedBucket?.doc_count || 0,
-      totalPassed: passedBucket?.doc_count || 0,
-    };
-  });
-};
-
-const getClusterAggs = async (
-  esClient: ElasticsearchClient,
-  cycleId: string
-): Promise<CloudPostureStats['clusterAggs']> => {
-  const queryResult = await esClient.search<unknown, AggsByClusterId>(getClustersQuery(cycleId));
-  const clusters = queryResult.body.aggregations?.aggs_by_cluster_id.buckets;
-  if (!Array.isArray(clusters)) throw new Error('missing aggregations by cluster id');
-
-  return clusters.map((cluster) => {
-    const benchmark = cluster.benchmark.buckets;
-    if (!Array.isArray(benchmark)) {
-      throw new Error('missing benchmark in aggregations by cluster id');
-    }
-
-    const failedFindings = cluster.failed_findings.doc_count;
-    const passedFindings = cluster.passed_findings.doc_count;
-    const totalFindings = failedFindings + passedFindings;
-    const postureScore = calculatePostureScore(totalFindings, passedFindings, failedFindings);
-
-    if (postureScore === undefined) {
-      throw new Error("couldn't calculate posture score");
-    }
-
-    const resourceTypes = cluster.aggs_by_resource_type.buckets;
-    if (!Array.isArray(resourceTypes)) throw new Error('missing aggregations by resource type');
-
-    const resourceTypeAggs = resourceTypes.map((bucket) => ({
-      resourceType: bucket.key,
-      totalFindings: bucket.doc_count,
-      totalFailed: bucket.failed_findings.doc_count || 0,
-      totalPassed: bucket.passed_findings.doc_count || 0,
-    }));
-
-    return {
-      meta: {
-        clusterId: cluster.key,
-        benchmarkName: benchmark[0].key,
-      },
-      stats: {
-        totalFailed: failedFindings,
-        totalPassed: passedFindings,
-        totalFindings,
-        postureScore,
-      },
-      resourceTypeAggs,
-    };
-  });
-};
-
 export const defineGetStatsRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
     {
@@ -258,22 +111,16 @@ export const defineGetStatsRoute = (router: IRouter, cspContext: CspAppContext):
     async (context, _, response) => {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const [benchmarks, latestCycleID] = await Promise.all([
-          getBenchmarks(esClient),
-          getLatestCycleId(esClient),
+        const latestCycleID = await getLatestCycleId(esClient);
+
+        const [stats, resourceTypesAggs, clusterAggs] = await Promise.all([
+          getAllFindingsStats(esClient, latestCycleID),
+          getResourceTypesAggs(esClient, latestCycleID),
+          getClusterAggs(esClient, latestCycleID),
         ]);
 
-        const [allFindingsStats, benchmarksStats, resourceTypesAggs, clusterAggs] =
-          await Promise.all([
-            getAllFindingsStats(esClient, latestCycleID),
-            getBenchmarksStats(esClient, latestCycleID, benchmarks),
-            getResourceTypesAggs(esClient, latestCycleID),
-            getClusterAggs(esClient, latestCycleID),
-          ]);
-
         const body: CloudPostureStats = {
-          ...allFindingsStats,
-          benchmarksStats,
+          stats,
           resourceTypesAggs,
           clusterAggs,
         };
