@@ -24,6 +24,7 @@ import {
   SerializedFieldFormat,
 } from '../../../field_formats/common';
 import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
+import { removeFieldAttrs } from './utils';
 
 interface DataViewDeps {
   spec?: DataViewSpec;
@@ -329,25 +330,24 @@ export class DataView implements IIndexPattern {
 
     const { type, script, customLabel, format, popularity } = runtimeField;
 
+    this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
+
     if (type === 'composite') {
       return this.addCompositeRuntimeField(name, runtimeField);
     }
 
-    const runtimeFieldSpec: RuntimeFieldSpec = {
+    const field = this.updateOrAddRuntimeField(
+      name,
       type,
-      script,
-    };
-
-    const dataViewFields = [
-      this.updateOrAddRuntimeField(name, type, runtimeFieldSpec, {
+      { type, script },
+      {
         customLabel,
         format,
         popularity,
-      }),
-    ];
+      }
+    );
 
-    this.runtimeFieldMap[name] = runtimeFieldSpec;
-    return dataViewFields;
+    return [field];
   }
 
   /**
@@ -517,7 +517,7 @@ export class DataView implements IIndexPattern {
   };
 
   private addCompositeRuntimeField(name: string, runtimeField: RuntimeField): DataViewField[] {
-    const { type, script, fields } = runtimeField;
+    const { fields } = runtimeField;
 
     // Make sure subFields are provided
     if (fields === undefined || Object.keys(fields).length === 0) {
@@ -531,31 +531,17 @@ export class DataView implements IIndexPattern {
       );
     }
 
-    const runtimeFieldSpecFields: RuntimeFieldSpec['fields'] = Object.entries(fields).reduce<
-      RuntimeFieldSpec['fields']
-    >((acc, [subFieldName, subField]) => {
-      return {
-        ...acc,
-        [subFieldName]: {
-          type: subField.type,
-        },
-      };
-    }, {});
-
-    const runtimeFieldSpec: RuntimeFieldSpec = {
-      type,
-      script,
-      fields: runtimeFieldSpecFields,
-    };
-
     // We first remove the runtime composite field with the same name which will remove all of its subFields.
     // This guarantees that we don't leave behind orphan data view fields
     this.removeRuntimeField(name);
+
+    const runtimeFieldSpec = removeFieldAttrs(runtimeField);
 
     // We don't add composite runtime fields to the field list as
     // they are not fields but **holder** of fields.
     // What we do add to the field list are all their subFields.
     const dataViewFields = Object.entries(fields).map(([subFieldName, subField]) =>
+      // Every child field gets the complete runtime field script for consumption by searchSource
       this.updateOrAddRuntimeField(`${name}.${subFieldName}`, subField.type, runtimeFieldSpec, {
         customLabel: subField.customLabel,
         format: subField.format,
@@ -567,13 +553,18 @@ export class DataView implements IIndexPattern {
     return dataViewFields;
   }
 
-  // todo this only does primitive types, no composite
   private updateOrAddRuntimeField(
     fieldName: string,
     fieldType: RuntimeType,
     runtimeFieldSpec: RuntimeFieldSpec,
     config: FieldConfiguration
   ): DataViewField {
+    if (fieldType === 'composite') {
+      throw new Error(
+        `Trying to add composite field as primmitive field, this shouldn't happen! [name = ${fieldName}]`
+      );
+    }
+
     // Create the field if it does not exist or update an existing one
     let createdField: DataViewField | undefined;
     const existingField = this.getFieldByName(fieldName);
