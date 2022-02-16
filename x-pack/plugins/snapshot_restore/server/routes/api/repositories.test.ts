@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common';
+import {
+  ON_PREM_REPOSITORY_TYPES,
+  MODULE_REPOSITORY_TYPES,
+  REPOSITORY_PLUGINS_MAP,
+} from '../../../common';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
 import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
@@ -253,52 +257,59 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       path: addBasePath('repository_types'),
     };
 
-    it('returns default types if no repository plugins returned from ES', async () => {
-      nodesInfoFn.mockResolvedValue({ nodes: { testNodeId: { plugins: [] } } });
+    // TODO add Cloud specific tests for repo types
+    describe('on prem', () => {
+      it('returns module types and on-prem types if no repository plugins returned from ES', async () => {
+        nodesInfoFn.mockResolvedValue({ nodes: { testNodeId: { plugins: [] } } });
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
-    });
+        const expectedResponse = [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
+        await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+      });
 
-    it('returns default types with any repository plugins returned from ES', async () => {
-      const pluginNames = Object.keys(REPOSITORY_PLUGINS_MAP);
-      const pluginTypes = Object.entries(REPOSITORY_PLUGINS_MAP).map(([key, value]) => value);
+      it('returns module types and on-prem types with any repository plugins returned from ES', async () => {
+        const pluginNames = Object.keys(REPOSITORY_PLUGINS_MAP);
+        const pluginTypes = Object.entries(REPOSITORY_PLUGINS_MAP).map(([key, value]) => value);
 
-      const mockEsResponse = {
-        nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
-      };
-      nodesInfoFn.mockResolvedValue(mockEsResponse);
+        const mockEsResponse = {
+          nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
+        };
+        nodesInfoFn.mockResolvedValue(mockEsResponse);
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES, ...pluginTypes];
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
-    });
+        const expectedResponse = [
+          ...MODULE_REPOSITORY_TYPES,
+          ...ON_PREM_REPOSITORY_TYPES,
+          ...pluginTypes,
+        ];
+        await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+      });
 
-    it(`doesn't return non-repository plugins returned from ES`, async () => {
-      const pluginNames = ['foo-plugin', 'bar-plugin'];
-      const mockEsResponse = {
-        nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
-      };
-      nodesInfoFn.mockResolvedValue(mockEsResponse);
+      it(`doesn't return non-repository plugins returned from ES`, async () => {
+        const pluginNames = ['foo-plugin', 'bar-plugin'];
+        const mockEsResponse = {
+          nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
+        };
+        nodesInfoFn.mockResolvedValue(mockEsResponse);
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
+        const expectedResponse = [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
 
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
-    });
+        await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+      });
 
-    it(`doesn't return repository plugins that are not installed on all nodes`, async () => {
-      const dataNodePlugins = ['repository-hdfs'];
-      const masterNodePlugins: string[] = [];
-      const mockEsResponse = {
-        nodes: {
-          dataNode: { plugins: [...dataNodePlugins.map((key) => ({ name: key }))] },
-          masterNode: { plugins: [...masterNodePlugins.map((key) => ({ name: key }))] },
-        },
-      };
-      nodesInfoFn.mockResolvedValue(mockEsResponse);
+      it(`doesn't return repository plugins that are not installed on all nodes`, async () => {
+        const dataNodePlugins = ['repository-hdfs'];
+        const masterNodePlugins: string[] = [];
+        const mockEsResponse = {
+          nodes: {
+            dataNode: { plugins: [...dataNodePlugins.map((key) => ({ name: key }))] },
+            masterNode: { plugins: [...masterNodePlugins.map((key) => ({ name: key }))] },
+          },
+        };
+        nodesInfoFn.mockResolvedValue(mockEsResponse);
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
+        const expectedResponse = [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
 
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+        await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+      });
     });
 
     it('should throw if ES error', async () => {
