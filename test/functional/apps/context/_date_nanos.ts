@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
 
-  describe.only('context view for date_nanos', () => {
+  describe('context view for date_nanos', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos');
