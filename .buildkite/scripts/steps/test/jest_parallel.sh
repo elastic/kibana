@@ -25,6 +25,6 @@ while read -r config; do
 
   ((i=i+1))
 # uses heredoc to avoid the while loop being in a sub-shell thus unable to overwrite exitCode
-done <<< "$(find src x-pack packages -name ${1:-jest.config.js} -not -path "*/__fixtures__/*" | sort)"
+done <<< "$(find src x-pack packages -name "$1" -not -path "*/__fixtures__/*" | sort)"
 
 exit $exitCode
