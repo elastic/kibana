@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      const docCell = await dataGrid.getCellElement(1, 2);
+      const docCell = await dataGrid.getCellElement(1, 4);
       await docCell.click();
       const expandCellContentButton = await docCell.findByClassName(
         'euiDataGridRowCell__expandButtonIcon'
