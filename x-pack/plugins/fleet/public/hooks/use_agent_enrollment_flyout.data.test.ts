@@ -23,6 +23,7 @@ describe('useAgentEnrollmentFlyoutData', () => {
     (useGetAgentPolicies as jest.Mock).mockReturnValue({ data: undefined, isLoading: true });
     const { result } = testRenderer.renderHook(() => useAgentEnrollmentFlyoutData());
     expect(result.current.agentPolicies).toEqual([]);
+    expect(result.current.isLoadingAgentPolicies).toBe(true);
   });
 
   it('should return empty agentPolicies when http not loading and no data', () => {
