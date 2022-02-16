@@ -8,13 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { KnownChromiumMessages } from '../../../common/errors';
 import { LevelLogger as Logger } from '../../lib';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { DiagnosticResponse } from './';
 
 const logsToHelpMap = {
-  [KnownChromiumMessages.SharedLibraries]: i18n.translate(
+  'error while loading shared libraries': i18n.translate(
     'xpack.reporting.diagnostic.browserMissingDependency',
     {
       defaultMessage: `The browser couldn't start properly due to missing system dependencies. Please see {url}`,
@@ -24,7 +23,7 @@ const logsToHelpMap = {
     }
   ),
 
-  [KnownChromiumMessages.MissingFont]: i18n.translate(
+  'Could not find the default font': i18n.translate(
     'xpack.reporting.diagnostic.browserMissingFonts',
     {
       defaultMessage: `The browser couldn't locate a default font. Please see {url} to fix this issue.`,
@@ -34,7 +33,7 @@ const logsToHelpMap = {
     }
   ),
 
-  [KnownChromiumMessages.NoSandbox]: i18n.translate('xpack.reporting.diagnostic.noUsableSandbox', {
+  'No usable sandbox': i18n.translate('xpack.reporting.diagnostic.noUsableSandbox', {
     defaultMessage: `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.reporting.capture.browser.chromium.disableSandbox'. Please see {url}`,
     values: {
       url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency',

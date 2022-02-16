@@ -63,5 +63,3 @@ export class QueueTimeoutError extends ReportingError {
 export class UnknownError extends ReportingError {
   code = 'unknown_error';
 }
-
-export { KnownChromiumMessages } from './known_chromium_messages';
