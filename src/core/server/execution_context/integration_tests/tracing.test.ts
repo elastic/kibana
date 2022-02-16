@@ -552,7 +552,7 @@ describe('trace', () => {
         expect(response.body).toEqual(parentContext);
       });
 
-      it('set execution context inerits a parent if presented', async () => {
+      it('set execution context becomes child if parent context is presented', async () => {
         const { executionContext, http } = await root.setup();
         const { createRouter } = http;
 
@@ -575,7 +575,7 @@ describe('trace', () => {
 
         await root.start();
         const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
-        expect(response.body).toEqual({ ...nestedContext, parent: parentContext });
+        expect(response.body).toEqual({ child: nestedContext, ...parentContext });
       });
 
       it('extends the execution context passed from the client-side', async () => {
