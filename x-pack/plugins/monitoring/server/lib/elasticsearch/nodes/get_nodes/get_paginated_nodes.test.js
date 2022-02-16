@@ -42,9 +42,7 @@ jest.mock('../../../details/get_metrics', () => ({
 describe('getPaginatedNodes', () => {
   const req = {
     server: {
-      config: () => ({
-        get: () => 10,
-      }),
+      config: { ui: { max_bucket_size: 10000 } },
     },
   };
   const clusterUuid = '1abc';
