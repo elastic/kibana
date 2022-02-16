@@ -7,15 +7,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-} from '@elastic/eui';
-import { ToolbarButton } from './toolbar_button';
+import { EuiFlexGroup, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { ToolbarButton as ToolbarButtonComponent } from './toolbar_button.component';
 import mdx from './toolbar_button.mdx';
 
