@@ -5,11 +5,22 @@
  * 2.0.
  */
 
+import { Client } from '@elastic/elasticsearch';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
-import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
+import { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
+import { ElasticsearchClientWithChild } from '../types';
 
 const esQuery = {
   body: { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } },
+};
+
+const logger = loggingSystemMock.create().get();
+
+const rule = {
+  name: 'test-rule',
+  alertTypeId: '.test-rule-type',
+  id: 'abcdefg',
 };
 
 describe('wrapScopedClusterClient', () => {
@@ -23,42 +34,117 @@ describe('wrapScopedClusterClient', () => {
 
   test('searches with asInternalUser when specified', async () => {
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const wrappedSearchClient = wrapScopedClusterClient({ scopedClusterClient });
+    const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
+    (
+      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
+    ).child.mockReturnValue(childClient as unknown as Client);
+    const asInternalUserWrappedSearchFn = childClient.search;
+
+    const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      rule,
+      logger,
+    }).client();
     await wrappedSearchClient.asInternalUser.search(esQuery);
-    expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith(esQuery, {});
+
+    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {});
+    expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
   });
 
   test('searches with asCurrentUser when specified', async () => {
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const wrappedSearchClient = wrapScopedClusterClient({ scopedClusterClient });
+    const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
+    (
+      scopedClusterClient.asCurrentUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
+    ).child.mockReturnValue(childClient as unknown as Client);
+    const asCurrentUserWrappedSearchFn = childClient.search;
+
+    const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      rule,
+      logger,
+    }).client();
     await wrappedSearchClient.asCurrentUser.search(esQuery);
-    expect(scopedClusterClient.asCurrentUser.search).toHaveBeenCalledWith(esQuery, {});
+
+    expect(asCurrentUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {});
     expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+    expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
   });
 
   test('uses search options when specified', async () => {
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const wrappedSearchClient = wrapScopedClusterClient({ scopedClusterClient });
+    const childClient = elasticsearchServiceMock.createElasticsearchClient();
 
+    (
+      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
+    ).child.mockReturnValue(childClient as unknown as Client);
+    const asInternalUserWrappedSearchFn = childClient.search;
+
+    const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      rule,
+      logger,
+    }).client();
     await wrappedSearchClient.asInternalUser.search(esQuery, { ignore: [404] });
-    expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith(esQuery, {
+
+    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
       ignore: [404],
     });
+    expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
   });
 
   test('re-throws error when search throws error', async () => {
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    scopedClusterClient.asInternalUser.search.mockRejectedValueOnce(
-      new Error('something went wrong!')
-    );
-    const wrappedSearchClient = wrapScopedClusterClient({ scopedClusterClient });
+    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    (
+      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
+    ).child.mockReturnValue(childClient as unknown as Client);
+    const asInternalUserWrappedSearchFn = childClient.search;
+
+    asInternalUserWrappedSearchFn.mockRejectedValueOnce(new Error('something went wrong!'));
+    const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      rule,
+      logger,
+    }).client();
 
     await expect(
       wrappedSearchClient.asInternalUser.search
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+  });
+
+  test('keeps track of number of queries', async () => {
+    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const childClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    (
+      scopedClusterClient.asInternalUser as unknown as jest.Mocked<ElasticsearchClientWithChild>
+    ).child.mockReturnValue(childClient as unknown as Client);
+    const asInternalUserWrappedSearchFn = childClient.search;
+    // @ts-ignore incomplete return type
+    asInternalUserWrappedSearchFn.mockResolvedValue({ took: 333 });
+
+    const wrappedSearchClientFactory = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      rule,
+      logger,
+    });
+    const wrappedSearchClient = wrappedSearchClientFactory.client();
+    await wrappedSearchClient.asInternalUser.search(esQuery);
+    await wrappedSearchClient.asInternalUser.search(esQuery);
+    await wrappedSearchClient.asInternalUser.search(esQuery);
+
+    expect(asInternalUserWrappedSearchFn).toHaveBeenCalledTimes(3);
+    expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+    expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+    const stats = wrappedSearchClientFactory.getStats();
+    expect(stats.numQueries).toEqual(3);
+    expect(stats.totalQueryDuration).toEqual(999);
   });
 });

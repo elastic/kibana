@@ -38,6 +38,9 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
 }));
+jest.mock('../lib/wrap_scoped_cluster_client', () => ({
+  createWrappedScopedClusterClientFactory: jest.fn(),
+}));
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
@@ -167,6 +170,11 @@ describe('Task Runner Cancel', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest
+      .requireMock('../lib/wrap_scoped_cluster_client')
+      .createWrappedScopedClusterClientFactory.mockReturnValue({
+        client: () => services.scopedClusterClient,
+      });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);

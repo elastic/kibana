@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
+import { Client } from '@elastic/elasticsearch';
+import type {
+  IRouter,
+  RequestHandlerContext,
+  SavedObjectReference,
+  ElasticsearchClient,
+} from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -39,6 +45,10 @@ import { IAbortableClusterClient } from './lib/create_abortable_es_client_factor
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
+
+export interface ElasticsearchClientWithChild extends ElasticsearchClient {
+  child: Client['child'];
+}
 
 /**
  * @public

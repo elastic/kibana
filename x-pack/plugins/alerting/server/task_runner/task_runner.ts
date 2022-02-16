@@ -63,7 +63,7 @@ import {
   Event,
 } from '../lib/create_alert_event_log_record_object';
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
-import { createWrappedEsClientFactory } from '../lib';
+import { createWrappedScopedClusterClientFactory } from '../lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -291,7 +291,7 @@ export class TaskRunner<
   }
 
   async executeAlerts(
-    generatedRequest: KibanaRequest,
+    fakeRequest: KibanaRequest,
     rule: SanitizedAlert<Params>,
     params: Params,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
@@ -332,6 +332,17 @@ export class TaskRunner<
     const eventLogger = this.context.eventLogger;
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
+    const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
+    const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      rule: {
+        name: rule.name,
+        alertTypeId: rule.alertTypeId,
+        id: rule.id,
+      },
+      logger: this.logger,
+    });
+
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
       const ctx = {
@@ -343,23 +354,12 @@ export class TaskRunner<
         }] namespace`,
       };
 
-      const scopedClusterClient = this.context.elasticsearch.client.asScoped(generatedRequest);
-      const wrappedScopedClusterClient = createWrappedEsClientFactory({
-        scopedClusterClient,
-        rule: {
-          name: rule.name,
-          alertTypeId: rule.alertTypeId,
-          id: rule.id,
-        },
-        logger: this.logger,
-      });
-
       updatedRuleTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.ruleType.executor({
           alertId: ruleId,
           executionId: this.executionId,
           services: {
-            savedObjectsClient: this.context.savedObjects.getScopedClient(generatedRequest, {
+            savedObjectsClient: this.context.savedObjects.getScopedClient(fakeRequest, {
               includedHiddenTypes: ['alert', 'action'],
             }),
             scopedClusterClient: wrappedScopedClusterClient.client(),
@@ -545,7 +545,7 @@ export class TaskRunner<
   }
 
   async validateAndExecuteRule(
-    generatedRequest: KibanaRequest,
+    fakeRequest: KibanaRequest,
     apiKey: RawRule['apiKey'],
     rule: SanitizedAlert<Params>,
     event: Event
@@ -565,16 +565,9 @@ export class TaskRunner<
       this.context.kibanaBaseUrl,
       rule.actions,
       rule.params,
-      generatedRequest
+      fakeRequest
     );
-    return this.executeAlerts(
-      generatedRequest,
-      rule,
-      validatedParams,
-      executionHandler,
-      spaceId,
-      event
-    );
+    return this.executeAlerts(fakeRequest, rule, validatedParams, executionHandler, spaceId, event);
   }
 
   async loadRuleAttributesAndRun(
@@ -600,10 +593,10 @@ export class TaskRunner<
       );
     }
 
-    const generatedRequest = this.generateKibanaRequestFromApiKey(spaceId, apiKey);
+    const fakeRequest = this.generateKibanaRequestFromApiKey(spaceId, apiKey);
 
     // Get rules client with space level permissions
-    const rulesClient = this.context.getRulesClientWithRequest(generatedRequest);
+    const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
 
     let rule: SanitizedAlert<Params>;
 
@@ -642,7 +635,7 @@ export class TaskRunner<
     return {
       monitoring: asOk(rule.monitoring),
       state: await promiseResult<RuleTaskStateWithActions, Error>(
-        this.validateAndExecuteRule(generatedRequest, apiKey, rule, event)
+        this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
       ),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have

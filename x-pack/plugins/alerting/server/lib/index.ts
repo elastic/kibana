@@ -24,4 +24,4 @@ export {
   ruleExecutionStatusToRaw,
   ruleExecutionStatusFromRaw,
 } from './rule_execution_status';
-export { createWrappedEsClientFactory } from './wrap_scoped_cluster_client';
+export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';

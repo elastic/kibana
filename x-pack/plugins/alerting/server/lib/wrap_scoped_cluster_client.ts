@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { TransportRequestOptions, TransportResult } from '@elastic/elasticsearch';
+import {
+  TransportRequestOptions,
+  TransportResult,
+  TransportRequestOptionsWithMeta,
+  TransportRequestOptionsWithOutMeta,
+} from '@elastic/elasticsearch';
 import type {
   SearchRequest,
   SearchResponse,
@@ -16,96 +21,147 @@ import type {
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, ElasticsearchClient, Logger } from 'src/core/server';
+import { ElasticsearchClientWithChild } from '../types';
 import { Alert as Rule } from '../types';
 
-interface WrapScopedClusterClientOpts {
+type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'>;
+interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
-  rule: Pick<Rule, 'name' | 'alertTypeId' | 'id'>;
+  rule: RuleInfo;
   logger: Logger;
 }
 
+type WrapScopedClusterClientOpts = WrapScopedClusterClientFactoryOpts & {
+  logMetricsFn: LogSearchMetricsFn;
+};
+
 type WrapEsClientOpts = Omit<WrapScopedClusterClientOpts, 'scopedClusterClient'> & {
   esClient: ElasticsearchClient;
-  logMetricsFn?: LogSearchMetricsFn;
 };
 
 interface LogSearchMetricsOpts {
-  duration: number;
+  queryDuration: number;
+  searchDuration: number;
 }
 type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
 
-export function createWrappedEsClientFactory(opts: WrapScopedClusterClientOpts) {
+export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterClientFactoryOpts) {
   let numQueries: number = 0;
-  let totalDurationMs: number = 0;
+  let totalQueryDurationMs: number = 0;
+  let totalSearchDurationMs: number = 0;
 
   function logMetrics(metrics: LogSearchMetricsOpts) {
     numQueries++;
-    totalDurationMs += metrics.duration;
+    totalQueryDurationMs += metrics.queryDuration;
+    totalSearchDurationMs += metrics.searchDuration;
   }
 
   return {
-    client: () => wrapScopedClusterClient(opts, logMetrics),
-    getStats: () => ({ totalDuration: totalDurationMs, numQueries }),
+    client: () => wrapScopedClusterClient({ ...opts, logMetricsFn: logMetrics }),
+    getStats: () => {
+      return {
+        totalQueryDuration: totalQueryDurationMs,
+        totalSearchDuration: totalSearchDurationMs,
+        numQueries,
+      };
+    },
   };
 }
 
-export function wrapScopedClusterClient(
-  opts: WrapScopedClusterClientOpts,
-  logMetricsFn?: LogSearchMetricsFn
-): IScopedClusterClient {
+function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClusterClient {
   const { scopedClusterClient, ...rest } = opts;
   return {
     asInternalUser: wrapEsClient({
       ...rest,
       esClient: scopedClusterClient.asInternalUser,
-      logMetricsFn,
     }),
     asCurrentUser: wrapEsClient({
       ...rest,
       esClient: scopedClusterClient.asCurrentUser,
-      logMetricsFn,
     }),
   };
 }
 
 function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
-  const { esClient, logger, rule, logMetricsFn } = opts;
-  const wrappedClient: Record<string, unknown> = {};
-  for (const attr in esClient) {
-    if (!['search'].includes(attr)) {
-      wrappedClient[attr] = esClient[attr as keyof ElasticsearchClient];
-    }
-  }
+  const { esClient, ...rest } = opts;
 
-  wrappedClient.search = async <
+  // Core hides access to .child via TS
+  const wrappedClient = (esClient as ElasticsearchClientWithChild).child({});
+
+  // Mutating the functions we want to wrap
+  wrappedClient.search = getWrappedSearchFn({ esClient: wrappedClient, ...rest });
+
+  return wrappedClient;
+}
+
+function getWrappedSearchFn(opts: WrapEsClientOpts) {
+  const originalSearch = opts.esClient.search;
+
+  // A bunch of overloads to make TypeScript happy
+  async function search<
     TDocument = unknown,
-    TAggregations = Record<AggregateName, AggregationsAggregate>,
-    TContext = unknown
+    TAggregations = Record<AggregateName, AggregationsAggregate>
   >(
-    query?: SearchRequest | SearchRequestWithBody,
+    params?: SearchRequest | SearchRequestWithBody,
+    options?: TransportRequestOptionsWithOutMeta
+  ): Promise<SearchResponse<TDocument, TAggregations>>;
+  async function search<
+    TDocument = unknown,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >(
+    params?: SearchRequest | SearchRequestWithBody,
+    options?: TransportRequestOptionsWithMeta
+  ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, unknown>>;
+  async function search<
+    TDocument = unknown,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >(
+    params?: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions
-  ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, TContext>> => {
+  ): Promise<SearchResponse<TDocument, TAggregations>>;
+  async function search<
+    TDocument = unknown,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >(
+    params?: SearchRequest | SearchRequestWithBody,
+    options?: TransportRequestOptions
+  ): Promise<
+    | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
+    | SearchResponse<TDocument, TAggregations>
+  > {
     try {
       const searchOptions = options ?? {};
       const start = Date.now();
-      logger.debug(
-        `executing query for rule ${rule.alertTypeId}:${rule.id} - ${JSON.stringify(query)}`
+      opts.logger.debug(
+        `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} - ${JSON.stringify(
+          params
+        )} - with options ${JSON.stringify(searchOptions)}`
       );
-      const result = await esClient.search<TDocument, TAggregations, TContext>(
-        query,
-        searchOptions
-      );
+      const result = (await originalSearch.call(opts.esClient, params, {
+        ...searchOptions,
+      })) as
+        | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
+        | SearchResponse<TDocument, TAggregations>;
+
       const end = Date.now();
       const durationMs = end - start;
 
-      if (logMetricsFn) {
-        logMetricsFn({ duration: durationMs });
+      let took = 0;
+      if (searchOptions.meta) {
+        // when meta: true, response is TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
+        took = (result as TransportResult<SearchResponse<TDocument, TAggregations>, unknown>).body
+          .took;
+      } else {
+        // when meta: false, response is SearchResponse<TDocument, TAggregations>
+        took = (result as SearchResponse<TDocument, TAggregations>).took;
       }
+
+      opts.logMetricsFn({ queryDuration: took, searchDuration: durationMs });
       return result;
     } catch (e) {
       throw e;
     }
-  };
+  }
 
-  return wrappedClient as ElasticsearchClient;
+  return search;
 }
