@@ -144,6 +144,8 @@ but in some cases you might need to search on dates. Include the date range in q
 @timestamp < "2021"
 -------------------
 
+KQL also supports queries such as `now-1h/d`. Check out the
+{ref}/common-options.html#date-math[date math documentation] for details.
 
 [discrete]
 === Exist queries
