@@ -72,7 +72,9 @@ export const findAllListTypes = async (
       namespaceType: ['agnostic'],
       page: undefined,
       perPage: CHUNK_PARSED_OBJECT_SIZE,
+      pit: undefined,
       savedObjectsClient,
+      searchAfter: undefined,
       sortField: undefined,
       sortOrder: undefined,
     });
@@ -82,7 +84,9 @@ export const findAllListTypes = async (
       namespaceType: ['single'],
       page: undefined,
       perPage: CHUNK_PARSED_OBJECT_SIZE,
+      pit: undefined,
       savedObjectsClient,
+      searchAfter: undefined,
       sortField: undefined,
       sortOrder: undefined,
     });
@@ -92,7 +96,9 @@ export const findAllListTypes = async (
       namespaceType: ['single', 'agnostic'],
       page: undefined,
       perPage: CHUNK_PARSED_OBJECT_SIZE,
+      pit: undefined,
       savedObjectsClient,
+      searchAfter: undefined,
       sortField: undefined,
       sortOrder: undefined,
     });
