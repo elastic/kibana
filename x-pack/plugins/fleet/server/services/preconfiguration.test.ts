@@ -121,7 +121,7 @@ function getPutPreconfiguredPackagesMock() {
 
 jest.mock('./epm/registry', () => ({
   ...jest.requireActual('./epm/registry'),
-  async fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
+  async fetchFindLatestPackageOrThrow(packageName: string): Promise<RegistrySearchResult> {
     return {
       name: packageName,
       version: '1.0.0',

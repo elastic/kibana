@@ -15,7 +15,7 @@ import { pageObjects } from './page_objects';
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution@sha256:a30d5b428bc3b22e87a4ae3c4d06c00bbd757ea41ef9a2ccf01c670f2f111577';
+  'docker.elastic.co/package-registry/distribution@sha256:c5bf8e058727de72e561b228f4b254a14a6f880e582190d01bd5ff74318e1d0b';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
