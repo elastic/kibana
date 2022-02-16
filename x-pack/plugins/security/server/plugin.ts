@@ -47,7 +47,7 @@ import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
 import { securityFeatures } from './features';
 import { defineRoutes } from './routes';
-import { setupSavedObjects } from './saved_objects';
+import { cspRuleTemplateAssetType, setupSavedObjects } from './saved_objects';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
@@ -208,6 +208,7 @@ export class SecurityPlugin
     core: CoreSetup<PluginStartDependencies>,
     { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
+    core.savedObjects.registerType(cspRuleTemplateAssetType);
     this.kibanaIndexName = core.savedObjects.getKibanaIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>

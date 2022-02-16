@@ -3524,7 +3524,8 @@
           "map",
           "lens",
           "ml-module",
-          "security-rule"
+          "security-rule",
+          "csp-rule-template"
         ]
       },
       "elasticsearch_asset_type": {
