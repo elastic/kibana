@@ -34,7 +34,7 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import './rules.scss';
+import './rule.scss';
 import { AlertMutedSwitch } from './alert_muted_switch';
 import { getHealthColor } from '../../rules_list/components/rule_status_filter';
 import {
