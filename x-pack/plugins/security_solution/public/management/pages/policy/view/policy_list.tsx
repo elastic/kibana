@@ -164,11 +164,9 @@ export const PolicyList = memo(() => {
     };
   }, [totalItemCount, pageSizeOptions, pagination.page, pagination.pageSize]);
 
-  const policyListErrorMessage =
-    result.error &&
-    i18n.translate('xpack.securitySolution.policy.list.errorMessage', {
-      defaultMessage: 'Error while retrieving list of policies',
-    });
+  const policyListErrorMessage = i18n.translate('xpack.securitySolution.policy.list.errorMessage', {
+    defaultMessage: 'Error while retrieving list of policies',
+  });
 
   return (
     <AdministrationListPage
