@@ -45,7 +45,7 @@ export function logstashPipelineRoute(server) {
       },
     },
     handler: async (req) => {
-      const config = server.config();
+      const config = server.config;
       const clusterUuid = req.params.clusterUuid;
       const detailVertexId = req.payload.detailVertexId;
 
@@ -66,6 +66,7 @@ export function logstashPipelineRoute(server) {
       }
       const version = getPipelineVersion(versions, pipelineHash);
 
+      // noinspection ES6MissingAwait
       const promises = [getPipeline(req, config, clusterUuid, pipelineId, version)];
       if (detailVertexId) {
         promises.push(
