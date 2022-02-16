@@ -38,6 +38,7 @@ export const Example: Story = () => {
     serviceName: 'testServiceName',
     threshold: 1500,
     transactionType: 'testTransactionType',
+    transactionName: 'testTransactionName',
     windowSize: 5,
     windowUnit: 'm',
   });
