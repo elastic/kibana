@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 // import pLimit from 'p-limit';
+import moment from 'moment';
 import { RunOptions } from './parse_run_cli_flags';
 import { getScenario } from './get_scenario';
 import { ApmSynthtraceEsClient } from '../../lib/apm';
 import { Logger } from '../../lib/utils/create_logger';
-import { StreamProcessor } from '../../lib/stream_processor';
+import { StreamToBulkOptions } from '../../lib/apm/client/apm_synthtrace_es_client';
 
 export async function startHistoricalDataUpload(
   esClient: ApmSynthtraceEsClient,
@@ -32,38 +33,44 @@ export async function startHistoricalDataUpload(
   return Promise.all(new Array(numBatches).fill(undefined).map((_) => limiter(processNextBatch)));
 */
 
-  logger.info(`Generating data from ${from} to ${to}`);
-
   const events = logger.perf('generate_scenario', () => generate({ from, to }));
-
-  if (runOptions.dryRun) {
-    const maxDocs = runOptions.maxDocs;
-    const stream = new StreamProcessor({
-      // processors: StreamProcessor.apmProcessors,
-      processors: [StreamProcessor.apmProcessors[0], StreamProcessor.apmProcessors[1]],
-      // processors: [StreamProcessor.apmProcessors[0]],
-      // processors: [],
-      maxSourceEvents: maxDocs,
-      logger,
-      // }).streamToDocument((e) => e, events);
-    }).streamToDocument(StreamProcessor.toDocument, events);
-    logger.perf('enumerate_scenario', () => {
-      // @ts-ignore
-      // We just want to enumerate
-      let yielded = 0;
-      for (const _ of stream) {
-        yielded++;
-      }
-    });
-    return;
+  const ratePerMinute = events.ratePerMinute();
+  logger.info(
+    `Scenario is generating ${ratePerMinute.toLocaleString()} events per minute interval`
+  );
+  let to2 = to;
+  if (runOptions.maxDocs) {
+    to2 = moment(from)
+      // ratePerMinute() is not exact if the generator is yielding variable documents
+      // the rate is calculated by peeking the first yielded event and its children.
+      // for real complex cases manually specifying --to is encouraged.
+      .subtract((runOptions.maxDocs / ratePerMinute) * 2, 'm')
+      .toDate();
+    const diff = moment(from).diff(to2);
+    const d = moment.duration(diff, 'ms');
+    logger.info(
+      `Estimated interval length ${d.days()} days, ${d.hours()} hours ${d.minutes()} minutes ${d.seconds()} seconds`
+    );
   }
 
-  const clientWorkers = runOptions.clientWorkers;
-  await logger.perf('index_scenario', () =>
-    esClient.index(events, {
-      concurrency: clientWorkers,
-      maxDocs: runOptions.maxDocs,
-      mapToIndex,
-    })
-  );
+  logger.info(`Generating data from ${from.toISOString()} to ${to2.toISOString()}`);
+
+  const streamToBulkOptions: StreamToBulkOptions = {
+    concurrency: runOptions.clientWorkers,
+    maxDocs: runOptions.maxDocs,
+    mapToIndex,
+  };
+
+  if (runOptions.dryRun) {
+    streamToBulkOptions.dryRunCallBack = (yielded, item, done) => {
+      if (yielded === 0) {
+        logger.info(`First item: ${item!['@timestamp']}`);
+      }
+      if (done && item) {
+        logger.info(`Last item: ${item['@timestamp']}`);
+      }
+    };
+  }
+
+  await logger.perf('index_scenario', () => esClient.index(events, streamToBulkOptions));
 }

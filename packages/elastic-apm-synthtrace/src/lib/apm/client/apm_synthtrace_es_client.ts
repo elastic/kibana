@@ -14,11 +14,13 @@ import { ApmFields } from '../apm_fields';
 import { EntityIterable } from '../../entity_iterable';
 import { StreamProcessor } from '../../stream_processor';
 import { EntityStreams } from '../../entity_streams';
+import { Fields } from '../../entity';
 
-export interface StreamToBulkOptions {
+export interface StreamToBulkOptions<TFields extends Fields = ApmFields> {
   concurrency?: number;
   maxDocs?: number;
   mapToIndex?: (document: Record<string, any>) => string;
+  dryRunCallBack?: (yielded: number, item: TFields | undefined, done: boolean) => void;
 }
 
 export class ApmSynthtraceEsClient {
@@ -82,20 +84,36 @@ export class ApmSynthtraceEsClient {
   ) {
     const dataStream = Array.isArray(events) ? new EntityStreams(events) : events;
 
+    const source = new StreamProcessor({
+      processors: StreamProcessor.apmProcessors,
+      maxSourceEvents: options?.maxDocs,
+      logger: this.logger,
+    });
+    // TODO https://github.com/elastic/elasticsearch-js/issues/1610
+    // having to map here is awkward, it'd be better to map just before serialization.
+
+    if (options?.dryRunCallBack) {
+      this.logger.perf('enumerate_scenario', () => {
+        // @ts-ignore
+        // We just want to enumerate
+        let yielded = 0;
+        let item;
+        for (item of source.streamToDocument(StreamProcessor.toDocument, dataStream)) {
+          options.dryRunCallBack!(yielded, item, false);
+          yielded++;
+        }
+        options.dryRunCallBack!(yielded, item, true);
+      });
+      return;
+    }
+
     const writeTargets = await this.getWriteTargets();
     // TODO logger.perf
     await this.client.helpers.bulk<ApmFields>({
       concurrency: options?.concurrency ?? 10,
       refresh: false,
       refreshOnCompletion: false,
-      datasource: new StreamProcessor({
-        processors: StreamProcessor.apmProcessors,
-        maxSourceEvents: options?.maxDocs,
-        logger: this.logger,
-      })
-        // TODO https://github.com/elastic/elasticsearch-js/issues/1610
-        // having to map here is awkward, it'd be better to map just before serialization.
-        .streamToDocumentAsync(StreamProcessor.toDocument, dataStream),
+      datasource: source.streamToDocumentAsync(StreamProcessor.toDocument, dataStream),
       onDrop: (doc) => {
         this.logger.info(doc);
       },
