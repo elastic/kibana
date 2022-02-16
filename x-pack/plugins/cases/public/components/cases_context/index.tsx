@@ -13,7 +13,6 @@ import { useApplication } from './use_application';
 import {
   CasesContextStoreAction,
   casesContextReducer,
-  CasesContextState,
   initialCasesContextState,
 } from './cases_context_reducer';
 import { CasesContextFeatures, CasesFeatures } from '../../containers/types';
@@ -26,7 +25,6 @@ export interface CasesContextValue {
   userCanCrud: boolean;
   basePath: string;
   features: CasesContextFeatures;
-  state: CasesContextState;
   dispatch: (action: CasesContextStoreAction) => void;
 }
 
@@ -78,12 +76,12 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   }, [appTitle, appId, userCanCrud]);
 
   const value = useMemo(() => {
-    return { ...baseValue, state, dispatch };
-  }, [baseValue, state]);
+    return { ...baseValue, dispatch };
+  }, [baseValue]);
 
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
-      <CasesContextUI state={value.state} />
+      <CasesContextUI state={state} />
       {children}
     </CasesContext.Provider>
   ) : null;
