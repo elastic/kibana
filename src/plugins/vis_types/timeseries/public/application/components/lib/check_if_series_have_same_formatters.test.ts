@@ -52,6 +52,20 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
     expect(result).toBe(true);
   });
 
+  it('should return true in case of separate y-axis and different field formatters', () => {
+    const seriesModel = [
+      { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ type: 'avg', field: 'someField' }] },
+      {
+        formatter: DATA_FORMATTERS.DEFAULT,
+        separate_axis: 1,
+        metrics: [{ id: 'avg', field: 'anotherField' }],
+      },
+    ] as Series[];
+    const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
+
+    expect(result).toBeTruthy();
+  });
+
   it('should return false for the different field formatters', () => {
     const seriesModel = [
       { formatter: DATA_FORMATTERS.DEFAULT, metrics: [{ type: 'avg', field: 'someField' }] },
