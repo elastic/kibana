@@ -387,10 +387,6 @@ export class DataView implements IIndexPattern {
             ...acc,
             [subFieldName]: {
               type: subField.type,
-              // todo I'm not sure why were doing this.
-              // format: this.getFormatterForFieldNoDefault(fieldFullName)?.toJSON(),
-              // customLabel: dataViewField.customLabel,
-              // popularity: dataViewField.count,
             },
           };
         },
@@ -398,15 +394,6 @@ export class DataView implements IIndexPattern {
       );
 
       runtimeField.fields = subFields;
-    } else {
-      // const dataViewField = this.getFieldByName(name);
-      /*
-      if (dataViewField) {
-        runtimeField.customLabel = dataViewField.customLabel;
-        runtimeField.popularity = dataViewField.count;
-        runtimeField.format = this.getFormatterForFieldNoDefault(name)?.toJSON();
-      }
-      */
     }
 
     return runtimeField;
@@ -466,7 +453,6 @@ export class DataView implements IIndexPattern {
         });
       }
     }
-
     delete this.runtimeFieldMap[name];
   }
 
