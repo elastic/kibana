@@ -96,7 +96,13 @@ interface MonitoringConfigTypeOverriddenUIElasticsearch
   elasticsearch: MonitoringElasticsearchConfig;
 }
 
+/**
+ * A functional representation of the `monitoring.*` configuration tree passed in from kibana.yml
+ */
 export interface MonitoringConfig extends MonitoringConfigTypeOverriddenUI {
+  /**
+   * A functional representation of the `monitoring.ui.*` configuration tree passed in from kibana.yml
+   */
   ui: MonitoringConfigTypeOverriddenUIElasticsearch;
 }
 
