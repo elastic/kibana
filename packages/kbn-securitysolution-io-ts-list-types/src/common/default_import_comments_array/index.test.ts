@@ -8,15 +8,16 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { UpdateCommentsArray } from '../update_comment';
-import { DefaultUpdateCommentsArray } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { getUpdateCommentsArrayMock } from '../update_comment/index.mock';
+import { ImportCommentsArray } from '../import_comment';
+import { DefaultImportCommentsArray } from '../default_import_comments_array';
+import { getCommentsArrayMock } from '../comment/index.mock';
+import { getCreateCommentsArrayMock } from '../create_comment/index.mock';
 
-describe('default_update_comments_array', () => {
+describe('default_import_comments_array', () => {
   test('it should pass validation when supplied an empty array', () => {
-    const payload: UpdateCommentsArray = [];
-    const decoded = DefaultUpdateCommentsArray.decode(payload);
+    const payload: ImportCommentsArray = [];
+    const decoded = DefaultImportCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -24,8 +25,29 @@ describe('default_update_comments_array', () => {
   });
 
   test('it should pass validation when supplied an array of comments', () => {
-    const payload: UpdateCommentsArray = getUpdateCommentsArrayMock();
-    const decoded = DefaultUpdateCommentsArray.decode(payload);
+    const payload: ImportCommentsArray = getCommentsArrayMock();
+    const decoded = DefaultImportCommentsArray.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should pass validation when supplied an array of new comments', () => {
+    const payload: ImportCommentsArray = getCreateCommentsArrayMock();
+    const decoded = DefaultImportCommentsArray.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should pass validation when supplied an array of new and existing comments', () => {
+    const payload: ImportCommentsArray = [
+      ...getCommentsArrayMock(),
+      ...getCreateCommentsArrayMock(),
+    ];
+    const decoded = DefaultImportCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -34,29 +56,29 @@ describe('default_update_comments_array', () => {
 
   test('it should fail validation when supplied an array of numbers', () => {
     const payload = [1];
-    const decoded = DefaultUpdateCommentsArray.decode(payload);
+    const decoded = DefaultImportCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "1" supplied to "DefaultUpdateComments"',
+      'Invalid value "1" supplied to "DefaultImportComments"',
     ]);
     expect(message.schema).toEqual({});
   });
 
   test('it should fail validation when supplied an array of strings', () => {
     const payload = ['some string'];
-    const decoded = DefaultUpdateCommentsArray.decode(payload);
+    const decoded = DefaultImportCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "some string" supplied to "DefaultUpdateComments"',
+      'Invalid value "some string" supplied to "DefaultImportComments"',
     ]);
     expect(message.schema).toEqual({});
   });
 
   test('it should return a default array entry', () => {
     const payload = null;
-    const decoded = DefaultUpdateCommentsArray.decode(payload);
+    const decoded = DefaultImportCommentsArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
