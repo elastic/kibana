@@ -203,7 +203,7 @@ export class PdfMaker {
         const generatePdfRequest: GeneratePdfRequest = {
           data: this.getGeneratePdfRequestData(),
         };
-        this.worker.postMessage(generatePdfRequest);
+        myPort.postMessage(generatePdfRequest);
 
         // We expect one message from the worker generating the PDF buffer.
         myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
