@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { ExitFullScreenButton } from './exit_full_screen_button';
+export { prepareLogTable } from './prepare_log_table';
+export type { Dimension } from './prepare_log_table';
+export { findAccessorOrFail, getAccessorByDimension } from './accessors';

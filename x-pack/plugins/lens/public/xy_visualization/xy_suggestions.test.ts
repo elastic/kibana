@@ -1031,7 +1031,7 @@ describe('xy_suggestions', () => {
             columnId: 'mybool',
             operation: {
               dataType: 'boolean',
-              isBucketed: false,
+              isBucketed: true,
               label: 'Yes / No',
             },
           },
