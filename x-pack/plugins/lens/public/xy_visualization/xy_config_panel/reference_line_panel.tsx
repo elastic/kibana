@@ -41,7 +41,7 @@ export const ReferenceLinePanel = (
   const index = localState.layers.findIndex((l) => l.layerId === layerId);
   const layer = localState.layers[index];
 
-  const setYConfig = useCallback(
+  const setConfig = useCallback(
     (yConfig: Partial<YConfig> | undefined) => {
       if (yConfig == null) {
         return;
@@ -63,27 +63,27 @@ export const ReferenceLinePanel = (
     [accessor, index, localState, layer, setLocalState]
   );
 
-  const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+  const currentConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
 
   return (
     <>
       <MarkerDecorationSettings
         accessor={accessor}
         isHorizontal={isHorizontal}
-        setYConfig={setYConfig}
-        currentYConfig={currentYConfig}
+        setConfig={setConfig}
+        currentConfig={currentConfig}
       />
       <LineStyleSettings
         accessor={accessor}
         isHorizontal={isHorizontal}
-        setYConfig={setYConfig}
-        currentYConfig={currentYConfig}
+        setConfig={setConfig}
+        currentConfig={currentConfig}
       />
       <FillSetting
         accessor={accessor}
         isHorizontal={isHorizontal}
-        setYConfig={setYConfig}
-        currentYConfig={currentYConfig}
+        setConfig={setConfig}
+        currentConfig={currentConfig}
       />
       <ColorPicker
         {...props}
@@ -140,13 +140,13 @@ function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
 }
 
 export const FillSetting = ({
-  currentYConfig,
-  setYConfig,
+  currentConfig,
+  setConfig,
   accessor,
   isHorizontal,
 }: {
-  currentYConfig?: YConfig;
-  setYConfig: (yConfig: Partial<YConfig> | undefined) => void;
+  currentConfig?: YConfig;
+  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
   accessor: string;
   isHorizontal: boolean;
 }) => {
@@ -166,11 +166,11 @@ export const FillSetting = ({
         data-test-subj="lnsXY_fill"
         name="fill"
         buttonSize="compressed"
-        options={getFillPositionOptions({ isHorizontal, axisMode: currentYConfig?.axisMode })}
-        idSelected={`${idPrefix}${currentYConfig?.fill || 'none'}`}
+        options={getFillPositionOptions({ isHorizontal, axisMode: currentConfig?.axisMode })}
+        idSelected={`${idPrefix}${currentConfig?.fill || 'none'}`}
         onChange={(id) => {
           const newMode = id.replace(idPrefix, '') as FillStyle;
-          setYConfig({ forAccessor: accessor, fill: newMode });
+          setConfig({ forAccessor: accessor, fill: newMode });
         }}
       />
     </EuiFormRow>

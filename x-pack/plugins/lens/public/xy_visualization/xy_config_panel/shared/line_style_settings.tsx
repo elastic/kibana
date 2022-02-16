@@ -13,13 +13,13 @@ import { LineStyle } from '../../../../common/expressions/xy_chart';
 import { idPrefix } from '../dimension_editor';
 
 export const LineStyleSettings = ({
-  currentYConfig,
-  setYConfig,
+  currentConfig,
+  setConfig,
   accessor,
   isHorizontal,
 }: {
-  currentYConfig?: YConfig;
-  setYConfig: (yConfig: Partial<YConfig> | undefined) => void;
+  currentConfig?: Pick<YConfig, 'lineStyle' | 'lineWidth'>;
+  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
   accessor: string;
   isHorizontal: boolean;
 }) => {
@@ -63,10 +63,10 @@ export const LineStyleSettings = ({
               'data-test-subj': 'lnsXY_line_style_dotted',
             },
           ]}
-          idSelected={`${idPrefix}${currentYConfig?.lineStyle || 'solid'}`}
+          idSelected={`${idPrefix}${currentConfig?.lineStyle || 'solid'}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as LineStyle;
-            setYConfig({ forAccessor: accessor, lineStyle: newMode });
+            setConfig({ forAccessor: accessor, lineStyle: newMode });
           }}
         />
       </EuiFormRow>
@@ -78,9 +78,9 @@ export const LineStyleSettings = ({
         })}
       >
         <LineThicknessSlider
-          value={currentYConfig?.lineWidth || 1}
+          value={currentConfig?.lineWidth || 1}
           onChange={(value) => {
-            setYConfig({ forAccessor: accessor, lineWidth: value });
+            setConfig({ forAccessor: accessor, lineWidth: value });
           }}
         />
       </EuiFormRow>

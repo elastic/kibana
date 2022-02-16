@@ -72,13 +72,13 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
 }
 
 export const MarkerDecorationSettings = ({
-  currentYConfig,
-  setYConfig,
+  currentConfig,
+  setConfig,
   accessor,
   isHorizontal,
 }: {
-  currentYConfig?: YConfig;
-  setYConfig: (yConfig: Partial<YConfig> | undefined) => void;
+  currentConfig?: Pick<YConfig, 'textVisibility' | 'icon' | 'iconPosition' | 'axisMode'>;
+  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
   accessor: string;
   isHorizontal: boolean;
 }) => {
@@ -114,9 +114,9 @@ export const MarkerDecorationSettings = ({
               'data-test-subj': 'lnsXY_textVisibility_name',
             },
           ]}
-          idSelected={`${idPrefix}${Boolean(currentYConfig?.textVisibility) ? 'name' : 'none'}`}
+          idSelected={`${idPrefix}${Boolean(currentConfig?.textVisibility) ? 'name' : 'none'}`}
           onChange={(id) => {
-            setYConfig({ forAccessor: accessor, textVisibility: id === `${idPrefix}name` });
+            setConfig({ forAccessor: accessor, textVisibility: id === `${idPrefix}name` });
           }}
           isFullWidth
         />
@@ -129,17 +129,17 @@ export const MarkerDecorationSettings = ({
         })}
       >
         <IconSelect
-          value={currentYConfig?.icon}
+          value={currentConfig?.icon}
           onChange={(newIcon) => {
-            setYConfig({ forAccessor: accessor, icon: newIcon });
+            setConfig({ forAccessor: accessor, icon: newIcon });
           }}
         />
       </EuiFormRow>
-      {hasIcon(currentYConfig?.icon) || currentYConfig?.textVisibility ? (
+      {hasIcon(currentConfig?.icon) || currentConfig?.textVisibility ? (
         <EuiFormRow
           display="columnCompressed"
           fullWidth
-          isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
+          isDisabled={!hasIcon(currentConfig?.icon) && !currentConfig?.textVisibility}
           label={i18n.translate('xpack.lens.xyChart.lineMarker.position', {
             defaultMessage: 'Decoration position',
           })}
@@ -149,7 +149,7 @@ export const MarkerDecorationSettings = ({
               defaultMessage:
                 'You must select an icon or show the name in order to alter its position',
             })}
-            condition={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
+            condition={!hasIcon(currentConfig?.icon) && !currentConfig?.textVisibility}
             position="top"
             delay="regular"
             display="block"
@@ -161,16 +161,16 @@ export const MarkerDecorationSettings = ({
               })}
               data-test-subj="lnsXY_markerPosition"
               name="markerPosition"
-              isDisabled={!hasIcon(currentYConfig?.icon) && !currentYConfig?.textVisibility}
+              isDisabled={!hasIcon(currentConfig?.icon) && !currentConfig?.textVisibility}
               buttonSize="compressed"
               options={getIconPositionOptions({
                 isHorizontal,
-                axisMode: currentYConfig!.axisMode,
+                axisMode: currentConfig!.axisMode,
               })}
-              idSelected={`${idPrefix}${currentYConfig?.iconPosition || 'auto'}`}
+              idSelected={`${idPrefix}${currentConfig?.iconPosition || 'auto'}`}
               onChange={(id) => {
                 const newMode = id.replace(idPrefix, '') as IconPosition;
-                setYConfig({ forAccessor: accessor, iconPosition: newMode });
+                setConfig({ forAccessor: accessor, iconPosition: newMode });
               }}
             />
           </TooltipWrapper>
