@@ -247,7 +247,7 @@ async function main() {
       default: false,
     },
     withNewUser: {
-      alias: 'nu',
+      alias: 'wnu',
       describe:
         'If the --fleet flag is enabled, using `--withNewUser=username:password` would add a new user with \
          the given username, password and `superuser`, `kibana_system` roles. Adding a new user would also write \
