@@ -89,7 +89,7 @@ export function ProcessTreeNode({
     const children = process.getChildren(showGroupLeadersOnly);
 
     if (!childrenExpanded || !children || children.length === 0) {
-      return;
+      return null;
     }
 
     const newDepth = depth + 1;
@@ -307,7 +307,7 @@ export function ProcessTreeNode({
         </div>
       </div>
       {alertsExpanded && <ProcessTreeAlerts alerts={alerts} />}
-      {renderChildren()}
+      <div>{renderChildren()}</div>
     </>
   );
 }
