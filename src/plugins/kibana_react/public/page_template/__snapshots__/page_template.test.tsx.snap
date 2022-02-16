@@ -108,7 +108,7 @@ exports[`KibanaPageTemplate render default empty prompt 1`] = `
 
 exports[`KibanaPageTemplate render noDataContent 1`] = `
 <EmptyStatePage
-  classes="kbnPageTemplate kbnPageTemplate--centeredBody"
+  className="kbnPageTemplate kbnPageTemplate--centeredBody"
   noDataConfig={
     Object {
       "actions": Object {
