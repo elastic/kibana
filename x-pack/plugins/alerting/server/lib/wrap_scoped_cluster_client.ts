@@ -43,13 +43,13 @@ function wrapEsClient(
   // Core hides access to .child via TS
   const wrappedClient = (esClient as ElasticsearchClientWithChild).child({});
 
-  // Wrap the functions we want to modify
-  wrapSearchFn(wrappedClient, abortController);
+  // Mutating the functions we want to wrap
+  wrappedClient.search = getWrappedSearchFn(wrappedClient, abortController);
 
   return wrappedClient;
 }
 
-function wrapSearchFn(esClient: ElasticsearchClient, abortController: AbortController) {
+function getWrappedSearchFn(esClient: ElasticsearchClient, abortController: AbortController) {
   const originalSearch = esClient.search;
 
   // A bunch of overloads to make TypeScript happy
@@ -100,5 +100,5 @@ function wrapSearchFn(esClient: ElasticsearchClient, abortController: AbortContr
     }
   }
 
-  esClient.search = search;
+  return search;
 }
