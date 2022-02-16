@@ -24,9 +24,11 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { EntityType } from '../../../../../timelines/common';
+import { Ecs } from '../../../../common/ecs';
 
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
+  ecs: Ecs | null;
 }
 
 export interface UseTimelineEventsDetailsProps {
@@ -45,7 +47,12 @@ export const useTimelineEventsDetails = ({
   eventId,
   runtimeMappings,
   skip,
-}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData'], object | undefined] => {
+}: UseTimelineEventsDetailsProps): [
+  boolean,
+  EventsArgs['detailsData'],
+  object | undefined,
+  EventsArgs['ecs']
+] => {
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -57,6 +64,7 @@ export const useTimelineEventsDetails = ({
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] =
     useState<EventsArgs['detailsData']>(null);
+  const [ecsData, setEcsData] = useState<EventsArgs['ecs']>(null);
 
   const [rawEventData, setRawEventData] = useState<object | undefined>(undefined);
 
@@ -84,6 +92,7 @@ export const useTimelineEventsDetails = ({
                 setLoading(false);
                 setTimelineDetailsResponse(response.data || []);
                 setRawEventData(response.rawResponse.hits.hits[0]);
+                setEcsData(response.ecs || null);
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
@@ -132,5 +141,5 @@ export const useTimelineEventsDetails = ({
     };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
-  return [loading, timelineDetailsResponse, rawEventData];
+  return [loading, timelineDetailsResponse, rawEventData, ecsData];
 };
