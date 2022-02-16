@@ -89,8 +89,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
               }
 
               eventLog.logExecutionComplete({
+                ...(output.metrics ?? {}),
                 byteSize: stream.bytesWritten,
-                csvRows: output.csv_rows,
               });
             })
             .finally(() => stream.end());
