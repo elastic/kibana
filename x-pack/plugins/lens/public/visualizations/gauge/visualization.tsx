@@ -392,7 +392,7 @@ export const getGaugeVisualization = ({
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.gauge.addLayer', {
-          defaultMessage: 'Add visualization layer',
+          defaultMessage: 'Visualization',
         }),
         initialDimensions: state
           ? [

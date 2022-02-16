@@ -53,7 +53,7 @@ export const bulkCreateFactory =
     ]);
     const start = performance.now();
 
-    const { body: response } = await withSecuritySpan('writeAlertsBulk', () =>
+    const response = await withSecuritySpan('writeAlertsBulk', () =>
       esClient.bulk({
         refresh: refreshForBulkCreate,
         body: bulkBody,
