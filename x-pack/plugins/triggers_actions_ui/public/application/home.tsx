@@ -10,10 +10,10 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
-import { Section, routeToConnectors, routeToRules, routeToAlerts } from './constants';
+import { Section, routeToConnectors, routeToRules } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
-import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabilities';
+import { hasShowActionsCapability } from './lib/capabilities';
 
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
@@ -23,8 +23,7 @@ import { suspendedComponentWithProps } from './lib/suspended_component_with_prop
 const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
-const RulesList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
-const AlertsList = lazy(() => import('./sections/alerts_list2/components/alerts_list2'));
+const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
 
 export interface MatchParams {
   section: Section;
@@ -44,7 +43,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
-  const canShowAlerts = hasShowAlertsCapability(capabilities);
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
@@ -64,18 +62,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         <FormattedMessage
           id="xpack.triggersActionsUI.home.connectorsTabTitle"
           defaultMessage="Connectors"
-        />
-      ),
-    });
-  }
-
-  if (canShowAlerts) {
-    tabs.push({
-      id: 'alerts',
-      name: (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.home.alertsTabTitle"
-          defaultMessage="Alerts"
         />
       ),
     });
@@ -143,17 +129,10 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
                 component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
               />
             )}
-            {canShowAlerts && (
-              <Route
-                exact
-                path={routeToAlerts}
-                component={suspendedComponentWithProps(AlertsList, 'xl')}
-              />
-            )}
             <Route
               exact
               path={routeToRules}
-              component={suspendedComponentWithProps(RulesList, 'xl')}
+              component={suspendedComponentWithProps(AlertsList, 'xl')}
             />
           </Switch>
         </HealthCheck>
