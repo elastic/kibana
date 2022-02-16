@@ -351,6 +351,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'security-rule',
           },
           {
+            id: 'sample_csp_rule_template',
+            type: 'csp-rule-template',
+          },
+          {
             id: 'sample_ml_module',
             type: 'ml-module',
           },
