@@ -11,7 +11,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
   AddFromLibraryButton,
-  AddControlButton,
   QuickButtonGroup,
   PrimaryActionButton,
   SolutionToolbarButton,
@@ -25,7 +24,7 @@ interface NamedSlots {
   primaryActionButton: ReactElement<typeof PrimaryActionButton | typeof PrimaryActionPopover>;
   quickButtonGroup?: ReactElement<typeof QuickButtonGroup>;
   addFromLibraryButton?: ReactElement<typeof AddFromLibraryButton>;
-  addControlButton?: ReactElement<typeof AddControlButton>;
+  addControlButton?: ReactElement<typeof SolutionToolbarButton | typeof SolutionToolbarPopover>;
   extraButtons?: Array<ReactElement<typeof SolutionToolbarButton | typeof SolutionToolbarPopover>>;
 }
 

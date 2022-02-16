@@ -605,7 +605,7 @@ export function DashboardTopNav({
                 />
               ),
               addControlButton:
-                dashboardAppState.dashboardContainer.controlGroup?.getControlButton(false),
+                dashboardAppState.dashboardContainer.controlGroup?.getControlButton('toolbar'),
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}

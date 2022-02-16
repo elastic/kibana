@@ -41,7 +41,7 @@ import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
 import { ViewMode } from '../../../../embeddable/public';
 import { ControlGroupStrings } from '../control_group_strings';
-import { CreateControlButton } from '../editor/create_control';
+import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { forwardAllContext } from '../editor/forward_all_context';
 import { controlGroupReducers } from '../state/control_group_reducers';
@@ -71,7 +71,7 @@ export const ControlGroup = () => {
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { setControlOrders, setDefaultControlWidth }, // setShowToolbarButton,
+    actions: { setControlOrders, setDefaultControlWidth },
     containerActions: { addNewEmbeddable },
   } = reduxContainerContext;
   const dispatch = useEmbeddableDispatch();
@@ -126,10 +126,10 @@ export const ControlGroup = () => {
   if (emptyState) panelBg = 'plain';
   if (draggingId) panelBg = 'success';
 
-  const getControlButton = (isIconButton: boolean) => {
+  const getControlButton = (buttonType: CreateControlButtonTypes) => {
     return (
       <CreateControlButton
-        isIconButton={isIconButton}
+        buttonType={buttonType}
         defaultControlWidth={defaultControlWidth}
         updateDefaultWidth={(newDefaultControlWidth) =>
           dispatch(setDefaultControlWidth(newDefaultControlWidth))
@@ -222,7 +222,7 @@ export const ControlGroup = () => {
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
-                        {getControlButton(true)}
+                        {getControlButton('icon')}
                       </EuiToolTip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -244,7 +244,7 @@ export const ControlGroup = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{getControlButton(false)}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{getControlButton('callout')}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty size="s" onClick={dismissControls}>
                   {ControlGroupStrings.emptyState.getDismissButton()}

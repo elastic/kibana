@@ -32,7 +32,7 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { Container, EmbeddableFactory } from '../../../../embeddable/public';
-import { CreateControlButton } from '../editor/create_control';
+import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
@@ -64,10 +64,10 @@ export class ControlGroupContainer extends Container<
     return Promise.resolve();
   };
 
-  public getControlButton = (isIconButton: boolean) => {
+  public getControlButton = (buttonType: CreateControlButtonTypes) => {
     return (
       <CreateControlButton
-        isIconButton={isIconButton}
+        buttonType={buttonType}
         defaultControlWidth={this.getInput().defaultControlWidth}
         updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}

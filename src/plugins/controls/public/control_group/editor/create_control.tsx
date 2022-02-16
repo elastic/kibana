@@ -24,19 +24,21 @@ import { ControlGroupStrings } from '../control_group_strings';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddable/public';
 import { ControlWidth, IEditableControlFactory, ControlInput } from '../../types';
 import { toMountPoint } from '../../../../kibana_react/public';
+import { SolutionToolbarButton } from '../../../../presentation_util/public';
 
+export type CreateControlButtonTypes = 'icon' | 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
   defaultControlWidth?: ControlWidth;
   updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
   addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
-  isIconButton: boolean;
+  buttonType: CreateControlButtonTypes;
 }
 
 export const CreateControlButton = ({
   defaultControlWidth,
   updateDefaultWidth,
   addNewEmbeddable,
-  isIconButton,
+  buttonType,
 }: CreateControlButtonProps) => {
   // Controls Services Context
   const { overlays, controls } = pluginServices.getServices();
@@ -127,13 +129,20 @@ export const CreateControlButton = ({
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
-  const createControlButton = isIconButton ? (
-    <EuiButtonIcon {...commonButtonProps} iconType={'plusInCircle'} />
-  ) : (
-    <EuiButton {...commonButtonProps} size="s">
-      {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
-    </EuiButton>
-  );
+  const createControlButton =
+    buttonType === 'icon' ? (
+      <EuiButtonIcon {...commonButtonProps} iconType={'plusInCircle'} />
+    ) : buttonType === 'callout' ? (
+      <EuiButton {...commonButtonProps} size="s">
+        {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
+      </EuiButton>
+    ) : (
+      <SolutionToolbarButton
+        {...commonButtonProps}
+        iconType="controlsHorizontal"
+        label={ControlGroupStrings.emptyState.getAddControlButtonTitle()}
+      />
+    );
 
   if (getControlTypes().length > 1) {
     const items: ReactElement[] = [];
