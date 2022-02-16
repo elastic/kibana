@@ -205,7 +205,11 @@ export function DependenciesTable(props: Props) {
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="dependenciesTable"
+    >
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

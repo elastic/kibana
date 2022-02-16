@@ -114,6 +114,7 @@ describe('Handle request to generate', () => {
             "layout": "preserve_layout",
             "objectType": "cool_object_type",
           },
+          "metrics": undefined,
           "migration_version": "7.14.0",
           "output": null,
           "process_expiration": undefined,
@@ -195,6 +196,7 @@ describe('Handle request to generate', () => {
           "layout": "preserve_layout",
           "objectType": "cool_object_type",
         },
+        "metrics": undefined,
         "migration_version": "7.14.0",
         "output": Object {},
         "payload": Object {

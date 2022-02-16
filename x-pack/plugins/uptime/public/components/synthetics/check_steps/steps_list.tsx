@@ -37,6 +37,7 @@ interface Props {
   error?: Error;
   loading: boolean;
   compactView?: boolean;
+  showStepDurationTrend?: boolean;
 }
 
 interface StepStatusCount {
@@ -85,7 +86,13 @@ function reduceStepStatus(prev: StepStatusCount, cur: JourneyStep): StepStatusCo
   return prev;
 }
 
-export const StepsList = ({ data, error, loading, compactView = false }: Props) => {
+export const StepsList = ({
+  data,
+  error,
+  loading,
+  showStepDurationTrend = true,
+  compactView = false,
+}: Props) => {
   const steps: JourneyStep[] = data.filter(isStepEnd);
 
   const { expandedRows, toggleExpand } = useExpandedRow({ steps, allSteps: data, loading });
@@ -140,6 +147,7 @@ export const StepsList = ({ data, error, loading, compactView = false }: Props) 
             step={item}
             durationPopoverOpenIndex={durationPopoverOpenIndex}
             setDurationPopoverOpenIndex={setDurationPopoverOpenIndex}
+            showStepDurationTrend={showStepDurationTrend}
             compactView={compactView}
           />
         );
