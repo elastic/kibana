@@ -187,7 +187,6 @@ export class painless_lexer extends Lexer {
 		switch (ruleIndex) {
     // DO NOT CHANGE
     // This is a manual fix to handle slashes appropriately, DIV: 32
-
 		case 32:
 			return this.DIV_sempred(_localctx, predIndex);
 
