@@ -10,7 +10,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createStartServicesMock } from '../../../../triggers_actions_ui/public/common/lib/kibana/kibana_react.mock';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
-import { WrappedHelper } from '../../../../uptime/public/lib/helper/rtl_helpers';
 
 jest.mock('../../common/lib/kibana');
 
@@ -42,14 +41,13 @@ describe('UseIsOsqueryAvailableSimple', () => {
     });
   });
   it('should expect response from API and return enabled flag', async () => {
-    const { result, waitForValueToChange } = renderHook(
-      () =>
-        useIsOsqueryAvailableSimple({
-          agentId: '3242332',
-        }),
-      { wrapper: WrappedHelper }
+    const { result, waitForValueToChange } = renderHook(() =>
+      useIsOsqueryAvailableSimple({
+        agentId: '3242332',
+      })
     );
 
+    expect(result.current).toBe(false);
     await waitForValueToChange(() => result.current);
 
     expect(result.current).toBe(true);

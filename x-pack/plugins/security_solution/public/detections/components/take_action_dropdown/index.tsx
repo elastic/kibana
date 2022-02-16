@@ -169,7 +169,6 @@ export const TakeActionDropdown = React.memo(
 
     const osqueryAvailable = osquery?.isOsqueryAvailable({
       agentId,
-      // onClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
     });
     const osqueryActionItem = OsqueryActionItem({
       handleClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
