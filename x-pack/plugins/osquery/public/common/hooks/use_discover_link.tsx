@@ -18,14 +18,14 @@ export const useDiscoverLink = ({ filters }: UseDiscoverLink) => {
   const {
     application: { navigateToUrl },
   } = useKibana().services;
-  const urlGenerator = useKibana().services.discover?.urlGenerator;
+  const locator = useKibana().services.discover?.locator;
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
     const getDiscoverUrl = async () => {
-      if (!urlGenerator?.createUrl) return;
+      if (!locator) return;
 
-      const newUrl = await urlGenerator.createUrl({
+      const newUrl = await locator.getUrl({
         indexPatternId: 'logs-*',
         filters: filters.map((filter) => ({
           meta: {
@@ -44,7 +44,7 @@ export const useDiscoverLink = ({ filters }: UseDiscoverLink) => {
       setDiscoverUrl(newUrl);
     };
     getDiscoverUrl();
-  }, [filters, urlGenerator]);
+  }, [filters, locator]);
 
   const onClick = useCallback(
     (event: React.MouseEvent) => {
