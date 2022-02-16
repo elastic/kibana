@@ -225,7 +225,7 @@ export function getAlertType(
       logger.debug(`setting context for recovered alert ${alertId}`);
       const baseContext: BaseActionContext = {
         date,
-        value: unmetGroupValues[alertId] ?? 0,
+        value: unmetGroupValues[alertId] ?? 'unknown',
         group: alertId,
         conditions: `${agg} is NOT ${getHumanReadableComparator(
           params.thresholdComparator
