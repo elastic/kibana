@@ -117,6 +117,15 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
 
     return (
       <MetricComponent
+        autoScaleParams={
+          this.props.visParams.metric.autoScale && this.props.visParams.metric.colorFullBackground
+            ? {
+                containerStyles: {
+                  backgroundColor: metric.bgColor,
+                },
+              }
+            : undefined
+        }
         key={index}
         metric={metric}
         style={this.props.visParams.metric.style}
@@ -124,6 +133,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
           this.props.visParams.dimensions.bucket ? () => this.filterBucket(index) : undefined
         }
         showLabel={this.props.visParams.metric.labels.show}
+        autoScale={this.props.visParams.metric.autoScale}
         colorFullBackground={this.props.visParams.metric.colorFullBackground}
       />
     );
