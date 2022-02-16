@@ -51,9 +51,6 @@ export class PdfMaker {
    * With this value we are able to generate PDFs in excess of 5000x5000 pixels
    * at which point issues other than memory start to show like glitches in the
    * image.
-   *
-   * TODO: Should we consider making this number dynamic? It is difficult to
-   * know how we'd describe this to users in the most helpful way.
    */
   protected workerMaxOldHeapSizeMb = 128;
 
