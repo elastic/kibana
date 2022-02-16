@@ -16,7 +16,7 @@ export const createTimerange = (
   const to = moment(timeframe ? timeframe.end : Date.now()).valueOf();
 
   // Rate aggregations need 5 buckets worth of data
-  const minimumBuckets = aggType === Aggregators.RATE ? 5 : 1;
+  const minimumBuckets = aggType === Aggregators.RATE ? 2 : 1;
 
   const calculatedFrom = to - interval * minimumBuckets;
 
