@@ -7,7 +7,7 @@
  */
 
 import { debounce } from 'lodash';
-import type { Cancelable } from 'lodash';
+import type { DebouncedFunc } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
@@ -21,8 +21,8 @@ export function useDebouncedValue<T>(value: T, timeout?: number): [T, boolean] {
     },
     [setStoredValue, setPending]
   );
-  const setDebouncedValue = useMemo<typeof setValue & Partial<Cancelable>>(
-    () => (timeout ? debounce(setValue, timeout) : setValue),
+  const setDebouncedValue = useMemo<DebouncedFunc<typeof setValue>>(
+    () => (timeout ? debounce(setValue, timeout) : (setValue as DebouncedFunc<typeof setValue>)),
     [setValue, timeout]
   );
 

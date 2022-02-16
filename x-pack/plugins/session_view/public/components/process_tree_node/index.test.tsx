@@ -15,7 +15,7 @@ import {
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessDeps, ProcessTreeNode } from '.';
-import { Cancelable } from 'lodash';
+import type { DebouncedFunc } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 
 jest.useFakeTimers('modern');
@@ -92,10 +92,10 @@ describe('ProcessTreeNode component', () => {
         current: {
           ...props.scrollerRef.current,
           clientHeight: -500,
-          addEventListener: (_event: string, scrollFn: (() => void) & Cancelable) => {
+          addEventListener: (_event: string, scrollFn: DebouncedFunc<() => void>) => {
             scrollFn();
           },
-          removeEventListener: (_event: string, _fn: (() => void) & Cancelable) => {},
+          removeEventListener: (_event: string, _fn: DebouncedFunc<() => void>) => {},
         },
       } as RefObject<HTMLDivElement>;
 
