@@ -7,8 +7,16 @@
  */
 
 import React from 'react';
-import { ToolbarButton as ToolbarButtonComponent } from './toolbar_button.component';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+} from '@elastic/eui';
 import { ToolbarButton } from './toolbar_button';
+import { ToolbarButton as ToolbarButtonComponent } from './toolbar_button.component';
 import mdx from './toolbar_button.mdx';
 
 export default {
@@ -19,10 +27,23 @@ export default {
   },
 };
 
-export const ConnectedComponent = () => {
-  return <ToolbarButton />;
-};
+const title = 'test';
 
 export const PureComponent = () => {
-  return <ToolbarButtonComponent hasArrow={false} />;
+  return (
+    <EuiFlexGroup alignItems="center">
+      <EuiPopover
+        ownFocus
+        button={
+          <ToolbarButtonComponent iconType="managementApp" iconSide="left">
+            <EuiText size="m">Sample Text</EuiText>
+          </ToolbarButtonComponent>
+        }
+        anchorPosition="downRight"
+      >
+        <EuiPopoverTitle>{title}</EuiPopoverTitle>
+        Test
+      </EuiPopover>
+    </EuiFlexGroup>
+  );
 };
