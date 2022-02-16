@@ -93,8 +93,6 @@ export function ServiceContents({
     query: { rangeFrom, rangeTo, environment, kuery, comparisonEnabled },
   });
 
-  // JUST A TEST
-
   const { serviceAnomalyStats } = nodeData;
 
   return (
