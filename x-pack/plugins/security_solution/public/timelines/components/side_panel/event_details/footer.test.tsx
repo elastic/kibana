@@ -59,6 +59,13 @@ jest.mock(
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
+jest.mock('../../../../common/hooks/endpoint/use_isolate_privileges', () => ({
+  isAllowed: jest.fn().mockReturnValue(true),
+}));
+
+jest.mock('../../../../detections/components/host_isolation/use_host_isolation_action', () => ({
+  useHostIsolationAction: jest.fn().mockReturnValue([() => <div />]),
+}));
 
 jest.mock('../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
