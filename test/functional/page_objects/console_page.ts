@@ -97,6 +97,11 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
+  public async getAutocompleteAttribute(attribute: string) {
+    const element = await this.find.byCssSelector('.ace_autocomplete');
+    return await element.getAttribute(attribute);
+  }
+
   public async enterRequest(request: string = '\nGET _search') {
     const textArea = await this.getEditorTextArea();
     await textArea.pressKeys(request);
@@ -105,7 +110,7 @@ export class ConsolePageObject extends FtrService {
 
   public async enterText(text: string) {
     const textArea = await this.getEditorTextArea();
-    await textArea.pressKeys(text);
+    await textArea.type(text);
   }
 
   private async getEditorTextArea() {

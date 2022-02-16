@@ -41,6 +41,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.pressEnter();
       await PageObjects.console.pressEnter();
       await PageObjects.console.promptAutocomplete();
+
+      await retry.waitForWithTimeout('autocomplete to be visible', 2000, async () => {
+        const attribute = await PageObjects.console.getAutocompleteAttribute('style');
+        log.debug(attribute);
+        expect(attribute).to.not.contain('display: none;');
+        return true;
+      });
       await PageObjects.console.pressEnter();
 
       await retry.try(async () => {
