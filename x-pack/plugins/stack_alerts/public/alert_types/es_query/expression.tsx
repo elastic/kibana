@@ -354,6 +354,13 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
             id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
             defaultMessage="When number of matches"
           />
+          <EuiIconTip
+            position="right"
+            type="questionInCircle"
+            content={i18n.translate('xpack.alertTypes.esQuery.forTheLastTooltip', {
+              defaultMessage: 'The time window defined below applies only to the first rule check.',
+            })}
+          />
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -384,13 +391,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         onChangeWindowUnit={(selectedWindowUnit: string) =>
           setParam('timeWindowUnit', selectedWindowUnit)
         }
-      />
-      <EuiIconTip
-        position="right"
-        type="questionInCircle"
-        content={i18n.translate('xpack.alertTypes.esQuery.forTheLastTooltip', {
-          defaultMessage: 'The data range defined here applies only to the first rule check.',
-        })}
       />
       <EuiSpacer />
     </Fragment>
