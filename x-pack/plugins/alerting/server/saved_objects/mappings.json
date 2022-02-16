@@ -155,6 +155,10 @@
             }
           }
         }
+      },
+      "snooze_end_time": {
+        "type": "date",
+        "format": "strict_date_time_no_millis"
       }
     }
   }
