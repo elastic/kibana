@@ -8,7 +8,7 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
-import { MessageChannel, Worker } from 'worker_threads';
+import { MessageChannel, MessagePort, Worker } from 'worker_threads';
 import type { Layout } from '../../../../../screenshotting/server';
 import {
   headingHeight,
@@ -21,7 +21,7 @@ import {
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
 import { PdfWorkerOutOfMemoryError } from './pdfmaker_errors';
-import type { GeneratePdfRequest, GeneratePdfResponse } from './worker';
+import type { GeneratePdfRequest, GeneratePdfResponse, WorkerData } from './worker';
 
 // Ensure that the worker and all dependencies are included in the release bundle.
 import './worker';
@@ -141,7 +141,7 @@ export class PdfMaker {
     this._title = title;
   }
 
-  private getWorkerData(): GeneratePdfRequest['data'] {
+  private getGeneratePdfRequestData(): GeneratePdfRequest['data'] {
     return {
       layout: {
         hasFooter: this._layout.hasFooter,
@@ -163,12 +163,17 @@ export class PdfMaker {
     };
   }
 
-  private createWorker(): Worker {
+  private createWorker(port: MessagePort): Worker {
+    const workerData: WorkerData = {
+      port,
+    };
     return new Worker(this.workerModulePath, {
+      workerData,
       resourceLimits: {
         maxYoungGenerationSizeMb: this.workerMaxYoungHeapSizeMb,
         maxOldGenerationSizeMb: this.workerMaxOldHeapSizeMb,
       },
+      transferList: [port],
     });
   }
 
@@ -185,7 +190,7 @@ export class PdfMaker {
     try {
       return await new Promise<Uint8Array>((resolve, reject) => {
         const { port1: myPort, port2: theirPort } = new MessageChannel();
-        this.worker = this.createWorker();
+        this.worker = this.createWorker(theirPort);
         this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
           if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
             reject(new PdfWorkerOutOfMemoryError(workerError.message));
@@ -196,10 +201,9 @@ export class PdfMaker {
 
         // Send the initial request
         const generatePdfRequest: GeneratePdfRequest = {
-          port: theirPort,
-          data: this.getWorkerData(),
+          data: this.getGeneratePdfRequestData(),
         };
-        this.worker.postMessage(generatePdfRequest, [theirPort]);
+        this.worker.postMessage(generatePdfRequest);
 
         // We expect one message from the worker generating the PDF buffer.
         myPort.on('message', ({ error, data }: GeneratePdfResponse) => {

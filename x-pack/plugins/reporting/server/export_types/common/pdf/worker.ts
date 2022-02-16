@@ -7,7 +7,7 @@
 
 import { Ensure, SerializableRecord } from '@kbn/utility-types';
 
-import { parentPort, isMainThread, MessagePort } from 'worker_threads';
+import { isMainThread, MessagePort, workerData } from 'worker_threads';
 import _ from 'lodash';
 import path from 'path';
 import Printer from 'pdfmake';
@@ -16,7 +16,11 @@ import { getTemplate } from './get_template';
 import type { TemplateLayout } from './types';
 import { assetPath } from './constants';
 
-export type PdfWorkerData = Ensure<
+export interface WorkerData {
+  port: MessagePort;
+}
+
+export type GenerateReportRequestData = Ensure<
   {
     layout: TemplateLayout;
     title: string;
@@ -28,8 +32,7 @@ export type PdfWorkerData = Ensure<
 >;
 
 export interface GeneratePdfRequest {
-  port: MessagePort;
-  data: PdfWorkerData;
+  data: GenerateReportRequestData;
 }
 
 export type GeneratePdfResponse = SuccessResponse | ErrorResponse;
@@ -50,7 +53,8 @@ export interface ErrorResponse {
 }
 
 if (!isMainThread) {
-  parentPort!.on('message', execute);
+  const { port } = workerData as WorkerData;
+  port.on('message', execute);
 }
 
 const getPageCount = (pdfDoc: PDFKit.PDFDocument): number => {
@@ -63,7 +67,8 @@ const getPageCount = (pdfDoc: PDFKit.PDFDocument): number => {
   return start + count;
 };
 
-async function execute({ data: { layout, logo, title, content }, port }: GeneratePdfRequest) {
+async function execute({ data: { layout, logo, title, content } }: GeneratePdfRequest) {
+  const { port } = workerData as WorkerData;
   try {
     const tableBorderWidth = 1;
 
