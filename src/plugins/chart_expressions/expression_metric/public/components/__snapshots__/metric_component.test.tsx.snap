@@ -4,6 +4,17 @@ exports[`MetricVisComponent should render correct structure for multi-value metr
 Array [
   <MetricVisValue
     key="0"
+    labelConfig={
+      Object {
+        "position": "bottom",
+        "show": true,
+        "style": Object {
+          "css": "",
+          "spec": Object {},
+          "type": "style",
+        },
+      }
+    }
     metric={
       Object {
         "bgColor": undefined,
@@ -14,7 +25,6 @@ Array [
         "value": 182,
       }
     }
-    showLabel={true}
     style={
       Object {
         "bgColor": false,
@@ -27,6 +37,17 @@ Array [
   />,
   <MetricVisValue
     key="1"
+    labelConfig={
+      Object {
+        "position": "bottom",
+        "show": true,
+        "style": Object {
+          "css": "",
+          "spec": Object {},
+          "type": "style",
+        },
+      }
+    }
     metric={
       Object {
         "bgColor": undefined,
@@ -37,7 +58,6 @@ Array [
         "value": 445842.4634666484,
       }
     }
-    showLabel={true}
     style={
       Object {
         "bgColor": false,
@@ -54,6 +74,17 @@ Array [
 exports[`MetricVisComponent should render correct structure for single metric 1`] = `
 <MetricVisValue
   key="0"
+  labelConfig={
+    Object {
+      "position": "bottom",
+      "show": true,
+      "style": Object {
+        "css": "",
+        "spec": Object {},
+        "type": "style",
+      },
+    }
+  }
   metric={
     Object {
       "bgColor": undefined,
@@ -64,7 +95,6 @@ exports[`MetricVisComponent should render correct structure for single metric 1`
       "value": 4301021,
     }
   }
-  showLabel={true}
   style={
     Object {
       "bgColor": false,

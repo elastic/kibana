@@ -25,6 +25,8 @@
 .mtrVis__container {
   text-align: center;
   padding: $euiSize;
+  display: flex;
+  flex-direction: column;
 }
 
 .mtrVis__container--light {
