@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useCallback } from 'react';
 import { useTrackPageview } from '../..';
 import { EmptySections } from '../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
@@ -61,6 +61,7 @@ export function OverviewPage({ routeParams }: Props) {
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
   const { hasDataMap, hasAnyData, isAllRequestsComplete } = useHasData();
+  const refetch = useRef<() => void>();
 
   const bucketSize = calculateBucketSize({
     start: absoluteTime.start,
@@ -75,6 +76,14 @@ export function OverviewPage({ routeParams }: Props) {
       };
     }
   }, [bucketSize?.bucketSize, bucketSize?.intervalString]);
+
+  const setRefetch = useCallback((ref) => {
+    refetch.current = ref;
+  }, []);
+
+  const onTimeRangeRefresh = useCallback(() => {
+    return refetch.current && refetch.current();
+  }, []);
 
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
@@ -103,6 +112,7 @@ export function OverviewPage({ routeParams }: Props) {
                   rangeTo={relativeTime.end}
                   refreshInterval={refreshInterval}
                   refreshPaused={refreshPaused}
+                  onTimeRangeRefresh={onTimeRangeRefresh}
                 />,
               ],
             }
@@ -122,7 +132,7 @@ export function OverviewPage({ routeParams }: Props) {
               >
                 {hasDataMap?.alert?.hasData && (
                   <AlertsTableTGrid
-                    setRefetch={() => {}}
+                    setRefetch={setRefetch}
                     rangeFrom={relativeTime.start}
                     rangeTo={relativeTime.end}
                     indexNames={indexNames}
