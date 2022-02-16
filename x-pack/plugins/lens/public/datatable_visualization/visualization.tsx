@@ -386,7 +386,7 @@ export const getDatatableVisualization = ({
                         !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
-                      colorMode: !canColor ? ['none'] : [column.colorMode ?? 'none'],
+                      colorMode: [canColor && column.colorMode ? column.colorMode : 'none'],
                       palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
                       summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
                       summaryLabel: hasNoSummaryRow
