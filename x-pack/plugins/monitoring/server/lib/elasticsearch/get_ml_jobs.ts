@@ -40,8 +40,8 @@ export function handleResponse(response: ElasticsearchResponse) {
 export type MLJobs = ReturnType<typeof handleResponse>;
 
 export function getMlJobs(req: LegacyRequest) {
-  const config = req.server.config();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const config = req.server.config;
+  const maxBucketSize = config.ui.max_bucket_size;
   const start = req.payload.timeRange.min; // no wrapping in moment :)
   const end = req.payload.timeRange.max;
   const clusterUuid = req.params.clusterUuid;
