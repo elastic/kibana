@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  isNoisy,
-  getTimeframeOptions,
-  getInfoFromQueryBar,
-  getIsRulePreviewDisabled,
-} from './helpers';
+import { isNoisy, getTimeframeOptions, getIsRulePreviewDisabled } from './helpers';
 
 describe('query_preview/helpers', () => {
   describe('isNoisy', () => {
@@ -190,119 +185,6 @@ describe('query_preview/helpers', () => {
       const options = getTimeframeOptions('threshold');
 
       expect(options).toEqual([{ value: 'h', text: 'Last hour' }]);
-    });
-  });
-
-  describe('getInfoFromQueryBar', () => {
-    test('returns queryFilter when ruleType is query', () => {
-      const { queryString, language, filters, queryFilter } = getInfoFromQueryBar(
-        {
-          query: { query: 'host.name:*', language: 'kuery' },
-          filters: [{ meta: { alias: '', disabled: false, negate: false } }],
-        },
-        ['foo-*'],
-        'query'
-      );
-
-      expect(queryString).toEqual('host.name:*');
-      expect(language).toEqual('kuery');
-      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false }, query: {} }]);
-      expect(queryFilter).toEqual({
-        bool: {
-          filter: [
-            { bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] } },
-            {},
-          ],
-          must: [],
-          must_not: [],
-          should: [],
-        },
-      });
-    });
-
-    test('returns queryFilter when ruleType is saved_query', () => {
-      const { queryString, language, filters, queryFilter } = getInfoFromQueryBar(
-        {
-          query: { query: 'host.name:*', language: 'kuery' },
-          filters: [{ meta: { alias: '', disabled: false, negate: false } }],
-        },
-        ['foo-*'],
-        'saved_query'
-      );
-
-      expect(queryString).toEqual('host.name:*');
-      expect(language).toEqual('kuery');
-      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false }, query: {} }]);
-      expect(queryFilter).toEqual({
-        bool: {
-          filter: [
-            { bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] } },
-            {},
-          ],
-          must: [],
-          must_not: [],
-          should: [],
-        },
-      });
-    });
-
-    test('returns queryFilter when ruleType is threshold', () => {
-      const { queryString, language, filters, queryFilter } = getInfoFromQueryBar(
-        {
-          query: { query: 'host.name:*', language: 'kuery' },
-          filters: [{ meta: { alias: '', disabled: false, negate: false } }],
-        },
-        ['foo-*'],
-        'threshold'
-      );
-
-      expect(queryString).toEqual('host.name:*');
-      expect(language).toEqual('kuery');
-      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false }, query: {} }]);
-      expect(queryFilter).toEqual({
-        bool: {
-          filter: [
-            { bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] } },
-            {},
-          ],
-          must: [],
-          must_not: [],
-          should: [],
-        },
-      });
-    });
-
-    test('returns undefined queryFilter when ruleType is eql', () => {
-      const { queryString, language, filters, queryFilter } = getInfoFromQueryBar(
-        {
-          query: { query: 'file where true', language: 'eql' },
-          filters: [{ meta: { alias: '', disabled: false, negate: false } }],
-        },
-        ['foo-*'],
-        'eql'
-      );
-
-      expect(queryString).toEqual('file where true');
-      expect(language).toEqual('eql');
-      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false } }]);
-      expect(queryFilter).toBeUndefined();
-    });
-
-    test('returns undefined queryFilter when getQueryFilter throws', () => {
-      // query is malformed, forcing error in getQueryFilter
-      const { queryString, language, filters, queryFilter } = getInfoFromQueryBar(
-        {
-          query: { query: 'host.name:', language: 'kuery' },
-          filters: [{ meta: { alias: '', disabled: false, negate: false } }],
-        },
-        ['foo-*'],
-        'threshold'
-      );
-
-      expect(queryString).toEqual('host.name:');
-      expect(language).toEqual('kuery');
-      expect(filters).toEqual([{ meta: { alias: '', disabled: false, negate: false } }]);
-      expect(queryFilter).toBeUndefined();
     });
   });
 });

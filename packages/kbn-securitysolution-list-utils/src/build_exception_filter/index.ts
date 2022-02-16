@@ -141,10 +141,12 @@ export const buildExceptionFilter = ({
   lists,
   excludeExceptions,
   chunkSize,
+  ruleExecutionLogger,
 }: {
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   excludeExceptions: boolean;
   chunkSize: number;
+  ruleExecutionLogger?: IRuleExecutionLogForExecutors;
 }): Filter | undefined => {
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
@@ -164,7 +166,7 @@ export const buildExceptionFilter = ({
       },
     },
   };
-
+  // TODO: be logging with ruleExecutionLogger
   if (exceptionsWithoutLargeValueLists.length === 0) {
     return undefined;
   } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {

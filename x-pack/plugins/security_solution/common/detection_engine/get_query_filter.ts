@@ -15,15 +15,27 @@ import { Filter, EsQueryConfig, DataViewBase, buildEsQuery } from '@kbn/es-query
 
 import { ESBoolQuery } from '../typed_json';
 import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
+import { IRuleExecutionLogForExecutors } from '../../server/lib/detection_engine/rule_execution_log';
 
-export const getQueryFilter = (
-  query: Query,
-  language: Language,
-  filters: unknown,
-  index: Index,
-  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  excludeExceptions: boolean = true
-): ESBoolQuery => {
+interface GetQueryFilterProps {
+  query: Query;
+  language: Language;
+  filters: unknown;
+  index: Index;
+  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  excludeExceptions?: boolean;
+  ruleExecutionLogger?: IRuleExecutionLogForExecutors;
+}
+
+export const getQueryFilter = ({
+  query,
+  language,
+  filters,
+  index,
+  lists,
+  excludeExceptions = true,
+  ruleExecutionLogger,
+}: GetQueryFilterProps): ESBoolQuery => {
   const indexPattern: DataViewBase = {
     fields: [],
     title: index.join(),
@@ -43,6 +55,7 @@ export const getQueryFilter = (
     lists,
     excludeExceptions,
     chunkSize: 1024,
+    ruleExecutionLogger,
   });
   const initialQuery = { query, language };
   const allFilters = getAllFilters(filters as Filter[], exceptionFilter);

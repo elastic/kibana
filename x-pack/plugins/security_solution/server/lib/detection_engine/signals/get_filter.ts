@@ -23,6 +23,7 @@ import {
 import { PartialFilter } from '../types';
 import { QueryFilter } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 
 interface GetFilterArgs {
   type: Type;
@@ -33,6 +34,7 @@ interface GetFilterArgs {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
   lists: ExceptionListItemSchema[];
+  ruleExecutionLogger?: IRuleExecutionLogForExecutors;
 }
 
 interface QueryAttributes {
@@ -53,10 +55,18 @@ export const getFilter = async ({
   type,
   query,
   lists,
+  ruleExecutionLogger,
 }: GetFilterArgs): Promise<QueryFilter> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
-      return getQueryFilter(query, language, filters || [], index, lists);
+      return getQueryFilter({
+        query,
+        language,
+        filters: filters || [],
+        index,
+        lists,
+        ruleExecutionLogger,
+      });
     } else {
       throw new BadRequestError('query, filters, and index parameter should be defined');
     }
@@ -69,18 +79,26 @@ export const getFilter = async ({
         const savedObject = await withSecuritySpan('getSavedFilter', () =>
           services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
-        return getQueryFilter(
-          savedObject.attributes.query.query,
-          savedObject.attributes.query.language,
-          savedObject.attributes.filters,
+        return getQueryFilter({
+          query: savedObject.attributes.query.query,
+          language: savedObject.attributes.query.language,
+          filters: savedObject.attributes.filters,
           index,
-          lists
-        );
+          lists,
+          ruleExecutionLogger,
+        });
       } catch (err) {
         // saved object does not exist, so try and fall back if the user pushed
         // any additional language, query, filters, etc...
         if (query != null && language != null && index != null) {
-          return getQueryFilter(query, language, filters || [], index, lists);
+          return getQueryFilter({
+            query,
+            language,
+            filters: filters || [],
+            index,
+            lists,
+            ruleExecutionLogger,
+          });
         } else {
           // user did not give any additional fall back mechanism for generating a rule
           // rethrow error for activity monitoring

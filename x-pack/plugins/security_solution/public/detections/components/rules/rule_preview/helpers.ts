@@ -7,15 +7,11 @@
 
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
-import { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Unit } from '@elastic/datemath';
-import type { Filter } from '@kbn/es-query';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import { FieldValueQueryBar } from '../query_bar';
-import { ESQuery } from '../../../../../common/typed_json';
 /**
  * Determines whether or not to display noise warning.
  * Is considered noisy if alerts/hour rate > 1
@@ -62,52 +58,6 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
       { value: 'd', text: i18n.LAST_DAY },
       { value: 'M', text: i18n.LAST_MONTH },
     ];
-  }
-};
-
-/**
- * Quick little helper to extract the query info from the
- * queryBar object.
- * @param queryBar Object containing all query info
- * @param index Indices searched
- * @param ruleType
- */
-export const getInfoFromQueryBar = (
-  queryBar: FieldValueQueryBar,
-  index: string[],
-  ruleType: Type
-): {
-  queryString: string;
-  language: Language;
-  filters: Filter[];
-  queryFilter: ESQuery | undefined;
-} => {
-  const queryString = typeof queryBar.query.query === 'string' ? queryBar.query.query : '';
-  const language = queryBar.query.language as Language;
-  const filters = queryBar.filters;
-
-  // hm?? Why a try catch here? Because if the
-  // query is invalid, it throws an error and
-  // entire UI shows gross KQLSyntax error screen
-  try {
-    const queryFilter =
-      ruleType !== 'eql'
-        ? getQueryFilter(queryString, language, filters, index, [], true)
-        : undefined;
-
-    return {
-      queryString,
-      language,
-      filters,
-      queryFilter,
-    };
-  } catch {
-    return {
-      queryString,
-      language,
-      filters,
-      queryFilter: undefined,
-    };
   }
 };
 

@@ -23,6 +23,7 @@ import { CompleteRule, SavedQueryRuleParams, QueryRuleParams } from '../../schem
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { IRuleExecutionLogForExecutors } from '../../rule_execution_log';
 
 export const queryExecutor = async ({
   completeRule,
@@ -38,6 +39,7 @@ export const queryExecutor = async ({
   buildRuleMessage,
   bulkCreate,
   wrapHits,
+  ruleExecutionLogger,
 }: {
   completeRule: CompleteRule<QueryRuleParams | SavedQueryRuleParams>;
   tuple: RuleRangeTuple;
@@ -52,6 +54,7 @@ export const queryExecutor = async ({
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -72,6 +75,7 @@ export const queryExecutor = async ({
       services,
       index: inputIndex,
       lists: exceptionItems,
+      ruleExecutionLogger,
     });
 
     return searchAfterAndBulkCreate({

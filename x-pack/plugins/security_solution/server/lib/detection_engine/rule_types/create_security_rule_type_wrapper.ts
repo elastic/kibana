@@ -270,6 +270,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   tuple,
                   wrapHits,
                   wrapSequences,
+                  ruleExecutionLogger,
                 },
               });
 

@@ -38,7 +38,10 @@ import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { IEventLogService } from '../../../../../event_log/server';
 import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
-import { RuleExecutionLogForExecutorsFactory } from '../rule_execution_log';
+import {
+  IRuleExecutionLogForExecutors,
+  RuleExecutionLogForExecutorsFactory,
+} from '../rule_execution_log';
 import { commonParamsCamelToSnake } from '../schemas/rule_converters';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
@@ -68,6 +71,7 @@ export interface RunOpts<TParams extends RuleParams> {
   };
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
 export type SecurityAlertType<

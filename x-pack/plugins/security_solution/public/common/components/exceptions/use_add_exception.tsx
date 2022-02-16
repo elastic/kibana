@@ -133,14 +133,14 @@ export const useAddOrUpdateException = ({
             'in-progress',
           ]);
 
-          const filter = getQueryFilter(
-            '',
-            'kuery',
-            [...buildAlertsFilter(ruleStaticId), ...alertStatusFilter],
-            bulkCloseIndex,
-            prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
-            false
-          );
+          const filter = getQueryFilter({
+            query: '',
+            language: 'kuery',
+            filters: [...buildAlertsFilter(ruleStaticId), ...alertStatusFilter],
+            index: bulkCloseIndex,
+            lists: prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
+            excludeExceptions: false,
+          });
 
           bulkResponse = await updateAlertStatus({
             query: {

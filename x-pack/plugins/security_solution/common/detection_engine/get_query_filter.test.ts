@@ -13,7 +13,13 @@ describe('get_filter', () => {
   describe('getQueryFilter', () => {
     describe('kuery', () => {
       test('it should work with an empty filter as kuery', () => {
-        const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
+        const esQuery = getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [],
@@ -38,10 +44,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter as a kuery', () => {
-        const esQuery = getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [
+        const esQuery = getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -60,9 +66,9 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [],
@@ -92,10 +98,10 @@ describe('get_filter', () => {
       });
 
       test('it should ignore disabled filters as a kuery', () => {
-        const esQuery = getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [
+        const esQuery = getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -131,9 +137,9 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [],
@@ -163,10 +169,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter as a kuery without meta information', () => {
-        const esQuery = getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [
+        const esQuery = getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [
             {
               query: {
                 match_phrase: {
@@ -175,9 +181,9 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [],
@@ -223,13 +229,13 @@ describe('get_filter', () => {
           },
         } as Partial<Filter>;
 
-        const esQuery = getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [query, exists],
-          ['auditbeat-*'],
-          []
-        );
+        const esQuery = getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [query, exists],
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [],
@@ -264,10 +270,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter that is disabled as a kuery', () => {
-        const esQuery = getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [
+        const esQuery = getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -286,9 +292,9 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [],
@@ -315,7 +321,13 @@ describe('get_filter', () => {
 
     describe('lucene', () => {
       test('it should work with an empty filter as lucene', () => {
-        const esQuery = getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*'], []);
+        const esQuery = getQueryFilter({
+          query: 'host.name: linux',
+          language: 'lucene',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [
@@ -335,10 +347,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter as a lucene', () => {
-        const esQuery = getQueryFilter(
-          'host.name: windows',
-          'lucene',
-          [
+        const esQuery = getQueryFilter({
+          query: 'host.name: windows',
+          language: 'lucene',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -357,9 +369,9 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [
@@ -385,10 +397,10 @@ describe('get_filter', () => {
       });
 
       test('it should ignore disabled lucene filters', () => {
-        const esQuery = getQueryFilter(
-          'host.name: windows',
-          'lucene',
-          [
+        const esQuery = getQueryFilter({
+          query: 'host.name: windows',
+          language: 'lucene',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -424,9 +436,9 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [
@@ -452,10 +464,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter that is disabled as a lucene', () => {
-        const esQuery = getQueryFilter(
-          'host.name: windows',
-          'lucene',
-          [
+        const esQuery = getQueryFilter({
+          query: 'host.name: windows',
+          language: 'lucene',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -474,9 +486,9 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
+          index: ['auditbeat-*'],
+          lists: [],
+        });
         expect(esQuery).toEqual({
           bool: {
             must: [
@@ -496,13 +508,13 @@ describe('get_filter', () => {
       });
 
       test('it should work with a list', () => {
-        const esQuery = getQueryFilter(
-          'host.name: linux',
-          'kuery',
-          [],
-          ['auditbeat-*'],
-          [getExceptionListItemSchemaMock()]
-        );
+        const esQuery = getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [getExceptionListItemSchemaMock()],
+        });
         expect(esQuery).toEqual({
           bool: {
             filter: [
@@ -560,13 +572,13 @@ describe('get_filter', () => {
     });
 
     test('it should work with a list with multiple items', () => {
-      const esQuery = getQueryFilter(
-        'host.name: linux',
-        'kuery',
-        [],
-        ['auditbeat-*'],
-        [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()]
-      );
+      const esQuery = getQueryFilter({
+        query: 'host.name: linux',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
+      });
       expect(esQuery).toEqual({
         bool: {
           filter: [
@@ -659,13 +671,13 @@ describe('get_filter', () => {
     });
 
     test('it should work with an exception list that includes a nested typ', () => {
-      const esQuery = getQueryFilter(
-        'host.name: linux',
-        'kuery',
-        [],
-        ['auditbeat-*'],
-        [getExceptionListItemSchemaMock()]
-      );
+      const esQuery = getQueryFilter({
+        query: 'host.name: linux',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [getExceptionListItemSchemaMock()],
+      });
 
       expect(esQuery).toEqual({
         bool: {
@@ -715,7 +727,13 @@ describe('get_filter', () => {
     });
 
     test('it should work with an empty list', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
+      const esQuery = getQueryFilter({
+        query: 'host.name: linux',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [],
+      });
       expect(esQuery).toEqual({
         bool: {
           filter: [
@@ -729,7 +747,13 @@ describe('get_filter', () => {
     });
 
     test('it should work when lists has value undefined', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
+      const esQuery = getQueryFilter({
+        query: 'host.name: linux',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [],
+      });
       expect(esQuery).toEqual({
         bool: {
           filter: [
@@ -744,14 +768,14 @@ describe('get_filter', () => {
 
     describe('when "excludeExceptions" is false', () => {
       test('it should work with a list', () => {
-        const esQuery = getQueryFilter(
-          'host.name: linux',
-          'kuery',
-          [],
-          ['auditbeat-*'],
-          [getExceptionListItemSchemaMock()],
-          false
-        );
+        const esQuery = getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [getExceptionListItemSchemaMock()],
+          excludeExceptions: false,
+        });
         expect(esQuery).toEqual({
           bool: {
             filter: [
@@ -807,14 +831,14 @@ describe('get_filter', () => {
       });
 
       test('it should work with a list with multiple items', () => {
-        const esQuery = getQueryFilter(
-          'host.name: linux',
-          'kuery',
-          [],
-          ['auditbeat-*'],
-          [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
-          false
-        );
+        const esQuery = getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
+          excludeExceptions: false,
+        });
         expect(esQuery).toEqual({
           bool: {
             filter: [
@@ -906,7 +930,14 @@ describe('get_filter', () => {
       });
 
       test('it should work with an empty list', () => {
-        const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], [], false);
+        const esQuery = getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [],
+          excludeExceptions: false,
+        });
         expect(esQuery).toEqual({
           bool: {
             filter: [
@@ -921,13 +952,13 @@ describe('get_filter', () => {
     });
 
     test('it should work with a nested object queries', () => {
-      const esQuery = getQueryFilter(
-        'category:{ name:Frank and trusted:true }',
-        'kuery',
-        [],
-        ['auditbeat-*'],
-        []
-      );
+      const esQuery = getQueryFilter({
+        query: 'category:{ name:Frank and trusted:true }',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [],
+      });
       expect(esQuery).toEqual({
         bool: {
           must: [],
@@ -976,13 +1007,14 @@ describe('get_filter', () => {
     });
 
     test('it works with references and does not add indexes', () => {
-      const esQuery = getQueryFilter(
-        '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',
-        'kuery',
-        [],
-        ['my custom index'],
-        []
-      );
+      const esQuery = getQueryFilter({
+        query:
+          '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',
+        language: 'kuery',
+        filters: [],
+        index: ['my custom index'],
+        lists: [],
+      });
       expect(esQuery).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
