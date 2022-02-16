@@ -221,7 +221,9 @@ describe('PartitionVisComponent', function () {
     } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
     const component = mount(<PartitionVisComponent {...newProps} />);
-    expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual('No results found');
+    expect(findTestSubject(component, 'partitionVisEmptyValues').text()).toEqual(
+      'No results found'
+    );
   });
 
   it('renders the no results component if there are negative values', () => {
@@ -250,8 +252,8 @@ describe('PartitionVisComponent', function () {
     } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
     const component = mount(<PartitionVisComponent {...newProps} />);
-    expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual(
-      "Pie/donut charts can't render with negative values."
+    expect(findTestSubject(component, 'partitionVisNegativeValues').text()).toEqual(
+      "Pie chart can't render with negative values."
     );
   });
 });

@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { ValueClickContext } from '../../../embeddable/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { ExpressionsPublicPlugin, ExpressionsServiceStart } from '../../../expressions/public';
 
@@ -18,4 +19,9 @@ export interface SetupDeps {
 
 export interface StartDeps {
   expression: ExpressionsServiceStart;
+}
+
+export interface FilterEvent {
+  name: 'filter';
+  data: ValueClickContext['data'];
 }
