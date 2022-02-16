@@ -114,8 +114,8 @@ export class UpdateSourceEditor extends Component<Props, State> {
       : (metric: EuiComboBoxOptionOption<AGG_TYPE>) => {
           // terms aggregation is not supported with Elasticsearch _mvt endpoint
           // The goal is to remove GeoJSON ESGeoGridSource implemenation and only have MVT ESGeoGridSource implemenation
-          // First step is to deprecate terms aggregation for ESGeoGridSource source
-          // and prevent new uses of terms aggregation for ESGeoGridSource source 
+          // First step is to deprecate terms aggregation for ESGeoGridSource
+          // and prevent new uses of terms aggregation for ESGeoGridSource
           return metric.value !== AGG_TYPE.TERMS;
         };
   }
