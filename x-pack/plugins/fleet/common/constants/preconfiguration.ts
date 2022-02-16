@@ -30,7 +30,7 @@ export const AUTO_UPGRADE_POLICIES_PACKAGES = autoUpgradePoliciesPackages.map((n
   version: PRECONFIGURATION_LATEST_KEYWORD,
 }));
 
-export const DEFAULT_PACKAGES = [
+export const FLEET_PACKAGES = [
   FLEET_SYSTEM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SERVER_PACKAGE,
@@ -41,7 +41,7 @@ export const DEFAULT_PACKAGES = [
 
 // Controls whether the `Keep Policies up to date` setting is exposed to the user
 export const KEEP_POLICIES_UP_TO_DATE_PACKAGES = uniqBy(
-  [...AUTO_UPGRADE_POLICIES_PACKAGES, ...DEFAULT_PACKAGES, ...AUTO_UPDATE_PACKAGES],
+  [...AUTO_UPGRADE_POLICIES_PACKAGES, ...FLEET_PACKAGES, ...AUTO_UPDATE_PACKAGES],
   ({ name }) => name
 );
 
