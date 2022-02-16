@@ -145,7 +145,7 @@ export const ActionBar = ({
   }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);
 
   return isSuccessful ? (
-    <Redirect to={MONITOR_MANAGEMENT_ROUTE} />
+    <Redirect to={MONITOR_MANAGEMENT_ROUTE + '/all'} />
   ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
