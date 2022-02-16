@@ -15,7 +15,7 @@ import {
   getImportExceptionsListItemSchemaDecodedMock,
   getImportExceptionsListItemSchemaMock,
 } from './index.mock';
-import { getCommentsArrayMock, getCommentsWithMetaMock } from '../../common/comment/index.mock';
+import { getCommentsArrayMock } from '../../common/comment/index.mock';
 
 describe('import_list_item_schema', () => {
   test('it should validate a typical item request', () => {

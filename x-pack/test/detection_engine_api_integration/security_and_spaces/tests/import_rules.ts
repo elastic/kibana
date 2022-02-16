@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
 
-  describe('import_rules', () => {
+  describe.only('import_rules', () => {
     describe('importing rules with an index', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
@@ -1011,9 +1011,9 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             {
               comment: 'I decided to add a new comment',
-              created_at: `${exceptionItemBody.comments[2].created_at}`,
+              created_at: `${exceptionItemBody.comments[1].created_at}`,
               created_by: 'elastic',
-              id: `${exceptionItemBody.comments[2].id}`,
+              id: `${exceptionItemBody.comments[1].id}`,
             },
           ]);
 
