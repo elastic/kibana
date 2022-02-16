@@ -32,7 +32,7 @@ const getLowDiskWatermarkSetting = (clusterSettings: ClusterGetSettingsResponse)
   const persistentLowDiskWatermarkSetting =
     persistent && persistent['cluster.routing.allocation.disk.watermark.low'];
 
-  // Settings are applied in the following order of precendence: transient, persistent, default
+  // ES applies cluster settings in the following order of precendence: transient, persistent, default
   if (transientLowDiskWatermarkSetting) {
     return transientLowDiskWatermarkSetting;
   } else if (persistentLowDiskWatermarkSetting) {
@@ -41,6 +41,7 @@ const getLowDiskWatermarkSetting = (clusterSettings: ClusterGetSettingsResponse)
     return defaultLowDiskWatermarkSetting;
   }
 
+  // May be undefined if defined in elasticsearch.yml
   return undefined;
 };
 

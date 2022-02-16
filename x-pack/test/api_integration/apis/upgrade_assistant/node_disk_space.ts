@@ -55,6 +55,9 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
+        // It's tricky to assert the correct node values on CI
+        // For now, this serves as a smoke test and verifies an array is returned
+        // There are jest unit tests that test additional logic
         expect(Array.isArray(apiRequestResponse)).be(true);
       });
     });

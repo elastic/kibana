@@ -259,7 +259,9 @@ describe('Reindex deprecation flyout', () => {
 
       expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
       expect(find('impactedNodeListItem').length).toEqual(1);
-      expect(find('impactedNodeListItem').at(0).text()).toContain('MacBook-Pro.local: 74% used');
+      expect(find('impactedNodeListItem').at(0).text()).toContain(
+        'MacBook-Pro.local: 74% used (20% allocated)'
+      );
     });
   });
 });
