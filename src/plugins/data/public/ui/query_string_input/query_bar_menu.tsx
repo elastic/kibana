@@ -26,7 +26,6 @@ import { fromUser } from '../../query';
 import { TimeRange, SavedQueryService, SavedQuery } from '../..';
 import { KibanaReactContextValue } from '../../../../kibana_react/public';
 import { QueryLanguageSwitcher } from '../query_string_input/language_switcher';
-import { LoadSavedFilterSetModal } from './load_saved_filter_set_modal';
 
 interface Props {
   language: string;
@@ -66,7 +65,6 @@ export function QueryBarMenu({
   filters,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
-  const [isLoadFilterSetModalOpen, setIsLoadFilterSetModalOpen] = useState(false);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection } = kibana.services;
@@ -187,6 +185,12 @@ export function QueryBarMenu({
       title: savedQueries.length ? 'Recently used' : undefined,
       items: [
         {
+          name: i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
+            defaultMessage: 'Load filter set...',
+          }),
+          panel: 4,
+        },
+        {
           name: i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
             defaultMessage: 'Save current filter set',
           }),
@@ -275,20 +279,17 @@ export function QueryBarMenu({
         />
       ),
     },
+    {
+      id: 4,
+      title: i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
+        defaultMessage: 'Load filter set...',
+      }),
+      content: <div style={{ padding: 8 }}>{manageFilterSetComponent}</div>,
+    },
   ] as EuiContextMenuPanelDescriptor[];
 
   if (savedQueries.length) {
-    panels[0].items?.unshift(
-      ...recentSavedQueriesPanels,
-      {
-        name: 'Load filter set...',
-        onClick: () => {
-          closePopover();
-          setIsLoadFilterSetModalOpen(true);
-        },
-      },
-      { isSeparator: true }
-    );
+    panels[0].items?.unshift(...recentSavedQueriesPanels, { isSeparator: true });
   }
 
   const buttonLabel = i18n.translate('data.filter.options.filterSetButtonLabel', {
@@ -320,13 +321,6 @@ export function QueryBarMenu({
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
-      {isLoadFilterSetModalOpen && (
-        <LoadSavedFilterSetModal
-          onCancel={() => setIsLoadFilterSetModalOpen(false)}
-          savedQueryManagement={manageFilterSetComponent}
-          applySavedQueries={() => {}}
-        />
-      )}
     </>
   );
 }

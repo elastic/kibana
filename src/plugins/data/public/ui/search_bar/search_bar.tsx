@@ -25,7 +25,7 @@ import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
-import { SavedFilterSetListing } from '../saved_query_management';
+import { SavedQueryManagementList } from '../saved_query_management';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -475,7 +475,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {queryBar}
         {filterBar}
 
-        {this.state.showSaveQueryModal ? (
+        {/* {this.state.showSaveQueryModal ? (
           <SaveQueryForm
             savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}
             savedQueryService={this.savedQueryService}
@@ -493,8 +493,33 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             showFilterOption={this.props.showFilterBar}
             showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
           />
-        ) : null}
+        ) : null} */}
       </div>
+    );
+  }
+
+  private renderSaveQueryForm() {
+    return (
+      <SaveQueryForm
+        savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}
+        savedQueryService={this.savedQueryService}
+        onSave={this.onSave}
+        onClose={() => this.setState({ showSaveQueryModal: false })}
+        showFilterOption={this.props.showFilterBar}
+        showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
+      />
+    );
+  }
+
+  private renderSaveQueryFormAsNew() {
+    return (
+      <SaveQueryForm
+        savedQueryService={this.savedQueryService}
+        onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
+        onClose={() => this.setState({ showSaveNewQueryModal: false })}
+        showFilterOption={this.props.showFilterBar}
+        showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
+      />
     );
   }
 
@@ -505,7 +530,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       savedQuery: SearchBarOwnProps['savedQuery']
     ) => {
       const savedQueryManagement = onClearSavedQuery && (
-        <SavedFilterSetListing
+        <SavedQueryManagementList
           showSaveQuery={showSaveQuery}
           loadedSavedQuery={savedQuery}
           onSave={this.onInitiateSave}
@@ -513,6 +538,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           onLoad={this.onLoadSavedQuery}
           savedQueryService={this.savedQueryService}
           onClearSavedQuery={onClearSavedQuery}
+          onClose={() => this.setState({ openQueryBarMenu: false })}
+          saveFormComponent={this.renderSaveQueryForm()}
+          saveAsNewFormComponent={this.renderSaveQueryFormAsNew()}
         />
       );
 
