@@ -8,8 +8,9 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiButtonIcon } from '@elastic/eui';
+import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
@@ -164,6 +165,7 @@ export function WorkspacePanelWrapper({
                     justifyContent="flexEnd"
                     gutterSize="s"
                     responsive={false}
+                    // ref={resizeRef as Ref<HTMLDivElement | HTMLSpanElement>}
                   >
                     <EuiFlexItem grow={false}>
                       <EuiSwitch
@@ -172,22 +174,25 @@ export function WorkspacePanelWrapper({
                         })}
                         checked={autoApplyEnabled}
                         onChange={toggleAutoApply}
-                        data-test-subj="lensToggleAutoApply"
                         className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        disabled={autoApplyEnabled || changesApplied}
-                        display="fill"
-                        className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-                        iconType="play"
-                        onClick={() => dispatchLens(applyChanges())}
-                        data-test-subj="lensApplyChanges"
-                        aria-label={i18n.translate('xpack.lens.editorFrame.applyChangesLabel', {
-                          defaultMessage: 'Apply',
-                        })}
-                      />
+                      <div>
+                        <EuiButton
+                          disabled={autoApplyEnabled || changesApplied}
+                          fill
+                          className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+                          iconType="play"
+                          onClick={() => dispatchLens(applyChanges())}
+                          size="s"
+                        >
+                          <FormattedMessage
+                            id="xpack.lens.editorFrame.applyChangesLabel"
+                            defaultMessage="Apply"
+                          />
+                        </EuiButton>
+                      </div>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
