@@ -11,7 +11,7 @@ import get from 'lodash/get';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace ExtendedHandlebars {
-  export function compileAst(template: string): (context: any) => string;
+  export function compileAST(template: string): (context: any) => string;
   export function create(): typeof Handlebars; // eslint-disable-line @typescript-eslint/no-shadow
 }
 
@@ -24,17 +24,17 @@ const Handlebars: typeof ExtendedHandlebars & typeof OriginalHandlebars = Origin
 export default Handlebars; // eslint-disable-line import/no-default-export
 export type { HelperDelegate, HelperOptions } from 'handlebars';
 
-// When creating new Handlebars environments, ensure the custom compileAst function is present in the new environment as well
+// When creating new Handlebars environments, ensure the custom compileAST function is present in the new environment as well
 export function create(): typeof Handlebars {
   const SandboxedHandlebars = originalCreate.call(Handlebars) as typeof Handlebars;
-  SandboxedHandlebars.compileAst = Handlebars.compileAst;
+  SandboxedHandlebars.compileAST = Handlebars.compileAST;
   return SandboxedHandlebars;
 }
 
 Handlebars.create = create;
 
 // Custom function to compile only the AST so we don't have to use `eval`
-Handlebars.compileAst = function (template: string) {
+Handlebars.compileAST = function (template: string) {
   const visitor = new ElasticHandlebarsVisitor(template, this.helpers);
   return (context: any) => visitor.render(context);
 };

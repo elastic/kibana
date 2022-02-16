@@ -16,7 +16,7 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
   const fieldFormats = getFieldFormats();
 
   if (!template) template = '{{value}}';
-  const render = handlebars.compileAst(template);
+  const render = handlebars.compileAST(template);
   let formatter;
 
   if (isDuration(format)) {
