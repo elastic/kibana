@@ -57,6 +57,14 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
           continue;
         }
         const currentMetric = metrics[layerMetricIdx];
+        // We can only support top_hit with size 1
+        if (
+          currentMetric.type === 'top_hit' &&
+          currentMetric?.size &&
+          Number(currentMetric?.size) !== 1
+        ) {
+          return null;
+        }
 
         // should treat percentiles differently
         if (currentMetric.type === 'percentile') {
