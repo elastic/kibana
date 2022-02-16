@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CreateCaseFlyoutProps } from './create_case_flyout';
 
 export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
   const context = useCasesContext();
-  const closeFlyout = () => {
+
+  const closeFlyout = useCallback(() => {
     context.dispatch({
       type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
     });
-  };
-  const openFlyout = () => {
+  }, [context]);
+
+  const openFlyout = useCallback(() => {
     context.dispatch({
       type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
       payload: {
@@ -35,7 +38,7 @@ export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
         },
       },
     });
-  };
+  }, [closeFlyout, context, props]);
   return {
     open: openFlyout,
     close: closeFlyout,
