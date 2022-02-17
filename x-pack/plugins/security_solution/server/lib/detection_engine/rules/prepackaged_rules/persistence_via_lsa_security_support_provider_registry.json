@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Installation of Security Support Provider",
-  "query": "registry where\n   registry.path : (\"HKLM\\\\SYSTEM\\\\CurrentControlSet\\\\Control\\\\Lsa\\\\Security Packages*\", \n                    \"HKLM\\\\SYSTEM\\\\CurrentControlSet\\\\Control\\\\Lsa\\\\OSConfig\\\\Security Packages*\") and\n   not process.executable : (\"C:\\\\Windows\\\\System32\\\\msiexec.exe\", \"C:\\\\Windows\\\\SysWOW64\\\\msiexec.exe\")\n",
+  "query": "registry where\n   registry.path : (\"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Lsa\\\\Security Packages*\", \n                    \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Lsa\\\\OSConfig\\\\Security Packages*\") and\n   not process.executable : (\"C:\\\\Windows\\\\System32\\\\msiexec.exe\", \"C:\\\\Windows\\\\SysWOW64\\\\msiexec.exe\")\n",
   "risk_score": 47,
   "rule_id": "e86da94d-e54b-4fb5-b96c-cecff87e8787",
   "severity": "medium",
@@ -49,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }
