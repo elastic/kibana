@@ -104,7 +104,7 @@ const ComplianceTrendChart = () => (
     <AreaSeries
       id="compliance_score"
       // TODO: no api yet
-      data={INTERNAL_FEATURE_FLAGS.trendLineMock ? mockData : []}
+      data={INTERNAL_FEATURE_FLAGS.showTrendLineMock ? mockData : []}
       xScaleType="time"
       xAccessor={0}
       yAccessors={[1]}

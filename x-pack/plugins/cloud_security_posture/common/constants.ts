@@ -20,11 +20,11 @@ export const RULE_FAILED = `failed`;
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
-  benchmarks: false,
-  trendLineMock: false,
-  clusterMetaMock: false,
-  manageRulesMock: false,
-  risksMock: false,
+  showBenchmarks: false,
+  showTrendLineMock: false,
+  showClusterMetaMock: false,
+  showManageRulesMock: false,
+  showRisksMock: false,
 } as const;
 
 /** This Kibana Advanced Setting enables the `Cloud Security Posture` experimental feature */

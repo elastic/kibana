@@ -15,6 +15,6 @@ export const allNavigationItems: Record<CspPage, CspNavigationItem> = {
   benchmarks: {
     name: TEXT.MY_BENCHMARKS,
     path: '/benchmarks',
-    disabled: !INTERNAL_FEATURE_FLAGS.benchmarks,
+    disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
   },
 };

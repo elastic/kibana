@@ -137,7 +137,7 @@ export const RisksTable = ({ data: resourcesTypes }: RisksTableProps) => {
         <EuiBasicTable<ResourceType>
           rowHeader="name"
           items={
-            INTERNAL_FEATURE_FLAGS.risksMock ? getTop5Risks(mockData) : getTop5Risks(resourcesTypes)
+            INTERNAL_FEATURE_FLAGS.showRisksMock ? getTop5Risks(mockData) : getTop5Risks(resourcesTypes)
           }
           columns={columns}
         />

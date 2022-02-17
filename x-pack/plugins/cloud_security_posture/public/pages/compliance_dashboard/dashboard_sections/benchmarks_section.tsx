@@ -88,7 +88,7 @@ export const BenchmarksSection = () => {
                       <EuiText style={{ textAlign: 'center' }}>
                         <h4>{`Cluster ID ${shortId || mockClusterId}`}</h4>
                       </EuiText>
-                      {INTERNAL_FEATURE_FLAGS.clusterMetaMock && (
+                      {INTERNAL_FEATURE_FLAGS.showClusterMetaMock && (
                         <EuiText size="xs" color="subdued" style={{ textAlign: 'center' }}>
                           <EuiIcon type="clock" />
                           {' Updated 7 second ago'}
@@ -99,7 +99,7 @@ export const BenchmarksSection = () => {
                       <EuiIcon type={getBenchmarkLogo(cluster.meta.benchmarkName)} size="xxl" />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      {INTERNAL_FEATURE_FLAGS.manageRulesMock && (
+                      {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
                         <EuiButtonEmpty>{'Manage Rules'}</EuiButtonEmpty>
                       )}
                     </EuiFlexItem>
