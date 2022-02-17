@@ -25,7 +25,14 @@ import {
   OnRefreshProps,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
+import {
+  IDataPluginServices,
+  IIndexPattern,
+  TimeRange,
+  TimeHistoryContract,
+  Query,
+  SavedQueryService,
+} from '../..';
 import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
 import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
@@ -85,6 +92,7 @@ export interface QueryBarTopRowProps {
   isAddFilterModalOpen?: boolean;
   addFilterMode?: string;
   onNewFiltersSave: (savedQueryMeta: SavedQueryMeta) => void;
+  savedQueryService: SavedQueryService;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -400,8 +408,8 @@ export const QueryBarTopRow = React.memo(
         // groupId starts from 1; id starts from 0
 
         if (lastFilter !== undefined) {
-        //   groupId += lastFilter.groupId;
-        //   id += lastFilter.id + 1;
+          //   groupId += lastFilter.groupId;
+          //   id += lastFilter.id + 1;
         }
 
         return {
@@ -459,6 +467,7 @@ export const QueryBarTopRow = React.memo(
               savedQueryManagement={props.savedQueryManagement}
               initialAddFilterMode={props.addFilterMode}
               saveFilters={props.onNewFiltersSave}
+              savedQueryService={props.savedQueryService}
             />
           )}
         </EuiFlexItem>

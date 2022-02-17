@@ -28,6 +28,23 @@
   }
 }
 
+.kbnQueryBar__dataViewInput {
+  & .euiFormRow__labelWrapper {
+    width: fit-content;
+    color: $euiTitleColor;
+    background-color: $euiFormInputGroupLabelBackground;
+    margin-right: 0;
+    padding: 0 7px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
+
+  & .euiComboBox__inputWrap {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
 .kbnQueryBar__filterModalWrapper {
   @media only screen and (min-width: map-get($euiBreakpoints, 'm')) {
     & {
@@ -89,6 +106,7 @@
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
+
   &.kbnQueryBar__textarea--hasAppend {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
@@ -113,6 +131,7 @@
   }
 
   @include euiFormControlWithIcon($isIconOptional: true);
+
   ~ .euiFormControlLayoutIcons {
     // By default form control layout icon is vertically centered, but our textarea
     // can expand to be multi-line, so we position it with padding that matches

@@ -109,16 +109,30 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
     const multipleFilters = [...props.multipleFilters];
 
-    const newMultipleFilters = multipleFilters.filter(
-      (filter) => filter.groupId !== Number(groupId)
+    const indexOfCurFilter = multipleFilters.findIndex(
+      (f) => Number(f.groupId) === Number(groupId)
     );
+    multipleFilters.splice(indexOfCurFilter, 1, ...mergedFilters);
 
-    const filtersNew = newMultipleFilters.concat(mergedFilters);
+    // when user adds new filters in edit modal they should appear near of editing filter
+    let gId: number = 0;
+    let reserveGroupId: number;
+    const updatedMultipleFilters = multipleFilters.map((filter, idx) => {
+      if (filter.groupId !== reserveGroupId) {
+        reserveGroupId = filter.groupId;
+        gId++;
+      }
+      return {
+        ...filter,
+        groupId: gId,
+        id: idx,
+      };
+    });
 
     const filters = [...props.filters, ...buildFilters];
     props?.onFiltersUpdated?.(filters);
 
-    props?.onMultipleFiltersUpdated?.(filtersNew);
+    props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
 
     props.toggleEditFilterModal?.(false);
   }
@@ -187,7 +201,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     labels.map((label) => {
       // we should have same groupIds on our labeled filters group
       gId = (groupedByAlias[label][0] as any).groupId;
-      groupedByAlias[label].forEach((filter) => ((filter as any).groupId = groupId));
+      groupedByAlias[label].forEach((filter) => ((filter as any).groupId = gId));
       const labelBadge = (
         <FilterExpressionItem
           groupId={gId}
@@ -231,6 +245,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             initialAddFilterMode={undefined}
             saveFilters={props.onFilterSave}
+            savedQueryService={props.savedQueryService}
           />
         )}
       </EuiFlexItem>
