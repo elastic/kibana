@@ -262,11 +262,16 @@ export const performBulkActionRoute = (
                 if (!rule.enabled) {
                   throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
                   await rulesClient.enable({ id: rule.id });
-                  try {
-                    await maybeRemoveAutoDisabledRuleTag(rulesClient, rule.id, rule);
-                  } catch (e) {
-                    console.log(JSON.stringify(e));
-                  }
+                  const { name, tags, schedule, actions, params, throttle, notifyWhen } = rule;
+                  await maybeRemoveAutoDisabledRuleTag(rulesClient, rule.id, {
+                    name,
+                    tags,
+                    schedule,
+                    actions,
+                    params,
+                    throttle,
+                    notifyWhen,
+                  });
                 }
 
                 return {
@@ -385,8 +390,6 @@ export const performBulkActionRoute = (
           throw new AbortError('Bulk action was aborted');
         }
 
-        console.log(JSON.stringify(fetchRulesOutcome));
-        console.log(JSON.stringify(bulkActionOutcome));
         return buildBulkResponse(response, fetchRulesOutcome, bulkActionOutcome);
       } catch (err) {
         const error = transformError(err);

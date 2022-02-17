@@ -411,10 +411,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const { body } = await postBulkAction()
-        .send({ query: '*', action: BulkAction.enable })
+        .send({ query: '', action: BulkAction.enable })
         .expect(200);
 
-      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 2, total: 1 });
+      expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 2, total: 2 });
 
       // Check that the updated rule is returned with the response
       expect(body.attributes.results.updated[0].enabled).to.eql(true);
@@ -429,7 +429,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(ruleBody2.tags).to.eql(['tag1', 'tag2']);
     });
 
-    it('should preserve tags and version if auto_disabled_8.0 tag is not present after enabling rule', async () => {
+    it('should preserve tags if auto_disabled_8.0 tag is not present after enabling rule', async () => {
       await createRule(supertest, log, {
         ...getSimpleRule('rule-1'),
         enabled: false,
@@ -461,7 +461,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(ruleBody2.tags).to.eql(['tag1', 'tag2']);
     });
 
-    it('should not modify tags or version when disabling rule', async () => {
+    it('should not modify tags when disabling rule', async () => {
       await createRule(supertest, log, {
         ...getSimpleRule('rule-1'),
         enabled: true,

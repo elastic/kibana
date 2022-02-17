@@ -68,7 +68,6 @@ import { FullResponseSchema } from '../../../../common/detection_engine/schemas/
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
-import { patchRules } from './patch_rules';
 import { LegacyMigrateParams } from './types';
 
 export const calculateInterval = (
@@ -375,12 +374,6 @@ export const maybeRemoveAutoDisabledRuleTag = async (
   rule: InternalRuleUpdate
 ) => {
   if (rule.tags.includes('auto_disabled_8.0')) {
-    return patchRules({
-      rulesClient,
-      rule,
-      tags: rule.tags.filter((tag) => tag !== 'auto_disabled_8.0'),
-    });
-    /*
     return rulesClient.update({
       id: ruleId,
       data: {
@@ -392,6 +385,5 @@ export const maybeRemoveAutoDisabledRuleTag = async (
         tags: rule.tags.filter((tag) => tag !== 'auto_disabled_8.0'),
       },
     });
-    */
   }
 };
