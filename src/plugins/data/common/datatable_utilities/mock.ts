@@ -12,6 +12,7 @@ export function createDatatableUtilitiesMock(): jest.Mocked<DatatableUtilitiesSe
   return {
     getAggConfig: jest.fn(),
     getDataView: jest.fn(),
+    getField: jest.fn(),
     isFilterable: jest.fn(),
   } as unknown as jest.Mocked<DatatableUtilitiesService>;
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewsContract } from 'src/plugins/data_views/common';
+import type { DataView, DataViewsContract, DataViewField } from 'src/plugins/data_views/common';
 import type { DatatableColumn } from 'src/plugins/expressions/common';
 import type { AggsCommonStart, AggConfig, CreateAggConfigParams, IAggType } from '../search';
 
@@ -14,6 +14,7 @@ export class DatatableUtilitiesService {
   constructor(private aggs: AggsCommonStart, private dataViews: DataViewsContract) {
     this.getAggConfig = this.getAggConfig.bind(this);
     this.getDataView = this.getDataView.bind(this);
+    this.getField = this.getField.bind(this);
     this.isFilterable = this.isFilterable.bind(this);
   }
 
@@ -38,6 +39,19 @@ export class DatatableUtilitiesService {
     }
 
     return this.dataViews.get(column.meta.index);
+  }
+
+  async getField(column: DatatableColumn): Promise<DataViewField | undefined> {
+    if (!column.meta.field) {
+      return;
+    }
+
+    const dataView = await this.getDataView(column);
+    if (!dataView) {
+      return;
+    }
+
+    return dataView.getFieldByName(column.meta.field);
   }
 
   isFilterable(column: DatatableColumn): boolean {

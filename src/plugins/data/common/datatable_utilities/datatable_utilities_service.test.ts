@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createStubDataView } from 'src/plugins/data_views/common/mocks';
 import type { DataViewsContract } from 'src/plugins/data_views/common';
 import type { DatatableColumn } from 'src/plugins/expressions/common';
 import type { AggsCommonStart } from '../search';
@@ -43,6 +44,25 @@ describe('DatatableUtilitiesService', () => {
 
       await expect(datatableUtilitiesService.getDataView(column)).resolves.toBeUndefined();
       expect(dataViews.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getField', () => {
+    it('should return a data view field instance', async () => {
+      const column = { meta: { field: 'field', index: 'index' } } as DatatableColumn;
+      const dataView = createStubDataView({ spec: {} });
+      const field = {};
+      spyOn(datatableUtilitiesService, 'getDataView').and.returnValue(dataView);
+      spyOn(dataView, 'getFieldByName').and.returnValue(field);
+
+      await expect(datatableUtilitiesService.getField(column)).resolves.toBe(field);
+      expect(dataView.getFieldByName).toHaveBeenCalledWith('field');
+    });
+
+    it('should return undefined when there is no field metadata', async () => {
+      const column = { meta: {} } as DatatableColumn;
+
+      await expect(datatableUtilitiesService.getField(column)).resolves.toBeUndefined();
     });
   });
 });
