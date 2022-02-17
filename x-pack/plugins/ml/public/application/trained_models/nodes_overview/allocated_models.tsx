@@ -164,7 +164,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
         'data-test-subj': `mlAllocatedModelTableRow row-${item.model_id}`,
       })}
       onTableChange={() => {}}
-      data-test-subj={'mlNodesTable'}
+      data-test-subj={'mlNodesAllocatedModels'}
     />
   );
 };

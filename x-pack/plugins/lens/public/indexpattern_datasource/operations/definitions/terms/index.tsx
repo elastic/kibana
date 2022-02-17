@@ -18,6 +18,7 @@ import {
   htmlIdGenerator,
   EuiButtonGroup,
 } from '@elastic/eui';
+import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
@@ -38,6 +39,13 @@ import {
   getMultiTermsScriptedFieldErrorMessage,
   isSortableByColumn,
 } from './helpers';
+
+export function supportsRarityRanking(field?: IndexPatternField) {
+  // these es field types can't be sorted by rarity
+  return !field?.esTypes?.some((esType) =>
+    ['double', 'float', 'half_float', 'scaled_float'].includes(esType)
+  );
+}
 
 export type { TermsIndexPatternColumn } from './types';
 
@@ -79,6 +87,11 @@ function isScriptedField(fieldName: string | IndexPatternField, indexPattern?: I
     return field && field.scripted;
   }
   return fieldName.scripted;
+}
+
+// It is not always possible to know if there's a numeric field, so just ignore it for now
+function getParentFormatter(params: Partial<TermsIndexPatternColumn['params']>) {
+  return { id: params.secondaryFields?.length ? 'multi_terms' : 'terms' };
 }
 
 const idPrefix = htmlIdGenerator()();
@@ -124,12 +137,24 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if (field && !isScriptedField(field)) {
       secondaryFields.add(field.name);
     }
-    return {
-      secondaryFields: [...secondaryFields].filter((f) => targetColumn.sourceField !== f),
+    // remove the sourceField
+    secondaryFields.delete(targetColumn.sourceField);
+
+    const secondaryFieldsList: string[] = [...secondaryFields];
+    const ret: Partial<TermsIndexPatternColumn['params']> = {
+      secondaryFields: secondaryFieldsList,
+      parentFormat: getParentFormatter({
+        ...targetColumn.params,
+        secondaryFields: secondaryFieldsList,
+      }),
     };
+    return ret;
   },
   canAddNewField: ({ targetColumn, sourceColumn, field, indexPattern }) => {
-    // first step: collect the fields from the targetColumn
+    if (targetColumn.params.orderBy.type === 'rare') {
+      return false;
+    }
+    // collect the fields from the targetColumn
     const originalTerms = new Set([
       targetColumn.sourceField,
       ...(targetColumn.params?.secondaryFields ?? []),
@@ -222,6 +247,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
         missingBucket: false,
+        parentFormat: { id: 'terms' },
       },
     };
   },
@@ -289,6 +315,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
     }
+    newParams.parentFormat = getParentFormatter(newParams);
+    if (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') {
+      newParams.orderBy = { type: 'alphabetical' };
+    }
     return {
       ...oldColumn,
       dataType: field.type as DataType,
@@ -348,23 +378,41 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       updateLayer,
     } = props;
     const onFieldSelectChange = useCallback(
-      (fields) => {
+      (fields: string[]) => {
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
+        const secondaryFields = fields.length > 1 ? fields.slice(1) : undefined;
+        const dataTypes = uniq(fields.map((field) => indexPattern.getFieldByName(field)?.type));
+        const newDataType = (dataTypes.length === 1 ? dataTypes[0] : 'string') || column.dataType;
+        const newParams = {
+          ...column.params,
+        };
+        if ('format' in newParams && newDataType !== 'number') {
+          delete newParams.format;
+        }
+        const mainField = indexPattern.getFieldByName(fields[0]);
+        if (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') {
+          newParams.orderBy = { type: 'alphabetical' };
+        }
         updateLayer({
           ...layer,
           columns: {
             ...layer.columns,
             [columnId]: {
               ...column,
+              dataType: newDataType,
               sourceField: fields[0],
               label: ofName(
                 indexPattern.getFieldByName(fields[0])?.displayName,
                 fields.length - 1,
-                column.params.orderBy.type === 'rare'
+                newParams.orderBy.type === 'rare'
               ),
               params: {
-                ...column.params,
-                secondaryFields: fields.length > 1 ? fields.slice(1) : undefined,
+                ...newParams,
+                secondaryFields,
+                parentFormat: getParentFormatter({
+                  ...newParams,
+                  secondaryFields,
+                }),
               },
             },
           } as Record<string, TermsIndexPatternColumn>,
@@ -463,7 +511,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         defaultMessage: 'Alphabetical',
       }),
     });
-    if (!currentColumn.params.secondaryFields?.length) {
+    if (
+      !currentColumn.params.secondaryFields?.length &&
+      supportsRarityRanking(indexPattern.getFieldByName(currentColumn.sourceField))
+    ) {
       orderOptions.push({
         value: toValue({ type: 'rare', maxDocCount: DEFAULT_MAX_DOC_COUNT }),
         text: i18n.translate('xpack.lens.indexPattern.terms.orderRare', {

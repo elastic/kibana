@@ -14,7 +14,12 @@ import { Document } from '../persistence';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { DateRange } from '../../common';
 import { LensAppServices } from '../app_plugin/types';
-import { DatasourceMap, VisualizationMap, SharingSavedObjectProps } from '../types';
+import {
+  DatasourceMap,
+  VisualizationMap,
+  SharingSavedObjectProps,
+  VisualizeEditorContext,
+} from '../types';
 export interface VisualizationState {
   activeId: string | null;
   state: unknown;
@@ -60,6 +65,6 @@ export interface LensStoreDeps {
   lensServices: LensAppServices;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  initialContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   embeddableEditorIncomingState?: EmbeddableEditorState;
 }
