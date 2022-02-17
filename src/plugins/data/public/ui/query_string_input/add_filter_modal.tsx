@@ -24,13 +24,11 @@ import {
   EuiTabs,
   EuiTab,
   EuiPanel,
-  EuiSpacer,
   EuiHorizontalRule,
   EuiButtonIcon,
   EuiText,
   EuiIcon,
   EuiFieldText,
-  EuiBadge,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -79,6 +77,7 @@ export interface FilterGroup {
   id: number;
   relationship?: string;
   subGroupId?: number;
+  groupsCount?: number;
 }
 
 export function AddFilterModal({
@@ -96,7 +95,11 @@ export function AddFilterModal({
   savedQueryService,
 }: {
   onSubmit: (filters: Filter[]) => void;
-  onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
+  onMultipleFiltersSubmit: (
+    filters: FilterGroup[],
+    buildFilters: Filter[],
+    groupsCount: number
+  ) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -138,6 +141,7 @@ export function AddFilterModal({
         : 0,
       subGroupId: 1,
       relationship: undefined,
+      groupsCount,
     },
   ]);
 
@@ -178,6 +182,7 @@ export function AddFilterModal({
             ) + 1
           : 0,
         subGroupId: 1,
+        groupsCount,
       },
     ]);
     setGroupsCount(1);
@@ -403,7 +408,6 @@ export function AddFilterModal({
       return; // typescript validation
     }
     const alias = customLabel || null;
-    // validation for existence of saved filter with given alias
     if (alias && isLabelDuplicated()) {
       setSubmitDisabled(true);
       return;
@@ -452,7 +456,7 @@ export function AddFilterModal({
         ) as Filter[];
         // onSubmit(finalFilters);
 
-        onMultipleFiltersSubmit(localFilters, finalFilters);
+        onMultipleFiltersSubmit(localFilters, finalFilters, groupsCount);
         if (alias) {
           saveFilters({
             title: customLabel,
@@ -542,6 +546,7 @@ export function AddFilterModal({
                                           groupId: localfilter.groupId,
                                           id: Number(multipleFilters?.length) + localFilters.length,
                                           subGroupId,
+                                          groupsCount,
                                         },
                                       ]);
                                     }}
@@ -584,6 +589,7 @@ export function AddFilterModal({
                                             ? localFilters[localFilters.length - 1].groupId
                                             : localFilters[localFilters.length - 1].groupId + 1,
                                         subGroupId,
+                                        groupsCount,
                                         id: Number(multipleFilters?.length) + localFilters.length,
                                       },
                                     ]);
@@ -685,7 +691,7 @@ export function AddFilterModal({
   };
 
   return (
-    <EuiModal maxWidth={800} onClose={onCancel} className="kbnQueryBar--addFilterModal">
+    <EuiModal style={{ minWidth: 992 }} maxWidth={992} onClose={onCancel} className="kbnQueryBar--addFilterModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
@@ -726,7 +732,7 @@ export function AddFilterModal({
             <EuiFlexItem>
               <EuiFormRow
                 label={i18n.translate('data.filter.filterEditor.createCustomLabelInputLabel', {
-                  defaultMessage: 'Label (optional)',
+                  defaultMessage: 'Save as (optional)',
                 })}
                 display="columnCompressed"
                 error={i18n.translate('data.search.searchBar.savedQueryForm.titleConflictText', {

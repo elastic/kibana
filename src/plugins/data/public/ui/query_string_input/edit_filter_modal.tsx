@@ -30,8 +30,8 @@ import {
   EuiModalBody,
   EuiTabs,
   EuiTab,
+  EuiPanel,
   EuiForm,
-  EuiSpacer,
   EuiHorizontalRule,
   EuiButtonIcon,
   EuiText,
@@ -81,6 +81,7 @@ export interface FilterGroup {
   id: number;
   relationship?: string;
   subGroupId?: number;
+  groupCount?: number;
 }
 
 export function EditFilterModal({
@@ -99,7 +100,11 @@ export function EditFilterModal({
   savedQueryService,
 }: {
   onSubmit: (filters: Filter[]) => void;
-  onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
+  onMultipleFiltersSubmit: (
+    filters: FilterGroup[],
+    buildFilters: Filter[],
+    groupCount: number
+  ) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -108,7 +113,7 @@ export function EditFilterModal({
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
   initialAddFilterMode?: string;
-  onRemoveFilterGroup: (groupId: string) => void;
+  onRemoveFilterGroup: () => void;
   saveFilters: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   savedQueryService: SavedQueryService;
 }) {
@@ -117,11 +122,11 @@ export function EditFilterModal({
   );
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
-  const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
+  const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(currentEditFilters?.map(filter => cleanFilter(filter)), null, 2));
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(currentEditFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(1);
+  const [groupsCount, setGroupsCount] = useState<number>(currentEditFilters[currentEditFilters?.length - 1].groupCount ?? 0);
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [submitDisabled, setSubmitDisabled] = useState(false);
 
@@ -145,6 +150,7 @@ export function EditFilterModal({
           id: 0,
           subGroupId: 1,
           relationship: undefined,
+          groupsCount
         },
       ];
     }
@@ -158,6 +164,7 @@ export function EditFilterModal({
         id: convertedfilter.id,
         subGroupId: convertedfilter.subGroupId,
         relationship: convertedfilter.relationship,
+        groupsCount: convertedfilter.groupsCount
       };
     });
   }
@@ -437,7 +444,6 @@ export function EditFilterModal({
       return; // typescript validation
     }
     const alias = customLabel || null;
-    // validation for existence of saved filter with given alias
     if (alias && !filter.meta.alias && isLabelDuplicated()) {
       setSubmitDisabled(true);
       return;
@@ -478,8 +484,7 @@ export function EditFilterModal({
         const finalFilters = builtFilters.filter(
           (value) => typeof value !== 'undefined'
         ) as Filter[];
-        // onSubmit(finalFilters);
-        onMultipleFiltersSubmit(localFilters, finalFilters);
+        onMultipleFiltersSubmit(localFilters, finalFilters, groupsCount);
         if (alias) {
           onSubmitWithLabel(finalFilters);
         }
@@ -494,7 +499,7 @@ export function EditFilterModal({
   };
 
   const onDeliteFilter = () => {
-    onRemoveFilterGroup(filter?.groupId);
+    onRemoveFilterGroup();
   };
 
   const renderGroupedFilters = () => {
@@ -509,10 +514,12 @@ export function EditFilterModal({
       }
 
       const temp = (
-        <div
+        <EuiPanel
+          color="subdued"
           className={classNames(
             filtersInGroup > 1 && groupsCount > 1 ? 'kbnQueryBar__filterModalGroups' : ''
           )}
+          paddingSize="s"
         >
           {subGroups.map((subGroup, subGroupIdx) => {
             const classes =
@@ -634,7 +641,7 @@ export function EditFilterModal({
                                       },
                                     ]);
                                     if (filtersOnGroup.length <= 1) {
-                                      setGroupsCount((groupsCount) => groupsCount + 1);
+                                      setGroupsCount(groupsCount + 1);
                                     }
                                   }}
                                   iconType="plus"
@@ -723,7 +730,7 @@ export function EditFilterModal({
               </>
             );
           })}
-        </div>
+        </EuiPanel>
       );
       GroupComponent.push(temp);
     }
@@ -731,7 +738,12 @@ export function EditFilterModal({
   };
 
   return (
-    <EuiModal maxWidth={800} onClose={onCancel} className="kbnQueryBar--addFilterModal">
+    <EuiModal
+      style={{ minWidth: 992 }}
+      maxWidth={992}
+      onClose={onCancel}
+      className="kbnQueryBar--addFilterModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>

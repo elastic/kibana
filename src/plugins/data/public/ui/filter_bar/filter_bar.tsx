@@ -51,7 +51,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
-  const [groupId, setGroupId] = useState<number | null>(null);
+  const [groupIds, setGroupIds] = useState<[] | undefined>(undefined);
   if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
@@ -62,16 +62,18 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     }
   }
 
-  const onEditFilterClick = (gId: number) => {
-    setGroupId(gId);
+  const onEditFilterClick = (groupIds: []) => {
+    setGroupIds(groupIds);
     props.toggleEditFilterModal?.(true);
   };
 
-  const onDeleteFilterGroup = (gId: string) => {
+  const onDeleteFilterGroup = () => {
     const multipleFilters = [...props.multipleFilters];
+
     const updatedMultipleFilters = multipleFilters.filter(
-      (filter) => filter.groupId !== Number(gId)
+      (filter) => !groupIds.includes(filter.groupId)
     );
+
     const filters = [...props.filters];
     const updatedFilters: Filter[] = [];
 
@@ -95,7 +97,11 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     props?.onFiltersUpdated?.(filters);
   }
 
-  function onEditMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+  function onEditMultipleFiltersANDOR(
+    selectedFilters: FilterGroup[],
+    buildFilters: Filter[],
+    groupCount: number
+  ) {
     const mappedFilters = mapAndFlattenFilters(buildFilters);
     const mergedFilters = mappedFilters.map((filter, idx) => {
       return {
@@ -104,35 +110,53 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         id: selectedFilters[idx].id,
         relationship: selectedFilters[idx].relationship,
         subGroupId: selectedFilters[idx].subGroupId,
+        groupCount
       };
     });
 
     const multipleFilters = [...props.multipleFilters];
 
-    const indexOfCurFilter = multipleFilters.findIndex(
-      (f) => Number(f.groupId) === Number(groupId)
+    const newMultipleFilters = multipleFilters.filter(
+      (filter) => !groupIds.includes(filter.groupId)
     );
-    multipleFilters.splice(indexOfCurFilter, 1, ...mergedFilters);
+
+    const filtersNew = newMultipleFilters.concat(mergedFilters);
+
+    // const indexOfCurFilter = multipleFilters.findIndex(
+    //   (f) => Number(f.groupId) === Number(groupId)
+    // );
+
+    // multipleFilters.splice(indexOfCurFilter, 1, ...mergedFilters);
 
     // when user adds new filters in edit modal they should appear near of editing filter
-    let gId: number = 0;
-    let reserveGroupId: number;
-    const updatedMultipleFilters = multipleFilters.map((filter, idx) => {
-      if (filter.groupId !== reserveGroupId) {
-        reserveGroupId = filter.groupId;
-        gId++;
-      }
-      return {
-        ...filter,
-        groupId: gId,
-        id: idx,
-      };
-    });
+    // let gId: number = 0;
+    // let reserveGroupId: number;
+    // const updatedMultipleFilters = multipleFilters.map((filter, idx) => {
+    //   if (filter.groupId !== reserveGroupId) {
+    //     reserveGroupId = filter.groupId;
+    //     gId++;
+    //   }
+    //   return {
+    //     ...filter,
+    //     groupId: gId,
+    //     id: idx,
+    //   };
+    // });
+
+    props?.onMultipleFiltersUpdated?.(filtersNew);
 
     const filters = [...props.filters, ...buildFilters];
-    props?.onFiltersUpdated?.(filters);
+    const updatedFilters: Filter[] = [];
 
-    props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
+    filtersNew.forEach((filter) => {
+      filters.forEach((f) => {
+        if (isEqual(f.query, filter.query)) {
+          updatedFilters.push(f);
+        }
+      });
+    });
+
+    props?.onFiltersUpdated?.(updatedFilters);
 
     props.toggleEditFilterModal?.(false);
   }
@@ -197,14 +221,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       GroupBadge.push(badge);
     }
 
-    let gId: string;
+    let groupId: string;
     labels.map((label) => {
       // we should have same groupIds on our labeled filters group
-      gId = (groupedByAlias[label][0] as any).groupId;
-      groupedByAlias[label].forEach((filter) => ((filter as any).groupId = gId));
+      groupId = (groupedByAlias[label][0] as any).groupId;
       const labelBadge = (
         <FilterExpressionItem
-          groupId={gId}
+          groupId={groupId}
           groupedFilters={groupedByAlias[label]}
           indexPatterns={props?.indexPatterns}
           onClick={() => {}}
@@ -225,9 +248,11 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function renderEditFilter() {
-    const currentEditFilters = props.multipleFilters.filter(
-      (filter) => filter.groupId === Number(groupId)
-    );
+    let currentEditFilters = [];
+    groupIds?.forEach((groupId) => {
+      const filteredFilters = props.multipleFilters.filter(filter => filter.groupId === groupId);
+      currentEditFilters.push(...filteredFilters);
+    });
 
     return (
       <EuiFlexItem grow={false}>
@@ -260,11 +285,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     groupRef.current?.focus();
   }
 
-  function onRemoveFilterGroup(gId: string) {
+  function onRemoveFilterGroup(groupIds: []) {
     const multipleFilters = [...props.multipleFilters];
+
     const updatedMultipleFilters = multipleFilters.filter(
-      (filter) => filter.groupId !== Number(gId)
+      (filter) => !groupIds.includes(filter.groupId)
     );
+
     const filters = [...props.filters];
     const updatedFilters: Filter[] = [];
 
@@ -282,11 +309,15 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   function onUpdateFilterGroup(
     updatedMultipleFilters: Filter[],
-    gId: string,
+    groupIds: [],
     toggleNegate = false
   ) {
     const multipleFilters = [...props.multipleFilters];
-    const notAffectedFilters = multipleFilters.filter((filter) => filter.groupId !== Number(gId));
+
+    const notAffectedFilters = multipleFilters.filter(
+      (filter) => !groupIds.includes(filter.groupId)
+    );
+
     const finalMultipleFilters = [...notAffectedFilters, ...updatedMultipleFilters];
     props?.onMultipleFiltersUpdated?.(finalMultipleFilters);
     const filters = [...props.filters];

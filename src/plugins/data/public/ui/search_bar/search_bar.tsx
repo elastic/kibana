@@ -298,7 +298,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     try {
       let response;
-      // if (this.props.savedQuery && !saveAsNew) {
       if (!saveAsNew) {
         response = await this.savedQueryService.updateQuery(
           savedQueryMeta.id!,
@@ -598,7 +597,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onToggleAllNegated={this.onToggleAllNegated}
         onRemoveAll={this.onRemoveAll}
         services={this.services}
-        onQueryChange={this.onQueryBarChange}
+        onQueryChange={this.onQueryBarSubmit}
         dateRangeFrom={this.state.dateRangeFrom}
         dateRangeTo={this.state.dateRangeTo}
         toggleAddFilterModal={this.toggleAddFilterModal}

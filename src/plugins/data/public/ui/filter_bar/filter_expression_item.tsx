@@ -46,11 +46,12 @@ interface Props {
   groupedFilters: any;
   indexPatterns: IIndexPattern[];
   onClick: (filter: Filter) => void;
-  onRemove: (groupId: string) => void;
+  onRemove: (filter: Filter[] | unknown[]) => void;
   groupId: string;
+  label?: string | undefined;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
-  onEditFilterClick: (groupId: number) => void;
+  onEditFilterClick: (groupIds: []) => void;
   savedQueryService?: SavedQueryService;
   onFilterSave?: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   customLabel?: string;
@@ -81,34 +82,38 @@ export const FilterExpressionItem: FC<Props> = ({
     setIsPopoverOpen(!isPopoverOpen);
   }
 
-  function onEdit(groupId: number) {
-    onEditFilterClick(groupId);
+  function onEdit() {
+    onEditFilterClick([...new Set(groupedFilters.map((filter) => filter.groupId))]);
   }
 
   function onDuplicate() {
+    const lastElement = groupedFilters[groupedFilters.length - 1];
+    let lastGroupId = lastElement.groupId;
+    let lastId = lastElement.id;
     const multipleUpdatedFilters = groupedFilters?.map((filter: Filter) => {
-      return { ...filter, groupId: filtersGroupsCount + 1 };
+      lastId = lastId + 1;
+      return { ...filter, groupId: lastGroupId + 1, id: lastId };
     });
-    const finalFilters = [...multipleUpdatedFilters, ...groupedFilters];
-    onUpdate?.(finalFilters, groupId, false);
+    const finalFilters = [...groupedFilters, ...multipleUpdatedFilters];
+    onUpdate?.(finalFilters, [...new Set(groupedFilters.map((filter) => filter.groupId))], false);
   }
 
   function onToggleNegated() {
     const isNegated = groupedFilters[0].groupNegated;
     const multipleUpdatedFilters = groupedFilters?.map((filter: Filter) => {
       if (filter.meta.negate) {
-        return { ...filter, meta: { ...filter.meta, negate: false } }
+        return { ...filter, meta: { ...filter.meta, negate: false } };
       } else {
         return { ...filter, groupNegated: !isNegated };
       }
     });
 
-    onUpdate?.(multipleUpdatedFilters, groupId, true);
+    onUpdate?.(multipleUpdatedFilters, [...new Set(groupedFilters.map((filter) => filter.groupId))], true);
   }
 
   function onToggleDisabled() {
     const multipleUpdatedFilters = groupedFilters?.map(toggleFilterDisabled);
-    onUpdate?.(multipleUpdatedFilters, groupId, true);
+    onUpdate?.(multipleUpdatedFilters, [...new Set(groupedFilters.map((filter) => filter.groupId))], true);
   }
 
   function getPanels() {
@@ -120,7 +125,7 @@ export const FilterExpressionItem: FC<Props> = ({
         icon: 'pencil',
         onClick: () => {
           setIsPopoverOpen(false);
-          onEdit(groupId);
+          onEdit();
         },
         'data-test-subj': 'editFilter',
       },
@@ -168,7 +173,7 @@ export const FilterExpressionItem: FC<Props> = ({
         icon: 'trash',
         onClick: () => {
           setIsPopoverOpen(false);
-          onRemove(groupId);
+          onRemove([...new Set(groupedFilters.map((filter) => filter.groupId))]);
         },
         'data-test-subj': 'deleteFilter',
       },
@@ -441,7 +446,7 @@ export const FilterExpressionItem: FC<Props> = ({
             ? 'globalFilterExpression-isDisabled'
             : ''
         }
-        iconOnClick={() => onRemove(groupId)}
+        iconOnClick={() => onRemove([...new Set(groupedFilters.map((filter) => filter.groupId))])}
         iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filteradgeIconAriaLabel', {
           defaultMessage: 'Remove {title}',
           values: { title: filterText },

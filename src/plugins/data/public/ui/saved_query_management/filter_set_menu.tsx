@@ -103,11 +103,12 @@ export function FilterSetMenu({
     };
   };
 
-  const onQueryStringChange = (value: string) => {
-    onQueryChange({
-      query: { query: value, language },
+  const onQueryStringChange = (query) => {
+    const newQuery = {
+      query,
       dateRange: getDateRange(),
-    });
+    };
+    onQueryChange(newQuery);
   };
 
   const onSelectLanguage = (lang: string) => {
@@ -119,7 +120,8 @@ export function FilterSetMenu({
     services.storage.set(storageKey!, lang);
 
     const newQuery = { query: '', language: lang };
-    onQueryStringChange(newQuery.query);
+    onQueryStringChange(newQuery);
+    closePopover();
   };
 
   const luceneLabel = i18n.translate('data.query.queryBar.luceneLanguageName', {
@@ -175,7 +177,8 @@ export function FilterSetMenu({
           icon: 'crossInACircleFilled',
           onClick: () => {
             closePopover();
-            onQueryStringChange('');
+            onQueryStringChange({ query: '', language: 'kuery' });
+
             onRemoveAll();
           },
         },
