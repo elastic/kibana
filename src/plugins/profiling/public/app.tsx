@@ -78,7 +78,7 @@ function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) 
           <EuiSpacer />
           <FlameGraphContext.Provider value={pixiFlamegraph}>
             <FlameGraphNavigation getter={fetchPixiFlamechart} setter={setPixiFlamegraph} />
-            <PixiFlamechart projectID={5} />
+            <PixiFlamechart projectID={'5'} />
           </FlameGraphContext.Provider>
         </>
       ),
