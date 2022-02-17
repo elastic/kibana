@@ -1228,7 +1228,9 @@ function logActiveAndRecoveredAlerts<
     if (canSetRecoveryContext) {
       for (const id of recoveredAlertIds) {
         if (!recoveredAlerts[id].hasContext()) {
-          logger.debug(`No recovery context specified for recovered alert ${id}`);
+          logger.debug(
+            `rule ${ruleLabel} has no recovery context specified for recovered alert ${id}`
+          );
         }
       }
     }

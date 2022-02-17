@@ -69,11 +69,11 @@ const createAlertFactoryMock = {
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = string
   >() => {
-    const mock = {
-      getRecoveredAlerts: jest.fn(),
-    };
-    mock.getRecoveredAlerts.mockReturnValue([]);
-    return mock as unknown as AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
+    const mock: jest.Mocked<AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>> =
+      {
+        getRecoveredAlerts: jest.fn().mockReturnValue([]),
+      };
+    return mock;
   },
 };
 
