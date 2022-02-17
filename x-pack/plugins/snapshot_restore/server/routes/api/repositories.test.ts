@@ -273,7 +273,6 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         const mockEsResponse = [...pluginNames.map((key) => ({ component: key }))];
         catPluginsFn.mockResolvedValue({ body: mockEsResponse });
 
-
         const expectedResponse = [
           ...MODULE_REPOSITORY_TYPES,
           ...ON_PREM_REPOSITORY_TYPES,
