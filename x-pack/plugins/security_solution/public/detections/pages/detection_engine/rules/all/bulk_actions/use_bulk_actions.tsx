@@ -44,8 +44,10 @@ import { getCustomRulesCountFromCache } from './use_custom_rules_count';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
 
-import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
-import type { BulkActionPartialErrorResponse } from '../../../../../../../common/detection_engine/schemas/response/perform_bulk_action_schema';
+import type {
+  BulkActionResponse,
+  FilterOptions,
+} from '../../../../../containers/detection_engine/rules/types';
 import type { HTTPError } from '../../../../../../../common/detection_engine/types';
 import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
 
@@ -298,8 +300,8 @@ export const useBulkActions = ({
             hideWarningToast();
             // if response doesn't have number of failed rules, it means the whole bulk action failed
             // and general error toast will be shown. Otherwise - error toast for partial failure
-            const failedRulesCount = (error?.body as BulkActionPartialErrorResponse)?.attributes
-              ?.rules?.failed;
+            const failedRulesCount = (error?.body as BulkActionResponse)?.attributes?.summary
+              ?.failed;
 
             if (isNaN(failedRulesCount)) {
               toasts.addError(error, { title: i18n.BULK_ACTION_FAILED });
