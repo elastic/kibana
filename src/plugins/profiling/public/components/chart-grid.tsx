@@ -37,7 +37,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ maximum }) => {
       const uniqueID = `bar-chart-${i}`;
 
       const barchart = (
-        <BarChart id={uniqueID} name={uniqueID} height={200} data={subdata} x="x" y="y" />
+        <BarChart id={uniqueID} name={keys[i]} height={200} data={subdata} x="x" y="y" />
       );
 
       const title = (
