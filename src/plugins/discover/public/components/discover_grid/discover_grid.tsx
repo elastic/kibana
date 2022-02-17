@@ -408,7 +408,14 @@ export const DiscoverGrid = ({
 
   if (!rowCount) {
     return (
-      <div className="euiDataGrid__noResults">
+      <div
+        className="euiDataGrid__noResults"
+        data-render-complete={!isLoading}
+        data-shared-item=""
+        data-title={searchTitle}
+        data-description={searchDescription}
+        data-document-number={0}
+      >
         <EuiText size="xs" color="subdued">
           <EuiIcon type="discoverApp" size="m" color="subdued" />
           <EuiSpacer size="s" />

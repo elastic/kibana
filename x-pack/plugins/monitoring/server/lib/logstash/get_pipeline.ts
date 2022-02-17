@@ -15,6 +15,7 @@ import {
   ElasticsearchSource,
   ElasticsearchSourceLogstashPipelineVertex,
 } from '../../../common/types/es';
+import { MonitoringConfig } from '../../config';
 
 export function _vertexStats(
   vertex: ElasticsearchSourceLogstashPipelineVertex,
@@ -120,13 +121,13 @@ export function _enrichStateWithStatsAggregation(
 
 export async function getPipeline(
   req: LegacyRequest,
-  config: { get: (key: string) => string | undefined },
+  config: MonitoringConfig,
   clusterUuid: string,
   pipelineId: string,
   version: PipelineVersion
 ) {
   // Determine metrics' timeseries interval based on version's timespan
-  const minIntervalSeconds = Math.max(Number(config.get('monitoring.ui.min_interval_seconds')), 30);
+  const minIntervalSeconds = Math.max(config.ui.min_interval_seconds, 30);
   const timeseriesInterval = calculateTimeseriesInterval(
     Number(version.firstSeen),
     Number(version.lastSeen),

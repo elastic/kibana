@@ -15,10 +15,11 @@ import {
   GaugeLabelMajorMode,
   GaugeTicksPosition,
   GaugeLabelMajorModes,
+  GaugeColorModes,
 } from '../../common';
 import { GaugeShapes, GaugeTicksPositions } from '../../common';
 import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
-import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
+import { getAccessorsFromArgs, getMaxValue, getMinValue, getValueFromAccessor } from './utils';
 import './index.scss';
 declare global {
   interface Window {
@@ -103,9 +104,11 @@ function getTitle(
   labelMajor?: string,
   fallbackTitle?: string
 ) {
-  if (labelMajorMode === GaugeLabelMajorModes.none) {
+  if (labelMajorMode === GaugeLabelMajorModes.NONE) {
     return '';
-  } else if (labelMajorMode === GaugeLabelMajorModes.auto) {
+  }
+
+  if (labelMajorMode === GaugeLabelMajorModes.AUTO) {
     return `${fallbackTitle || ''}   `; // added extra space for nice rendering
   }
   return `${labelMajor || fallbackTitle || ''}   `; // added extra space for nice rendering
@@ -131,7 +134,7 @@ function getTicks(
   range: [number, number],
   colorBands?: number[]
 ) {
-  if (ticksPosition === GaugeTicksPositions.bands && colorBands) {
+  if (ticksPosition === GaugeTicksPositions.BANDS && colorBands) {
     return colorBands && getTicksLabels(colorBands);
   }
   const TICKS_NO = 3;
@@ -150,7 +153,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
   ({ data, args, formatFactory, chartsThemeService }) => {
     const {
       shape: subtype,
-      metricAccessor,
       palette,
       colorMode,
       labelMinor,
@@ -158,32 +160,35 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       labelMajorMode,
       ticksPosition,
     } = args;
-    if (!metricAccessor) {
+    const table = data;
+    const accessors = getAccessorsFromArgs(args, table.columns);
+
+    if (!accessors || !accessors.metric) {
       // Chart is not ready
       return null;
     }
 
     const chartTheme = chartsThemeService.useChartsTheme();
 
-    const table = data;
-    const metricColumn = table.columns.find((col) => col.id === metricAccessor);
+    const metricColumn = table.columns.find((col) => col.id === accessors.metric);
 
     const chartData = table.rows.filter(
-      (v) => typeof v[metricAccessor!] === 'number' || Array.isArray(v[metricAccessor!])
+      (v) => typeof v[accessors.metric!] === 'number' || Array.isArray(v[accessors.metric!])
     );
     const row = chartData?.[0];
 
-    const metricValue = getValueFromAccessor('metricAccessor', row, args);
+    const metricValue = args.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
 
-    const icon = subtype === GaugeShapes.horizontalBullet ? GaugeIconHorizontal : GaugeIconVertical;
+    const icon =
+      subtype === GaugeShapes.HORIZONTAL_BULLET ? GaugeIconHorizontal : GaugeIconVertical;
 
     if (typeof metricValue !== 'number') {
       return <EmptyPlaceholder icon={icon} />;
     }
 
-    const goal = getValueFromAccessor('goalAccessor', row, args);
-    const min = getMinValue(row, args);
-    const max = getMaxValue(row, args);
+    const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
+    const min = getMinValue(row, accessors);
+    const max = getMaxValue(row, accessors);
 
     if (min === max) {
       return (
@@ -197,7 +202,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           }
         />
       );
-    } else if (min > max) {
+    }
+
+    if (min > max) {
       return (
         <EmptyPlaceholder
           icon={icon}
@@ -247,7 +254,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           bands={bands}
           ticks={getTicks(ticksPosition, [min, max], bands)}
           bandFillColor={
-            colorMode === 'palette' && colors
+            colorMode === GaugeColorModes.PALETTE && colors
               ? (val) => {
                   const index = bands && bands.indexOf(val.value) - 1;
                   return colors && index >= 0 && colors[index]

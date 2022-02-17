@@ -4,7 +4,7 @@
   ],
   "description": "Identifies when events are deleted in Azure Kubernetes. Kubernetes events are objects that log any state changes. Example events are a container creation, an image pull, or a pod scheduling on a node.  An adversary may delete events in Azure Kubernetes in an attempt to evade detection.",
   "false_positives": [
-    "Events deletions may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Events deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Events deletions may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Events deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-25m",
   "index": [
@@ -56,5 +56,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }
