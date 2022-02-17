@@ -47,7 +47,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/perform_bulk_action`)],
+      testFiles: [require.resolve(`../${name}/tests/`)],
       servers,
       services,
       junit: {
