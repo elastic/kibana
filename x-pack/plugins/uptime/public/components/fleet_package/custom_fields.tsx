@@ -217,7 +217,11 @@ export const CustomFields = memo<Props>(
         )}
         <EuiSpacer size="m" />
         {isHTTP && (
-          <HTTPAdvancedFields validate={validate} minColumnWidth={minColumnWidth} onFieldBlur={onFieldBlur}>
+          <HTTPAdvancedFields
+            validate={validate}
+            minColumnWidth={minColumnWidth}
+            onFieldBlur={onFieldBlur}
+          >
             {appendAdvancedFields}
           </HTTPAdvancedFields>
         )}
@@ -227,7 +231,11 @@ export const CustomFields = memo<Props>(
           </TCPAdvancedFields>
         )}
         {isBrowser && (
-          <BrowserAdvancedFields validate={validate} minColumnWidth={minColumnWidth} onFieldBlur={onFieldBlur}>
+          <BrowserAdvancedFields
+            validate={validate}
+            minColumnWidth={minColumnWidth}
+            onFieldBlur={onFieldBlur}
+          >
             {appendAdvancedFields}
           </BrowserAdvancedFields>
         )}
