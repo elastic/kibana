@@ -19,6 +19,7 @@ import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import {
   cleanPreconfiguredOutputs,
+  ensureManagedPackagePoliciesUpgraded,
   ensurePreconfiguredOutputs,
   ensurePreconfiguredPackagesAndPolicies,
 } from './preconfiguration';
@@ -98,14 +99,23 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up initial Fleet packages');
 
-  const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+  const { nonFatalErrors: preconfiguredPackagesNonFatalErrors } =
+    await ensurePreconfiguredPackagesAndPolicies(
+      soClient,
+      esClient,
+      policies,
+      packages,
+      defaultOutput,
+      DEFAULT_SPACE_ID
+    );
+
+  logger.debug('Ensure managed package policies are upgraded');
+  const packagePolicyUpgradeResults = await ensureManagedPackagePoliciesUpgraded(
     soClient,
-    esClient,
-    policies,
-    packages,
-    defaultOutput,
-    DEFAULT_SPACE_ID
+    esClient
   );
+
+  const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeResults];
 
   logger.debug('Cleaning up Fleet outputs');
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);

@@ -357,18 +357,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  // Handle automatic package policy upgrades for managed packages and package with
-  // the `keep_policies_up_to_date` setting enabled
-  const allPackagePolicyIds = await packagePolicyService.listIds(soClient, {
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-  });
-  const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
-    soClient,
-    esClient,
-    allPackagePolicyIds.items
-  );
-
   return {
     policies: fulfilledPolicies.map((p) =>
       p.policy
@@ -385,8 +373,17 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           }
     ),
     packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
-    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
+    nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
   };
+}
+
+export async function ensureManagedPackagePoliciesUpgraded(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+): Promise<UpgradeManagedPackagePoliciesResult[]> {
+  // Handle automatic package policy upgrades for managed packages and package with
+  // the `keep_policies_up_to_date` setting enabled
+  return upgradeManagedPackagePolicies(soClient, esClient);
 }
 
 export function comparePreconfiguredPolicyToCurrent(
