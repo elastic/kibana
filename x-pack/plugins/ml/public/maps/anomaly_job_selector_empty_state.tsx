@@ -7,10 +7,7 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 interface Props {
   jobsManagementPath: string;

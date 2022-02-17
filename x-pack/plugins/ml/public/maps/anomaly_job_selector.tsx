@@ -81,6 +81,11 @@ export class AnomalyJobSelector extends Component<Props, State> {
           }
         />
       </EuiFormRow>
-    ) : < AnomalyJobSelectorEmptyState jobsManagementPath={this.props.jobsManagementPath} canGetJobs={this.props.canGetJobs} />;
+    ) : (
+      <AnomalyJobSelectorEmptyState
+        jobsManagementPath={this.props.jobsManagementPath}
+        canGetJobs={this.props.canGetJobs}
+      />
+    );
   }
 }

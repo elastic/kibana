@@ -46,7 +46,7 @@ export class AnomalyLayerWizardFactory {
     this.canGetJobs = canGetJobs;
   }
 
-  private async getServices(): Promise<{ mlJobsService: MlApiServices['jobs'], mlLocator: any }> {
+  private async getServices(): Promise<{ mlJobsService: MlApiServices['jobs']; mlLocator: any }> {
     const [coreStart, pluginStart] = await this.getStartServices();
     const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs');
 
@@ -61,7 +61,7 @@ export class AnomalyLayerWizardFactory {
     const { mlJobsService, mlLocator } = await this.getServices();
     const jobsManagementPath = await mlLocator.getUrl({
       page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    })
+    });
 
     const { anomalyLayerWizard } = await import('./anomaly_layer_wizard');
 
