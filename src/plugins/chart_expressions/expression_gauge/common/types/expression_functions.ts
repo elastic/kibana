@@ -21,12 +21,14 @@ import {
   GaugeTicksPositions,
   GaugeLabelMajorModes,
   GaugeColorModes,
+  GaugeCentralMajorModes,
 } from '../constants';
 import { CustomPaletteParams } from '.';
 
 export type GaugeColorMode = $Values<typeof GaugeColorModes>;
 export type GaugeShape = $Values<typeof GaugeShapes>;
 export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
+export type GaugeCentralMajorMode = $Values<typeof GaugeCentralMajorModes>;
 export type GaugeTicksPosition = $Values<typeof GaugeTicksPositions>;
 
 export interface GaugeState {
@@ -38,6 +40,8 @@ export interface GaugeState {
   labelMajorMode: GaugeLabelMajorMode;
   labelMajor?: string;
   labelMinor?: string;
+  centralMajorMode?: GaugeCentralMajorMode;
+  centralMajor?: string;
   colorMode?: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteParams>;
   shape: GaugeShape;

@@ -13,11 +13,13 @@ import type { DatatableColumn } from '../../../../expressions';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
+  GaugeCentralMajorModes,
   GaugeColorModes,
   GaugeLabelMajorModes,
   GaugeShapes,
   GaugeTicksPositions,
 } from '../constants';
+import { isRoundShape } from '../utils';
 
 export const errors = {
   invalidShapeError: () =>
@@ -39,6 +41,12 @@ export const errors = {
     i18n.translate('expressionGauge.functions.gauge.errors.invalidLabelMajorModeError', {
       defaultMessage: `Invalid label major mode is specified. Supported label major modes: {labelMajorModes}`,
       values: { labelMajorModes: Object.values(GaugeLabelMajorModes).join(', ') },
+    }),
+  centralMajorNotSupportedForShapeError: (shape: string) =>
+    i18n.translate('expressionGauge.functions.gauge.errors.centralMajorNotSupportedForShapeError', {
+      defaultMessage:
+        'Fields "centralMajor" and "centralMajorMode" are not supported by the shape "{shape}"',
+      values: { shape },
     }),
 };
 
@@ -71,7 +79,12 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
   args: {
     shape: {
       types: ['string'],
-      options: [GaugeShapes.HORIZONTAL_BULLET, GaugeShapes.VERTICAL_BULLET],
+      options: [
+        GaugeShapes.HORIZONTAL_BULLET,
+        GaugeShapes.VERTICAL_BULLET,
+        GaugeShapes.ARC,
+        GaugeShapes.CIRCLE,
+      ],
       help: i18n.translate('expressionGauge.functions.gauge.args.shape.help', {
         defaultMessage: 'Type of gauge chart',
       }),
@@ -118,7 +131,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     ticksPosition: {
       types: ['string'],
       default: GaugeTicksPositions.AUTO,
-      options: [GaugeTicksPositions.AUTO, GaugeTicksPositions.BANDS],
+      options: [GaugeTicksPositions.HIDDEN, GaugeTicksPositions.AUTO, GaugeTicksPositions.BANDS],
       help: i18n.translate('expressionGauge.functions.gauge.args.ticksPosition.help', {
         defaultMessage: 'Specifies the placement of ticks',
       }),
@@ -143,6 +156,19 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Specifies the labelMinor of the gauge chart',
       }),
     },
+    centralMajor: {
+      types: ['string'],
+      help: i18n.translate('expressionGauge.functions.gauge.args.centralMajor.help', {
+        defaultMessage: 'Specifies the centralMajor of the gauge chart displayed inside the chart.',
+      }),
+    },
+    centralMajorMode: {
+      types: ['string'],
+      options: [GaugeLabelMajorModes.NONE, GaugeLabelMajorModes.AUTO, GaugeLabelMajorModes.CUSTOM],
+      help: i18n.translate('expressionGauge.functions.gauge.args.centralMajorMode.help', {
+        defaultMessage: 'Specifies the mode of centralMajor',
+      }),
+    },
     ariaLabel: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gaugeChart.config.ariaLabel.help', {
@@ -162,13 +188,27 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     validateAccessor(args.max, data.columns);
     validateAccessor(args.goal, data.columns);
 
+    const { centralMajor, centralMajorMode, ...restArgs } = args;
+
+    if (!isRoundShape(args.shape) && (centralMajorMode || centralMajor)) {
+      throw new Error(errors.centralMajorNotSupportedForShapeError(args.shape));
+    }
+
+    const centralMajorArgs = isRoundShape(args.shape)
+      ? {
+          centralMajorMode: !centralMajorMode ? GaugeCentralMajorModes.AUTO : centralMajorMode,
+          centralMajor,
+        }
+      : {};
+
     return {
       type: 'render',
       as: EXPRESSION_GAUGE_NAME,
       value: {
         data,
         args: {
-          ...args,
+          ...restArgs,
+          ...centralMajorArgs,
           ariaLabel:
             args.ariaLabel ??
             (handlers.variables?.embeddableTitle as string) ??
