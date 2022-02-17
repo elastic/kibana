@@ -6,7 +6,8 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { AuthenticationTable } from '../../components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useAuthentications } from '../../containers/authentications';
@@ -20,6 +21,10 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { HostsKpiChartColors } from '../../components/kpi_hosts/types';
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import { EmbeddableHistogram } from '../../../common/components/matrix_histogram/embeddable_histogram';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { AUTHENTICATIONS } from '../../components/authentications_table/translations';
+import { authentication } from '../../configs/authentication';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 
@@ -86,6 +91,14 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
     type,
   });
 
+  const { patternList, dataViewId } = useSourcererDataView();
+  const customLensAttrs = useMemo(() => {
+    return {
+      ...authentication,
+      references: authentication.references.map((ref) => ({ ...ref, id: dataViewId })),
+    };
+  }, [dataViewId]);
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -105,6 +118,16 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
         startDate={startDate}
         {...histogramConfigs}
       />
+
+      <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>
+        <EmbeddableHistogram
+          title={AUTHENTICATIONS}
+          dataTypesIndexPatterns={patternList?.join(',')}
+          customLensAttrs={customLensAttrs}
+          customTimeRange={{ from: startDate, to: endDate }}
+          isSingleMetric={false}
+        />
+      </EuiPanel>
 
       <AuthenticationTableManage
         data={authentications}
