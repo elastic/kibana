@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer, useCallback, Reducer } from 'react';
+import React, { useEffect, useReducer, useCallback, Reducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '../../../../observability/public';
@@ -30,6 +30,8 @@ export const MonitorManagementPage: React.FC = () => {
     }
   );
 
+  const [invalidTotal, setInvalidTotal] = useState(0);
+
   const onPageStateChange = useCallback(
     (state) => {
       dispatchPageAction({ type: 'update', payload: state });
@@ -50,15 +52,21 @@ export const MonitorManagementPage: React.FC = () => {
   const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementListPageState;
 
   const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
-  const { errorSummaries } = useInlineErrors(viewType === 'invalid');
+  const { errorSummaries, loading } = useInlineErrors({
+    onlyInvalidMonitors: viewType === 'invalid',
+    sortField: pageState.sortField,
+    sortOrder: pageState.sortOrder,
+  });
 
   useEffect(() => {
-    dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortField, sortOrder }));
-  }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder]);
+    if (viewType === 'all') {
+      dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortField, sortOrder }));
+    }
+  }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder, viewType]);
 
   return (
     <>
-      <MonitorListTabs errorSummaries={errorSummaries ?? []} onUpdate={onUpdate} />
+      <MonitorListTabs invalidTotal={invalidTotal} onUpdate={onUpdate} />
       {viewType === 'all' ? (
         <AllMonitors
           pageState={pageState}
@@ -74,6 +82,8 @@ export const MonitorManagementPage: React.FC = () => {
           onPageStateChange={onPageStateChange}
           onUpdate={onUpdate}
           errorSummaries={errorSummaries}
+          setInvalidTotal={setInvalidTotal}
+          loading={Boolean(loading)}
         />
       )}
     </>

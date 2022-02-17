@@ -23,7 +23,9 @@ export const useInvalidMonitors = (errorSummaries?: Ping[]) => {
       const response = await savedObjects?.client.bulkResolve<SyntheticsMonitor>(ids);
       if (response) {
         const { resolved_objects: resolvedObjects } = response;
-        return resolvedObjects.map(({ saved_object: savedObject }) => savedObject);
+        return resolvedObjects
+          .filter((sv) => !Boolean(sv.saved_object.error))
+          .map(({ saved_object: savedObject }) => savedObject);
       }
     }
   }, [errorSummaries]);

@@ -14,7 +14,20 @@ import { Ping } from '../../../../common/runtime_types';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 
-export function useInlineErrors(onlyInvalidMonitors?: boolean) {
+const sortFieldMap: Record<string, string> = {
+  name: 'monitor.name',
+  urls: 'url.full',
+  '@timestamp': '@timestamp',
+};
+export function useInlineErrors({
+  onlyInvalidMonitors,
+  sortField = '@timestamp',
+  sortOrder = 'desc',
+}: {
+  onlyInvalidMonitors?: boolean;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
+}) {
   const monitorList = useSelector(monitorManagementListSelector);
 
   const { settings } = useSelector(selectDynamicSettings);
@@ -33,7 +46,7 @@ export function useInlineErrors(onlyInvalidMonitors?: boolean) {
         query: {
           bool: {
             filter: [
-              ...(onlyInvalidMonitors
+              ...(!onlyInvalidMonitors
                 ? [
                     {
                       terms: {
@@ -83,10 +96,15 @@ export function useInlineErrors(onlyInvalidMonitors?: boolean) {
           },
         },
         collapse: { field: 'config_id' },
-        sort: [{ '@timestamp': 'desc' }],
+        sort: [{ [sortFieldMap[sortField]]: sortOrder }],
+        aggs: {
+          total: {
+            cardinality: { field: 'config_id' },
+          },
+        },
       },
     },
-    [settings?.heartbeatIndices, monitorList, lastRefresh],
+    [settings?.heartbeatIndices, monitorList, lastRefresh, doFetch, sortField, sortOrder],
     { name: 'getInvalidMonitors' }
   );
 

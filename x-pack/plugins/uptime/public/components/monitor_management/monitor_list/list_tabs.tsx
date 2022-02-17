@@ -16,14 +16,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState, Fragment, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Ping } from '../../../../common/runtime_types';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 
 export const MonitorListTabs = ({
-  errorSummaries,
+  invalidTotal,
   onUpdate,
 }: {
-  errorSummaries: Ping[];
+  invalidTotal: number;
   onUpdate: () => void;
 }) => {
   const [selectedTabId, setSelectedTabId] = useState('all');
@@ -53,14 +52,14 @@ export const MonitorListTabs = ({
         <EuiNotificationBadge
           className="eui-alignCenter"
           size="m"
-          color={errorSummaries?.length === 0 ? 'subdued' : 'accent'}
+          color={invalidTotal === 0 ? 'subdued' : 'accent'}
         >
-          {errorSummaries.length}
+          {invalidTotal}
         </EuiNotificationBadge>
       ),
       href: history.createHref({ pathname: '/manage-monitors/invalid' }),
       content: <Fragment />,
-      disabled: errorSummaries?.length === 0,
+      disabled: invalidTotal === 0,
     },
   ];
 
