@@ -32,24 +32,25 @@ export const upgradeManagedPackagePolicies = async (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<UpgradeManagedPackagePoliciesResult[]> => {
+  appContextService
+    .getLogger()
+    .debug('Running required package policies upgrades for managed policies');
   const results: UpgradeManagedPackagePoliciesResult[] = [];
 
   const installedPackages = await getInstallations(soClient, {
-    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed`,
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed AND ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.keep_policies_up_to_date:true`,
   });
 
   for (const { attributes: installedPackage } of installedPackages.saved_objects) {
-    if (installedPackage.keep_policies_up_to_date) {
-      const packagePolicies = await getPackagePoliciesNotMatchingVersion(
-        soClient,
-        installedPackage.name,
-        installedPackage.version
-      );
+    const packagePolicies = await getPackagePoliciesNotMatchingVersion(
+      soClient,
+      installedPackage.name,
+      installedPackage.version
+    );
 
-      for (const packagePolicy of packagePolicies) {
-        if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
-          await upgradePackagePolicy(soClient, esClient, packagePolicy.id, results);
-        }
+    for (const packagePolicy of packagePolicies) {
+      if (isPolicyVersionLtInstalledVersion(packagePolicy, installedPackage)) {
+        await upgradePackagePolicy(soClient, esClient, packagePolicy.id, results);
       }
     }
   }

@@ -109,7 +109,6 @@ async function createSetupSideEffects(
       DEFAULT_SPACE_ID
     );
 
-  logger.debug('Ensure managed package policies are upgraded');
   const packagePolicyUpgradeErrors = (
     await upgradeManagedPackagePolicies(soClient, esClient)
   ).filter((result) => (result.errors ?? []).length > 0);

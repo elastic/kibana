@@ -18,7 +18,7 @@ jest.mock('./app_context', () => {
     ...jest.requireActual('./app_context'),
     appContextService: {
       getLogger: jest.fn(() => {
-        return { error: jest.fn() };
+        return { error: jest.fn(), debug: jest.fn() };
       }),
     },
   };
@@ -34,15 +34,7 @@ describe('upgradeManagedPackagePolicies', () => {
     const soClient = savedObjectsClientMock.create();
 
     (getInstallations as jest.Mock).mockResolvedValueOnce({
-      saved_objects: [
-        {
-          attributes: {
-            id: 'test-installation',
-            version: '0.0.1',
-            keep_policies_up_to_date: false,
-          },
-        },
-      ],
+      saved_objects: [],
     });
 
     await upgradeManagedPackagePolicies(soClient, esClient);
