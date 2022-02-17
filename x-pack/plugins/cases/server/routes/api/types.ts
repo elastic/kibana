@@ -5,11 +5,25 @@
  * 2.0.
  */
 
-import type { Logger, PluginInitializerContext } from 'kibana/server';
+import type {
+  Logger,
+  PluginInitializerContext,
+  RouteConfig,
+  RouteMethod,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
 
-import type { CasesRouter } from '../../types';
+import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 
 export interface RouteDeps {
+  router: CasesRouter;
+  logger: Logger;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+}
+
+export interface RegisterRoutesDeps {
   router: CasesRouter;
   logger: Logger;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -18,4 +32,22 @@ export interface RouteDeps {
 export interface TotalCommentByCase {
   caseId: string;
   totalComments: number;
+}
+
+interface CaseRouteHandlerArguments<P, Q, B> {
+  request: KibanaRequest<P, Q, B>;
+  context: CasesRequestHandlerContext;
+  response: KibanaResponseFactory;
+  logger: Logger;
+}
+
+export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
+  method: 'get' | 'post' | 'put' | 'delete';
+  options: RouteConfig<P, Q, B, RouteMethod>;
+  handler: ({
+    request,
+    context,
+    response,
+    logger,
+  }: CaseRouteHandlerArguments<P, Q, B>) => Promise<IKibanaResponse>;
 }

@@ -30,6 +30,7 @@ import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { LensServerPluginSetup } from '../../lens/server';
+import { registerRoutes } from './routes/api/register_routes';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -105,6 +106,8 @@ export class CasePlugin {
       router,
       kibanaVersion: this.kibanaVersion,
     });
+
+    registerRoutes({ router, logger: this.log, kibanaVersion: this.kibanaVersion });
   }
 
   public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {

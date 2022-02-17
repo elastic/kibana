@@ -5,34 +5,37 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
+import { CaseRoute } from '../types';
 import { CASES_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
 
-export function initDeleteCasesApi({ router, logger }: RouteDeps) {
-  router.delete(
-    {
-      path: CASES_URL,
-      validate: {
-        query: schema.object({
-          ids: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const client = await context.cases.getCasesClient();
-        await client.cases.delete(request.query.ids);
+const validate = {
+  query: schema.object({
+    ids: schema.arrayOf(schema.string()),
+  }),
+};
 
-        return response.noContent();
-      } catch (error) {
-        logger.error(
-          `Failed to delete cases in route ids: ${JSON.stringify(request.query.ids)}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+export const deleteCaseRoute: CaseRoute<unknown, TypeOf<typeof validate['query']>> = {
+  method: 'delete',
+  options: {
+    path: CASES_URL,
+    validate,
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const client = await context.cases.getCasesClient();
+      await client.cases.delete(request.query.ids);
+
+      return response.noContent();
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to delete cases in route ids: ${JSON.stringify(
+          request.query.ids
+        )}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+};

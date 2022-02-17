@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { initDeleteCasesApi } from './cases/delete_cases';
 import { initFindCasesApi } from '././cases/find_cases';
 import { initGetCaseApi } from './cases/get_case';
 import { initPatchCasesApi } from './cases/patch_cases';
@@ -45,7 +44,6 @@ export const defaultPerPage = 20;
 
 export function initCaseApi(deps: RouteDeps) {
   // Cases
-  initDeleteCasesApi(deps);
   initFindCasesApi(deps);
   initGetCaseApi(deps);
   initPatchCasesApi(deps);
