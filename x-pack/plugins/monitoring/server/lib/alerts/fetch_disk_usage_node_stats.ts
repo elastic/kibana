@@ -40,7 +40,7 @@ export async function fetchDiskUsageNodeStats(
                 cluster_uuid: clustersIds,
               },
             },
-            createDatasetFilter('node_stats', 'elasticsearch.node_stats'),
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
