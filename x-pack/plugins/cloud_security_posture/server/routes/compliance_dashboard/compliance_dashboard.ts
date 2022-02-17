@@ -58,9 +58,11 @@ export const defineGetComplianceDashboardRoute = (
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const latestCycleID = await getLatestCycleId(esClient);
 
-        const stats = await getStats(esClient, latestCycleID);
-        const resourcesTypes = await getResourcesTypes(esClient, latestCycleID);
-        const clusters = await getClusters(esClient, latestCycleID);
+        const [stats, resourcesTypes, clusters] = await Promise.all([
+          getStats(esClient, latestCycleID),
+          getResourcesTypes(esClient, latestCycleID),
+          getClusters(esClient, latestCycleID),
+        ]);
 
         const body: CloudPostureStats = {
           stats,
