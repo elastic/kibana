@@ -83,7 +83,6 @@ export interface FleetStart {
 }
 
 export interface FleetSetupDeps {
-  licensing: LicensingPluginStart;
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
@@ -93,6 +92,7 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
+  licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   navigation: NavigationPublicPluginStart;
@@ -130,9 +130,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // variable from plugin setup.  Refactor to an abstraction, if necessary.
     // Set up http client
     setHttpClient(core.http);
-
-    // Set up license service
-    licenseService.start(deps.licensing.license$);
 
     // Register Integrations app
     core.application.register({
@@ -257,6 +254,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const getPermissions = once(() =>
       core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
     );
+
+    // Set up license service
+    licenseService.start(deps.licensing.license$);
 
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,
