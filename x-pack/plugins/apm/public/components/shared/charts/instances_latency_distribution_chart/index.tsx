@@ -114,8 +114,13 @@ export function InstancesLatencyDistributionChart({
           })}
         </h2>
       </EuiTitle>
-      <ChartContainer hasData={hasData} height={height} status={status}>
-        <Chart id="instances-latency-distribution">
+      <ChartContainer
+        hasData={hasData}
+        height={height}
+        status={status}
+        id="instancesLatencyDistribution"
+      >
+        <Chart>
           <Settings
             legendPosition={Position.Bottom}
             onElementClick={handleElementClick}

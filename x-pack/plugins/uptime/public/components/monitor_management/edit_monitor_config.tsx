@@ -88,7 +88,7 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
       browserDefaultValues={fullDefaultConfig[DataStream.BROWSER]}
       tlsDefaultValues={defaultTLSConfig}
     >
-      <MonitorConfig />
+      <MonitorConfig isEdit={true} />
     </SyntheticsProviders>
   );
 };

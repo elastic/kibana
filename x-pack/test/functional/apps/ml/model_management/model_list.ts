@@ -10,12 +10,11 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
-  describe('trained models', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/125455
+  describe.skip('trained models', function () {
     before(async () => {
       await ml.trainedModels.createTestTrainedModels('classification', 15, true);
       await ml.trainedModels.createTestTrainedModels('regression', 15);
-      await ml.securityUI.loginAsMlPowerUser();
-      await ml.navigation.navigateToTrainedModels();
     });
 
     after(async () => {
@@ -46,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await ml.securityUI.loginAsMlPowerUser();
         await ml.navigation.navigateToTrainedModels();
+        await ml.commonUI.waitForRefreshButtonEnabled();
       });
 
       after(async () => {
@@ -173,6 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await ml.securityUI.loginAsMlViewer();
         await ml.navigation.navigateToTrainedModels();
+        await ml.commonUI.waitForRefreshButtonEnabled();
       });
 
       after(async () => {
