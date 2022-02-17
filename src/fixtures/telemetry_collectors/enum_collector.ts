@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CollectorSet } from '../../plugins/usage_collection/server/collector';
-import { executionContextServiceMock, loggingSystemMock } from '../../core/server/mocks';
+import { createUsageCollectionSetupMock } from '../../plugins/usage_collection/server/mocks';
 
-const { makeUsageCollector } = new CollectorSet({
-  logger: loggingSystemMock.createLogger(),
-  executionContext: executionContextServiceMock.createSetupContract(),
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+const { makeUsageCollector } = createUsageCollectionSetupMock();
 
 enum TELEMETRY_LAYER_TYPE {
   ES_DOCS = 'es_docs',
