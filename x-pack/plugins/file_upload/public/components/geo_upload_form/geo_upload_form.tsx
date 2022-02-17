@@ -6,7 +6,7 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import { EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiSelect, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { GeoFilePicker, OnFileSelectParameters } from './geo_file_picker';
@@ -119,13 +119,60 @@ export class GeoUploadForm extends Component<Props, State> {
         <GeoFilePicker onSelect={this._onFileSelect} onClear={this._onFileClear} />
         {this._renderGeoFieldTypeSelect()}
         {this.state.hasFile ? (
-          <IndexNameForm
-            indexName={this.props.indexName}
-            indexNameError={this.props.indexNameError}
-            onIndexNameChange={this.props.onIndexNameChange}
-            onIndexNameValidationStart={this.props.onIndexNameValidationStart}
-            onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
-          />
+          <>
+            <IndexNameForm
+              indexName={this.props.indexName}
+              indexNameError={this.props.indexNameError}
+              onIndexNameChange={this.props.onIndexNameChange}
+              onIndexNameValidationStart={this.props.onIndexNameValidationStart}
+              onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
+            />
+
+            <EuiCallOut
+              title={i18n.translate('xpack.fileUpload.indexNameForm.indexNameGuidelines', {
+                defaultMessage: 'Index name guidelines',
+              })}
+              size="s"
+            >
+              <ul style={{ marginBottom: 0 }}>
+                <li>
+                  {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.mustBeNewIndex', {
+                    defaultMessage: 'Must be a new index',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.lowercaseOnly', {
+                    defaultMessage: 'Lowercase only',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.cannotInclude', {
+                    defaultMessage:
+                      'Cannot include \\\\, /, *, ?, ", <, >, |, \
+                      " " (space character), , (comma), #',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.cannotStartWith', {
+                    defaultMessage: 'Cannot start with -, _, +',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.cannotBe', {
+                    defaultMessage: 'Cannot be . or ..',
+                  })}
+                </li>
+                <li>
+                  {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.length', {
+                    defaultMessage:
+                      'Cannot be longer than 255 bytes (note it is bytes, \
+                      so multi-byte characters will count towards the 255 \
+                      limit faster)',
+                  })}
+                </li>
+              </ul>
+            </EuiCallOut>
+          </>
         ) : null}
       </EuiForm>
     );

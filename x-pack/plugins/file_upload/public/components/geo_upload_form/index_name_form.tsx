@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { EuiFormRow, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiSpacer, CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { validateIndexName } from '../../validate_index_name';
 
@@ -19,7 +19,7 @@ export interface Props {
   onIndexNameValidationEnd: () => void;
 }
 
-export class IndexNameForm extends Component<Props> {
+export class IndexNameForm extends Component<CommonProps & Props> {
   private _isMounted = false;
 
   componentDidMount() {
@@ -66,53 +66,10 @@ export class IndexNameForm extends Component<Props> {
             aria-label={i18n.translate('xpack.fileUpload.indexNameForm.indexNameReqField', {
               defaultMessage: 'Index name, required field',
             })}
+            {...this.props}
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.fileUpload.indexNameForm.indexNameGuidelines', {
-            defaultMessage: 'Index name guidelines',
-          })}
-          size="s"
-        >
-          <ul style={{ marginBottom: 0 }}>
-            <li>
-              {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.mustBeNewIndex', {
-                defaultMessage: 'Must be a new index',
-              })}
-            </li>
-            <li>
-              {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.lowercaseOnly', {
-                defaultMessage: 'Lowercase only',
-              })}
-            </li>
-            <li>
-              {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.cannotInclude', {
-                defaultMessage:
-                  'Cannot include \\\\, /, *, ?, ", <, >, |, \
-                  " " (space character), , (comma), #',
-              })}
-            </li>
-            <li>
-              {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.cannotStartWith', {
-                defaultMessage: 'Cannot start with -, _, +',
-              })}
-            </li>
-            <li>
-              {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.cannotBe', {
-                defaultMessage: 'Cannot be . or ..',
-              })}
-            </li>
-            <li>
-              {i18n.translate('xpack.fileUpload.indexNameForm.guidelines.length', {
-                defaultMessage:
-                  'Cannot be longer than 255 bytes (note it is bytes, \
-                  so multi-byte characters will count towards the 255 \
-                  limit faster)',
-              })}
-            </li>
-          </ul>
-        </EuiCallOut>
       </>
     );
   }

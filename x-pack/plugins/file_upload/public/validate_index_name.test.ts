@@ -22,7 +22,7 @@ describe('checkIndexPatternValid', () => {
   validNames.forEach((validName) => {
     it(`Should validate index pattern: "${validName}"`, () => {
       const isValid = checkIndexPatternValid(validName);
-      expect(isValid).toEqual(true);
+      expect(isValid).toEqual(undefined); // check if there's no error message
     });
   });
 
@@ -50,7 +50,7 @@ describe('checkIndexPatternValid', () => {
   inValidNames.forEach((inValidName) => {
     it(`Should invalidate index pattern: "${inValidName}"`, () => {
       const isValid = checkIndexPatternValid(inValidName);
-      expect(isValid).toEqual(false);
+      expect(isValid).not.toEqual(undefined); // check if there's error message
     });
   });
 });

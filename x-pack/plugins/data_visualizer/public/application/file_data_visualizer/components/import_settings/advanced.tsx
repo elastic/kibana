@@ -15,6 +15,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  CommonProps,
 } from '@elastic/eui';
 
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
@@ -46,7 +47,7 @@ interface Props {
   canCreateDataView: boolean;
 }
 
-export const AdvancedSettings: FC<Props> = ({
+export const AdvancedSettings: FC<Props & CommonProps> = ({
   index,
   dataView,
   initialized,
@@ -66,6 +67,7 @@ export const AdvancedSettings: FC<Props> = ({
   onCombinedFieldsChange,
   results,
   canCreateDataView,
+  ...otherProps
 }) => {
   const IndexNameForm = getIndexNameFormComponent();
 
@@ -77,6 +79,7 @@ export const AdvancedSettings: FC<Props> = ({
         onIndexNameChange={onIndexChange}
         onIndexNameValidationStart={() => {}}
         onIndexNameValidationEnd={() => {}}
+        {...otherProps}
       />
 
       <EuiSpacer size="m" />

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 
-import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
+import { EuiTabbedContent, EuiSpacer, CommonProps } from '@elastic/eui';
 
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { SimpleSettings } from './simple';
@@ -37,7 +37,7 @@ interface Props {
   results: FindFileStructureResponse;
 }
 
-export const ImportSettings: FC<Props> = ({
+export const ImportSettings: FC<Props & CommonProps> = ({
   index,
   dataView,
   initialized,
@@ -56,6 +56,7 @@ export const ImportSettings: FC<Props> = ({
   combinedFields,
   onCombinedFieldsChange,
   results,
+  ...otherProps
 }) => {
   const {
     services: {
@@ -85,6 +86,7 @@ export const ImportSettings: FC<Props> = ({
             indexNameError={indexNameError}
             combinedFields={combinedFields}
             canCreateDataView={canCreateDataView}
+            {...otherProps}
           />
         </React.Fragment>
       ),
@@ -118,6 +120,7 @@ export const ImportSettings: FC<Props> = ({
             onCombinedFieldsChange={onCombinedFieldsChange}
             results={results}
             canCreateDataView={canCreateDataView}
+            {...otherProps}
           />
         </React.Fragment>
       ),
