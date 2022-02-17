@@ -122,6 +122,8 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
             ? {
                 containerStyles: {
                   backgroundColor: metric.bgColor,
+                  minHeight: '100%',
+                  minWidth: '100%',
                 },
               }
             : undefined
