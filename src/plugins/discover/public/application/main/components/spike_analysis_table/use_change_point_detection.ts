@@ -7,9 +7,14 @@
  */
 
 import { useCallback, useMemo, useReducer, useRef } from 'react';
+
 import { chunk, debounce } from 'lodash';
 
+import { asyncForEach } from '@kbn/std';
+
 import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+
+import type { DataView } from '../../../../../../data_views/public';
 
 import type { WindowParameters } from '../chart/get_window_parameters';
 
@@ -76,6 +81,7 @@ export interface ChangePointsResponse {
   ccsWarning: boolean;
   changePoints?: ChangePoint[];
   fieldStats?: FieldStats[];
+  overallTimeSeries?: { data: any[] };
 }
 
 export const DEBOUNCE_INTERVAL = 100;
@@ -87,27 +93,32 @@ const LOADED_DONE = 1;
 const PROGRESS_STEP_P_VALUES = 0.9;
 
 export function useChangePointDetection(
-  indexPatternTitle: string,
+  dataView: DataView,
   searchStrategyParams?: WindowParameters
 ) {
   const {
+    data,
     core: { http },
   } = useDiscoverServices();
+  const discoverQuery = data.query.getEsQuery(dataView);
+
   // const fetchParams = useFetchParams();
+
+  const { title: dataViewTitle } = dataView;
 
   // ?kuery=&rangeFrom=now-1y%2Fd&rangeTo=now&environment=ENVIRONMENT_ALL&transactionName=PUT%20%2Fapi%2Fsecurity%2Frole%2F%3F&transactionType=request&comparisonEnabled=true&comparisonType=period&latencyAggregationType=avg&transactionId=54c7151a517c62fa&traceId=6ee0f571e2d75cf83ca1767f748cb2dc
   const fetchParams = useMemo(
     () => ({
-      indexPatternTitle,
-      start: '2020-02-09T23:00:00.000Z',
-      end: '2022-02-09T23:00:00.000Z',
+      indexPatternTitle: dataViewTitle,
+      start: '1970-02-09T23:00:00.000Z',
+      end: '2100-02-09T23:00:00.000Z',
       kuery: '',
       environment: 'ENVIRONMENT_ALL',
       // serviceName: 'myServiceName',
       // transactionName: 'PUT /api/security/role/',
       // transactionType: 'request',
     }),
-    [indexPatternTitle]
+    [dataViewTitle]
   );
 
   // This use of useReducer (the dispatch function won't get reinstantiated
@@ -230,7 +241,49 @@ export function useChangePointDetection(
         }
       );
 
+      // overall time series
+      const body = JSON.stringify({
+        query: discoverQuery,
+        fields: [{ fieldName: '@timestamp', type: 'date' }],
+        samplerShardSize: -1,
+      });
+
+      const overallTimeSeries = await http.post<unknown[]>({
+        path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
+        body,
+      });
+
+      // time series filtered by fields
+      if (responseUpdate.changePoints) {
+        await asyncForEach(responseUpdate.changePoints, async (cp, index) => {
+          const histogramQuery = {
+            bool: {
+              filter: [
+                ...discoverQuery.bool.filter,
+                {
+                  term: { [cp.fieldName]: cp.fieldValue },
+                },
+              ],
+            },
+          };
+
+          const hBody = JSON.stringify({
+            query: histogramQuery,
+            fields: [{ fieldName: '@timestamp', type: 'date' }],
+            samplerShardSize: -1,
+          });
+
+          const cpTimeSeries = await http.post<unknown[]>({
+            path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
+            body: hBody,
+          });
+
+          responseUpdate.changePoints[index].histogram = cpTimeSeries[0].data;
+        });
+      }
+
       responseUpdate.fieldStats = stats;
+      responseUpdate.overallTimeSeries = overallTimeSeries[0];
       setResponse({
         ...responseUpdate,
         loaded: LOADED_DONE,
@@ -247,7 +300,7 @@ export function useChangePointDetection(
         setResponse.flush();
       }
     }
-  }, [http, fetchParams, setResponse, searchStrategyParams]);
+  }, [dataViewTitle, discoverQuery, http, fetchParams, setResponse, searchStrategyParams]);
 
   const cancelFetch = useCallback(() => {
     abortCtrl.current.abort();

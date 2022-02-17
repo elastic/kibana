@@ -26,7 +26,7 @@ const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
 const AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE = 200;
 const FIELDS_REQUEST_BATCH_SIZE = 10;
 
-const MAX_CHART_COLUMNS = 20;
+const MAX_CHART_COLUMNS = 40;
 
 interface FieldData {
   fieldName: string;

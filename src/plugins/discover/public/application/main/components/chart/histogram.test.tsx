@@ -12,6 +12,7 @@ import { DataCharts$ } from '../../utils/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { Chart } from './point_series';
 import { DiscoverHistogram } from './histogram';
+import { VIEW_MODE } from '../../../../components/view_mode_toggle/constants';
 import React from 'react';
 import * as hooks from '../../utils/use_data_state';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -73,9 +74,11 @@ function mountComponent(fetchStatus: FetchStatus) {
   }) as DataCharts$;
 
   const timefilterUpdateHandler = jest.fn();
+  const spikeSelectionUpdateHandler = jest.fn();
 
   const props = {
     savedSearchData$: charts$,
+    spikeSelectionUpdateHandler,
     timefilterUpdateHandler,
     stateContainer: {
       appStateContainer: {
@@ -84,6 +87,7 @@ function mountComponent(fetchStatus: FetchStatus) {
         }),
       },
     } as unknown as GetStateReturn,
+    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
   };
 
   return mountWithIntl(

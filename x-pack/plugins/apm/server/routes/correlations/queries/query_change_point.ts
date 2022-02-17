@@ -10,7 +10,7 @@ import { ElasticsearchClient } from 'kibana/server';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import { CorrelationsParams } from '../../../../common/correlations/types';
 import { ChangePointParams } from '../../../../common/correlations/change_point/types';
-import { getQueryWithParams, getTermsQuery } from './get_query_with_params';
+import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export const getChangePointRequest = (
@@ -103,11 +103,11 @@ export const fetchChangePointPValues = async (
       request
     );
 
-    if (resp.body.aggregations === undefined) {
+    if (resp.aggregations === undefined) {
       throw new Error('fetchChangePoint failed, did not return aggregations.');
     }
 
-    const overallResult = resp.body.aggregations.change_point_p_value;
+    const overallResult = resp.aggregations.change_point_p_value;
 
     // Using for of to sequentially augment the results with histogram data.
     for (const bucket of overallResult.buckets) {

@@ -9,10 +9,20 @@
 import React, { useCallback, useEffect, useMemo, useState, FC } from 'react';
 import { orderBy } from 'lodash';
 
-import { EuiBasicTable, EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { Chart, BarSeries, ScaleType, Settings } from '@elastic/charts';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSplitPanel,
+  EuiStat,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { WindowParameters } from '../chart/get_window_parameters';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 
 import { ImpactBar } from './impact_bar';
 import { useChangePointDetection, ChangePoint } from './use_change_point_detection';
@@ -26,9 +36,9 @@ const noDataText = i18n.translate('xpack.apm.correlations.correlationsTable.noDa
   defaultMessage: 'No data',
 });
 
-const errorMessage = i18n.translate('xpack.apm.correlations.correlationsTable.errorMessage', {
-  defaultMessage: 'Failed to fetch',
-});
+// const errorMessage = i18n.translate('xpack.apm.correlations.correlationsTable.errorMessage', {
+//   defaultMessage: 'Failed to fetch',
+// });
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 
@@ -47,6 +57,10 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   indexPattern,
   spikeSelection,
 }) => {
+  const { theme } = useDiscoverServices();
+  const chartTheme = theme.useChartsTheme();
+  const chartBaseTheme = theme.useChartsBaseTheme();
+
   const failedTransactionsCorrelationsColumns: Array<EuiBasicTableColumn<ChangePoint>> =
     useMemo(() => {
       const percentageColumns: Array<EuiBasicTableColumn<ChangePoint>> = [
@@ -207,10 +221,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   //   />
   // );
 
-  const { progress, response, startFetch } = useChangePointDetection(
-    indexPattern.title,
-    spikeSelection
-  );
+  const { progress, response, startFetch } = useChangePointDetection(indexPattern, spikeSelection);
   const status = progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS;
 
   useEffect(() => {
@@ -253,39 +264,113 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     // onTableChange(tableSettings);
   }, []);
 
+  const barSeries = useMemo(
+    () => orderBy(response?.overallTimeSeries?.data ?? [], 'normalizedScore', 'desc'),
+    [response?.overallTimeSeries?.data]
+  );
+
+  const cpBarSeries =
+    response.changePoints?.map((cp) => {
+      return {
+        ...cp,
+        data:
+          cp?.histogram?.map((h, i) => {
+            return {
+              ...h,
+              other: Math.max(0, barSeries[i].doc_count - h.doc_count),
+            };
+          }) ?? [],
+      };
+    }) ?? [];
+
   return (
-    <EuiBasicTable
-      items={pageOfItems ?? []}
-      noItemsMessage={status === FETCH_STATUS.LOADING ? loadingText : noDataText}
-      loading={status === FETCH_STATUS.LOADING}
-      error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
-      columns={columns}
-      rowProps={(term) => {
-        return {
-          onClick: () => {
-            // if (setPinnedSignificantTerm) {
-            //   setPinnedSignificantTerm(term);
-            // }
-          },
-          onMouseEnter: () => {
-            // setSelectedSignificantTerm(term);
-          },
-          onMouseLeave: () => {
-            // setSelectedSignificantTerm(null);
-          },
-          // style:
-          //   selectedTerm &&
-          //   selectedTerm.fieldValue === term.fieldValue &&
-          //   selectedTerm.fieldName === term.fieldName
-          //     ? {
-          //         backgroundColor: euiTheme.eui.euiColorLightestShade,
-          //       }
-          //     : null,
-        };
-      }}
-      pagination={pagination}
-      onChange={onChange}
-      // sorting={sorting}
-    />
+    <EuiFlexItem grow={false} style={{ height: '100%', overflow: 'hidden' }}>
+      <div style={{ padding: '16px', overflow: 'scroll' }}>
+        <EuiFlexGroup wrap gutterSize="xs">
+          {cpBarSeries.map((cp) => {
+            return (
+              <EuiFlexItem>
+                <EuiSplitPanel.Outer grow>
+                  <EuiSplitPanel.Inner grow={false} paddingSize="s">
+                    <div
+                      style={{
+                        width: '200px',
+                        height: '50px',
+                        // margin: '0px 0 16px 8px',
+                      }}
+                    >
+                      <Chart>
+                        <Settings theme={chartTheme} baseTheme={chartBaseTheme} />
+                        <BarSeries
+                          id="Other"
+                          xScaleType={ScaleType.Time}
+                          yScaleType={ScaleType.Linear}
+                          xAccessor={'key'}
+                          yAccessors={['other']}
+                          data={cp.data as any[]}
+                          stackAccessors={[0]}
+                          // color={['lightblue']}
+                        />
+                        <BarSeries
+                          id={`${cp.fieldName}:${cp.fieldValue}`}
+                          xScaleType={ScaleType.Time}
+                          yScaleType={ScaleType.Linear}
+                          xAccessor={'key'}
+                          yAccessors={['doc_count']}
+                          data={cp.data as any[]}
+                          stackAccessors={[0]}
+                          color={['orange']}
+                        />
+                      </Chart>
+                    </div>
+                  </EuiSplitPanel.Inner>
+                  <EuiSplitPanel.Inner
+                    color="subdued"
+                    paddingSize="s"
+                    style={{ width: '200px', overflow: 'hidden' }}
+                  >
+                    <EuiStat title={cp.fieldValue} description={cp.fieldName} titleSize="xxxs" />
+                  </EuiSplitPanel.Inner>
+                </EuiSplitPanel.Outer>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+
+        <EuiBasicTable
+          items={pageOfItems ?? []}
+          noItemsMessage={status === FETCH_STATUS.LOADING ? loadingText : noDataText}
+          loading={status === FETCH_STATUS.LOADING}
+          // error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
+          columns={columns}
+          rowProps={(term) => {
+            return {
+              onClick: () => {
+                // if (setPinnedSignificantTerm) {
+                //   setPinnedSignificantTerm(term);
+                // }
+              },
+              onMouseEnter: () => {
+                // setSelectedSignificantTerm(term);
+              },
+              onMouseLeave: () => {
+                // setSelectedSignificantTerm(null);
+              },
+              // style:
+              //   selectedTerm &&
+              //   selectedTerm.fieldValue === term.fieldValue &&
+              //   selectedTerm.fieldName === term.fieldName
+              //     ? {
+              //         backgroundColor: euiTheme.eui.euiColorLightestShade,
+              //       }
+              //     : null,
+            };
+          }}
+          pagination={pagination}
+          onChange={onChange}
+          // sorting={sorting}
+        />
+      </div>
+    </EuiFlexItem>
   );
 };
