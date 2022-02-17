@@ -18,6 +18,7 @@ import {
   formatDate,
 } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiInMemoryTable } from '@elastic/eui';
 import moment from 'moment';
@@ -45,7 +46,7 @@ export const StdErrorLogs = ({
   const columns = [
     {
       field: '@timestamp',
-      name: 'Timestamp',
+      name: TIMESTAMP_LABEL,
       sortable: true,
       render: (date: string) => formatDate(date, 'dateTime'),
     },
@@ -97,19 +98,19 @@ export const StdErrorLogs = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
-            <h3>{title ?? 'Test run logs'}</h3>
+            <h3>{title ?? TEST_RUN_LOGS_LABEL}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiLink>
             <EuiButtonEmpty href={discoverLink} iconType="discoverApp" isDisabled={!discoverLink}>
-              View in discover
+              {VIEW_IN_DISCOVER_LABEL}
             </EuiButtonEmpty>
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiCallOut title="Error summary" color="danger" iconType="alert">
+      <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
         <p>{summaryMessage}</p>
       </EuiCallOut>
 
@@ -129,3 +130,19 @@ export const StdErrorLogs = ({
     </>
   );
 };
+
+export const TIMESTAMP_LABEL = i18n.translate('xpack.uptime.monitorList.timestamp', {
+  defaultMessage: 'Timestamp',
+});
+
+export const ERROR_SUMMARY_LABEL = i18n.translate('xpack.uptime.monitorList.errorSummary', {
+  defaultMessage: 'Error summary',
+});
+
+export const VIEW_IN_DISCOVER_LABEL = i18n.translate('xpack.uptime.monitorList.viewInDiscover', {
+  defaultMessage: 'View in discover',
+});
+
+export const TEST_RUN_LOGS_LABEL = i18n.translate('xpack.uptime.monitorList.testRunLogs', {
+  defaultMessage: 'Test run logs',
+});

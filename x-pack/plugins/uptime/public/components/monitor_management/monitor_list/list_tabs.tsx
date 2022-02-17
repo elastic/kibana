@@ -41,14 +41,14 @@ export const MonitorListTabs = ({
   const tabs = [
     {
       id: 'all',
-      name: 'All monitors',
+      name: ALL_MONITORS_LABEL,
       content: <Fragment />,
       href: history.createHref({ pathname: '/manage-monitors/all' }),
       disabled: false,
     },
     {
       id: 'invalid',
-      name: 'Invalid monitors',
+      name: INVALID_MONITORS_LABEL,
       append: (
         <EuiNotificationBadge
           className="eui-alignCenter"
@@ -104,4 +104,12 @@ export const MonitorListTabs = ({
 
 export const REFRESH_LABEL = i18n.translate('xpack.uptime.monitorList.refresh', {
   defaultMessage: 'Refresh list',
+});
+
+export const INVALID_MONITORS_LABEL = i18n.translate('xpack.uptime.monitorList.invalidMonitors', {
+  defaultMessage: 'Invalid monitors',
+});
+
+export const ALL_MONITORS_LABEL = i18n.translate('xpack.uptime.monitorList.allMonitors', {
+  defaultMessage: 'All monitors',
 });

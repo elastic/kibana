@@ -41,7 +41,7 @@ export const InlineError = ({ errorSummary }: { errorSummary: Ping }) => {
 
 export const getInlineErrorLabel = (message?: string) => {
   return i18n.translate('xpack.uptime.monitorList.statusColumn.error.message', {
-    defaultMessage: '{message}, Click for more details.',
+    defaultMessage: '{message}. Click for more details.',
     values: { message },
   });
 };
