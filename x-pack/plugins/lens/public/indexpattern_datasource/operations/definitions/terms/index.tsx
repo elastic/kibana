@@ -19,7 +19,6 @@ import {
   htmlIdGenerator,
   EuiButtonGroup,
 } from '@elastic/eui';
-import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
