@@ -23,15 +23,17 @@ export interface ResourceType extends FindingsEvaluations {
   name: string;
 }
 
+export interface Cluster {
+  meta: {
+    clusterId: string;
+    benchmarkName: string;
+  };
+  stats: Stats;
+  resourcesTypes: ResourceType[];
+}
+
 export interface CloudPostureStats {
   stats: Stats;
   resourcesTypes: ResourceType[];
-  clusters: Array<{
-    meta: {
-      clusterId: string;
-      benchmarkName: string;
-    };
-    stats: Stats;
-    resourcesTypes: ResourceType[];
-  }>;
+  clusters: Cluster[];
 }

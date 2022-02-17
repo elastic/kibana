@@ -65,7 +65,7 @@ export const SummarySection = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <ChartPanel title={TEXT.RISKS} isLoading={getStats.isLoading} isError={getStats.isError}>
-          <RisksTable data={getStats.data?.resourcesTypes} />
+          <RisksTable data={getStats.data.resourcesTypes} />
         </ChartPanel>
       </EuiFlexItem>
       <EuiFlexItem>
