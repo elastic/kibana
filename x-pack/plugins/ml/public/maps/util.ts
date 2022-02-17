@@ -23,6 +23,32 @@ export const ML_ANOMALY_LAYERS = {
 } as const;
 
 export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMALY_LAYERS];
+const INFLUENCER_LIMIT = 2;
+const INFLUENCER_MAX_VALUES = 5;
+
+function getInfluencersHtmlString(
+  influencers: Array<{ influencer_field_name: string; influencer_field_values: string[] }>
+) {
+  let htmlString = '<ul>';
+  for (let i = 0; i < influencers.length; i++) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { influencer_field_name, influencer_field_values } = influencers[i];
+    // Skip if there are no values
+    if (!influencer_field_values.length) continue;
+
+    const fieldValuesString = influencer_field_values.slice(0, INFLUENCER_MAX_VALUES).join(', ');
+
+    htmlString += `<li>${influencer_field_name}: ${fieldValuesString}</li>`;
+
+    // Only show top two influencers
+    if (i === INFLUENCER_LIMIT - 1) {
+      htmlString += '</ul>';
+      break;
+    }
+  }
+
+  return htmlString;
+}
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
 function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {
@@ -154,6 +180,9 @@ export async function getResultsForJobId(
           ...(_source.by_field_name ? { [_source.by_field_name]: _source.by_field_value } : {}),
           ...(_source.over_field_name
             ? { [_source.over_field_name]: _source.over_field_value }
+            : {}),
+          ...(_source.influencers
+            ? { influencers: getInfluencersHtmlString(_source.influencers) }
             : {}),
         },
       };
