@@ -4,7 +4,7 @@
   ],
   "description": "Detects events which have a mismatch on the expected event agent ID. The status \"agent_id_mismatch\" occurs when the expected agent ID associated with the API key does not match the actual agent ID in an event. This could indicate attempts to spoof events in order to masquerade actual activity to evade detection.",
   "false_positives": [
-    "This is meant to run only on datasources using agents v7.14+ since versions prior to that will be missing the necessary field, resulting in false positives."
+    "This is meant to run only on datasources using Elastic Agent 7.14+ since versions prior to that will be missing the necessary field, resulting in false positives."
   ],
   "from": "now-9m",
   "index": [
@@ -43,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }
