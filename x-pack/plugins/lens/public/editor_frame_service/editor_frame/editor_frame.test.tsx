@@ -476,6 +476,8 @@ describe('editor_frame', () => {
         getOperationForColumnId: jest.fn(),
         getTableSpec: jest.fn(),
         getVisualDefaults: jest.fn(),
+        getSourceId: jest.fn(),
+        getFilters: jest.fn(),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 

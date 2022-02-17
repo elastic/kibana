@@ -8,7 +8,7 @@
 import React from 'react';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
-import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
+import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../types';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
@@ -1204,7 +1204,7 @@ describe('IndexPattern Data Source', () => {
 
     describe('getTableSpec', () => {
       it('should include col1', () => {
-        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col1' }]);
+        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col1', fields: ['op'] }]);
       });
 
       it('should skip columns that are being referenced', () => {
@@ -1241,7 +1241,7 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
 
-        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col2' }]);
+        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col2', fields: ['test'] }]);
       });
     });
 
@@ -1252,7 +1252,9 @@ describe('IndexPattern Data Source', () => {
           dataType: 'string',
           isBucketed: true,
           isStaticValue: false,
-        } as Operation);
+          hasFilter: false,
+          hasTimeShift: false,
+        } as OperationDescriptor);
       });
 
       it('should return null for non-existant columns', () => {

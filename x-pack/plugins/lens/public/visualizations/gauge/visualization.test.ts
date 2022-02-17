@@ -8,7 +8,7 @@
 import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from './visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { GROUP_ID } from './constants';
-import type { DatasourcePublicAPI, Operation } from '../../types';
+import type { DatasourcePublicAPI, OperationDescriptor } from '../../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import type { GaugeVisualizationState } from './constants';
@@ -58,7 +58,7 @@ describe('gauge', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -461,7 +461,7 @@ describe('gauge', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
@@ -532,7 +532,7 @@ describe('gauge', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };

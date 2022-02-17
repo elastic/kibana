@@ -20,7 +20,7 @@ import {
 } from './constants';
 import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
-import type { DatasourcePublicAPI, Operation } from '../types';
+import type { DatasourcePublicAPI, OperationDescriptor } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { layerTypes } from '../../common';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
@@ -99,7 +99,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -363,7 +363,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -483,7 +483,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -612,7 +612,7 @@ describe('heatmap', () => {
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         label: 'MyOperation',
-      } as Operation);
+      } as OperationDescriptor);
 
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,

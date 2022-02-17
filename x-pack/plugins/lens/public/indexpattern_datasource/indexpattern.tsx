@@ -48,7 +48,12 @@ import {
 import { getFiltersInLayer, getVisualDefaultsForLayer, isColumnInvalid } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
-import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
+import {
+  GenericIndexPatternColumn,
+  getErrorMessages,
+  insertNewColumn,
+  TermsIndexPatternColumn,
+} from './operations';
 import {
   IndexPatternField,
   IndexPatternPrivateState,
@@ -71,6 +76,7 @@ import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../common/constants';
+import { isColumnOfType } from './operations/definitions/helpers';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -454,10 +460,13 @@ export function getIndexPatternDatasource({
       return {
         datasourceId: 'indexpattern',
         getTableSpec: () => {
-          const fieldsPerColumn = visibleColumnIds.map((colId) => {
+          // consider also referenced columns in this case
+          const fieldsPerColumn = layer.columnOrder.map((colId) => {
             const column = layer.columns[colId];
+            if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
+              return [column.sourceField].concat(column.params.secondaryFields ?? []);
+            }
             if ('sourceField' in column) {
-              // TOOD: Multi-terms support?
               return [column.sourceField].filter((field) => field !== DOCUMENT_FIELD_NAME);
             }
           });
