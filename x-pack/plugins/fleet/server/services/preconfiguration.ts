@@ -22,7 +22,7 @@ import type {
   PackagePolicy,
 } from '../../common';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
-import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
+import { normalizeHostsForAgents } from '../../common';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -32,7 +32,7 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { preconfigurePackageInputs, packagePolicyService } from './package_policy';
+import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';

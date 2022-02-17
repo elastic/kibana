@@ -50,7 +50,7 @@ export const upgradeManagedPackagePolicies = async (
         if (isPolicyVersionGteInstalledVersion(packagePolicy, installedPackage)) {
           continue;
         }
-        upgradePackagePolicy(soClient, esClient, packagePolicy.id, results);
+        await upgradePackagePolicy(soClient, esClient, packagePolicy.id, results);
       }
     }
   }
