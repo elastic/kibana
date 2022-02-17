@@ -66,6 +66,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
           projectID: schema.maybe(schema.string()),
           timeFrom: schema.maybe(schema.string()),
           timeTo: schema.maybe(schema.string()),
+          n: schema.maybe(schema.number()),
         }),
       },
     },
