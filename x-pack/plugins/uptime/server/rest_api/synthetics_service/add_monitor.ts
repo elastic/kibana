@@ -19,6 +19,7 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
+    const monitors = [];
 
     const validationResult = validateMonitor(monitor as MonitorFields);
 
@@ -27,26 +28,29 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    for (let i = 0; i < 500; i++) {
-      await savedObjectsClient.create<SyntheticsMonitor>(syntheticsMonitorType, monitor);
+    for (let i = 0; i < 200; i++) {
+      const mon = savedObjectsClient.create<SyntheticsMonitor>(syntheticsMonitorType, monitor);
+      monitors.push(mon);
     }
 
-    // const { syntheticsService } = server;
+    const newMonitor = monitors[0];
 
-    // const errors = await syntheticsService.pushConfigs(request, [
-    //   {
-    //     ...newMonitor.attributes,
-    //     id: newMonitor.id,
-    //     fields: {
-    //       config_id: newMonitor.id,
-    //     },
-    //     fields_under_root: true,
-    //   },
-    // ]);
+    const { syntheticsService } = server;
 
-    // if (errors) {
-    //   return errors;
-    // }
+    const errors = await syntheticsService.pushConfigs(request, [
+      {
+        ...newMonitor.attributes,
+        id: newMonitor.id,
+        fields: {
+          config_id: newMonitor.id,
+        },
+        fields_under_root: true,
+      },
+    ]);
+
+    if (errors) {
+      return errors;
+    }
 
     return [];
   },
