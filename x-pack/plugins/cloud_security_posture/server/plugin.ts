@@ -19,6 +19,7 @@ import type {
   CspServerPluginStartDeps,
 } from './types';
 import { defineRoutes } from './routes';
+import { cspRuleTemplateAssetType } from './saved_objects/cis_1_4_1/csp_rule_template';
 
 export class CspPlugin
   implements
@@ -38,6 +39,8 @@ export class CspPlugin
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
+    core.savedObjects.registerType(cspRuleTemplateAssetType);
+
     const router = core.http.createRouter();
 
     // Register server side APIs

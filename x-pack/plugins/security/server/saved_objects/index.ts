@@ -12,7 +12,6 @@ import type { AuditServiceSetup } from '../audit';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { SpacesService } from '../plugin';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
-export { cspRuleTemplateAssetType } from './csp_rule_template';
 
 interface SetupSavedObjectsParams {
   audit: AuditServiceSetup;

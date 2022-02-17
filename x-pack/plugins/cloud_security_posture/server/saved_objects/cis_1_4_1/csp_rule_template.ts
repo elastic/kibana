@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsType } from '../../../../../src/core/server';
+import type { SavedObjectsType } from '../../../../../../src/core/server';
 
 export const ruleTemplateSavedObjectType = 'csp-rule-template';
 
