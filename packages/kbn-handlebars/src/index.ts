@@ -45,7 +45,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private scopes: any[] = [];
   private values: any[] = [];
   private helpers: { [name: string]: Handlebars.HelperDelegate };
-  private ast: hbs.AST.Program;
+  private template: string;
+  private ast?: hbs.AST.Program;
   private defaultHelperOptions: Handlebars.HelperOptions = {
     // @ts-expect-error this function is lifted from the handlebars source and slightly modified (lib/handlebars/runtime.js)
     lookupProperty(parent, propertyName) {
@@ -66,13 +67,18 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   constructor(template: string, helpers: { [name: string]: Handlebars.HelperDelegate }) {
     super();
-    this.ast = Handlebars.parse(template);
+    this.template = template;
     this.helpers = helpers;
   }
 
   render(context: any): string {
     this.scopes = [context];
     this.values = [];
+
+    if (!this.ast) {
+      this.ast = Handlebars.parse(this.template); // TODO: can we get away with using parseWithoutProcessing instead?
+    }
+
     this.accept(this.ast);
     return this.values.join('');
   }
