@@ -71,7 +71,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Generating signals from source indexes', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('Generating signals from source indexes', () => {
     beforeEach(async () => {
       await deleteSignalsIndex(supertest, log);
       await createSignalsIndex(supertest, log);

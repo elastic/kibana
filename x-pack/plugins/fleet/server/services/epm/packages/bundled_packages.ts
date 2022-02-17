@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 
+import type { BundledPackage } from '../../../types';
 import { appContextService } from '../../app_context';
+import { splitPkgKey } from '../registry';
 
 const BUNDLED_PACKAGE_DIRECTORY = path.join(__dirname, '../../../bundled_packages');
-
-interface BundledPackage {
-  name: string;
-  buffer: Buffer;
-}
 
 export async function getBundledPackages(): Promise<BundledPackage[]> {
   try {
@@ -26,8 +23,11 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
       zipFiles.map(async (zipFile) => {
         const file = await fs.readFile(path.join(BUNDLED_PACKAGE_DIRECTORY, zipFile));
 
+        const { pkgName, pkgVersion } = splitPkgKey(zipFile.replace(/\.zip$/, ''));
+
         return {
-          name: zipFile.replace(/\.zip$/, ''),
+          name: pkgName,
+          version: pkgVersion,
           buffer: file,
         };
       })
@@ -40,4 +40,11 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
 
     return [];
   }
+}
+
+export async function getBundledPackageByName(name: string): Promise<BundledPackage | undefined> {
+  const bundledPackages = await getBundledPackages();
+  const bundledPackage = bundledPackages.find((pkg) => pkg.name === name);
+
+  return bundledPackage;
 }
