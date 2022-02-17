@@ -15,7 +15,7 @@ import {
 import { ExpandableEventTitle } from '../event_details/expandable_event';
 import { ACTIVE_PANEL } from '../event_details';
 
-interface IProps {
+export interface IProps {
   activePanel: ACTIVE_PANEL | null;
   isAlert: boolean;
   isolateAction: string;
@@ -38,6 +38,7 @@ const EventDetailsFlyoutHeaderComponent: React.FC<IProps> = ({
     case ACTIVE_PANEL.OSQUERY:
       return (
         <EventDetailsBackToAlertDetailsLink
+          data-test-subj={'flyout-header-osquery'}
           primaryText={<h2>{ACTION_OSQUERY}</h2>}
           handleClick={showAlertDetails}
         />
@@ -45,6 +46,7 @@ const EventDetailsFlyoutHeaderComponent: React.FC<IProps> = ({
     case ACTIVE_PANEL.HOST_ISOLATION:
       return (
         <EventDetailsBackToAlertDetailsLink
+          data-test-subj={'flyout-header-host-isolation'}
           primaryText={<h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>}
           handleClick={showAlertDetails}
         />
@@ -52,6 +54,7 @@ const EventDetailsFlyoutHeaderComponent: React.FC<IProps> = ({
     default:
       return (
         <ExpandableEventTitle
+          data-test-subj={'flyout-header-default'}
           isAlert={isAlert}
           loading={loading}
           ruleName={ruleName}

@@ -10,3 +10,4 @@ export { EventDetailsFlyoutFooter } from './flyout_footer';
 export { EventDetailsFlyoutHeader } from './flyout_header';
 export type { IProps as IFlyoutBodyProps } from './flyout_body';
 export type { IProps as IFlyoutFooterProps } from './flyout_footer';
+export type { IProps as IFlyoutHeaderProps } from './flyout_header';

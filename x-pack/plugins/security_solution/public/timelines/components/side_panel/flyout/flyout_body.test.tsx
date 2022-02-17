@@ -14,16 +14,16 @@ import { TestProviders } from '../../../../common/mock';
 import { ACTIVE_PANEL } from '../event_details';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-jest.mock('.../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
+jest.mock('.../../../../common/hooks/use_app_toasts');
 
-const addErrorMock = jest.fn();
-const addSuccessMock = jest.fn();
-const addWarningMock = jest.fn();
 describe('Flyout body', () => {
   let wrapper: ReactWrapper;
+  const addErrorMock = jest.fn();
+  const addSuccessMock = jest.fn();
+  const addWarningMock = jest.fn();
 
   const defaultProps: IFlyoutBodyProps = {
     browserFields: {},
