@@ -43,7 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
     getBody: () => BodyReturnType;
   }>;
 
-  describe('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let existingExceptionData: ArtifactTestData;
 

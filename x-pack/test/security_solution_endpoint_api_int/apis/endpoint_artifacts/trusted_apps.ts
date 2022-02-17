@@ -28,7 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin): Trusted Applications', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('Endpoint artifacts (via lists plugin): Trusted Applications', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
