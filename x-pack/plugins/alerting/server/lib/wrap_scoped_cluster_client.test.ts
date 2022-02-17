@@ -146,5 +146,9 @@ describe('wrapScopedClusterClient', () => {
     const stats = wrappedSearchClientFactory.getStats();
     expect(stats.numQueries).toEqual(3);
     expect(stats.totalQueryDurationMs).toEqual(999);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      `executing query for rule .test-rule-type:abcdefg - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+    );
   });
 });
