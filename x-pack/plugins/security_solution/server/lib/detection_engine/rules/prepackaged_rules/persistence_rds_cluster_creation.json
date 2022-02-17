@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the creation of a new Amazon Relational Database Service (RDS) Aurora DB cluster or global database spread across multiple regions.",
   "false_positives": [
-    "Valid clusters may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Cluster creations from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Valid clusters may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Cluster creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -62,5 +62,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }

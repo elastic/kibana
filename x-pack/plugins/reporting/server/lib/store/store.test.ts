@@ -5,8 +5,6 @@
  * 2.0.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
 import {
@@ -16,12 +14,10 @@ import {
 } from '../../test_helpers';
 import { Report, ReportDocument, ReportingStore, SavedReport } from './';
 
-const { createApiResponse } = elasticsearchServiceMock;
-
 describe('ReportingStore', () => {
   const mockLogger = createMockLevelLogger();
   let mockCore: ReportingCore;
-  let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(async () => {
     const reportingConfig = {
@@ -31,12 +27,12 @@ describe('ReportingStore', () => {
     mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
     mockEsClient = (await mockCore.getEsClient()).asInternalUser as typeof mockEsClient;
 
-    mockEsClient.indices.create.mockResolvedValue({} as any);
-    mockEsClient.indices.exists.mockResolvedValue({} as any);
-    mockEsClient.indices.refresh.mockResolvedValue({} as any);
-    mockEsClient.get.mockResolvedValue({} as any);
-    mockEsClient.index.mockResolvedValue({ body: { _id: 'stub-id', _index: 'stub-index' } } as any);
-    mockEsClient.update.mockResolvedValue({} as any);
+    mockEsClient.indices.create.mockResponse({} as any);
+    mockEsClient.indices.exists.mockResponse({} as any);
+    mockEsClient.indices.refresh.mockResponse({} as any);
+    mockEsClient.get.mockResponse({} as any);
+    mockEsClient.index.mockResponse({ _id: 'stub-id', _index: 'stub-index' } as any);
+    mockEsClient.update.mockResponse({} as any);
   });
 
   describe('addReport', () => {
@@ -85,7 +81,7 @@ describe('ReportingStore', () => {
 
     it('handles error creating the index', async () => {
       // setup
-      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.exists.mockResponse(false);
       mockEsClient.indices.create.mockRejectedValue(new Error('horrible error'));
 
       const store = new ReportingStore(mockCore, mockLogger);
@@ -108,7 +104,7 @@ describe('ReportingStore', () => {
      */
     it('ignores index creation error if the index already exists and continues adding the report', async () => {
       // setup
-      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.exists.mockResponse(false);
       mockEsClient.indices.create.mockRejectedValue(new Error('devastating error'));
 
       const store = new ReportingStore(mockCore, mockLogger);
@@ -125,7 +121,7 @@ describe('ReportingStore', () => {
 
     it('skips creating the index if already exists', async () => {
       // setup
-      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.exists.mockResponse(false);
       // will be triggered but ignored
       mockEsClient.indices.create.mockRejectedValue(new Error('resource_already_exists_exception'));
 
@@ -149,7 +145,7 @@ describe('ReportingStore', () => {
 
     it('allows username string to be `false`', async () => {
       // setup
-      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.exists.mockResponse(false);
       // will be triggered but ignored
       mockEsClient.indices.create.mockRejectedValue(new Error('resource_already_exists_exception'));
 
@@ -197,9 +193,17 @@ describe('ReportingStore', () => {
         max_attempts: 1,
         timeout: 30000,
         output: null,
+        metrics: {
+          png: {
+            cpu: 0.02,
+            cpuInPercentage: 2,
+            memory: 1024 * 1024,
+            memoryInMegabytes: 1,
+          },
+        },
       },
     };
-    mockEsClient.get.mockResolvedValue({ body: mockReport } as any);
+    mockEsClient.get.mockResponse(mockReport as any);
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new Report({
       ...mockReport,
@@ -222,6 +226,14 @@ describe('ReportingStore', () => {
         "max_attempts": 1,
         "meta": Object {
           "testMeta": "meta",
+        },
+        "metrics": Object {
+          "png": Object {
+            "cpu": 0.02,
+            "cpuInPercentage": 2,
+            "memory": 1048576,
+            "memoryInMegabytes": 1,
+          },
         },
         "migration_version": "7.14.0",
         "output": null,
@@ -405,8 +417,8 @@ describe('ReportingStore', () => {
 
   describe('start', () => {
     it('creates an ILM policy for managing reporting indices if there is not already one', async () => {
-      mockEsClient.ilm.getLifecycle.mockRejectedValueOnce(createApiResponse({ statusCode: 404 }));
-      mockEsClient.ilm.putLifecycle.mockResolvedValueOnce(createApiResponse());
+      mockEsClient.ilm.getLifecycle.mockRejectedValue({ statusCode: 404 });
+      mockEsClient.ilm.putLifecycle.mockResponse({} as any);
 
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();
@@ -429,7 +441,7 @@ describe('ReportingStore', () => {
     });
 
     it('does not create an ILM policy for managing reporting indices if one already exists', async () => {
-      mockEsClient.ilm.getLifecycle.mockResolvedValueOnce(createApiResponse());
+      mockEsClient.ilm.getLifecycle.mockResponse({});
 
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();

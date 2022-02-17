@@ -6,8 +6,6 @@
  */
 
 import { fetchKibanaVersions } from './fetch_kibana_versions';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 jest.mock('../../static_globals', () => ({
@@ -35,9 +33,9 @@ describe('fetchKibanaVersions', () => {
   const size = 10;
 
   it('fetch as expected', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           index: {
             buckets: [
@@ -76,7 +74,7 @@ describe('fetchKibanaVersions', () => {
             ],
           },
         },
-      })
+      }
     );
 
     const result = await fetchKibanaVersions(esClient, clusters, size);
@@ -104,6 +102,7 @@ describe('fetchKibanaVersions', () => {
                 bool: {
                   should: [
                     { term: { type: 'kibana_stats' } },
+                    { term: { 'metricset.name': 'stats' } },
                     { term: { 'data_stream.dataset': 'kibana.stats' } },
                   ],
                   minimum_should_match: 1,
@@ -143,7 +142,7 @@ describe('fetchKibanaVersions', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     await fetchKibanaVersions(esClient, clusters, size);
     // @ts-ignore

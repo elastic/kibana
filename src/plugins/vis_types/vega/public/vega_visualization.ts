@@ -64,6 +64,7 @@ export const createVegaVisualization = (
 
     async _render(vegaParser: VegaParser) {
       if (vegaParser) {
+        vegaParser.searchAPI.inspectorAdapters?.vega.clearError();
         // New data received, rebuild the graph
         if (this.vegaView) {
           await this.vegaView.destroy();

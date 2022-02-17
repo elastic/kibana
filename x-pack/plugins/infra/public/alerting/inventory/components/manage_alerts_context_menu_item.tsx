@@ -8,15 +8,12 @@
 import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLinkProps } from '../../../hooks/use_link_props';
+import { useRulesLink } from '../../../../../observability/public';
 
 export const ManageAlertsContextMenuItem = () => {
-  const manageAlertsLinkProps = useLinkProps({
-    app: 'management',
-    pathname: '/insightsAndAlerting/triggersActions/alerts',
-  });
+  const manageRulesLinkProps = useRulesLink();
   return (
-    <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageAlertsLinkProps}>
+    <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageRulesLinkProps}>
       <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage rules" />
     </EuiContextMenuItem>
   );
