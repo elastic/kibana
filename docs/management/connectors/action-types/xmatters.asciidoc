@@ -5,18 +5,7 @@
 <titleabbrev>xMatters</titleabbrev>
 ++++
 
-The xMatters connector uses https://github.com/axios/axios[axios] to send a POST request to an xMatters trigger.
-
-[float]
-[[xmatters-connector-prerequisites]]
-==== Prerequisites ** still needs to be string reviewed by the xMatters team **
-First Elastic must be configured within your xMatters instance. In your xMatters instance, navigate to workflows. Once you have installed the Elastic workflow template or created a custom workflow with the Elastic trigger, you can begin configuration.
-
-. Open the trigger in the workflow
-. Choose the type of authentication
-. Copy the URL (this is the URL to use in the xMatters connector in Elastic)
-
-For more information and documentation visit https://help.xmatters.com/integrations/#cshid=Elastic[xMatters Documentation].
+The xMatters connector uses the https://help.xmatters.com/integrations/#cshid=Elastic[xMatters Workflow for Elastic] to send actionable alerts to on-call xMatters resources.
 
 [float]
 [[xmatters-connector-configuration]]
@@ -25,8 +14,8 @@ For more information and documentation visit https://help.xmatters.com/integrati
 xMatters connectors have the following configuration properties.
 
 Name::                                 The name of the connector. The name is used to identify a connector in the management UI connector listing, or in the connector list when configuring an action.
+Authentication Type::                                                                                                                  The type of authentication used in the request made to xMatters.
 URL:: The request URL for the Elastic Alerts trigger in xMatters. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-Require authentication::                                                                                               If true, a username and password for login type authentication must be provided.
 Username::                                                                                                                                                      Username for HTTP Basic Authentication.
 Password::                                                                                                                                                      Password for HTTP Basic Authentication.
 
@@ -50,17 +39,19 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
    secrets:
      user: testuser
      password: passwordkeystorevalue
+     url: https://test.host?apiKey=1234-abcd
 --
 
 Config defines information for the connector type.
 
-`url`:: A URL string that corresponds to *URL*.
-`hasAuth`:: A boolean that corresponds to *Requires authentication*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
+`url`:: A URL string that corresponds to *URL*. Only used if `usesBasic` is true.
+`usesBasic`:: A boolean that corresponds to *Authentication Type*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
 
 Secrets defines sensitive information for the connector type.
 
-`user`:: A string that corresponds to *User*. Required if `hasAuth` is set to `true`.
-`password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
+`user`:: A string that corresponds to *User*. Required if `usesBasic` is set to `true`.
+`password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `usesBasic` is set to `true`.
+`url`:: A URL string that corresponds to *URL*. Only used if `usesBasic` is false, indicating the API Key is included in the URL.
 
 [float]
 [[define-xmatters-ui]]
@@ -82,16 +73,25 @@ image::management/connectors/images/xmatters-params-test.png[xMatters params tes
 
 xMatters rules have the following properties.
 
-severity:                                                     Severity of the rule.
-tags: Comma-separated list of tags for the rule as provided by the user in Elastic.
+Severity::                                                     Severity of the rule.
+Tags:: Comma-separated list of tags for the rule as provided by the user in Elastic.
 
-Here is an example set of inputs:
---
-{
-  "severity": "High",
-  "tags": "{tags}",
-}
---
+[float]
+[[xmatters-benefits]]
+==== Configure xMatters
+
+By integrating with xMatters, you can
+
+[float]
+[[xmatters-connector-prerequisites]]
+==== Prerequisites ** still needs to be string reviewed by the xMatters team **
+First Elastic must be configured within your xMatters instance. In your xMatters instance, navigate to workflows. Once you have installed the Elastic workflow template or created a custom workflow with the Elastic trigger, you can begin setup.
+
+. Open the trigger in the workflow
+. Choose the type of authentication
+. Copy the URL (this is the URL to use in the xMatters connector in Elastic)
+. Paste the URL into the connector in Elastic once you have selected the appropriate authentication type
+
 
 Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have
 their values escaped, so that the final JSON will be valid (escaping double quote characters).

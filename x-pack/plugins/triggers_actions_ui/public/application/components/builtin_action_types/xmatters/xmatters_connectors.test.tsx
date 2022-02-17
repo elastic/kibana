@@ -23,7 +23,7 @@ describe('XmattersActionConnectorFields renders', () => {
       name: 'xmatters',
       config: {
         url: 'http:\\test',
-        hasAuth: true,
+        usesBasic: true,
       },
     } as XmattersActionConnector;
     const wrapper = mountWithIntl(
@@ -48,7 +48,7 @@ describe('XmattersActionConnectorFields renders', () => {
       actionTypeId: '.xmatters',
       isPreconfigured: false,
       config: {
-        hasAuth: true,
+        usesBasic: true,
       },
     } as XmattersActionConnector;
     const wrapper = mountWithIntl(
@@ -78,7 +78,7 @@ describe('XmattersActionConnectorFields renders', () => {
       name: 'xmatters',
       config: {
         url: 'http:\\test',
-        hasAuth: true,
+        usesBasic: true,
       },
     } as XmattersActionConnector;
     const wrapper = mountWithIntl(
@@ -109,7 +109,7 @@ describe('XmattersActionConnectorFields renders', () => {
       name: 'xmatters',
       config: {
         url: 'http:\\test',
-        hasAuth: true,
+        usesBasic: true,
       },
     } as XmattersActionConnector;
     const wrapper = mountWithIntl(

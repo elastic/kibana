@@ -51,7 +51,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           connector_type_id: '.xmatters',
           config: {
             url: xmattersSimulatorURL,
-            hasAuth: false,
+            usesBasic: false,
           },
         })
         .expect(200);
@@ -64,7 +64,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         is_missing_secrets: false,
         config: {
           url: xmattersSimulatorURL,
-          hasAuth: false,
+          usesBasic: false,
         },
       });
 
@@ -84,7 +84,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           },
           config: {
             url: xmattersSimulatorURL,
-            hasAuth: true,
+            usesBasic: true,
           },
         })
         .expect(200);
@@ -97,7 +97,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         is_missing_secrets: false,
         config: {
           url: xmattersSimulatorURL,
-          hasAuth: true,
+          usesBasic: true,
         },
       });
 
@@ -135,7 +135,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           connector_type_id: '.xmatters',
           config: {
             url: xmattersSimulatorURL,
-            hasAuth: false,
+            usesBasic: false,
           },
           secrets: {
             user: 'username',

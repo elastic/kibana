@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+jest.mock('./lib/post_xmatters', () => ({
+  postXmatters: jest.fn(),
+}));
+
 import { Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
+import { postXmatters } from './lib/post_xmatters';
 import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
 import { actionsMock } from '../mocks';
-import axios from 'axios';
 import {
   ActionParamsType,
   ActionTypeConfigType,
@@ -20,22 +24,7 @@ import {
   XmattersActionType,
 } from './xmatters';
 
-import * as utils from './lib/axios_utils';
-
-jest.mock('axios');
-jest.mock('./lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('./lib/axios_utils');
-  return {
-    ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
-  };
-});
-
-axios.create = jest.fn(() => axios);
-const requestMock = utils.request as jest.Mock;
-
-axios.create = jest.fn(() => axios);
+const postxMattersMock = postXmatters as jest.Mock;
 
 const ACTION_TYPE_ID = '.xmatters';
 
@@ -74,7 +63,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, { user: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: Both user and password must be specified"`
+      `"error validating action type secrets: Username is required when password is used."`
     );
   });
 
@@ -86,8 +75,8 @@ describe('secrets validation', () => {
 describe('config validation', () => {
   test('config validation passes when only required fields are provided', () => {
     const config: Record<string, string | boolean> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      hasAuth: true,
+      urlConfig: 'http://mylisteningserver:9200/endpoint',
+      usesBasic: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
@@ -96,8 +85,8 @@ describe('config validation', () => {
 
   test('config validation passes when a url is specified', () => {
     const config: Record<string, string | boolean> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      hasAuth: true,
+      urlConfig: 'http://mylisteningserver:9200/endpoint',
+      usesBasic: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
@@ -105,8 +94,9 @@ describe('config validation', () => {
   });
 
   test('config validation failed when a url is invalid', () => {
-    const config: Record<string, string> = {
-      url: 'example.com/do-something',
+    const config: Record<string, string | boolean> = {
+      urlConfig: 'example.com/do-something',
+      usesBasic: true,
     };
     expect(() => {
       validateConfig(actionType, config);
@@ -119,8 +109,8 @@ describe('config validation', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
-      url: 'http://mylisteningserver.com:9200/endpoint',
-      hasAuth: true,
+      urlConfig: 'http://mylisteningserver.com:9200/endpoint',
+      usesBasic: true,
     };
 
     expect(validateConfig(actionType, config)).toEqual({
@@ -142,7 +132,8 @@ describe('config validation', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
-      url: 'http://mylisteningserver.com:9200/endpoint',
+      urlConfig: 'http://mylisteningserver.com:9200/endpoint',
+      usesBasic: true,
     };
 
     expect(() => {
@@ -183,7 +174,7 @@ describe('params validation', () => {
 
 describe('execute()', () => {
   beforeAll(() => {
-    requestMock.mockReset();
+    postxMattersMock.mockReset();
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: actionsConfigMock.create(),
@@ -191,8 +182,8 @@ describe('execute()', () => {
   });
 
   beforeEach(() => {
-    requestMock.mockReset();
-    requestMock.mockResolvedValue({
+    postxMattersMock.mockReset();
+    postxMattersMock.mockResolvedValue({
       status: 200,
       statusText: '',
       data: '',
@@ -202,8 +193,8 @@ describe('execute()', () => {
 
   test('execute with username/password sends request with basic auth', async () => {
     const config: ActionTypeConfigType = {
-      url: 'https://abc.def/my-xmatters',
-      hasAuth: true,
+      urlConfig: 'https://abc.def/my-xmatters',
+      usesBasic: true,
     };
     await actionType.executor({
       actionId: 'some-id',
@@ -221,26 +212,10 @@ describe('execute()', () => {
       },
     });
 
-    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+    const { url, data, auth } = postxMattersMock.mock.calls[0][0];
+    expect({ url, data, auth }).toMatchInlineSnapshot(`
       Object {
-        "auth": Object {
-          "password": "123",
-          "username": "abc",
-        },
-        "axios": undefined,
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
+        "auth": undefined,
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
           "date": "2022-01-18T19:01:08.818Z",
@@ -250,30 +225,6 @@ describe('execute()', () => {
           "spaceId": "default",
           "tags": "test1, test2",
         },
-        "logger": Object {
-          "context": Array [],
-          "debug": [MockFunction] {
-            "calls": Array [
-              Array [
-                "response from xMatters action \\"some-id\\": [HTTP 200] ",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        "method": "post",
         "url": "https://abc.def/my-xmatters",
       }
     `);
@@ -281,13 +232,12 @@ describe('execute()', () => {
 
   test('execute with exception maxContentLength size exceeded should log the proper error', async () => {
     const config: ActionTypeConfigType = {
-      url: 'https://abc.def/my-xmatters',
-      hasAuth: true,
+      urlConfig: 'https://abc.def/my-xmatters',
+      usesBasic: true,
     };
-    requestMock.mockReset();
-    requestMock.mockRejectedValueOnce({
+    postxMattersMock.mockReset();
+    postxMattersMock.mockRejectedValueOnce({
       tag: 'err',
-      isAxiosError: true,
       message: 'maxContentLength size of 1000000 exceeded',
     });
     await actionType.executor({
@@ -312,10 +262,13 @@ describe('execute()', () => {
 
   test('execute without username/password sends request without basic auth', async () => {
     const config: ActionTypeConfigType = {
-      url: 'https://abc.def/my-xmatters',
-      hasAuth: false,
+      usesBasic: false,
     };
-    const secrets: ActionTypeSecretsType = { user: null, password: null };
+    const secrets: ActionTypeSecretsType = {
+      user: null,
+      password: null,
+      urlSecrets: 'https://abc.def/my-xmatters?apiKey=someKey',
+    };
     await actionType.executor({
       actionId: 'some-id',
       services,
@@ -332,22 +285,9 @@ describe('execute()', () => {
       },
     });
 
-    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+    expect(postxMattersMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "axios": undefined,
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
+        "basicAuth": undefined,
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
           "date": "2022-01-18T19:01:08.818Z",
@@ -357,31 +297,7 @@ describe('execute()', () => {
           "spaceId": "default",
           "tags": "test1, test2",
         },
-        "logger": Object {
-          "context": Array [],
-          "debug": [MockFunction] {
-            "calls": Array [
-              Array [
-                "response from xMatters action \\"some-id\\": [HTTP 200] ",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        "method": "post",
-        "url": "https://abc.def/my-xmatters",
+        "url": "https://abc.def/my-xmatters?apiKey=someKey",
       }
     `);
   });

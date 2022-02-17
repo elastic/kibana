@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -16,113 +16,162 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiSwitch,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { XmattersActionConnector } from '../types';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { XmattersActionConnector, XmattersAuthenticationType } from '../types';
 
 const XmattersActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<XmattersActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const { user, password } = action.secrets;
-  const { url, hasAuth } = action.config;
+  const { user, password, urlSecrets } = action.secrets;
+  const { urlConfig, usesBasic } = action.config;
 
   useEffect(() => {
     if (!action.id) {
-      editActionConfig('hasAuth', true);
+      editActionConfig('usesBasic', true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const isUrlInvalid: boolean =
-    errors.url !== undefined && errors.url.length > 0 && url !== undefined;
+    errors.urlSecrets !== undefined &&
+    errors.urlSecrets.length > 0 &&
+    urlSecrets !== undefined &&
+    errors.urlConfig !== undefined &&
+    errors.urlConfig.length > 0 &&
+    urlConfig !== undefined;
   const isPasswordInvalid: boolean =
     password !== undefined && errors.password !== undefined && errors.password.length > 0;
   const isUserInvalid: boolean =
     user !== undefined && errors.user !== undefined && errors.user.length > 0;
 
+  const authenticationButtons = [
+    { id: XmattersAuthenticationType.Basic, label: 'Basic Authentication' },
+    { id: XmattersAuthenticationType.URL, label: 'URL Authentication' },
+  ];
+
+  const [selectedAuth, setSelectedAuth] = useState(XmattersAuthenticationType.Basic);
+
   return (
     <>
+      <EuiTitle size="xxs">
+        <h4>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.authenticationLabel"
+            defaultMessage="Authentication"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiFormRow fullWidth>
+        <p>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.connectorSettingsLabel"
+            defaultMessage="Select the authentication method used when setting up the xMatters trigger."
+          />
+        </p>
+      </EuiFormRow>
+      <EuiSpacer size="l" />
+      <EuiButtonGroup
+        isFullWidth
+        buttonSize="m"
+        legend="Basic Authentication"
+        options={authenticationButtons}
+        color="primary"
+        idSelected={selectedAuth}
+        onChange={(id: string) => {
+          if (id === 'Basic Authentication') {
+            setSelectedAuth(XmattersAuthenticationType.Basic);
+            editActionConfig('usesBasic', true);
+          } else {
+            setSelectedAuth(XmattersAuthenticationType.URL);
+            editActionConfig('usesBasic', false);
+          }
+        }}
+      />
+      <EuiSpacer size="m" />
+      {selectedAuth === XmattersAuthenticationType.URL ? (
+        <>
+          <EuiFormRow fullWidth>
+            <p>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.urlReenterDescription"
+                defaultMessage="You must reenter this value each time you edit the connector."
+              />
+            </p>
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFormRow
             id="url"
             fullWidth
-            error={errors.url}
+            error={usesBasic ? errors.urlConfig : errors.urlSecrets}
             isInvalid={isUrlInvalid}
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.urlTextFieldLabel',
+              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.connectorSettingsFieldLabel',
               {
-                defaultMessage: 'URL',
+                defaultMessage: 'Initiation URL',
               }
             )}
+            helpText={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.initiationUrlHelpText"
+                defaultMessage="Include the full xMatters url."
+              />
+            }
           >
             <EuiFieldText
               name="url"
               isInvalid={isUrlInvalid}
               fullWidth
               readOnly={readOnly}
-              value={url || ''}
+              value={usesBasic ? urlConfig : urlSecrets}
               data-test-subj="xmattersUrlText"
               onChange={(e) => {
-                editActionConfig('url', e.target.value);
+                if (selectedAuth === XmattersAuthenticationType.Basic) {
+                  editActionConfig('urlConfig', e.target.value);
+                  editActionSecrets('urlSecrets', '');
+                } else {
+                  editActionSecrets('urlSecrets', e.target.value);
+                  editActionConfig('urlConfig', '');
+                }
               }}
               onBlur={() => {
-                if (!url) {
-                  editActionConfig('url', '');
+                if (!urlConfig || !urlSecrets) {
+                  editActionConfig('urlConfig', '');
+                  editActionSecrets('urlSecrets', '');
                 }
               }}
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      {selectedAuth === XmattersAuthenticationType.Basic ? (
+        <>
           <EuiSpacer size="m" />
           <EuiTitle size="xxs">
             <h4>
               <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.authenticationLabel"
-                defaultMessage="Authentication"
+                id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.userCredsLabel"
+                defaultMessage="User credentials"
               />
             </h4>
           </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiSwitch
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.hasAuthSwitchLabel',
-              {
-                defaultMessage: 'Require Basic Authentication for xMatters.',
-              }
-            )}
-            disabled={readOnly}
-            checked={hasAuth}
-            onChange={(e) => {
-              editActionConfig('hasAuth', e.target.checked);
-              if (!e.target.checked) {
-                editActionSecrets('user', null);
-                editActionSecrets('password', null);
-              }
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {hasAuth ? (
-        <>
-          {getEncryptedFieldNotifyLabel(
-            !action.id,
-            2,
-            action.isMissingSecrets ?? false,
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.reenterValuesLabel',
-              {
-                defaultMessage:
-                  'Username and password are encrypted. Please reenter values for these fields.',
-              }
-            )
-          )}
+          <EuiSpacer size="xs" />
+          <EuiFormRow fullWidth>
+            <p>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.userCredsDescription"
+                defaultMessage="You will need to reenter these credentials each time you edit the connector."
+              />
+            </p>
+          </EuiFormRow>
+          <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiFormRow
@@ -155,6 +204,8 @@ const XmattersActionConnectorFields: React.FunctionComponent<
                 />
               </EuiFormRow>
             </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
                 id="xmattersPassword"
@@ -189,7 +240,6 @@ const XmattersActionConnectorFields: React.FunctionComponent<
           </EuiFlexGroup>
         </>
       ) : null}
-      <EuiSpacer size="m" />
     </>
   );
 };

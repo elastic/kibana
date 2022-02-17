@@ -7,9 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { curry, isString } from 'lodash';
-import { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { isOk, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
@@ -28,8 +26,8 @@ export type XmattersActionTypeExecutorOptions = ActionTypeExecutorOptions<
 >;
 
 const configSchemaProps = {
-  url: schema.string(),
-  hasAuth: schema.boolean({ defaultValue: true }),
+  urlConfig: schema.maybe(schema.string()),
+  usesBasic: schema.boolean({ defaultValue: true }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -39,6 +37,7 @@ export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
+  urlSecrets: schema.maybe(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
@@ -82,7 +81,9 @@ export function getActionType({
       config: schema.object(configSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
-      secrets: SecretsSchema,
+      secrets: schema.object(secretSchemaProps, {
+        validate: curry(validateActionTypeSecrets)(configurationUtilities),
+      }),
       params: ParamsSchema,
     },
     executor: curry(executor)({ logger, configurationUtilities }),
@@ -93,9 +94,11 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ): string | undefined {
-  const configuredUrl = configObject.url;
+  const configuredUrl = configObject.urlConfig;
   try {
-    new URL(configuredUrl);
+    if (configuredUrl) {
+      new URL(configuredUrl);
+    }
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
       defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
@@ -106,7 +109,41 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureUriAllowed(configuredUrl);
+    if (configuredUrl) {
+      configurationUtilities.ensureUriAllowed(configuredUrl);
+    }
+  } catch (allowListError) {
+    return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
+      defaultMessage: 'Error configuring xMatters action: {message}',
+      values: {
+        message: allowListError.message,
+      },
+    });
+  }
+}
+
+function validateActionTypeSecrets(
+  configurationUtilities: ActionsConfigurationUtilities,
+  secretsObject: ActionTypeSecretsType
+): string | undefined {
+  const secretsUrl = secretsObject.urlSecrets;
+  try {
+    if (secretsUrl) {
+      new URL(secretsUrl);
+    }
+  } catch (err) {
+    return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
+      defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
+      values: {
+        err,
+      },
+    });
+  }
+
+  try {
+    if (secretsUrl) {
+      configurationUtilities.ensureUriAllowed(secretsUrl);
+    }
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
       defaultMessage: 'Error configuring xMatters action: {message}',
@@ -126,17 +163,21 @@ export async function executor(
   execOptions: XmattersActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const { url, hasAuth } = execOptions.config;
+  const { urlConfig, usesBasic } = execOptions.config;
   const data = getPayloadForRequest(execOptions.params);
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const basicAuth =
-    hasAuth && isString(secrets.user) && isString(secrets.password)
+    usesBasic && isString(secrets.user) && isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
-      : {};
+      : undefined;
+  const url = usesBasic ? urlConfig : secrets.urlSecrets;
 
-  let result: Result<AxiosResponse, AxiosError>;
+  let result;
   try {
+    if (!url) {
+      throw new Error('Error: no url provided');
+    }
     result = await postXmatters({ url, data, basicAuth }, logger, configurationUtilities);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.xmatters.postingErrorMessage', {
@@ -151,106 +192,31 @@ export async function executor(
     };
   }
 
-  if (isOk(result)) {
-    const {
-      value: { status, statusText },
-    } = result;
+  if (result.status >= 200 && result.status < 300) {
+    const { status, statusText } = result;
     logger.debug(`response from xMatters action "${actionId}": [HTTP ${status}] ${statusText}`);
 
     return successResult(actionId, data);
-  } else {
-    const { error } = result;
-    if (error.response) {
-      const {
-        status,
-        statusText,
-        data: { message: responseMessage },
-      } = error.response;
-      const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
-      const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
-      logger.error(`Error on ${actionId} xMatters event: ${message}`);
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      // special handling for 5xx
-      if (status >= 500) {
-        return retryResult(actionId, message);
-      }
-      return errorResultInvalid(actionId, message);
-    } else if (error.code) {
-      const message = `[${error.code}] ${error.message}`;
-      logger.error(`Error on ${actionId} xMatters event: ${message}`);
-      return errorResultRequestFailed(actionId, message);
-    } else if (error.isAxiosError) {
-      const message = `${error.message}`;
-      logger.error(`Error on ${actionId} xMatters event: ${message}`);
-      return errorResultRequestFailed(actionId, message);
-    }
-
-    logger.error(`Error on ${actionId} xMatters action: unexpected error`);
-    return errorResultUnexpectedError(actionId);
   }
+
+  const message = i18n.translate('xpack.actions.builtin.xmatters.postingRetryErrorMessage', {
+    defaultMessage: 'Error triggering xMatters flow: http status {status}, retry later',
+    values: {
+      status: result.status,
+    },
+  });
+
+  return {
+    status: 'error',
+    actionId,
+    message,
+    retry: true,
+  };
 }
 
 // Action Executor Result w/ internationalisation
 function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };
-}
-
-function errorResultInvalid(
-  actionId: string,
-  serviceMessage: string
-): ActionTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.xmatters.invalidResponseErrorMessage', {
-    defaultMessage: 'Error calling xMatters, invalid response',
-  });
-  return {
-    status: 'error',
-    message: errMessage,
-    actionId,
-    serviceMessage,
-  };
-}
-
-function errorResultRequestFailed(
-  actionId: string,
-  serviceMessage: string
-): ActionTypeExecutorResult<unknown> {
-  const errMessage = i18n.translate('xpack.actions.builtin.xmatters.requestFailedErrorMessage', {
-    defaultMessage: 'Error calling xMatters, request failed',
-  });
-  return {
-    status: 'error',
-    message: errMessage,
-    actionId,
-    serviceMessage,
-  };
-}
-
-function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.xmatters.unreachableErrorMessage', {
-    defaultMessage: 'Error calling xMatters, unexpected error',
-  });
-  return {
-    status: 'error',
-    message: errMessage,
-    actionId,
-  };
-}
-
-function retryResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult<void> {
-  const errMessage = i18n.translate(
-    'xpack.actions.builtin.xmatters.invalidResponseRetryLaterErrorMessage',
-    {
-      defaultMessage: 'Error calling xMatters, retry later',
-    }
-  );
-  return {
-    status: 'error',
-    message: errMessage,
-    retry: true,
-    actionId,
-    serviceMessage,
-  };
 }
 
 interface XmattersPayload {

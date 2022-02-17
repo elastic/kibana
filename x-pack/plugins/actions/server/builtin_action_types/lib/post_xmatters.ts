@@ -13,8 +13,21 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 
 interface PostXmattersOptions {
   url: string;
-  data: unknown;
-  basicAuth?: object;
+  data: {
+    alertActionGroupName?: string;
+    signalId?: string;
+    ruleName?: string;
+    date?: string;
+    severity?: string;
+    spaceId?: string;
+    tags?: string;
+  };
+  basicAuth?: {
+    auth: {
+      username: string;
+      password: string;
+    };
+  };
 }
 
 // trigger a flow in xmatters
@@ -22,20 +35,16 @@ export async function postXmatters(
   options: PostXmattersOptions,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
-): Promise<Result<AxiosResponse, AxiosError>> {
+): Promise<AxiosResponse> {
   const { url, data, basicAuth } = options;
   const axiosInstance = axios.create();
-  const result: Result<AxiosResponse, AxiosError> = await promiseResult(
-    request({
-      axios: axiosInstance,
-      method: 'post',
-      url,
-      logger,
-      ...basicAuth,
-      data,
-      configurationUtilities,
-    })
-  );
-
-  return result;
+  return await request({
+    axios: axiosInstance,
+    method: 'post',
+    url,
+    logger,
+    ...basicAuth,
+    data,
+    configurationUtilities,
+  });
 }

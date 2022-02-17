@@ -152,19 +152,25 @@ export interface XmattersActionParams {
 }
 
 export interface XmattersConfig {
-  url: string;
-  hasAuth: boolean;
+  urlConfig?: string;
+  usesBasic: boolean;
 }
 
 export interface XmattersSecrets {
   user: string;
   password: string;
+  urlSecrets?: string;
 }
 
 export type XmattersActionConnector = UserConfiguredActionConnector<
   XmattersConfig,
   XmattersSecrets
 >;
+
+export enum XmattersAuthenticationType {
+  Basic = 'Basic Authentication',
+  URL = 'URL Authentication',
+}
 
 export interface TeamsSecrets {
   webhookUrl: string;

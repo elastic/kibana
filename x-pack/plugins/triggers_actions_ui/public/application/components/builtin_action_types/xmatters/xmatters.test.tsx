@@ -30,7 +30,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('xmatters connector validation', () => {
-  test('connector validation succeeds when hasAuth is true and connector config is valid', async () => {
+  test('connector validation succeeds when usesBasic is true and connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -41,15 +41,15 @@ describe('xmatters connector validation', () => {
       name: 'xmatters',
       isPreconfigured: false,
       config: {
-        url: 'http://test.com',
-        hasAuth: true,
+        urlConfig: 'http://test.com',
+        usesBasic: true,
       },
     } as XmattersActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          url: [],
+          urlConfig: [],
         },
       },
       secrets: {
@@ -61,7 +61,7 @@ describe('xmatters connector validation', () => {
     });
   });
 
-  test('connector validation succeeds when hasAuth is false and connector config is valid', async () => {
+  test('connector validation succeeds when usesBasic is false and connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         user: '',
@@ -72,15 +72,15 @@ describe('xmatters connector validation', () => {
       name: 'xmatters',
       isPreconfigured: false,
       config: {
-        url: 'http://test.com',
-        hasAuth: false,
+        urlConfig: 'http://test.com',
+        usesBasic: false,
       },
     } as XmattersActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          url: [],
+          urlConfig: [],
         },
       },
       secrets: {
@@ -101,14 +101,14 @@ describe('xmatters connector validation', () => {
       actionTypeId: '.xmatters',
       name: 'xmatters',
       config: {
-        hasAuth: true,
+        usesBasic: true,
       },
     } as XmattersActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          url: ['URL is required.'],
+          urlConfig: ['URL is required.'],
         },
       },
       secrets: {
@@ -130,15 +130,15 @@ describe('xmatters connector validation', () => {
       actionTypeId: '.xmatters',
       name: 'xmatters',
       config: {
-        url: 'invalid.url',
-        hasAuth: true,
+        urlConfig: 'invalid.url',
+        usesBasic: true,
       },
     } as XmattersActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          url: ['URL is invalid.'],
+          urlConfig: ['URL is invalid.'],
         },
       },
       secrets: {
