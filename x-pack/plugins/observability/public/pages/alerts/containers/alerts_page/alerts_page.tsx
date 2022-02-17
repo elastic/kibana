@@ -333,6 +333,7 @@ function AlertsPage() {
           <CasesContext
             owner={[observabilityFeatureId]}
             userCanCrud={userPermissions?.crud ?? false}
+            features={{ alerts: { sync: false } }}
           >
             <AlertsTableTGrid
               indexNames={indexNames}
