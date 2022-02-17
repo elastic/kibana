@@ -56,8 +56,10 @@ export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterC
     totalSearchDurationMs += metrics.searchDuration;
   }
 
+  const wrappedClient = wrapScopedClusterClient({ ...opts, logMetricsFn: logMetrics });
+
   return {
-    client: () => wrapScopedClusterClient({ ...opts, logMetricsFn: logMetrics }),
+    client: () => wrappedClient,
     getStats: (): RuleExecutionMetrics => {
       return {
         totalQueryDurationMs,
