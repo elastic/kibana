@@ -17,7 +17,6 @@ import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_format
 export const createSetupDepsMock = () => {
   const cloud = cloudMock.createSetup();
   return {
-    licensing: licensingMock.createSetup(),
     data: dataPluginMock.createSetupContract(),
     home: homePluginMock.createSetupContract(),
     customIntegrations: customIntegrationsMock.createSetup(),
@@ -27,6 +26,7 @@ export const createSetupDepsMock = () => {
 
 export const createStartDepsMock = () => {
   return {
+    licensing: licensingMock.createStart(),
     data: dataPluginMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract() as any,
     navigation: navigationPluginMock.createStartContract(),
