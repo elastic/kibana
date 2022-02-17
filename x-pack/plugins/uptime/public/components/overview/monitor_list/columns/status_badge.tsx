@@ -64,6 +64,7 @@ export const StatusBadge = ({
       setIsOpen={setIsOpen}
       checkGroup={checkGroup!}
       button={button}
+      summaryMessage={summaryError?.message}
     />
   );
 };
