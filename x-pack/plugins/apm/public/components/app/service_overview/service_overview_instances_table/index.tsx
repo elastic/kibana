@@ -145,7 +145,11 @@ export function ServiceOverviewInstancesTable({
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="serviceOverviewInstancesTable"
+    >
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h2>
