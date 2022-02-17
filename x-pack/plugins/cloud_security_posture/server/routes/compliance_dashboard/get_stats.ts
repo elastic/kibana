@@ -49,8 +49,8 @@ export const getEvaluationsQuery = (cycleId: string): SearchRequest => ({
 export const getStatsFromFindingsEvaluationsAggs = (
   findingsEvaluationsAggs: FindingsEvaluationsQueryResult
 ): CloudPostureStats['stats'] => {
-  const failedFindings = findingsEvaluationsAggs.failed_findings.doc_count;
-  const passedFindings = findingsEvaluationsAggs.passed_findings.doc_count;
+  const failedFindings = findingsEvaluationsAggs.failed_findings.doc_count || 0;
+  const passedFindings = findingsEvaluationsAggs.passed_findings.doc_count || 0;
   const totalFindings = failedFindings + passedFindings;
   if (!totalFindings) throw new Error("couldn't calculate posture score");
   const postureScore = calculatePostureScore(passedFindings, failedFindings);

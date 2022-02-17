@@ -6,12 +6,6 @@
  */
 
 import { getResourceTypeFromAggs, ResourceTypeBucket } from './get_resources_types';
-import {
-  calculatePostureScore,
-  FindingsEvaluationsQueryResult,
-  getStatsFromFindingsEvaluationsAggs,
-  roundScore,
-} from './get_stats';
 
 const resourceTypeBuckets: ResourceTypeBucket[] = [
   {

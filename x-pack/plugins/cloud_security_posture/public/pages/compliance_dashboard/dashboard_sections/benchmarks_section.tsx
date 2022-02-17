@@ -105,7 +105,10 @@ export const BenchmarksSection = () => {
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={4} style={{ borderRight: '1px solid #D3DAE6' }}>
+                <EuiFlexItem
+                  grow={4}
+                  style={{ borderRight: `1px solid ${euiTheme.colors.lightShade}` }}
+                >
                   <ChartPanel
                     title={TEXT.COMPLIANCE_SCORE}
                     hasBorder={false}

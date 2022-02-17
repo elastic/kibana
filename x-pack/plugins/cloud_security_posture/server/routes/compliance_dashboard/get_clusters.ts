@@ -14,7 +14,7 @@ import { CloudPostureStats } from '../../../common/types';
 import {
   getResourceTypeFromAggs,
   resourceTypeAggQuery,
-  ResourceTypeQueryResult,
+  type ResourceTypeQueryResult,
 } from './get_resources_types';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';

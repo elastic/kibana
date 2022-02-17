@@ -8,42 +8,42 @@
 import { getTop5Risks, RisksTableProps } from './risks_table';
 
 const podsAgg = {
-  resourceType: 'pods',
+  name: 'pods',
   totalFindings: 2,
   totalPassed: 1,
   totalFailed: 1,
 };
 
 const etcdAgg = {
-  resourceType: 'etcd',
+  name: 'etcd',
   totalFindings: 5,
   totalPassed: 0,
   totalFailed: 5,
 };
 
 const clusterAgg = {
-  resourceType: 'cluster',
+  name: 'cluster',
   totalFindings: 2,
   totalPassed: 2,
   totalFailed: 0,
 };
 
 const systemAgg = {
-  resourceType: 'system',
+  name: 'system',
   totalFindings: 10,
   totalPassed: 6,
   totalFailed: 4,
 };
 
 const apiAgg = {
-  resourceType: 'api',
+  name: 'api',
   totalFindings: 19100,
   totalPassed: 2100,
   totalFailed: 17000,
 };
 
 const serverAgg = {
-  resourceType: 'server',
+  name: 'server',
   totalFindings: 7,
   totalPassed: 4,
   totalFailed: 3,

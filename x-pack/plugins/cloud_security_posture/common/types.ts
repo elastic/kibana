@@ -9,17 +9,17 @@ export type Evaluation = 'passed' | 'failed' | 'NA';
 /** number between 1-100 */
 export type Score = number;
 
-export interface FindingsEvaluations {
+export interface FindingsEvaluation {
   totalFindings: number;
   totalPassed: number;
   totalFailed: number;
 }
 
-export interface Stats extends FindingsEvaluations {
+export interface Stats extends FindingsEvaluation {
   postureScore: Score;
 }
 
-export interface ResourceType extends FindingsEvaluations {
+export interface ResourceType extends FindingsEvaluation {
   name: string;
 }
 
