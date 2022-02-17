@@ -15,11 +15,14 @@ export abstract class ReportingError extends Error {
   }
 
   public get message(): string {
-    return `ReportingError "${this.code}"`;
+    const prefix = `ReportingError`;
+    return this.details
+      ? `${prefix} "${this.details}" (code: ${this.code})`
+      : `${prefix} (code: ${this.code})`;
   }
 
   public toString() {
-    return this.code;
+    return this.message;
   }
 }
 
