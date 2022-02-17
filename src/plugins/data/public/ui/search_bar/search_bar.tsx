@@ -323,7 +323,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       }
     } catch (error) {
       this.services.notifications.toasts.addDanger(
-        `An error occured while saving your query: ${error}`
+        `An error occured while saving your query: ${error.message}`
       );
       throw error;
     }
