@@ -84,6 +84,32 @@ describe('getSeries', () => {
     ]);
   });
 
+  test('should return the correct formula config for a positive only function', () => {
+    const metric = [
+      {
+        field: 'day_of_week_i',
+        id: '123456',
+        type: 'max',
+      },
+      {
+        id: '891011',
+        type: 'positive_only',
+        field: '123456',
+      },
+    ] as Metric[];
+    const config = getSeries(metric);
+    expect(config).toStrictEqual([
+      {
+        agg: 'formula',
+        fieldName: 'document',
+        isFullReference: true,
+        params: {
+          formula: 'clamp(max(day_of_week_i), 0, max(day_of_week_i))',
+        },
+      },
+    ]);
+  });
+
   test('should return the correct config for the cumulative sum on count', () => {
     const metric = [
       {

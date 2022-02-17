@@ -88,4 +88,8 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
     name: 'formula',
     isFullReference: true,
   },
+  positive_only: {
+    name: 'clamp',
+    isFullReference: true,
+  },
 };
