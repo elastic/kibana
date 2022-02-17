@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
 import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
@@ -74,7 +76,26 @@ export class FunctionalTestRunner {
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
+      let reporter;
+      let reporterOptions;
+      if (config.get('mochaOpts.dryRun', false)) {
+        // override default reporter for dryRun results
+        reporter = 'json';
+        reporterOptions = {
+          output: Path.resolve(REPO_ROOT, 'target/functional-tests/dryRunOutput.json'),
+        };
+      }
+
+      const mocha = await setupMocha(
+        this.lifecycle,
+        this.log,
+        config,
+        providers,
+        this.esVersion,
+        reporter,
+        reporterOptions
+      );
+
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
