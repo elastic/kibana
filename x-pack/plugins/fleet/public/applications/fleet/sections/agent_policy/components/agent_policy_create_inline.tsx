@@ -39,7 +39,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 interface Props {
-  updateAgentPolicy: (u: AgentPolicy | null) => void;
+  updateAgentPolicy: (u: AgentPolicy | null, errorMessage?: string) => void;
   isFleetServerPolicy?: boolean;
   agentPolicyName: string;
 }
@@ -84,7 +84,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
         updateAgentPolicy(resp.data.item);
       }
     } catch (e) {
-      updateAgentPolicy(null);
+      updateAgentPolicy(null, e.message);
     } finally {
       setIsLoading(false);
     }
