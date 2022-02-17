@@ -31,6 +31,6 @@ export const txtUseCurrentDateRange = i18n.translate(
 export const txtOpenInNewTab = i18n.translate(
   'xpack.dashboard.components.DashboardDrilldownConfig.openInNewTab',
   {
-    defaultMessage: 'Open in new tab',
+    defaultMessage: 'Open dashboard in new tab',
   }
 );
