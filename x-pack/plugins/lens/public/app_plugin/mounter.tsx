@@ -61,6 +61,7 @@ export async function getLensServices(
     usageCollection,
     fieldFormats,
     spaces,
+    discover,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -94,6 +95,7 @@ export async function getLensServices(
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
     spaces,
+    discover,
   };
 }
 
@@ -114,10 +116,13 @@ export async function mountApp(
     topNavMenuEntryGenerators,
   } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
-  const instance = await createEditorFrame();
+  // const instance = await createEditorFrame();
   const historyLocationState = params.history.location.state as HistoryLocationState;
 
-  const lensServices = await getLensServices(coreStart, startDependencies, attributeService);
+  const [lensServices, instance] = await Promise.all([
+    getLensServices(coreStart, startDependencies, attributeService),
+    createEditorFrame(),
+  ]);
 
   const { stateTransfer, data, storage } = lensServices;
 

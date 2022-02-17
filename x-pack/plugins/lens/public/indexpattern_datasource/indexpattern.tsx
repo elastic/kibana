@@ -18,10 +18,10 @@ import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
   DatasourceDataPanelProps,
-  Operation,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   InitializationOptions,
+  OperationDescriptor,
 } from '../types';
 import {
   loadInitialState,
@@ -45,7 +45,7 @@ import {
   getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
-import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
+import { getFiltersInLayer, getVisualDefaultsForLayer, isColumnInvalid } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
@@ -70,6 +70,7 @@ import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/wor
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
+import { DOCUMENT_FIELD_NAME } from '../../common/constants';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -77,8 +78,8 @@ export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
   dataView?: IndexPattern
-): Operation {
-  const { dataType, label, isBucketed, scale, operationType } = column;
+): OperationDescriptor {
+  const { dataType, label, isBucketed, scale, operationType, timeShift, filter } = column;
   const fieldTypes =
     'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
   return {
@@ -91,6 +92,8 @@ export function columnToOperation(
       column.dataType === 'string' && fieldTypes?.includes(ES_FIELD_TYPES.VERSION)
         ? 'version'
         : undefined,
+    hasTimeShift: Boolean(timeShift),
+    hasFilter: Boolean(filter),
   };
 }
 
@@ -445,18 +448,25 @@ export function getIndexPatternDatasource({
 
     getPublicAPI({ state, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = indexPatternDatasource.uniqueLabels(state);
+      const layer = state.layers[layerId];
+      const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
 
       return {
         datasourceId: 'indexpattern',
-
         getTableSpec: () => {
-          return state.layers[layerId].columnOrder
-            .filter((colId) => !isReferenced(state.layers[layerId], colId))
-            .map((colId) => ({ columnId: colId }));
+          const fieldsPerColumn = visibleColumnIds.map((colId) => {
+            const column = layer.columns[colId];
+            if ('sourceField' in column) {
+              // TOOD: Multi-terms support?
+              return [column.sourceField].filter((field) => field !== DOCUMENT_FIELD_NAME);
+            }
+          });
+          return visibleColumnIds.map((colId, i) => ({
+            columnId: colId,
+            fields: fieldsPerColumn[i] || [],
+          }));
         },
         getOperationForColumnId: (columnId: string) => {
-          const layer = state.layers[layerId];
-
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {
               return columnToOperation(
@@ -468,10 +478,9 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
-        getVisualDefaults: () => {
-          const layer = state.layers[layerId];
-          return getVisualDefaultsForLayer(layer);
-        },
+        getSourceId: () => layer.indexPatternId,
+        getFilters: () => getFiltersInLayer(layer, visibleColumnIds),
+        getVisualDefaults: () => getVisualDefaultsForLayer(layer),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers) {

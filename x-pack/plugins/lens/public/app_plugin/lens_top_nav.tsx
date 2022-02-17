@@ -28,10 +28,16 @@ import {
   DispatchSetState,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
+import {
+  combineQueryAndFilters,
+  getLayerMetaInfo,
+  getShowUnderlyingDataLabel,
+} from './show_underlying_data';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
   enableExportToCSV: boolean;
+  showOpenInDiscover?: boolean;
   showCancel: boolean;
   isByValueMode: boolean;
   allowByValue: boolean;
@@ -46,6 +52,7 @@ function getLensTopNavConfig(options: {
     showCancel,
     allowByValue,
     enableExportToCSV,
+    showOpenInDiscover,
     showSaveAndReturn,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
@@ -87,6 +94,19 @@ function getLensTopNavConfig(options: {
         values: { contextOriginatingApp },
       }),
       disableButton: false,
+    });
+  }
+
+  if (showOpenInDiscover) {
+    topNavMenu.push({
+      label: getShowUnderlyingDataLabel(),
+      run: actions.showUnderlyingData,
+      testId: 'lnsApp_openInDiscover',
+      description: i18n.translate('xpack.lens.app.openInDiscoverAriaLabel', {
+        defaultMessage: 'Open underlying data in Discover',
+      }),
+      disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
+      tooltip: tooltips.showUnderlyingDataWarning,
     });
   }
 
@@ -183,6 +203,7 @@ export const LensTopNavMenu = ({
     uiSettings,
     application,
     attributeService,
+    discover,
     dashboardFeatureFlag,
   } = useKibana<LensAppServices>().services;
 
@@ -290,6 +311,19 @@ export const LensTopNavMenu = ({
     filters,
     initialContext,
   ]);
+
+  const canShowUnderlyingData = useMemo(() => {
+    if (!activeDatasourceId || !discover) {
+      return;
+    }
+    return getLayerMetaInfo(
+      datasourceMap[activeDatasourceId],
+      datasourceStates[activeDatasourceId].state,
+      activeData,
+      discover
+    );
+  }, [activeData, activeDatasourceId, datasourceMap, datasourceStates, discover]);
+
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
@@ -299,6 +333,7 @@ export const LensTopNavMenu = ({
             (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
         ) || Boolean(initialContextIsEmbedded),
       enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
+      showOpenInDiscover: Boolean(canShowUnderlyingData?.isVisible),
       isByValueMode: getIsByValueMode(),
       allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
       showCancel: Boolean(isLinkedToOriginatingApp),
@@ -320,6 +355,9 @@ export const LensTopNavMenu = ({
             }
           }
           return undefined;
+        },
+        showUnderlyingDataWarning: () => {
+          return canShowUnderlyingData?.error;
         },
       },
       actions: {
@@ -389,17 +427,29 @@ export const LensTopNavMenu = ({
           }
         },
         showUnderlyingData: () => {
+          if (!canShowUnderlyingData) {
+            return;
+          }
+          const { error, meta } = canShowUnderlyingData;
           // If Discover is not available, return
           // If there's no data, return
-          if (!activeData) {
+          if (error || !discover || !meta) {
             return;
           }
-          // If Multiple tables, return
-          // If there are time shifts, return
-          const [datatable, ...otherTables] = Object.values(activeData);
-          if (otherTables.length || datatable) {
-            return;
-          }
+          const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+            query,
+            filters,
+            meta,
+            indexPatterns
+          );
+
+          discover.locator!.navigate({
+            indexPatternId: meta.id,
+            timeRange: data.query.timefilter.timefilter.getTime(),
+            filters: newFilters,
+            query: newQuery,
+            columns: meta.columns,
+          });
         },
       },
     });
@@ -411,6 +461,7 @@ export const LensTopNavMenu = ({
     initialContextIsEmbedded,
     isSaveable,
     activeData,
+    canShowUnderlyingData,
     getIsByValueMode,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
@@ -427,6 +478,11 @@ export const LensTopNavMenu = ({
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
+    discover,
+    query,
+    filters,
+    indexPatterns,
+    data.query.timefilter.timefilter,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

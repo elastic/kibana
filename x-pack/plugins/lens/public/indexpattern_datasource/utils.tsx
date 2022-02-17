@@ -12,6 +12,7 @@ import type { DocLinksStart } from 'kibana/public';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { DatatableColumn } from 'src/plugins/expressions';
+import { groupBy } from 'lodash';
 import type { FramePublicAPI, StateSetter } from '../types';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -23,11 +24,12 @@ import {
   CountIndexPatternColumn,
   updateColumnParam,
   updateDefaultLabels,
+  RangeIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
-import { isQueryValid } from './operations/definitions/filters';
-import { checkColumnForPrecisionError } from '../../../../../src/plugins/data/common';
+import { FiltersIndexPatternColumn, isQueryValid } from './operations/definitions/filters';
+import { checkColumnForPrecisionError, Query } from '../../../../../src/plugins/data/common';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms';
@@ -231,4 +233,63 @@ export function getVisualDefaultsForLayer(layer: IndexPatternLayer) {
     },
     {}
   );
+}
+
+export function getFiltersInLayer(layer: IndexPatternLayer, columnIds: string[]) {
+  // extract filters from filtered metrics
+  const filteredMetrics = columnIds
+    .map((colId) => layer.columns[colId].filter)
+    .filter(Boolean) as Query[];
+
+  const { kuery: kqlMetricQueries, lucene: luceneMetricQueries } = groupBy(
+    filteredMetrics,
+    'language'
+  );
+
+  const filterOperation = columnIds
+    .map((colId) => {
+      const column = layer.columns[colId];
+      if (isColumnOfType<FiltersIndexPatternColumn>('filters', column)) {
+        const groupsByLanguage = groupBy(
+          column.params.filters,
+          ({ input }) => input.language
+        ) as Record<'lucene' | 'kuery', FiltersIndexPatternColumn['params']['filters']>;
+        return {
+          kuery: groupsByLanguage.kuery?.map(({ input }) => input),
+          lucene: groupsByLanguage.lucene?.map(({ input }) => input),
+        };
+      }
+      if (isColumnOfType<RangeIndexPatternColumn>('range', column) && column.sourceField) {
+        return {
+          kuery: column.params.ranges.map(({ from, to }) => ({
+            query: `${column.sourceField} >= ${from} AND ${column.sourceField} <= ${to}`,
+            language: 'kuery',
+          })),
+        };
+      }
+      if (
+        isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
+        !(column.params.otherBucket || column.params.missingBucket)
+      ) {
+        // TODO: return field -> terms
+        // TODO: support multi-terms
+        return {
+          kuery: [{ query: `${column.sourceField}: *`, language: 'kuery' }].concat(
+            column.params.secondaryFields?.map((field) => ({
+              query: `${field}: *`,
+              language: 'kuery',
+            })) || []
+          ),
+        };
+      }
+    })
+    .filter(Boolean) as Array<{ kuery?: Query[]; lucene?: Query[] }>;
+  return {
+    kuery: [kqlMetricQueries, ...filterOperation.map(({ kuery }) => kuery)].filter(
+      Boolean
+    ) as Query[][],
+    lucene: [luceneMetricQueries, ...filterOperation.map(({ lucene }) => lucene)].filter(
+      Boolean
+    ) as Query[][],
+  };
 }

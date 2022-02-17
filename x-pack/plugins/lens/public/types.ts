@@ -216,6 +216,7 @@ export interface Datasource<T = unknown, P = unknown> {
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
+  // getLayerInfo(state: T, layerId: string): { datasourceId: string; fields: string[] };
   removeColumn: (props: { prevState: T; layerId: string; columnId: string }) => T;
   initializeDimension?: (
     state: T,
@@ -350,12 +351,20 @@ export interface DatasourceFixAction<T> {
  */
 export interface DatasourcePublicAPI {
   datasourceId: string;
-  getTableSpec: () => Array<{ columnId: string }>;
-  getOperationForColumnId: (columnId: string) => Operation | null;
+  getTableSpec: () => Array<{ columnId: string; fields: string[] }>;
+  getOperationForColumnId: (columnId: string) => OperationDescriptor | null;
   /**
    * Collect all default visual values given the current state
    */
   getVisualDefaults: () => Record<string, Record<string, unknown>>;
+  /**
+   * Retrieve the specific source id for the current state
+   */
+  getSourceId: () => string | undefined;
+  /**
+   * Collect all defined filters from all the operations in the layer
+   */
+  getFilters: () => { kuery: Query[][]; lucene: Query[][] };
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -487,8 +496,16 @@ export interface OperationMetadata {
   // TODO currently it's not possible to differentiate between a field from a raw
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
+}
 
-  isStaticValue?: boolean;
+/**
+ * Specific type used to store some meta information on top of the Operation type
+ * Rather than populate the Operation type with optional types, it can leverage a super type
+ */
+export interface OperationDescriptor extends Operation {
+  hasTimeShift: boolean;
+  hasFilter: boolean;
+  isStaticValue: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
