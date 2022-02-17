@@ -17,8 +17,8 @@ export abstract class ReportingError extends Error {
   public get message(): string {
     const prefix = `ReportingError`;
     return this.details
-      ? `${prefix} "${this.details}" (code: ${this.code})`
-      : `${prefix} (code: ${this.code})`;
+      ? `${prefix}(code: ${this.code}) "${this.details}"`
+      : `${prefix}(code: ${this.code})`;
   }
 
   public toString() {
