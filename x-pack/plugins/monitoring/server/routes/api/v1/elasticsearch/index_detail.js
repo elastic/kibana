@@ -40,17 +40,12 @@ export function esIndexRoute(server) {
     },
     handler: async (req) => {
       try {
-        const config = server.config();
+        const config = server.config;
         const clusterUuid = req.params.clusterUuid;
         const indexUuid = req.params.id;
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
-        const filebeatIndexPattern = prefixIndexPattern(
-          config,
-          config.get('monitoring.ui.logs.index'),
-          '*',
-          true
-        );
+        const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
         const isAdvanced = req.payload.is_advanced;
         const metricSet = isAdvanced ? metricSetAdvanced : metricSetOverview;
 
