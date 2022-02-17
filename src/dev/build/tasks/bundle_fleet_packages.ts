@@ -58,6 +58,7 @@ export const BundleFleetPackages: Task = {
             shaChecksum: '',
             shaAlgorithm: 'sha512',
             skipChecksumCheck: true,
+            maxAttempts: 3,
           });
         } catch (error) {
           log.warning(`Failed to download bundled package archive ${archivePath}`);

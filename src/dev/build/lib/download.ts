@@ -85,18 +85,26 @@ export async function downloadToDisk({
       }
 
       const hash = createHash(shaAlgorithm);
+      let bytesWritten = 0;
 
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         response.data.on('data', (chunk: Buffer) => {
           if (!skipChecksumCheck) {
             hash.update(chunk);
           }
 
-          writeSync(fileHandle, chunk);
+          const bytes = writeSync(fileHandle, chunk);
+          bytesWritten += bytes;
         });
 
         response.data.on('error', reject);
-        response.data.on('end', resolve);
+        response.data.on('end', () => {
+          if (bytesWritten === 0) {
+            throw new Error(`No bytes written when downloading ${url}`);
+          }
+
+          resolve();
+        });
       });
 
       if (!skipChecksumCheck) {
