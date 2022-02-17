@@ -330,12 +330,11 @@ export class DataView implements IIndexPattern {
 
     const { type, script, customLabel, format, popularity } = runtimeField;
 
-    this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
-
     if (type === 'composite') {
       return this.addCompositeRuntimeField(name, runtimeField);
     }
 
+    this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
     const field = this.updateOrAddRuntimeField(
       name,
       type,
@@ -549,7 +548,7 @@ export class DataView implements IIndexPattern {
       })
     );
 
-    this.runtimeFieldMap[name] = runtimeFieldSpec;
+    this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
     return dataViewFields;
   }
 
