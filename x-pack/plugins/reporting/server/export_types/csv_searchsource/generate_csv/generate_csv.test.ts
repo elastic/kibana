@@ -7,6 +7,7 @@
 
 import { Writable } from 'stream';
 import * as Rx from 'rxjs';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { identity, range } from 'lodash';
 import { IScopedClusterClient, IUiSettingsClient, SearchResponse } from 'src/core/server';
 import {
@@ -26,6 +27,7 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../../../../common/constants';
+import { AuthenticationExpiredError } from '../../../../common/errors';
 import {
   createMockConfig,
   createMockConfigSchema,
@@ -804,4 +806,27 @@ it('can override ignoring frozen indices', async () => {
     { params: { ignore_throttled: false, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
+});
+
+it('throws an AuthenticationExpiredError when ES does not accept credentials', async () => {
+  mockDataClient.search = jest.fn().mockImplementation(() => {
+    throw new esErrors.ResponseError({ statusCode: 403, meta: {} as any, warnings: [] });
+  });
+  const generateCsv = new CsvGenerator(
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
+    mockConfig,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
+    new CancellationToken(),
+    logger,
+    stream
+  );
+  await expect(generateCsv.generateData()).rejects.toEqual(new AuthenticationExpiredError());
 });
