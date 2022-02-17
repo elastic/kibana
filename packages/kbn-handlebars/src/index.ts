@@ -7,6 +7,8 @@
  */
 
 import OriginalHandlebars from 'handlebars';
+// @ts-expect-error
+import { resultIsAllowed } from 'handlebars/dist/cjs/handlebars/internal/proto-access';
 import get from 'lodash/get';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -44,6 +46,23 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private values: any[] = [];
   private helpers: { [name: string]: Handlebars.HelperDelegate };
   private ast: hbs.AST.Program;
+  private defaultHelperOptions: Handlebars.HelperOptions = {
+    // @ts-expect-error this function is lifted from the handlebars source and slightly modified (lib/handlebars/runtime.js)
+    lookupProperty(parent, propertyName) {
+      const result = parent[propertyName];
+      if (result == null) {
+        return result;
+      }
+      if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+        return result;
+      }
+
+      if (resultIsAllowed(result, {}, propertyName)) {
+        return result;
+      }
+      return undefined;
+    },
+  };
 
   constructor(template: string, helpers: { [name: string]: Handlebars.HelperDelegate }) {
     super();
@@ -70,9 +89,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     if (helper) {
       const [context] = this.scopes;
       const params = this.getParams(sexpr);
-      const result = helper.call(context, ...params, {
-        hash: {}, // TODO: Figure out what actual value to put here
-      });
+      const result = helper.call(
+        context,
+        ...params,
+        Object.assign(
+          { hash: {} }, // TODO: Figure out what actual value to put in hash
+          this.defaultHelperOptions
+        )
+      );
       this.values.push(result);
       return;
     }
