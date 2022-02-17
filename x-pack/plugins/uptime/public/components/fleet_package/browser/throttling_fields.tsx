@@ -7,14 +7,8 @@
 
 import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiDescribedFormGroup,
-  EuiSwitch,
-  EuiSpacer,
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiText,
-} from '@elastic/eui';
+import { EuiSwitch, EuiSpacer, EuiFormRow, EuiFieldNumber, EuiText } from '@elastic/eui';
+import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
 import { OptionalLabel } from '../optional_label';
 import { useBrowserAdvancedFieldsContext } from '../contexts';
@@ -22,6 +16,7 @@ import { Validation, ConfigKey } from '../types';
 
 interface Props {
   validate: Validation;
+  minColumnWidth?: string;
 }
 
 type ThrottlingConfigs =
@@ -30,7 +25,7 @@ type ThrottlingConfigs =
   | ConfigKey.UPLOAD_SPEED
   | ConfigKey.LATENCY;
 
-export const ThrottlingFields = memo<Props>(({ validate }) => {
+export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
@@ -148,7 +143,8 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
   ) : null;
 
   return (
-    <EuiDescribedFormGroup
+    <DescribedFormGroupWithWrap
+      minColumnWidth={minColumnWidth}
       title={
         <h4>
           <FormattedMessage
@@ -183,6 +179,6 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
         }
       />
       {throttlingInputs}
-    </EuiDescribedFormGroup>
+    </DescribedFormGroupWithWrap>
   );
 });

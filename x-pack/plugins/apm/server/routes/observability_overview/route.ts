@@ -58,25 +58,36 @@ const observabilityOverviewRoute = createApmServerRoute({
       kuery: '',
     });
 
-    return withApmSpan('observability_overview', async () => {
-      const [serviceCount, transactionPerMinute] = await Promise.all([
-        getServiceCount({
-          setup,
-          searchAggregatedTransactions,
-          start,
-          end,
-        }),
-        getTransactionsPerMinute({
-          setup,
-          bucketSize,
-          searchAggregatedTransactions,
-          start,
-          end,
-          intervalString,
-        }),
-      ]);
-      return { serviceCount, transactionPerMinute };
-    });
+    return withApmSpan(
+      'observability_overview',
+      async (): Promise<{
+        serviceCount: number;
+        transactionPerMinute:
+          | { value: undefined; timeseries: never[] }
+          | {
+              value: number;
+              timeseries: Array<{ x: number; y: number | null }>;
+            };
+      }> => {
+        const [serviceCount, transactionPerMinute] = await Promise.all([
+          getServiceCount({
+            setup,
+            searchAggregatedTransactions,
+            start,
+            end,
+          }),
+          getTransactionsPerMinute({
+            setup,
+            bucketSize,
+            searchAggregatedTransactions,
+            start,
+            end,
+            intervalString,
+          }),
+        ]);
+        return { serviceCount, transactionPerMinute };
+      }
+    );
   },
 });
 

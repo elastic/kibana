@@ -2,9 +2,9 @@
   "author": [
     "Austin Songer"
   ],
-  "description": "Identifies when a virtual network device is being modified or deleted. This can be a network virtual appliance, virtual hub, or virtual router.",
+  "description": "Identifies when a virtual network device is modified or deleted. This can be a network virtual appliance, virtual hub, or virtual router.",
   "false_positives": [
-    "Virtual Network Device being modified or deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Virtual Network Device modified or deleted from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Virtual Network Device modification or deletion may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Virtual Network Device modification or deletion by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-25m",
   "index": [
@@ -15,7 +15,7 @@
   "license": "Elastic License v2",
   "name": "Azure Virtual Network Device Modified or Deleted",
   "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:(\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/DELETE\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/JOIN/ACTION\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/DELETE\"or\n\"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/DELETE\" or \"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALHUBS/DELETE\" or \"MICROSOFT.NETWORK/VIRTUALHUBS/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALROUTERS/WRITE\" or \"MICROSOFT.NETWORK/VIRTUALROUTERS/DELETE\") and \nevent.outcome:(Success or success)\n",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:(\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/DELETE\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/JOIN/ACTION\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/DELETE\" or\n\"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/DELETE\" or \"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALHUBS/DELETE\" or \"MICROSOFT.NETWORK/VIRTUALHUBS/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALROUTERS/WRITE\" or \"MICROSOFT.NETWORK/VIRTUALROUTERS/DELETE\") and \nevent.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations"
   ],
@@ -43,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

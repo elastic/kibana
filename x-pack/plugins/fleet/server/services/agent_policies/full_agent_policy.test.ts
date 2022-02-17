@@ -145,7 +145,6 @@ describe('getFullAgentPolicy', () => {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
           ca_sha256: undefined,
-          api_key: undefined,
         },
       },
       inputs: [],
@@ -178,7 +177,6 @@ describe('getFullAgentPolicy', () => {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
           ca_sha256: undefined,
-          api_key: undefined,
         },
       },
       inputs: [],
@@ -213,7 +211,6 @@ describe('getFullAgentPolicy', () => {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
           ca_sha256: undefined,
-          api_key: undefined,
         },
       },
       inputs: [],
@@ -315,12 +312,10 @@ describe('transformOutputToFullPolicyOutput', () => {
       is_default_monitoring: false,
       name: 'test output',
       type: 'elasticsearch',
-      api_key: 'apikey123',
     });
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
-        "api_key": "apikey123",
         "ca_sha256": undefined,
         "hosts": Array [
           "http://host.fr",
@@ -337,7 +332,6 @@ describe('transformOutputToFullPolicyOutput', () => {
       is_default_monitoring: false,
       name: 'test output',
       type: 'elasticsearch',
-      api_key: 'apikey123',
       ca_trusted_fingerprint: 'fingerprint123',
       config_yaml: `
 test: 1234      
@@ -347,7 +341,6 @@ ssl.test: 123
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
-        "api_key": "apikey123",
         "ca_sha256": undefined,
         "hosts": Array [
           "http://host.fr",
