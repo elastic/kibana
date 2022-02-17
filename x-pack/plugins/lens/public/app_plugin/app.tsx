@@ -271,6 +271,7 @@ export function App({
 
   const runSave = useCallback(
     (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+      dispatch(applyChanges());
       return runSaveLensVisualization(
         {
           lastKnownDoc,
@@ -290,7 +291,6 @@ export function App({
         (newState) => {
           if (newState) {
             dispatchSetState(newState);
-            dispatch(applyChanges());
             setIsSaveModalVisible(false);
           }
         },
