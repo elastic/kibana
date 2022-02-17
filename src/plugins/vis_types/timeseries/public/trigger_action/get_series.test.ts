@@ -332,16 +332,17 @@ describe('getSeries', () => {
         type: 'top_hit',
         field: 'day_of_week_i',
         size: 1,
+        order_by: 'timestamp',
       },
     ] as Metric[];
     const config = getSeries(metric);
     expect(config).toStrictEqual([
       {
-        agg: 'formula',
-        fieldName: 'document',
-        isFullReference: true,
+        agg: 'last_value',
+        fieldName: 'day_of_week_i',
+        isFullReference: false,
         params: {
-          formula: 'last_value(day_of_week_i)',
+          sortField: 'timestamp',
         },
       },
     ]);

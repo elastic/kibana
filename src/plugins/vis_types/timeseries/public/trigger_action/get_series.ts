@@ -59,9 +59,10 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
         const currentMetric = metrics[layerMetricIdx];
         // We can only support top_hit with size 1
         if (
-          currentMetric.type === 'top_hit' &&
-          currentMetric?.size &&
-          Number(currentMetric?.size) !== 1
+          (currentMetric.type === 'top_hit' &&
+            currentMetric?.size &&
+            Number(currentMetric?.size) !== 1) ||
+          currentMetric?.order === 'asc'
         ) {
           return null;
         }
@@ -163,14 +164,24 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
     case 'top_hit': {
       const currentMetric = metrics[metricIdx];
       // We can only support top_hit with size 1
-      if (currentMetric?.size && Number(currentMetric?.size) !== 1) {
+      if (
+        (currentMetric?.size && Number(currentMetric?.size) !== 1) ||
+        currentMetric?.order === 'asc'
+      ) {
         return null;
       }
-      const formula = getFormulaEquivalent(currentMetric, metrics);
-      if (!formula) {
-        return null;
-      }
-      metricsArray = getFormulaSeries(formula) as VisualizeEditorLayersContext['metrics'];
+      const timeScale = getTimeScale(currentMetric);
+      metricsArray = [
+        {
+          agg: aggregationMap.name,
+          isFullReference: aggregationMap.isFullReference,
+          fieldName: fieldName ?? 'document',
+          params: {
+            ...(timeScale && { timeScale }),
+            ...(currentMetric?.order_by && { sortField: currentMetric?.order_by }),
+          },
+        },
+      ];
       break;
     }
     default: {
