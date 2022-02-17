@@ -350,7 +350,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      // TODO: auto_disabled_8.0.1 tests
+      // TODO: auto_disabled_8.0 tests
     });
   });
 };

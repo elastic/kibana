@@ -355,11 +355,11 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should remove the auto_disabled_8.0.1 tag if present after enabling rule', async () => {
+      it('should remove the auto_disabled_8.0 tag if present after enabling rule', async () => {
         await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
           enabled: false,
-          tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
         });
 
         const { body } = await supertest
@@ -368,7 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({
             ...getSimpleRuleUpdate('rule-1'),
             enabled: true,
-            tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+            tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
           })
           .expect(200);
 
@@ -411,11 +411,11 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should remove the auto_disabled_8.0.1 tag if it is the only tag present after enabling rule', async () => {
+      it('should remove the auto_disabled_8.0 tag if it is the only tag present after enabling rule', async () => {
         await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
           enabled: false,
-          tags: ['auto_disabled_8.0.1'],
+          tags: ['auto_disabled_8.0'],
         });
 
         const { body } = await supertest
@@ -424,7 +424,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({
             ...getSimpleRuleUpdate('rule-1'),
             enabled: true,
-            tags: ['auto_disabled_8.0.1'],
+            tags: ['auto_disabled_8.0'],
           })
           .expect(200);
 
@@ -442,7 +442,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not modify tags or version when disabling rule', async () => {
         await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
-          tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
         });
 
         const { body } = await supertest
@@ -451,14 +451,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send({
             ...getSimpleRuleUpdate('rule-1'),
             enabled: false,
-            tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+            tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
           })
           .expect(200);
 
         const outputRule = {
           ...getSimpleRuleOutput(),
           enabled: false,
-          tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
           version: 2,
         };
 

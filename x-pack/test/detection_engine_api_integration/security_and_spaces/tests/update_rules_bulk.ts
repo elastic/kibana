@@ -466,12 +466,12 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
           enabled: false,
-          tags: ['auto_disabled_8.0.1', 'tag1', 'tag2'],
+          tags: ['auto_disabled_8.0', 'tag1', 'tag2'],
         });
         await createRule(supertest, log, {
           ...getSimpleRule('rule-2'),
           enabled: false,
-          tags: ['auto_disabled_8.0.1'],
+          tags: ['auto_disabled_8.0'],
         });
         await createRule(supertest, log, {
           ...getSimpleRule('rule-3'),
@@ -483,14 +483,14 @@ export default ({ getService }: FtrProviderContext) => {
           ...getSimpleRuleUpdate('rule-1'),
           enabled: true,
           severity: 'low',
-          tags: ['auto_disabled_8.0.1', 'tag1', 'tag2'],
+          tags: ['auto_disabled_8.0', 'tag1', 'tag2'],
         };
 
         const updatedRule2 = {
           ...getSimpleRuleUpdate('rule-2'),
           enabled: false,
           severity: 'low',
-          tags: ['auto_disabled_8.0.1'],
+          tags: ['auto_disabled_8.0'],
         };
 
         const updatedRule3 = {
@@ -517,7 +517,7 @@ export default ({ getService }: FtrProviderContext) => {
           rule_id: 'rule-2',
           enabled: false,
           severity: 'low',
-          tags: ['auto_disabled_8.0.1'],
+          tags: ['auto_disabled_8.0'],
           version: 2,
         });
         expect(removeServerGeneratedProperties(body[2])).to.eql({

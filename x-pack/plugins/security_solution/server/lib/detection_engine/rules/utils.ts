@@ -373,7 +373,7 @@ export const maybeRemoveAutoDisabledRuleTag = async (
   ruleId: string,
   rule: InternalRuleUpdate
 ) => {
-  if (rule.tags.includes('auto_disabled_8.0.1')) {
+  if (rule.tags.includes('auto_disabled_8.0')) {
     return rulesClient.update({
       id: ruleId,
       data: {
@@ -382,7 +382,7 @@ export const maybeRemoveAutoDisabledRuleTag = async (
           ...rule.params,
           version: rule.params.version + 1,
         },
-        tags: rule.tags.filter((tag) => tag !== 'auto_disabled_8.0.1'),
+        tags: rule.tags.filter((tag) => tag !== 'auto_disabled_8.0'),
       },
     });
   }

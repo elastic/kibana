@@ -229,11 +229,11 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should remove the auto_disabled_8.0.1 tag if present after enabling rule', async () => {
+      it('should remove the auto_disabled_8.0 tag if present after enabling rule', async () => {
         await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
           enabled: false,
-          tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
         });
 
         // patch a simple rule's enabled property to true
@@ -254,7 +254,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should preserve tags and version if auto_disabled tag_8.0.1 tag is not present after enabling rule', async () => {
+      it('should preserve tags and version if auto_disabled_8.0 tag is not present after enabling rule', async () => {
         await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
           enabled: false,
@@ -279,11 +279,11 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should remove the auto_disabled_8.0.1 tag if it is the only tag present after enabling rule', async () => {
+      it('should remove the auto_disabled_8.0 tag if it is the only tag present after enabling rule', async () => {
         await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
           enabled: false,
-          tags: ['auto_disabled_8.0.1'],
+          tags: ['auto_disabled_8.0'],
         });
 
         // patch a simple rule's enabled property to true
@@ -307,7 +307,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not modify tags or version when disabling rule', async () => {
         await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
-          tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
         });
 
         // patch a simple rule's enabled property to true
@@ -320,7 +320,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = {
           ...getSimpleRuleOutput(),
           enabled: false,
-          tags: ['tag1', 'tag2', 'auto_disabled_8.0.1'],
+          tags: ['tag1', 'tag2', 'auto_disabled_8.0'],
           version: 1,
         };
 
