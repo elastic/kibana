@@ -224,6 +224,6 @@ describe('Embeddable', () => {
     expect((AddToCaseAction as jest.Mock).mock.calls[0][0].timeRange).toEqual(mockTimeRange);
     expect((AddToCaseAction as jest.Mock).mock.calls[0][0].appId).toEqual(mockAppId);
     expect((AddToCaseAction as jest.Mock).mock.calls[0][0].lensAttributes).toEqual(mockLensAttrs);
-    expect((AddToCaseAction as jest.Mock).mock.calls[0][0].caseOwner).toEqual(mockOwner);
+    expect((AddToCaseAction as jest.Mock).mock.calls[0][0].owner).toEqual(mockOwner);
   });
 });
