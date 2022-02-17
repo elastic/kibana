@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import { EuiFieldNumber, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import { ConfigKey, Validation } from '../types';
+import React, { memo, useCallback } from 'react';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 import { useHTTPSimpleFieldsContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
-import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
+import { ConfigKey, Validation } from '../types';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const HTTPSimpleFields = memo<Props>(({ validate }) => {
+export const HTTPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields } = useHTTPSimpleFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -49,6 +50,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
           onChange={(event) =>
             handleInputChange({ value: event.target.value, configKey: ConfigKey.URLS })
           }
+          onBlur={() => onFieldBlur(ConfigKey.URLS)}
           data-test-subj="syntheticsUrlField"
         />
       </EuiFormRow>
@@ -75,6 +77,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.SCHEDULE,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
           number={fields[ConfigKey.SCHEDULE].number}
           unit={fields[ConfigKey.SCHEDULE].unit}
         />
@@ -110,6 +113,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.MAX_REDIRECTS,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.MAX_REDIRECTS)}
         />
       </EuiFormRow>
     </SimpleFieldsWrapper>

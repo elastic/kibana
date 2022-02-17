@@ -17,9 +17,10 @@ import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const BrowserSimpleFields = memo<Props>(({ validate }) => {
+export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields, defaultValues } = useBrowserSimpleFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -85,6 +86,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.SCHEDULE,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
           number={fields[ConfigKey.SCHEDULE].number}
           unit={fields[ConfigKey.SCHEDULE].unit}
         />
@@ -99,6 +101,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
       >
         <SourceField
           onChange={onChangeSourceField}
+          onFieldBlur={onFieldBlur}
           defaultConfig={useMemo(
             () => ({
               zipUrl: defaultValues[ConfigKey.SOURCE_ZIP_URL],

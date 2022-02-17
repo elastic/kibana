@@ -16,9 +16,10 @@ import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const ICMPSimpleFields = memo<Props>(({ validate }) => {
+export const ICMPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields } = useICMPSimpleFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -52,6 +53,7 @@ export const ICMPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.HOSTS,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.HOSTS)}
           data-test-subj="syntheticsICMPHostField"
         />
       </EuiFormRow>
@@ -78,6 +80,7 @@ export const ICMPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.SCHEDULE,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
           number={fields[ConfigKey.SCHEDULE].number}
           unit={fields[ConfigKey.SCHEDULE].unit}
         />
@@ -113,6 +116,7 @@ export const ICMPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.WAIT,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.WAIT)}
           step={'any'}
         />
       </EuiFormRow>

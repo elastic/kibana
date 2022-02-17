@@ -29,9 +29,10 @@ interface Props {
   validate: Validation;
   children?: React.ReactNode;
   minColumnWidth?: string;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
-export const BrowserAdvancedFields = memo<Props>(({ validate, children, minColumnWidth }) => {
+export const BrowserAdvancedFields = memo<Props>(({ validate, children, minColumnWidth, onFieldBlur }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
   const { fields: simpleFields } = useBrowserSimpleFieldsContext();
 
@@ -91,6 +92,7 @@ export const BrowserAdvancedFields = memo<Props>(({ validate, children, minColum
                   configKey: ConfigKey.JOURNEY_FILTERS_MATCH,
                 })
               }
+              onBlur={() => onFieldBlur?.(ConfigKey.JOURNEY_FILTERS_MATCH)}
               data-test-subj="syntheticsBrowserJourneyFiltersMatch"
             />
           </EuiFormRow>
@@ -114,6 +116,7 @@ export const BrowserAdvancedFields = memo<Props>(({ validate, children, minColum
               onChange={(value) =>
                 handleInputChange({ value, configKey: ConfigKey.JOURNEY_FILTERS_TAGS })
               }
+              onBlur={() => onFieldBlur?.(ConfigKey.JOURNEY_FILTERS_TAGS)}
               data-test-subj="syntheticsBrowserJourneyFiltersTags"
             />
           </EuiFormRow>
@@ -163,6 +166,7 @@ export const BrowserAdvancedFields = memo<Props>(({ validate, children, minColum
                 configKey: ConfigKey.IGNORE_HTTPS_ERRORS,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.IGNORE_HTTPS_ERRORS)}
           />
         </EuiFormRow>
 
@@ -190,6 +194,7 @@ export const BrowserAdvancedFields = memo<Props>(({ validate, children, minColum
                 configKey: ConfigKey.SCREENSHOTS,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.SCREENSHOTS)}
             data-test-subj="syntheticsBrowserScreenshots"
           />
         </EuiFormRow>
@@ -211,12 +216,13 @@ export const BrowserAdvancedFields = memo<Props>(({ validate, children, minColum
           <ComboBox
             selectedOptions={fields[ConfigKey.SYNTHETICS_ARGS]}
             onChange={(value) => handleInputChange({ value, configKey: ConfigKey.SYNTHETICS_ARGS })}
+            onBlur={() => onFieldBlur?.(ConfigKey.SYNTHETICS_ARGS)}
             data-test-subj="syntheticsBrowserSyntheticsArgs"
           />
         </EuiFormRow>
       </DescribedFormGroupWithWrap>
 
-      <ThrottlingFields validate={validate} minColumnWidth={minColumnWidth} />
+      <ThrottlingFields validate={validate} minColumnWidth={minColumnWidth} onFieldBlur={onFieldBlur} />
       {children}
     </EuiAccordion>
   );

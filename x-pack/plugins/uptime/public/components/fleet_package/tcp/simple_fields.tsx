@@ -15,9 +15,10 @@ import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const TCPSimpleFields = memo<Props>(({ validate }) => {
+export const TCPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields } = useTCPSimpleFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -51,6 +52,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.HOSTS,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.HOSTS)}
           data-test-subj="syntheticsTCPHostField"
         />
       </EuiFormRow>
@@ -78,6 +80,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.SCHEDULE,
             })
           }
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
           number={fields[ConfigKey.SCHEDULE].number}
           unit={fields[ConfigKey.SCHEDULE].unit}
         />

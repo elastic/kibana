@@ -34,9 +34,10 @@ interface Props {
   validate: Validation;
   children?: React.ReactNode;
   minColumnWidth?: string;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
-export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWidth }) => {
+export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWidth , onFieldBlur}) => {
   const { fields, setFields } = useHTTPAdvancedFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -99,6 +100,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 configKey: ConfigKey.USERNAME,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.USERNAME)}
             data-test-subj="syntheticsUsername"
           />
         </EuiFormRow>
@@ -125,6 +127,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 configKey: ConfigKey.PASSWORD,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.PASSWORD)}
             data-test-subj="syntheticsPassword"
           />
         </EuiFormRow>
@@ -151,6 +154,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 configKey: ConfigKey.PROXY_URL,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.PROXY_URL)}
             data-test-subj="syntheticsProxyUrl"
           />
         </EuiFormRow>
@@ -177,6 +181,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 configKey: ConfigKey.REQUEST_METHOD_CHECK,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.REQUEST_METHOD_CHECK)}
             data-test-subj="syntheticsRequestMethod"
           />
         </EuiFormRow>
@@ -218,6 +223,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.REQUEST_HEADERS_CHECK)}
             data-test-subj="syntheticsRequestHeaders"
           />
         </EuiFormRow>
@@ -248,6 +254,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.REQUEST_BODY_CHECK)}
           />
         </EuiFormRow>
       </DescribedFormGroupWithWrap>
@@ -297,6 +304,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 configKey: ConfigKey.RESPONSE_HEADERS_INDEX,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.RESPONSE_HEADERS_INDEX)}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -317,6 +325,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 handleInputChange({ value: policy, configKey: ConfigKey.RESPONSE_BODY_INDEX }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.RESPONSE_BODY_INDEX)}
           />
         </EuiFormRow>
       </DescribedFormGroupWithWrap>
@@ -368,6 +377,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 configKey: ConfigKey.RESPONSE_STATUS_CHECK,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.RESPONSE_STATUS_CHECK)}
             data-test-subj="syntheticsResponseStatusCheck"
           />
         </EuiFormRow>
@@ -404,6 +414,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.RESPONSE_HEADERS_CHECK)}
             data-test-subj="syntheticsResponseHeaders"
           />
         </EuiFormRow>
@@ -433,6 +444,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.RESPONSE_BODY_CHECK_POSITIVE)}
             data-test-subj="syntheticsResponseBodyCheckPositive"
           />
         </EuiFormRow>
@@ -462,6 +474,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate, children, minColumnWi
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE)}
             data-test-subj="syntheticsResponseBodyCheckNegative"
           />
         </EuiFormRow>
