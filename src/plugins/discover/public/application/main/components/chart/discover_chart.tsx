@@ -27,7 +27,10 @@ import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { triggerVisualizeActions } from '../sidebar/lib/visualize_trigger_utils';
+import {
+  getVisualizeInformation,
+  triggerVisualizeActions,
+} from '../sidebar/lib/visualize_trigger_utils';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
@@ -65,12 +68,23 @@ export function DiscoverChart({
     moveFocus: false,
   });
 
-  const onEditVisualization = useCallback(() => {
-    if (!indexPattern.timeFieldName) return;
-    const timeField = indexPattern.getFieldByName(indexPattern.timeFieldName);
+  const timeField =
+    indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
+  const [canVisualize, setCanVisualize] = useState(false);
+
+  useEffect(() => {
     if (!timeField) return;
+    getVisualizeInformation(timeField, indexPattern.id, savedSearch.columns || []).then((info) => {
+      setCanVisualize(Boolean(info));
+    });
+  }, [indexPattern, savedSearch.columns, timeField]);
+
+  const onEditVisualization = useCallback(() => {
+    if (!timeField) {
+      return;
+    }
     triggerVisualizeActions(timeField, indexPattern.id, savedSearch.columns || []);
-  }, [indexPattern, savedSearch]);
+  }, [indexPattern.id, savedSearch, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);
@@ -136,23 +150,25 @@ export function DiscoverChart({
           {isTimeBased && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate('discover.editVisualizationButton', {
-                      defaultMessage: 'Edit visualization',
-                    })}
-                  >
-                    <EuiButtonIcon
-                      size="xs"
-                      iconType="lensApp"
-                      onClick={onEditVisualization}
-                      data-test-subj="discoverEditVisualization"
-                      aria-label={i18n.translate('discover.editVisualizationButton', {
+                {canVisualize && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={i18n.translate('discover.editVisualizationButton', {
                         defaultMessage: 'Edit visualization',
                       })}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
+                    >
+                      <EuiButtonIcon
+                        size="xs"
+                        iconType="lensApp"
+                        onClick={onEditVisualization}
+                        data-test-subj="discoverEditVisualization"
+                        aria-label={i18n.translate('discover.editVisualizationButton', {
+                          defaultMessage: 'Edit visualization',
+                        })}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     id="dscChartOptions"
