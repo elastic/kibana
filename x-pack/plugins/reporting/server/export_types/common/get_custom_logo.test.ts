@@ -7,12 +7,10 @@
 
 import { ReportingCore } from '../..';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
-import { getConditionalHeaders } from '.';
 import { getCustomLogo } from './get_custom_logo';
 
 let mockReportingPlugin: ReportingCore;
@@ -24,7 +22,7 @@ beforeEach(async () => {
 });
 
 test(`gets logo from uiSettings`, async () => {
-  const permittedHeaders = {
+  const headers = {
     foo: 'bar',
     baz: 'quix',
   };
@@ -40,17 +38,7 @@ test(`gets logo from uiSettings`, async () => {
     get: mockGet,
   });
 
-  const conditionalHeaders = getConditionalHeaders(
-    createMockConfig(createMockConfigSchema()),
-    permittedHeaders
-  );
-
-  const { logo } = await getCustomLogo(
-    mockReportingPlugin,
-    conditionalHeaders,
-    'spaceyMcSpaceIdFace',
-    logger
-  );
+  const { logo } = await getCustomLogo(mockReportingPlugin, headers, 'spaceyMcSpaceIdFace', logger);
 
   expect(mockGet).toBeCalledWith('xpackReporting:customPdfLogo');
   expect(logo).toBe('purple pony');
