@@ -25,8 +25,10 @@ export interface Props {
 
 /**
  * A service-enabled component that provides Kibana-specific functionality to the `ExitFullScreenButton`
- * component.  Use of this component requires both the `EuiTheme` context as well as the Shared UX
- * `ServicesProvider`.
+ * component.
+ *
+ * Use of this component requires both the `EuiTheme` context as well as either a configured Shared UX
+ * `ServicesProvider` or the `ServicesContext` provided by the Shared UX public plugin contract.
  *
  * See shared-ux/public/services for information.
  */
