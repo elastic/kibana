@@ -30,10 +30,15 @@ export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
 }
+export interface AppliedState {
+  activeDatasourceId: EditorFrameState['activeDatasourceId'];
+  visualization: VisualizationState;
+  datasourceStates: DatasourceStates;
+}
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;
   stagedPreview?: PreviewState;
-  appliedState?: PreviewState;
+  appliedState?: AppliedState;
   isFullscreenDatasource?: boolean;
 }
 export interface LensAppState extends EditorFrameState {

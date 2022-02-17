@@ -67,6 +67,9 @@ import {
   selectActiveDatasourceId,
   selectSearchSessionId,
   selectAppliedState,
+  VisualizationState,
+  DatasourceStates,
+  AppliedState,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 
@@ -118,8 +121,32 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
-// Exported for testing purposes only.
-export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
+/**
+ * This function returns the appropriate arguments depending on whether
+ * or not auto-apply is enabled
+ */
+const maybeGetAppliedArgs = ({
+  appliedState,
+  visualization,
+  datasourceStates,
+  activeDatasourceId,
+  framePublicAPI: { datasourceLayers, appliedDatasourceLayers },
+}: {
+  appliedState?: AppliedState;
+  visualization: VisualizationState;
+  datasourceStates: DatasourceStates;
+  activeDatasourceId: string | null;
+  framePublicAPI: FramePublicAPI;
+}) => {
+  return {
+    visualization: appliedState?.visualization || visualization,
+    datasourceStates: appliedState?.datasourceStates || datasourceStates,
+    activeDatasourceId: appliedState?.activeDatasourceId || activeDatasourceId,
+    datasourceLayers: appliedDatasourceLayers || datasourceLayers,
+  };
+};
+
+const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
   visualizationMap,
   datasourceMap,
@@ -133,12 +160,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 }) {
   const dispatchLens = useLensDispatch();
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
-  const visualization = useLensSelector(selectVisualization);
-  const appliedState = useLensSelector(selectAppliedState);
-  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
-  const datasourceStates = useLensSelector(selectDatasourceStates);
+  const { visualization, datasourceStates, activeDatasourceId, datasourceLayers } =
+    maybeGetAppliedArgs({
+      visualization: useLensSelector(selectVisualization),
+      datasourceStates: useLensSelector(selectDatasourceStates),
+      activeDatasourceId: useLensSelector(selectActiveDatasourceId),
+      appliedState: useLensSelector(selectAppliedState),
+      framePublicAPI,
+    });
 
-  const { datasourceLayers, appliedDatasourceLayers } = framePublicAPI;
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
     expandError: false,
@@ -181,7 +211,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
         activeVisualization,
         visualization.state,
-        framePublicAPI
+        { datasourceLayers }
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
@@ -192,10 +222,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
-          visualizationState: appliedState?.visualization.state || visualization.state,
+          visualizationState: visualization.state,
           datasourceMap,
-          datasourceStates: appliedState?.datasourceStates || datasourceStates,
-          datasourceLayers: appliedDatasourceLayers || datasourceLayers,
+          datasourceStates,
+          datasourceLayers,
         });
 
         if (ast) {
@@ -235,8 +265,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     configurationValidationError?.length,
     missingRefsErrors.length,
-    appliedState,
-    appliedDatasourceLayers,
     unknownVisError,
     visualization.activeId,
   ]);

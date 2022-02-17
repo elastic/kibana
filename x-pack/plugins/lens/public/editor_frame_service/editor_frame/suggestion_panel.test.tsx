@@ -134,6 +134,7 @@ describe('suggestion_panel', () => {
         } as VisualizationState,
         // including appliedState signals that auto-apply has been disabled
         appliedState: {
+          activeDatasourceId: 'foobar',
           visualization: preloadedState.visualization as VisualizationState,
           datasourceStates: preloadedState.datasourceStates as DatasourceStates,
         },

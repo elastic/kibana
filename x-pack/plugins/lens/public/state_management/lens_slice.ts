@@ -190,6 +190,7 @@ export const lensActions = {
 
 const buildAppliedState = (state: LensAppState) => {
   return {
+    activeDatasourceId: state.activeDatasourceId,
     visualization: cloneDeep(state.visualization),
     datasourceStates: cloneDeep(state.datasourceStates),
   };

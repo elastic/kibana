@@ -28,11 +28,11 @@ export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
 export const selectChangesApplied = createSelector(
-  [selectAppliedState, selectVisualization, selectDatasourceStates],
-  (appliedState, visualization, datasourceStates) => {
+  [selectAppliedState, selectVisualization, selectDatasourceStates, selectActiveDatasourceId],
+  (appliedState, visualization, datasourceStates, activeDatasourceId) => {
     if (!appliedState) return true; // auto-apply is enabled
 
-    const workingState = { visualization, datasourceStates };
+    const workingState = { activeDatasourceId, visualization, datasourceStates };
     return isEqual(appliedState, workingState);
   }
 );

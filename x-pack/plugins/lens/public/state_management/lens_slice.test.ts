@@ -51,6 +51,7 @@ describe('lensSlice', () => {
 
         expect(newState.appliedState).toBeDefined();
         expect(newState.appliedState).toEqual({
+          activeDatasourceId: newState.activeDatasourceId,
           visualization: newState.visualization,
           datasourceStates: newState.datasourceStates,
         });

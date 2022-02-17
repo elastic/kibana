@@ -35,10 +35,16 @@ import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/publ
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
-import { LensRootStore, setState } from '../../../state_management';
+import {
+  applyChanges,
+  LensRootStore,
+  setState,
+  updateDatasourceState,
+  updateVisualizationState,
+} from '../../../state_management';
 import { getLensInspectorService } from '../../../lens_inspector_service';
 import { inspectorPluginMock } from '../../../../../../../src/plugins/inspector/public/mocks';
-import { enableAutoApply } from '../../../state_management/lens_slice';
+import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -213,8 +219,9 @@ describe('workspace_panel', () => {
       {
         preloadedState: {
           appliedState: {
+            activeDatasourceId: 'testDatasource',
             visualization: {
-              activeId: 'some-id',
+              activeId: 'testVis',
               state: { applied: true },
             },
             datasourceStates: {
@@ -715,6 +722,89 @@ describe('workspace_panel', () => {
       instance.find('[data-test-subj="configuration-failure-more-errors"]').last().text()
     ).toEqual(' +1 error');
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
+  });
+
+  it('should display errors for unapplied changes', async () => {
+    // this test is important since we don't want the workspace panel to
+    // display errors if the user has disabled auto-apply, messed something up,
+    // but not yet applied their changes
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockDatasource.getErrorMessages.mockImplementation((currentDatasourceState: any) => {
+      if (currentDatasourceState.hasProblem) {
+        return [{ shortMessage: 'An error occurred', longMessage: 'An long description here' }];
+      } else {
+        return [];
+      }
+    });
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockVisualization.getErrorMessages.mockImplementation((currentDatasourceState: any) => {
+      if (currentDatasourceState.hasProblem) {
+        return [{ shortMessage: 'An error occurred', longMessage: 'An long description here' }];
+      } else {
+        return [];
+      }
+    });
+    mockVisualization.toExpression.mockReturnValue('testVis');
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: mockVisualization,
+        }}
+      />
+    );
+
+    instance = mounted.instance;
+    const lensStore = mounted.lensStore;
+
+    const showingErrors = () =>
+      instance.exists('[data-test-subj="configuration-failure-error"]') ||
+      instance.exists('[data-test-subj="configuration-failure-more-errors"]');
+
+    expect(showingErrors()).toBeFalsy();
+
+    lensStore.dispatch(disableAutoApply());
+    instance.update();
+
+    expect(showingErrors()).toBeFalsy();
+
+    // introduce some issues in working state
+    lensStore.dispatch(
+      updateDatasourceState({
+        datasourceId: 'testDatasource',
+        updater: { hasProblem: true },
+      })
+    );
+    instance.update();
+
+    expect(showingErrors()).toBeFalsy();
+
+    lensStore.dispatch(
+      updateVisualizationState({
+        visualizationId: 'testVis',
+        newState: { activeId: 'testVis', hasProblem: true },
+      })
+    );
+    instance.update();
+
+    expect(showingErrors()).toBeFalsy();
+
+    // errors should appear when problem changes are applied
+    lensStore.dispatch(applyChanges());
+    instance.update();
+
+    expect(showingErrors()).toBeTruthy();
   });
 
   it('should show an error message if the expression fails to parse', async () => {

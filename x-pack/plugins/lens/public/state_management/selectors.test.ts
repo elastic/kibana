@@ -11,6 +11,7 @@ describe('lens selectors', () => {
   it('should select applied state', () => {
     const lensState = {
       appliedState: {
+        activeDatasourceId: 'foobar',
         visualization: {
           activeId: 'some-id',
           state: {},
@@ -32,6 +33,7 @@ describe('lens selectors', () => {
   describe('selecting changes applied', () => {
     it('should be true when applied state matches working state', () => {
       const lensState = {
+        activeDatasourceId: 'foobar',
         visualization: {
           activeId: 'some-id',
           state: {},
@@ -43,6 +45,7 @@ describe('lens selectors', () => {
           },
         },
         appliedState: {
+          activeDatasourceId: 'foobar',
           visualization: {
             activeId: 'some-id',
             state: {},
@@ -79,6 +82,7 @@ describe('lens selectors', () => {
 
     it('should be false when applied state differs from working state', () => {
       const lensState = {
+        activeDatasourceId: 'foobar',
         visualization: {
           activeId: 'some-other-id',
           state: {
@@ -94,6 +98,7 @@ describe('lens selectors', () => {
           },
         },
         appliedState: {
+          activeDatasourceId: 'foobar',
           visualization: {
             activeId: 'some-id',
             state: {},
