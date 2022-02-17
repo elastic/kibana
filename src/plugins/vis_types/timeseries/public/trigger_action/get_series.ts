@@ -125,6 +125,14 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       }
       break;
     }
+    case 'positive_only': {
+      const formula = getSiblingPipelineSeriesFormula(aggregation, metrics[metricIdx], metrics);
+      if (!formula) {
+        return null;
+      }
+      metricsArray = getFormulaSeries(formula) as VisualizeEditorLayersContext['metrics'];
+      break;
+    }
     case 'avg_bucket':
     case 'max_bucket':
     case 'min_bucket':
