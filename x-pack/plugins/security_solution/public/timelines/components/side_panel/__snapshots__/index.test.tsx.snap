@@ -318,6 +318,7 @@ Array [
               timestamp=""
             >
               <ExpandableEventTitle
+                data-test-subj="flyout-header-default"
                 isAlert={false}
                 loading={true}
                 ruleName=""
@@ -387,6 +388,7 @@ Array [
                   >
                     <ExpandableEvent
                       browserFields={Object {}}
+                      data-test-subj="flyout-body-default"
                       detailsData={null}
                       event={
                         Object {
@@ -515,6 +517,7 @@ Array [
           timelineId="test"
         >
           <Connect(Component)
+            data-test-subj="flyout-footer-default"
             detailsData={null}
             detailsEcsData={null}
             expandedEvent={
@@ -531,6 +534,7 @@ Array [
             timelineId="test"
           >
             <Memo()
+              data-test-subj="flyout-footer-default"
               detailsData={null}
               detailsEcsData={null}
               dispatch={[Function]}
@@ -653,6 +657,7 @@ Array [
             timestamp=""
           >
             <ExpandableEventTitle
+              data-test-subj="flyout-header-default"
               isAlert={false}
               loading={true}
               ruleName=""
@@ -722,6 +727,7 @@ Array [
                 >
                   <ExpandableEvent
                     browserFields={Object {}}
+                    data-test-subj="flyout-body-default"
                     detailsData={null}
                     event={
                       Object {
@@ -850,6 +856,7 @@ Array [
         timelineId="test"
       >
         <Connect(Component)
+          data-test-subj="flyout-footer-default"
           detailsData={null}
           detailsEcsData={null}
           expandedEvent={
@@ -866,6 +873,7 @@ Array [
           timelineId="test"
         >
           <Memo()
+            data-test-subj="flyout-footer-default"
             detailsData={null}
             detailsEcsData={null}
             dispatch={[Function]}
