@@ -16,7 +16,7 @@ export const MAPPED_PARAMS_PROPERTIES = ['risk_score', 'severity'];
 /**
  * Returns the mapped_params object when given a params object.
  * The function will match params present in MAPPED_PARAMS_PROPERTIES and
- * return an empty object is nothing is matched.
+ * return an empty object if nothing is matched.
  */
 export const getMappedParams = (params: AlertTypeParams) => {
   return Object.keys(params).reduce<MappedParams>((result, key) => {

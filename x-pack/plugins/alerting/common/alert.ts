@@ -65,7 +65,7 @@ export interface AlertAggregations {
 
 export interface MappedParams extends SavedObjectAttributes {
   risk_score?: number;
-  severity?: number;
+  severity?: string; // TODO: translate severity to number so it can sortable (20, 40, 60, 80)
 }
 
 export interface Alert<Params extends AlertTypeParams = never> {

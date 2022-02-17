@@ -844,7 +844,7 @@ function addMappedParams(
       ...doc,
       attributes: {
         ...doc.attributes,
-        mapped_params: mappedParams,
+        ...(mappedParams && { mapped_params: mappedParams }),
       },
     };
   }
