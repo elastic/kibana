@@ -9,6 +9,8 @@
 import { createStubDataView } from 'src/plugins/data_views/common/mocks';
 import type { DataViewsContract } from 'src/plugins/data_views/common';
 import type { DatatableColumn } from 'src/plugins/expressions/common';
+import { FieldFormat } from 'src/plugins/field_formats/common';
+import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';
 import type { AggsCommonStart } from '../search';
 import { DatatableUtilitiesService } from './datatable_utilities_service';
 
@@ -26,7 +28,7 @@ describe('DatatableUtilitiesService', () => {
       get: jest.fn(),
     } as unknown as typeof dataViews;
 
-    datatableUtilitiesService = new DatatableUtilitiesService(aggs, dataViews);
+    datatableUtilitiesService = new DatatableUtilitiesService(aggs, dataViews, fieldFormatsMock);
   });
 
   describe('getDataView', () => {
@@ -63,6 +65,15 @@ describe('DatatableUtilitiesService', () => {
       const column = { meta: {} } as DatatableColumn;
 
       await expect(datatableUtilitiesService.getField(column)).resolves.toBeUndefined();
+    });
+  });
+
+  describe('getFieldFormat', () => {
+    it('should deserialize field format', () => {
+      const column = { meta: { params: { id: 'number' } } } as DatatableColumn;
+      const fieldFormat = datatableUtilitiesService.getFieldFormat(column);
+
+      expect(fieldFormat).toBeInstanceOf(FieldFormat);
     });
   });
 });

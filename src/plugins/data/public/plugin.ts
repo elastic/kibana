@@ -166,7 +166,7 @@ export class DataPublicPlugin
       uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
     );
 
-    const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews);
+    const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {
       actions: {
         createFiltersFromValueClickAction,

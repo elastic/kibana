@@ -122,7 +122,12 @@ export class DataServerPlugin
 
   public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
     const search = this.searchService.start(core, { fieldFormats, indexPatterns: dataViews });
-    const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews);
+    const datatableUtilities = new DatatableUtilitiesService(
+      search.aggs,
+      dataViews,
+      fieldFormats,
+      core.uiSettings
+    );
 
     return {
       datatableUtilities,

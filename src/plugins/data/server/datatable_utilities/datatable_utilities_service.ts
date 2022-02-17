@@ -6,13 +6,23 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  UiSettingsServiceStart,
+} from 'src/core/server';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import type { IndexPatternsServiceStart } from 'src/plugins/data_views/server';
 import { DatatableUtilitiesService as DatatableUtilitiesServiceCommon } from '../../common';
 import type { AggsStart } from '../search';
 
 export class DatatableUtilitiesService {
-  constructor(private aggs: AggsStart, private dataViews: IndexPatternsServiceStart) {
+  constructor(
+    private aggs: AggsStart,
+    private dataViews: IndexPatternsServiceStart,
+    private fieldFormats: FieldFormatsStart,
+    private uiSettings: UiSettingsServiceStart
+  ) {
     this.asScopedToClient = this.asScopedToClient.bind(this);
   }
 
@@ -25,7 +35,9 @@ export class DatatableUtilitiesService {
       savedObjectsClient,
       elasticsearchClient
     );
+    const uiSettings = this.uiSettings.asScopedToClient(savedObjectsClient);
+    const fieldFormats = await this.fieldFormats.fieldFormatServiceFactory(uiSettings);
 
-    return new DatatableUtilitiesServiceCommon(aggs, dataViews);
+    return new DatatableUtilitiesServiceCommon(aggs, dataViews, fieldFormats);
   }
 }

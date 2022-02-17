@@ -8,10 +8,15 @@
 
 import type { DataView, DataViewsContract, DataViewField } from 'src/plugins/data_views/common';
 import type { DatatableColumn } from 'src/plugins/expressions/common';
+import type { FieldFormatsStartCommon, FieldFormat } from 'src/plugins/field_formats/common';
 import type { AggsCommonStart, AggConfig, CreateAggConfigParams, IAggType } from '../search';
 
 export class DatatableUtilitiesService {
-  constructor(private aggs: AggsCommonStart, private dataViews: DataViewsContract) {
+  constructor(
+    private aggs: AggsCommonStart,
+    private dataViews: DataViewsContract,
+    private fieldFormats: FieldFormatsStartCommon
+  ) {
     this.getAggConfig = this.getAggConfig.bind(this);
     this.getDataView = this.getDataView.bind(this);
     this.getField = this.getField.bind(this);
@@ -52,6 +57,10 @@ export class DatatableUtilitiesService {
     }
 
     return dataView.getFieldByName(column.meta.field);
+  }
+
+  getFieldFormat(column: DatatableColumn): FieldFormat | undefined {
+    return this.fieldFormats.deserialize(column.meta.params);
   }
 
   isFilterable(column: DatatableColumn): boolean {
