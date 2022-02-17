@@ -54,8 +54,20 @@ export function useInlineErrors(onlyInvalidMonitors?: boolean) {
                 },
               },
               {
-                match_phrase: {
-                  'error.message': 'journey did not finish executing',
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match_phrase: {
+                        'error.message': 'journey did not finish executing',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        'error.message': 'ReferenceError:',
+                      },
+                    },
+                  ],
                 },
               },
               {
