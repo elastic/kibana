@@ -23,6 +23,10 @@ export class DatatableUtilitiesService {
     this.isFilterable = this.isFilterable.bind(this);
   }
 
+  clearFieldFormat(column: DatatableColumn): void {
+    delete column.meta.params;
+  }
+
   async getAggConfig(column: DatatableColumn): Promise<AggConfig | undefined> {
     const dataView = await this.getDataView(column);
 
@@ -71,5 +75,9 @@ export class DatatableUtilitiesService {
     const aggType = this.aggs.types.get(column.meta.sourceParams?.type as string) as IAggType;
 
     return Boolean(aggType.createFilter);
+  }
+
+  setFieldFormat(column: DatatableColumn, fieldFormat: FieldFormat): void {
+    column.meta.params = fieldFormat.toJSON();
   }
 }

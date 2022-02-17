@@ -10,10 +10,12 @@ import type { DatatableUtilitiesService } from './datatable_utilities_service';
 
 export function createDatatableUtilitiesMock(): jest.Mocked<DatatableUtilitiesService> {
   return {
+    clearFieldFormat: jest.fn(),
     getAggConfig: jest.fn(),
     getDataView: jest.fn(),
     getField: jest.fn(),
     getFieldFormat: jest.fn(),
     isFilterable: jest.fn(),
+    setFieldFormat: jest.fn(),
   } as unknown as jest.Mocked<DatatableUtilitiesService>;
 }

@@ -31,6 +31,15 @@ describe('DatatableUtilitiesService', () => {
     datatableUtilitiesService = new DatatableUtilitiesService(aggs, dataViews, fieldFormatsMock);
   });
 
+  describe('clearFieldFormat', () => {
+    it('should remove field format', () => {
+      const column = { meta: { params: { id: 'number' } } } as DatatableColumn;
+      datatableUtilitiesService.clearFieldFormat(column);
+
+      expect(column).not.toHaveProperty('meta.params');
+    });
+  });
+
   describe('getDataView', () => {
     it('should return a data view instance', async () => {
       const column = { meta: { index: 'index' } } as DatatableColumn;
@@ -74,6 +83,21 @@ describe('DatatableUtilitiesService', () => {
       const fieldFormat = datatableUtilitiesService.getFieldFormat(column);
 
       expect(fieldFormat).toBeInstanceOf(FieldFormat);
+    });
+  });
+
+  describe('setFieldFormat', () => {
+    it('should set new field format', () => {
+      const column = { meta: {} } as DatatableColumn;
+      const fieldFormat = fieldFormatsMock.deserialize({ id: 'number' });
+      datatableUtilitiesService.setFieldFormat(column, fieldFormat);
+
+      expect(column.meta.params).toEqual(
+        expect.objectContaining({
+          id: expect.anything(),
+          params: undefined,
+        })
+      );
     });
   });
 });
