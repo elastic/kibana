@@ -18,7 +18,7 @@ beforeEach(() => clock.reset());
 afterAll(() => clock.restore());
 
 describe('getId()', () => {
-  test('correctly sets id in constructory', () => {
+  test('correctly sets id in constructor', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
     expect(alert.getId()).toEqual('1');
   });
@@ -454,6 +454,35 @@ describe('updateLastScheduledActions()', () => {
         },
       },
     });
+  });
+});
+
+describe('getContext()', () => {
+  test('returns empty object when context has not been set', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    expect(alert.getContext()).toStrictEqual({});
+  });
+
+  test('returns context when context has not been set', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alert.setContext({ field: true });
+    expect(alert.getContext()).toStrictEqual({ field: true });
   });
 });
 
