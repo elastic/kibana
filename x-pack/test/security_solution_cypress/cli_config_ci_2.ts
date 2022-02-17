@@ -9,6 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 import { SecuritySolutionCypressCliTestRunnerCISet2 } from './runner';
 
+// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const securitySolutionCypressConfig = await readConfigFile(require.resolve('./config.ts'));
   return {
