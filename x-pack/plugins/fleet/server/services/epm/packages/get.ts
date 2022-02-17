@@ -106,7 +106,7 @@ export async function getPackageInfoFromRegistry(options: {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackage(pkgName),
+    Registry.fetchFindLatestPackageOrThrow(pkgName),
   ]);
 
   // If no package version is provided, use the installed version in the response
@@ -143,9 +143,10 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
+
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackage(pkgName, { throwIfNotFound: false }),
+    Registry.fetchFindLatestPackageOrUndefined(pkgName),
   ]);
 
   if (!savedObject && !latestPackage) {
