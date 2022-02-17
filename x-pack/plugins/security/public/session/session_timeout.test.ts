@@ -164,6 +164,19 @@ describe('SessionTimeout', () => {
     expect(http.fetch).toHaveBeenCalledTimes(1);
   });
 
+  it('exponentially increases retry time when extending session fails', async () => {
+    const { sessionTimeout, http } = createSessionTimeout(60 * 60 * 1000);
+    http.fetch.mockRejectedValue(new Error('Failure'));
+    await sessionTimeout.start();
+    expect(http.fetch).toHaveBeenCalledTimes(1);
+
+    // Increment system time enough so that session extension gets triggered
+    nowMock.mockReturnValue(Date.now() + SESSION_EXTENSION_THROTTLE_MS + 10);
+    window.dispatchEvent(new Event('mousemove'));
+
+    expect(http.fetch).toHaveBeenCalledTimes(1);
+  });
+
   it('marks HTTP requests as system requests when tab is not visible', async () => {
     const { sessionTimeout, http } = createSessionTimeout();
     await sessionTimeout.start();
