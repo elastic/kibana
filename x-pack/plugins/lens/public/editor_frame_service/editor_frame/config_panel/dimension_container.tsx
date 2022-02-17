@@ -37,7 +37,7 @@ function fromExcludedClickTarget(event: Event) {
     node !== null;
     node = node!.parentElement
   ) {
-    if (node.className.includes(DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS)) {
+    if (node.classList!.contains(DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS)) {
       return true;
     }
   }
